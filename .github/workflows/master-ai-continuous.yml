@@ -27,26 +27,27 @@ jobs:
           node-version: '22'
       - name: Install Lua 5.3
         run: sudo apt-get update && sudo apt-get install -y lua5.3
-      - name: Generate deterministic candidate
+      - name: Generate structural candidate
         run: node scripts/master-ai.mjs
-      - name: Compile, normalize and gate
+      - name: Simulate, compile, normalize and gate
         id: gate
         shell: bash
         run: |
           set +e
-          CANDIDATE=$(ls generations/candidates/*.lua | sort | tail -1)
+          CANDIDATE=$(find generations/candidates -maxdepth 1 -name '*.lua' | sort | tail -1)
           BASE=$(basename "$CANDIDATE" .lua)
           RAW="generations/candidates/${BASE}_raw.luac"
           FINAL="generations/candidates/${BASE}.luac"
           REPORT="reports/${BASE}-gate.txt"
           PASS=1
           {
-            echo "engine=hand-built-deterministic"
+            echo "engine=hand-built-structural"
             echo "candidate=$CANDIDATE"
             echo "started=$(date -u +%FT%TZ)"
+            node scripts/simulator.mjs "$CANDIDATE" || PASS=0
             node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
             luac5.3 -p "$CANDIDATE" || PASS=0
-            luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0
+            if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
             if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.js "$RAW" "$FINAL" || PASS=0; fi
             if [ "$PASS" = 1 ]; then
               BYTES=$(wc -c < "$FINAL" | tr -d ' ')
@@ -61,21 +62,23 @@ jobs:
           echo "candidate=$CANDIDATE" >> "$GITHUB_OUTPUT"
           echo "base=$BASE" >> "$GITHUB_OUTPUT"
           echo "pass=$PASS" >> "$GITHUB_OUTPUT"
-      - name: Promote passing generation
+      - name: Promote accepted generation and learning state
         if: steps.gate.outputs.pass == '1'
         shell: bash
         run: |
           BASE='${{ steps.gate.outputs.base }}'
           cp "generations/candidates/${BASE}.lua" "generations/accepted/${BASE}.lua"
           cp "generations/candidates/${BASE}.luac" "generations/accepted/${BASE}.luac"
-          cp "reports/${BASE}-gate.txt" "reports/latest-accepted.txt"
-          printf '{"generation":"%s","engine":"hand-built","status":"accepted","updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
-      - name: Record rejected generation
+          cp reports/pending-state.json reports/hand-ai-state.json
+          cp "reports/${BASE}-gate.txt" reports/latest-accepted.txt
+          SCORE=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/pending-state.json')).last.score)")
+          printf '{"generation":"%s","engine":"hand-built-structural","status":"accepted","score":%s,"updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
+      - name: Record rejected architecture
         if: steps.gate.outputs.pass != '1'
         shell: bash
         run: |
           BASE='${{ steps.gate.outputs.base }}'
-          printf '{"generation":"%s","engine":"hand-built","status":"rejected","updated":"%s","report":"reports/%s-gate.txt"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
+          printf '{"generation":"%s","engine":"hand-built-structural","status":"rejected","updated":"%s","report":"reports/%s-gate.txt"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
       - name: Commit engineering evidence
         shell: bash
         run: |
@@ -84,7 +87,7 @@ jobs:
           git add generations reports
           git diff --cached --quiet && exit 0
           STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/status.json')).status)")
-          git commit -m "Hand AI cycle: ${STATUS} $(date -u +%Y-%m-%dT%H:%MZ)"
+          git commit -m "Hand AI architecture cycle: ${STATUS} $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase
           git push
       - name: Upload cycle evidence
