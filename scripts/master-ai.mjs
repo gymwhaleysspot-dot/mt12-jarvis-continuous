@@ -1,48 +1,31 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import OpenAI from 'openai';
 
-const root=process.cwd();
-const contract=fs.readFileSync(path.join(root,'spec/master-ai-contract.md'),'utf8');
-const acceptedDir=path.join(root,'generations/accepted');
-const candidatesDir=path.join(root,'generations/candidates');
-const reportsDir=path.join(root,'reports');
-for(const d of [acceptedDir,candidatesDir,reportsDir]) fs.mkdirSync(d,{recursive:true});
-
-function latestLua(dir){
-  if(!fs.existsSync(dir)) return null;
-  const files=fs.readdirSync(dir).filter(x=>x.endsWith('.lua')).sort();
-  return files.length?path.join(dir,files.at(-1)):null;
-}
-function generation(){
-  const n=fs.readdirSync(acceptedDir).filter(x=>x.endsWith('.lua')).length+1;
-  return String(n).padStart(4,'0');
-}
-function parseJSON(text){
-  const clean=text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
-  const a=clean.indexOf('{'),b=clean.lastIndexOf('}');
-  if(a<0||b<a) throw new Error('model did not return a JSON object');
-  return JSON.parse(clean.slice(a,b+1));
-}
-
-const previous=latestLua(acceptedDir);
-const previousSource=previous?fs.readFileSync(previous,'utf8'):'No accepted controller exists yet. Create Generation 1 from scratch.';
-const recentReports=fs.readdirSync(reportsDir).filter(x=>x.endsWith('.txt')).sort().slice(-3).map(x=>fs.readFileSync(path.join(reportsDir,x),'utf8')).join('\n---\n')||'No previous reports.';
-const model=process.env.OPENAI_MODEL||'gpt-5';
-if(!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY secret is required');
-const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY});
-const gen=generation();
-const prompt=`You are the Master AI Programmer for a RadioMaster MT12 running EdgeTX Lua 5.3.\n\n${contract}\n\nCURRENT ACCEPTED SOURCE:\n${previousSource}\n\nRECENT ENGINEERING REPORTS:\n${recentReports}\n\nBuild exactly one complete candidate named j${gen.slice(-3)}. It must be a full loadable EdgeTX controller, not pseudocode, placeholders, TODOs or omitted functions. Improve the accepted source measurably while preserving every working behavior. Keep deployed source compact and allocation-conscious. Do not use unsupported Lua libraries. Do not claim tests passed.\n\nReturn only JSON with keys: name, objective, lua_source, engineering_notes, expected_improvements, risks. lua_source must contain the complete source.`;
-
-const response=await client.responses.create({model,input:prompt});
-const data=parseJSON(response.output_text);
-if(typeof data.lua_source!=='string'||data.lua_source.length<500) throw new Error('candidate source missing or implausibly small');
-const safe=(data.name||`j${gen.slice(-3)}`).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,6)||`j${gen.slice(-3)}`;
-const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-const luaPath=path.join(candidatesDir,`${gen}-${safe}.lua`);
-const metaPath=path.join(reportsDir,`${gen}-${safe}-model.txt`);
-fs.writeFileSync(luaPath,data.lua_source.trimEnd()+'\n');
-fs.writeFileSync(metaPath,[`generation=${gen}`,`name=${safe}`,`model=${model}`,`created=${new Date().toISOString()}`,`objective=${data.objective||''}`,`expected=${JSON.stringify(data.expected_improvements||[])}`,`risks=${JSON.stringify(data.risks||[])}`,'',data.engineering_notes||''].join('\n'));
-fs.writeFileSync(path.join(root,'reports/latest-model.json'),JSON.stringify({...data,name:safe,generation:gen,created:stamp,lua_path:path.relative(root,luaPath)},null,2));
-console.log(luaPath);
+const root=process.cwd(),A=path.join(root,'generations/accepted'),C=path.join(root,'generations/candidates'),R=path.join(root,'reports');
+for(const d of [A,C,R])fs.mkdirSync(d,{recursive:true});
+const statePath=path.join(R,'hand-ai-state.json');
+const defaults={cycle:0,seed:7303,best:null,params:{rpm2mph:.000914,tcSlip:25,tcSpan:24,tcCut:330,absLock:7200,gyrBase:120,gyrMax:460,truthRate:.45,trustRate:.04,coast:.985},history:[]};
+let S=fs.existsSync(statePath)?{...defaults,...JSON.parse(fs.readFileSync(statePath,'utf8'))}:defaults;
+S.cycle++;
+function rnd(){S.seed=(S.seed*1664525+1013904223)>>>0;return S.seed/4294967296}
+const objectives=['truth-lag','traction-smoothness','abs-release','gyro-stability','dropout-safety','memory-size'];
+const objective=objectives[(S.cycle-1)%objectives.length];
+const step={rpm2mph:.000003,tcSlip:.35,tcSpan:.4,tcCut:3,absLock:30,gyrBase:1,gyrMax:2,truthRate:.004,trustRate:.002,coast:.0003};
+const keyMap={
+ 'truth-lag':['truthRate','trustRate','coast','rpm2mph'],
+ 'traction-smoothness':['tcSlip','tcSpan','tcCut'],
+ 'abs-release':['absLock'],
+ 'gyro-stability':['gyrBase','gyrMax'],
+ 'dropout-safety':['trustRate','coast'],
+ 'memory-size':['tcSpan','truthRate']
+};
+const p={...S.params};for(const k of keyMap[objective])p[k]+=(rnd()>.5?1:-1)*step[k];
+p.rpm2mph=Math.max(.00075,Math.min(.0011,p.rpm2mph));p.tcSlip=Math.max(10,Math.min(45,p.tcSlip));p.tcSpan=Math.max(12,Math.min(40,p.tcSpan));p.tcCut=Math.max(180,Math.min(430,p.tcCut));p.absLock=Math.max(6000,Math.min(9000,p.absLock));p.gyrBase=Math.max(80,Math.min(220,p.gyrBase));p.gyrMax=Math.max(300,Math.min(520,p.gyrMax));p.truthRate=Math.max(.2,Math.min(.7,p.truthRate));p.trustRate=Math.max(.01,Math.min(.12,p.trustRate));p.coast=Math.max(.96,Math.min(.999,p.coast));
+const n=String(S.cycle).padStart(4,'0'),name=`j${n.slice(-3)}`;
+const f=x=>Number(x).toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
+const lua=`--${name} hand-built MT12 Jarvis cycle ${S.cycle}\n-- objective:${objective}\nlocal abs,min,max,floor=math.abs,math.min,math.max,math.floor\nlocal V=setmetatable({},{__index=function()return 0 end})\nlocal function cl(x,a,b)if x<a then return a elseif x>b then return b end return x end\nlocal function val(x,d)local v=getValue(x);if type(v)~='number'or v~=v then return d or 0 end return v end\nlocal function gv(i,v)model.setGlobalVariable(i,0,floor(cl(v,-1024,1024)+.5))end\nlocal function init()V[10]=${f(p.rpm2mph)};V[11]=${f(p.tcSlip)};V[12]=${f(p.tcSpan)};V[13]=${f(p.tcCut)};V[14]=${f(p.absLock)};V[15]=${f(p.gyrBase)};V[16]=${f(p.gyrMax)};V[17]=${f(p.truthRate)};V[18]=${f(p.trustRate)};V[19]=${f(p.coast)};V[20]=1024 end\nlocal function sense()local g=val('GSpd',val('GPS',0)),r=val('RPM',0),s=val('Sats',0),rm=r*V[10],q=s>=5 and 1 or s>=4 and .55 or .2;V[1]=V[1]+(q-V[1])*V[18];local t;if q>.8 then t=g+cl(rm-g,0,8)*.45 elseif rm>1 then t=rm*.98 else t=V[2]*V[19] end;V[2]=V[2]+(cl(t,0,120)-V[2])*V[17];V[3]=r;V[4]=g;return V[2],r,q end\nlocal function brain(mph,rpm,q)local th=val('thr',0),st=val('ste',0),sl=max(0,rpm*V[10]-mph),tc=0,lk=0;if th>120 and mph>1 then tc=cl((sl-V[11])/V[12],0,1)end;if th<-80 and mph>4 then lk=cl((V[14]-rpm)/V[14],0,1)end;local risk=max(tc,lk)*(1-q*.25),tct=1024-floor(tc*V[13]);if q<.2 then tct=1024 end;local gyr=cl(V[15]+abs(st)*.05+tc*90-lk*25,80,V[16]);gv(7,tct);gv(1,gyr);gv(8,50+risk*40);V[30]=tc;V[31]=lk;V[32]=risk;V[33]=sl end\nlocal function run()local m,r,q=sense();brain(m,r,q);return 0 end\nlocal function background()run()end\nreturn{init=init,run=run,background=background}\n`;
+const file=path.join(C,`${n}-${name}.lua`);fs.writeFileSync(file,lua);
+S.params=p;S.history.push({cycle:S.cycle,name,objective,params:p,created:new Date().toISOString()});S.history=S.history.slice(-100);fs.writeFileSync(statePath,JSON.stringify(S,null,2));
+fs.writeFileSync(path.join(R,`${n}-${name}-hand-ai.txt`),`engine=hand-built deterministic\ncycle=${S.cycle}\nname=${name}\nobjective=${objective}\nmutation=${JSON.stringify(keyMap[objective])}\nparams=${JSON.stringify(p)}\nsource=${path.relative(root,file)}\n`);
+console.log(file);
