@@ -2,6 +2,13 @@ name: MT12 LUAC Factory
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/master-ai-continuous.yml'
+      - 'scripts/**'
+      - 'toolchain/**'
   schedule:
     - cron: '*/5 * * * *'
 
