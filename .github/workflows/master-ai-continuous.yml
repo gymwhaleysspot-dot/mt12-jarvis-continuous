@@ -1,4 +1,4 @@
-name: MT12 Master AI Continuous
+name: MT12 Hand-Built AI Continuous
 
 on:
   workflow_dispatch:
@@ -9,16 +9,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: mt12-master-ai
+  group: mt12-hand-ai
   cancel-in-progress: false
 
 jobs:
   engineer:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5' }}
       MT12_LIMIT: '88944'
     steps:
       - uses: actions/checkout@v4
@@ -27,12 +25,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - name: Install Lua 5.3
         run: sudo apt-get update && sudo apt-get install -y lua5.3
-      - name: Install cloud AI runtime
-        run: npm install
-      - name: Generate one candidate
+      - name: Generate deterministic candidate
         run: node scripts/master-ai.mjs
       - name: Compile, normalize and gate
         id: gate
@@ -46,6 +41,7 @@ jobs:
           REPORT="reports/${BASE}-gate.txt"
           PASS=1
           {
+            echo "engine=hand-built-deterministic"
             echo "candidate=$CANDIDATE"
             echo "started=$(date -u +%FT%TZ)"
             node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
@@ -65,7 +61,6 @@ jobs:
           echo "candidate=$CANDIDATE" >> "$GITHUB_OUTPUT"
           echo "base=$BASE" >> "$GITHUB_OUTPUT"
           echo "pass=$PASS" >> "$GITHUB_OUTPUT"
-          exit 0
       - name: Promote passing generation
         if: steps.gate.outputs.pass == '1'
         shell: bash
@@ -74,27 +69,28 @@ jobs:
           cp "generations/candidates/${BASE}.lua" "generations/accepted/${BASE}.lua"
           cp "generations/candidates/${BASE}.luac" "generations/accepted/${BASE}.luac"
           cp "reports/${BASE}-gate.txt" "reports/latest-accepted.txt"
-          printf '{"generation":"%s","status":"accepted","updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
+          printf '{"generation":"%s","engine":"hand-built","status":"accepted","updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
       - name: Record rejected generation
         if: steps.gate.outputs.pass != '1'
         shell: bash
         run: |
           BASE='${{ steps.gate.outputs.base }}'
-          printf '{"generation":"%s","status":"rejected","updated":"%s","report":"reports/%s-gate.txt"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
+          printf '{"generation":"%s","engine":"hand-built","status":"rejected","updated":"%s","report":"reports/%s-gate.txt"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
       - name: Commit engineering evidence
         shell: bash
         run: |
-          git config user.name 'mt12-master-ai'
-          git config user.email 'mt12-master-ai@users.noreply.github.com'
+          git config user.name 'mt12-hand-ai'
+          git config user.email 'mt12-hand-ai@users.noreply.github.com'
           git add generations reports
           git diff --cached --quiet && exit 0
           STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/status.json')).status)")
-          git commit -m "Master AI cycle: ${STATUS} $(date -u +%Y-%m-%dT%H:%MZ)"
+          git commit -m "Hand AI cycle: ${STATUS} $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase
           git push
       - name: Upload cycle evidence
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-master-ai-cycle
+          name: mt12-hand-ai-cycle
           path: |
             generations/candidates/
             generations/accepted/
