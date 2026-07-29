@@ -9,6 +9,7 @@ on:
       - '.github/workflows/master-ai-continuous.yml'
       - 'scripts/**'
       - 'toolchain/**'
+      - 'factory-admin.js'
   schedule:
     - cron: '*/5 * * * *'
 
@@ -32,6 +33,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install LUAC vault controls
+        run: node scripts/install-factory-admin.mjs
       - name: Install Lua 5.3
         run: sudo apt-get update && sudo apt-get install -y lua5.3
       - name: Prepare MT12 normalizer
@@ -98,7 +101,7 @@ jobs:
         run: |
           git config user.name 'mt12-luac-factory'
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
-          git add generations reports
+          git add generations reports factory.html
           git diff --cached --quiet && exit 0
           git commit -m "LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase
