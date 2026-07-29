@@ -34,6 +34,8 @@ jobs:
           node-version: '22'
       - name: Install Lua 5.3
         run: sudo apt-get update && sudo apt-get install -y lua5.3
+      - name: Prepare MT12 normalizer
+        run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
       - name: Synthesize four different controller families
         run: node scripts/master-ai.mjs
       - name: Simulate compile normalize and rank factory batch
@@ -55,7 +57,7 @@ jobs:
               node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
               luac5.3 -p "$CANDIDATE" || PASS=0
               if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
-              if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.js "$RAW" "$FINAL" || PASS=0; fi
+              if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || PASS=0; fi
               if [ "$PASS" = 1 ]; then
                 BYTES=$(wc -c < "$FINAL" | tr -d ' ')
                 echo "normalized_bytes=$BYTES"
