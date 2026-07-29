@@ -1,4 +1,4 @@
-name: MT12 Hand-Built AI Continuous
+name: MT12 LUAC Factory
 
 on:
   workflow_dispatch:
@@ -9,13 +9,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: mt12-hand-ai
+  group: mt12-luac-factory
   cancel-in-progress: false
 
 jobs:
-  engineer:
+  factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       MT12_LIMIT: '88944'
     steps:
@@ -27,75 +27,81 @@ jobs:
           node-version: '22'
       - name: Install Lua 5.3
         run: sudo apt-get update && sudo apt-get install -y lua5.3
-      - name: Generate structural candidate
+      - name: Synthesize four different controller families
         run: node scripts/master-ai.mjs
-      - name: Simulate, compile, normalize and gate
-        id: gate
+      - name: Simulate compile normalize and rank factory batch
         shell: bash
         run: |
           set +e
-          CANDIDATE=$(find generations/candidates -maxdepth 1 -name '*.lua' | sort | tail -1)
-          BASE=$(basename "$CANDIDATE" .lua)
-          RAW="generations/candidates/${BASE}_raw.luac"
-          FINAL="generations/candidates/${BASE}.luac"
-          REPORT="reports/${BASE}-gate.txt"
-          PASS=1
-          {
-            echo "engine=hand-built-structural"
-            echo "candidate=$CANDIDATE"
-            echo "started=$(date -u +%FT%TZ)"
-            node scripts/simulator.mjs "$CANDIDATE" || PASS=0
-            node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
-            luac5.3 -p "$CANDIDATE" || PASS=0
-            if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
-            if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.js "$RAW" "$FINAL" || PASS=0; fi
+          mkdir -p generations/factory generations/accepted reports
+          : > reports/factory-results.tsv
+          node -e "const p=require('./reports/pending-factory.json');for(const x of p.batch)console.log(x.file)" | while read CANDIDATE; do
+            BASE=$(basename "$CANDIDATE" .lua)
+            RAW="generations/candidates/${BASE}_raw.luac"
+            FINAL="generations/candidates/${BASE}.luac"
+            REPORT="reports/${BASE}-gate.txt"
+            PASS=1
+            {
+              echo "engine=continuous-luac-factory"
+              echo "candidate=$CANDIDATE"
+              node scripts/simulator.mjs "$CANDIDATE" || PASS=0
+              node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
+              luac5.3 -p "$CANDIDATE" || PASS=0
+              if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
+              if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.js "$RAW" "$FINAL" || PASS=0; fi
+              if [ "$PASS" = 1 ]; then
+                BYTES=$(wc -c < "$FINAL" | tr -d ' ')
+                echo "normalized_bytes=$BYTES"
+                echo "margin=$((MT12_LIMIT-BYTES))"
+                [ "$BYTES" -le "$MT12_LIMIT" ] || PASS=0
+              fi
+              echo "passed=$PASS"
+            } > "$REPORT" 2>&1
+            cat "$REPORT"
+            SCORE=$(node -e "const r=require('./reports/${BASE}-sim.json');console.log(r.score)")
+            FAMILY=$(node -e "const r=require('./reports/${BASE}-sim.json');console.log(r.family)")
+            printf '%s\t%s\t%s\t%s\n' "$PASS" "$SCORE" "$FAMILY" "$BASE" >> reports/factory-results.tsv
             if [ "$PASS" = 1 ]; then
-              BYTES=$(wc -c < "$FINAL" | tr -d ' ')
-              echo "normalized_bytes=$BYTES"
-              echo "margin=$((MT12_LIMIT-BYTES))"
-              [ "$BYTES" -le "$MT12_LIMIT" ] || PASS=0
+              mkdir -p "generations/factory/$FAMILY"
+              cp "$CANDIDATE" "generations/factory/$FAMILY/${BASE}.lua"
+              cp "$FINAL" "generations/factory/$FAMILY/${BASE}.luac"
             fi
-            echo "passed=$PASS"
-            echo "finished=$(date -u +%FT%TZ)"
-          } > "$REPORT" 2>&1
-          cat "$REPORT"
-          echo "candidate=$CANDIDATE" >> "$GITHUB_OUTPUT"
-          echo "base=$BASE" >> "$GITHUB_OUTPUT"
-          echo "pass=$PASS" >> "$GITHUB_OUTPUT"
-      - name: Promote accepted generation and learning state
-        if: steps.gate.outputs.pass == '1'
+          done
+      - name: Promote smartest generation and update catalog
         shell: bash
         run: |
-          BASE='${{ steps.gate.outputs.base }}'
-          cp "generations/candidates/${BASE}.lua" "generations/accepted/${BASE}.lua"
-          cp "generations/candidates/${BASE}.luac" "generations/accepted/${BASE}.luac"
-          cp reports/pending-state.json reports/hand-ai-state.json
-          cp "reports/${BASE}-gate.txt" reports/latest-accepted.txt
-          SCORE=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/pending-state.json')).last.score)")
-          printf '{"generation":"%s","engine":"hand-built-structural","status":"accepted","score":%s,"updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
-      - name: Record rejected architecture
-        if: steps.gate.outputs.pass != '1'
+          BEST=$(awk -F '\t' '$1==1{print $2"\t"$3"\t"$4}' reports/factory-results.tsv | sort -nr | head -1)
+          if [ -z "$BEST" ]; then
+            printf '{"status":"batch-rejected","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            exit 0
+          fi
+          SCORE=$(echo "$BEST" | cut -f1)
+          FAMILY=$(echo "$BEST" | cut -f2)
+          BASE=$(echo "$BEST" | cut -f3)
+          cp "generations/factory/$FAMILY/${BASE}.lua" "generations/accepted/${BASE}.lua"
+          cp "generations/factory/$FAMILY/${BASE}.luac" "generations/accepted/${BASE}.luac"
+          node - <<'NODE'
+          const fs=require('fs'),p=require('./reports/pending-factory.json'),rows=fs.readFileSync('reports/factory-results.tsv','utf8').trim().split('\n').filter(Boolean).map(x=>{const [pass,score,family,base]=x.split('\t');return{pass:pass==='1',score:+score,family,base}}),old=fs.existsSync('reports/factory-catalog.json')?require('./reports/factory-catalog.json'):{builds:[]};for(const r of rows.filter(x=>x.pass)){const m=require('./reports/'+r.base+'-sim.json');old.builds.unshift({...r,generation:m.generation,style:m.style,novelty:m.novelty,luac:'generations/factory/'+r.family+'/'+r.base+'.luac',created:new Date().toISOString()})}old.builds=old.builds.slice(0,100);old.latestBatch=p.cycle;old.updated=new Date().toISOString();fs.writeFileSync('reports/factory-catalog.json',JSON.stringify(old,null,2));
+          NODE
+          printf '{"status":"accepted","family":"%s","generation":"%s","score":%s,"updated":"%s","luac":"generations/accepted/%s.luac"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
+      - name: Commit factory output
         shell: bash
         run: |
-          BASE='${{ steps.gate.outputs.base }}'
-          printf '{"generation":"%s","engine":"hand-built-structural","status":"rejected","updated":"%s","report":"reports/%s-gate.txt"}\n' "$BASE" "$(date -u +%FT%TZ)" "$BASE" > reports/status.json
-      - name: Commit engineering evidence
-        shell: bash
-        run: |
-          git config user.name 'mt12-hand-ai'
-          git config user.email 'mt12-hand-ai@users.noreply.github.com'
+          git config user.name 'mt12-luac-factory'
+          git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports
           git diff --cached --quiet && exit 0
-          STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/status.json')).status)")
-          git commit -m "Hand AI architecture cycle: ${STATUS} $(date -u +%Y-%m-%dT%H:%MZ)"
+          git commit -m "LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase
           git push
-      - name: Upload cycle evidence
+      - name: Upload deployable factory batch
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-hand-ai-cycle
+          name: mt12-luac-factory
           path: |
-            generations/candidates/
+            generations/factory/
             generations/accepted/
-            reports/
+            reports/factory-catalog.json
+            reports/*-gate.txt
+            reports/*-sim.json
           retention-days: 30
