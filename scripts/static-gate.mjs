@@ -1,22 +1,3 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-const file=process.argv[2];
-if(!file) throw new Error('usage: node scripts/static-gate.mjs <candidate.lua>');
-const s=fs.readFileSync(file,'utf8');
-const checks={
- edgeTxReturn:/return\s*\{[\s\S]*init\s*=[\s\S]*run\s*=[\s\S]*background\s*=/.test(s),
- gvarWrite:/model\.setGlobalVariable/.test(s),
- tct1024:/1024/.test(s),
- truthSpeed:/truth|mph/i.test(s),
- rpm:/rpm/i.test(s),
- tc:/traction|\btc\b/i.test(s),
- abs:/\babs\b|lock/i.test(s),
- gyro:/gyro|gyr/i.test(s),
- failOpen:/fail.?open|tct\s*=\s*1024|return\s+1024/i.test(s),
- clamp:/clamp/.test(s),
- carGuard:/car.?off|armed|connected|startup|stage/i.test(s)
-};
-const failed=Object.entries(checks).filter(([,v])=>!v).map(([k])=>k);
-const report={file,bytes:Buffer.byteLength(s),checks,passed:failed.length===0,failed};
-console.log(JSON.stringify(report,null,2));
-if(failed.length) process.exit(2);
+import fs from'node:fs';const file=process.argv[2];if(!file)throw new Error('usage: node scripts/static-gate.mjs <candidate.lua>');const s=fs.readFileSync(file,'utf8');
+const C={edgeTxReturn:/return\s*\{[\s\S]*init\s*=[\s\S]*run\s*=[\s\S]*background\s*=/.test(s),gvarWrite:/model\.setGlobalVariable/.test(s),tctGV7:/gv\(7\s*,/.test(s),gyroGV1:/gv\(1\s*,/.test(s),ecuGV8:/gv\(8\s*,/.test(s),tct1024:/1024/.test(s),truth:/function sense|truth|rpmK/i.test(s),intent:/function intent/i.test(s),tc:/\btc\b/.test(s),abs:/\blk\b|absLock/i.test(s),gyro:/\bgyr\b|gyrBase/i.test(s),jump:/function air|airborne/i.test(s),landing:/landing|landHold/i.test(s),learning:/function learn|learnRate/i.test(s),director:/risk/.test(s),mood:/mood/.test(s),failOpen:/q<\.2[\s\S]*tct=1024|gv\(7,1024\)/.test(s),bounded:/function cl\(|function clamp\(/.test(s),carGuard:/local car=|car.?off|connected/i.test(s),startup:/V\[90\]<20/.test(s),noCloud:!/(openai|anthropic|fetch\(|https?:\/\/)/i.test(s),noDynamicCode:!/(loadstring|dofile|require\s*\()/i.test(s)};const failed=Object.entries(C).filter(([,v])=>!v).map(([k])=>k),report={file,sourceBytes:Buffer.byteLength(s),checks:C,passed:!failed.length,failed};console.log(JSON.stringify(report,null,2));if(failed.length)process.exit(2);
