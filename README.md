@@ -1,25 +1,53 @@
 # MT12 Jarvis Continuous
 
-A phone-first engineering workbench for RadioMaster MT12 / EdgeTX Lua controllers.
+A phone-first engineering workbench and autonomous cloud AI programmer for RadioMaster MT12 / EdgeTX Lua controllers.
 
-## Goals
+## Master AI Programmer
+
+The repository contains an hourly GitHub Actions engineering loop in `.github/workflows/master-ai-continuous.yml`.
+
+Each cycle:
+
+1. Reads the latest accepted controller, engineering contract and recent failure reports.
+2. Calls a cloud language model through the OpenAI Responses API.
+3. Generates one complete loadable Lua 5.3 controller candidate.
+4. Runs deterministic contract checks.
+5. Compiles with `luac5.3 -s`.
+6. Normalizes desktop bytecode to MT12 4/4/4/4/4 format.
+7. Enforces the 88,944-byte ceiling.
+8. Promotes only passing generations to `generations/accepted/`.
+9. Archives rejected source and exact failure evidence in `reports/`.
+
+The autonomous loop does not deploy directly to a radio and cannot bypass its promotion gates.
+
+## Required GitHub configuration
+
+Add this repository secret:
+
+- `OPENAI_API_KEY` — server-side OpenAI API key used only by GitHub Actions.
+
+Optional repository variable:
+
+- `OPENAI_MODEL` — model identifier. Default: `gpt-5`.
+
+Then run **Actions → MT12 Master AI Continuous → Run workflow** once. The schedule continues at minute 17 of every hour. Scheduled GitHub Actions may start later than the exact cron minute during platform load.
+
+## Controller goals
 
 - A15XQ-inspired controller architecture without silently treating legacy source as the new implementation.
+- Truth MPH and Truth RPM with sensor confidence and lag handling.
+- Smooth traction control, ABS, adaptive gyro and risk arbitration.
+- Torque-governor behavior and fail-open safety.
+- Continuous bounded learning and explainable event outcomes.
 - CSV telemetry and blackbox log viewer.
-- Explainable event analysis for TC, ABS, GPS/RPM disagreement, launches, drops and virtual-air candidates.
-- Built-in controller architect that generates complete Lua source from selected systems and tuning intent.
-- Real Lua 5.3 stripped compilation in GitHub Actions.
-- MT12 32-bit bytecode normalization.
-- Hard deploy ceiling of 88,944 bytes by default.
+- Real Lua 5.3 compilation and MT12 normalization.
 
-## Build flow
+## Manual web build flow
 
 1. Generate or edit Lua in the web app.
-2. Store a GitHub classic token locally in the browser.
+2. Store a GitHub token locally in the browser.
 3. Queue the source to `builds/queue/<name>.lua`.
-4. GitHub Actions compiles with Lua 5.3, normalizes for MT12, checks size and writes:
-   - `builds/output/<name>.luac`
-   - `builds/reports/<name>.txt`
+4. GitHub Actions writes the normalized build and report.
 5. Download only the final normalized `.luac`.
 
 ## Safety contract
@@ -28,6 +56,6 @@ A phone-first engineering workbench for RadioMaster MT12 / EdgeTX Lua controller
 - CH3 gyro is preserved.
 - CH15 is TCT monitor.
 - CH16 is GYR monitor.
-- Fail-open on uncertain sensor/control state.
+- Fail open on uncertain sensor or control state.
 - No browser-generated fake bytecode.
 - Raw desktop `.luac` is never the deploy artifact.
