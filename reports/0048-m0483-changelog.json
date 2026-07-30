@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "engine": "a15xq-research-dynamic-v6",
+  "candidate": "0048-m0483",
+  "family": "monday",
+  "generation": 48,
+  "experiment": 3,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "style": "truth-lab",
+  "dynamic": true,
+  "researchDriven": true,
+  "researchBrief": "reports/research-latest.md",
+  "researchEvidence": [
+    {
+      "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+      "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+      "source": "Crossref"
+    },
+    {
+      "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+      "url": "https://doi.org/10.23919/icif.2018.8455730",
+      "source": "Crossref"
+    },
+    {
+      "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+      "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+      "source": "Crossref"
+    },
+    {
+      "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+      "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+      "source": "Crossref"
+    },
+    {
+      "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+      "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+      "source": "Crossref"
+    },
+    {
+      "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+      "url": "https://doi.org/10.1002/9781119876045.ch4",
+      "source": "Crossref"
+    }
+  ],
+  "functionChanges": 2,
+  "passed": false,
+  "score": 95.258,
+  "previousBest": 0,
+  "improvement": 95.258,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0048-m0483.lua",
+      "bytes": 85867,
+      "sha256": "5a592ff51e3364122c75bad747bc7132d4e0332eb7be00449c327a4093c5de74"
+    },
+    "luac": {
+      "path": "generations/candidates/0048-m0483.luac",
+      "bytes": 89082,
+      "sha256": "56b90a0904885d231a082190496751e5dcd6c2c90bb29851e7968d373f8af635"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "researchDirected": false,
+      "from": "parent implementation",
+      "to": "saturating-session-counter"
+    },
+    {
+      "index": 2,
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "researchDirected": true,
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend"
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "RPM2MPH",
+      "summary": null,
+      "researchDirected": false,
+      "from": 0.00091792,
+      "to": 0.0009280903164513572
+    }
+  ],
+  "created": "2026-07-30T12:12:42.493Z"
+}

@@ -1,7 +1,7 @@
 {
   "engine": "a15xq-research-dynamic-v6",
-  "cycle": 47,
-  "created": "2026-07-30T12:11:52.292Z",
+  "cycle": 48,
+  "created": "2026-07-30T12:12:41.887Z",
   "mode": "research-directed-multi-function-evolution",
   "parent": "generations/accepted/0042-m0422.lua",
   "candidateCount": 12,
@@ -10,8 +10,8 @@
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m0471",
-      "generation": 47,
+      "name": "m0481",
+      "generation": 48,
       "experiment": 1,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -23,125 +23,187 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009084,
-        "tcSlip": 8.132,
-        "tcSpan": 4.877,
-        "tcCut": 28,
-        "absLock": 7424,
-        "truthRate": 0.204,
-        "coast": 0.9818
-      },
-      "file": "generations/candidates/0047-m0471.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85779,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "q",
-          "variant": "safe-quantizer",
-          "label": "q function rewrite",
-          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
-          "from": "parent implementation",
-          "to": "safe-quantizer",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "bounded-ease-blend",
-          "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
-          "from": "parent implementation",
-          "to": "bounded-ease-blend",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.0009222187997692778
-        }
-      ],
-      "sha256": "6dc5218456531ac0b6a91597dc9b7096ba6e79e37210360b6058ff184aa67a40",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "monday",
-      "name": "m0472",
-      "generation": 47,
-      "experiment": 2,
-      "objective": "truth prediction, calibration and sensor resilience",
-      "style": "truth-lab",
-      "focus": [
-        "rpm",
-        "truth",
-        "gps",
-        "coast"
-      ],
-      "variant": 3,
-      "params": {
-        "rpmK": 0.0009271,
-        "tcSlip": 7.054,
-        "tcSpan": 5.123,
+        "rpmK": 0.0009066,
+        "tcSlip": 7.132,
+        "tcSpan": 5.053,
         "tcCut": 26,
-        "absLock": 7624,
-        "truthRate": 0.197,
-        "coast": 0.9835
+        "absLock": 7622,
+        "truthRate": 0.175,
+        "coast": 0.9822
       },
-      "file": "generations/candidates/0047-m0472.lua",
+      "file": "generations/candidates/0048-m0481.lua",
       "parent": "generations/accepted/0042-m0422.lua",
       "parentBytes": 85744,
-      "sourceBytes": 85833,
+      "sourceBytes": 85932,
       "fullScript": true,
       "changes": [
         {
           "kind": "function",
-          "function": "q",
-          "variant": "safe-quantizer",
-          "label": "q function rewrite",
-          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+          "function": "trait",
+          "variant": "trait-stability-zone",
+          "label": "trait function rewrite",
+          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
           "from": "parent implementation",
-          "to": "safe-quantizer",
-          "researchDirected": false
+          "to": "trait-stability-zone",
+          "researchDirected": true
         },
         {
           "kind": "function",
-          "function": "lerp",
-          "variant": "adaptive-linear-blend",
-          "label": "lerp function rewrite",
-          "summary": "Keep linear response near center while softening only the ends of state transitions",
+          "function": "md",
+          "variant": "meta-trend-verifier",
+          "label": "md function rewrite",
+          "summary": "Rebuild meta-learning verification with direction, magnitude and adaptive baseline speed",
           "from": "parent implementation",
-          "to": "adaptive-linear-blend",
-          "researchDirected": false
+          "to": "meta-trend-verifier",
+          "researchDirected": true
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.00091792,
-          "to": 0.0009246913094378822
+          "to": 0.0009214285230669822
         }
       ],
-      "sha256": "8b55134e734799889532117f3e1470a72954a61324dd1ee8ac23faeec051758a",
+      "sha256": "fa2a7d061ff45eea34bf2bba0a046e1675f9084ae9eef28df56d24004e73dc88",
       "previousBest": 0,
       "functionChanges": 2,
       "dynamic": true,
       "researchDriven": true,
       "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
+      "researchEvidence": [
+        {
+          "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+          "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+          "source": "Crossref"
+        },
+        {
+          "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+          "url": "https://doi.org/10.23919/icif.2018.8455730",
+          "source": "Crossref"
+        },
+        {
+          "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+          "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+          "source": "Crossref"
+        },
+        {
+          "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+          "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+          "source": "Crossref"
+        },
+        {
+          "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+          "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+          "source": "Crossref"
+        },
+        {
+          "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+          "url": "https://doi.org/10.1002/9781119876045.ch4",
+          "source": "Crossref"
+        }
+      ]
     },
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m0473",
-      "generation": 47,
+      "name": "m0482",
+      "generation": 48,
+      "experiment": 2,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.0009179,
+        "tcSlip": 7.723,
+        "tcSpan": 5.411,
+        "tcCut": 24,
+        "absLock": 6782,
+        "truthRate": 0.171,
+        "coast": 0.982
+      },
+      "file": "generations/candidates/0048-m0482.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85871,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "bounded-ease-blend",
+          "label": "lerp function rewrite",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "from": "parent implementation",
+          "to": "bounded-ease-blend",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "md",
+          "variant": "meta-trend-verifier",
+          "label": "md function rewrite",
+          "summary": "Rebuild meta-learning verification with direction, magnitude and adaptive baseline speed",
+          "from": "parent implementation",
+          "to": "meta-trend-verifier",
+          "researchDirected": true
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.0009263927785282768
+        }
+      ],
+      "sha256": "b0eeac65453e2043ce2557ea7b1f8b198eba23d3802c9908941341096397fa6b",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+          "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+          "source": "Crossref"
+        },
+        {
+          "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+          "url": "https://doi.org/10.23919/icif.2018.8455730",
+          "source": "Crossref"
+        },
+        {
+          "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+          "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+          "source": "Crossref"
+        },
+        {
+          "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+          "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+          "source": "Crossref"
+        },
+        {
+          "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+          "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+          "source": "Crossref"
+        },
+        {
+          "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+          "url": "https://doi.org/10.1002/9781119876045.ch4",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "monday",
+      "name": "m0483",
+      "generation": 48,
       "experiment": 3,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -153,30 +215,20 @@
       ],
       "variant": 4,
       "params": {
-        "rpmK": 0.0009186,
-        "tcSlip": 7.192,
-        "tcSpan": 5.304,
-        "tcCut": 24,
-        "absLock": 7348,
-        "truthRate": 0.188,
-        "coast": 0.9895
+        "rpmK": 0.0009177,
+        "tcSlip": 7.311,
+        "tcSpan": 4.869,
+        "tcCut": 27,
+        "absLock": 7188,
+        "truthRate": 0.208,
+        "coast": 0.984
       },
-      "file": "generations/candidates/0047-m0473.lua",
+      "file": "generations/candidates/0048-m0483.lua",
       "parent": "generations/accepted/0042-m0422.lua",
       "parentBytes": 85744,
-      "sourceBytes": 85814,
+      "sourceBytes": 85867,
       "fullScript": true,
       "changes": [
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "bounded-ease-blend",
-          "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
-          "from": "parent implementation",
-          "to": "bounded-ease-blend",
-          "researchDirected": false
-        },
         {
           "kind": "function",
           "function": "i9",
@@ -188,25 +240,66 @@
           "researchDirected": false
         },
         {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "adaptive-linear-blend",
+          "label": "lerp function rewrite",
+          "summary": "Keep linear response near center while softening only the ends of state transitions",
+          "from": "parent implementation",
+          "to": "adaptive-linear-blend",
+          "researchDirected": true
+        },
+        {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.00091792,
-          "to": 0.0009110475477086077
+          "to": 0.0009280903164513572
         }
       ],
-      "sha256": "85ba3133c5b79b9b576e994e55b0179a7bee86564cfca18eecc6a6d0c55898e0",
+      "sha256": "5a592ff51e3364122c75bad747bc7132d4e0332eb7be00449c327a4093c5de74",
       "previousBest": 0,
       "functionChanges": 2,
       "dynamic": true,
       "researchDriven": true,
       "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
+      "researchEvidence": [
+        {
+          "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+          "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+          "source": "Crossref"
+        },
+        {
+          "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+          "url": "https://doi.org/10.23919/icif.2018.8455730",
+          "source": "Crossref"
+        },
+        {
+          "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+          "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+          "source": "Crossref"
+        },
+        {
+          "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+          "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+          "source": "Crossref"
+        },
+        {
+          "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+          "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+          "source": "Crossref"
+        },
+        {
+          "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+          "url": "https://doi.org/10.1002/9781119876045.ch4",
+          "source": "Crossref"
+        }
+      ]
     },
     {
       "engine": "a15xq-full-v4",
       "family": "tuesday",
-      "name": "t0471",
-      "generation": 47,
+      "name": "t0481",
+      "generation": 48,
       "experiment": 1,
       "objective": "traction, ABS and intervention quality",
       "style": "control-lab",
@@ -218,29 +311,29 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009274,
-        "tcSlip": 7.45,
-        "tcSpan": 4.773,
-        "tcCut": 23,
-        "absLock": 7370,
-        "truthRate": 0.208,
-        "coast": 0.9885
+        "rpmK": 0.0009188,
+        "tcSlip": 8.039,
+        "tcSpan": 5.897,
+        "tcCut": 28,
+        "absLock": 6770,
+        "truthRate": 0.195,
+        "coast": 0.9858
       },
-      "file": "generations/candidates/0047-t0471.lua",
+      "file": "generations/candidates/0048-t0481.lua",
       "parent": "generations/accepted/0042-m0422.lua",
       "parentBytes": 85744,
-      "sourceBytes": 85862,
+      "sourceBytes": 85808,
       "fullScript": true,
       "changes": [
         {
           "kind": "function",
           "function": "lerp",
-          "variant": "adaptive-linear-blend",
+          "variant": "bounded-ease-blend",
           "label": "lerp function rewrite",
-          "summary": "Keep linear response near center while softening only the ends of state transitions",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
           "from": "parent implementation",
-          "to": "adaptive-linear-blend",
-          "researchDirected": false
+          "to": "bounded-ease-blend",
+          "researchDirected": true
         },
         {
           "kind": "function",
@@ -250,34 +343,65 @@
           "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
           "from": "parent implementation",
           "to": "saturating-session-counter",
-          "researchDirected": false
+          "researchDirected": true
         },
         {
-          "key": "absBlend",
-          "label": "ABS blend",
-          "from": 0.42,
-          "to": 0.37983311868156305
+          "key": "release",
+          "label": "runaway release base",
+          "from": 0.1,
+          "to": 0.07511668664999889
         },
         {
           "key": "absDiv",
           "label": "ABS response divisor",
           "from": 650,
-          "to": 689.5179618559196
+          "to": 692.6864806298399
         }
       ],
-      "sha256": "490833171e4034ee85c9fd17de7a0f0cb85e6bfc8fd87d6488b7c94ed8c4f5bc",
+      "sha256": "28906503268ba4364647f66629e68cbb5c567956edcca8b8a09e9ea99809e3e8",
       "previousBest": 0,
       "functionChanges": 2,
       "dynamic": true,
       "researchDriven": true,
       "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
+      "researchEvidence": [
+        {
+          "title": "An Investigation into the Traction and Anti-Lock Braking System Control Design",
+          "url": "https://doi.org/10.4271/2020-01-0997",
+          "source": "Crossref"
+        },
+        {
+          "title": "Anti-Lock Braking Control Design Using a Nonlinear Model Predictive Approach and Wheel Information",
+          "url": "https://doi.org/10.1109/icmech.2019.8722841",
+          "source": "Crossref"
+        },
+        {
+          "title": "Constrained Nonlinear Estimation of Road Friction Coefficient and Wheel Slip for Control of Anti-Lock Braking System",
+          "url": "https://doi.org/10.52547/joc.15.1.67",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intelligent Adaptive Control for Anti-Lock Braking System",
+          "url": "https://doi.org/10.1115/imece2018-87659",
+          "source": "Crossref"
+        },
+        {
+          "title": "Data-driven model-free slip control of anti-lock braking systems using reinforcement Q-learning",
+          "url": "https://doi.org/10.1016/j.neucom.2017.08.036",
+          "source": "Crossref"
+        },
+        {
+          "title": "Optimal design for slip deceleration control in anti-lock braking system",
+          "url": "https://doi.org/10.1063/1.5033150",
+          "source": "Crossref"
+        }
+      ]
     },
     {
       "engine": "a15xq-full-v4",
       "family": "tuesday",
-      "name": "t0472",
-      "generation": 47,
+      "name": "t0482",
+      "generation": 48,
       "experiment": 2,
       "objective": "traction, ABS and intervention quality",
       "style": "control-lab",
@@ -288,510 +412,21 @@
         "governor"
       ],
       "variant": 3,
-      "params": {
-        "rpmK": 0.0009197,
-        "tcSlip": 6.92,
-        "tcSpan": 5.389,
-        "tcCut": 25,
-        "absLock": 7313,
-        "truthRate": 0.204,
-        "coast": 0.9878
-      },
-      "file": "generations/candidates/0047-t0472.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85815,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "bounded-ease-blend",
-          "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
-          "from": "parent implementation",
-          "to": "bounded-ease-blend",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "i9",
-          "variant": "saturating-session-counter",
-          "label": "i9 function rewrite",
-          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
-          "from": "parent implementation",
-          "to": "saturating-session-counter",
-          "researchDirected": false
-        },
-        {
-          "key": "absBlend",
-          "label": "ABS blend",
-          "from": 0.42,
-          "to": 0.4896512213260867
-        },
-        {
-          "key": "absDiv",
-          "label": "ABS response divisor",
-          "from": 650,
-          "to": 739.3866881551221
-        },
-        {
-          "key": "release",
-          "label": "runaway release base",
-          "from": 0.1,
-          "to": 0.12923067931842525
-        }
-      ],
-      "sha256": "9692d84190974656602878c84656a59f08b5322cb7203646f047bb128f7c08c2",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "tuesday",
-      "name": "t0473",
-      "generation": 47,
-      "experiment": 3,
-      "objective": "traction, ABS and intervention quality",
-      "style": "control-lab",
-      "focus": [
-        "tc",
-        "abs",
-        "slew",
-        "governor"
-      ],
-      "variant": 4,
-      "params": {
-        "rpmK": 0.0009276,
-        "tcSlip": 7.061,
-        "tcSpan": 4.737,
-        "tcCut": 24,
-        "absLock": 7564,
-        "truthRate": 0.182,
-        "coast": 0.9899
-      },
-      "file": "generations/candidates/0047-t0473.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85862,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "i9",
-          "variant": "saturating-session-counter",
-          "label": "i9 function rewrite",
-          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
-          "from": "parent implementation",
-          "to": "saturating-session-counter",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "adaptive-linear-blend",
-          "label": "lerp function rewrite",
-          "summary": "Keep linear response near center while softening only the ends of state transitions",
-          "from": "parent implementation",
-          "to": "adaptive-linear-blend",
-          "researchDirected": false
-        },
-        {
-          "key": "absBlend",
-          "label": "ABS blend",
-          "from": 0.42,
-          "to": 0.4651713612023508
-        },
-        {
-          "key": "release",
-          "label": "runaway release base",
-          "from": 0.1,
-          "to": 0.06
-        },
-        {
-          "key": "absDiv",
-          "label": "ABS response divisor",
-          "from": 650,
-          "to": 786.6019134247093
-        }
-      ],
-      "sha256": "26f92b50f99069750d02a7228f682c07dccd42b005c6df4ba90599135dd8f3b0",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "cloud",
-      "name": "c0471",
-      "generation": 47,
-      "experiment": 1,
-      "objective": "confidence arbitration, neural learning and reasoning",
-      "style": "brain-lab",
-      "focus": [
-        "confidence",
-        "neural",
-        "learn",
-        "reason"
-      ],
-      "variant": 2,
       "params": {
         "rpmK": 0.0009159,
-        "tcSlip": 8.044,
-        "tcSpan": 5.236,
-        "tcCut": 24,
-        "absLock": 7437,
-        "truthRate": 0.145,
-        "coast": 0.9863
-      },
-      "file": "generations/candidates/0047-c0471.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85841,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-stability-zone",
-          "label": "trait function rewrite",
-          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
-          "from": "parent implementation",
-          "to": "trait-stability-zone",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "q",
-          "variant": "safe-quantizer",
-          "label": "q function rewrite",
-          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
-          "from": "parent implementation",
-          "to": "safe-quantizer",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.000914097009816235
-        }
-      ],
-      "sha256": "d5de7f199d0688d4f2888844edf8a5fc9a730862c78a6cd55b3bae3828bcd618",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "cloud",
-      "name": "c0472",
-      "generation": 47,
-      "experiment": 2,
-      "objective": "confidence arbitration, neural learning and reasoning",
-      "style": "brain-lab",
-      "focus": [
-        "confidence",
-        "neural",
-        "learn",
-        "reason"
-      ],
-      "variant": 3,
-      "params": {
-        "rpmK": 0.0009026,
-        "tcSlip": 7.708,
-        "tcSpan": 5.639,
-        "tcCut": 28,
-        "absLock": 6911,
-        "truthRate": 0.153,
-        "coast": 0.9897
-      },
-      "file": "generations/candidates/0047-c0472.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85875,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-confidence-rate",
-          "label": "trait function rewrite",
-          "summary": "Rebuild personality learning rate around confidence and disagreement",
-          "from": "parent implementation",
-          "to": "trait-confidence-rate",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "adaptive-linear-blend",
-          "label": "lerp function rewrite",
-          "summary": "Keep linear response near center while softening only the ends of state transitions",
-          "from": "parent implementation",
-          "to": "adaptive-linear-blend",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.0009137440060460987
-        }
-      ],
-      "sha256": "7897066fb11622bad0bfadcd5a2fb776fb209323aa2d118c9beeb2e8fd049c5e",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "cloud",
-      "name": "c0473",
-      "generation": 47,
-      "experiment": 3,
-      "objective": "confidence arbitration, neural learning and reasoning",
-      "style": "brain-lab",
-      "focus": [
-        "confidence",
-        "neural",
-        "learn",
-        "reason"
-      ],
-      "variant": 4,
-      "params": {
-        "rpmK": 0.000912,
-        "tcSlip": 7.163,
-        "tcSpan": 5.89,
+        "tcSlip": 7.556,
+        "tcSpan": 5.817,
         "tcCut": 23,
-        "absLock": 7480,
-        "truthRate": 0.179,
-        "coast": 0.9846
-      },
-      "file": "generations/candidates/0047-c0473.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85835,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-stability-zone",
-          "label": "trait function rewrite",
-          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
-          "from": "parent implementation",
-          "to": "trait-stability-zone",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "bounded-ease-blend",
-          "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
-          "from": "parent implementation",
-          "to": "bounded-ease-blend",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.0009144520048166439
-        }
-      ],
-      "sha256": "e68d35e7636f9bfb94021c9dab378a0407a4f149d256acc917aad8ae14dac8e2",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w0471",
-      "generation": 47,
-      "experiment": 1,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
-      "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
-      ],
-      "variant": 2,
-      "params": {
-        "rpmK": 0.0009237,
-        "tcSlip": 7.721,
-        "tcSpan": 5.548,
-        "tcCut": 25,
-        "absLock": 7159,
-        "truthRate": 0.157,
-        "coast": 0.9832
-      },
-      "file": "generations/candidates/0047-w0471.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85877,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "i9",
-          "variant": "saturating-session-counter",
-          "label": "i9 function rewrite",
-          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
-          "from": "parent implementation",
-          "to": "saturating-session-counter",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-stability-zone",
-          "label": "trait function rewrite",
-          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
-          "from": "parent implementation",
-          "to": "trait-stability-zone",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.0009206205017269636
-        }
-      ],
-      "sha256": "da5aff51124d686e192c2e91b010e0b109104166c3b864144387a8db3805a25d",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w0472",
-      "generation": 47,
-      "experiment": 2,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
-      "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
-      ],
-      "variant": 3,
-      "params": {
-        "rpmK": 0.0009167,
-        "tcSlip": 8.114,
-        "tcSpan": 6.026,
-        "tcCut": 24,
-        "absLock": 6869,
+        "absLock": 7284,
         "truthRate": 0.201,
-        "coast": 0.9877
+        "coast": 0.9821
       },
-      "file": "generations/candidates/0047-w0472.lua",
+      "file": "generations/candidates/0048-t0482.lua",
       "parent": "generations/accepted/0042-m0422.lua",
       "parentBytes": 85744,
-      "sourceBytes": 85822,
+      "sourceBytes": 85916,
       "fullScript": true,
       "changes": [
-        {
-          "kind": "function",
-          "function": "lerp",
-          "variant": "bounded-ease-blend",
-          "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
-          "from": "parent implementation",
-          "to": "bounded-ease-blend",
-          "researchDirected": false
-        },
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-confidence-rate",
-          "label": "trait function rewrite",
-          "summary": "Rebuild personality learning rate around confidence and disagreement",
-          "from": "parent implementation",
-          "to": "trait-confidence-rate",
-          "researchDirected": false
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.00091792,
-          "to": 0.0009202378078455385
-        }
-      ],
-      "sha256": "472681cad8bb4788f82796d0940eafb4c184085ec67412c977769dc01fdd14dc",
-      "previousBest": 0,
-      "functionChanges": 2,
-      "dynamic": true,
-      "researchDriven": true,
-      "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w0473",
-      "generation": 47,
-      "experiment": 3,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
-      "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
-      ],
-      "variant": 4,
-      "params": {
-        "rpmK": 0.0009122,
-        "tcSlip": 6.869,
-        "tcSpan": 5.218,
-        "tcCut": 25,
-        "absLock": 7069,
-        "truthRate": 0.182,
-        "coast": 0.9809
-      },
-      "file": "generations/candidates/0047-w0473.lua",
-      "parent": "generations/accepted/0042-m0422.lua",
-      "parentBytes": 85744,
-      "sourceBytes": 85903,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "trait",
-          "variant": "trait-confidence-rate",
-          "label": "trait function rewrite",
-          "summary": "Rebuild personality learning rate around confidence and disagreement",
-          "from": "parent implementation",
-          "to": "trait-confidence-rate",
-          "researchDirected": false
-        },
         {
           "kind": "function",
           "function": "md",
@@ -800,22 +435,759 @@
           "summary": "Add hysteresis to meta-learning so one noisy sample cannot reverse a learned trend",
           "from": "parent implementation",
           "to": "meta-hysteresis-verifier",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "trait",
+          "variant": "trait-stability-zone",
+          "label": "trait function rewrite",
+          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
+          "from": "parent implementation",
+          "to": "trait-stability-zone",
+          "researchDirected": true
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 716.3481630091555
+        },
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.37322393874591214
+        },
+        {
+          "key": "release",
+          "label": "runaway release base",
+          "from": 0.1,
+          "to": 0.07226412725402043
+        }
+      ],
+      "sha256": "a04b9fbb236281df2fc232d424e30ccbb4565918d847aef35c2ac4b5aa1d8eb9",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "An Investigation into the Traction and Anti-Lock Braking System Control Design",
+          "url": "https://doi.org/10.4271/2020-01-0997",
+          "source": "Crossref"
+        },
+        {
+          "title": "Anti-Lock Braking Control Design Using a Nonlinear Model Predictive Approach and Wheel Information",
+          "url": "https://doi.org/10.1109/icmech.2019.8722841",
+          "source": "Crossref"
+        },
+        {
+          "title": "Constrained Nonlinear Estimation of Road Friction Coefficient and Wheel Slip for Control of Anti-Lock Braking System",
+          "url": "https://doi.org/10.52547/joc.15.1.67",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intelligent Adaptive Control for Anti-Lock Braking System",
+          "url": "https://doi.org/10.1115/imece2018-87659",
+          "source": "Crossref"
+        },
+        {
+          "title": "Data-driven model-free slip control of anti-lock braking systems using reinforcement Q-learning",
+          "url": "https://doi.org/10.1016/j.neucom.2017.08.036",
+          "source": "Crossref"
+        },
+        {
+          "title": "Optimal design for slip deceleration control in anti-lock braking system",
+          "url": "https://doi.org/10.1063/1.5033150",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "tuesday",
+      "name": "t0483",
+      "generation": 48,
+      "experiment": 3,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009135,
+        "tcSlip": 8.064,
+        "tcSpan": 6.005,
+        "tcCut": 25,
+        "absLock": 7017,
+        "truthRate": 0.168,
+        "coast": 0.9854
+      },
+      "file": "generations/candidates/0048-t0483.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85820,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "q",
+          "variant": "safe-quantizer",
+          "label": "q function rewrite",
+          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+          "from": "parent implementation",
+          "to": "safe-quantizer",
+          "researchDirected": false
+        },
+        {
+          "key": "release",
+          "label": "runaway release base",
+          "from": 0.1,
+          "to": 0.14137165565072793
+        },
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.5240781403366942
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 546.8324132334558
+        }
+      ],
+      "sha256": "498d15f5ca7620f39d207b9eefbdbff4783e9a7a9232dbe4b53c112d29362c99",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "An Investigation into the Traction and Anti-Lock Braking System Control Design",
+          "url": "https://doi.org/10.4271/2020-01-0997",
+          "source": "Crossref"
+        },
+        {
+          "title": "Anti-Lock Braking Control Design Using a Nonlinear Model Predictive Approach and Wheel Information",
+          "url": "https://doi.org/10.1109/icmech.2019.8722841",
+          "source": "Crossref"
+        },
+        {
+          "title": "Constrained Nonlinear Estimation of Road Friction Coefficient and Wheel Slip for Control of Anti-Lock Braking System",
+          "url": "https://doi.org/10.52547/joc.15.1.67",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intelligent Adaptive Control for Anti-Lock Braking System",
+          "url": "https://doi.org/10.1115/imece2018-87659",
+          "source": "Crossref"
+        },
+        {
+          "title": "Data-driven model-free slip control of anti-lock braking systems using reinforcement Q-learning",
+          "url": "https://doi.org/10.1016/j.neucom.2017.08.036",
+          "source": "Crossref"
+        },
+        {
+          "title": "Optimal design for slip deceleration control in anti-lock braking system",
+          "url": "https://doi.org/10.1063/1.5033150",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "cloud",
+      "name": "c0481",
+      "generation": 48,
+      "experiment": 1,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 2,
+      "params": {
+        "rpmK": 0.0009198,
+        "tcSlip": 7.142,
+        "tcSpan": 5.323,
+        "tcCut": 24,
+        "absLock": 7517,
+        "truthRate": 0.2,
+        "coast": 0.982
+      },
+      "file": "generations/candidates/0048-c0481.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85841,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "q",
+          "variant": "safe-quantizer",
+          "label": "q function rewrite",
+          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+          "from": "parent implementation",
+          "to": "safe-quantizer",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "trait",
+          "variant": "trait-stability-zone",
+          "label": "trait function rewrite",
+          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
+          "from": "parent implementation",
+          "to": "trait-stability-zone",
+          "researchDirected": true
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.0009150692886032211
+        }
+      ],
+      "sha256": "af8e7d36dcc877d2fcf8d3e725fdd6fd63f542407d83b433cbfce946069d66c3",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "A Dynamic Content Safety Policy Updating Framework Based on Online Learning and Concept Drift Adaptation",
+          "url": "https://doi.org/10.1109/mlise70044.2026.11607660",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning Calibration Functions on the Fly: Hybrid Batch Online Stacking Ensembles for the Calibration of Low-Cost Air Quality Sensor Networks in the Presence of Concept Drift",
+          "url": "https://doi.org/10.3390/atmos13030416",
+          "source": "Crossref"
+        },
+        {
+          "title": "Drift Calibration for Machine Olfaction with an Online Active Learning Approach",
+          "url": "https://doi.org/10.1109/icsai.2018.8599390",
+          "source": "Crossref"
+        },
+        {
+          "title": "Tackling Concept Drift and Class Imbalance: An F1-Driven Parameter-Efficient Online Learning Framework",
+          "url": "https://doi.org/10.2139/ssrn.7070383",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning to Extrapolate and Adjust: Two-Stage Meta-Learning for Concept Drift in Online Time Series Forecasting",
+          "url": "https://doi.org/10.24963/ijcai.2024/542",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intrusion Detection based on Concept Drift Detection &amp; Online Incremental Learning",
+          "url": "https://doi.org/10.21203/rs.3.rs-3251910/v1",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "cloud",
+      "name": "c0482",
+      "generation": 48,
+      "experiment": 2,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.0009102,
+        "tcSlip": 6.799,
+        "tcSpan": 4.913,
+        "tcCut": 22,
+        "absLock": 7172,
+        "truthRate": 0.16,
+        "coast": 0.9839
+      },
+      "file": "generations/candidates/0048-c0482.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85862,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "trait",
+          "variant": "trait-confidence-rate",
+          "label": "trait function rewrite",
+          "summary": "Rebuild personality learning rate around confidence and disagreement",
+          "from": "parent implementation",
+          "to": "trait-confidence-rate",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter",
           "researchDirected": false
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.00091792,
-          "to": 0.0009161946570943156
+          "to": 0.0009159860393092782
         }
       ],
-      "sha256": "abb1c9fbd26d7788e7f0f33257e45f77854d0e96d9ae428c64b7019667c04627",
+      "sha256": "41d528e7d90115547a006181d3f4a9fe09776952e99d308fffc0af4a3c2e4411",
       "previousBest": 0,
       "functionChanges": 2,
       "dynamic": true,
       "researchDriven": true,
       "researchBrief": "reports/research-latest.md",
-      "researchEvidence": []
+      "researchEvidence": [
+        {
+          "title": "A Dynamic Content Safety Policy Updating Framework Based on Online Learning and Concept Drift Adaptation",
+          "url": "https://doi.org/10.1109/mlise70044.2026.11607660",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning Calibration Functions on the Fly: Hybrid Batch Online Stacking Ensembles for the Calibration of Low-Cost Air Quality Sensor Networks in the Presence of Concept Drift",
+          "url": "https://doi.org/10.3390/atmos13030416",
+          "source": "Crossref"
+        },
+        {
+          "title": "Drift Calibration for Machine Olfaction with an Online Active Learning Approach",
+          "url": "https://doi.org/10.1109/icsai.2018.8599390",
+          "source": "Crossref"
+        },
+        {
+          "title": "Tackling Concept Drift and Class Imbalance: An F1-Driven Parameter-Efficient Online Learning Framework",
+          "url": "https://doi.org/10.2139/ssrn.7070383",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning to Extrapolate and Adjust: Two-Stage Meta-Learning for Concept Drift in Online Time Series Forecasting",
+          "url": "https://doi.org/10.24963/ijcai.2024/542",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intrusion Detection based on Concept Drift Detection &amp; Online Incremental Learning",
+          "url": "https://doi.org/10.21203/rs.3.rs-3251910/v1",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "cloud",
+      "name": "c0483",
+      "generation": 48,
+      "experiment": 3,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0008999,
+        "tcSlip": 7.771,
+        "tcSpan": 4.882,
+        "tcCut": 23,
+        "absLock": 7579,
+        "truthRate": 0.15,
+        "coast": 0.9827
+      },
+      "file": "generations/candidates/0048-c0483.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85815,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter",
+          "researchDirected": false
+        },
+        {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "bounded-ease-blend",
+          "label": "lerp function rewrite",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "from": "parent implementation",
+          "to": "bounded-ease-blend",
+          "researchDirected": false
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.0009220243220093707
+        }
+      ],
+      "sha256": "416cf51781bd1a0cac37bfd5989e869b1b8221f876d997f9cc3b92f0277eaad6",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "A Dynamic Content Safety Policy Updating Framework Based on Online Learning and Concept Drift Adaptation",
+          "url": "https://doi.org/10.1109/mlise70044.2026.11607660",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning Calibration Functions on the Fly: Hybrid Batch Online Stacking Ensembles for the Calibration of Low-Cost Air Quality Sensor Networks in the Presence of Concept Drift",
+          "url": "https://doi.org/10.3390/atmos13030416",
+          "source": "Crossref"
+        },
+        {
+          "title": "Drift Calibration for Machine Olfaction with an Online Active Learning Approach",
+          "url": "https://doi.org/10.1109/icsai.2018.8599390",
+          "source": "Crossref"
+        },
+        {
+          "title": "Tackling Concept Drift and Class Imbalance: An F1-Driven Parameter-Efficient Online Learning Framework",
+          "url": "https://doi.org/10.2139/ssrn.7070383",
+          "source": "Crossref"
+        },
+        {
+          "title": "Learning to Extrapolate and Adjust: Two-Stage Meta-Learning for Concept Drift in Online Time Series Forecasting",
+          "url": "https://doi.org/10.24963/ijcai.2024/542",
+          "source": "Crossref"
+        },
+        {
+          "title": "Intrusion Detection based on Concept Drift Detection &amp; Online Incremental Learning",
+          "url": "https://doi.org/10.21203/rs.3.rs-3251910/v1",
+          "source": "Crossref"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "html",
+      "name": "w0481",
+      "generation": 48,
+      "experiment": 1,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 2,
+      "params": {
+        "rpmK": 0.0009248,
+        "tcSlip": 7.29,
+        "tcSpan": 4.91,
+        "tcCut": 25,
+        "absLock": 7612,
+        "truthRate": 0.149,
+        "coast": 0.9819
+      },
+      "file": "generations/candidates/0048-w0481.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85816,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "bounded-ease-blend",
+          "label": "lerp function rewrite",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "from": "parent implementation",
+          "to": "bounded-ease-blend",
+          "researchDirected": false
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.000915835014352696
+        }
+      ],
+      "sha256": "60a885585f07c1d3fd60bb7489b2a29d6c9069ffe33cb17cec0a93b7bb2dbe70",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "Practical Quantum Topological Data Analysis with Applications to High-Dimensional Feature Extraction and Time Series Analysis",
+          "url": "http://arxiv.org/abs/2607.27206v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with &lt;1 GB VRAM",
+          "url": "http://arxiv.org/abs/2607.27205v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Fault-Tolerant Logical Operations and Efficient State Preparation in Modular Quantum Architectures with Noisy Interfaces",
+          "url": "http://arxiv.org/abs/2607.27204v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "From Classification to Regression: Using a Fruitfly to Solve Equations",
+          "url": "http://arxiv.org/abs/2607.27196v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "VidMap: Exploiting Temporal Structure for Video-Based Structure-from-Motion",
+          "url": "http://arxiv.org/abs/2607.27194v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Mental World Modeling",
+          "url": "http://arxiv.org/abs/2607.27201v1",
+          "source": "arXiv"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "html",
+      "name": "w0482",
+      "generation": 48,
+      "experiment": 2,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.0009016,
+        "tcSlip": 7.762,
+        "tcSpan": 5.023,
+        "tcCut": 26,
+        "absLock": 7238,
+        "truthRate": 0.169,
+        "coast": 0.9881
+      },
+      "file": "generations/candidates/0048-w0482.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85863,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "trait",
+          "variant": "trait-confidence-rate",
+          "label": "trait function rewrite",
+          "summary": "Rebuild personality learning rate around confidence and disagreement",
+          "from": "parent implementation",
+          "to": "trait-confidence-rate",
+          "researchDirected": true
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.0009159834736340726
+        }
+      ],
+      "sha256": "b469c0a46d523117c40d3ba50169fd544c2c88cbe2016cf95afe6dd4d9a14aee",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "Practical Quantum Topological Data Analysis with Applications to High-Dimensional Feature Extraction and Time Series Analysis",
+          "url": "http://arxiv.org/abs/2607.27206v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with &lt;1 GB VRAM",
+          "url": "http://arxiv.org/abs/2607.27205v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Fault-Tolerant Logical Operations and Efficient State Preparation in Modular Quantum Architectures with Noisy Interfaces",
+          "url": "http://arxiv.org/abs/2607.27204v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "From Classification to Regression: Using a Fruitfly to Solve Equations",
+          "url": "http://arxiv.org/abs/2607.27196v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "VidMap: Exploiting Temporal Structure for Video-Based Structure-from-Motion",
+          "url": "http://arxiv.org/abs/2607.27194v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Mental World Modeling",
+          "url": "http://arxiv.org/abs/2607.27201v1",
+          "source": "arXiv"
+        }
+      ]
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "html",
+      "name": "w0483",
+      "generation": 48,
+      "experiment": 3,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009179,
+        "tcSlip": 7.889,
+        "tcSpan": 5.129,
+        "tcCut": 25,
+        "absLock": 7511,
+        "truthRate": 0.196,
+        "coast": 0.9824
+      },
+      "file": "generations/candidates/0048-w0483.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85778,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "q",
+          "variant": "safe-quantizer",
+          "label": "q function rewrite",
+          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+          "from": "parent implementation",
+          "to": "safe-quantizer",
+          "researchDirected": true
+        },
+        {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "bounded-ease-blend",
+          "label": "lerp function rewrite",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "from": "parent implementation",
+          "to": "bounded-ease-blend",
+          "researchDirected": false
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.00091792,
+          "to": 0.0009140000139294006
+        }
+      ],
+      "sha256": "1a9a9f64782215a0fa898099377df136559f35c50ed327333760bf0a1c8714f5",
+      "previousBest": 0,
+      "functionChanges": 2,
+      "dynamic": true,
+      "researchDriven": true,
+      "researchBrief": "reports/research-latest.md",
+      "researchEvidence": [
+        {
+          "title": "Practical Quantum Topological Data Analysis with Applications to High-Dimensional Feature Extraction and Time Series Analysis",
+          "url": "http://arxiv.org/abs/2607.27206v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with &lt;1 GB VRAM",
+          "url": "http://arxiv.org/abs/2607.27205v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Fault-Tolerant Logical Operations and Efficient State Preparation in Modular Quantum Architectures with Noisy Interfaces",
+          "url": "http://arxiv.org/abs/2607.27204v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "From Classification to Regression: Using a Fruitfly to Solve Equations",
+          "url": "http://arxiv.org/abs/2607.27196v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "VidMap: Exploiting Temporal Structure for Video-Based Structure-from-Motion",
+          "url": "http://arxiv.org/abs/2607.27194v1",
+          "source": "arXiv"
+        },
+        {
+          "title": "Mental World Modeling",
+          "url": "http://arxiv.org/abs/2607.27201v1",
+          "source": "arXiv"
+        }
+      ]
     }
   ],
   "requirements": {
@@ -830,6 +1202,6 @@
   "research": {
     "brief": "reports/research-latest.md",
     "data": "reports/research-latest.json",
-    "created": null
+    "created": "2026-07-30T12:12:41.876Z"
   }
 }

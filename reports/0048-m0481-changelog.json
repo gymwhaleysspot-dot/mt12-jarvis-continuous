@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "engine": "a15xq-research-dynamic-v6",
+  "candidate": "0048-m0481",
+  "family": "monday",
+  "generation": 48,
+  "experiment": 1,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "style": "truth-lab",
+  "dynamic": true,
+  "researchDriven": true,
+  "researchBrief": "reports/research-latest.md",
+  "researchEvidence": [
+    {
+      "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+      "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+      "source": "Crossref"
+    },
+    {
+      "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+      "url": "https://doi.org/10.23919/icif.2018.8455730",
+      "source": "Crossref"
+    },
+    {
+      "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+      "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+      "source": "Crossref"
+    },
+    {
+      "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+      "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+      "source": "Crossref"
+    },
+    {
+      "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+      "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+      "source": "Crossref"
+    },
+    {
+      "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+      "url": "https://doi.org/10.1002/9781119876045.ch4",
+      "source": "Crossref"
+    }
+  ],
+  "functionChanges": 2,
+  "passed": false,
+  "score": 86.454,
+  "previousBest": 0,
+  "improvement": 86.454,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0048-m0481.lua",
+      "bytes": 85932,
+      "sha256": "fa2a7d061ff45eea34bf2bba0a046e1675f9084ae9eef28df56d24004e73dc88"
+    },
+    "luac": {
+      "path": "generations/candidates/0048-m0481.luac",
+      "bytes": 89126,
+      "sha256": "62a84b83540b21ecef91235e8dc143db93f4b95ad8f921b96d5b640db9727dd4"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "trait",
+      "variant": "trait-stability-zone",
+      "label": "trait function rewrite",
+      "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
+      "researchDirected": true,
+      "from": "parent implementation",
+      "to": "trait-stability-zone"
+    },
+    {
+      "index": 2,
+      "kind": "function",
+      "function": "md",
+      "variant": "meta-trend-verifier",
+      "label": "md function rewrite",
+      "summary": "Rebuild meta-learning verification with direction, magnitude and adaptive baseline speed",
+      "researchDirected": true,
+      "from": "parent implementation",
+      "to": "meta-trend-verifier"
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "RPM2MPH",
+      "summary": null,
+      "researchDirected": false,
+      "from": 0.00091792,
+      "to": 0.0009214285230669822
+    }
+  ],
+  "created": "2026-07-30T12:12:42.085Z"
+}

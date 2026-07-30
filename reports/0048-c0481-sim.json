@@ -1,0 +1,117 @@
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0048-c0481",
+  "family": "cloud",
+  "generation": 48,
+  "experiment": 1,
+  "style": "brain-lab",
+  "objective": "confidence arbitration, neural learning and reasoning",
+  "score": 87.536,
+  "previousBest": 0,
+  "improvement": 87.536,
+  "novelty": 0.75,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "q",
+      "variant": "safe-quantizer",
+      "label": "q function rewrite",
+      "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+      "from": "parent implementation",
+      "to": "safe-quantizer",
+      "researchDirected": true
+    },
+    {
+      "kind": "function",
+      "function": "trait",
+      "variant": "trait-stability-zone",
+      "label": "trait function rewrite",
+      "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
+      "from": "parent implementation",
+      "to": "trait-stability-zone",
+      "researchDirected": true
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.00091792,
+      "to": 0.0009150692886032211
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.10039159689784904
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.3947424341340255
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.713233373300838
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 34,
+      "osc": 0.7266203249724639,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 42,
+      "osc": 0.7420480243531162,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7417663498443634,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.9171368845837856,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.6982084017175385,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48629563381738755,
+    "truth": 7.047825736268571,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  }
+}
