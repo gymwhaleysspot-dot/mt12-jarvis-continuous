@@ -1,42 +1,49 @@
 {
-  "schema": 1,
-  "created": "2026-07-30T20:05:55.656Z",
+  "schema": 3,
+  "created": "2026-07-30T20:53:40.061Z",
   "candidates": [
     {
       "candidate": "0089-m089a",
       "passed": false,
-      "judge": "reject",
       "domain": "control",
-      "contradictions": 3,
-      "runtime": false,
-      "evidenceGaps": [
-        "replay",
-        "runtime"
+      "contradictions": [
+        "declared-truth vs changed-control",
+        "duplicate locals",
+        "possible read before table initialization"
+      ]
+    },
+    {
+      "candidate": "0090-t090a",
+      "passed": false,
+      "domain": "control",
+      "contradictions": [
+        "read before table initialization"
+      ]
+    },
+    {
+      "candidate": "0091-c091a",
+      "passed": false,
+      "domain": "cockpit",
+      "contradictions": [
+        "read before table initialization",
+        "declared-brain vs changed-cockpit"
+      ]
+    },
+    {
+      "candidate": "0099-c099a",
+      "passed": false,
+      "judge": "reject",
+      "domain": "core",
+      "emulator": false,
+      "contradictions": [
+        "EdgeTX emulator failure",
+        "declared-brain vs changed-core"
       ]
     }
   ],
-  "promotionExplanation": {
-    "whatChanged": [
-      "bb_tick"
-    ],
-    "whyBetter": "Only candidates passing runtime, contracts, isolation and contradiction gates are eligible",
-    "missingEvidence": [
-      "replay",
-      "runtime"
-    ],
-    "remainingRisk": "Physical radio and real-drive evidence remain authoritative"
-  },
-  "reflection": {
-    "expected": "isolated explainable improvement",
-    "actual": [
-      false
-    ],
-    "wrong": [
-      "declared-truth vs changed-control",
-      "duplicate locals",
-      "possible read before table initialization"
-    ],
-    "newEvaluator": "mock EdgeTX runtime plus contract/state governance",
-    "stopDoing": "treating syntax or unavailable evidence as proof"
-  }
+  "missingEvidence": [
+    "replay",
+    "runtime",
+    "emulator"
+  ]
 }
