@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0108-w108a
+Controller: 0109-m109a
 Phase: postcycle
 
 ## Leading hypothesis
@@ -8,7 +8,7 @@ Phase: postcycle
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.602
+- Known: Digital twin score 99.581
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
@@ -26,7 +26,7 @@ Phase: postcycle
 ## Long-term priorities
 - Preserve at least 256 bytes normalized LUAC reserve: 0%
 - Reduce jump false positives without missed real jumps: 0%
-- Reduce truth-speed error below 3 mph equivalent: 77.3%
+- Reduce truth-speed error below 3 mph equivalent: 76.1%
 
 ## Required self-critique
 - What evidence contradicts the leading hypothesis?

@@ -1,0 +1,122 @@
+{
+  "engine": "luac-factory-simulator-v6",
+  "candidate": "0109-m109a",
+  "parent": "0042-m0422",
+  "family": "monday",
+  "generation": 109,
+  "experiment": 1,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 85.194,
+  "previousBest": 93.992,
+  "parentScoreSource": "parent-report",
+  "improvement": -8.798,
+  "minGain": 0.15,
+  "novelty": 0.25,
+  "architecture": 1,
+  "parity": 1,
+  "improved": false,
+  "passed": true,
+  "promotable": false,
+  "regressions": [],
+  "scenarioPass": {
+    "dryLaunch": true,
+    "wetLaunch": true,
+    "bumpyLaunch": true,
+    "dryBrake": true,
+    "wetBrake": true,
+    "roughBrake": true,
+    "truth": true,
+    "lagTruth": true,
+    "jump": true,
+    "dropout": true,
+    "subsystemParity": true
+  },
+  "changes": [
+    {
+      "kind": "local-continuity-fallback",
+      "function": "vGear",
+      "variant": "truth-autonomous-v9",
+      "label": "Model outage continuity proof",
+      "summary": "Equivalent local marker used only to exercise compile and emulator pipeline; not eligible as an AI improvement",
+      "from": "d1b691c77d03",
+      "to": "35ca6143bb05"
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.08118712045000409
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.2668486721121806
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.598203843141679
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.739945864332604,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7297631976659336,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 40,
+      "osc": 0.7568797050685605,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.078797444723232,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.8532091821835743,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4898495287547616,
+    "truth": 7.885979321922088,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  },
+  "rewards": {
+    "novelty": 0.75,
+    "architecture": 2,
+    "parity": 5
+  }
+}

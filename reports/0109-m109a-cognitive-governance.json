@@ -1,0 +1,62 @@
+{
+  "schema": 4,
+  "engine": "mt12-cognitive-governance-v4",
+  "candidate": "0109-m109a",
+  "created": "2026-07-30T21:35:00.551Z",
+  "passed": false,
+  "judge": "reject",
+  "why": {
+    "function": "vGear",
+    "domain": "truth",
+    "declaredDomain": "truth",
+    "protected": false,
+    "objective": "truth prediction, calibration and sensor resilience",
+    "successMetric": "parent/family gain with deploy safety",
+    "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
+  },
+  "changes": [
+    {
+      "name": "vGear",
+      "before": "662dea665516807d",
+      "after": "93ee291823c29401",
+      "bytesDelta": 66
+    }
+  ],
+  "constantChanges": [],
+  "duplicateLocals": [],
+  "stateSlots": [],
+  "emulator": {
+    "passed": false,
+    "scenarios": [],
+    "report": "reports/0109-m109a-edgetx-emulator.json"
+  },
+  "evidence": [
+    {
+      "source": "static",
+      "grade": "F",
+      "available": true
+    },
+    {
+      "source": "simulation",
+      "grade": "E",
+      "available": true
+    },
+    {
+      "source": "emulator",
+      "grade": "B-",
+      "available": false
+    },
+    {
+      "source": "replay",
+      "grade": "C",
+      "available": false
+    }
+  ],
+  "contradictions": [
+    {
+      "severity": "critical",
+      "claim": "EdgeTX emulator failure"
+    }
+  ],
+  "parent": "generations/accepted/0042-m0422.lua"
+}
