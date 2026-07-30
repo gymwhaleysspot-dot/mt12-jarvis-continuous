@@ -1,17 +1,17 @@
 {
-  "engine": "a15xq-full-v4",
-  "cycle": 68,
-  "created": "2026-07-30T15:39:31.802Z",
-  "mode": "four-full-ai-architectures",
+  "engine": "a15xq-verified-subsystem-v2",
+  "cycle": 69,
+  "created": "2026-07-30T16:30:57.936Z",
+  "mode": "verified-subsystem-production",
   "parent": "generations/accepted/0058-m058a.lua",
-  "candidateCount": 4,
+  "candidateCount": 1,
   "selection": "four research-directed clean-sheet architectures with regression veto",
   "batch": [
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m068a",
-      "generation": 68,
+      "name": "m069a",
+      "generation": 69,
       "experiment": 1,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -23,155 +23,91 @@
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0008996,
-        "tcSlip": 7.21,
-        "tcSpan": 5.285,
+        "rpmK": 0.0009118,
+        "tcSlip": 6.67,
+        "tcSpan": 4.721,
         "tcCut": 23,
-        "absLock": 6950,
-        "truthRate": 0.181,
-        "coast": 0.9899
+        "absLock": 6839,
+        "truthRate": 0.159,
+        "coast": 0.9886
       },
-      "file": "generations/candidates/0068-m068a.lua",
+      "file": "generations/candidates/0069-m069a.lua",
       "parent": "generations/accepted/0058-m058a.lua",
       "parentBytes": 85726,
-      "sourceBytes": 85726,
+      "sourceBytes": 85857,
       "fullScript": true,
       "changes": [
         {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.000922365,
-          "to": 0.000918764256380496
-        }
-      ],
-      "sha256": "ae04a6dafcf54cc2a1d77bc306738b362702dbe8acc40fbabb848a872feaacc0",
-      "previousBest": 0
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "tuesday",
-      "name": "t068a",
-      "generation": 68,
-      "experiment": 1,
-      "objective": "traction, ABS and intervention quality",
-      "style": "control-lab",
-      "focus": [
-        "tc",
-        "abs",
-        "slew",
-        "governor"
-      ],
-      "variant": 1,
-      "params": {
-        "rpmK": 0.0009023,
-        "tcSlip": 7.737,
-        "tcSpan": 5.115,
-        "tcCut": 24,
-        "absLock": 7337,
-        "truthRate": 0.153,
-        "coast": 0.9832
-      },
-      "file": "generations/candidates/0068-t068a.lua",
-      "parent": "generations/accepted/0058-m058a.lua",
-      "parentBytes": 85726,
-      "sourceBytes": 85728,
-      "fullScript": true,
-      "changes": [
-        {
-          "key": "release",
-          "label": "runaway release base",
-          "from": 0.1,
-          "to": 0.11868682927073679
+          "kind": "subsystem-architecture",
+          "function": "md,traitLearn,wrmem",
+          "variant": "truth-evolution-v2",
+          "label": "Verified truth subsystem evolution",
+          "summary": "Rebuilt 3 related functions while preserving the complete accepted controller",
+          "from": "65024686f5bb",
+          "to": "a53c6bf1ea8e"
         },
         {
-          "key": "absBlend",
-          "label": "ABS blend",
-          "from": 0.42,
-          "to": 0.44824399103445467
-        }
-      ],
-      "sha256": "39e462c80cd8affed261397066171d21625f602f536318a637fb0eb537704a4b",
-      "previousBest": 0
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "cloud",
-      "name": "c068a",
-      "generation": 68,
-      "experiment": 1,
-      "objective": "confidence arbitration, neural learning and reasoning",
-      "style": "brain-lab",
-      "focus": [
-        "confidence",
-        "neural",
-        "learn",
-        "reason"
-      ],
-      "variant": 1,
-      "params": {
-        "rpmK": 0.0009017,
-        "tcSlip": 6.999,
-        "tcSpan": 5.411,
-        "tcCut": 24,
-        "absLock": 7534,
-        "truthRate": 0.154,
-        "coast": 0.9802
-      },
-      "file": "generations/candidates/0068-c068a.lua",
-      "parent": "generations/accepted/0058-m058a.lua",
-      "parentBytes": 85726,
-      "sourceBytes": 85726,
-      "fullScript": true,
-      "changes": [
-        {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000922365,
-          "to": 0.00092652966688863
+          "to": 0.000927881972070455
         }
       ],
-      "sha256": "21ed683670cb34c50c03f46075e69fad610f53bba0c43ad94abfbf51505918ed",
-      "previousBest": 0
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w068a",
-      "generation": 68,
-      "experiment": 1,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
-      "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
+      "sha256": "76fc67f5d7ac266872342d8aff9e2ad3568b629fcc8e73d6a1403f84a0598fd1",
+      "previousBest": 0,
+      "functionChanges": 3,
+      "totalNamedFunctions": 64,
+      "allFunctionsRewritten": false,
+      "substantiveSubsystem": true,
+      "dynamic": true,
+      "researchDriven": true,
+      "aiArchitect": true,
+      "multiAgent": false,
+      "aiModel": "openai/gpt-4o-mini",
+      "rewrittenFunctions": [
+        "md",
+        "traitLearn",
+        "wrmem"
       ],
-      "variant": 1,
-      "params": {
-        "rpmK": 0.0009091,
-        "tcSlip": 7.703,
-        "tcSpan": 5.162,
-        "tcCut": 26,
-        "absLock": 6961,
-        "truthRate": 0.176,
-        "coast": 0.988
-      },
-      "file": "generations/candidates/0068-w068a.lua",
-      "parent": "generations/accepted/0058-m058a.lua",
-      "parentBytes": 85726,
-      "sourceBytes": 85728,
-      "fullScript": true,
-      "changes": [
+      "subsystem": "truth",
+      "changedLines": 120,
+      "aiUsage": [
         {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.000922365,
-          "to": 0.0009254509033191343
+          "completion_tokens": 1870,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": 0
+          },
+          "latency_checkpoint": {
+            "engine_tbt_ms": 12,
+            "engine_ttft_ms": 105,
+            "engine_ttlt_ms": 22653,
+            "pre_inference_ms": 206,
+            "service_tbt_ms": 12,
+            "service_ttft_ms": 974,
+            "service_ttlt_ms": 23515,
+            "total_duration_ms": 23321,
+            "user_visible_ttft_ms": 768
+          },
+          "prompt_tokens": 2282,
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 0
+          },
+          "total_tokens": 4152
         }
-      ],
-      "sha256": "cc74aacd7c725cd17ccad70c684de0fd72b363a016e21bf026c019e5425132f1",
-      "previousBest": 0
+      ]
     }
-  ]
+  ],
+  "requirements": {
+    "completeSource": true,
+    "substantiveSubsystem": true,
+    "preserveUntouchedSystems": true,
+    "functionalDashboard": true,
+    "luaDownload": true,
+    "luacDownload": true,
+    "changelogPerFile": true
+  }
 }
