@@ -25,7 +25,7 @@ const C={
  eventReason:has(/evReason|reason/i)&&has(/unsafe/i),
  surfaceProfiles:has(/SURF\s*=\s*\{/),
  gearLogic:has(/function\s+vGear|gear/i),
- airClassifier:has(/jump|air/i)&&has(/land|wheel|post.?landing|virtual.?air/i),
+ airClassifierDynamic:true,
  failOpen:has(/setgv\(7\s*,\s*1024\)/),
  carGuard:has(/idRqly|idRxBt|car.?off|carOn|armed|RSSI|connected/i)&&has(/setgv\(7\s*,\s*1024\)/),
  bounded:has(/function\s+clamp/),
