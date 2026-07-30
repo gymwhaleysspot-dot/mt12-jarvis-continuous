@@ -1,0 +1,158 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0042-m0422.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0042-m0422",
+  "family": "monday",
+  "generation": 42,
+  "experiment": 2,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 93.992,
+  "previousBest": 0,
+  "improvement": 93.992,
+  "novelty": 0.75,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "q",
+      "variant": "sentinel-aware-quantizer",
+      "label": "q function rewrite",
+      "summary": "Preserve loud invalid telemetry sentinel behavior while making range handling explicit",
+      "from": "parent implementation",
+      "to": "sentinel-aware-quantizer"
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.000914,
+      "to": 0.0009179201173113659
+    },
+    {
+      "key": "warm",
+      "label": "boot voice wait",
+      "from": 90,
+      "to": 99.47957354341634
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.08482934874183679
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.291104385599082
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.620019788516689
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7369999103923071,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7268172437256366,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 40,
+      "osc": 0.7542742358835501,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.1066339301162234,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.8798372242768422,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4879801058003286,
+    "truth": 8.030129053265716,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0042-m0422.lua",
+  "sourceBytes": 85744,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0042-m0422.luac: 88941 bytes (MT12 4/4/4/4/4)
+normalized_bytes=88941
+margin=3
+passed=1

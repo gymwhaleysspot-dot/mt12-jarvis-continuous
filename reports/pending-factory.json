@@ -1,7 +1,7 @@
 {
   "engine": "a15xq-dynamic-functions-v5",
-  "cycle": 41,
-  "created": "2026-07-30T11:47:19.252Z",
+  "cycle": 42,
+  "created": "2026-07-30T11:48:30.925Z",
   "mode": "dynamic-full-code-function-evolution",
   "parent": "generations/accepted/0040-c0403.lua",
   "candidateCount": 12,
@@ -10,8 +10,8 @@
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m0411",
-      "generation": 41,
+      "name": "m0421",
+      "generation": 42,
       "experiment": 1,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -23,15 +23,15 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009229,
-        "tcSlip": 7.31,
-        "tcSpan": 5.462,
-        "tcCut": 28,
-        "absLock": 7149,
-        "truthRate": 0.148,
-        "coast": 0.9823
+        "rpmK": 0.0009223,
+        "tcSlip": 7.088,
+        "tcSpan": 5.97,
+        "tcCut": 26,
+        "absLock": 7521,
+        "truthRate": 0.203,
+        "coast": 0.9859
       },
-      "file": "generations/candidates/0041-m0411.lua",
+      "file": "generations/candidates/0042-m0421.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
       "sourceBytes": 85741,
@@ -50,25 +50,25 @@
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000914,
-          "to": 0.0009114643644479685
+          "to": 0.000918351429093047
         },
         {
           "key": "warm",
           "label": "boot voice wait",
           "from": 90,
-          "to": 84.59081785770832
+          "to": 83.25065182952676
         }
       ],
-      "sha256": "f12f75989e600e0c1c1d59e9935c202f6442239174b5725bbc6637926b65a000",
-      "previousBest": 95.052,
+      "sha256": "846b37e459e68f04b7fff45dfddda954b5916cc7746da5a46e900fd40d5c1fe3",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m0412",
-      "generation": 41,
+      "name": "m0422",
+      "generation": 42,
       "experiment": 2,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -80,52 +80,52 @@
       ],
       "variant": 3,
       "params": {
-        "rpmK": 0.0009147,
-        "tcSlip": 6.729,
-        "tcSpan": 6.028,
-        "tcCut": 25,
-        "absLock": 7073,
-        "truthRate": 0.205,
-        "coast": 0.9899
+        "rpmK": 0.0009151,
+        "tcSlip": 7.195,
+        "tcSpan": 6.035,
+        "tcCut": 23,
+        "absLock": 7168,
+        "truthRate": 0.177,
+        "coast": 0.9802
       },
-      "file": "generations/candidates/0041-m0412.lua",
+      "file": "generations/candidates/0042-m0422.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85766,
+      "sourceBytes": 85744,
       "fullScript": true,
       "changes": [
         {
           "kind": "function",
           "function": "q",
-          "variant": "safe-quantizer",
+          "variant": "sentinel-aware-quantizer",
           "label": "q function rewrite",
-          "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+          "summary": "Preserve loud invalid telemetry sentinel behavior while making range handling explicit",
           "from": "parent implementation",
-          "to": "safe-quantizer"
-        },
-        {
-          "key": "warm",
-          "label": "boot voice wait",
-          "from": 90,
-          "to": 102.48810698860325
+          "to": "sentinel-aware-quantizer"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000914,
-          "to": 0.0009189664413207211
+          "to": 0.0009179201173113659
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 99.47957354341634
         }
       ],
-      "sha256": "a1fda54dfe3dbebe52d7d9f71599b5bcd2a77c5fe183201644dbb4ddadf9befc",
-      "previousBest": 95.052,
+      "sha256": "7177c8bafa9ef5d4a8ae60d19327f9b572d93b400e4590eca7c7d1afd78d7f91",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "monday",
-      "name": "m0413",
-      "generation": 41,
+      "name": "m0423",
+      "generation": 42,
       "experiment": 3,
       "objective": "truth prediction, calibration and sensor resilience",
       "style": "truth-lab",
@@ -137,52 +137,52 @@
       ],
       "variant": 4,
       "params": {
-        "rpmK": 0.000924,
-        "tcSlip": 7.48,
-        "tcSpan": 4.996,
-        "tcCut": 27,
-        "absLock": 6752,
-        "truthRate": 0.156,
-        "coast": 0.9893
+        "rpmK": 0.0009282,
+        "tcSlip": 6.79,
+        "tcSpan": 5.141,
+        "tcCut": 22,
+        "absLock": 6907,
+        "truthRate": 0.153,
+        "coast": 0.9878
       },
-      "file": "generations/candidates/0041-m0413.lua",
+      "file": "generations/candidates/0042-m0423.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85741,
+      "sourceBytes": 85796,
       "fullScript": true,
       "changes": [
         {
           "kind": "function",
           "function": "lerp",
-          "variant": "bounded-ease-blend",
+          "variant": "adaptive-linear-blend",
           "label": "lerp function rewrite",
-          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "summary": "Keep linear response near center while softening only the ends of state transitions",
           "from": "parent implementation",
-          "to": "bounded-ease-blend"
-        },
-        {
-          "key": "warm",
-          "label": "boot voice wait",
-          "from": 90,
-          "to": 78.01353533588117
+          "to": "adaptive-linear-blend"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000914,
-          "to": 0.0009220570932130771
+          "to": 0.000905080785850936
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 103.62806204867084
         }
       ],
-      "sha256": "2c178c8c65b7240081c7a4c15267aff0c669825861deb480e1b1ba6b21708daf",
-      "previousBest": 95.052,
+      "sha256": "42a313a1654fb8fb96d3e232b3701e5fbd6127182511c0e49473149f6f28d647",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "tuesday",
-      "name": "t0411",
-      "generation": 41,
+      "name": "t0421",
+      "generation": 42,
       "experiment": 1,
       "objective": "traction, ABS and intervention quality",
       "style": "control-lab",
@@ -194,15 +194,15 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009085,
-        "tcSlip": 6.882,
-        "tcSpan": 5.058,
-        "tcCut": 27,
-        "absLock": 7217,
-        "truthRate": 0.197,
-        "coast": 0.9882
+        "rpmK": 0.0009191,
+        "tcSlip": 6.908,
+        "tcSpan": 5.639,
+        "tcCut": 28,
+        "absLock": 6755,
+        "truthRate": 0.146,
+        "coast": 0.9815
       },
-      "file": "generations/candidates/0041-t0411.lua",
+      "file": "generations/candidates/0042-t0421.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
       "sourceBytes": 85774,
@@ -221,25 +221,25 @@
           "key": "absDiv",
           "label": "ABS response divisor",
           "from": 650,
-          "to": 581.3797120805248
+          "to": 707.176166961086
         },
         {
           "key": "release",
           "label": "runaway release base",
           "from": 0.1,
-          "to": 0.12344686273339904
+          "to": 0.11694143606247964
         }
       ],
-      "sha256": "07ee6741f4fb16875fdd7fd4082c28174cab6e3b915458c6195bb86ca0b6d965",
-      "previousBest": 86.931,
+      "sha256": "169f5b1ce9e99c001fff317fb244783b8f0abaf8e3a2682fca72de63a02eede5",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "tuesday",
-      "name": "t0412",
-      "generation": 41,
+      "name": "t0422",
+      "generation": 42,
       "experiment": 2,
       "objective": "traction, ABS and intervention quality",
       "style": "control-lab",
@@ -251,81 +251,18 @@
       ],
       "variant": 3,
       "params": {
-        "rpmK": 0.0009218,
-        "tcSlip": 7.939,
-        "tcSpan": 5.045,
-        "tcCut": 27,
-        "absLock": 7605,
-        "truthRate": 0.155,
-        "coast": 0.9881
+        "rpmK": 0.000925,
+        "tcSlip": 7.405,
+        "tcSpan": 5.68,
+        "tcCut": 25,
+        "absLock": 7057,
+        "truthRate": 0.181,
+        "coast": 0.982
       },
-      "file": "generations/candidates/0041-t0412.lua",
+      "file": "generations/candidates/0042-t0422.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85780,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "i9",
-          "variant": "saturating-session-counter",
-          "label": "i9 function rewrite",
-          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
-          "from": "parent implementation",
-          "to": "saturating-session-counter"
-        },
-        {
-          "key": "release",
-          "label": "runaway release base",
-          "from": 0.1,
-          "to": 0.1183050869300496
-        },
-        {
-          "key": "absDiv",
-          "label": "ABS response divisor",
-          "from": 650,
-          "to": 720.2317520978395
-        },
-        {
-          "key": "absBlend",
-          "label": "ABS blend",
-          "from": 0.42,
-          "to": 0.4944265596996993
-        }
-      ],
-      "sha256": "6102e47fde27992924cb0a8b58db6106d83f7c6702fdb22886bc60df88eb3b28",
-      "previousBest": 86.931,
-      "functionChanges": 1,
-      "dynamic": true
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "tuesday",
-      "name": "t0413",
-      "generation": 41,
-      "experiment": 3,
-      "objective": "traction, ABS and intervention quality",
-      "style": "control-lab",
-      "focus": [
-        "tc",
-        "abs",
-        "slew",
-        "governor"
-      ],
-      "variant": 4,
-      "params": {
-        "rpmK": 0.0009271,
-        "tcSlip": 7.558,
-        "tcSpan": 5.749,
-        "tcCut": 23,
-        "absLock": 7010,
-        "truthRate": 0.184,
-        "coast": 0.9841
-      },
-      "file": "generations/candidates/0041-t0413.lua",
-      "parent": "generations/accepted/0040-c0403.lua",
-      "parentBytes": 85720,
-      "sourceBytes": 85733,
+      "sourceBytes": 85739,
       "fullScript": true,
       "changes": [
         {
@@ -341,31 +278,94 @@
           "key": "absDiv",
           "label": "ABS response divisor",
           "from": 650,
-          "to": 552.0167168057757
+          "to": 555.6734373364598
         },
         {
           "key": "absBlend",
           "label": "ABS blend",
           "from": 0.42,
-          "to": 0.4974381563273957
+          "to": 0.3411192601122893
         },
         {
           "key": "release",
           "label": "runaway release base",
           "from": 0.1,
-          "to": 0.06
+          "to": 0.06486426884424873
         }
       ],
-      "sha256": "0fbff8dfb217cd6ed60e3735ead971e14ebaf62d78ce9ceeac42608cd2ebbde9",
-      "previousBest": 86.931,
+      "sha256": "71c47da9da8b8d72984046bec2992a883f50ce8ded910baffab5cd4f9509d5bf",
+      "previousBest": 0,
+      "functionChanges": 1,
+      "dynamic": true
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "tuesday",
+      "name": "t0423",
+      "generation": 42,
+      "experiment": 3,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009174,
+        "tcSlip": 8.138,
+        "tcSpan": 5.865,
+        "tcCut": 27,
+        "absLock": 6824,
+        "truthRate": 0.204,
+        "coast": 0.9888
+      },
+      "file": "generations/candidates/0042-t0423.lua",
+      "parent": "generations/accepted/0040-c0403.lua",
+      "parentBytes": 85720,
+      "sourceBytes": 85733,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "lerp",
+          "variant": "bounded-ease-blend",
+          "label": "lerp function rewrite",
+          "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+          "from": "parent implementation",
+          "to": "bounded-ease-blend"
+        },
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.32
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 769.2604634310585
+        },
+        {
+          "key": "release",
+          "label": "runaway release base",
+          "from": 0.1,
+          "to": 0.12556179086770863
+        }
+      ],
+      "sha256": "53d9baa06da6645358e5e0aee1fece36f02c7d8a97064cbd5b2c4e83fbb7b6d8",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "cloud",
-      "name": "c0411",
-      "generation": 41,
+      "name": "c0421",
+      "generation": 42,
       "experiment": 1,
       "objective": "confidence arbitration, neural learning and reasoning",
       "style": "brain-lab",
@@ -377,69 +377,18 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009143,
-        "tcSlip": 7.684,
-        "tcSpan": 5.738,
-        "tcCut": 23,
-        "absLock": 7549,
-        "truthRate": 0.178,
-        "coast": 0.9804
+        "rpmK": 0.0009215,
+        "tcSlip": 7.719,
+        "tcSpan": 6.073,
+        "tcCut": 26,
+        "absLock": 7124,
+        "truthRate": 0.186,
+        "coast": 0.9819
       },
-      "file": "generations/candidates/0041-c0411.lua",
+      "file": "generations/candidates/0042-c0421.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85823,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "md",
-          "variant": "meta-hysteresis-verifier",
-          "label": "md function rewrite",
-          "summary": "Add hysteresis to meta-learning so one noisy sample cannot reverse a learned trend",
-          "from": "parent implementation",
-          "to": "meta-hysteresis-verifier"
-        },
-        {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.000914,
-          "to": 0.000917136603469099
-        }
-      ],
-      "sha256": "fc929ab25d580ba63eb908662515e708f5e808bf352f0a9d515054a7405fd150",
-      "previousBest": 95.286,
-      "functionChanges": 1,
-      "dynamic": true
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "cloud",
-      "name": "c0412",
-      "generation": 41,
-      "experiment": 2,
-      "objective": "confidence arbitration, neural learning and reasoning",
-      "style": "brain-lab",
-      "focus": [
-        "confidence",
-        "neural",
-        "learn",
-        "reason"
-      ],
-      "variant": 3,
-      "params": {
-        "rpmK": 0.0009172,
-        "tcSlip": 7.866,
-        "tcSpan": 6.085,
-        "tcCut": 28,
-        "absLock": 6801,
-        "truthRate": 0.171,
-        "coast": 0.9899
-      },
-      "file": "generations/candidates/0041-c0412.lua",
-      "parent": "generations/accepted/0040-c0403.lua",
-      "parentBytes": 85720,
-      "sourceBytes": 85840,
+      "sourceBytes": 85839,
       "fullScript": true,
       "changes": [
         {
@@ -455,20 +404,20 @@
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000914,
-          "to": 0.0009121106997791677
+          "to": 0.0009172498350830981
         }
       ],
-      "sha256": "a925f77c4c5d164d7ede8b648258bfb2607554a2b73469a5b94d173b0faa3e40",
-      "previousBest": 95.286,
+      "sha256": "e6aade65a415f8404e9ddc45433b110b94164aee221609134d7b852a37b593b2",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "cloud",
-      "name": "c0413",
-      "generation": 41,
-      "experiment": 3,
+      "name": "c0422",
+      "generation": 42,
+      "experiment": 2,
       "objective": "confidence arbitration, neural learning and reasoning",
       "style": "brain-lab",
       "focus": [
@@ -477,20 +426,20 @@
         "learn",
         "reason"
       ],
-      "variant": 4,
+      "variant": 3,
       "params": {
-        "rpmK": 0.0009179,
-        "tcSlip": 7.697,
-        "tcSpan": 5.449,
-        "tcCut": 24,
-        "absLock": 7587,
-        "truthRate": 0.215,
-        "coast": 0.9869
+        "rpmK": 0.0009199,
+        "tcSlip": 6.834,
+        "tcSpan": 5.645,
+        "tcCut": 25,
+        "absLock": 7539,
+        "truthRate": 0.193,
+        "coast": 0.9851
       },
-      "file": "generations/candidates/0041-c0413.lua",
+      "file": "generations/candidates/0042-c0422.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85788,
+      "sourceBytes": 85789,
       "fullScript": true,
       "changes": [
         {
@@ -506,19 +455,70 @@
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000914,
-          "to": 0.0009177398811778286
+          "to": 0.000916786480102269
         }
       ],
-      "sha256": "1acd87a55339290b131011ed88dbe3b6d70d5b9bd8534e5eeff980514a6eea77",
-      "previousBest": 95.286,
+      "sha256": "9f5117805d79952f50e55df32bf0b289915bd730441e2e6b32241cfd61f161dd",
+      "previousBest": 0,
+      "functionChanges": 1,
+      "dynamic": true
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "cloud",
+      "name": "c0423",
+      "generation": 42,
+      "experiment": 3,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009149,
+        "tcSlip": 7.129,
+        "tcSpan": 4.926,
+        "tcCut": 28,
+        "absLock": 7056,
+        "truthRate": 0.211,
+        "coast": 0.9859
+      },
+      "file": "generations/candidates/0042-c0423.lua",
+      "parent": "generations/accepted/0040-c0403.lua",
+      "parentBytes": 85720,
+      "sourceBytes": 85803,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "trait",
+          "variant": "trait-stability-zone",
+          "label": "trait function rewrite",
+          "summary": "Add a stability zone so tiny personality noise learns slowly and large evidence learns faster",
+          "from": "parent implementation",
+          "to": "trait-stability-zone"
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000914,
+          "to": 0.0009181628638475901
+        }
+      ],
+      "sha256": "11ed2e7dc0eb62d857aa76e8af26d8a5508f7ef70a33ec24603f7f8f4d3703fd",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "html",
-      "name": "w0411",
-      "generation": 41,
+      "name": "w0421",
+      "generation": 42,
       "experiment": 1,
       "objective": "memory efficiency, observability and deploy reliability",
       "style": "systems-lab",
@@ -530,66 +530,15 @@
       ],
       "variant": 2,
       "params": {
-        "rpmK": 0.0009024,
-        "tcSlip": 8.027,
-        "tcSpan": 5.967,
-        "tcCut": 25,
-        "absLock": 6832,
-        "truthRate": 0.157,
-        "coast": 0.9847
+        "rpmK": 0.0009162,
+        "tcSlip": 7.797,
+        "tcSpan": 5.79,
+        "tcCut": 26,
+        "absLock": 7179,
+        "truthRate": 0.176,
+        "coast": 0.9854
       },
-      "file": "generations/candidates/0041-w0411.lua",
-      "parent": "generations/accepted/0040-c0403.lua",
-      "parentBytes": 85720,
-      "sourceBytes": 85781,
-      "fullScript": true,
-      "changes": [
-        {
-          "kind": "function",
-          "function": "i9",
-          "variant": "saturating-session-counter",
-          "label": "i9 function rewrite",
-          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
-          "from": "parent implementation",
-          "to": "saturating-session-counter"
-        },
-        {
-          "key": "warm",
-          "label": "boot voice wait",
-          "from": 90,
-          "to": 97.72578695771517
-        }
-      ],
-      "sha256": "9ee8383e76b880b00428d3da67475301c7158e5143f9a06d951fee136cf70048",
-      "previousBest": 96.144,
-      "functionChanges": 1,
-      "dynamic": true
-    },
-    {
-      "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w0412",
-      "generation": 41,
-      "experiment": 2,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
-      "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
-      ],
-      "variant": 3,
-      "params": {
-        "rpmK": 0.0009063,
-        "tcSlip": 7.337,
-        "tcSpan": 5.961,
-        "tcCut": 25,
-        "absLock": 6982,
-        "truthRate": 0.214,
-        "coast": 0.9866
-      },
-      "file": "generations/candidates/0041-w0412.lua",
+      "file": "generations/candidates/0042-w0421.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
       "sourceBytes": 85801,
@@ -608,20 +557,20 @@
           "key": "warm",
           "label": "boot voice wait",
           "from": 90,
-          "to": 80.8946354528889
+          "to": 84.82555500481976
         }
       ],
-      "sha256": "a9dded3bca772e40a181390b5d4d8edf5bee6050e28ca7a55c0c5864b049a8d0",
-      "previousBest": 96.144,
+      "sha256": "43e90c484d884450c8a8812e304678f8bd9fff0e753b225a44017fa7c4985e33",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     },
     {
       "engine": "a15xq-full-v4",
       "family": "html",
-      "name": "w0413",
-      "generation": 41,
-      "experiment": 3,
+      "name": "w0422",
+      "generation": 42,
+      "experiment": 2,
       "objective": "memory efficiency, observability and deploy reliability",
       "style": "systems-lab",
       "focus": [
@@ -630,20 +579,20 @@
         "logger",
         "dashboard"
       ],
-      "variant": 4,
+      "variant": 3,
       "params": {
-        "rpmK": 0.0009028,
-        "tcSlip": 7.318,
-        "tcSpan": 6.046,
-        "tcCut": 28,
-        "absLock": 7268,
-        "truthRate": 0.189,
-        "coast": 0.9858
+        "rpmK": 0.0009257,
+        "tcSlip": 6.817,
+        "tcSpan": 4.83,
+        "tcCut": 27,
+        "absLock": 6791,
+        "truthRate": 0.212,
+        "coast": 0.9811
       },
-      "file": "generations/candidates/0041-w0413.lua",
+      "file": "generations/candidates/0042-w0422.lua",
       "parent": "generations/accepted/0040-c0403.lua",
       "parentBytes": 85720,
-      "sourceBytes": 85781,
+      "sourceBytes": 85782,
       "fullScript": true,
       "changes": [
         {
@@ -659,11 +608,62 @@
           "key": "warm",
           "label": "boot voice wait",
           "from": 90,
-          "to": 97.42878027143888
+          "to": 100.49916761368513
         }
       ],
-      "sha256": "91dde6c7ebe906549540551b3a1265199443cc9cae4ace045e4e43f0f19ecaf8",
-      "previousBest": 96.144,
+      "sha256": "43b30281057e7b7089d6c4a1fb9bf04dd3b2a2bca33ad82fecb880209ef004b4",
+      "previousBest": 0,
+      "functionChanges": 1,
+      "dynamic": true
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "html",
+      "name": "w0423",
+      "generation": 42,
+      "experiment": 3,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009015,
+        "tcSlip": 7.258,
+        "tcSpan": 5.016,
+        "tcCut": 24,
+        "absLock": 7190,
+        "truthRate": 0.191,
+        "coast": 0.99
+      },
+      "file": "generations/candidates/0042-w0423.lua",
+      "parent": "generations/accepted/0040-c0403.lua",
+      "parentBytes": 85720,
+      "sourceBytes": 85782,
+      "fullScript": true,
+      "changes": [
+        {
+          "kind": "function",
+          "function": "i9",
+          "variant": "saturating-session-counter",
+          "label": "i9 function rewrite",
+          "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+          "from": "parent implementation",
+          "to": "saturating-session-counter"
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 107.4612153069349
+        }
+      ],
+      "sha256": "d8647adc480bc824b1e3cd7e6d681654781c6c3ff2c984d8c4879aeb1471b5fe",
+      "previousBest": 0,
       "functionChanges": 1,
       "dynamic": true
     }
