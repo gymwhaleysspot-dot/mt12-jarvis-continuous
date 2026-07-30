@@ -1,18 +1,18 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0075-c075a
-Digital twin: 99.577 (PASS)
+Controller: 0076-w076a
+Digital twin: 99.579 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
 Required design constraints:
-- Consider innovation: dynamic intervention risk budget
 - Consider innovation: counterfactual event reasoning
 - Consider innovation: self-calibrating sensor lag
+- Consider innovation: multi-timescale neural memory
 - Preserve fail-open TCT=1024, MT12 global io.read(handle,...), dashboard, logging, learning, voice, mood, personality and all existing behavior.
 
 
 # MT12 Reasoning Mission
 
-Controller: 0091-w091a
+Controller: 0094-c094a
 Phase: preflight
 
 ## Leading hypothesis
@@ -20,7 +20,7 @@ Phase: preflight
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.577
+- Known: Digital twin score 99.579
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
@@ -38,7 +38,7 @@ Phase: preflight
 ## Long-term priorities
 - Preserve at least 256 bytes normalized LUAC reserve: 0%
 - Reduce jump false positives without missed real jumps: 0%
-- Reduce truth-speed error below 3 mph equivalent: 75.8%
+- Reduce truth-speed error below 3 mph equivalent: 75.9%
 
 ## Required self-critique
 - What evidence contradicts the leading hypothesis?
