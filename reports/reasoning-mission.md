@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0101-m101a
+Controller: 0102-t102a
 Phase: postcycle
 
 ## Leading hypothesis

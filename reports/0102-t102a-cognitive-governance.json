@@ -1,0 +1,66 @@
+{
+  "schema": 3,
+  "engine": "mt12-cognitive-governance-v3",
+  "candidate": "0102-t102a",
+  "created": "2026-07-30T21:01:53.201Z",
+  "passed": false,
+  "judge": "reject",
+  "why": {
+    "function": "nt",
+    "domain": "core",
+    "objective": "traction, ABS and intervention quality",
+    "successMetric": "parent/family gain with deploy safety",
+    "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
+  },
+  "changes": [
+    {
+      "name": "nt",
+      "before": "ca250f154d3094eb",
+      "after": "f4fdf862a3d69cf1",
+      "bytesDelta": 66
+    }
+  ],
+  "constantChanges": [],
+  "duplicateLocals": [],
+  "stateSlots": [
+    277
+  ],
+  "emulator": {
+    "passed": false,
+    "scenarios": [],
+    "report": "reports/0102-t102a-edgetx-emulator.json"
+  },
+  "evidence": [
+    {
+      "source": "static",
+      "grade": "F",
+      "available": true
+    },
+    {
+      "source": "simulation",
+      "grade": "E",
+      "available": true
+    },
+    {
+      "source": "emulator",
+      "grade": "B-",
+      "available": false
+    },
+    {
+      "source": "replay",
+      "grade": "C",
+      "available": false
+    }
+  ],
+  "contradictions": [
+    {
+      "severity": "critical",
+      "claim": "EdgeTX emulator failure"
+    },
+    {
+      "severity": "high",
+      "claim": "declared-control vs changed-core"
+    }
+  ],
+  "parent": "generations/accepted/0074-t074a.lua"
+}
