@@ -24,7 +24,7 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 20
     env:
       MT12_LIMIT: '88944'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y lua5.3
       - name: Prepare MT12 normalizer
         run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
-      - name: Research and run resumable chief-specialist-integrator factory
+      - name: Build one complete architecture now with four parallel specialists
         run: node scripts/master-ai.mjs
       - name: Simulate compile normalize rank and document factory batch
         shell: bash
@@ -57,7 +57,7 @@ jobs:
             REPORT="reports/${BASE}-gate.txt"
             PASS=1
             {
-              echo "engine=resumable-multi-agent-luac-factory"
+              echo "engine=immediate-four-specialist-luac-factory"
               echo "candidate=$CANDIDATE"
               node scripts/all-function-gate.mjs "$CANDIDATE" || PASS=0
               node scripts/simulator.mjs "$CANDIDATE" || PASS=0
@@ -103,7 +103,7 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
           node - <<'NODE'
-          const fs=require('fs'),p=require('./reports/pending-factory.json'),rows=fs.readFileSync('reports/factory-results.tsv','utf8').trim().split('\n').filter(Boolean).map(x=>{const [pass,score,family,base]=x.split('\t');return{pass:pass==='1',score:+score,family,base}}),old=fs.existsSync('reports/factory-catalog.json')?require('./reports/factory-catalog.json'):{builds:[]},state=require('./reports/factory-state.json');for(const r of rows.filter(x=>x.pass)){const m=require('./reports/'+r.base+'-sim.json'),c=require('./reports/'+r.base+'-changelog.json');old.builds.unshift({...r,generation:m.generation,style:m.style,novelty:m.novelty,improvement:m.improvement,dynamic:c.dynamic,functionChanges:c.functionChanges,allFunctionsRewritten:c.allFunctionsRewritten,aiArchitect:c.aiArchitect,aiModel:c.aiModel,lua:'generations/factory/'+r.family+'/'+r.base+'.lua',luac:'generations/factory/'+r.family+'/'+r.base+'.luac',changelog:'generations/factory/'+r.family+'/'+r.base+'-CHANGELOG.md',changelogJson:'generations/factory/'+r.family+'/'+r.base+'-changelog.json',created:new Date().toISOString()});state.families[r.family].best=Math.max(state.families[r.family].best||0,r.score)}old.builds=old.builds.slice(0,100);old.latestBatch=p.cycle;old.updated=new Date().toISOString();old.downloads='Each build provides complete Lua source, normalized MT12 LUAC, Markdown changelog and JSON changelog';old.architecture='Resumable chief architect, parallel subsystem specialists and integrator';state.globalBest=Math.max(state.globalBest||0,...rows.filter(x=>x.pass).map(x=>x.score));fs.writeFileSync('reports/factory-catalog.json',JSON.stringify(old,null,2));fs.writeFileSync('reports/factory-state.json',JSON.stringify(state,null,2));
+          const fs=require('fs'),p=require('./reports/pending-factory.json'),rows=fs.readFileSync('reports/factory-results.tsv','utf8').trim().split('\n').filter(Boolean).map(x=>{const [pass,score,family,base]=x.split('\t');return{pass:pass==='1',score:+score,family,base}}),old=fs.existsSync('reports/factory-catalog.json')?require('./reports/factory-catalog.json'):{builds:[]},state=require('./reports/factory-state.json');for(const r of rows.filter(x=>x.pass)){const m=require('./reports/'+r.base+'-sim.json'),c=require('./reports/'+r.base+'-changelog.json');old.builds.unshift({...r,generation:m.generation,style:m.style,novelty:m.novelty,improvement:m.improvement,dynamic:c.dynamic,functionChanges:c.functionChanges,allFunctionsRewritten:c.allFunctionsRewritten,aiArchitect:c.aiArchitect,aiModel:c.aiModel,lua:'generations/factory/'+r.family+'/'+r.base+'.lua',luac:'generations/factory/'+r.family+'/'+r.base+'.luac',changelog:'generations/factory/'+r.family+'/'+r.base+'-CHANGELOG.md',changelogJson:'generations/factory/'+r.family+'/'+r.base+'-changelog.json',created:new Date().toISOString()});state.families[r.family].best=Math.max(state.families[r.family].best||0,r.score)}old.builds=old.builds.slice(0,100);old.latestBatch=p.cycle;old.updated=new Date().toISOString();old.downloads='Each build provides complete Lua source, normalized MT12 LUAC, Markdown changelog and JSON changelog';old.architecture='Immediate chief architect plus four parallel specialists';state.globalBest=Math.max(state.globalBest||0,...rows.filter(x=>x.pass).map(x=>x.score));fs.writeFileSync('reports/factory-catalog.json',JSON.stringify(old,null,2));fs.writeFileSync('reports/factory-state.json',JSON.stringify(state,null,2));
           NODE
           printf '{"status":"accepted","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md","changelogJson":"generations/accepted/%s-changelog.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" "$BASE" > reports/status.json
       - name: Commit factory output
@@ -116,10 +116,10 @@ jobs:
           git commit -m "LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
-      - name: Upload complete downloadable factory batch
+      - name: Upload immediate downloadable factory build
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-resumable-multi-agent-factory
+          name: mt12-immediate-ai-lua-luac
           path: |
             generations/factory/
             generations/accepted/
