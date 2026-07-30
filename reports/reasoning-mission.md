@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0104-w104a
+Controller: 0105-m105a
 Phase: postcycle
 
 ## Leading hypothesis

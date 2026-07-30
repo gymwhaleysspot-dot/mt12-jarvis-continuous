@@ -1,0 +1,90 @@
+{
+  "schema": 3,
+  "engine": "mt12-cognitive-governance-v3",
+  "candidate": "0105-m105a",
+  "created": "2026-07-30T21:27:01.649Z",
+  "passed": false,
+  "judge": "reject",
+  "why": {
+    "function": "traitLearn",
+    "domain": "brain",
+    "objective": "truth prediction, calibration and sensor resilience",
+    "successMetric": "parent/family gain with deploy safety",
+    "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
+  },
+  "changes": [
+    {
+      "name": "traitLearn",
+      "before": "e91e5e0290ddc442",
+      "after": "b0445686d7dc12ce",
+      "bytesDelta": 66
+    }
+  ],
+  "constantChanges": [],
+  "duplicateLocals": [],
+  "stateSlots": [
+    119,
+    216,
+    239,
+    289,
+    302,
+    304,
+    325,
+    326,
+    327,
+    331,
+    333,
+    341,
+    342,
+    343,
+    347,
+    370,
+    371,
+    372,
+    373,
+    374,
+    375,
+    376,
+    560,
+    561,
+    562
+  ],
+  "emulator": {
+    "passed": false,
+    "scenarios": [],
+    "report": "reports/0105-m105a-edgetx-emulator.json"
+  },
+  "evidence": [
+    {
+      "source": "static",
+      "grade": "F",
+      "available": true
+    },
+    {
+      "source": "simulation",
+      "grade": "E",
+      "available": true
+    },
+    {
+      "source": "emulator",
+      "grade": "B-",
+      "available": false
+    },
+    {
+      "source": "replay",
+      "grade": "C",
+      "available": false
+    }
+  ],
+  "contradictions": [
+    {
+      "severity": "critical",
+      "claim": "EdgeTX emulator failure"
+    },
+    {
+      "severity": "high",
+      "claim": "declared-truth vs changed-brain"
+    }
+  ],
+  "parent": "generations/accepted/0042-m0422.lua"
+}

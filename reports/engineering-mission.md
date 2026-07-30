@@ -1,18 +1,18 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0104-w104a
+Controller: 0105-m105a
 Digital twin: 99.582 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
 Required design constraints:
-- Consider innovation: dynamic intervention risk budget
 - Consider innovation: counterfactual event reasoning
 - Consider innovation: self-calibrating sensor lag
+- Consider innovation: multi-timescale neural memory
 - Preserve fail-open TCT=1024, MT12 global io.read(handle,...), dashboard, logging, learning, voice, mood, personality and all existing behavior.
 
 
 # MT12 Reasoning Mission
 
-Controller: 0104-w104a
+Controller: 0105-m105a
 Phase: postflight
 
 ## Leading hypothesis
@@ -49,7 +49,7 @@ Phase: postflight
 
 # MT12 Reasoning Mission
 
-Controller: 0104-w104a
+Controller: 0105-m105a
 Phase: postcycle
 
 ## Leading hypothesis

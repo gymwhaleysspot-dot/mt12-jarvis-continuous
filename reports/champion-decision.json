@@ -55,20 +55,22 @@
     {
       "pass": false,
       "score": 85.194,
-      "family": "html",
-      "base": "0104-w104a",
+      "family": "monday",
+      "base": "0105-m105a",
       "bytes": 0,
       "margin": 0,
-      "parentScore": 84.243,
-      "parentGain": 0.951,
-      "familyChampion": "0055-w055a",
-      "familyScore": 86.252,
-      "familyGain": -1.058,
+      "parentScore": 93.992,
+      "parentGain": -8.798,
+      "familyChampion": "0042-m0422",
+      "familyScore": 93.992,
+      "familyGain": -8.798,
       "requiredMargin": 48,
       "reasons": [
         "build-gate",
+        "differential",
         "cognitive-governance",
         "edgetx-emulator",
+        "gain:parent=-8.798,family=-8.798<0.15",
         "margin:0<48"
       ],
       "evidenceGaps": [
@@ -79,7 +81,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0104-w104a",
+          "candidate": "0105-m105a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -87,7 +89,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87665,
+            "sourceBytes": 85797,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -107,7 +109,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0104-w104a",
+          "candidate": "0105-m105a",
           "passed": true,
           "checks": {
             "path": true,
@@ -140,7 +142,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0104-w104a",
+          "candidate": "0105-m105a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -172,29 +174,31 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0104-w104a",
-          "parent": "0076-w076a",
+          "candidate": "0105-m105a",
+          "parent": "0042-m0422",
           "parentFound": true,
-          "scoreDelta": 0.951,
+          "scoreDelta": -8.798,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": -1,
-            "roughBrake.lock": -4,
-            "truth.mae": -0.3336,
-            "lagTruth.mae": -0.3111,
+            "wetBrake.lock": 0,
+            "roughBrake.lock": 0,
+            "truth.mae": -0.0278,
+            "lagTruth.mae": -0.0266,
             "jump.fp": 0,
-            "jump.miss": 0,
+            "jump.miss": 6,
             "dropout.unsafe": 0
           },
-          "criticalWorse": [],
-          "passed": true
+          "criticalWorse": [
+            "jump.miss:+6"
+          ],
+          "passed": false
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0104-w104a",
+          "candidate": "0105-m105a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -213,14 +217,14 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0104-w104a",
-          "parent": "generations/accepted/0076-w076a.lua",
+          "candidate": "0105-m105a",
+          "parent": "generations/accepted/0042-m0422.lua",
           "changedFunctions": [
-            "setgv"
+            "traitLearn"
           ],
           "tests": [
             {
-              "function": "setgv",
+              "function": "traitLearn",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
@@ -234,47 +238,73 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0104-w104a",
-          "parent": "generations/accepted/0076-w076a.lua",
+          "candidate": "0105-m105a",
+          "parent": "generations/accepted/0042-m0422.lua",
           "changedFunctions": [
-            "setgv"
+            "traitLearn"
           ],
           "constantChanges": [],
           "gvarMappingChanged": false,
           "memoryIoChanged": false,
           "voiceCallsDelta": 0,
           "dashboardDrawDelta": 0,
-          "sourceBytesDelta": 72
+          "sourceBytesDelta": 53
         },
         "cognitive": {
           "schema": 3,
           "engine": "mt12-cognitive-governance-v3",
-          "candidate": "0104-w104a",
-          "created": "2026-07-30T21:07:09.813Z",
+          "candidate": "0105-m105a",
+          "created": "2026-07-30T21:27:01.649Z",
           "passed": false,
           "judge": "reject",
           "why": {
-            "function": "setgv",
-            "domain": "core",
-            "objective": "memory efficiency, observability and deploy reliability",
+            "function": "traitLearn",
+            "domain": "brain",
+            "objective": "truth prediction, calibration and sensor resilience",
             "successMetric": "parent/family gain with deploy safety",
             "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
           },
           "changes": [
             {
-              "name": "setgv",
-              "before": "a02458fac0f8ec38",
-              "after": "f2e2215c17c1a25e",
+              "name": "traitLearn",
+              "before": "e91e5e0290ddc442",
+              "after": "b0445686d7dc12ce",
               "bytesDelta": 66
             }
           ],
           "constantChanges": [],
           "duplicateLocals": [],
-          "stateSlots": [],
+          "stateSlots": [
+            119,
+            216,
+            239,
+            289,
+            302,
+            304,
+            325,
+            326,
+            327,
+            331,
+            333,
+            341,
+            342,
+            343,
+            347,
+            370,
+            371,
+            372,
+            373,
+            374,
+            375,
+            376,
+            560,
+            561,
+            562
+          ],
           "emulator": {
             "passed": false,
             "scenarios": [],
-            "report": "reports/0104-w104a-edgetx-emulator.json"
+            "report": "reports/0105-m105a-edgetx-emulator.json"
           },
           "evidence": [
             {
@@ -305,16 +335,16 @@
             },
             {
               "severity": "high",
-              "claim": "declared-cockpit vs changed-core"
+              "claim": "declared-truth vs changed-brain"
             }
           ],
-          "parent": "generations/accepted/0076-w076a.lua"
+          "parent": "generations/accepted/0042-m0422.lua"
         },
         "emulator": {
           "schema": 2,
           "engine": "official-edgetx-source-backed-mt12-emulator",
           "edgetxCommit": "f8a89393c560a1057b045048f4b6ff5096ca22a0",
-          "candidate": "0104-w104a",
+          "candidate": "0105-m105a",
           "passed": false,
           "error": "emulator produced no report"
         }
@@ -330,5 +360,5 @@
   },
   "status": "hold-deploy-safe-champion",
   "deploymentWarning": null,
-  "created": "2026-07-30T21:07:10.128Z"
+  "created": "2026-07-30T21:27:01.984Z"
 }
