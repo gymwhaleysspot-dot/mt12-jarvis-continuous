@@ -23,7 +23,7 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 22
     env:
       MT12_LIMIT: '88944'
       MT12_HARD_MARGIN: '48'
@@ -44,7 +44,7 @@ jobs:
       - name: Mark factory started
         run: |
           mkdir -p reports
-          printf '{"status":"building","mode":"autonomous-engineering-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"metacognitive-autonomous-engineering-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
       - name: Install and verify Lua 5.3
         shell: bash
         run: |
@@ -60,11 +60,13 @@ jobs:
         run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
       - name: Build engineering mission and world model
         run: node scripts/autonomous-engineering-system.mjs preflight
+      - name: Form hypotheses goals uncertainty and tool plan
+        run: node scripts/reasoning-orchestrator.mjs preflight
       - name: Build mission-driven AI controller
         id: architecture
         continue-on-error: true
         run: |
-          printf '{"status":"building","mode":"autonomous-engineering-factory","stage":"mission-driven architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"metacognitive-autonomous-engineering-factory","stage":"hypothesis-driven architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           node scripts/master-ai.mjs
       - name: Record architecture outcome
         if: steps.architecture.outcome == 'failure'
@@ -72,9 +74,9 @@ jobs:
         run: |
           STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
           if [ "$STATE" = "rate-limited" ]; then
-            printf '{"status":"rate-limited","mode":"autonomous-engineering-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"rate-limited","mode":"metacognitive-autonomous-engineering-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           else
-            printf '{"status":"builder-failed","mode":"autonomous-engineering-factory","stage":"mission-driven architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"builder-failed","mode":"metacognitive-autonomous-engineering-factory","stage":"hypothesis-driven architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           fi
       - name: Compile normalize and deeply validate candidates
         if: steps.architecture.outcome == 'success'
@@ -92,7 +94,7 @@ jobs:
             BYTES=0
             MARGIN=0
             {
-              echo "engine=autonomous-mt12-ai-luac-factory"
+              echo "engine=metacognitive-autonomous-mt12-ai-luac-factory"
               echo "candidate=$CANDIDATE"
               node scripts/all-function-gate.mjs "$CANDIDATE" || PASS=0
               node scripts/simulator.mjs "$CANDIDATE" || PASS=0
@@ -100,6 +102,7 @@ jobs:
               node scripts/replay-real-logs.mjs "$CANDIDATE" || PASS=0
               node scripts/ablation-test.mjs "$CANDIDATE" || PASS=0
               node scripts/semantic-diff.mjs "$CANDIDATE" || PASS=0
+              node scripts/reasoning-orchestrator.mjs gate || PASS=0
               luac5.3 -p "$CANDIDATE" || PASS=0
               if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
               if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || PASS=0; fi
@@ -128,7 +131,9 @@ jobs:
           done
       - name: Run autonomous engineering council on candidate
         if: steps.architecture.outcome == 'success'
-        run: node scripts/autonomous-engineering-system.mjs postflight
+        run: |
+          node scripts/autonomous-engineering-system.mjs postflight
+          node scripts/reasoning-orchestrator.mjs postflight
       - name: Promote only a true new champion
         if: steps.architecture.outcome == 'success'
         shell: bash
@@ -140,8 +145,9 @@ jobs:
             node scripts/write-rejection-summary.mjs || true
             node scripts/quarantine-generation.mjs || true
             node scripts/category-champions.mjs || true
+            node scripts/reasoning-orchestrator.mjs postcycle || true
             CHAMPION=$(node -e "const d=require('./reports/champion-decision.json');console.log(d.champion?.base||'none')" 2>/dev/null || echo none)
-            printf '{"status":"champion-held","mode":"autonomous-engineering-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"champion-held","mode":"metacognitive-autonomous-engineering-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json","brief":"reports/engineering-brief.json","hypotheses":"reports/hypothesis-board.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
             node scripts/rebuild-factory-catalog.mjs || true
             exit 0
           fi
@@ -155,7 +161,8 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
           node scripts/category-champions.mjs || true
           node scripts/autonomous-engineering-system.mjs postflight || true
-          printf '{"status":"accepted","mode":"autonomous-engineering-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json","digitalTwin":"reports/digital-twin.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" > reports/status.json
+          node scripts/reasoning-orchestrator.mjs postcycle || true
+          printf '{"status":"accepted","mode":"metacognitive-autonomous-engineering-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json","digitalTwin":"reports/digital-twin.json","brief":"reports/engineering-brief.json","hypotheses":"reports/hypothesis-board.json","goals":"reports/long-term-goals.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" > reports/status.json
           node scripts/rebuild-factory-catalog.mjs
       - name: Commit factory output and engineering knowledge
         if: always()
@@ -165,14 +172,14 @@ jobs:
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports factory.html factory-admin.js 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m "Autonomous MT12 AI engineering cycle $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
+          git commit -m "Metacognitive MT12 AI engineering cycle $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
       - name: Upload complete engineering evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-autonomous-ai-engineering-factory
+          name: mt12-metacognitive-ai-engineering-factory
           path: |
             generations/factory/
             generations/accepted/
