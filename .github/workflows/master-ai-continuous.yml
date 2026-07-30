@@ -89,6 +89,7 @@ jobs:
           if [ -z "$BEST" ]; then
             node scripts/write-rejection-summary.mjs || true
             printf '{"status":"batch-rejected","updated":"%s","diagnostics":"reports/rejection-summary.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            node scripts/rebuild-factory-catalog.mjs || true
             exit 0
           fi
           SCORE=$(echo "$BEST" | cut -f1)
@@ -99,12 +100,13 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
           printf '{"status":"accepted","mode":"rapid-factory","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
+          node scripts/rebuild-factory-catalog.mjs
       - name: Commit factory output
         shell: bash
         run: |
           git config user.name 'mt12-luac-factory'
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
-          git add generations reports factory.html
+          git add generations reports factory.html factory-admin.js
           git diff --cached --quiet && exit 0
           git commit -m "Rapid LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
