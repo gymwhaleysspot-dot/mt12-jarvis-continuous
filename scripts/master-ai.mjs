@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Research first, synthesize complete A15XQ descendants, then use a chief
-// architect and subsystem specialists to rebuild and integrate every function.
-await import('./research-factory.mjs');
+// Fast production lane: synthesize four complete A15XQ descendants immediately.
+// AI research/architecture work must never block downloadable Lua/LUAC output.
 await import('./synthesize-factory.mjs');
-await import('./multi-agent-architect.mjs');
