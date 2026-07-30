@@ -1,0 +1,64 @@
+{
+  "schema": 3,
+  "engine": "mt12-cognitive-governance-v3",
+  "candidate": "0104-w104a",
+  "created": "2026-07-30T21:07:09.813Z",
+  "passed": false,
+  "judge": "reject",
+  "why": {
+    "function": "setgv",
+    "domain": "core",
+    "objective": "memory efficiency, observability and deploy reliability",
+    "successMetric": "parent/family gain with deploy safety",
+    "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
+  },
+  "changes": [
+    {
+      "name": "setgv",
+      "before": "a02458fac0f8ec38",
+      "after": "f2e2215c17c1a25e",
+      "bytesDelta": 66
+    }
+  ],
+  "constantChanges": [],
+  "duplicateLocals": [],
+  "stateSlots": [],
+  "emulator": {
+    "passed": false,
+    "scenarios": [],
+    "report": "reports/0104-w104a-edgetx-emulator.json"
+  },
+  "evidence": [
+    {
+      "source": "static",
+      "grade": "F",
+      "available": true
+    },
+    {
+      "source": "simulation",
+      "grade": "E",
+      "available": true
+    },
+    {
+      "source": "emulator",
+      "grade": "B-",
+      "available": false
+    },
+    {
+      "source": "replay",
+      "grade": "C",
+      "available": false
+    }
+  ],
+  "contradictions": [
+    {
+      "severity": "critical",
+      "claim": "EdgeTX emulator failure"
+    },
+    {
+      "severity": "high",
+      "claim": "declared-cockpit vs changed-core"
+    }
+  ],
+  "parent": "generations/accepted/0076-w076a.lua"
+}

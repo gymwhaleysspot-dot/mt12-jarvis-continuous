@@ -55,22 +55,20 @@
     {
       "pass": false,
       "score": 85.194,
-      "family": "cloud",
-      "base": "0103-c103a",
+      "family": "html",
+      "base": "0104-w104a",
       "bytes": 0,
       "margin": 0,
-      "parentScore": 85.392,
-      "parentGain": -0.198,
-      "familyChampion": "0071-c071a",
-      "familyScore": 87.142,
-      "familyGain": -1.948,
+      "parentScore": 84.243,
+      "parentGain": 0.951,
+      "familyChampion": "0055-w055a",
+      "familyScore": 86.252,
+      "familyGain": -1.058,
       "requiredMargin": 48,
       "reasons": [
         "build-gate",
-        "differential",
         "cognitive-governance",
         "edgetx-emulator",
-        "gain:parent=-0.198,family=-1.948<0.15",
         "margin:0<48"
       ],
       "evidenceGaps": [
@@ -81,7 +79,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0103-c103a",
+          "candidate": "0104-w104a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -89,7 +87,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87338,
+            "sourceBytes": 87665,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -109,7 +107,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0103-c103a",
+          "candidate": "0104-w104a",
           "passed": true,
           "checks": {
             "path": true,
@@ -142,7 +140,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0103-c103a",
+          "candidate": "0104-w104a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -174,29 +172,29 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0103-c103a",
-          "parent": "0075-c075a",
+          "candidate": "0104-w104a",
+          "parent": "0076-w076a",
           "parentFound": true,
-          "scoreDelta": -0.198,
+          "scoreDelta": 0.951,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": 1,
-            "roughBrake.lock": 1,
-            "truth.mae": -0.1075,
-            "lagTruth.mae": -0.1017,
+            "wetBrake.lock": -1,
+            "roughBrake.lock": -4,
+            "truth.mae": -0.3336,
+            "lagTruth.mae": -0.3111,
             "jump.fp": 0,
             "jump.miss": 0,
             "dropout.unsafe": 0
           },
           "criticalWorse": [],
-          "passed": false
+          "passed": true
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0103-c103a",
+          "candidate": "0104-w104a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -215,14 +213,14 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0103-c103a",
-          "parent": "generations/accepted/0075-c075a.lua",
+          "candidate": "0104-w104a",
+          "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "md"
+            "setgv"
           ],
           "tests": [
             {
-              "function": "md",
+              "function": "setgv",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
@@ -236,10 +234,10 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0103-c103a",
-          "parent": "generations/accepted/0075-c075a.lua",
+          "candidate": "0104-w104a",
+          "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "md"
+            "setgv"
           ],
           "constantChanges": [],
           "gvarMappingChanged": false,
@@ -251,22 +249,22 @@
         "cognitive": {
           "schema": 3,
           "engine": "mt12-cognitive-governance-v3",
-          "candidate": "0103-c103a",
-          "created": "2026-07-30T21:06:37.338Z",
+          "candidate": "0104-w104a",
+          "created": "2026-07-30T21:07:09.813Z",
           "passed": false,
           "judge": "reject",
           "why": {
-            "function": "md",
+            "function": "setgv",
             "domain": "core",
-            "objective": "confidence arbitration, neural learning and reasoning",
+            "objective": "memory efficiency, observability and deploy reliability",
             "successMetric": "parent/family gain with deploy safety",
             "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
           },
           "changes": [
             {
-              "name": "md",
-              "before": "f203a872f8cb96f5",
-              "after": "31d1940b6743f1db",
+              "name": "setgv",
+              "before": "a02458fac0f8ec38",
+              "after": "f2e2215c17c1a25e",
               "bytesDelta": 66
             }
           ],
@@ -276,7 +274,7 @@
           "emulator": {
             "passed": false,
             "scenarios": [],
-            "report": "reports/0103-c103a-edgetx-emulator.json"
+            "report": "reports/0104-w104a-edgetx-emulator.json"
           },
           "evidence": [
             {
@@ -307,16 +305,16 @@
             },
             {
               "severity": "high",
-              "claim": "declared-brain vs changed-core"
+              "claim": "declared-cockpit vs changed-core"
             }
           ],
-          "parent": "generations/accepted/0075-c075a.lua"
+          "parent": "generations/accepted/0076-w076a.lua"
         },
         "emulator": {
           "schema": 2,
           "engine": "official-edgetx-source-backed-mt12-emulator",
           "edgetxCommit": "f8a89393c560a1057b045048f4b6ff5096ca22a0",
-          "candidate": "0103-c103a",
+          "candidate": "0104-w104a",
           "passed": false,
           "error": "emulator produced no report"
         }
@@ -332,5 +330,5 @@
   },
   "status": "hold-deploy-safe-champion",
   "deploymentWarning": null,
-  "created": "2026-07-30T21:06:37.673Z"
+  "created": "2026-07-30T21:07:10.128Z"
 }
