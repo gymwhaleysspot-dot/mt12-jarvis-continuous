@@ -1,0 +1,117 @@
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0047-m0473",
+  "family": "monday",
+  "generation": 47,
+  "experiment": 3,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 94.494,
+  "previousBest": 0,
+  "improvement": 94.494,
+  "novelty": 0.75,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "lerp",
+      "variant": "bounded-ease-blend",
+      "label": "lerp function rewrite",
+      "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+      "from": "parent implementation",
+      "to": "bounded-ease-blend",
+      "researchDirected": false
+    },
+    {
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter",
+      "researchDirected": false
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.00091792,
+      "to": 0.0009110475477086077
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.09641825694312223
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.3682816557846795
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.68943416016446
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.727673359460048,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 42,
+      "osc": 0.7452293594600443,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7449476849512913,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.0093951523322,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.78736185650475,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48792708885170444,
+    "truth": 7.5281010790438,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "engine": "a15xq-research-dynamic-v6",
+  "candidate": "0047-m0472",
+  "family": "monday",
+  "generation": 47,
+  "experiment": 2,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "style": "truth-lab",
+  "dynamic": true,
+  "functionChanges": 2,
+  "passed": false,
+  "score": 94.859,
+  "previousBest": 0,
+  "improvement": 94.859,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0047-m0472.lua",
+      "bytes": 85833,
+      "sha256": "8b55134e734799889532117f3e1470a72954a61324dd1ee8ac23faeec051758a"
+    },
+    "luac": {
+      "path": "generations/candidates/0047-m0472.luac",
+      "bytes": 89072,
+      "sha256": "343f78de5c92be8b3f5960f751265b22410ae0df740146dc0ad4432d8a9b1108"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "q",
+      "variant": "safe-quantizer",
+      "label": "q function rewrite",
+      "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+      "from": "parent implementation",
+      "to": "safe-quantizer"
+    },
+    {
+      "index": 2,
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend"
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "RPM2MPH",
+      "summary": null,
+      "from": 0.00091792,
+      "to": 0.0009246913094378822
+    }
+  ],
+  "created": "2026-07-30T12:11:52.717Z"
+}

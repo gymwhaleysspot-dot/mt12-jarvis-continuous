@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "engine": "a15xq-research-dynamic-v6",
+  "candidate": "0047-t0473",
+  "family": "tuesday",
+  "generation": 47,
+  "experiment": 3,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "traction, ABS and intervention quality",
+  "style": "control-lab",
+  "dynamic": true,
+  "functionChanges": 2,
+  "passed": false,
+  "score": 94.977,
+  "previousBest": 0,
+  "improvement": 94.977,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0047-t0473.lua",
+      "bytes": 85862,
+      "sha256": "26f92b50f99069750d02a7228f682c07dccd42b005c6df4ba90599135dd8f3b0"
+    },
+    "luac": {
+      "path": "generations/candidates/0047-t0473.luac",
+      "bytes": 89096,
+      "sha256": "ae1c88ea1b9f5d90f6fc2259a85ae55643a8797ed3c495d8944497e1335323fd"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter"
+    },
+    {
+      "index": 2,
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend"
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "ABS blend",
+      "summary": null,
+      "from": 0.42,
+      "to": 0.4651713612023508
+    },
+    {
+      "index": 4,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "runaway release base",
+      "summary": null,
+      "from": 0.1,
+      "to": 0.06
+    },
+    {
+      "index": 5,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "ABS response divisor",
+      "summary": null,
+      "from": 650,
+      "to": 786.6019134247093
+    }
+  ],
+  "created": "2026-07-30T12:11:53.562Z"
+}
