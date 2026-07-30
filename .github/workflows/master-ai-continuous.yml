@@ -93,6 +93,7 @@ jobs:
             FINAL="generations/candidates/${BASE}.luac"
             REPORT="reports/${BASE}-gate.txt"
             PASS=1
+            BUILD=1
             BYTES=0
             MARGIN=0
             {
@@ -106,17 +107,20 @@ jobs:
               node scripts/semantic-diff.mjs "$CANDIDATE" || PASS=0
               node scripts/reasoning-orchestrator.mjs gate || PASS=0
               node scripts/cognitive-governance.mjs gate "$CANDIDATE" || PASS=0
-              luac5.3 -p "$CANDIDATE" || PASS=0
-              if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
-              if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || PASS=0; fi
-              if [ "$PASS" = 1 ]; then
+              luac5.3 -p "$CANDIDATE" || BUILD=0
+              if [ "$BUILD" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || BUILD=0; fi
+              if [ "$BUILD" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || BUILD=0; fi
+              if [ "$BUILD" = 1 ]; then
                 BYTES=$(wc -c < "$FINAL" | tr -d ' ')
                 MARGIN=$((MT12_LIMIT-BYTES))
                 echo "normalized_bytes=$BYTES"
                 echo "margin=$MARGIN"
                 [ "$BYTES" -le "$MT12_LIMIT" ] || PASS=0
                 [ "$MARGIN" -ge "$MT12_HARD_MARGIN" ] || PASS=0
+              else
+                PASS=0
               fi
+              echo "buildable=$BUILD"
               echo "passed=$PASS"
             } > "$REPORT" 2>&1
             node scripts/write-generation-changelog.mjs "$BASE" || PASS=0
@@ -130,6 +134,10 @@ jobs:
               cp "$FINAL" "generations/factory/$FAMILY/${BASE}.luac"
               cp "reports/${BASE}-CHANGELOG.md" "generations/factory/$FAMILY/${BASE}-CHANGELOG.md"
               cp "reports/${BASE}-changelog.json" "generations/factory/$FAMILY/${BASE}-changelog.json"
+            elif [ "$BUILD" = 1 ]; then
+              mkdir -p "generations/quarantined/$FAMILY"
+              cp "$CANDIDATE" "generations/quarantined/$FAMILY/${BASE}.lua"
+              cp "$FINAL" "generations/quarantined/$FAMILY/${BASE}.luac"
             fi
           done
       - name: Run engineering council belief update and reflection
