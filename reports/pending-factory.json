@@ -1,16 +1,66 @@
 {
-  "engine": "a15xq-autonomous-engineering-v10",
-  "cycle": 111,
-  "created": "2026-07-30T21:51:54.853Z",
-  "mode": "continuity-validation-no-model",
-  "candidateCount": 1,
-  "selection": "one active cloud family candidate; 4 family seeds generated",
+  "engine": "a15xq-full-v5",
+  "cycle": 112,
+  "created": "2026-07-30T22:10:27.019Z",
+  "mode": "four-family-isolated-architectures",
+  "candidateCount": 4,
+  "selection": "four family-parent isolated architectures; one family is architected per cycle and all generated files remain declared",
   "batch": [
     {
       "engine": "a15xq-full-v5",
+      "family": "monday",
+      "name": "m112a",
+      "generation": 112,
+      "experiment": 1,
+      "experimentIsolation": true,
+      "allowConstantChanges": false,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
+      "file": "generations/candidates/0112-m112a.lua",
+      "parent": "generations/accepted/0042-m0422.lua",
+      "parentBytes": 85744,
+      "sourceBytes": 85731,
+      "fullScript": true,
+      "changes": [],
+      "sha256": "3fe2a5ced869fcf661c955f62a687a186e7a579b3968463d418c38ad50efa28a",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v5",
+      "family": "tuesday",
+      "name": "t112a",
+      "generation": 112,
+      "experiment": 1,
+      "experimentIsolation": true,
+      "allowConstantChanges": false,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "file": "generations/candidates/0112-t112a.lua",
+      "parent": "generations/accepted/0074-t074a.lua",
+      "parentBytes": 87253,
+      "sourceBytes": 87259,
+      "fullScript": true,
+      "changes": [],
+      "sha256": "2b8d19a50a2af09f0c62ac12db107cb64ae8254a072f01b8b65a043076ba21c7",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v5",
       "family": "cloud",
-      "name": "c111a",
-      "generation": 111,
+      "name": "c112a",
+      "generation": 112,
       "experiment": 1,
       "experimentIsolation": true,
       "allowConstantChanges": false,
@@ -22,51 +72,39 @@
         "learn",
         "reason"
       ],
-      "file": "generations/candidates/0111-c111a.lua",
+      "file": "generations/candidates/0112-c112a.lua",
       "parent": "generations/accepted/0075-c075a.lua",
       "parentBytes": 87266,
-      "sourceBytes": 87319,
+      "sourceBytes": 87272,
       "fullScript": true,
-      "changes": [
-        {
-          "kind": "local-continuity-fallback",
-          "function": "condBrain",
-          "variant": "brain-autonomous-v10",
-          "label": "Model outage continuity proof",
-          "summary": "Comment-only source marker; compiled behavior and bytecode remain parent-equivalent; never eligible as an AI improvement",
-          "from": "98c6947ed021",
-          "to": "2457e1ee0440"
-        }
+      "changes": [],
+      "sha256": "42c93113c72a72782429028a64f1e79fba7422dc3d6867c67f3bf31ba8236dd8",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v5",
+      "family": "html",
+      "name": "w112a",
+      "generation": 112,
+      "experiment": 1,
+      "experimentIsolation": true,
+      "allowConstantChanges": false,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
       ],
-      "sha256": "ac31876b8a4f942269102b52d656559857ffe5bfeae39be942ca0019ac9d4b24",
-      "previousBest": 0,
-      "functionChanges": 1,
-      "totalNamedFunctions": 64,
-      "substantiveSubsystem": true,
-      "aiArchitect": true,
-      "multiAgent": true,
-      "modelGenerated": false,
-      "bytecodeNeutralFallback": true,
-      "aiModel": "local-fallback",
-      "fallbackReason": "HTTP 410 openai/gpt-4o-mini: {\"error\":{\"code\":\"github_models_retirement_brownout\",\"message\":\"GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.\"}}\n",
-      "rewrittenFunctions": [
-        "condBrain"
-      ],
-      "functions": [
-        "condBrain"
-      ],
-      "parentResolved": true,
-      "subsystem": "brain",
-      "changedLines": 18,
-      "aiUsage": []
+      "file": "generations/candidates/0112-w112a.lua",
+      "parent": "generations/accepted/0076-w076a.lua",
+      "parentBytes": 87593,
+      "sourceBytes": 87599,
+      "fullScript": true,
+      "changes": [],
+      "sha256": "8189873568ffbd42bd09c6e262633689d55d0053ebca9b9a4ccf5ef698d570c6",
+      "previousBest": 0
     }
-  ],
-  "generatedCandidates": [
-    "generations/candidates/0111-m111a.lua",
-    "generations/candidates/0111-t111a.lua",
-    "generations/candidates/0111-c111a.lua",
-    "generations/candidates/0111-w111a.lua"
-  ],
-  "parent": "generations/accepted/0075-c075a.lua",
-  "lastParent": "generations/accepted/0075-c075a.lua"
+  ]
 }
