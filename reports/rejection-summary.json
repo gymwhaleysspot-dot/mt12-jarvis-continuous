@@ -1,28 +1,34 @@
 {
-  "status": "partial-pass",
-  "created": "2026-07-30T18:48:46.866Z",
+  "status": "batch-rejected",
+  "created": "2026-07-30T18:56:52.768Z",
   "candidates": [
     {
-      "pass": true,
-      "score": 85.5,
-      "family": "monday",
-      "base": "0077-m077a",
+      "pass": false,
+      "score": 84.376,
+      "family": "cloud",
+      "base": "0079-c079a",
       "scoreLeague": null,
       "regressions": [],
-      "improved": true,
+      "improved": false,
       "previousBest": 84.243,
       "failures": [
         "\"missing\": [],",
         "\"regressions\": [],",
-        "\"failed\": []"
+        "\"stdout\": \"{\\n  \\\"schema\\\": 1,\\n  \\\"engine\\\": \\\"mt12-memory-schema-gate\\\",\\n  \\\"candidate\\\": \\\"0079-c079a\\\",\\n  \\\"passed\\\": true,\\n  \\\"checks\\\": {\\n    \\\"path\\\": true,\\n    \\\"globalRead\\\": true,\\n    \\\"noMethodRead\\\": true,\\n    \\\"openRead\\\": true,\\n    \\\"openWrite\\\": true,\\n    \\\"closeSafe\\\": true,\\n    \\\"tagGate\\\": true,\\n    \\\"numericFallback\\\": true,\\n    \\\"bounds\\\": true,\\n    \\\"minimumFields\\\": true,\\n    \\\"schemaMarker\\\": true,\\n    \\\"safeMissing\\\": true,\\n    \\\"writePresent\\\": true\\n  },\\n  \\\"failed\\\": [],\\n  \\\"warnings\\\": [],\\n  \\\"cases\\\": [\\n    \\\"missing-file\\\",\\n    \\\"empty-file\\\",\\n    \\\"truncated-row\\\",\\n    \\\"invalid-tag\\\",\\n    \\\"nonnumeric-field\\\",\\n    \\\"out-of-range-field\\\",\\n    \\\"old-schema-marker\\\",\\n    \\\"current-schema-marker\\\"\\n  ]\\n}\",",
+        "\"stdout\": \"{\\n  \\\"schema\\\": 1,\\n  \\\"engine\\\": \\\"mt12-control-invariants\\\",\\n  \\\"candidate\\\": \\\"0079-c079a\\\",\\n  \\\"passed\\\": true,\\n  \\\"checks\\\": {\\n    \\\"boundedMath\\\": true,\\n    \\\"badNumberGuard\\\": true,\\n    \\\"tctFailOpen\\\": true,\\n    \\\"gyroWrite\\\": true,\\n    \\\"carOffGuard\\\": true,\\n    \\\"noStaticBrake\\\": true,\\n    \\\"truthNonnegative\\\": true,\\n    \\\"gvarRounding\\\": true,\\n    \\\"noDynamicCode\\\": true,\\n    \\\"finitePackGuard\\\": true,\\n    \\\"allGvars\\\": true\\n  },\\n  \\\"failed\\\": [],\\n  \\\"randomized\\\": {\\n    \\\"cases\\\": 10000,\\n    \\\"violations\\\": 0\\n  },\\n  \\\"invariants\\\": [\\n    \\\"TCT fail-open is 1024\\\",\\n    \\\"all outputs bounded\\\",\\n    \\\"bad numbers rejected\\\",\\n    \\\"truth speed nonnegative\\\",\\n    \\\"car-off guard present\\\",\\n    \\\"no dynamic code\\\"\\n  ]\\n}\",",
+        "\"failed\": [",
+        "passed=0"
       ],
-      "gate": "reports/0077-m077a-gate.txt",
-      "sim": "reports/0077-m077a-sim.json"
+      "gate": "reports/0079-c079a-gate.txt",
+      "sim": "reports/0079-c079a-sim.json"
     }
   ],
   "primaryReasons": [
     "\"missing\": [],",
     "\"regressions\": [],",
-    "\"failed\": []"
+    "\"stdout\": \"{\\n  \\\"schema\\\": 1,\\n  \\\"engine\\\": \\\"mt12-memory-schema-gate\\\",\\n  \\\"candidate\\\": \\\"0079-c079a\\\",\\n  \\\"passed\\\": true,\\n  \\\"checks\\\": {\\n    \\\"path\\\": true,\\n    \\\"globalRead\\\": true,\\n    \\\"noMethodRead\\\": true,\\n    \\\"openRead\\\": true,\\n    \\\"openWrite\\\": true,\\n    \\\"closeSafe\\\": true,\\n    \\\"tagGate\\\": true,\\n    \\\"numericFallback\\\": true,\\n    \\\"bounds\\\": true,\\n    \\\"minimumFields\\\": true,\\n    \\\"schemaMarker\\\": true,\\n    \\\"safeMissing\\\": true,\\n    \\\"writePresent\\\": true\\n  },\\n  \\\"failed\\\": [],\\n  \\\"warnings\\\": [],\\n  \\\"cases\\\": [\\n    \\\"missing-file\\\",\\n    \\\"empty-file\\\",\\n    \\\"truncated-row\\\",\\n    \\\"invalid-tag\\\",\\n    \\\"nonnumeric-field\\\",\\n    \\\"out-of-range-field\\\",\\n    \\\"old-schema-marker\\\",\\n    \\\"current-schema-marker\\\"\\n  ]\\n}\",",
+    "\"stdout\": \"{\\n  \\\"schema\\\": 1,\\n  \\\"engine\\\": \\\"mt12-control-invariants\\\",\\n  \\\"candidate\\\": \\\"0079-c079a\\\",\\n  \\\"passed\\\": true,\\n  \\\"checks\\\": {\\n    \\\"boundedMath\\\": true,\\n    \\\"badNumberGuard\\\": true,\\n    \\\"tctFailOpen\\\": true,\\n    \\\"gyroWrite\\\": true,\\n    \\\"carOffGuard\\\": true,\\n    \\\"noStaticBrake\\\": true,\\n    \\\"truthNonnegative\\\": true,\\n    \\\"gvarRounding\\\": true,\\n    \\\"noDynamicCode\\\": true,\\n    \\\"finitePackGuard\\\": true,\\n    \\\"allGvars\\\": true\\n  },\\n  \\\"failed\\\": [],\\n  \\\"randomized\\\": {\\n    \\\"cases\\\": 10000,\\n    \\\"violations\\\": 0\\n  },\\n  \\\"invariants\\\": [\\n    \\\"TCT fail-open is 1024\\\",\\n    \\\"all outputs bounded\\\",\\n    \\\"bad numbers rejected\\\",\\n    \\\"truth speed nonnegative\\\",\\n    \\\"car-off guard present\\\",\\n    \\\"no dynamic code\\\"\\n  ]\\n}\",",
+    "\"failed\": [",
+    "passed=0"
   ]
 }

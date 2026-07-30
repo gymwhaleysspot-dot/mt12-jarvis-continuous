@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "champion": {
     "base": "0042-m0422",
     "score": 93.992,
@@ -16,19 +16,140 @@
   "selected": null,
   "candidates": [
     {
-      "pass": true,
-      "score": 85.5,
-      "family": "monday",
-      "base": "0077-m077a",
-      "bytes": 88843,
-      "margin": 101,
-      "scoreGain": -8.492,
+      "pass": false,
+      "score": 84.376,
+      "family": "cloud",
+      "base": "0079-c079a",
+      "bytes": 0,
+      "margin": 0,
+      "scoreGain": -9.616,
       "reasons": [
-        "gain:-8.492<0.15"
+        "build-gate",
+        "differential",
+        "gain:-9.616<0.15",
+        "margin:0<48"
       ],
-      "eligible": false
+      "eligible": false,
+      "validation": {
+        "memory": {
+          "schema": 1,
+          "engine": "mt12-runtime-memory-audit",
+          "candidate": "0079-c079a",
+          "risk": 9,
+          "limit": 32,
+          "passed": true,
+          "warnings": [
+            "table-allocation-in-hot-path"
+          ],
+          "metrics": {
+            "sourceBytes": 87633,
+            "tableLiterals": 20,
+            "closures": 5,
+            "gmatch": 1,
+            "concat": 4,
+            "format": 0,
+            "ipairs": 3,
+            "pairs": 0,
+            "hotTableLiterals": 1,
+            "hotClosures": 0,
+            "hotConcat": 0,
+            "hotFormat": 0,
+            "readBuffers": [
+              512
+            ]
+          }
+        },
+        "schema": {
+          "schema": 1,
+          "engine": "mt12-memory-schema-gate",
+          "candidate": "0079-c079a",
+          "passed": true,
+          "checks": {
+            "path": true,
+            "globalRead": true,
+            "noMethodRead": true,
+            "openRead": true,
+            "openWrite": true,
+            "closeSafe": true,
+            "tagGate": true,
+            "numericFallback": true,
+            "bounds": true,
+            "minimumFields": true,
+            "schemaMarker": true,
+            "safeMissing": true,
+            "writePresent": true
+          },
+          "failed": [],
+          "warnings": [],
+          "cases": [
+            "missing-file",
+            "empty-file",
+            "truncated-row",
+            "invalid-tag",
+            "nonnumeric-field",
+            "out-of-range-field",
+            "old-schema-marker",
+            "current-schema-marker"
+          ]
+        },
+        "invariants": {
+          "schema": 1,
+          "engine": "mt12-control-invariants",
+          "candidate": "0079-c079a",
+          "passed": true,
+          "checks": {
+            "boundedMath": true,
+            "badNumberGuard": true,
+            "tctFailOpen": true,
+            "gyroWrite": true,
+            "carOffGuard": true,
+            "noStaticBrake": true,
+            "truthNonnegative": true,
+            "gvarRounding": true,
+            "noDynamicCode": true,
+            "finitePackGuard": true,
+            "allGvars": true
+          },
+          "failed": [],
+          "randomized": {
+            "cases": 10000,
+            "violations": 0
+          },
+          "invariants": [
+            "TCT fail-open is 1024",
+            "all outputs bounded",
+            "bad numbers rejected",
+            "truth speed nonnegative",
+            "car-off guard present",
+            "no dynamic code"
+          ]
+        },
+        "diff": {
+          "schema": 1,
+          "engine": "mt12-differential-simulator",
+          "candidate": "0079-c079a",
+          "parent": "0076-w076a",
+          "parentFound": true,
+          "scoreDelta": 0.133,
+          "deltas": {
+            "dryLaunch.jerk": 0,
+            "wetLaunch.jerk": 0,
+            "bumpyLaunch.jerk": 0,
+            "dryBrake.lock": 0,
+            "wetBrake.lock": -1,
+            "roughBrake.lock": -4,
+            "truth.mae": -0.0267,
+            "lagTruth.mae": -0.0246,
+            "jump.fp": 0,
+            "jump.miss": 0,
+            "dropout.unsafe": 0
+          },
+          "criticalWorse": [],
+          "passed": false
+        }
+      }
     }
   ],
   "status": "hold-champion",
-  "created": "2026-07-30T18:48:46.834Z"
+  "created": "2026-07-30T18:56:52.700Z"
 }
