@@ -1,7 +1,7 @@
 {
   "engine": "a15xq-autonomous-engineering-v6",
-  "cycle": 89,
-  "created": "2026-07-30T20:03:04.990Z",
+  "cycle": 90,
+  "created": "2026-07-30T20:13:45.909Z",
   "mode": "autonomous-engineering-production",
   "parent": "generations/accepted/0076-w076a.lua",
   "candidateCount": 1,
@@ -9,51 +9,51 @@
   "batch": [
     {
       "engine": "a15xq-full-v4",
-      "family": "monday",
-      "name": "m089a",
-      "generation": 89,
+      "family": "tuesday",
+      "name": "t090a",
+      "generation": 90,
       "experiment": 1,
-      "objective": "truth prediction, calibration and sensor resilience",
-      "style": "truth-lab",
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
       "focus": [
-        "rpm",
-        "truth",
-        "gps",
-        "coast"
+        "tc",
+        "abs",
+        "slew",
+        "governor"
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0009112,
-        "tcSlip": 7.928,
-        "tcSpan": 6.023,
-        "tcCut": 27,
-        "absLock": 7642,
-        "truthRate": 0.159,
-        "coast": 0.9831
+        "rpmK": 0.0008991,
+        "tcSlip": 7.1,
+        "tcSpan": 5.193,
+        "tcCut": 23,
+        "absLock": 6926,
+        "truthRate": 0.202,
+        "coast": 0.9846
       },
-      "file": "generations/candidates/0089-m089a.lua",
+      "file": "generations/candidates/0090-t090a.lua",
       "parent": "generations/accepted/0076-w076a.lua",
       "parentBytes": 87593,
-      "sourceBytes": 88847,
+      "sourceBytes": 87925,
       "fullScript": true,
       "changes": [
         {
           "kind": "mission-driven-function-architecture",
-          "function": "bb_tick",
-          "variant": "truth-autonomous-v6",
-          "label": "Mission-driven truth evolution",
+          "function": "nt",
+          "variant": "control-autonomous-v6",
+          "label": "Mission-driven control evolution",
           "summary": "Rebuilt one complete function from digital-twin, causal, specialist and race-engineer evidence",
-          "from": "b66ef449896f",
-          "to": "29317db49307"
+          "from": "948bd0df74c4",
+          "to": "95a7824e2633"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000933821,
-          "to": 0.0009299960655806391
+          "to": 0.0009300562030047914
         }
       ],
-      "sha256": "854c80f01c689b86676de8655b0f714965d8386dc51813b72a89ec944f971b35",
+      "sha256": "f8eb4596654234e0f51666c908ea8297246ff6b59870568a6bc5e98f5ca0988d",
       "previousBest": 0,
       "functionChanges": 1,
       "totalNamedFunctions": 64,
@@ -66,17 +66,17 @@
       "multiAgent": true,
       "aiModel": "openai/gpt-4o-mini",
       "rewrittenFunctions": [
-        "bb_tick"
+        "nt"
       ],
       "functions": [
-        "bb_tick"
+        "nt"
       ],
       "parentResolved": true,
-      "subsystem": "truth",
-      "changedLines": 109,
+      "subsystem": "control",
+      "changedLines": 36,
       "aiUsage": [
         {
-          "completion_tokens": 2128,
+          "completion_tokens": 583,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -84,22 +84,22 @@
             "rejected_prediction_tokens": 0
           },
           "latency_checkpoint": {
-            "engine_tbt_ms": 10,
-            "engine_ttft_ms": 105,
-            "engine_ttlt_ms": 22233,
-            "pre_inference_ms": 425,
-            "service_tbt_ms": 10,
-            "service_ttft_ms": 1335,
-            "service_ttlt_ms": 23363,
-            "total_duration_ms": 22948,
-            "user_visible_ttft_ms": 910
+            "engine_tbt_ms": 9,
+            "engine_ttft_ms": 46,
+            "engine_ttlt_ms": 5442,
+            "pre_inference_ms": 171,
+            "service_tbt_ms": 9,
+            "service_ttft_ms": 850,
+            "service_ttlt_ms": 6238,
+            "total_duration_ms": 6078,
+            "user_visible_ttft_ms": 679
           },
-          "prompt_tokens": 4551,
+          "prompt_tokens": 1761,
           "prompt_tokens_details": {
             "audio_tokens": 0,
-            "cached_tokens": 2304
+            "cached_tokens": 1024
           },
-          "total_tokens": 6679
+          "total_tokens": 2344
         }
       ]
     }

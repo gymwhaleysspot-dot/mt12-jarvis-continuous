@@ -1,27 +1,23 @@
 {
-  "schema": 1,
+  "schema": 2,
   "assumptions": [
     {
       "id": "sensor-scale",
-      "text": "RPM and GPS scales match the simulator",
       "impact": "high",
       "test": "real drive replay"
     },
     {
       "id": "edge-runtime",
-      "text": "mocked EdgeTX APIs represent the radio lifecycle",
       "impact": "high",
       "test": "radio bench load"
     },
     {
       "id": "parent-lineage",
-      "text": "candidate parent metadata resolves to the actual source",
       "impact": "critical",
       "test": "hash and path verification"
     },
     {
       "id": "twin-calibration",
-      "text": "digital twin timing resembles the physical car",
       "impact": "high",
       "test": "prediction-vs-log calibration"
     }

@@ -1,0 +1,128 @@
+{
+  "engine": "luac-factory-simulator-v6",
+  "candidate": "0090-t090a",
+  "parent": "0076-w076a",
+  "family": "tuesday",
+  "generation": 90,
+  "experiment": 1,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 86.862,
+  "previousBest": 84.243,
+  "parentScoreSource": "parent-report",
+  "improvement": 2.619,
+  "minGain": 0.15,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "promotable": true,
+  "regressions": [],
+  "scenarioPass": {
+    "dryLaunch": true,
+    "wetLaunch": true,
+    "bumpyLaunch": true,
+    "dryBrake": true,
+    "wetBrake": true,
+    "roughBrake": true,
+    "truth": true,
+    "lagTruth": true,
+    "jump": true,
+    "dropout": true,
+    "subsystemParity": true
+  },
+  "changes": [
+    {
+      "kind": "mission-driven-function-architecture",
+      "function": "nt",
+      "variant": "control-autonomous-v6",
+      "label": "Mission-driven control evolution",
+      "summary": "Rebuilt one complete function from digital-twin, causal, specialist and race-engineer evidence",
+      "from": "948bd0df74c4",
+      "to": "95a7824e2633"
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.000933821,
+      "to": 0.0009300562030047914
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.040250663302944245
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.9429586683406015
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.3026969466983225
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 31,
+      "osc": 0.7304402691580469,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 51,
+      "release": 39,
+      "osc": 0.7426389358247099,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 43,
+      "release": 36,
+      "osc": 0.7244843938102907,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.9032901833066354,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.684281113734943,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4834639917344705,
+    "truth": 6.974212576724429,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  },
+  "rewards": {
+    "novelty": 1.5,
+    "architecture": 2,
+    "parity": 5
+  }
+}
