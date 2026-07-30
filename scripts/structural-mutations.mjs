@@ -19,8 +19,8 @@ const variants={
   {id:'saturating-session-counter',summary:'Rebuild persistent session counter as explicit saturating arithmetic',apply:s=>s.replace(/local function i9\(x\)[^\n]*/,`local function i9(x)x=tonumber(x)or 0;if x<0 then x=0 end;if x>=99 then return 99 end;return x+1 end`)}
  ]
 };
-export function structuralMutate(source,family,slot,rnd){
- const plans={monday:['lerp','q'],tuesday:['lerp','i9'],cloud:['trait','md'],html:['q','i9','trait']},preferred=plans[family]||Object.keys(variants),start=Math.floor(rnd()*preferred.length),attempts=[];
- for(let k=0;k<preferred.length;k++){const key=preferred[(start+k)%preferred.length],list=variants[key],v0=(slot+Math.floor(rnd()*list.length))%list.length;for(let n=0;n<list.length;n++){const v=list[(v0+n)%list.length],out=v.apply(source);attempts.push(v.id);if(out!==source)return{source:out,change:{kind:'function',function:key,variant:v.id,label:`${key} function rewrite`,summary:v.summary,from:'parent implementation',to:v.id}}}}
- throw Error(`No new structural mutation available for ${family}; tried ${attempts.join(', ')}`);
+export function structuralMutate(source,family,slot,rnd,opt={}){
+ const plans={monday:['lerp','q'],tuesday:['lerp','i9'],cloud:['trait','md'],html:['q','i9','trait']},blocked=new Set(opt.excludeFunctions||[]),preferred=(opt.preferredFunctions||[]).filter(k=>variants[k]&&!blocked.has(k)),fallback=(plans[family]||Object.keys(variants)).filter(k=>!blocked.has(k)),keys=[...new Set([...preferred,...fallback,...Object.keys(variants).filter(k=>!blocked.has(k))])];
+ for(let ki=0;ki<keys.length;ki++){const key=keys[(ki+Math.floor(rnd()*keys.length))%keys.length],list=variants[key];for(let vi=0;vi<list.length;vi++){const v=list[(slot+vi+Math.floor(rnd()*list.length))%list.length],out=v.apply(source);if(out!==source)return{source:out,change:{kind:'function',function:key,variant:v.id,label:`${key} function rewrite`,summary:v.summary,from:'parent implementation',to:v.id,researchDirected:preferred.includes(key)}}}}
+ throw Error(`No unused structural mutation matched ${family}; blocked=${[...blocked].join(',')}`);
 }
