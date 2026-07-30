@@ -19,15 +19,15 @@
   "candidates": [
     {
       "pass": false,
-      "score": 85.065,
-      "family": "cloud",
-      "base": "0087-c087a",
+      "score": 87.27,
+      "family": "html",
+      "base": "0088-w088a",
       "bytes": 0,
       "margin": 0,
-      "scoreGain": -8.927,
+      "scoreGain": -6.722,
       "reasons": [
         "build-gate",
-        "gain:-8.927<0.15",
+        "gain:-6.722<0.15",
         "margin:0<48"
       ],
       "evidenceGaps": [
@@ -39,7 +39,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -47,7 +47,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 88099,
+            "sourceBytes": 87887,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -67,7 +67,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "passed": true,
           "checks": {
             "path": true,
@@ -100,7 +100,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -132,19 +132,19 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "parent": "0076-w076a",
           "parentFound": true,
-          "scoreDelta": 0.822,
+          "scoreDelta": 3.027,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": -2,
-            "roughBrake.lock": -5,
-            "truth.mae": -0.1612,
-            "lagTruth.mae": -0.1488,
+            "wetBrake.lock": -1,
+            "roughBrake.lock": -4,
+            "truth.mae": -0.5846,
+            "lagTruth.mae": -0.5581,
             "jump.fp": 0,
             "jump.miss": 0,
             "dropout.unsafe": 0
@@ -154,7 +154,7 @@
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -173,18 +173,18 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "condBrain"
+            "draw"
           ],
           "tests": [
             {
-              "function": "condBrain",
+              "function": "draw",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
-              "bytesDelta": 507
+              "bytesDelta": 294
             }
           ],
           "available": true,
@@ -194,30 +194,30 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0087-c087a",
+          "candidate": "0088-w088a",
           "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "condBrain"
+            "draw"
           ],
           "constantChanges": [
             {
               "type": "constant",
               "name": "RPM2MPH",
               "before": 0.000933821,
-              "after": 0.000935636,
-              "percent": 0.194
+              "after": 0.000935754,
+              "percent": 0.207
             }
           ],
           "gvarMappingChanged": false,
           "memoryIoChanged": false,
           "voiceCallsDelta": 0,
           "dashboardDrawDelta": 0,
-          "sourceBytesDelta": 506
+          "sourceBytesDelta": 294
         }
       }
     }
   ],
   "status": "hold-legacy-unsafe-champion",
   "deploymentWarning": "Champion has 3 bytes margin; below required 48",
-  "created": "2026-07-30T19:41:07.703Z"
+  "created": "2026-07-30T19:57:41.522Z"
 }
