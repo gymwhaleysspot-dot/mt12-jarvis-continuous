@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Compatibility entry point. Generate the complete A15XQ lineage first,
-// then require a whole-function rewrite in every candidate.
+// Build a fresh cited engineering brief, synthesize complete A15XQ descendants,
+// then require multiple distinct research-directed whole-function rewrites.
+await import('./research-factory.mjs');
 await import('./synthesize-factory.mjs');
 await import('./enforce-structural.mjs');
