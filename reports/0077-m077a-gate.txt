@@ -1,0 +1,205 @@
+engine=substantive-ai-architecture-luac-factory
+candidate=generations/candidates/0077-m077a.lua
+{
+  "candidate": "0077-m077a",
+  "engine": "a15xq-verified-subsystem-v2",
+  "mode": "verified-subsystem-production",
+  "subsystem": "truth",
+  "aiArchitect": true,
+  "substantiveSubsystem": true,
+  "sourceNamedFunctions": 64,
+  "reportedRewrittenFunctions": 3,
+  "rewrittenFunctions": [
+    "aiGate",
+    "learn",
+    "gripSM"
+  ],
+  "missing": [],
+  "changedFromParent": true,
+  "sizeRatio": 1.0159,
+  "changedLines": 122,
+  "passed": true
+}
+{
+  "engine": "luac-factory-simulator-v6",
+  "candidate": "0077-m077a",
+  "parent": "0076-w076a",
+  "family": "monday",
+  "generation": 77,
+  "experiment": 1,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 85.5,
+  "previousBest": 84.243,
+  "parentScoreSource": "parent-report",
+  "improvement": 1.257,
+  "minGain": 0.15,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "promotable": true,
+  "regressions": [],
+  "scenarioPass": {
+    "dryLaunch": true,
+    "wetLaunch": true,
+    "bumpyLaunch": true,
+    "dryBrake": true,
+    "wetBrake": true,
+    "roughBrake": true,
+    "truth": true,
+    "lagTruth": true,
+    "jump": true,
+    "dropout": true,
+    "subsystemParity": true
+  },
+  "changes": [
+    {
+      "kind": "subsystem-architecture",
+      "function": "aiGate,learn,gripSM",
+      "variant": "truth-evolution-v2",
+      "label": "Verified truth subsystem evolution",
+      "summary": "Rebuilt 3 related functions while preserving the complete accepted controller",
+      "from": "d73b7870e5c5",
+      "to": "0a38e496dc5a"
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.000933821,
+      "to": 0.0009301543446491394
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.055494336699073665
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.089676184189486
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.437559154471128
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 32,
+      "osc": 0.7367991036538248,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 52,
+      "release": 41,
+      "osc": 0.731744413498586,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 43,
+      "release": 39,
+      "osc": 0.7419776553560051,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.165700046087465,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.9355820090408378,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4863146579518515,
+    "truth": 8.333879740533007,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  },
+  "rewards": {
+    "novelty": 1.5,
+    "architecture": 2,
+    "parity": 5
+  }
+}
+{
+  "file": "generations/candidates/0077-m077a.lua",
+  "sourceBytes": 88988,
+  "functionCount": 64,
+  "stateReferences": 2511,
+  "dashboardDrawCalls": 6,
+  "dashboardSignalGroups": 11,
+  "dashboardMinimum": {
+    "drawCalls": 5,
+    "signalGroups": 8
+  },
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "dashboardFunctional": true,
+    "dashboardAdaptive": true,
+    "dashboardControlsVisible": true,
+    "dashboardTruthVisible": true,
+    "dashboardIntelligenceVisible": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0077-m077a.luac: 88843 bytes (MT12 4/4/4/4/4)
+normalized_bytes=88843
+margin=101
+passed=1
