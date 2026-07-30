@@ -55,20 +55,22 @@
     {
       "pass": false,
       "score": 85.194,
-      "family": "html",
-      "base": "0100-w100a",
+      "family": "monday",
+      "base": "0101-m101a",
       "bytes": 0,
       "margin": 0,
-      "parentScore": 84.243,
-      "parentGain": 0.951,
-      "familyChampion": "0055-w055a",
-      "familyScore": 86.252,
-      "familyGain": -1.058,
+      "parentScore": 93.992,
+      "parentGain": -8.798,
+      "familyChampion": "0042-m0422",
+      "familyScore": 93.992,
+      "familyGain": -8.798,
       "requiredMargin": 48,
       "reasons": [
         "build-gate",
+        "differential",
         "cognitive-governance",
         "edgetx-emulator",
+        "gain:parent=-8.798,family=-8.798<0.15",
         "margin:0<48"
       ],
       "evidenceGaps": [
@@ -79,7 +81,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0100-w100a",
+          "candidate": "0101-m101a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -87,7 +89,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87665,
+            "sourceBytes": 85797,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -107,7 +109,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0100-w100a",
+          "candidate": "0101-m101a",
           "passed": true,
           "checks": {
             "path": true,
@@ -140,7 +142,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0100-w100a",
+          "candidate": "0101-m101a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -172,29 +174,31 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0100-w100a",
-          "parent": "0076-w076a",
+          "candidate": "0101-m101a",
+          "parent": "0042-m0422",
           "parentFound": true,
-          "scoreDelta": 0.951,
+          "scoreDelta": -8.798,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": -1,
-            "roughBrake.lock": -4,
-            "truth.mae": -0.3336,
-            "lagTruth.mae": -0.3111,
+            "wetBrake.lock": 0,
+            "roughBrake.lock": 0,
+            "truth.mae": -0.0278,
+            "lagTruth.mae": -0.0266,
             "jump.fp": 0,
-            "jump.miss": 0,
+            "jump.miss": 6,
             "dropout.unsafe": 0
           },
-          "criticalWorse": [],
-          "passed": true
+          "criticalWorse": [
+            "jump.miss:+6"
+          ],
+          "passed": false
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0100-w100a",
+          "candidate": "0101-m101a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -213,14 +217,14 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0100-w100a",
-          "parent": "generations/accepted/0076-w076a.lua",
+          "candidate": "0101-m101a",
+          "parent": "generations/accepted/0042-m0422.lua",
           "changedFunctions": [
-            "bb_tick"
+            "segIndex"
           ],
           "tests": [
             {
-              "function": "bb_tick",
+              "function": "segIndex",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
@@ -234,119 +238,47 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0100-w100a",
-          "parent": "generations/accepted/0076-w076a.lua",
+          "candidate": "0101-m101a",
+          "parent": "generations/accepted/0042-m0422.lua",
           "changedFunctions": [
-            "bb_tick"
+            "segIndex"
           ],
           "constantChanges": [],
           "gvarMappingChanged": false,
           "memoryIoChanged": false,
           "voiceCallsDelta": 0,
           "dashboardDrawDelta": 0,
-          "sourceBytesDelta": 72
+          "sourceBytesDelta": 53
         },
         "cognitive": {
           "schema": 3,
           "engine": "mt12-cognitive-governance-v3",
-          "candidate": "0100-w100a",
-          "created": "2026-07-30T20:55:07.057Z",
+          "candidate": "0101-m101a",
+          "created": "2026-07-30T20:58:00.771Z",
           "passed": false,
           "judge": "reject",
           "why": {
-            "function": "bb_tick",
-            "domain": "cockpit",
-            "objective": "memory efficiency, observability and deploy reliability",
+            "function": "segIndex",
+            "domain": "core",
+            "objective": "truth prediction, calibration and sensor resilience",
             "successMetric": "parent/family gain with deploy safety",
             "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
           },
           "changes": [
             {
-              "name": "bb_tick",
-              "before": "7052efe17a2e9fb0",
-              "after": "101917c6ab90314b",
+              "name": "segIndex",
+              "before": "55af2fb488331d30",
+              "after": "6371f5e45d55e96c",
               "bytesDelta": 66
             }
           ],
           "constantChanges": [],
           "duplicateLocals": [],
-          "stateSlots": [
-            1,
-            6,
-            16,
-            23,
-            30,
-            35,
-            38,
-            39,
-            41,
-            43,
-            70,
-            100,
-            101,
-            113,
-            116,
-            117,
-            119,
-            120,
-            132,
-            155,
-            168,
-            169,
-            180,
-            181,
-            182,
-            183,
-            184,
-            185,
-            186,
-            187,
-            223,
-            225,
-            226,
-            289,
-            346,
-            373,
-            375,
-            376,
-            409,
-            410,
-            418,
-            423,
-            424,
-            549,
-            552,
-            553,
-            554,
-            555,
-            556,
-            557,
-            570,
-            588,
-            589,
-            590,
-            591,
-            592,
-            593,
-            594,
-            604,
-            620,
-            650,
-            652,
-            658,
-            659,
-            660,
-            661,
-            679,
-            680,
-            681,
-            682,
-            683
-          ],
+          "stateSlots": [],
           "emulator": {
             "passed": false,
             "scenarios": [],
-            "report": "reports/0100-w100a-edgetx-emulator.json"
+            "report": "reports/0101-m101a-edgetx-emulator.json"
           },
           "evidence": [
             {
@@ -374,17 +306,21 @@
             {
               "severity": "critical",
               "claim": "EdgeTX emulator failure"
+            },
+            {
+              "severity": "high",
+              "claim": "declared-truth vs changed-core"
             }
           ],
-          "parent": "generations/accepted/0076-w076a.lua"
+          "parent": "generations/accepted/0042-m0422.lua"
         },
         "emulator": {
           "schema": 2,
           "engine": "official-edgetx-source-backed-mt12-emulator",
           "edgetxCommit": "f8a89393c560a1057b045048f4b6ff5096ca22a0",
-          "candidate": "0100-w100a",
+          "candidate": "0101-m101a",
           "passed": false,
-          "error": "lua5.3: ...jarvis-continuous/reports/0100-w100a-edgetx-emulator.lua:31: ')' expected near '\\'\n"
+          "error": "lua5.3: ...jarvis-continuous/reports/0101-m101a-edgetx-emulator.lua:34: 'end' expected (to close 'function' at line 20) near <eof>\n"
         }
       }
     }
@@ -398,5 +334,5 @@
   },
   "status": "hold-deploy-safe-champion",
   "deploymentWarning": null,
-  "created": "2026-07-30T20:55:07.354Z"
+  "created": "2026-07-30T20:58:01.100Z"
 }
