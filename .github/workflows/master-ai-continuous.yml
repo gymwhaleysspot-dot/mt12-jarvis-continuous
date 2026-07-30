@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  models: read
 
 concurrency:
   group: mt12-luac-factory
@@ -23,9 +24,11 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     env:
       MT12_LIMIT: '88944'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FACTORY_MODEL: openai/gpt-4.1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,9 +42,9 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.3
       - name: Prepare MT12 normalizer
         run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
-      - name: Produce four complete controllers immediately
+      - name: Build one genuinely new complete AI controller
         run: node scripts/master-ai.mjs
-      - name: Compile normalize validate rank and publish all usable builds
+      - name: Compile normalize validate rank and publish substantive builds
         shell: bash
         run: |
           set +e
@@ -54,8 +57,9 @@ jobs:
             REPORT="reports/${BASE}-gate.txt"
             PASS=1
             {
-              echo "engine=rapid-production-luac-factory"
+              echo "engine=substantive-ai-architecture-luac-factory"
               echo "candidate=$CANDIDATE"
+              node scripts/all-function-gate.mjs "$CANDIDATE" || PASS=0
               node scripts/simulator.mjs "$CANDIDATE" || true
               node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
               luac5.3 -p "$CANDIDATE" || PASS=0
@@ -99,7 +103,7 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}.luac" "generations/accepted/${BASE}.luac"
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
-          printf '{"status":"accepted","mode":"rapid-factory","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
+          printf '{"status":"accepted","mode":"substantive-ai-factory","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
           node scripts/rebuild-factory-catalog.mjs
       - name: Commit factory output
         shell: bash
@@ -108,13 +112,13 @@ jobs:
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports factory.html factory-admin.js
           git diff --cached --quiet && exit 0
-          git commit -m "Rapid LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
+          git commit -m "Substantive AI LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
-      - name: Upload rapid downloadable factory batch
+      - name: Upload substantive downloadable factory build
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-rapid-factory-lua-luac
+          name: mt12-substantive-ai-lua-luac
           path: |
             generations/factory/
             generations/accepted/
