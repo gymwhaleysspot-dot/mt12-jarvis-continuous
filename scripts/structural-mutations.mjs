@@ -20,8 +20,7 @@ const variants={
  ]
 };
 export function structuralMutate(source,family,slot,rnd){
- const plans={monday:['lerp','q'],tuesday:['lerp','i9'],cloud:['trait','md'],html:['q','i9','trait']};
- const keys=plans[family]||Object.keys(variants),key=keys[Math.floor(rnd()*keys.length)],list=variants[key],v=list[(slot+Math.floor(rnd()*list.length))%list.length],out=v.apply(source);
- if(out===source)throw Error(`Structural mutation ${v.id} did not match parent source`);
- return{source:out,change:{kind:'function',function:key,variant:v.id,label:`${key} function rewrite`,summary:v.summary,from:'parent implementation',to:v.id}};
+ const plans={monday:['lerp','q'],tuesday:['lerp','i9'],cloud:['trait','md'],html:['q','i9','trait']},preferred=plans[family]||Object.keys(variants),start=Math.floor(rnd()*preferred.length),attempts=[];
+ for(let k=0;k<preferred.length;k++){const key=preferred[(start+k)%preferred.length],list=variants[key],v0=(slot+Math.floor(rnd()*list.length))%list.length;for(let n=0;n<list.length;n++){const v=list[(v0+n)%list.length],out=v.apply(source);attempts.push(v.id);if(out!==source)return{source:out,change:{kind:'function',function:key,variant:v.id,label:`${key} function rewrite`,summary:v.summary,from:'parent implementation',to:v.id}}}}
+ throw Error(`No new structural mutation available for ${family}; tried ${attempts.join(', ')}`);
 }
