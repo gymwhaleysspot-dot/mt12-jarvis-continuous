@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0094-c094a
+Controller: 0095-w095a
 Phase: preflight
 
 ## Leading hypothesis
@@ -8,7 +8,7 @@ Phase: preflight
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.579
+- Known: Digital twin score 99.586
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
@@ -26,7 +26,7 @@ Phase: preflight
 ## Long-term priorities
 - Preserve at least 256 bytes normalized LUAC reserve: 0%
 - Reduce jump false positives without missed real jumps: 0%
-- Reduce truth-speed error below 3 mph equivalent: 75.9%
+- Reduce truth-speed error below 3 mph equivalent: 76.4%
 
 ## Required self-critique
 - What evidence contradicts the leading hypothesis?
