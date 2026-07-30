@@ -24,7 +24,7 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     env:
       MT12_LIMIT: '88944'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,6 +38,10 @@ jobs:
           node-version: '22'
       - name: Install LUAC vault controls
         run: node scripts/install-factory-admin.mjs
+      - name: Mark factory started
+        run: |
+          mkdir -p reports
+          printf '{"status":"building","mode":"four-specialist-ai-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
       - name: Install and verify Lua 5.3
         shell: bash
         run: |
@@ -56,8 +60,17 @@ jobs:
       - name: Prepare MT12 normalizer
         run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
       - name: Build one genuinely new complete AI controller
-        run: node scripts/master-ai.mjs
+        id: architecture
+        continue-on-error: true
+        run: |
+          printf '{"status":"building","mode":"four-specialist-ai-factory","stage":"chief-and-specialists","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          node scripts/master-ai.mjs
+      - name: Record architecture failure
+        if: steps.architecture.outcome == 'failure'
+        run: |
+          printf '{"status":"builder-failed","mode":"four-specialist-ai-factory","stage":"chief-and-specialists","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
       - name: Compile normalize validate rank and publish substantive builds
+        if: steps.architecture.outcome == 'success'
         shell: bash
         run: |
           set +e
@@ -100,6 +113,7 @@ jobs:
             fi
           done
       - name: Promote best and update downloadable catalog
+        if: steps.architecture.outcome == 'success'
         shell: bash
         run: |
           BEST=$(awk -F '\t' '$1==1{print $2"\t"$3"\t"$4}' reports/factory-results.tsv | sort -nr | head -1)
@@ -118,17 +132,19 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
           printf '{"status":"accepted","mode":"substantive-ai-factory","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
           node scripts/rebuild-factory-catalog.mjs
-      - name: Commit factory output
+      - name: Commit factory output and diagnostics
+        if: always()
         shell: bash
         run: |
           git config user.name 'mt12-luac-factory'
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
-          git add generations reports factory.html factory-admin.js
+          git add generations reports factory.html factory-admin.js 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m "Substantive AI LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
+          git commit -m "Observable AI LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
       - name: Upload substantive downloadable factory build
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mt12-substantive-ai-lua-luac
@@ -137,9 +153,13 @@ jobs:
             generations/accepted/
             reports/factory-catalog.json
             reports/status.json
+            reports/multi-agent-progress.json
             reports/rejection-summary.json
             reports/*-CHANGELOG.md
             reports/*-changelog.json
             reports/*-gate.txt
             reports/*-sim.json
           retention-days: 30
+      - name: Report architecture failure to Actions
+        if: steps.architecture.outcome == 'failure'
+        run: exit 1
