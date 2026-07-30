@@ -17,15 +17,15 @@
   "candidates": [
     {
       "pass": false,
-      "score": 83.961,
-      "family": "tuesday",
-      "base": "0082-t082a",
+      "score": 87.236,
+      "family": "cloud",
+      "base": "0083-c083a",
       "bytes": 0,
       "margin": 0,
-      "scoreGain": -10.031,
+      "scoreGain": -6.756,
       "reasons": [
         "build-gate",
-        "gain:-10.031<0.15",
+        "gain:-6.756<0.15",
         "margin:0<48"
       ],
       "eligible": false,
@@ -33,7 +33,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -41,8 +41,8 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87619,
-            "tableLiterals": 21,
+            "sourceBytes": 87593,
+            "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
             "concat": 4,
@@ -61,7 +61,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "passed": true,
           "checks": {
             "path": true,
@@ -94,7 +94,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -126,17 +126,17 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "parent": null,
           "parentFound": false,
-          "scoreDelta": 83.961,
+          "scoreDelta": 87.236,
           "deltas": {},
           "criticalWorse": [],
           "passed": true
         },
         "replay": {
           "engine": "real-log-replay-v1",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "corpus": [],
           "available": false,
           "metrics": {
@@ -153,11 +153,9 @@
         },
         "ablation": {
           "engine": "function-ablation-v1",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "changedFunctions": [
-            "setgv",
-            "rd1",
-            "rdmem"
+            "md"
           ],
           "tests": [],
           "available": false,
@@ -165,18 +163,16 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0082-t082a",
+          "candidate": "0083-c083a",
           "changedFunctions": [
-            "setgv",
-            "rd1",
-            "rdmem"
+            "md"
           ],
           "constantChanges": [
             {
               "type": "constant",
               "name": "RPM2MPH",
               "before": null,
-              "after": 0.000937314,
+              "after": 0.000936455,
               "percent": null
             },
             {
@@ -191,11 +187,11 @@
           "memoryIoChanged": true,
           "voiceCallsDelta": 1,
           "dashboardDrawDelta": 6,
-          "sourceBytesDelta": 87619
+          "sourceBytesDelta": 87593
         }
       }
     }
   ],
   "status": "hold-champion",
-  "created": "2026-07-30T19:02:22.493Z"
+  "created": "2026-07-30T19:07:50.885Z"
 }

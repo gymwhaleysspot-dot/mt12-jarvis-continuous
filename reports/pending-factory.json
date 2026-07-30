@@ -1,7 +1,7 @@
 {
-  "engine": "a15xq-verified-subsystem-v3",
-  "cycle": 82,
-  "created": "2026-07-30T19:01:02.000Z",
+  "engine": "a15xq-bounded-function-v4",
+  "cycle": 83,
+  "created": "2026-07-30T19:05:44.050Z",
   "mode": "verified-subsystem-production",
   "parent": "generations/accepted/0076-w076a.lua",
   "candidateCount": 1,
@@ -9,52 +9,52 @@
   "batch": [
     {
       "engine": "a15xq-full-v4",
-      "family": "tuesday",
-      "name": "t082a",
-      "generation": 82,
+      "family": "cloud",
+      "name": "c083a",
+      "generation": 83,
       "experiment": 1,
-      "objective": "traction, ABS and intervention quality",
-      "style": "control-lab",
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
       "focus": [
-        "tc",
-        "abs",
-        "slew",
-        "governor"
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0008996,
-        "tcSlip": 6.742,
-        "tcSpan": 6.081,
-        "tcCut": 24,
-        "absLock": 7181,
-        "truthRate": 0.146,
-        "coast": 0.9897
+        "rpmK": 0.0009088,
+        "tcSlip": 7.247,
+        "tcSpan": 5.435,
+        "tcCut": 25,
+        "absLock": 6958,
+        "truthRate": 0.213,
+        "coast": 0.9898
       },
-      "file": "generations/candidates/0082-t082a.lua",
+      "file": "generations/candidates/0083-c083a.lua",
       "parentBytes": 87593,
-      "sourceBytes": 87619,
+      "sourceBytes": 87593,
       "fullScript": true,
       "changes": [
         {
-          "kind": "subsystem-architecture",
-          "function": "setgv,rd1,rdmem",
-          "variant": "control-evolution-v3",
-          "label": "Verified control subsystem evolution",
-          "summary": "Rebuilt 3 related functions while preserving the complete accepted controller",
-          "from": "70c52950d65f",
-          "to": "108892193c64"
+          "kind": "bounded-function-architecture",
+          "function": "md",
+          "variant": "brain-evolution-v4",
+          "label": "Verified bounded brain evolution",
+          "summary": "Rebuilt one complete function within the model prompt budget",
+          "from": "4d156ad86fb3",
+          "to": "2981b1eb73f4"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000933821,
-          "to": 0.0009373144628604213
+          "to": 0.000936454932199562
         }
       ],
-      "sha256": "879235fe6bb84388ab953b0ff258ab2f9b2a9a7fa12aa874902e1bdccfd1550d",
+      "sha256": "876af6cd3b72312291a80c9bf36c7be95699c12259efb98f517d842c37b24378",
       "previousBest": 0,
-      "functionChanges": 3,
+      "functionChanges": 1,
       "totalNamedFunctions": 64,
       "allFunctionsRewritten": false,
       "substantiveSubsystem": true,
@@ -64,20 +64,16 @@
       "multiAgent": false,
       "aiModel": "openai/gpt-4o-mini",
       "rewrittenFunctions": [
-        "setgv",
-        "rd1",
-        "rdmem"
+        "md"
       ],
       "functions": [
-        "setgv",
-        "rd1",
-        "rdmem"
+        "md"
       ],
-      "subsystem": "control",
-      "changedLines": 116,
+      "subsystem": "brain",
+      "changedLines": 6,
       "aiUsage": [
         {
-          "completion_tokens": 1440,
+          "completion_tokens": 120,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -85,33 +81,24 @@
             "rejected_prediction_tokens": 0
           },
           "latency_checkpoint": {
-            "engine_tbt_ms": 11,
-            "engine_ttft_ms": 71,
-            "engine_ttlt_ms": 16307,
-            "pre_inference_ms": 172,
-            "service_tbt_ms": 11,
-            "service_ttft_ms": 914,
-            "service_ttlt_ms": 17110,
-            "total_duration_ms": 16952,
-            "user_visible_ttft_ms": 742
+            "engine_tbt_ms": 10,
+            "engine_ttft_ms": 32,
+            "engine_ttlt_ms": 1249,
+            "pre_inference_ms": 112,
+            "service_tbt_ms": 10,
+            "service_ttft_ms": 608,
+            "service_ttlt_ms": 1851,
+            "total_duration_ms": 1743,
+            "user_visible_ttft_ms": 496
           },
-          "prompt_tokens": 1831,
+          "prompt_tokens": 570,
           "prompt_tokens_details": {
             "audio_tokens": 0,
             "cached_tokens": 0
           },
-          "total_tokens": 3271
+          "total_tokens": 690
         }
       ]
     }
-  ],
-  "requirements": {
-    "completeSource": true,
-    "substantiveSubsystem": true,
-    "preserveUntouchedSystems": true,
-    "functionalDashboard": true,
-    "luaDownload": true,
-    "luacDownload": true,
-    "changelogPerFile": true
-  }
+  ]
 }
