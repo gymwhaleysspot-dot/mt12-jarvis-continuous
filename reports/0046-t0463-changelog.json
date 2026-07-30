@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "engine": "a15xq-dynamic-functions-v5",
+  "candidate": "0046-t0463",
+  "family": "tuesday",
+  "generation": 46,
+  "experiment": 3,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "traction, ABS and intervention quality",
+  "style": "control-lab",
+  "dynamic": true,
+  "functionChanges": 1,
+  "passed": false,
+  "score": 96.208,
+  "previousBest": 0,
+  "improvement": 96.208,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0046-t0463.lua",
+      "bytes": 85760,
+      "sha256": "a41222fa37cbc0ac9a80c195ddfcf22834ed5a2d887715f5cc5e6d7ed7e003d2"
+    },
+    "luac": {
+      "path": "generations/candidates/0046-t0463.luac",
+      "bytes": 88990,
+      "sha256": "624d6812f9d281004c2685b6adf7e6cc515d7f8182cc6282503aa1a2eb191e78"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "lerp",
+      "variant": "bounded-ease-blend",
+      "label": "lerp function rewrite",
+      "summary": "Replace linear interpolation with bounded smoothstep blending for less abrupt state transitions",
+      "from": "parent implementation",
+      "to": "bounded-ease-blend"
+    },
+    {
+      "index": 2,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "ABS response divisor",
+      "summary": null,
+      "from": 650,
+      "to": 709.8795581191546
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "ABS blend",
+      "summary": null,
+      "from": 0.42,
+      "to": 0.533153101659799
+    },
+    {
+      "index": 4,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "runaway release base",
+      "summary": null,
+      "from": 0.1,
+      "to": 0.12115425610757666
+    }
+  ],
+  "created": "2026-07-30T12:11:25.982Z"
+}

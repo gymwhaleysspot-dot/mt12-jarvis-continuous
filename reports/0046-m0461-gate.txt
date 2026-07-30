@@ -1,0 +1,153 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0046-m0461.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0046-m0461",
+  "family": "monday",
+  "generation": 46,
+  "experiment": 1,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 86.517,
+  "previousBest": 0,
+  "improvement": 86.517,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "q",
+      "variant": "safe-quantizer",
+      "label": "q function rewrite",
+      "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+      "from": "parent implementation",
+      "to": "safe-quantizer",
+      "researchDirected": false
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.00091792,
+      "to": 0.0009131688461938571
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.07125377056318793
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.200696726238812
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.538705810300737
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 32,
+      "osc": 0.7320683454196488,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7378337768020451,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 39,
+      "osc": 0.7281349951708957,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.9690589373285537,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.749001994775641,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48356816582636974,
+    "truth": 7.319852928693178,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0046-m0461.lua",
+  "sourceBytes": 85765,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0046-m0461.luac: 88977 bytes (MT12 4/4/4/4/4)
+normalized_bytes=88977
+margin=-33
+passed=0

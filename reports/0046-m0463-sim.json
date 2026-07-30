@@ -1,0 +1,107 @@
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0046-m0463",
+  "family": "monday",
+  "generation": 46,
+  "experiment": 3,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 93.616,
+  "previousBest": 0,
+  "improvement": 93.616,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter",
+      "researchDirected": false
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.00091792,
+      "to": 0.000907669630364494
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.07423377552923283
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.2205423100008215
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.556555220153019
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 32,
+      "osc": 0.742750101069888,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7354070273787292,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 39,
+      "osc": 0.7322631572688898,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.034615040007724,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.81126860812116,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48629246285785155,
+    "truth": 7.6580897027585575,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}
