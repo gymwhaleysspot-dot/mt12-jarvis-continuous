@@ -1,5 +1,5 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0091-c091a
+Controller: 0076-w076a
 Digital twin: 99.588 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
@@ -12,8 +12,8 @@ Required design constraints:
 
 # MT12 Reasoning Mission
 
-Controller: 0091-c091a
-Phase: postflight
+Controller: 0090-m090a
+Phase: preflight
 
 ## Leading hypothesis
 - sensor lag or calibration is the primary source of truth-speed error (confidence 0.2)
@@ -45,3 +45,5 @@ Phase: postflight
 - Is there a simpler explanation?
 - What result would make this design unacceptable?
 - Can the same behavior be achieved with less runtime memory?
+
+COGNITIVE GOVERNANCE V2: preserve initialization order, avoid duplicate locals, select the correct function domain, execute the mocked EdgeTX lifecycle, and reject unexplained regressions.
