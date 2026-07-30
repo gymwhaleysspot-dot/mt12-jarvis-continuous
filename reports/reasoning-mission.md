@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0113-t113a
+Controller: 0115-t115a
 Phase: preflight
 
 ## Leading hypothesis
@@ -8,7 +8,7 @@ Phase: preflight
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.588
+- Known: Digital twin score 99.589
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
