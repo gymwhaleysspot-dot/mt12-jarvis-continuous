@@ -1,5 +1,5 @@
 {
-  "schema": 6,
+  "schema": 7,
   "absoluteChampion": {
     "base": "0042-m0422",
     "family": "monday",
@@ -55,33 +55,41 @@
     {
       "pass": false,
       "score": 85.194,
-      "family": "monday",
-      "base": "0109-m109a",
-      "bytes": 88954,
-      "margin": -10,
-      "parentScore": 93.992,
-      "parentGain": -8.798,
-      "familyChampion": "0042-m0422",
-      "familyScore": 93.992,
-      "familyGain": -8.798,
+      "family": "cloud",
+      "base": "0111-c111a",
+      "bytes": 88883,
+      "margin": 61,
+      "parentScore": 85.392,
+      "parentGain": -0.198,
+      "familyChampion": "0071-c071a",
+      "familyScore": 87.142,
+      "familyGain": -1.948,
       "requiredMargin": 48,
       "reasons": [
         "build-gate",
         "differential",
         "cognitive-governance",
         "edgetx-emulator",
-        "gain:parent=-8.798,family=-8.798<0.15",
-        "margin:-10<48"
+        "gain:parent=-0.198,family=-1.948<0.15"
       ],
       "evidenceGaps": [
         "real-log-replay"
       ],
       "eligible": false,
+      "promotionType": "family-improvement",
+      "continuity": {
+        "requested": true,
+        "modelGenerated": false,
+        "bytecodeEquivalent": false,
+        "candidateHash": null,
+        "parentHash": "295942e2d6554c5f8cdc027cdc15362be736c82d630ebf2849db0d26bde19cfb",
+        "parent": "generations/accepted/0075-c075a.lua"
+      },
       "validation": {
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0109-m109a",
+          "candidate": "0111-c111a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -89,7 +97,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 85797,
+            "sourceBytes": 87319,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -109,7 +117,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0109-m109a",
+          "candidate": "0111-c111a",
           "passed": true,
           "checks": {
             "path": true,
@@ -142,7 +150,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0109-m109a",
+          "candidate": "0111-c111a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -174,31 +182,29 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0109-m109a",
-          "parent": "0042-m0422",
+          "candidate": "0111-c111a",
+          "parent": "0075-c075a",
           "parentFound": true,
-          "scoreDelta": -8.798,
+          "scoreDelta": -0.198,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": 0,
-            "roughBrake.lock": 0,
-            "truth.mae": -0.0278,
-            "lagTruth.mae": -0.0266,
+            "wetBrake.lock": 1,
+            "roughBrake.lock": 1,
+            "truth.mae": -0.1075,
+            "lagTruth.mae": -0.1017,
             "jump.fp": 0,
-            "jump.miss": 6,
+            "jump.miss": 0,
             "dropout.unsafe": 0
           },
-          "criticalWorse": [
-            "jump.miss:+6"
-          ],
+          "criticalWorse": [],
           "passed": false
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0109-m109a",
+          "candidate": "0111-c111a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -217,18 +223,18 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0109-m109a",
-          "parent": "generations/accepted/0042-m0422.lua",
+          "candidate": "0111-c111a",
+          "parent": "generations/accepted/0075-c075a.lua",
           "changedFunctions": [
-            "vGear"
+            "condBrain"
           ],
           "tests": [
             {
-              "function": "vGear",
+              "function": "condBrain",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
-              "bytesDelta": 66
+              "bytesDelta": 47
             }
           ],
           "available": true,
@@ -238,10 +244,10 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0109-m109a",
-          "parent": "generations/accepted/0042-m0422.lua",
+          "candidate": "0111-c111a",
+          "parent": "generations/accepted/0075-c075a.lua",
           "changedFunctions": [
-            "vGear"
+            "condBrain"
           ],
           "constantChanges": [],
           "gvarMappingChanged": false,
@@ -253,34 +259,69 @@
         "cognitive": {
           "schema": 4,
           "engine": "mt12-cognitive-governance-v4",
-          "candidate": "0109-m109a",
-          "created": "2026-07-30T21:35:00.551Z",
+          "candidate": "0111-c111a",
+          "created": "2026-07-30T21:51:56.144Z",
           "passed": false,
           "judge": "reject",
           "why": {
-            "function": "vGear",
-            "domain": "truth",
-            "declaredDomain": "truth",
+            "function": "condBrain",
+            "domain": "brain",
+            "declaredDomain": "brain",
             "protected": false,
-            "objective": "truth prediction, calibration and sensor resilience",
+            "objective": "confidence arbitration, neural learning and reasoning",
             "successMetric": "parent/family gain with deploy safety",
             "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
           },
           "changes": [
             {
-              "name": "vGear",
-              "before": "662dea665516807d",
-              "after": "93ee291823c29401",
-              "bytesDelta": 66
+              "name": "condBrain",
+              "before": "5f81546a16f44417",
+              "after": "670184afab5442eb",
+              "bytesDelta": 47
             }
           ],
           "constantChanges": [],
           "duplicateLocals": [],
-          "stateSlots": [],
+          "stateSlots": [
+            38,
+            39,
+            204,
+            262,
+            300,
+            303,
+            336,
+            337,
+            338,
+            339,
+            340,
+            342,
+            343,
+            347,
+            361,
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            510,
+            511,
+            512,
+            513,
+            520,
+            521,
+            522,
+            523,
+            530,
+            531,
+            532,
+            533,
+            534
+          ],
           "emulator": {
             "passed": false,
             "scenarios": [],
-            "report": "reports/0109-m109a-edgetx-emulator.json"
+            "report": "reports/0111-c111a-edgetx-emulator.json"
           },
           "evidence": [
             {
@@ -310,13 +351,13 @@
               "claim": "EdgeTX emulator failure"
             }
           ],
-          "parent": "generations/accepted/0042-m0422.lua"
+          "parent": "generations/accepted/0075-c075a.lua"
         },
         "emulator": {
           "schema": 2,
           "engine": "official-edgetx-source-backed-mt12-emulator",
           "edgetxCommit": "f8a89393c560a1057b045048f4b6ff5096ca22a0",
-          "candidate": "0109-m109a",
+          "candidate": "0111-c111a",
           "passed": false,
           "error": "emulator produced no report"
         }
@@ -328,9 +369,9 @@
     "minGain": 0.15,
     "hardMargin": 48,
     "reserveTarget": 256,
-    "promotionBasis": "parent-or-family gain plus deploy safety"
+    "promotionBasis": "real improvements require gain; model-outage continuity requires byte-identical normalized LUAC plus all safety gates"
   },
   "status": "hold-deploy-safe-champion",
   "deploymentWarning": null,
-  "created": "2026-07-30T21:35:00.919Z"
+  "created": "2026-07-30T21:51:56.545Z"
 }
