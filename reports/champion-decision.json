@@ -1,10 +1,12 @@
 {
-  "schema": 3,
+  "schema": 4,
   "champion": {
     "base": "0042-m0422",
     "score": 93.992,
     "margin": 3,
-    "bytes": 88941
+    "bytes": 88941,
+    "deploySafe": false,
+    "safetyStatus": "legacy-unsafe-margin"
   },
   "policy": {
     "limit": 88944,
@@ -17,23 +19,27 @@
   "candidates": [
     {
       "pass": false,
-      "score": 85.122,
-      "family": "tuesday",
-      "base": "0086-t086a",
+      "score": 85.065,
+      "family": "cloud",
+      "base": "0087-c087a",
       "bytes": 0,
       "margin": 0,
-      "scoreGain": -8.87,
+      "scoreGain": -8.927,
       "reasons": [
         "build-gate",
-        "gain:-8.87<0.15",
+        "gain:-8.927<0.15",
         "margin:0<48"
       ],
+      "evidenceGaps": [
+        "real-log-replay"
+      ],
+      "evidenceStatus": "inconclusive",
       "eligible": false,
       "validation": {
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0086-t086a",
+          "candidate": "0087-c087a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -41,7 +47,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87925,
+            "sourceBytes": 88099,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -61,7 +67,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0086-t086a",
+          "candidate": "0087-c087a",
           "passed": true,
           "checks": {
             "path": true,
@@ -94,7 +100,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0086-t086a",
+          "candidate": "0087-c087a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -126,10 +132,10 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0086-t086a",
+          "candidate": "0087-c087a",
           "parent": "0076-w076a",
           "parentFound": true,
-          "scoreDelta": 0.879,
+          "scoreDelta": 0.822,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
@@ -137,8 +143,8 @@
             "dryBrake.lock": 0,
             "wetBrake.lock": -2,
             "roughBrake.lock": -5,
-            "truth.mae": -0.1725,
-            "lagTruth.mae": -0.1591,
+            "truth.mae": -0.1612,
+            "lagTruth.mae": -0.1488,
             "jump.fp": 0,
             "jump.miss": 0,
             "dropout.unsafe": 0
@@ -147,66 +153,71 @@
           "passed": true
         },
         "replay": {
-          "engine": "real-log-replay-v1",
-          "candidate": "0086-t086a",
+          "engine": "real-log-replay-v2",
+          "candidate": "0087-c087a",
           "corpus": [],
           "available": false,
+          "status": "inconclusive",
+          "evidenceRequired": true,
           "metrics": {
             "files": 0,
             "rows": 0,
-            "truthMae": 0,
+            "truthMae": null,
             "dropFrames": 0,
             "unsafeDropFrames": 0,
             "eventFrames": 0,
             "jumpFalsePositiveHints": 0
           },
           "regressions": [],
-          "passed": true
+          "passed": false
         },
         "ablation": {
-          "engine": "function-ablation-v1",
-          "candidate": "0086-t086a",
+          "engine": "function-ablation-v2",
+          "candidate": "0087-c087a",
           "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "nt"
+            "condBrain"
           ],
           "tests": [
             {
-              "function": "nt",
+              "function": "condBrain",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
-              "bytesDelta": 347
+              "bytesDelta": 507
             }
           ],
           "available": true,
+          "status": "pass",
+          "evidenceRequired": true,
           "passed": true
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0086-t086a",
+          "candidate": "0087-c087a",
           "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "nt"
+            "condBrain"
           ],
           "constantChanges": [
             {
               "type": "constant",
               "name": "RPM2MPH",
               "before": 0.000933821,
-              "after": 0.000932068,
-              "percent": -0.188
+              "after": 0.000935636,
+              "percent": 0.194
             }
           ],
           "gvarMappingChanged": false,
           "memoryIoChanged": false,
           "voiceCallsDelta": 0,
           "dashboardDrawDelta": 0,
-          "sourceBytesDelta": 332
+          "sourceBytesDelta": 506
         }
       }
     }
   ],
-  "status": "hold-champion",
-  "created": "2026-07-30T19:35:06.161Z"
+  "status": "hold-legacy-unsafe-champion",
+  "deploymentWarning": "Champion has 3 bytes margin; below required 48",
+  "created": "2026-07-30T19:41:07.703Z"
 }
