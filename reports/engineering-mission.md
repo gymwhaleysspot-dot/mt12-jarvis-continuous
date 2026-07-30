@@ -1,18 +1,18 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0107-c107a
-Digital twin: 99.575 (PASS)
+Controller: 0108-w108a
+Digital twin: 99.602 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
 Required design constraints:
-- Consider innovation: multi-timescale neural memory
 - Consider innovation: experience replay compression
 - Consider innovation: safety envelope forecasting
+- Consider innovation: predictive landing control
 - Preserve fail-open TCT=1024, MT12 global io.read(handle,...), dashboard, logging, learning, voice, mood, personality and all existing behavior.
 
 
 # MT12 Reasoning Mission
 
-Controller: 0107-c107a
+Controller: 0108-w108a
 Phase: postflight
 
 ## Leading hypothesis
@@ -20,7 +20,7 @@ Phase: postflight
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.575
+- Known: Digital twin score 99.602
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
@@ -38,7 +38,7 @@ Phase: postflight
 ## Long-term priorities
 - Preserve at least 256 bytes normalized LUAC reserve: 0%
 - Reduce jump false positives without missed real jumps: 0%
-- Reduce truth-speed error below 3 mph equivalent: 75.7%
+- Reduce truth-speed error below 3 mph equivalent: 77.3%
 
 ## Required self-critique
 - What evidence contradicts the leading hypothesis?
@@ -49,7 +49,7 @@ Phase: postflight
 
 # MT12 Reasoning Mission
 
-Controller: 0107-c107a
+Controller: 0108-w108a
 Phase: postcycle
 
 ## Leading hypothesis
@@ -57,7 +57,7 @@ Phase: postcycle
 - Test: replay aligned GPS and RPM lag against real logs
 
 ## Known / inferred / unknown
-- Known: Digital twin score 99.575
+- Known: Digital twin score 99.602
 - Inferred: sensor lag or calibration is the primary source of truth-speed error at confidence 0.2
 - Unknown: No curated real-log corpus detected
 - Unknown: Replay evidence incomplete or not passing
@@ -75,7 +75,7 @@ Phase: postcycle
 ## Long-term priorities
 - Preserve at least 256 bytes normalized LUAC reserve: 0%
 - Reduce jump false positives without missed real jumps: 0%
-- Reduce truth-speed error below 3 mph equivalent: 75.7%
+- Reduce truth-speed error below 3 mph equivalent: 77.3%
 
 ## Required self-critique
 - What evidence contradicts the leading hypothesis?

@@ -1,0 +1,383 @@
+engine=cognitive-governed-metacognitive-mt12-ai-luac-factory
+candidate=generations/candidates/0108-w108a.lua
+{
+  "candidate": "0108-w108a",
+  "engine": "a15xq-autonomous-engineering-v9",
+  "mode": "continuity-validation-no-model",
+  "subsystem": "cockpit",
+  "aiArchitect": true,
+  "substantiveSubsystem": true,
+  "experimentIsolation": true,
+  "expectedMinimumRewrites": 1,
+  "sourceNamedFunctions": 64,
+  "reportedRewrittenFunctions": 1,
+  "rewrittenFunctions": [
+    "rdmem"
+  ],
+  "missing": [],
+  "changedFromParent": true,
+  "sizeRatio": 1.0008,
+  "changedLines": 95,
+  "checks": {
+    "metadataOk": true,
+    "structureOk": true,
+    "sizeOk": true,
+    "changed": true
+  },
+  "passed": true
+}
+{
+  "engine": "luac-factory-simulator-v6",
+  "candidate": "0108-w108a",
+  "parent": "0076-w076a",
+  "family": "html",
+  "generation": 108,
+  "experiment": 1,
+  "style": "systems-lab",
+  "objective": "memory efficiency, observability and deploy reliability",
+  "score": 85.194,
+  "previousBest": 84.243,
+  "parentScoreSource": "parent-report",
+  "improvement": 0.951,
+  "minGain": 0.15,
+  "novelty": 0.25,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "promotable": true,
+  "regressions": [],
+  "scenarioPass": {
+    "dryLaunch": true,
+    "wetLaunch": true,
+    "bumpyLaunch": true,
+    "dryBrake": true,
+    "wetBrake": true,
+    "roughBrake": true,
+    "truth": true,
+    "lagTruth": true,
+    "jump": true,
+    "dropout": true,
+    "subsystemParity": true
+  },
+  "changes": [
+    {
+      "kind": "local-continuity-fallback",
+      "function": "rdmem",
+      "variant": "cockpit-autonomous-v9",
+      "label": "Model outage continuity proof",
+      "summary": "Equivalent local marker used only to exercise compile and emulator pipeline; not eligible as an AI improvement",
+      "from": "f89ac63799f8",
+      "to": "fdf049e96c3b"
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.08118712045000409
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.2668486721121806
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.598203843141679
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.739945864332604,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7297631976659336,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 40,
+      "osc": 0.7568797050685605,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.078797444723232,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.8532091821835743,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4898495287547616,
+    "truth": 7.885979321922088,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  },
+  "rewards": {
+    "novelty": 0.75,
+    "architecture": 2,
+    "parity": 5
+  }
+}
+{
+  "file": "generations/candidates/0108-w108a.lua",
+  "sourceBytes": 87665,
+  "functionCount": 64,
+  "stateReferences": 2511,
+  "dashboardDrawCalls": 6,
+  "dashboardSignalGroups": 11,
+  "dashboardMinimum": {
+    "drawCalls": 5,
+    "signalGroups": 8
+  },
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "dashboardFunctional": true,
+    "dashboardAdaptive": true,
+    "dashboardControlsVisible": true,
+    "dashboardTruthVisible": true,
+    "dashboardIntelligenceVisible": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "subGates": {
+    "runtime-memory-audit.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"engine\": \"mt12-runtime-memory-audit\",\n  \"candidate\": \"0108-w108a\",\n  \"risk\": 9,\n  \"limit\": 32,\n  \"passed\": true,\n  \"warnings\": [\n    \"table-allocation-in-hot-path\"\n  ],\n  \"metrics\": {\n    \"sourceBytes\": 87665,\n    \"tableLiterals\": 20,\n    \"closures\": 5,\n    \"gmatch\": 1,\n    \"concat\": 4,\n    \"format\": 0,\n    \"ipairs\": 3,\n    \"pairs\": 0,\n    \"hotTableLiterals\": 1,\n    \"hotClosures\": 0,\n    \"hotConcat\": 0,\n    \"hotFormat\": 0,\n    \"readBuffers\": [\n      512\n    ]\n  }\n}",
+      "stderr": ""
+    },
+    "memory-schema-test.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"engine\": \"mt12-memory-schema-gate\",\n  \"candidate\": \"0108-w108a\",\n  \"passed\": true,\n  \"checks\": {\n    \"path\": true,\n    \"globalRead\": true,\n    \"noMethodRead\": true,\n    \"openRead\": true,\n    \"openWrite\": true,\n    \"closeSafe\": true,\n    \"tagGate\": true,\n    \"numericFallback\": true,\n    \"bounds\": true,\n    \"minimumFields\": true,\n    \"schemaMarker\": true,\n    \"safeMissing\": true,\n    \"writePresent\": true\n  },\n  \"failed\": [],\n  \"warnings\": [],\n  \"cases\": [\n    \"missing-file\",\n    \"empty-file\",\n    \"truncated-row\",\n    \"invalid-tag\",\n    \"nonnumeric-field\",\n    \"out-of-range-field\",\n    \"old-schema-marker\",\n    \"current-schema-marker\"\n  ]\n}",
+      "stderr": ""
+    },
+    "control-invariants.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"engine\": \"mt12-control-invariants\",\n  \"candidate\": \"0108-w108a\",\n  \"passed\": true,\n  \"checks\": {\n    \"boundedMath\": true,\n    \"badNumberGuard\": true,\n    \"tctFailOpen\": true,\n    \"gyroWrite\": true,\n    \"carOffGuard\": true,\n    \"noStaticBrake\": true,\n    \"truthNonnegative\": true,\n    \"gvarRounding\": true,\n    \"noDynamicCode\": true,\n    \"finitePackGuard\": true,\n    \"allGvars\": true\n  },\n  \"failed\": [],\n  \"randomized\": {\n    \"cases\": 10000,\n    \"violations\": 0\n  },\n  \"invariants\": [\n    \"TCT fail-open is 1024\",\n    \"all outputs bounded\",\n    \"bad numbers rejected\",\n    \"truth speed nonnegative\",\n    \"car-off guard present\",\n    \"no dynamic code\"\n  ]\n}",
+      "stderr": ""
+    },
+    "differential-simulator.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"engine\": \"mt12-differential-simulator\",\n  \"candidate\": \"0108-w108a\",\n  \"parent\": \"0076-w076a\",\n  \"parentFound\": true,\n  \"scoreDelta\": 0.951,\n  \"deltas\": {\n    \"dryLaunch.jerk\": 0,\n    \"wetLaunch.jerk\": 0,\n    \"bumpyLaunch.jerk\": 0,\n    \"dryBrake.lock\": 0,\n    \"wetBrake.lock\": -1,\n    \"roughBrake.lock\": -4,\n    \"truth.mae\": -0.3336,\n    \"lagTruth.mae\": -0.3111,\n    \"jump.fp\": 0,\n    \"jump.miss\": 0,\n    \"dropout.unsafe\": 0\n  },\n  \"criticalWorse\": [],\n  \"passed\": true\n}",
+      "stderr": ""
+    },
+    "replay-real-logs.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"engine\": \"real-log-replay-v2\",\n  \"candidate\": \"0108-w108a\",\n  \"corpus\": [],\n  \"available\": false,\n  \"status\": \"inconclusive\",\n  \"evidenceRequired\": true,\n  \"metrics\": {\n    \"files\": 0,\n    \"rows\": 0,\n    \"truthMae\": null,\n    \"dropFrames\": 0,\n    \"unsafeDropFrames\": 0,\n    \"eventFrames\": 0,\n    \"jumpFalsePositiveHints\": 0\n  },\n  \"regressions\": [],\n  \"passed\": false\n}",
+      "stderr": ""
+    },
+    "ablation-test.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"engine\": \"function-ablation-v2\",\n  \"candidate\": \"0108-w108a\",\n  \"parent\": \"generations/accepted/0076-w076a.lua\",\n  \"changedFunctions\": [\n    \"rdmem\"\n  ],\n  \"tests\": [\n    {\n      \"function\": \"rdmem\",\n      \"candidateFound\": true,\n      \"parentFound\": true,\n      \"changed\": true,\n      \"bytesDelta\": 66\n    }\n  ],\n  \"available\": true,\n  \"status\": \"pass\",\n  \"evidenceRequired\": true,\n  \"passed\": true\n}",
+      "stderr": ""
+    },
+    "semantic-diff.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\n  \"engine\": \"semantic-diff-v1\",\n  \"candidate\": \"0108-w108a\",\n  \"parent\": \"generations/accepted/0076-w076a.lua\",\n  \"changedFunctions\": [\n    \"rdmem\"\n  ],\n  \"constantChanges\": [],\n  \"gvarMappingChanged\": false,\n  \"memoryIoChanged\": false,\n  \"voiceCallsDelta\": 0,\n  \"dashboardDrawDelta\": 0,\n  \"sourceBytesDelta\": 72\n}",
+      "stderr": ""
+    },
+    "edgetx-emulator.mjs": {
+      "passed": true,
+      "status": 0,
+      "stdout": "{\"schema\":2,\"engine\":\"official-edgetx-source-backed-mt12-emulator\",\"edgetxCommit\":\"f8a89393c560a1057b045048f4b6ff5096ca22a0\",\"candidate\":\"0108-w108a\",\"passed\":true,\"scenarios\":[{\"name\":\"missing-memory\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":54,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"truncated-memory\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":54,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"valid-memory\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":81,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"car-off\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":162,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"car-on-drive\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":702,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"telemetry-dropout\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":621,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"rpm-spike-gps-freeze\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":432,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"wet-brake\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":432,\"sounds\":0,\"wrote\":false,\"writeBytes\":0},{\"name\":\"scheduler-restart\",\"passed\":true,\"error\":null,\"tct\":1024,\"gyr\":0,\"lcd\":324,\"sounds\":0,\"wrote\":false,\"writeBytes\":0}]}",
+      "stderr": ""
+    }
+  },
+  "passed": true,
+  "failed": []
+}
+{
+  "engine": "real-log-replay-v2",
+  "candidate": "0108-w108a",
+  "corpus": [],
+  "available": false,
+  "status": "inconclusive",
+  "evidenceRequired": true,
+  "metrics": {
+    "files": 0,
+    "rows": 0,
+    "truthMae": null,
+    "dropFrames": 0,
+    "unsafeDropFrames": 0,
+    "eventFrames": 0,
+    "jumpFalsePositiveHints": 0
+  },
+  "regressions": [],
+  "passed": false
+}
+{
+  "engine": "function-ablation-v2",
+  "candidate": "0108-w108a",
+  "parent": "generations/accepted/0076-w076a.lua",
+  "changedFunctions": [
+    "rdmem"
+  ],
+  "tests": [
+    {
+      "function": "rdmem",
+      "candidateFound": true,
+      "parentFound": true,
+      "changed": true,
+      "bytesDelta": 66
+    }
+  ],
+  "available": true,
+  "status": "pass",
+  "evidenceRequired": true,
+  "passed": true
+}
+{
+  "engine": "semantic-diff-v1",
+  "candidate": "0108-w108a",
+  "parent": "generations/accepted/0076-w076a.lua",
+  "changedFunctions": [
+    "rdmem"
+  ],
+  "constantChanges": [],
+  "gvarMappingChanged": false,
+  "memoryIoChanged": false,
+  "voiceCallsDelta": 0,
+  "dashboardDrawDelta": 0,
+  "sourceBytesDelta": 72
+}
+{
+  "phase": "gate",
+  "controller": "0108-w108a",
+  "hypotheses": 5,
+  "top": "H1",
+  "confidence": 0.2,
+  "functions": 60,
+  "tools": 7,
+  "goals": 5,
+  "selfCalibration": 6
+}
+{
+  "schema": 4,
+  "engine": "mt12-cognitive-governance-v4",
+  "candidate": "0108-w108a",
+  "created": "2026-07-30T21:30:09.450Z",
+  "passed": false,
+  "judge": "reject",
+  "why": {
+    "function": "rdmem",
+    "domain": "cockpit",
+    "declaredDomain": "cockpit",
+    "protected": false,
+    "objective": "memory efficiency, observability and deploy reliability",
+    "successMetric": "parent/family gain with deploy safety",
+    "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
+  },
+  "changes": [
+    {
+      "name": "rdmem",
+      "before": "c47d231a91eb246d",
+      "after": "767b140d8f88f2c6",
+      "bytesDelta": 66
+    }
+  ],
+  "constantChanges": [],
+  "duplicateLocals": [],
+  "stateSlots": [],
+  "emulator": {
+    "passed": false,
+    "scenarios": [],
+    "report": "reports/0108-w108a-edgetx-emulator.json"
+  },
+  "evidence": [
+    {
+      "source": "static",
+      "grade": "F",
+      "available": true
+    },
+    {
+      "source": "simulation",
+      "grade": "E",
+      "available": true
+    },
+    {
+      "source": "emulator",
+      "grade": "B-",
+      "available": false
+    },
+    {
+      "source": "replay",
+      "grade": "C",
+      "available": false
+    }
+  ],
+  "contradictions": [
+    {
+      "severity": "critical",
+      "claim": "EdgeTX emulator failure"
+    }
+  ],
+  "parent": "generations/accepted/0076-w076a.lua"
+}
+generations/candidates/0108-w108a.luac: 88890 bytes (MT12 4/4/4/4/4)
+normalized_bytes=88890
+margin=54
+buildable=1
+passed=0
