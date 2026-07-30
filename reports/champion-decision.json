@@ -16,25 +16,22 @@
   "selected": null,
   "candidates": [
     {
-      "pass": false,
-      "score": 84.376,
-      "family": "cloud",
-      "base": "0079-c079a",
-      "bytes": 0,
-      "margin": 0,
-      "scoreGain": -9.616,
+      "pass": true,
+      "score": 85.551,
+      "family": "html",
+      "base": "0080-w080a",
+      "bytes": 88883,
+      "margin": 61,
+      "scoreGain": -8.441,
       "reasons": [
-        "build-gate",
-        "differential",
-        "gain:-9.616<0.15",
-        "margin:0<48"
+        "gain:-8.441<0.15"
       ],
       "eligible": false,
       "validation": {
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0079-c079a",
+          "candidate": "0080-w080a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -42,7 +39,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87633,
+            "sourceBytes": 87929,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -62,7 +59,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0079-c079a",
+          "candidate": "0080-w080a",
           "passed": true,
           "checks": {
             "path": true,
@@ -95,7 +92,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0079-c079a",
+          "candidate": "0080-w080a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -127,29 +124,29 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0079-c079a",
+          "candidate": "0080-w080a",
           "parent": "0076-w076a",
           "parentFound": true,
-          "scoreDelta": 0.133,
+          "scoreDelta": 1.308,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": -1,
-            "roughBrake.lock": -4,
-            "truth.mae": -0.0267,
-            "lagTruth.mae": -0.0246,
+            "wetBrake.lock": -2,
+            "roughBrake.lock": -5,
+            "truth.mae": -0.2569,
+            "lagTruth.mae": -0.2382,
             "jump.fp": 0,
             "jump.miss": 0,
             "dropout.unsafe": 0
           },
           "criticalWorse": [],
-          "passed": false
+          "passed": true
         }
       }
     }
   ],
   "status": "hold-champion",
-  "created": "2026-07-30T18:56:52.700Z"
+  "created": "2026-07-30T18:58:43.955Z"
 }
