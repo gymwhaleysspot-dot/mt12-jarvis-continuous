@@ -1,10 +1,9 @@
-name: MT12 LUAC Factory
+name: MT12 Autonomous AI LUAC Factory
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - '.github/workflows/master-ai-continuous.yml'
       - 'scripts/**'
@@ -24,7 +23,7 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       MT12_LIMIT: '88944'
       MT12_HARD_MARGIN: '48'
@@ -45,29 +44,27 @@ jobs:
       - name: Mark factory started
         run: |
           mkdir -p reports
-          printf '{"status":"building","mode":"verified-subsystem-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"autonomous-engineering-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
       - name: Install and verify Lua 5.3
         shell: bash
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
             sudo apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends lua5.3 && break
-            echo "Lua 5.3 install attempt $attempt failed; retrying..."
-            sudo rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock-frontend || true
             sudo dpkg --configure -a || true
             sleep $((attempt * 3))
           done
           command -v lua5.3
           command -v luac5.3
-          lua5.3 -v
-          luac5.3 -v
       - name: Prepare MT12 normalizer
         run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
-      - name: Build one genuinely new complete AI controller
+      - name: Build engineering mission and world model
+        run: node scripts/autonomous-engineering-system.mjs preflight
+      - name: Build mission-driven AI controller
         id: architecture
         continue-on-error: true
         run: |
-          printf '{"status":"building","mode":"verified-subsystem-factory","stage":"AI subsystem architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"autonomous-engineering-factory","stage":"mission-driven architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           node scripts/master-ai.mjs
       - name: Record architecture outcome
         if: steps.architecture.outcome == 'failure'
@@ -75,16 +72,16 @@ jobs:
         run: |
           STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
           if [ "$STATE" = "rate-limited" ]; then
-            printf '{"status":"rate-limited","mode":"verified-subsystem-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"rate-limited","mode":"autonomous-engineering-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           else
-            printf '{"status":"builder-failed","mode":"verified-subsystem-factory","stage":"AI subsystem architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"builder-failed","mode":"autonomous-engineering-factory","stage":"mission-driven architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           fi
-      - name: Compile normalize validate rank and publish substantive builds
+      - name: Compile normalize and deeply validate candidates
         if: steps.architecture.outcome == 'success'
         shell: bash
         run: |
           set +e
-          mkdir -p generations/factory generations/accepted reports
+          mkdir -p generations/factory generations/accepted generations/quarantined reports
           : > reports/factory-results.tsv
           node -e "const p=require('./reports/pending-factory.json');for(const x of p.batch)console.log(x.file)" | while read CANDIDATE; do
             BASE=$(basename "$CANDIDATE" .lua)
@@ -95,11 +92,14 @@ jobs:
             BYTES=0
             MARGIN=0
             {
-              echo "engine=substantive-ai-architecture-luac-factory"
+              echo "engine=autonomous-mt12-ai-luac-factory"
               echo "candidate=$CANDIDATE"
               node scripts/all-function-gate.mjs "$CANDIDATE" || PASS=0
-              node scripts/simulator.mjs "$CANDIDATE" || true
+              node scripts/simulator.mjs "$CANDIDATE" || PASS=0
               node scripts/static-gate.mjs "$CANDIDATE" || PASS=0
+              node scripts/replay-real-logs.mjs "$CANDIDATE" || PASS=0
+              node scripts/ablation-test.mjs "$CANDIDATE" || PASS=0
+              node scripts/semantic-diff.mjs "$CANDIDATE" || PASS=0
               luac5.3 -p "$CANDIDATE" || PASS=0
               if [ "$PASS" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || PASS=0; fi
               if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || PASS=0; fi
@@ -126,6 +126,9 @@ jobs:
               cp "reports/${BASE}-changelog.json" "generations/factory/$FAMILY/${BASE}-changelog.json"
             fi
           done
+      - name: Run autonomous engineering council on candidate
+        if: steps.architecture.outcome == 'success'
+        run: node scripts/autonomous-engineering-system.mjs postflight
       - name: Promote only a true new champion
         if: steps.architecture.outcome == 'success'
         shell: bash
@@ -135,8 +138,10 @@ jobs:
           SELECT_RC=$?
           if [ "$SELECT_RC" -ne 0 ] || [ -z "$BEST" ]; then
             node scripts/write-rejection-summary.mjs || true
+            node scripts/quarantine-generation.mjs || true
+            node scripts/category-champions.mjs || true
             CHAMPION=$(node -e "const d=require('./reports/champion-decision.json');console.log(d.champion?.base||'none')" 2>/dev/null || echo none)
-            printf '{"status":"champion-held","mode":"strict-champion-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
+            printf '{"status":"champion-held","mode":"autonomous-engineering-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
             node scripts/rebuild-factory-catalog.mjs || true
             exit 0
           fi
@@ -148,44 +153,36 @@ jobs:
           cp "generations/factory/$FAMILY/${BASE}.luac" "generations/accepted/${BASE}.luac"
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
-          printf '{"status":"accepted","mode":"strict-champion-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md","decision":"reports/champion-decision.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
+          node scripts/category-champions.mjs || true
+          node scripts/autonomous-engineering-system.mjs postflight || true
+          printf '{"status":"accepted","mode":"autonomous-engineering-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","decision":"reports/champion-decision.json","raceEngineer":"reports/race-engineer.json","digitalTwin":"reports/digital-twin.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" > reports/status.json
           node scripts/rebuild-factory-catalog.mjs
-      - name: Commit factory output and diagnostics
+      - name: Commit factory output and engineering knowledge
         if: always()
         shell: bash
         run: |
-          git config user.name 'mt12-luac-factory'
+          git config user.name 'mt12-autonomous-ai-factory'
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports factory.html factory-admin.js 2>/dev/null || true
           git diff --cached --quiet && exit 0
-          git commit -m "Observable AI LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
+          git commit -m "Autonomous MT12 AI engineering cycle $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
-      - name: Upload substantive downloadable factory build
+      - name: Upload complete engineering evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mt12-substantive-ai-lua-luac
+          name: mt12-autonomous-ai-engineering-factory
           path: |
             generations/factory/
             generations/accepted/
-            reports/factory-catalog.json
-            reports/status.json
-            reports/champion-decision.json
-            reports/multi-agent-progress.json
-            reports/rejection-summary.json
-            reports/*-CHANGELOG.md
-            reports/*-changelog.json
-            reports/*-gate.txt
-            reports/*-sim.json
+            generations/quarantined/
+            reports/
           retention-days: 30
-      - name: Report real architecture failure to Actions
+      - name: Report architecture failure
         if: steps.architecture.outcome == 'failure'
         shell: bash
         run: |
           STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
-          if [ "$STATE" = "rate-limited" ]; then
-            echo "GitHub Models quota exhausted; generation deferred to the next scheduled run."
-            exit 0
-          fi
+          [ "$STATE" = "rate-limited" ] && exit 0
           exit 1
