@@ -1,17 +1,137 @@
 {
-  "engine": "a15xq-verified-subsystem-v2",
-  "cycle": 80,
-  "created": "2026-07-30T18:58:02.901Z",
-  "mode": "verified-subsystem-production",
+  "engine": "a15xq-full-v4",
+  "cycle": 81,
+  "created": "2026-07-30T19:00:24.582Z",
+  "mode": "four-full-ai-architectures",
   "parent": "generations/accepted/0076-w076a.lua",
-  "candidateCount": 1,
+  "candidateCount": 4,
   "selection": "four research-directed clean-sheet architectures with regression veto",
   "batch": [
     {
       "engine": "a15xq-full-v4",
+      "family": "monday",
+      "name": "m081a",
+      "generation": 81,
+      "experiment": 1,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
+      "variant": 1,
+      "params": {
+        "rpmK": 0.0009244,
+        "tcSlip": 7.724,
+        "tcSpan": 5.261,
+        "tcCut": 24,
+        "absLock": 7126,
+        "truthRate": 0.199,
+        "coast": 0.9879
+      },
+      "file": "generations/candidates/0081-m081a.lua",
+      "parent": "generations/accepted/0076-w076a.lua",
+      "parentBytes": 87593,
+      "sourceBytes": 87591,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000933821,
+          "to": 0.0009304747316928385
+        }
+      ],
+      "sha256": "8d7e5a4b635155ff802046a31a5a554dd4797ac8103187448343ca2c3b103fae",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "tuesday",
+      "name": "t081a",
+      "generation": 81,
+      "experiment": 1,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 1,
+      "params": {
+        "rpmK": 0.0009098,
+        "tcSlip": 7.614,
+        "tcSpan": 4.826,
+        "tcCut": 26,
+        "absLock": 7266,
+        "truthRate": 0.21,
+        "coast": 0.9809
+      },
+      "file": "generations/candidates/0081-t081a.lua",
+      "parent": "generations/accepted/0076-w076a.lua",
+      "parentBytes": 87593,
+      "sourceBytes": 87579,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000933821,
+          "to": 0.0009295747126295968
+        }
+      ],
+      "sha256": "363f48b477bb5a189620bfacba11fc0ddc4efb4bc3cd8f6df44792fee86798de",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v4",
+      "family": "cloud",
+      "name": "c081a",
+      "generation": 81,
+      "experiment": 1,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 1,
+      "params": {
+        "rpmK": 0.0009112,
+        "tcSlip": 8.003,
+        "tcSpan": 4.856,
+        "tcCut": 26,
+        "absLock": 7153,
+        "truthRate": 0.169,
+        "coast": 0.982
+      },
+      "file": "generations/candidates/0081-c081a.lua",
+      "parent": "generations/accepted/0076-w076a.lua",
+      "parentBytes": 87593,
+      "sourceBytes": 87592,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000933821,
+          "to": 0.0009312415745707732
+        }
+      ],
+      "sha256": "1457ce68d1fd4775a9c7c803f18d46536d0fb5ccf599d97e512c7fcd2b878e92",
+      "previousBest": 0
+    },
+    {
+      "engine": "a15xq-full-v4",
       "family": "html",
-      "name": "w080a",
-      "generation": 80,
+      "name": "w081a",
+      "generation": 81,
       "experiment": 1,
       "objective": "memory efficiency, observability and deploy reliability",
       "style": "systems-lab",
@@ -23,91 +143,29 @@
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0009067,
-        "tcSlip": 7.938,
-        "tcSpan": 5.85,
-        "tcCut": 24,
-        "absLock": 7463,
-        "truthRate": 0.172,
-        "coast": 0.9878
+        "rpmK": 0.000928,
+        "tcSlip": 6.867,
+        "tcSpan": 5.291,
+        "tcCut": 26,
+        "absLock": 6953,
+        "truthRate": 0.205,
+        "coast": 0.9871
       },
-      "file": "generations/candidates/0080-w080a.lua",
+      "file": "generations/candidates/0081-w081a.lua",
       "parent": "generations/accepted/0076-w076a.lua",
       "parentBytes": 87593,
-      "sourceBytes": 87929,
+      "sourceBytes": 87593,
       "fullScript": true,
       "changes": [
-        {
-          "kind": "subsystem-architecture",
-          "function": "vl,voice,voiceTick",
-          "variant": "cockpit-evolution-v2",
-          "label": "Verified cockpit subsystem evolution",
-          "summary": "Rebuilt 3 related functions while preserving the complete accepted controller",
-          "from": "f9dd0151100d",
-          "to": "474cc8f4dfac"
-        },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000933821,
-          "to": 0.0009318352674284289
+          "to": 0.0009355922033313466
         }
       ],
-      "sha256": "df046e30ebf7ea0b159c78c4c27ba908bc2914381e1ea5668e886bd5d9122f88",
-      "previousBest": 0,
-      "functionChanges": 3,
-      "totalNamedFunctions": 64,
-      "allFunctionsRewritten": false,
-      "substantiveSubsystem": true,
-      "dynamic": true,
-      "researchDriven": true,
-      "aiArchitect": true,
-      "multiAgent": false,
-      "aiModel": "openai/gpt-4o-mini",
-      "rewrittenFunctions": [
-        "vl",
-        "voice",
-        "voiceTick"
-      ],
-      "subsystem": "cockpit",
-      "changedLines": 64,
-      "aiUsage": [
-        {
-          "completion_tokens": 638,
-          "completion_tokens_details": {
-            "accepted_prediction_tokens": 0,
-            "audio_tokens": 0,
-            "reasoning_tokens": 0,
-            "rejected_prediction_tokens": 0
-          },
-          "latency_checkpoint": {
-            "engine_tbt_ms": 12,
-            "engine_ttft_ms": 104,
-            "engine_ttlt_ms": 8001,
-            "pre_inference_ms": 122,
-            "service_tbt_ms": 12,
-            "service_ttft_ms": 825,
-            "service_ttlt_ms": 8715,
-            "total_duration_ms": 8601,
-            "user_visible_ttft_ms": 703
-          },
-          "prompt_tokens": 1004,
-          "prompt_tokens_details": {
-            "audio_tokens": 0,
-            "cached_tokens": 0
-          },
-          "total_tokens": 1642
-        }
-      ]
+      "sha256": "7748b3b8842cd82df3c8c6afc5fae00e994fe84493b775c063454e797ec88cef",
+      "previousBest": 0
     }
-  ],
-  "requirements": {
-    "completeSource": true,
-    "substantiveSubsystem": true,
-    "preserveUntouchedSystems": true,
-    "functionalDashboard": true,
-    "luaDownload": true,
-    "luacDownload": true,
-    "changelogPerFile": true
-  }
+  ]
 }
