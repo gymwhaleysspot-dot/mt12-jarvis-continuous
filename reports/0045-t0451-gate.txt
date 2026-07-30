@@ -1,0 +1,158 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0045-t0451.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0045-t0451",
+  "family": "tuesday",
+  "generation": 45,
+  "experiment": 1,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 85.385,
+  "previousBest": 0,
+  "improvement": 85.385,
+  "novelty": 0.75,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend"
+    },
+    {
+      "key": "absDiv",
+      "label": "ABS response divisor",
+      "from": 650,
+      "to": 589.6127408327302
+    },
+    {
+      "key": "absBlend",
+      "label": "ABS blend",
+      "from": 0.42,
+      "to": 0.3850672021560604
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.12811162597307124
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.560476947563135
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.861978455403197
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 35,
+      "osc": 0.7298552270031273,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 43,
+      "osc": 0.7381633535447243,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 49,
+      "release": 41,
+      "osc": 0.7572726876428086,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.334422014418129,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 2.0926117116057155,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48956407900194526,
+    "truth": 9.195367828541325,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0045-t0451.lua",
+  "sourceBytes": 85807,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0045-t0451.luac: 89045 bytes (MT12 4/4/4/4/4)
+normalized_bytes=89045
+margin=-101
+passed=0
