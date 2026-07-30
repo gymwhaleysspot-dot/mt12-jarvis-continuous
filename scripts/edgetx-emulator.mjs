@@ -35,7 +35,7 @@ scenario('rpm-spike-gps-freeze',nil,function(m)vals.RxBt=7.8;vals.RQly=100;vals.
 scenario('wet-brake',nil,function(m)vals.RxBt=7.8;vals.RQly=100;vals.Sats=8;vals.GSpd=28;vals.RPM=35000;vals.TH=-900;return frame(m,50)end)
 scenario('scheduler-restart',nil,function(m)vals.RxBt=7.8;vals.RQly=100;vals.Sats=8;vals.GSpd=10;vals.RPM=14000;assert(frame(m,20));local n,e=loadController();if not n then return false,e end;assert(call(n,'init'));return frame(n,20)end)
 local pass=true;for _,r in ipairs(results)do if not r.passed then pass=false end end
-local function esc(s)return tostring(s):gsub('\\','\\\\'):gsub('"','\\"'):gsub('\n','\\n')end
+local function esc(s)s=tostring(s);local bs=string.char(92);s=s:gsub(bs,bs..bs);s=s:gsub('"',bs..'"');s=s:gsub(string.char(10),bs..'n');return s end
 local j='{"schema":2,"engine":"official-edgetx-source-backed-mt12-emulator","edgetxCommit":"${profile.commit}","candidate":"${base}","passed":'..tostring(pass)..',"scenarios":[';for i,r in ipairs(results)do if i>1 then j=j..','end;j=j..'{"name":"'..esc(r.name)..'","passed":'..tostring(r.passed)..',"error":'..(r.error and('"'..esc(r.error)..'"')or'null')..',"tct":'..tostring(r.tct or 0)..',"gyr":'..tostring(r.gyr or 0)..',"lcd":'..tostring(r.lcd or 0)..',"sounds":'..tostring(r.sounds or 0)..',"wrote":'..tostring(r.wrote or false)..',"writeBytes":'..tostring(r.writeBytes or 0)..'}'end;j=j..']}'
 local f=assert(realio.open(${JSON.stringify(out)},'w'));f:write(j);f:close();print(j);if not pass then os.exit(2)end
 `;
