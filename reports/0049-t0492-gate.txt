@@ -1,0 +1,175 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0049-t0492.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0049-t0492",
+  "family": "tuesday",
+  "generation": 49,
+  "experiment": 2,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 95.73,
+  "previousBest": 0,
+  "improvement": 95.73,
+  "novelty": 1,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "q",
+      "variant": "safe-quantizer",
+      "label": "q function rewrite",
+      "summary": "Rebuild telemetry quantization with explicit defaults, finite checks and symmetric rounding",
+      "from": "parent implementation",
+      "to": "safe-quantizer",
+      "researchDirected": false
+    },
+    {
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter",
+      "researchDirected": true
+    },
+    {
+      "key": "absBlend",
+      "label": "ABS blend",
+      "from": 0.42,
+      "to": 0.34177063777763395
+    },
+    {
+      "key": "absDiv",
+      "label": "ABS response divisor",
+      "from": 650,
+      "to": 600.3812326646876
+    },
+    {
+      "key": "release",
+      "label": "runaway release base",
+      "from": 0.1,
+      "to": 0.12346603950951249
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.042940723314025986
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.968849994666876
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.326496159834701
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 31,
+      "osc": 0.7271195357103188,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 52,
+      "release": 39,
+      "osc": 0.7393182023769815,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 43,
+      "release": 36,
+      "osc": 0.7269664493219596,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.9171368845837856,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.6982084017175385,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4825489212300372,
+    "truth": 7.047825736268571,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0049-t0492.lua",
+  "sourceBytes": 85820,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0049-t0492.luac: 89037 bytes (MT12 4/4/4/4/4)
+normalized_bytes=89037
+margin=-93
+passed=0

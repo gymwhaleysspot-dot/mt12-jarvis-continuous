@@ -1,0 +1,117 @@
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0049-m0492",
+  "family": "monday",
+  "generation": 49,
+  "experiment": 2,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 93.693,
+  "previousBest": 0,
+  "improvement": 93.693,
+  "novelty": 0.75,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend",
+      "researchDirected": true
+    },
+    {
+      "kind": "function",
+      "function": "md",
+      "variant": "meta-hysteresis-verifier",
+      "label": "md function rewrite",
+      "summary": "Add hysteresis to meta-learning so one noisy sample cannot reverse a learned trend",
+      "from": "parent implementation",
+      "to": "meta-hysteresis-verifier",
+      "researchDirected": true
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.00091792,
+      "to": 0.0009113663367236778
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.11941639676433091
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.516021001568538
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.822313100175901
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7350764854641738,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 42,
+      "osc": 0.7275724854641701,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7324502831168453,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.165700046087465,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.9355820090408378,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48292183588994164,
+    "truth": 8.333879740533007,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}

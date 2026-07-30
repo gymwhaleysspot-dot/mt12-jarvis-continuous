@@ -1,0 +1,175 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0049-t0493.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0049-t0493",
+  "family": "tuesday",
+  "generation": 49,
+  "experiment": 3,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 96.238,
+  "previousBest": 0,
+  "improvement": 96.238,
+  "novelty": 1,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter",
+      "researchDirected": true
+    },
+    {
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend",
+      "researchDirected": true
+    },
+    {
+      "key": "absDiv",
+      "label": "ABS response divisor",
+      "from": 650,
+      "to": 727.5273800903233
+    },
+    {
+      "key": "absBlend",
+      "label": "ABS blend",
+      "from": 0.42,
+      "to": 0.5098712766969111
+    },
+    {
+      "key": "release",
+      "label": "runaway release base",
+      "from": 0.1,
+      "to": 0.14206111629275256
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.10072270856074272
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.39694749899647
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.715216641062202
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7262018213157571,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 41,
+      "osc": 0.7417832877486645,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7415016132399117,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.8220603678977073,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.6001478057798768,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48608707890695335,
+    "truth": 6.535564775927924,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0049-t0493.lua",
+  "sourceBytes": 85869,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0049-t0493.luac: 89105 bytes (MT12 4/4/4/4/4)
+normalized_bytes=89105
+margin=-161
+passed=0

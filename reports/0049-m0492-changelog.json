@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "engine": "a15xq-research-dynamic-v6",
+  "candidate": "0049-m0492",
+  "family": "monday",
+  "generation": 49,
+  "experiment": 2,
+  "parent": "generations/accepted/0042-m0422.lua",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "style": "truth-lab",
+  "dynamic": true,
+  "researchDriven": true,
+  "researchBrief": "reports/research-latest.md",
+  "researchEvidence": [
+    {
+      "title": "A Longitudinal Vehicle Speed Estimation Method Based on Adaptive Fusion of Kalman Filter and Wheel Speed",
+      "url": "https://doi.org/10.1109/icaace69793.2026.11508740",
+      "source": "Crossref"
+    },
+    {
+      "title": "Fusion of GPS/OSM/DEM Data by Particle Filtering for Vehicle Attitude Estimation",
+      "url": "https://doi.org/10.23919/icif.2018.8455730",
+      "source": "Crossref"
+    },
+    {
+      "title": "Improved Multi-Sensor Fusion by Federated Invariant Kalman Filtering for Underwater Vehicle State Estimation",
+      "url": "https://doi.org/10.1109/icecie66637.2025.11363791",
+      "source": "Crossref"
+    },
+    {
+      "title": "Sensor Fusion Estimation for Omni-Directional Vehicle with Mecanum Wheel",
+      "url": "https://doi.org/10.1109/aris59192.2023.10268507",
+      "source": "Crossref"
+    },
+    {
+      "title": "Efficient Path Estimation via Sensor Fusion of IMU, GPS, and Wheel Encoder and Control Parameter Optimization",
+      "url": "https://doi.org/10.1109/icac64487.2024.10851042",
+      "source": "Crossref"
+    },
+    {
+      "title": "GPS/Odometry/Map Fusion for Vehicle Positioning Using Potential Functions",
+      "url": "https://doi.org/10.1002/9781119876045.ch4",
+      "source": "Crossref"
+    }
+  ],
+  "functionChanges": 2,
+  "passed": false,
+  "score": 93.693,
+  "previousBest": 0,
+  "improvement": 93.693,
+  "regressions": [],
+  "files": {
+    "lua": {
+      "path": "generations/candidates/0049-m0492.lua",
+      "bytes": 85908,
+      "sha256": "c1429ebc0fb97bbfec21b034db4ed97da7f2d9b81f35f20b44a6a3301499a8b1"
+    },
+    "luac": {
+      "path": "generations/candidates/0049-m0492.luac",
+      "bytes": 89122,
+      "sha256": "7225612d63d6b59f71cc3333458f3b4e7ecca2786fa5fbcef1cc2fa22647c3bb"
+    }
+  },
+  "changes": [
+    {
+      "index": 1,
+      "kind": "function",
+      "function": "lerp",
+      "variant": "adaptive-linear-blend",
+      "label": "lerp function rewrite",
+      "summary": "Keep linear response near center while softening only the ends of state transitions",
+      "researchDirected": true,
+      "from": "parent implementation",
+      "to": "adaptive-linear-blend"
+    },
+    {
+      "index": 2,
+      "kind": "function",
+      "function": "md",
+      "variant": "meta-hysteresis-verifier",
+      "label": "md function rewrite",
+      "summary": "Add hysteresis to meta-learning so one noisy sample cannot reverse a learned trend",
+      "researchDirected": true,
+      "from": "parent implementation",
+      "to": "meta-hysteresis-verifier"
+    },
+    {
+      "index": 3,
+      "kind": "parameter",
+      "function": null,
+      "variant": null,
+      "label": "RPM2MPH",
+      "summary": null,
+      "researchDirected": false,
+      "from": 0.00091792,
+      "to": 0.0009113663367236778
+    }
+  ],
+  "created": "2026-07-30T12:19:11.065Z"
+}

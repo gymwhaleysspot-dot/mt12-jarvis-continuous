@@ -1,6 +1,6 @@
 # MT12 autonomous research brief
 
-Generated 2026-07-30T12:12:41.876Z
+Generated 2026-07-30T12:19:10.714Z
 
 ## MONDAY
 
@@ -51,7 +51,7 @@ Preferred function targets: `trait`, `md`, `q`
 - [Drift Calibration for Machine Olfaction with an Online Active Learning Approach](https://doi.org/10.1109/icsai.2018.8599390) — Crossref
 - [Tackling Concept Drift and Class Imbalance: An F1-Driven Parameter-Efficient Online Learning Framework](https://doi.org/10.2139/ssrn.7070383) — Crossref
 - [Learning to Extrapolate and Adjust: Two-Stage Meta-Learning for Concept Drift in Online Time Series Forecasting](https://doi.org/10.24963/ijcai.2024/542) — Crossref
-- [Intrusion Detection based on Concept Drift Detection &amp; Online Incremental Learning](https://doi.org/10.21203/rs.3.rs-3251910/v1) — Crossref
+- [Intrusion Detection based on Concept Drift Detection &amp; Online Incremental Learning](https://doi.org/10.21203/rs.3.rs-3692862/v1) — Crossref
 - [From Classification to Regression: Using a Fruitfly to Solve Equations](http://arxiv.org/abs/2607.27196v1) — arXiv
 - [Do You Really Need to Pretrain Q-Functions for Online RL Fine-Tuning?](http://arxiv.org/abs/2607.27203v1) — arXiv
 - [Quantum-Geometric Raman Response in Multiorbital Flat-Band Systems](http://arxiv.org/abs/2607.27200v1) — arXiv
@@ -65,12 +65,16 @@ Query: `embedded Lua memory optimization real time observability fault tolerant 
 
 Preferred function targets: `trait`, `md`, `q`, `i9`
 
+- [A Novel Fault Tolerant Scheduling Approach with Energy Optimization for Real-Time Embedded Systems](https://doi.org/10.2139/ssrn.4891188) — Crossref
+- [A Novel Fault Tolerant Scheduling Approach with Energy Optimization for Real-Time Embedded Systemss](https://doi.org/10.12785/ijcds/1571111857) — Crossref
+- [Research on Optimization Method for Fault-Tolerant Integration of Real-Time Dual-Computer Embedded Systems](https://doi.org/10.2478/amns-2024-0447) — Crossref
+- [Cross-Vendor Telemetry Standards for Real-Time Network Synchronization and Observability](https://doi.org/10.2139/ssrn.5976636) — Crossref
+- [Multiscale Analysis of Complex Time Series: Integration of Chaos and Random Fractal Theory, and Beyond](https://www.semanticscholar.org/paper/22b6a338396622219a8bca05b607f857c90e135b) — Semantic Scholar
 - [Practical Quantum Topological Data Analysis with Applications to High-Dimensional Feature Extraction and Time Series Analysis](http://arxiv.org/abs/2607.27206v1) — arXiv
 - [TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with &lt;1 GB VRAM](http://arxiv.org/abs/2607.27205v1) — arXiv
 - [Fault-Tolerant Logical Operations and Efficient State Preparation in Modular Quantum Architectures with Noisy Interfaces](http://arxiv.org/abs/2607.27204v1) — arXiv
 - [From Classification to Regression: Using a Fruitfly to Solve Equations](http://arxiv.org/abs/2607.27196v1) — arXiv
 - [VidMap: Exploiting Temporal Structure for Video-Based Structure-from-Motion](http://arxiv.org/abs/2607.27194v1) — arXiv
-- [Mental World Modeling](http://arxiv.org/abs/2607.27201v1) — arXiv
-- [Settling the Optimal Exponent Relating Sumsets and Difference Sets](http://arxiv.org/abs/2607.27199v1) — arXiv
-- [Non-Minimally Coupled Chain Inflation at High Scales](http://arxiv.org/abs/2607.27193v1) — arXiv
+- [Fault-Tolerant Offloading Framework for Real-Time Applications in Mobile Edge Computing](https://doi.org/10.1109/rtas68450.2026.00028) — Crossref
+- [Optimal Synthesis of Fault-Tolerant IDK Cascades for Real-Time Classification](https://doi.org/10.1109/rtas61025.2024.00011) — Crossref
 
