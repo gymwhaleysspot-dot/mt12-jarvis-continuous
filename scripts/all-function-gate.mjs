@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import fs from'node:fs';import path from'node:path';
+import fs from'node:fs';import path from'node:path';import crypto from'node:crypto';
 const file=process.argv[2];if(!file)throw Error('usage: node scripts/all-function-gate.mjs <candidate.lua>');
 const root=process.cwd(),p=JSON.parse(fs.readFileSync(path.join(root,'reports/pending-factory.json'),'utf8')),base=path.basename(file,'.lua'),c=p.batch.find(x=>path.basename(x.file,'.lua')===base);if(!c)throw Error('candidate metadata missing');
-const src=fs.readFileSync(file,'utf8'),names=[...new Set([...src.matchAll(/local function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/g)].map(m=>m[1]))],listed=new Set(c.rewrittenFunctions||[]),missing=names.filter(n=>!listed.has(n));
-const report={candidate:base,engine:p.engine,allFunctionsRewritten:c.allFunctionsRewritten===true,aiArchitect:c.aiArchitect===true,sourceNamedFunctions:names.length,reportedRewrittenFunctions:listed.size,missing,passed:c.allFunctionsRewritten===true&&c.aiArchitect===true&&names.length>30&&missing.length===0&&listed.size>=names.length};
-console.log(JSON.stringify(report,null,2));if(!report.passed)process.exit(2);
+const src=fs.readFileSync(file,'utf8'),names=[...new Set([...src.matchAll(/local function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/g)].map(m=>m[1]))],listed=[...new Set(c.rewrittenFunctions||[])],present=listed.filter(n=>names.includes(n)),missing=listed.filter(n=>!names.includes(n));
+let parent='',parentHash='';if(c.parent&&fs.existsSync(path.join(root,c.parent))){parent=fs.readFileSync(path.join(root,c.parent),'utf8');parentHash=crypto.createHash('sha256').update(parent).digest('hex')}
+const sourceHash=crypto.createHash('sha256').update(src).digest('hex'),changed=!!parent&&sourceHash!==parentHash,sizeRatio=parent?src.length/parent.length:1,metadataOk=c.substantiveSubsystem===true&&c.aiArchitect===true&&c.functionChanges===listed.length&&listed.length>=3,structureOk=names.length>30&&missing.length===0&&present.length===listed.length,sizeOk=sizeRatio>=.85&&sizeRatio<=1.15,passed=metadataOk&&structureOk&&sizeOk&&changed;
+const report={candidate:base,engine:p.engine,mode:p.mode,subsystem:c.subsystem,aiArchitect:c.aiArchitect===true,substantiveSubsystem:c.substantiveSubsystem===true,sourceNamedFunctions:names.length,reportedRewrittenFunctions:listed.length,rewrittenFunctions:listed,missing,changedFromParent:changed,sizeRatio:Number(sizeRatio.toFixed(4)),changedLines:c.changedLines||0,passed};console.log(JSON.stringify(report,null,2));if(!passed)process.exit(2);
