@@ -1,93 +1,615 @@
 {
-  "cycle": 24,
-  "created": "2026-07-30T05:41:19.975Z",
+  "cycle": 25,
+  "created": "2026-07-30T05:47:00.191Z",
+  "mode": "ambitious-full-lineage",
+  "parent": "a15xq.lua",
+  "candidateCount": 12,
+  "selection": "multi-objective tournament with regression veto",
   "batch": [
     {
       "family": "monday",
-      "name": "mon024",
-      "style": "balanced",
+      "name": "mon025",
+      "generation": 25,
+      "experiment": 1,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
       "variant": 2,
-      "generation": 24,
-      "file": "generations/candidates/0024-mon024.lua",
       "params": {
-        "rpmK": 0.0009118151478981599,
-        "tcSlip": 24.362335598329082,
-        "tcSpan": 20.842148579657078,
-        "tcCut": 304,
-        "absLock": 7214,
-        "gyrBase": 122,
-        "gyrMax": 443,
-        "truthRate": 0.399556597690098,
-        "trustRate": 0.0484878433747217,
-        "coast": 0.9832475107195787,
-        "learn": 0.0021994857657700777
+        "rpmK": 0.0009203,
+        "tcSlip": 7.96,
+        "tcSpan": 5.012,
+        "tcCut": 23,
+        "absLock": 7183,
+        "truthRate": 0.163,
+        "coast": 0.9822
       },
+      "file": "generations/candidates/0025-mon025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85717,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9885461633171421
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 97.10530216380721
+        }
+      ],
+      "sha256": "0fe9a8c82e7b63fd5b58c90521a1b776b01e79950327629b22ea1aa2807d7447",
+      "previousBest": 91.326
+    },
+    {
+      "family": "monday",
+      "name": "mon025",
+      "generation": 25,
+      "experiment": 2,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.000913,
+        "tcSlip": 6.817,
+        "tcSpan": 4.747,
+        "tcCut": 27,
+        "absLock": 7584,
+        "truthRate": 0.197,
+        "coast": 0.9843
+      },
+      "file": "generations/candidates/0025-mon025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85720,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000914,
+          "to": 0.0009181991425669286
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 84.39920825976878
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9772237827923614
+        }
+      ],
+      "sha256": "832c915947e6a81fbed60ddd0825c93e7edb3399dc218eee8fe9c8ae656dda0d",
+      "previousBest": 91.326
+    },
+    {
+      "family": "monday",
+      "name": "mon025",
+      "generation": 25,
+      "experiment": 3,
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
+      "focus": [
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009148,
+        "tcSlip": 7.585,
+        "tcSpan": 5.063,
+        "tcCut": 25,
+        "absLock": 6858,
+        "truthRate": 0.162,
+        "coast": 0.9846
+      },
+      "file": "generations/candidates/0025-mon025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85720,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 79.19924756021938
+        },
+        {
+          "key": "rpm",
+          "label": "RPM2MPH",
+          "from": 0.000914,
+          "to": 0.0009202346394773479
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9898551372134988
+        }
+      ],
+      "sha256": "002f438d5144a62d494faf6fc085db7885b68fd0fa186ba188a2fc89f429f3e1",
       "previousBest": 91.326
     },
     {
       "family": "tuesday",
-      "name": "tue024",
-      "style": "predictive",
-      "variant": 3,
-      "generation": 24,
-      "file": "generations/candidates/0024-tue024.lua",
+      "name": "tue025",
+      "generation": 25,
+      "experiment": 1,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 2,
       "params": {
-        "rpmK": 0.0009190460554058664,
-        "tcSlip": 25.006575890351087,
-        "tcSpan": 24.914226507069543,
-        "tcCut": 310,
-        "absLock": 7406,
-        "gyrBase": 126,
-        "gyrMax": 458,
-        "truthRate": 0.4718500449508429,
-        "trustRate": 0.03954214781848714,
-        "coast": 0.984615596937947,
-        "learn": 0.0018182573376689106
+        "rpmK": 0.0009016,
+        "tcSlip": 7.526,
+        "tcSpan": 4.7,
+        "tcCut": 25,
+        "absLock": 7417,
+        "truthRate": 0.205,
+        "coast": 0.9895
       },
+      "file": "generations/candidates/0025-tue025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85698,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "release",
+          "label": "runaway release base",
+          "from": 114,
+          "to": 0.18
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 603.9740086069796
+        }
+      ],
+      "sha256": "32c79d6fb563743defd51658cf3f46b8770498f08a079cc32fd3cf89ca67c897",
+      "previousBest": 92.271
+    },
+    {
+      "family": "tuesday",
+      "name": "tue025",
+      "generation": 25,
+      "experiment": 2,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.0009175,
+        "tcSlip": 7.303,
+        "tcSpan": 5.826,
+        "tcCut": 22,
+        "absLock": 7229,
+        "truthRate": 0.205,
+        "coast": 0.9849
+      },
+      "file": "generations/candidates/0025-tue025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85705,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "tcRise",
+          "label": "TC confidence rise",
+          "from": 1,
+          "to": 0.26
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 562.3799905271735
+        },
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.4896474402789026
+        }
+      ],
+      "sha256": "be2edc3ce77d6bd3f12ac16071f6edd193680606c38636d03ef70caf955a711f",
+      "previousBest": 92.271
+    },
+    {
+      "family": "tuesday",
+      "name": "tue025",
+      "generation": 25,
+      "experiment": 3,
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
+      "focus": [
+        "tc",
+        "abs",
+        "slew",
+        "governor"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009224,
+        "tcSlip": 7.941,
+        "tcSpan": 4.876,
+        "tcCut": 22,
+        "absLock": 7425,
+        "truthRate": 0.202,
+        "coast": 0.9898
+      },
+      "file": "generations/candidates/0025-tue025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85699,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.32
+        },
+        {
+          "key": "tcRise",
+          "label": "TC confidence rise",
+          "from": 1,
+          "to": 0.26
+        },
+        {
+          "key": "absDiv",
+          "label": "ABS response divisor",
+          "from": 650,
+          "to": 763.6904977466445
+        },
+        {
+          "key": "release",
+          "label": "runaway release base",
+          "from": 114,
+          "to": 0.18
+        }
+      ],
+      "sha256": "a6545bb86697724f308e59083d9f6471a7f17eab6c24d96eb7676ddd92bec922",
       "previousBest": 92.271
     },
     {
       "family": "cloud",
-      "name": "cld024",
-      "style": "confidence",
-      "variant": 4,
-      "generation": 24,
-      "file": "generations/candidates/0024-cld024.lua",
+      "name": "cld025",
+      "generation": 25,
+      "experiment": 1,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 2,
       "params": {
-        "rpmK": 0.0009145589236933737,
-        "tcSlip": 23.641649037366733,
-        "tcSpan": 25.04426272539422,
-        "tcCut": 294,
-        "absLock": 7027,
-        "gyrBase": 119,
-        "gyrMax": 448,
-        "truthRate": 0.4658851604396477,
-        "trustRate": 0.039651768347248435,
-        "coast": 0.9846524757375009,
-        "learn": 0.0017655619303695858
+        "rpmK": 0.0009043,
+        "tcSlip": 8.002,
+        "tcSpan": 5.003,
+        "tcCut": 28,
+        "absLock": 7157,
+        "truthRate": 0.163,
+        "coast": 0.9813
       },
+      "file": "generations/candidates/0025-cld025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85718,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "voiceHeat",
+          "label": "voice heat guard",
+          "from": 78,
+          "to": 72.58922103242367
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9801980260231067
+        }
+      ],
+      "sha256": "85b479158cec2a0c8a06d2b5dcb3861714c8a71ca08b0a69a387a0bdc1baef8b",
+      "previousBest": 91.688
+    },
+    {
+      "family": "cloud",
+      "name": "cld025",
+      "generation": 25,
+      "experiment": 2,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.0009083,
+        "tcSlip": 8.004,
+        "tcSpan": 5.343,
+        "tcCut": 24,
+        "absLock": 7609,
+        "truthRate": 0.167,
+        "coast": 0.9899
+      },
+      "file": "generations/candidates/0025-cld025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85719,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "tcRise",
+          "label": "TC confidence rise",
+          "from": 1,
+          "to": 0.26
+        },
+        {
+          "key": "voiceLoad",
+          "label": "voice load guard",
+          "from": 82,
+          "to": 77.1873303459026
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9890813420655206
+        }
+      ],
+      "sha256": "9d0bbb7fc424af822aedfd6a0046806cc9917b296fbea3f7e3ef1980cd9ce70e",
+      "previousBest": 91.688
+    },
+    {
+      "family": "cloud",
+      "name": "cld025",
+      "generation": 25,
+      "experiment": 3,
+      "objective": "confidence arbitration, neural learning and reasoning",
+      "style": "brain-lab",
+      "focus": [
+        "confidence",
+        "neural",
+        "learn",
+        "reason"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009078,
+        "tcSlip": 6.65,
+        "tcSpan": 5.668,
+        "tcCut": 25,
+        "absLock": 7573,
+        "truthRate": 0.159,
+        "coast": 0.9831
+      },
+      "file": "generations/candidates/0025-cld025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85719,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "voiceHeat",
+          "label": "voice heat guard",
+          "from": 78,
+          "to": 70.72759663917823
+        },
+        {
+          "key": "tcRise",
+          "label": "TC confidence rise",
+          "from": 1,
+          "to": 0.26
+        },
+        {
+          "key": "voiceLoad",
+          "label": "voice load guard",
+          "from": 82,
+          "to": 76.52014586916194
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9735632948944415
+        }
+      ],
+      "sha256": "cbea0f4bdf7bcc7c9ec201b815c1688692349a255f2907a4e98c01944af11915",
       "previousBest": 91.688
     },
     {
       "family": "html",
-      "name": "web024",
-      "style": "compact",
-      "variant": 1,
-      "generation": 24,
-      "file": "generations/candidates/0024-web024.lua",
+      "name": "web025",
+      "generation": 25,
+      "experiment": 1,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 2,
       "params": {
-        "rpmK": 0.0009177478953362443,
-        "tcSlip": 22.259384855628014,
-        "tcSpan": 21.757154083577916,
-        "tcCut": 299,
-        "absLock": 7137,
-        "gyrBase": 116,
-        "gyrMax": 472,
-        "truthRate": 0.3859066371526569,
-        "trustRate": 0.048386398235801605,
-        "coast": 0.9832575570605695,
-        "learn": 0.0022637753875460478
+        "rpmK": 0.0009113,
+        "tcSlip": 8.039,
+        "tcSpan": 5.515,
+        "tcCut": 23,
+        "absLock": 6994,
+        "truthRate": 0.207,
+        "coast": 0.9881
       },
+      "file": "generations/candidates/0025-web025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85719,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9891946950090001
+        },
+        {
+          "key": "voiceLoad",
+          "label": "voice load guard",
+          "from": 82,
+          "to": 79.69172219103203
+        }
+      ],
+      "sha256": "fe21a168e03bdd70fcd5501acb9af1ffb060d13edc3c0a9a300b214884ed9184",
+      "previousBest": 90.431
+    },
+    {
+      "family": "html",
+      "name": "web025",
+      "generation": 25,
+      "experiment": 2,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 3,
+      "params": {
+        "rpmK": 0.000906,
+        "tcSlip": 6.891,
+        "tcSpan": 5.871,
+        "tcCut": 25,
+        "absLock": 7253,
+        "truthRate": 0.167,
+        "coast": 0.9837
+      },
+      "file": "generations/candidates/0025-web025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85720,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "voiceHeat",
+          "label": "voice heat guard",
+          "from": 78,
+          "to": 75.1713256065268
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 102.41012641764246
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9919017150798812
+        }
+      ],
+      "sha256": "9c38ec37b46316be15c290f03d5491f632ad90417e9b9b17b6593a441d09c94d",
+      "previousBest": 90.431
+    },
+    {
+      "family": "html",
+      "name": "web025",
+      "generation": 25,
+      "experiment": 3,
+      "objective": "memory efficiency, observability and deploy reliability",
+      "style": "systems-lab",
+      "focus": [
+        "memory",
+        "voice",
+        "logger",
+        "dashboard"
+      ],
+      "variant": 4,
+      "params": {
+        "rpmK": 0.0009108,
+        "tcSlip": 7.892,
+        "tcSpan": 4.975,
+        "tcCut": 22,
+        "absLock": 7367,
+        "truthRate": 0.178,
+        "coast": 0.9899
+      },
+      "file": "generations/candidates/0025-web025.lua",
+      "parent": "a15xq.lua",
+      "parentBytes": 85603,
+      "sourceBytes": 85719,
+      "fullScript": true,
+      "changes": [
+        {
+          "key": "voiceHeat",
+          "label": "voice heat guard",
+          "from": 78,
+          "to": 86.80230795481475
+        },
+        {
+          "key": "tcDecay",
+          "label": "TC confidence decay",
+          "from": 0.985,
+          "to": 0.9801578813727223
+        },
+        {
+          "key": "warm",
+          "label": "boot voice wait",
+          "from": 90,
+          "to": 79.8441547903698
+        },
+        {
+          "key": "voiceLoad",
+          "label": "voice load guard",
+          "from": 82,
+          "to": 87.02641382440459
+        }
+      ],
+      "sha256": "ca533cea897687c039e7814cdd8f2814a3aaac651f0510d57aec45ad07515a91",
       "previousBest": 90.431
     }
   ]

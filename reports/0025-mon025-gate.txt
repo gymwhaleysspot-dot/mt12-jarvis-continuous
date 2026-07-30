@@ -1,0 +1,151 @@
+engine=continuous-luac-factory
+candidate=generations/candidates/0025-mon025.lua
+{
+  "engine": "luac-factory-simulator-v3",
+  "candidate": "0025-mon025",
+  "family": "monday",
+  "generation": 25,
+  "experiment": 1,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 85.062,
+  "previousBest": 91.326,
+  "improvement": -6.264,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": false,
+  "passed": false,
+  "regressions": [
+    "wet-brake"
+  ],
+  "changes": [
+    {
+      "key": "tcDecay",
+      "label": "TC confidence decay",
+      "from": 0.985,
+      "to": 0.9885461633171421
+    },
+    {
+      "key": "warm",
+      "label": "boot voice wait",
+      "from": 90,
+      "to": 97.10530216380721
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.10204715521231833
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.405767758446254
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.723149712107659
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7314467863001106,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 42,
+      "osc": 0.740724916657608,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7404432421488552,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.2512231379748977,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 2.015519998819867,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4867752879234462,
+    "truth": 8.771513841632872,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0025-mon025.lua",
+  "sourceBytes": 85720,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifier": false,
+    "failOpen": true,
+    "carGuard": false,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": false,
+  "failed": [
+    "airClassifier",
+    "carGuard"
+  ]
+}
+passed=0

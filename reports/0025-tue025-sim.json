@@ -1,0 +1,105 @@
+{
+  "engine": "luac-factory-simulator-v3",
+  "candidate": "0025-tue025",
+  "family": "tuesday",
+  "generation": 25,
+  "experiment": 1,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 86.97,
+  "previousBest": 92.271,
+  "improvement": -5.301,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": false,
+  "passed": false,
+  "regressions": [
+    "wet-brake"
+  ],
+  "changes": [
+    {
+      "key": "release",
+      "label": "runaway release base",
+      "from": 114,
+      "to": 0.18
+    },
+    {
+      "key": "absDiv",
+      "label": "ABS response divisor",
+      "from": 650,
+      "to": 603.9740086069796
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.04585495499269787
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.996898931520338
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.352278640732443
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 32,
+      "osc": 0.7303655195030869,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 52,
+      "release": 40,
+      "osc": 0.7357307163561038,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 43,
+      "release": 39,
+      "osc": 0.7298347731175558,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 0.8830708894677719,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.6638523732235426,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4831048219748842,
+    "truth": 6.866463868695349,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  }
+}
