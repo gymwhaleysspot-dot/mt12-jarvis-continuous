@@ -1,59 +1,65 @@
 {
   "engine": "a15xq-verified-subsystem-v2",
-  "cycle": 69,
-  "created": "2026-07-30T16:30:57.936Z",
+  "cycle": 70,
+  "created": "2026-07-30T16:33:39.321Z",
   "mode": "verified-subsystem-production",
-  "parent": "generations/accepted/0058-m058a.lua",
+  "parent": "generations/accepted/0069-m069a.lua",
   "candidateCount": 1,
   "selection": "four research-directed clean-sheet architectures with regression veto",
   "batch": [
     {
       "engine": "a15xq-full-v4",
-      "family": "monday",
-      "name": "m069a",
-      "generation": 69,
+      "family": "tuesday",
+      "name": "t070a",
+      "generation": 70,
       "experiment": 1,
-      "objective": "truth prediction, calibration and sensor resilience",
-      "style": "truth-lab",
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
       "focus": [
-        "rpm",
-        "truth",
-        "gps",
-        "coast"
+        "tc",
+        "abs",
+        "slew",
+        "governor"
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0009118,
-        "tcSlip": 6.67,
-        "tcSpan": 4.721,
+        "rpmK": 0.0009017,
+        "tcSlip": 7.24,
+        "tcSpan": 5.52,
         "tcCut": 23,
-        "absLock": 6839,
-        "truthRate": 0.159,
-        "coast": 0.9886
+        "absLock": 7269,
+        "truthRate": 0.161,
+        "coast": 0.984
       },
-      "file": "generations/candidates/0069-m069a.lua",
-      "parent": "generations/accepted/0058-m058a.lua",
-      "parentBytes": 85726,
-      "sourceBytes": 85857,
+      "file": "generations/candidates/0070-t070a.lua",
+      "parent": "generations/accepted/0069-m069a.lua",
+      "parentBytes": 85857,
+      "sourceBytes": 86003,
       "fullScript": true,
       "changes": [
         {
           "kind": "subsystem-architecture",
-          "function": "md,traitLearn,wrmem",
-          "variant": "truth-evolution-v2",
-          "label": "Verified truth subsystem evolution",
+          "function": "ol,nt,neural",
+          "variant": "control-evolution-v2",
+          "label": "Verified control subsystem evolution",
           "summary": "Rebuilt 3 related functions while preserving the complete accepted controller",
-          "from": "65024686f5bb",
-          "to": "a53c6bf1ea8e"
+          "from": "fc0008177781",
+          "to": "6f4d022b8a76"
         },
         {
-          "key": "rpm",
-          "label": "RPM2MPH",
-          "from": 0.000922365,
-          "to": 0.000927881972070455
+          "key": "release",
+          "label": "runaway release base",
+          "from": 0.1,
+          "to": 0.08473544689404662
+        },
+        {
+          "key": "absBlend",
+          "label": "ABS blend",
+          "from": 0.42,
+          "to": 0.4843702752435347
         }
       ],
-      "sha256": "76fc67f5d7ac266872342d8aff9e2ad3568b629fcc8e73d6a1403f84a0598fd1",
+      "sha256": "3d3352ad12501249072e5a2fbe2d896ab02d908da3d22d7cab914cb6c456ed09",
       "previousBest": 0,
       "functionChanges": 3,
       "totalNamedFunctions": 64,
@@ -65,15 +71,15 @@
       "multiAgent": false,
       "aiModel": "openai/gpt-4o-mini",
       "rewrittenFunctions": [
-        "md",
-        "traitLearn",
-        "wrmem"
+        "ol",
+        "nt",
+        "neural"
       ],
-      "subsystem": "truth",
-      "changedLines": 120,
+      "subsystem": "control",
+      "changedLines": 78,
       "aiUsage": [
         {
-          "completion_tokens": 1870,
+          "completion_tokens": 1105,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -81,22 +87,22 @@
             "rejected_prediction_tokens": 0
           },
           "latency_checkpoint": {
-            "engine_tbt_ms": 12,
-            "engine_ttft_ms": 105,
-            "engine_ttlt_ms": 22653,
-            "pre_inference_ms": 206,
-            "service_tbt_ms": 12,
-            "service_ttft_ms": 974,
-            "service_ttlt_ms": 23515,
-            "total_duration_ms": 23321,
-            "user_visible_ttft_ms": 768
+            "engine_tbt_ms": 15,
+            "engine_ttft_ms": 54,
+            "engine_ttlt_ms": 16297,
+            "pre_inference_ms": 119,
+            "service_tbt_ms": 15,
+            "service_ttft_ms": 494,
+            "service_ttlt_ms": 16708,
+            "total_duration_ms": 16597,
+            "user_visible_ttft_ms": 376
           },
-          "prompt_tokens": 2282,
+          "prompt_tokens": 1489,
           "prompt_tokens_details": {
             "audio_tokens": 0,
             "cached_tokens": 0
           },
-          "total_tokens": 4152
+          "total_tokens": 2594
         }
       ]
     }
