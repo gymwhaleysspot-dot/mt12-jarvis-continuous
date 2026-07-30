@@ -27,6 +27,9 @@ jobs:
     timeout-minutes: 15
     env:
       MT12_LIMIT: '88944'
+      MT12_HARD_MARGIN: '48'
+      MT12_RESERVE_TARGET: '256'
+      MIN_CHAMPION_GAIN: '0.15'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       MODELS_TOKEN: ${{ secrets.MODELS_TOKEN }}
       FACTORY_MODELS: openai/gpt-4.1,openai/gpt-4o-mini
@@ -89,6 +92,8 @@ jobs:
             FINAL="generations/candidates/${BASE}.luac"
             REPORT="reports/${BASE}-gate.txt"
             PASS=1
+            BYTES=0
+            MARGIN=0
             {
               echo "engine=substantive-ai-architecture-luac-factory"
               echo "candidate=$CANDIDATE"
@@ -100,9 +105,11 @@ jobs:
               if [ "$PASS" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || PASS=0; fi
               if [ "$PASS" = 1 ]; then
                 BYTES=$(wc -c < "$FINAL" | tr -d ' ')
+                MARGIN=$((MT12_LIMIT-BYTES))
                 echo "normalized_bytes=$BYTES"
-                echo "margin=$((MT12_LIMIT-BYTES))"
+                echo "margin=$MARGIN"
                 [ "$BYTES" -le "$MT12_LIMIT" ] || PASS=0
+                [ "$MARGIN" -ge "$MT12_HARD_MARGIN" ] || PASS=0
               fi
               echo "passed=$PASS"
             } > "$REPORT" 2>&1
@@ -110,7 +117,7 @@ jobs:
             cat "$REPORT"
             SCORE=$(node -e "const r=require('./reports/${BASE}-sim.json');console.log(r.score||0)" 2>/dev/null || echo 0)
             FAMILY=$(node -e "const r=require('./reports/${BASE}-sim.json');console.log(r.family||'factory')" 2>/dev/null || echo factory)
-            printf '%s\t%s\t%s\t%s\n' "$PASS" "$SCORE" "$FAMILY" "$BASE" >> reports/factory-results.tsv
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$PASS" "$SCORE" "$FAMILY" "$BASE" "$BYTES" "$MARGIN" >> reports/factory-results.tsv
             if [ "$PASS" = 1 ]; then
               mkdir -p "generations/factory/$FAMILY"
               cp "$CANDIDATE" "generations/factory/$FAMILY/${BASE}.lua"
@@ -119,25 +126,29 @@ jobs:
               cp "reports/${BASE}-changelog.json" "generations/factory/$FAMILY/${BASE}-changelog.json"
             fi
           done
-      - name: Promote best and update downloadable catalog
+      - name: Promote only a true new champion
         if: steps.architecture.outcome == 'success'
         shell: bash
         run: |
-          BEST=$(awk -F '\t' '$1==1{print $2"\t"$3"\t"$4}' reports/factory-results.tsv | sort -nr | head -1)
-          if [ -z "$BEST" ]; then
+          set +e
+          BEST=$(node scripts/select-champion.mjs)
+          SELECT_RC=$?
+          if [ "$SELECT_RC" -ne 0 ] || [ -z "$BEST" ]; then
             node scripts/write-rejection-summary.mjs || true
-            printf '{"status":"batch-rejected","updated":"%s","diagnostics":"reports/rejection-summary.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            CHAMPION=$(node -e "const d=require('./reports/champion-decision.json');console.log(d.champion?.base||'none')" 2>/dev/null || echo none)
+            printf '{"status":"champion-held","mode":"strict-champion-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
             node scripts/rebuild-factory-catalog.mjs || true
             exit 0
           fi
           SCORE=$(echo "$BEST" | cut -f1)
           FAMILY=$(echo "$BEST" | cut -f2)
           BASE=$(echo "$BEST" | cut -f3)
+          MARGIN=$(echo "$BEST" | cut -f4)
           cp "generations/factory/$FAMILY/${BASE}.lua" "generations/accepted/${BASE}.lua"
           cp "generations/factory/$FAMILY/${BASE}.luac" "generations/accepted/${BASE}.luac"
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
           cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
-          printf '{"status":"accepted","mode":"substantive-ai-factory","family":"%s","generation":"%s","score":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md"}\n' "$FAMILY" "$BASE" "$SCORE" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
+          printf '{"status":"accepted","mode":"strict-champion-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","changelog":"generations/accepted/%s-CHANGELOG.md","decision":"reports/champion-decision.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" "$BASE" > reports/status.json
           node scripts/rebuild-factory-catalog.mjs
       - name: Commit factory output and diagnostics
         if: always()
@@ -160,6 +171,7 @@ jobs:
             generations/accepted/
             reports/factory-catalog.json
             reports/status.json
+            reports/champion-decision.json
             reports/multi-agent-progress.json
             reports/rejection-summary.json
             reports/*-CHANGELOG.md
