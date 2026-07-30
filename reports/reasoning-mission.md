@@ -1,7 +1,7 @@
 # MT12 Reasoning Mission
 
-Controller: 0109-m109a
-Phase: postcycle
+Controller: 0109-c109a
+Phase: preflight
 
 ## Leading hypothesis
 - sensor lag or calibration is the primary source of truth-speed error (confidence 0.2)
