@@ -55,23 +55,23 @@
     {
       "pass": false,
       "score": 85.194,
-      "family": "tuesday",
-      "base": "0102-t102a",
+      "family": "cloud",
+      "base": "0103-c103a",
       "bytes": 0,
       "margin": 0,
-      "parentScore": 87.233,
-      "parentGain": -2.039,
-      "familyChampion": "0074-t074a",
-      "familyScore": 87.233,
-      "familyGain": -2.039,
-      "requiredMargin": 66,
+      "parentScore": 85.392,
+      "parentGain": -0.198,
+      "familyChampion": "0071-c071a",
+      "familyScore": 87.142,
+      "familyGain": -1.948,
+      "requiredMargin": 48,
       "reasons": [
         "build-gate",
         "differential",
         "cognitive-governance",
         "edgetx-emulator",
-        "gain:parent=-2.039,family=-2.039<0.15",
-        "margin:0<66"
+        "gain:parent=-0.198,family=-1.948<0.15",
+        "margin:0<48"
       ],
       "evidenceGaps": [
         "real-log-replay"
@@ -81,7 +81,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0102-t102a",
+          "candidate": "0103-c103a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -89,7 +89,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87325,
+            "sourceBytes": 87338,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -109,7 +109,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0102-t102a",
+          "candidate": "0103-c103a",
           "passed": true,
           "checks": {
             "path": true,
@@ -142,7 +142,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0102-t102a",
+          "candidate": "0103-c103a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -174,19 +174,19 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0102-t102a",
-          "parent": "0074-t074a",
+          "candidate": "0103-c103a",
+          "parent": "0075-c075a",
           "parentFound": true,
-          "scoreDelta": -2.039,
+          "scoreDelta": -0.198,
           "deltas": {
             "dryLaunch.jerk": 0,
             "wetLaunch.jerk": 0,
             "bumpyLaunch.jerk": 0,
             "dryBrake.lock": 0,
-            "wetBrake.lock": 0,
-            "roughBrake.lock": 0,
-            "truth.mae": 0.2452,
-            "lagTruth.mae": 0.2409,
+            "wetBrake.lock": 1,
+            "roughBrake.lock": 1,
+            "truth.mae": -0.1075,
+            "lagTruth.mae": -0.1017,
             "jump.fp": 0,
             "jump.miss": 0,
             "dropout.unsafe": 0
@@ -196,7 +196,7 @@
         },
         "replay": {
           "engine": "real-log-replay-v2",
-          "candidate": "0102-t102a",
+          "candidate": "0103-c103a",
           "corpus": [],
           "available": false,
           "status": "inconclusive",
@@ -215,14 +215,14 @@
         },
         "ablation": {
           "engine": "function-ablation-v2",
-          "candidate": "0102-t102a",
-          "parent": "generations/accepted/0074-t074a.lua",
+          "candidate": "0103-c103a",
+          "parent": "generations/accepted/0075-c075a.lua",
           "changedFunctions": [
-            "nt"
+            "md"
           ],
           "tests": [
             {
-              "function": "nt",
+              "function": "md",
               "candidateFound": true,
               "parentFound": true,
               "changed": true,
@@ -236,10 +236,10 @@
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0102-t102a",
-          "parent": "generations/accepted/0074-t074a.lua",
+          "candidate": "0103-c103a",
+          "parent": "generations/accepted/0075-c075a.lua",
           "changedFunctions": [
-            "nt"
+            "md"
           ],
           "constantChanges": [],
           "gvarMappingChanged": false,
@@ -251,34 +251,32 @@
         "cognitive": {
           "schema": 3,
           "engine": "mt12-cognitive-governance-v3",
-          "candidate": "0102-t102a",
-          "created": "2026-07-30T21:01:53.201Z",
+          "candidate": "0103-c103a",
+          "created": "2026-07-30T21:06:37.338Z",
           "passed": false,
           "judge": "reject",
           "why": {
-            "function": "nt",
+            "function": "md",
             "domain": "core",
-            "objective": "traction, ABS and intervention quality",
+            "objective": "confidence arbitration, neural learning and reasoning",
             "successMetric": "parent/family gain with deploy safety",
             "rollback": "runtime, replay, invariant, size, memory or fail-open failure"
           },
           "changes": [
             {
-              "name": "nt",
-              "before": "ca250f154d3094eb",
-              "after": "f4fdf862a3d69cf1",
+              "name": "md",
+              "before": "f203a872f8cb96f5",
+              "after": "31d1940b6743f1db",
               "bytesDelta": 66
             }
           ],
           "constantChanges": [],
           "duplicateLocals": [],
-          "stateSlots": [
-            277
-          ],
+          "stateSlots": [],
           "emulator": {
             "passed": false,
             "scenarios": [],
-            "report": "reports/0102-t102a-edgetx-emulator.json"
+            "report": "reports/0103-c103a-edgetx-emulator.json"
           },
           "evidence": [
             {
@@ -309,18 +307,18 @@
             },
             {
               "severity": "high",
-              "claim": "declared-control vs changed-core"
+              "claim": "declared-brain vs changed-core"
             }
           ],
-          "parent": "generations/accepted/0074-t074a.lua"
+          "parent": "generations/accepted/0075-c075a.lua"
         },
         "emulator": {
           "schema": 2,
           "engine": "official-edgetx-source-backed-mt12-emulator",
           "edgetxCommit": "f8a89393c560a1057b045048f4b6ff5096ca22a0",
-          "candidate": "0102-t102a",
+          "candidate": "0103-c103a",
           "passed": false,
-          "error": "lua5.3: ...jarvis-continuous/reports/0102-t102a-edgetx-emulator.lua:34: 'end' expected (to close 'function' at line 20) near <eof>\n"
+          "error": "emulator produced no report"
         }
       }
     }
@@ -334,5 +332,5 @@
   },
   "status": "hold-deploy-safe-champion",
   "deploymentWarning": null,
-  "created": "2026-07-30T21:01:53.433Z"
+  "created": "2026-07-30T21:06:37.673Z"
 }
