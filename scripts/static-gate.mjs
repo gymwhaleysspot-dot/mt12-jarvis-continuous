@@ -2,6 +2,7 @@
 import fs from'node:fs';
 const file=process.argv[2];if(!file)throw Error('usage: node scripts/static-gate.mjs <candidate.lua>');
 const s=fs.readFileSync(file,'utf8'),bytes=Buffer.byteLength(s),has=r=>r.test(s),count=r=>(s.match(r)||[]).length;
+const drawCount=count(/lcd\.draw(?:Text|Number|Rectangle|FilledRectangle|Line|Gauge|Bitmap)/g),dashSignals=['MPH|SPEED','RPM','TCT','GYR|GYRO','TC','ABS','GEAR','GPS|RQly|QUALITY','AI|CONF','MOOD|TRAIT|MEM|LOG','REASON|WHY|FAULT|WARN'].filter(x=>has(new RegExp(x,'i'))).length;
 const C={
  lineageSize:bytes>=50000,
  edgeTxReturn:has(/return\s*\{[\s\S]*init\s*=[\s\S]*run\s*=[\s\S]*background\s*=/),
@@ -21,6 +22,11 @@ const C={
  voice:has(/playFile/)&&has(/function\s+voice/)&&has(/function\s+choose/)&&has(/phrase|VS\s*=/i),
  moodPersonality:has(/mood|personality|traitLearn|function\s+trait/i),
  dashboard:has(/lcd\.drawText/)&&has(/lcd\.drawRectangle|lcd\.drawFilledRectangle/),
+ dashboardFunctional:drawCount>=12&&dashSignals>=8,
+ dashboardAdaptive:has(/LCD_W|LCD_H|lcd\.get.*[Ww]idth|lcd\.get.*[Hh]eight/)||has(/212|128/)&&has(/64/),
+ dashboardControlsVisible:has(/TCT/i)&&has(/GYR|GYRO/i)&&has(/TC/i)&&has(/ABS/i),
+ dashboardTruthVisible:has(/MPH|SPEED/i)&&has(/RPM/i)&&has(/GEAR/i),
+ dashboardIntelligenceVisible:has(/AI|CONF|MOOD|TRAIT|MEM|LOG/i)&&has(/REASON|WHY|FAULT|WARN|UNSAFE/i),
  logger:has(/blackbox|bb|burst/i)&&has(/LOGS/i),
  eventReason:has(/evReason|reason/i)&&has(/unsafe/i),
  surfaceProfiles:has(/SURF\s*=\s*\{/),
@@ -33,5 +39,5 @@ const C={
  noDynamicCode:!has(/loadstring|dofile/),
  complexity:count(/local function /g)>=35&&count(/V\[\d+\]/g)>=120
 };
-const failed=Object.entries(C).filter(([,v])=>!v).map(([k])=>k),report={file,sourceBytes:bytes,functionCount:count(/local function /g),stateReferences:count(/V\[\d+\]/g),checks:C,passed:!failed.length,failed};
+const failed=Object.entries(C).filter(([,v])=>!v).map(([k])=>k),report={file,sourceBytes:bytes,functionCount:count(/local function /g),stateReferences:count(/V\[\d+\]/g),dashboardDrawCalls:drawCount,dashboardSignalGroups:dashSignals,checks:C,passed:!failed.length,failed};
 console.log(JSON.stringify(report,null,2));if(failed.length)process.exit(2);
