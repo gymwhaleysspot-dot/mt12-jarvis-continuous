@@ -28,7 +28,8 @@ jobs:
     env:
       MT12_LIMIT: '88944'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      FACTORY_MODEL: openai/gpt-4.1
+      MODELS_TOKEN: ${{ secrets.MODELS_TOKEN }}
+      FACTORY_MODELS: openai/gpt-4.1,openai/gpt-4o-mini
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,7 +42,7 @@ jobs:
       - name: Mark factory started
         run: |
           mkdir -p reports
-          printf '{"status":"building","mode":"four-specialist-ai-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"verified-subsystem-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
       - name: Install and verify Lua 5.3
         shell: bash
         run: |
@@ -63,12 +64,18 @@ jobs:
         id: architecture
         continue-on-error: true
         run: |
-          printf '{"status":"building","mode":"four-specialist-ai-factory","stage":"chief-and-specialists","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          printf '{"status":"building","mode":"verified-subsystem-factory","stage":"AI subsystem architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
           node scripts/master-ai.mjs
-      - name: Record architecture failure
+      - name: Record architecture outcome
         if: steps.architecture.outcome == 'failure'
+        shell: bash
         run: |
-          printf '{"status":"builder-failed","mode":"four-specialist-ai-factory","stage":"chief-and-specialists","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
+          if [ "$STATE" = "rate-limited" ]; then
+            printf '{"status":"rate-limited","mode":"verified-subsystem-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          else
+            printf '{"status":"builder-failed","mode":"verified-subsystem-factory","stage":"AI subsystem architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          fi
       - name: Compile normalize validate rank and publish substantive builds
         if: steps.architecture.outcome == 'success'
         shell: bash
@@ -160,6 +167,13 @@ jobs:
             reports/*-gate.txt
             reports/*-sim.json
           retention-days: 30
-      - name: Report architecture failure to Actions
+      - name: Report real architecture failure to Actions
         if: steps.architecture.outcome == 'failure'
-        run: exit 1
+        shell: bash
+        run: |
+          STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
+          if [ "$STATE" = "rate-limited" ]; then
+            echo "GitHub Models quota exhausted; generation deferred to the next scheduled run."
+            exit 0
+          fi
+          exit 1
