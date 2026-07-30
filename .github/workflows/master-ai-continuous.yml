@@ -11,7 +11,7 @@ on:
       - 'toolchain/**'
       - 'factory-admin.js'
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '17 */3 * * *'
 
 permissions:
   contents: write
@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: mt12-luac-factory
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   factory:
@@ -91,7 +91,8 @@ jobs:
         run: |
           BEST=$(awk -F '\t' '$1==1{print $2"\t"$3"\t"$4}' reports/factory-results.tsv | sort -nr | head -1)
           if [ -z "$BEST" ]; then
-            printf '{"status":"batch-rejected","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+            node scripts/write-rejection-summary.mjs || true
+            printf '{"status":"batch-rejected","updated":"%s","diagnostics":"reports/rejection-summary.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
             exit 0
           fi
           SCORE=$(echo "$BEST" | cut -f1)
@@ -112,7 +113,7 @@ jobs:
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports factory.html
           git diff --cached --quiet && exit 0
-          git commit -m "LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ)"
+          git commit -m "LUAC factory batch $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
           git pull --rebase
           git push
       - name: Upload complete downloadable factory batch
@@ -127,6 +128,7 @@ jobs:
             reports/research-latest.md
             reports/research-latest.json
             reports/multi-agent-progress.json
+            reports/rejection-summary.json
             reports/*-CHANGELOG.md
             reports/*-changelog.json
             reports/*-gate.txt
