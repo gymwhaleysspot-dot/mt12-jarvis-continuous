@@ -1,31 +1,47 @@
-# MT12 Jarvis Master AI Contract
+# MT12 A15XQ Lineage Factory Contract
 
-The Master AI evolves one RadioMaster MT12 / EdgeTX Lua 5.3 controller lineage inspired by the engineering ideas proven in A15XQ. A15XQ is reference-only; generated source must be a clean implementation.
+The factory evolves the complete hardware-proven A15XQ controller lineage. It must not replace A15XQ with a clean-room miniature, toy controller, feature sketch, or source generated only to satisfy keyword checks.
 
-## Required controller systems
+## Required lineage source
 
-- Truth MPH and Truth RPM with bounded GPS/RPM trust and lag handling.
-- Smooth traction control with no abrupt throttle steps.
-- Smooth ABS with brake-intent gating and no static braking.
-- Adaptive gyro command with CH3 preserved.
-- Risk arbitration and torque-governor behavior.
-- Fail-open behavior when control evidence is invalid or uncertain.
-- Continuous bounded learning that never corrupts control output.
-- Car-off guard and staged startup.
-- Explainable event state: evidence, confidence, reason and outcome.
-- MT12 GVar contract: GV7/TCT full pass-through is 1024; CH15 monitors TCT; CH16 monitors GYR.
-- EdgeTX return table with init, run and background.
+- Canonical seed: `baselines/a15xq.lua`.
+- Every candidate must be produced from the canonical seed or the latest accepted direct descendant.
+- Mutations must be bounded and recorded in an engineering manifest.
+- Unchanged systems must remain source-equivalent in behavior.
+- A candidate with missing lineage source is blocked, not synthesized from scratch.
+
+## Required preserved systems
+
+- Truth MPH and Truth RPM with GPS/RPM trust, lag handling, learned RPM calibration and GPS coast/lost behavior.
+- Full smooth traction control, launch handling and TCT 1024 pass-through foundation.
+- Full ABS intervention with brake-intent gating, lock learning and no static braking.
+- Adaptive gyro, SXP, AGR, TCA, SRF, BTL, BMX, TCT and ECU GVar output contract.
+- Risk arbitration and torque governor.
+- SuperBrain decision path, neural inference, online bounded training and outcome learning.
+- Persistent `/LOGS/aicmem.csv` loading and saving using MT12-compatible `io.read(fileHandle, ...)`.
+- Mood, personality, phrase scoring, voice queue and learned phrase selection.
+- Blackbox logging, burst logging, event reasons, unsafe snapshots and session summaries.
+- Full dashboard and live control/AI diagnostics.
+- Surface profiles, gear logic, receiver-quality handling, fail-open recovery and staged startup.
+- Virtual-air/jump evidence, wheelspin separation, landing outcome and retrigger protection.
+- Car-off guard and safe GVar reset.
+- EdgeTX return table with `init`, `run` and `background`.
 
 ## Hard promotion gates
 
-1. Lua 5.3 syntax must compile with `luac5.3 -s`.
-2. Desktop bytecode must normalize to MT12 4/4/4/4/4 format.
-3. Final normalized artifact must be no larger than 88,944 bytes.
-4. Source must contain the required controller contracts.
-5. Outputs must remain bounded and fail open on invalid sensing.
-6. Every generation must include engineering notes and measurable intended improvement.
-7. A failed candidate is retained as evidence but never promoted to `generations/accepted`.
+1. Candidate must declare its direct parent and mutation manifest.
+2. Lua 5.3 source must parse and compile with `luac5.3 -s`.
+3. Desktop bytecode must normalize to the MT12 4/4/4/4/4 format.
+4. Final normalized artifact must be no larger than 88,944 bytes unless the configured ceiling is explicitly changed.
+5. A candidate must pass feature-parity gates for every preserved subsystem above.
+6. A candidate must retain MT12 file I/O compatibility and contain no `fileHandle:read()` calls.
+7. TCT full pass-through must remain 1024; no 0–100 interpretation is permitted.
+8. Outputs must remain bounded, smooth and fail open on invalid sensing.
+9. Simulation must test launch, braking, GPS loss, receiver drops, wheelspin, jumps, landing, reconnect and persistent-memory corruption.
+10. Candidates substantially smaller than the lineage without a verified equivalent-code explanation are rejected as probable feature loss.
+11. Every accepted generation must include source, normalized LUAC, byte count, parent hash, feature-parity report, simulation report and intended improvement.
+12. Failed candidates remain evidence and never enter the download vault.
 
 ## Autonomous behavior
 
-Each scheduled cycle reads the latest accepted generation, latest reports and this contract. It asks a cloud language model to produce exactly one candidate. The candidate is compiled, normalized and gated. Passing candidates are promoted; failing candidates are archived with the exact failure report. The system never edits GitHub workflow permissions or secrets and never deploys directly to a radio.
+Each scheduled cycle reads the canonical seed, latest accepted generation, reports and this contract. It performs one bounded mutation or equivalent optimization, then runs parity, syntax, normalization, size and behavioral gates. The factory never deploys directly to the radio and never promotes a candidate merely because a simplified simulator gives it a high score.
