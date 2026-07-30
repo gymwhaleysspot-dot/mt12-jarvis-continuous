@@ -17,15 +17,15 @@
   "candidates": [
     {
       "pass": false,
-      "score": 84.576,
-      "family": "monday",
-      "base": "0085-m085a",
+      "score": 85.122,
+      "family": "tuesday",
+      "base": "0086-t086a",
       "bytes": 0,
       "margin": 0,
-      "scoreGain": -9.416,
+      "scoreGain": -8.87,
       "reasons": [
         "build-gate",
-        "gain:-9.416<0.15",
+        "gain:-8.87<0.15",
         "margin:0<48"
       ],
       "eligible": false,
@@ -33,7 +33,7 @@
         "memory": {
           "schema": 1,
           "engine": "mt12-runtime-memory-audit",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
           "risk": 9,
           "limit": 32,
           "passed": true,
@@ -41,7 +41,7 @@
             "table-allocation-in-hot-path"
           ],
           "metrics": {
-            "sourceBytes": 87892,
+            "sourceBytes": 87925,
             "tableLiterals": 20,
             "closures": 5,
             "gmatch": 1,
@@ -61,7 +61,7 @@
         "schema": {
           "schema": 1,
           "engine": "mt12-memory-schema-gate",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
           "passed": true,
           "checks": {
             "path": true,
@@ -94,7 +94,7 @@
         "invariants": {
           "schema": 1,
           "engine": "mt12-control-invariants",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
           "passed": true,
           "checks": {
             "boundedMath": true,
@@ -126,17 +126,29 @@
         "diff": {
           "schema": 1,
           "engine": "mt12-differential-simulator",
-          "candidate": "0085-m085a",
-          "parent": null,
-          "parentFound": false,
-          "scoreDelta": 84.576,
-          "deltas": {},
+          "candidate": "0086-t086a",
+          "parent": "0076-w076a",
+          "parentFound": true,
+          "scoreDelta": 0.879,
+          "deltas": {
+            "dryLaunch.jerk": 0,
+            "wetLaunch.jerk": 0,
+            "bumpyLaunch.jerk": 0,
+            "dryBrake.lock": 0,
+            "wetBrake.lock": -2,
+            "roughBrake.lock": -5,
+            "truth.mae": -0.1725,
+            "lagTruth.mae": -0.1591,
+            "jump.fp": 0,
+            "jump.miss": 0,
+            "dropout.unsafe": 0
+          },
           "criticalWorse": [],
           "passed": true
         },
         "replay": {
           "engine": "real-log-replay-v1",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
           "corpus": [],
           "available": false,
           "metrics": {
@@ -153,45 +165,48 @@
         },
         "ablation": {
           "engine": "function-ablation-v1",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
+          "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "draw"
+            "nt"
           ],
-          "tests": [],
-          "available": false,
+          "tests": [
+            {
+              "function": "nt",
+              "candidateFound": true,
+              "parentFound": true,
+              "changed": true,
+              "bytesDelta": 347
+            }
+          ],
+          "available": true,
           "passed": true
         },
         "semantic": {
           "engine": "semantic-diff-v1",
-          "candidate": "0085-m085a",
+          "candidate": "0086-t086a",
+          "parent": "generations/accepted/0076-w076a.lua",
           "changedFunctions": [
-            "draw"
+            "nt"
           ],
           "constantChanges": [
             {
               "type": "constant",
               "name": "RPM2MPH",
-              "before": null,
-              "after": 0.000940161,
-              "percent": null
-            },
-            {
-              "type": "constant",
-              "name": "GPS_LOST",
-              "before": null,
-              "after": 0,
-              "percent": null
+              "before": 0.000933821,
+              "after": 0.000932068,
+              "percent": -0.188
             }
           ],
-          "gvarMappingChanged": true,
-          "memoryIoChanged": true,
-          "voiceCallsDelta": 1,
-          "dashboardDrawDelta": 6,
-          "sourceBytesDelta": 87892
+          "gvarMappingChanged": false,
+          "memoryIoChanged": false,
+          "voiceCallsDelta": 0,
+          "dashboardDrawDelta": 0,
+          "sourceBytesDelta": 332
         }
       }
     }
   ],
   "status": "hold-champion",
-  "created": "2026-07-30T19:18:09.815Z"
+  "created": "2026-07-30T19:35:06.161Z"
 }

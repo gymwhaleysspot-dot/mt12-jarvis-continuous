@@ -1,0 +1,54 @@
+{
+  "headline": "Controller remains inside the simulated safety envelope",
+  "summary": "The leading explanation is sensor lag or calibration is the primary source of truth-speed error with confidence 0.2. The next priority is Preserve at least 256 bytes normalized LUAC reserve.",
+  "evidence": {
+    "known": [
+      "Digital twin score 99.584"
+    ],
+    "inferred": [
+      "sensor lag or calibration is the primary source of truth-speed error at confidence 0.2"
+    ],
+    "unknown": [
+      "No curated real-log corpus detected",
+      "Digital twin parameters are not yet fully calibrated to the physical car"
+    ]
+  },
+  "recommendedAction": "replay aligned GPS and RPM lag against real logs",
+  "selectedTools": [
+    "static-analysis",
+    "semantic-map",
+    "real-log-replay",
+    "digital-twin",
+    "cross-correlation",
+    "runtime-memory-audit",
+    "luac-size-gate"
+  ],
+  "goals": [
+    {
+      "id": "G4",
+      "goal": "Preserve at least 256 bytes normalized LUAC reserve",
+      "progress": 0
+    },
+    {
+      "id": "G5",
+      "goal": "Reduce jump false positives without missed real jumps",
+      "progress": 0
+    },
+    {
+      "id": "G3",
+      "goal": "Reduce truth-speed error below 3 mph equivalent",
+      "progress": 76.2
+    },
+    {
+      "id": "G1",
+      "goal": "Reduce wet-launch wheelspin by 15%",
+      "progress": 89.3
+    },
+    {
+      "id": "G2",
+      "goal": "Keep telemetry-drop throttle fully fail-open",
+      "progress": 100
+    }
+  ],
+  "created": "2026-07-30T19:35:06.440Z"
+}

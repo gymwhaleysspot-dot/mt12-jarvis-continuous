@@ -1,7 +1,7 @@
 {
-  "engine": "a15xq-autonomous-engineering-v5",
-  "cycle": 85,
-  "created": "2026-07-30T19:15:51.355Z",
+  "engine": "a15xq-autonomous-engineering-v6",
+  "cycle": 86,
+  "created": "2026-07-30T19:32:46.761Z",
   "mode": "autonomous-engineering-production",
   "parent": "generations/accepted/0076-w076a.lua",
   "candidateCount": 1,
@@ -9,50 +9,51 @@
   "batch": [
     {
       "engine": "a15xq-full-v4",
-      "family": "monday",
-      "name": "m085a",
-      "generation": 85,
+      "family": "tuesday",
+      "name": "t086a",
+      "generation": 86,
       "experiment": 1,
-      "objective": "truth prediction, calibration and sensor resilience",
-      "style": "truth-lab",
+      "objective": "traction, ABS and intervention quality",
+      "style": "control-lab",
       "focus": [
-        "rpm",
-        "truth",
-        "gps",
-        "coast"
+        "tc",
+        "abs",
+        "slew",
+        "governor"
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0009262,
-        "tcSlip": 6.685,
-        "tcSpan": 5.162,
-        "tcCut": 26,
-        "absLock": 7646,
-        "truthRate": 0.155,
-        "coast": 0.9827
+        "rpmK": 0.000902,
+        "tcSlip": 7.238,
+        "tcSpan": 5.803,
+        "tcCut": 27,
+        "absLock": 7286,
+        "truthRate": 0.164,
+        "coast": 0.9862
       },
-      "file": "generations/candidates/0085-m085a.lua",
+      "file": "generations/candidates/0086-t086a.lua",
+      "parent": "generations/accepted/0076-w076a.lua",
       "parentBytes": 87593,
-      "sourceBytes": 87892,
+      "sourceBytes": 87925,
       "fullScript": true,
       "changes": [
         {
           "kind": "mission-driven-function-architecture",
-          "function": "draw",
-          "variant": "truth-autonomous-v5",
-          "label": "Mission-driven truth evolution",
+          "function": "nt",
+          "variant": "control-autonomous-v6",
+          "label": "Mission-driven control evolution",
           "summary": "Rebuilt one complete function from digital-twin, causal, specialist and race-engineer evidence",
-          "from": "8f4615de91aa",
-          "to": "4cd2125caa3e"
+          "from": "948bd0df74c4",
+          "to": "95a7824e2633"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000933821,
-          "to": 0.0009401614324802454
+          "to": 0.0009320681146529308
         }
       ],
-      "sha256": "a6f0d136ab92f1f77f6a507938fa1743ce2a57c235f70dcabaef0cea807cd83b",
+      "sha256": "36bccff44c7a75f855520426489a2ccf7d2ebc1fe4af875f4d08ae1e4322094d",
       "previousBest": 0,
       "functionChanges": 1,
       "totalNamedFunctions": 64,
@@ -65,16 +66,17 @@
       "multiAgent": true,
       "aiModel": "openai/gpt-4o-mini",
       "rewrittenFunctions": [
-        "draw"
+        "nt"
       ],
       "functions": [
-        "draw"
+        "nt"
       ],
-      "subsystem": "truth",
-      "changedLines": 39,
+      "parentResolved": true,
+      "subsystem": "control",
+      "changedLines": 36,
       "aiUsage": [
         {
-          "completion_tokens": 604,
+          "completion_tokens": 583,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -82,24 +84,25 @@
             "rejected_prediction_tokens": 0
           },
           "latency_checkpoint": {
-            "engine_tbt_ms": 11,
+            "engine_tbt_ms": 12,
             "engine_ttft_ms": 48,
-            "engine_ttlt_ms": 6579,
-            "pre_inference_ms": 120,
-            "service_tbt_ms": 11,
-            "service_ttft_ms": 749,
-            "service_ttlt_ms": 7270,
-            "total_duration_ms": 7161,
-            "user_visible_ttft_ms": 630
+            "engine_ttlt_ms": 6784,
+            "pre_inference_ms": 109,
+            "service_tbt_ms": 12,
+            "service_ttft_ms": 809,
+            "service_ttlt_ms": 7514,
+            "total_duration_ms": 7413,
+            "user_visible_ttft_ms": 700
           },
-          "prompt_tokens": 1484,
+          "prompt_tokens": 1739,
           "prompt_tokens_details": {
             "audio_tokens": 0,
-            "cached_tokens": 0
+            "cached_tokens": 1024
           },
-          "total_tokens": 2088
+          "total_tokens": 2322
         }
       ]
     }
-  ]
+  ],
+  "lastParent": "generations/accepted/0076-w076a.lua"
 }
