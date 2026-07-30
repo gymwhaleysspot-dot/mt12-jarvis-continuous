@@ -1,7 +1,7 @@
 {
   "engine": "a15xq-autonomous-engineering-v6",
-  "cycle": 88,
-  "created": "2026-07-30T19:55:23.531Z",
+  "cycle": 89,
+  "created": "2026-07-30T20:03:04.990Z",
   "mode": "autonomous-engineering-production",
   "parent": "generations/accepted/0076-w076a.lua",
   "candidateCount": 1,
@@ -9,51 +9,51 @@
   "batch": [
     {
       "engine": "a15xq-full-v4",
-      "family": "html",
-      "name": "w088a",
-      "generation": 88,
+      "family": "monday",
+      "name": "m089a",
+      "generation": 89,
       "experiment": 1,
-      "objective": "memory efficiency, observability and deploy reliability",
-      "style": "systems-lab",
+      "objective": "truth prediction, calibration and sensor resilience",
+      "style": "truth-lab",
       "focus": [
-        "memory",
-        "voice",
-        "logger",
-        "dashboard"
+        "rpm",
+        "truth",
+        "gps",
+        "coast"
       ],
       "variant": 1,
       "params": {
-        "rpmK": 0.0009106,
-        "tcSlip": 6.925,
-        "tcSpan": 5.883,
-        "tcCut": 25,
-        "absLock": 7314,
-        "truthRate": 0.214,
-        "coast": 0.9823
+        "rpmK": 0.0009112,
+        "tcSlip": 7.928,
+        "tcSpan": 6.023,
+        "tcCut": 27,
+        "absLock": 7642,
+        "truthRate": 0.159,
+        "coast": 0.9831
       },
-      "file": "generations/candidates/0088-w088a.lua",
+      "file": "generations/candidates/0089-m089a.lua",
       "parent": "generations/accepted/0076-w076a.lua",
       "parentBytes": 87593,
-      "sourceBytes": 87887,
+      "sourceBytes": 88847,
       "fullScript": true,
       "changes": [
         {
           "kind": "mission-driven-function-architecture",
-          "function": "draw",
-          "variant": "cockpit-autonomous-v6",
-          "label": "Mission-driven cockpit evolution",
+          "function": "bb_tick",
+          "variant": "truth-autonomous-v6",
+          "label": "Mission-driven truth evolution",
           "summary": "Rebuilt one complete function from digital-twin, causal, specialist and race-engineer evidence",
-          "from": "8f4615de91aa",
-          "to": "eb578ca14150"
+          "from": "b66ef449896f",
+          "to": "29317db49307"
         },
         {
           "key": "rpm",
           "label": "RPM2MPH",
           "from": 0.000933821,
-          "to": 0.0009357544238027921
+          "to": 0.0009299960655806391
         }
       ],
-      "sha256": "39d5503d6513824fb19a86f3899b3b20bfb90e26fa879232d17f6614ed310d9a",
+      "sha256": "854c80f01c689b86676de8655b0f714965d8386dc51813b72a89ec944f971b35",
       "previousBest": 0,
       "functionChanges": 1,
       "totalNamedFunctions": 64,
@@ -66,17 +66,17 @@
       "multiAgent": true,
       "aiModel": "openai/gpt-4o-mini",
       "rewrittenFunctions": [
-        "draw"
+        "bb_tick"
       ],
       "functions": [
-        "draw"
+        "bb_tick"
       ],
       "parentResolved": true,
-      "subsystem": "cockpit",
-      "changedLines": 36,
+      "subsystem": "truth",
+      "changedLines": 109,
       "aiUsage": [
         {
-          "completion_tokens": 605,
+          "completion_tokens": 2128,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -85,21 +85,21 @@
           },
           "latency_checkpoint": {
             "engine_tbt_ms": 10,
-            "engine_ttft_ms": 44,
-            "engine_ttlt_ms": 6078,
-            "pre_inference_ms": 126,
+            "engine_ttft_ms": 105,
+            "engine_ttlt_ms": 22233,
+            "pre_inference_ms": 425,
             "service_tbt_ms": 10,
-            "service_ttft_ms": 1362,
-            "service_ttlt_ms": 7392,
-            "total_duration_ms": 7274,
-            "user_visible_ttft_ms": 1235
+            "service_ttft_ms": 1335,
+            "service_ttlt_ms": 23363,
+            "total_duration_ms": 22948,
+            "user_visible_ttft_ms": 910
           },
-          "prompt_tokens": 1750,
+          "prompt_tokens": 4551,
           "prompt_tokens_details": {
             "audio_tokens": 0,
-            "cached_tokens": 1024
+            "cached_tokens": 2304
           },
-          "total_tokens": 2355
+          "total_tokens": 6679
         }
       ]
     }

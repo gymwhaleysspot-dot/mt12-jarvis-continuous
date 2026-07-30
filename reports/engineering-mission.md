@@ -1,18 +1,18 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0088-w088a
+Controller: 0089-m089a
 Digital twin: 99.578 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
 Required design constraints:
-- Consider innovation: experience replay compression
 - Consider innovation: safety envelope forecasting
 - Consider innovation: predictive landing control
+- Consider innovation: adaptive terrain memory
 - Preserve fail-open TCT=1024, MT12 global io.read(handle,...), dashboard, logging, learning, voice, mood, personality and all existing behavior.
 
 
 # MT12 Reasoning Mission
 
-Controller: 0088-w088a
+Controller: 0089-m089a
 Phase: postflight
 
 ## Leading hypothesis
@@ -49,7 +49,7 @@ Phase: postflight
 
 # MT12 Reasoning Mission
 
-Controller: 0088-w088a
+Controller: 0089-m089a
 Phase: postcycle
 
 ## Leading hypothesis

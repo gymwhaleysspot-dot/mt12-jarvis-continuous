@@ -1,0 +1,128 @@
+{
+  "engine": "luac-factory-simulator-v6",
+  "candidate": "0089-m089a",
+  "parent": "0076-w076a",
+  "family": "monday",
+  "generation": 89,
+  "experiment": 1,
+  "style": "truth-lab",
+  "objective": "truth prediction, calibration and sensor resilience",
+  "score": 84.827,
+  "previousBest": 84.243,
+  "parentScoreSource": "parent-report",
+  "improvement": 0.584,
+  "minGain": 0.15,
+  "novelty": 0.5,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "promotable": true,
+  "regressions": [],
+  "scenarioPass": {
+    "dryLaunch": true,
+    "wetLaunch": true,
+    "bumpyLaunch": true,
+    "dryBrake": true,
+    "wetBrake": true,
+    "roughBrake": true,
+    "truth": true,
+    "lagTruth": true,
+    "jump": true,
+    "dropout": true,
+    "subsystemParity": true
+  },
+  "changes": [
+    {
+      "kind": "mission-driven-function-architecture",
+      "function": "bb_tick",
+      "variant": "truth-autonomous-v6",
+      "label": "Mission-driven truth evolution",
+      "summary": "Rebuilt one complete function from digital-twin, causal, specialist and race-engineer evidence",
+      "from": "b66ef449896f",
+      "to": "29317db49307"
+    },
+    {
+      "key": "rpm",
+      "label": "RPM2MPH",
+      "from": 0.000933821,
+      "to": 0.0009299960655806391
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.07191599388897574
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.205106855963704
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.5426723458234655
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7353015535972256,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 53,
+      "release": 41,
+      "osc": 0.7372940848697647,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 44,
+      "release": 40,
+      "osc": 0.7275953032386153,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.2977285704289232,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 2.058755162635126,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 6,
+      "delay": 26
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.4840420071752332,
+    "truth": 9.00883588145066,
+    "truthSpikes": 0,
+    "jump": 10.479999999999999,
+    "dropout": 0.7
+  },
+  "rewards": {
+    "novelty": 1.5,
+    "architecture": 2,
+    "parity": 5
+  }
+}

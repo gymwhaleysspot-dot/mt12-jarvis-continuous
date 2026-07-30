@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "created": "2026-07-30T20:05:55.656Z",
+  "candidates": [
+    {
+      "candidate": "0089-m089a",
+      "passed": false,
+      "judge": "reject",
+      "domain": "control",
+      "contradictions": 3,
+      "runtime": false,
+      "evidenceGaps": [
+        "replay",
+        "runtime"
+      ]
+    }
+  ],
+  "promotionExplanation": {
+    "whatChanged": [
+      "bb_tick"
+    ],
+    "whyBetter": "Only candidates passing runtime, contracts, isolation and contradiction gates are eligible",
+    "missingEvidence": [
+      "replay",
+      "runtime"
+    ],
+    "remainingRisk": "Physical radio and real-drive evidence remain authoritative"
+  },
+  "reflection": {
+    "expected": "isolated explainable improvement",
+    "actual": [
+      false
+    ],
+    "wrong": [
+      "declared-truth vs changed-control",
+      "duplicate locals",
+      "possible read before table initialization"
+    ],
+    "newEvaluator": "mock EdgeTX runtime plus contract/state governance",
+    "stopDoing": "treating syntax or unavailable evidence as proof"
+  }
+}
