@@ -1,0 +1,164 @@
+engine=dynamic-full-code-luac-factory
+candidate=generations/candidates/0043-t0433.lua
+{
+  "engine": "luac-factory-simulator-v4",
+  "candidate": "0043-t0433",
+  "family": "tuesday",
+  "generation": 43,
+  "experiment": 3,
+  "style": "control-lab",
+  "objective": "traction, ABS and intervention quality",
+  "score": 94.115,
+  "previousBest": 0,
+  "improvement": 94.115,
+  "novelty": 1,
+  "architecture": 1,
+  "parity": 1,
+  "improved": true,
+  "passed": true,
+  "regressions": [],
+  "changes": [
+    {
+      "kind": "function",
+      "function": "i9",
+      "variant": "saturating-session-counter",
+      "label": "i9 function rewrite",
+      "summary": "Rebuild persistent session counter as explicit saturating arithmetic",
+      "from": "parent implementation",
+      "to": "saturating-session-counter"
+    },
+    {
+      "key": "absBlend",
+      "label": "ABS blend",
+      "from": 0.42,
+      "to": 0.32
+    },
+    {
+      "key": "absDiv",
+      "label": "ABS response divisor",
+      "from": 650,
+      "to": 571.7781650944729
+    },
+    {
+      "key": "release",
+      "label": "runaway release base",
+      "from": 0.1,
+      "to": 0.06
+    }
+  ],
+  "metrics": {
+    "dryLaunch": {
+      "mph": 73.37502162197447,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 0.10171604354942465
+    },
+    "wetLaunch": {
+      "mph": 44.6630566394627,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 5.40356269358381
+    },
+    "bumpyLaunch": {
+      "mph": 49.448384136547986,
+      "cut": 0,
+      "jerk": 0,
+      "falseCut": 0,
+      "peakSlip": 4.721166444346299
+    },
+    "dryBrake": {
+      "lock": 0,
+      "release": 33,
+      "osc": 0.7301695391129954,
+      "stop": 0
+    },
+    "wetBrake": {
+      "lock": 54,
+      "release": 42,
+      "osc": 0.7409894231688725,
+      "stop": 7.823999999999885
+    },
+    "roughBrake": {
+      "lock": 48,
+      "release": 40,
+      "osc": 0.7407077486601195,
+      "stop": 1.8720000000000592
+    },
+    "truth": {
+      "mae": 1.2289742201165896,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "lagTruth": {
+      "mae": 1.9948969691041363,
+      "spike": 0,
+      "overshoot": 0
+    },
+    "jump": {
+      "fp": 0,
+      "miss": 0,
+      "delay": 38
+    },
+    "dropout": {
+      "unsafe": 0,
+      "recovery": 2
+    }
+  },
+  "penalties": {
+    "launchJerk": 0,
+    "falseCut": 0,
+    "wetCut": 0,
+    "brakeLock": 15,
+    "brakeOsc": 0.48661067640723726,
+    "truth": 8.658147063783055,
+    "truthSpikes": 0,
+    "jump": 3.04,
+    "dropout": 0.7
+  }
+}
+{
+  "file": "generations/candidates/0043-t0433.lua",
+  "sourceBytes": 85787,
+  "functionCount": 64,
+  "stateReferences": 2513,
+  "checks": {
+    "lineageSize": true,
+    "edgeTxReturn": true,
+    "gvarRead": true,
+    "gvarWrite": true,
+    "completeGvars": true,
+    "tct1024": true,
+    "truthFusion": true,
+    "rpmCalibration": true,
+    "traction": true,
+    "absControl": true,
+    "gyro": true,
+    "torqueGovernor": true,
+    "neural": true,
+    "outcomeLearning": true,
+    "persistentMemory": true,
+    "mt12Read": true,
+    "voice": true,
+    "moodPersonality": true,
+    "dashboard": true,
+    "logger": true,
+    "eventReason": true,
+    "surfaceProfiles": true,
+    "gearLogic": true,
+    "airClassifierDynamic": true,
+    "failOpen": true,
+    "carGuard": true,
+    "bounded": true,
+    "noCloud": true,
+    "noDynamicCode": true,
+    "complexity": true
+  },
+  "passed": true,
+  "failed": []
+}
+generations/candidates/0043-t0433.luac: 88992 bytes (MT12 4/4/4/4/4)
+normalized_bytes=88992
+margin=-48
+passed=0
