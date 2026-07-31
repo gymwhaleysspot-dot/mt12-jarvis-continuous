@@ -1,20 +1,18 @@
-name: MT12 YA Forge
+name: MT12 Master Programming Factory
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'candidate/**'
-      - 'baseline/**'
+      - 'factory/**'
       - 'scripts/**'
       - 'toolchain/**'
       - 'spec/**'
       - '.github/workflows/build.yml'
   pull_request:
     paths:
-      - 'candidate/**'
-      - 'baseline/**'
+      - 'factory/**'
       - 'scripts/**'
       - 'toolchain/**'
       - 'spec/**'
@@ -23,36 +21,32 @@ permissions:
   contents: read
 
 concurrency:
-  group: mt12-ya-forge-${{ github.ref }}
+  group: mt12-master-factory-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install Lua 5.3
+      - name: Install deterministic toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.3
+          sudo apt-get install -y lua5.3 zip
           command -v luac5.3
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build normalized MT12 bytecode
-        run: node scripts/build.mjs
-      - name: Audit retained contract
-        run: node scripts/audit.mjs
-      - name: Package release
+      - name: Run master factory
+        run: node scripts/master-factory.mjs
+      - name: Package all verified outputs and diagnostics
         run: |
-          cp candidate/a15yb.lua dist/a15yb.lua
-          cp spec/factory.json dist/factory.json
           cd dist
-          zip -9 a15yb-release.zip a15yb.lua a15yb.luac build.json audit.json SHA256SUMS factory.json
+          zip -9 -r mt12-master-factory.zip . -x mt12-master-factory.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: a15yb-mt12-release
+          name: mt12-master-factory
           path: dist/
           if-no-files-found: error
           retention-days: 90
