@@ -1,0 +1,134 @@
+name: MT12 Scratch Recovery Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'factory_inbox/scratch-*.json'
+      - '.github/workflows/scratch-recovery.yml'
+      - 'scripts/scratch-lua-generator.mjs'
+      - 'toolchain/normalize_luac53_mt12.js'
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+env:
+  MT12_LIMIT: '88944'
+
+concurrency:
+  group: mt12-scratch-recovery
+  cancel-in-progress: false
+
+jobs:
+  build-pending-scratch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends lua5.3
+          command -v luac5.3
+
+      - name: Prepare MT12 normalizer
+        run: cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
+
+      - name: Build every pending scratch request
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p generations/scratch reports
+          FOUND=0
+          while IFS= read -r SPEC; do
+            [ -n "$SPEC" ] || continue
+            FOUND=1
+            NAME=$(node -e "const s=require('./'+process.argv[1]);const n=String(s.name||'').toLowerCase();if(!/^[a-z0-9_-]{1,6}$/.test(n))process.exit(2);process.stdout.write(n)" "$SPEC")
+            OUT="generations/scratch/$NAME"
+            if [ -f "$OUT/build.json" ]; then
+              STATUS=$(node -e "try{process.stdout.write(String(require('./'+process.argv[1]).status||''))}catch{}" "$OUT/build.json")
+              [ "$STATUS" = "PASS" ] && continue
+            fi
+
+            FILE=$(node scripts/scratch-lua-generator.mjs "$SPEC")
+            test -f "$FILE"
+            mkdir -p "$OUT"
+            cp "$FILE" "$OUT/$NAME.lua"
+            luac5.3 -p "$OUT/$NAME.lua"
+            luac5.3 -s -o "$OUT/${NAME}_raw.luac" "$OUT/$NAME.lua"
+            node toolchain/normalize_luac53_mt12.cjs "$OUT/${NAME}_raw.luac" "$OUT/$NAME.luac"
+            rm -f "$OUT/${NAME}_raw.luac"
+
+            BYTES=$(wc -c < "$OUT/$NAME.luac" | tr -d ' ')
+            MARGIN=$((MT12_LIMIT-BYTES))
+            test "$BYTES" -le "$MT12_LIMIT"
+            SOURCE_SHA=$(sha256sum "$OUT/$NAME.lua" | awk '{print $1}')
+            LUAC_SHA=$(sha256sum "$OUT/$NAME.luac" | awk '{print $1}')
+            node - "$NAME" "$SPEC" "$BYTES" "$MARGIN" "$SOURCE_SHA" "$LUAC_SHA" <<'NODE'
+          const fs=require('fs');
+          const [name,spec,bytes,margin,sourceSha,luacSha]=process.argv.slice(2);
+          const out=`generations/scratch/${name}`;
+          const build={status:'PASS',name,source:`${out}/${name}.lua`,luac:`${out}/${name}.luac`,bytes:Number(bytes),limit:88944,margin:Number(margin),source_sha256:sourceSha,luac_sha256:luacSha,spec,built:new Date().toISOString()};
+          fs.writeFileSync(`${out}/build.json`,JSON.stringify(build,null,2)+'\n');
+          NODE
+          done < <(find factory_inbox -maxdepth 1 -type f -name 'scratch-*.json' -print | sort)
+
+          if [ "$FOUND" = 0 ]; then
+            echo 'No scratch requests found.'
+          fi
+
+      - name: Rebuild scratch catalog
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const root='generations/scratch';
+          const builds=[];
+          if(fs.existsSync(root))for(const name of fs.readdirSync(root)){
+            const p=path.join(root,name,'build.json');
+            try{const b=JSON.parse(fs.readFileSync(p,'utf8'));if(b.status==='PASS')builds.push(b)}catch{}
+          }
+          builds.sort((a,b)=>String(b.built).localeCompare(String(a.built)));
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/scratch-catalog.json',JSON.stringify({updated:new Date().toISOString(),builds},null,2)+'\n');
+          if(builds[0])fs.writeFileSync('reports/scratch-latest.json',JSON.stringify(builds[0],null,2)+'\n');
+          NODE
+
+      - name: Commit generated Lua and normalized LUAC
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'MT12 Scratch Recovery'
+          git config user.email 'actions@users.noreply.github.com'
+          git add generations/scratch reports/scratch-catalog.json reports/scratch-latest.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Build pending scratch MT12 Lua releases [skip factory]"
+          for attempt in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 4))
+          done
+          exit 1
+
+      - name: Upload scratch releases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mt12-scratch-releases
+          path: |
+            generations/scratch/
+            reports/scratch-catalog.json
+            reports/scratch-latest.json
+          retention-days: 30
