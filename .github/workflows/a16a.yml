@@ -1,0 +1,76 @@
+name: Build A16A
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: GitHub Models model ID
+        required: false
+        default: openai/gpt-4.1
+  push:
+    branches: [main]
+    paths:
+      - 'a15ya.lua'
+      - 'scripts/build-a16a.mjs'
+      - 'spec/a16a-upgrade.json'
+      - 'scripts/mt12-harness.lua'
+      - 'scripts/evaluate-fitness.mjs'
+      - 'toolchain/**'
+      - '.github/workflows/a16a.yml'
+permissions:
+  contents: read
+  actions: read
+  models: read
+concurrency:
+  group: a16a-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-a16a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      A16_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          luac5.3 -v
+      - name: Check builder syntax
+        run: node --check scripts/build-a16a.mjs
+      - name: Build complete A16A
+        run: node scripts/build-a16a.mjs
+      - name: Verify deploy bytecode
+        run: |
+          test -f dist-a16a/a16a.lua
+          test -f dist-a16a/a16a.luac
+          test -f dist-a16a/DEPLOY.luac
+          cmp dist-a16a/a16a.luac dist-a16a/DEPLOY.luac
+          luac5.3 -p dist-a16a/a16a.lua
+          test "$(stat -c%s dist-a16a/a16a.luac)" -le 87000
+          grep -q 'SIMULATION VERIFIED' dist-a16a/A16A-BUILD.json
+      - name: Package A16A
+        run: |
+          cd dist-a16a
+          zip -9 -r ../a16a-simulation-verified.zip . -x '*_raw.luac' 'phase-*'
+      - name: Upload A16A
+        uses: actions/upload-artifact@v4
+        with:
+          name: a16a-simulation-verified
+          path: a16a-simulation-verified.zip
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a16a-diagnostics
+          path: dist-a16a/
+          if-no-files-found: warn
+          retention-days: 90
