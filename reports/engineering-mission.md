@@ -1,5 +1,5 @@
 MT12 AUTONOMOUS ENGINEERING MISSION
-Controller: 0076-w076a
+Controller: 0075-c075a
 Digital twin: 99.569 (PASS)
 Race engineer: ready-for-bench
 Primary finding: No critical causal concern found
@@ -12,7 +12,7 @@ Required design constraints:
 
 # MT12 Reasoning Mission
 
-Controller: 0114-w114a
+Controller: 0116-m116a
 Phase: preflight
 
 ## Leading hypothesis
