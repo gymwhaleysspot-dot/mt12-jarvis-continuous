@@ -1,0 +1,97 @@
+name: MT12 Manual Build Factory
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_path:
+        description: Repository path to Lua source
+        required: true
+        type: string
+      release:
+        description: Release name, maximum 6 characters
+        required: true
+        type: string
+      baseline_path:
+        description: Optional repository path to baseline Lua
+        required: false
+        default: ''
+        type: string
+      strict:
+        description: Fail on warnings
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mt12-manual-${{ inputs.release }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install LuaTeX compiler
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends texlive-luatex
+          luatex --version | head -1
+      - name: Validate request
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE='${{ inputs.release }}'
+          SOURCE='${{ inputs.source_path }}'
+          BASELINE='${{ inputs.baseline_path }}'
+          [[ "$RELEASE" =~ ^[A-Za-z0-9_-]{1,6}$ ]] || { echo 'Release must be 1-6 safe filename characters.'; exit 2; }
+          test -f "$SOURCE" || { echo "Source not found: $SOURCE"; exit 2; }
+          if [ -n "$BASELINE" ]; then test -f "$BASELINE" || { echo "Baseline not found: $BASELINE"; exit 2; }; fi
+      - name: Build audit compile and normalize
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE='${{ inputs.release }}'
+          SOURCE='${{ inputs.source_path }}'
+          BASELINE='${{ inputs.baseline_path }}'
+          OUT="factory_runs/$RELEASE"
+          ARGS=("$SOURCE" --release "$RELEASE" --out "$OUT" --normalizer toolchain/normalize_luac53_mt12.js --limit 88944)
+          if [ -n "$BASELINE" ]; then ARGS+=(--baseline "$BASELINE"); fi
+          if [ '${{ inputs.strict }}' = 'true' ]; then ARGS+=(--strict); fi
+          python3 tools/mt12_factory.py "${ARGS[@]}" | tee "$OUT-console.txt"
+      - name: Publish latest manual report
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p reports
+          RELEASE='${{ inputs.release }}'
+          if [ -f "factory_runs/$RELEASE/${RELEASE}_report.json" ]; then
+            cp "factory_runs/$RELEASE/${RELEASE}_report.json" reports/manual-factory-latest.json
+          else
+            printf '{"release":"%s","status":"FAIL","message":"Factory stopped before report generation"}\n' "$RELEASE" > reports/manual-factory-latest.json
+          fi
+      - name: Commit factory outputs
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'mt12-factory-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add factory_runs reports/manual-factory-latest.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Factory build ${{ inputs.release }} [skip factory]"
+          git push
+      - name: Upload complete build package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mt12-${{ inputs.release }}
+          path: |
+            factory_runs/${{ inputs.release }}/
+            factory_runs/${{ inputs.release }}-console.txt
+          if-no-files-found: warn
