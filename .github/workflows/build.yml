@@ -17,6 +17,7 @@ on:
       - 'scripts/**'
       - 'toolchain/**'
       - 'spec/**'
+      - 'tests/replays/**'
       - '.github/workflows/build.yml'
 permissions:
   contents: read
@@ -47,17 +48,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify authoritative root seed exists
-        run: test -f a15ya.lua
+      - name: Verify factory source and root seed
+        run: |
+          test -f a15ya.lua
+          node --check scripts/master-factory.mjs
+          node --check scripts/evaluate-fitness.mjs
+          node --check scripts/verify-release.mjs
+          luac5.3 -p scripts/mt12-harness.lua
+          luac5.3 -p scripts/fitness-harness.lua
       - name: Invent, compile, normalize, simulate and audit
         run: node scripts/master-factory.mjs
       - name: Independently reproduce and verify release
         run: node scripts/verify-release.mjs
-      - name: Package verified deployable release
+      - name: Package simulation-verified test release
         run: |
           cd dist/verified-release
           zip -9 -r ../mt12-verified-release.zip .
-      - name: Publish verified deployable release
+      - name: Publish simulation-verified test release
         uses: actions/upload-artifact@v4
         with:
           name: mt12-verified-release
