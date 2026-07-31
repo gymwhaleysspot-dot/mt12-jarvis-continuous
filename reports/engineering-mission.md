@@ -12,7 +12,7 @@ Required design constraints:
 
 # MT12 Reasoning Mission
 
-Controller: 0116-t116a
+Controller: 0115-t115a
 Phase: preflight
 
 ## Leading hypothesis
