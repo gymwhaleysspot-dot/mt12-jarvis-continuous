@@ -7,6 +7,10 @@ on:
         description: Repository path to scratch build JSON specification
         required: true
         type: string
+  push:
+    branches: [main]
+    paths:
+      - 'factory_inbox/scratch-*.json'
 
 permissions:
   contents: write
@@ -25,18 +29,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Resolve specification
+        id: spec
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SPEC="${{ inputs.spec_path }}"
+          else
+            SPEC=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'factory_inbox/scratch-*.json' | tail -n 1)
+          fi
+          test -n "$SPEC"
+          test -f "$SPEC"
+          echo "path=$SPEC" >> "$GITHUB_OUTPUT"
       - name: Install Lua 5.3
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lua5.3
       - name: Validate specification
         run: |
-          test -f "${{ inputs.spec_path }}"
-          node -e "const s=require('./${{ inputs.spec_path }}');if(!/^[a-zA-Z0-9_-]{1,6}$/.test(s.name||''))throw Error('name must be 1-6 safe characters');if(!s.mission)throw Error('mission required')"
+          SPEC="${{ steps.spec.outputs.path }}"
+          node -e "const s=require('./'+process.argv[1]);if(!/^[a-zA-Z0-9_-]{1,6}$/.test(s.name||''))throw Error('name must be 1-6 safe characters');if(!s.mission)throw Error('mission required')" "$SPEC"
       - name: Generate complete Lua from scratch
         id: generate
         run: |
-          FILE=$(node scripts/scratch-lua-generator.mjs "${{ inputs.spec_path }}")
+          FILE=$(node scripts/scratch-lua-generator.mjs "${{ steps.spec.outputs.path }}")
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
           echo "base=$(basename "$FILE" .lua)" >> "$GITHUB_OUTPUT"
       - name: Syntax compile and normalize
