@@ -1,0 +1,38 @@
+name: Build A16K
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'a16k.lua'
+      - '.github/workflows/build-a16k.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3
+      - name: Compile and normalize
+        run: |
+          luac5.3 -p a16k.lua
+          luac5.3 -s -o a16k_raw.luac a16k.lua
+          node toolchain/normalize_luac53_mt12.js a16k_raw.luac a16k.luac
+          test -s a16k.luac
+          grep -Fq 'function fo()setgv(0,0);setgv(1,0);setgv(3,100);setgv(7,1024)end' a16k.lua
+          ! grep -Fq 'function fo()fo()end' a16k.lua
+          sha256sum a16k.lua a16k.luac > SHA256SUMS.txt
+          wc -c a16k.lua a16k.luac
+      - name: Package A16K
+        run: zip -9 a16k-build.zip a16k.lua a16k.luac SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: a16k-build
+          path: a16k-build.zip
+          if-no-files-found: error
+          retention-days: 30
