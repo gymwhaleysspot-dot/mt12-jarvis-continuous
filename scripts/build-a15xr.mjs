@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Reproducible MT12 deploy build revision 2.
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 
@@ -27,14 +28,7 @@ must(
   'successful-open save commit'
 );
 
-// Keep the proven network and superBrain unchanged, but make the initialization
-// contract explicit before any memory load can be invoked by future refactors.
-must(
-  'local nW,N;local VS=',
-  'local nW,N;local VS=',
-  'neural state declaration'
-);
-
+if(!s.includes('local nW,N;local VS=')) throw new Error('neural state declaration missing');
 if(!s.includes('local function superBrain(')) throw new Error('superBrain missing');
 if(!s.includes('local function neural(')) throw new Error('neural network missing');
 if(!s.includes('io.read(f,512)')) throw new Error('MT12 global io.read contract missing');
