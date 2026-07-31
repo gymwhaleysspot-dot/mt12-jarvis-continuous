@@ -44,7 +44,7 @@ jobs:
       - name: Mark factory started
         run: |
           mkdir -p reports
-          printf '{"status":"building","mode":"cognitive-governed-metacognitive-factory","stage":"bootstrap","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          node -e "require('fs').writeFileSync('reports/status.json',JSON.stringify({status:'building',mode:'cognitive-governed-metacognitive-factory',stage:'bootstrap',updated:new Date().toISOString()},null,2)+'\n')"
       - name: Install and verify Lua 5.3
         shell: bash
         run: |
@@ -68,20 +68,31 @@ jobs:
         id: architecture
         continue-on-error: true
         run: |
-          printf '{"status":"building","mode":"cognitive-governed-metacognitive-factory","stage":"deliberated hypothesis-driven architecture","updated":"%s"}\n' "$(date -u +%FT%TZ)" > reports/status.json
+          node -e "require('fs').writeFileSync('reports/status.json',JSON.stringify({status:'building',mode:'cognitive-governed-metacognitive-factory',stage:'deliberated hypothesis-driven architecture',updated:new Date().toISOString()},null,2)+'\n')"
           node scripts/master-ai.mjs
-      - name: Record architecture outcome
-        if: steps.architecture.outcome == 'failure'
+      - name: Classify architecture outcome
+        id: outcome
+        if: always()
         shell: bash
+        env:
+          ARCH_OUTCOME: ${{ steps.architecture.outcome }}
         run: |
-          STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
-          if [ "$STATE" = "rate-limited" ]; then
-            printf '{"status":"rate-limited","mode":"cognitive-governed-metacognitive-factory","stage":"GitHub Models quota","deferred":true,"updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
-          else
-            printf '{"status":"builder-failed","mode":"cognitive-governed-metacognitive-factory","stage":"architecture","updated":"%s","diagnostics":"reports/multi-agent-progress.json"}\n' "$(date -u +%FT%TZ)" > reports/status.json
-          fi
+          node - <<'NODE'
+          const fs=require('fs');
+          let p={status:'unknown',error:''};
+          try{p=JSON.parse(fs.readFileSync('reports/multi-agent-progress.json','utf8'))}catch{}
+          const text=String(p.error||p.lastModelError||'').toLowerCase();
+          const external=/github_models_retirement_brownout|temporarily unavailable|rate.?limit|quota|http 410|http 429|http 5\d\d|timeout|econnreset|service unavailable/.test(text);
+          const architecture=process.env.ARCH_OUTCOME||'unknown';
+          let kind='success';
+          if(architecture==='failure')kind=external?'deferred':'failed';
+          const status=kind==='deferred'?{status:'deferred',mode:'cognitive-governed-metacognitive-factory',stage:'external model service unavailable',deferred:true,reason:text.slice(0,800),updated:new Date().toISOString(),diagnostics:'reports/multi-agent-progress.json'}:kind==='failed'?{status:'builder-failed',mode:'cognitive-governed-metacognitive-factory',stage:'architecture',error:text.slice(0,800),updated:new Date().toISOString(),diagnostics:'reports/multi-agent-progress.json'}:{status:'architecture-complete',mode:'cognitive-governed-metacognitive-factory',stage:'validation',updated:new Date().toISOString()};
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/status.json',JSON.stringify(status,null,2)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`kind=${kind}\n`);
+          NODE
       - name: Compile normalize and deeply validate candidates
-        if: steps.architecture.outcome == 'success'
+        if: steps.outcome.outputs.kind == 'success'
         shell: bash
         run: |
           set +e
@@ -92,10 +103,7 @@ jobs:
             RAW="generations/candidates/${BASE}_raw.luac"
             FINAL="generations/candidates/${BASE}.luac"
             REPORT="reports/${BASE}-gate.txt"
-            PASS=1
-            BUILD=1
-            BYTES=0
-            MARGIN=0
+            PASS=1; BUILD=1; BYTES=0; MARGIN=0
             {
               echo "engine=cognitive-governed-metacognitive-mt12-ai-luac-factory"
               echo "candidate=$CANDIDATE"
@@ -108,8 +116,8 @@ jobs:
               node scripts/reasoning-orchestrator.mjs gate || PASS=0
               node scripts/cognitive-governance.mjs gate "$CANDIDATE" || PASS=0
               luac5.3 -p "$CANDIDATE" || BUILD=0
-              if [ "$BUILD" = 1 ]; then luac5.3 -s -o "$RAW" "$CANDIDATE" || BUILD=0; fi
-              if [ "$BUILD" = 1 ]; then node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || BUILD=0; fi
+              [ "$BUILD" = 1 ] && luac5.3 -s -o "$RAW" "$CANDIDATE" || BUILD=0
+              [ "$BUILD" = 1 ] && node toolchain/normalize_luac53_mt12.cjs "$RAW" "$FINAL" || BUILD=0
               if [ "$BUILD" = 1 ]; then
                 BYTES=$(wc -c < "$FINAL" | tr -d ' ')
                 MARGIN=$((MT12_LIMIT-BYTES))
@@ -117,9 +125,7 @@ jobs:
                 echo "margin=$MARGIN"
                 [ "$BYTES" -le "$MT12_LIMIT" ] || PASS=0
                 [ "$MARGIN" -ge "$MT12_HARD_MARGIN" ] || PASS=0
-              else
-                PASS=0
-              fi
+              else PASS=0; fi
               echo "buildable=$BUILD"
               echo "passed=$PASS"
             } > "$REPORT" 2>&1
@@ -141,18 +147,17 @@ jobs:
             fi
           done
       - name: Run engineering council belief update and reflection
-        if: steps.architecture.outcome == 'success'
+        if: steps.outcome.outputs.kind == 'success'
         run: |
           node scripts/autonomous-engineering-system.mjs postflight
           node scripts/reasoning-orchestrator.mjs postflight
           node scripts/cognitive-governance.mjs postflight
       - name: Promote only a true new champion
-        if: steps.architecture.outcome == 'success'
+        if: steps.outcome.outputs.kind == 'success'
         shell: bash
         run: |
           set +e
-          BEST=$(node scripts/select-champion.mjs)
-          SELECT_RC=$?
+          BEST=$(node scripts/select-champion.mjs); SELECT_RC=$?
           if [ "$SELECT_RC" -ne 0 ] || [ -z "$BEST" ]; then
             node scripts/write-rejection-summary.mjs || true
             node scripts/quarantine-generation.mjs || true
@@ -160,35 +165,41 @@ jobs:
             node scripts/reasoning-orchestrator.mjs postcycle || true
             node scripts/cognitive-governance.mjs postcycle || true
             CHAMPION=$(node -e "const d=require('./reports/champion-decision.json');console.log(d.champion?.base||'none')" 2>/dev/null || echo none)
-            printf '{"status":"champion-held","mode":"cognitive-governed-metacognitive-factory","champion":"%s","updated":"%s","decision":"reports/champion-decision.json","brief":"reports/engineering-brief.json","cognitive":"reports/cognitive-cycle-summary.json","reflection":"reports/post-cycle-reflection.json"}\n' "$CHAMPION" "$(date -u +%FT%TZ)" > reports/status.json
+            node - "$CHAMPION" <<'NODE'
+          const fs=require('fs'),champion=process.argv[2];fs.writeFileSync('reports/status.json',JSON.stringify({status:'champion-held',mode:'cognitive-governed-metacognitive-factory',champion,updated:new Date().toISOString(),decision:'reports/champion-decision.json',brief:'reports/engineering-brief.json',cognitive:'reports/cognitive-cycle-summary.json',reflection:'reports/post-cycle-reflection.json'},null,2)+'\n');
+          NODE
             node scripts/rebuild-factory-catalog.mjs || true
             exit 0
           fi
-          SCORE=$(echo "$BEST" | cut -f1)
-          FAMILY=$(echo "$BEST" | cut -f2)
-          BASE=$(echo "$BEST" | cut -f3)
-          MARGIN=$(echo "$BEST" | cut -f4)
+          SCORE=$(echo "$BEST" | cut -f1); FAMILY=$(echo "$BEST" | cut -f2); BASE=$(echo "$BEST" | cut -f3); MARGIN=$(echo "$BEST" | cut -f4)
           cp "generations/factory/$FAMILY/${BASE}.lua" "generations/accepted/${BASE}.lua"
           cp "generations/factory/$FAMILY/${BASE}.luac" "generations/accepted/${BASE}.luac"
           cp "generations/factory/$FAMILY/${BASE}-CHANGELOG.md" "generations/accepted/${BASE}-CHANGELOG.md"
-          cp "generations/factory/$FAMILY/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
+          cp "reports/${BASE}-changelog.json" "generations/accepted/${BASE}-changelog.json"
           node scripts/category-champions.mjs || true
           node scripts/autonomous-engineering-system.mjs postflight || true
           node scripts/reasoning-orchestrator.mjs postcycle || true
           node scripts/cognitive-governance.mjs postcycle || true
-          printf '{"status":"accepted","mode":"cognitive-governed-metacognitive-factory","family":"%s","generation":"%s","score":%s,"margin":%s,"updated":"%s","lua":"generations/accepted/%s.lua","luac":"generations/accepted/%s.luac","decision":"reports/champion-decision.json","cognitive":"reports/cognitive-cycle-summary.json","promotionExplanation":"reports/promotion-explanation.json","reflection":"reports/post-cycle-reflection.json"}\n' "$FAMILY" "$BASE" "$SCORE" "$MARGIN" "$(date -u +%FT%TZ)" "$BASE" "$BASE" > reports/status.json
+          node - "$FAMILY" "$BASE" "$SCORE" "$MARGIN" <<'NODE'
+          const fs=require('fs');const [family,generation,score,margin]=process.argv.slice(2);fs.writeFileSync('reports/status.json',JSON.stringify({status:'accepted',mode:'cognitive-governed-metacognitive-factory',family,generation,score:Number(score),margin:Number(margin),updated:new Date().toISOString(),lua:`generations/accepted/${generation}.lua`,luac:`generations/accepted/${generation}.luac`,decision:'reports/champion-decision.json',cognitive:'reports/cognitive-cycle-summary.json',promotionExplanation:'reports/promotion-explanation.json',reflection:'reports/post-cycle-reflection.json'},null,2)+'\n');
+          NODE
           node scripts/rebuild-factory-catalog.mjs
       - name: Commit factory output and engineering knowledge
         if: always()
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name 'mt12-autonomous-ai-factory'
           git config user.email 'mt12-luac-factory@users.noreply.github.com'
           git add generations reports factory.html factory-admin.js 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Cognitive-governed MT12 AI engineering cycle $(date -u +%Y-%m-%dT%H:%MZ) [skip factory]"
-          git pull --rebase
-          git push
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 4))
+          done
+          exit 1
       - name: Upload complete engineering evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -200,10 +211,6 @@ jobs:
             generations/quarantined/
             reports/
           retention-days: 30
-      - name: Report architecture failure
-        if: steps.architecture.outcome == 'failure'
-        shell: bash
-        run: |
-          STATE=$(node -e "try{console.log(require('./reports/multi-agent-progress.json').status||'failed')}catch(e){console.log('failed')}" )
-          [ "$STATE" = "rate-limited" ] && exit 0
-          exit 1
+      - name: Fail only for an internal architecture defect
+        if: steps.outcome.outputs.kind == 'failed'
+        run: exit 1
