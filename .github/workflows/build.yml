@@ -1,7 +1,12 @@
-name: MT12 Master Programming Factory
+name: MT12 Master Factory
 
 on:
   workflow_dispatch:
+    inputs:
+      mission:
+        description: Optional programming mission
+        required: false
+        default: Build the brightest safe next generation
   push:
     branches: [main]
     paths:
@@ -9,27 +14,26 @@ on:
       - 'scripts/**'
       - 'toolchain/**'
       - 'spec/**'
+      - 'web/**'
       - '.github/workflows/build.yml'
-  pull_request:
-    paths:
-      - 'factory/**'
-      - 'scripts/**'
-      - 'toolchain/**'
-      - 'spec/**'
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: mt12-master-factory-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   factory:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout complete lineage
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install deterministic toolchain
         run: |
           sudo apt-get update
@@ -38,15 +42,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run master factory
-        run: node scripts/master-factory.mjs
-      - name: Package all verified outputs and diagnostics
+      - name: Record mission
         run: |
+          mkdir -p dist
+          printf '%s\n' '${{ inputs.mission }}' > dist/MISSION.txt
+      - name: Run self-seeding master factory
+        run: node scripts/master-factory.mjs
+      - name: Package verified outputs and diagnostics
+        if: always()
+        run: |
+          test -d dist || mkdir -p dist
           cd dist
-          zip -9 -r mt12-master-factory.zip . -x mt12-master-factory.zip
-      - uses: actions/upload-artifact@v4
+          zip -9 -r mt12-master-factory-release.zip . -x mt12-master-factory-release.zip
+      - name: Publish factory output
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: mt12-master-factory
+          name: mt12-master-factory-release
           path: dist/
           if-no-files-found: error
           retention-days: 90
