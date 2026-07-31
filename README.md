@@ -1,26 +1,27 @@
 # MT12 YA Forge
 
-Clean restart of the MT12 AI controller project.
+A clean deterministic factory for the RadioMaster MT12 / EdgeTX A15YA lineage.
 
 ## Golden baseline
 
-The project is anchored to **A15YA**. Existing behavior is preserved as the reference contract; no subsystem may be simplified or removed merely to save memory.
+`baseline/a15ya.lua` and its normalized bytecode are the preserved reference contract. No subsystem may be removed, simplified, weakened, or bypassed merely to save memory.
 
-## First evolution
+## Candidate lane
 
-**A15YB — Unified Episode Brain**
+`candidate/a15yb.lua` is the active evolution source. Every candidate passes one fixed pipeline:
 
-The controller joins prediction, cause, intervention, outcome, confidence, learning eligibility, learning direction, and rollback into one compact causal episode model.
+1. Lua 5.3 syntax validation
+2. stripped Lua 5.3 compilation
+3. proven MT12 4/4/4/4/4 bytecode normalization
+4. 88,944-byte hard ceiling
+5. behavior-contract audit
+6. SHA-256 generation
+7. packaged GitHub Actions artifact
 
-## Repository rule
+## Run the factory
 
-This repository now uses one deterministic path:
+Use **Actions → MT12 YA Forge → Run workflow**. The optional `web/index.html` page provides the same one-button dispatch using your GitHub token.
 
-1. preserve and verify the YA baseline
-2. compile Lua 5.3 bytecode
-3. normalize for RadioMaster MT12 / EdgeTX
-4. enforce the 88,944-byte ceiling
-5. audit capability retention
-6. publish only passing source, normalized LUAC, hashes, and reports
+The factory has no GitHub Models dependency, no scratch queue, no competing recovery workflow, and no background agent state. A build either passes every hard gate and publishes an artifact or fails visibly.
 
-The previous autonomous-agent factory, scratch queues, recovery workflows, stale generations, and model-dependent build state were intentionally removed from the active tree. They remain recoverable from Git history.
+Only the final normalized `.luac` is deployable to the MT12.
