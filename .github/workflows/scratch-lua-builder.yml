@@ -1,0 +1,89 @@
+name: MT12 Scratch Lua Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: Repository path to scratch build JSON specification
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  MT12_LIMIT: '88944'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lua5.3
+      - name: Validate specification
+        run: |
+          test -f "${{ inputs.spec_path }}"
+          node -e "const s=require('./${{ inputs.spec_path }}');if(!/^[a-zA-Z0-9_-]{1,6}$/.test(s.name||''))throw Error('name must be 1-6 safe characters');if(!s.mission)throw Error('mission required')"
+      - name: Generate complete Lua from scratch
+        id: generate
+        run: |
+          FILE=$(node scripts/scratch-lua-generator.mjs "${{ inputs.spec_path }}")
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          echo "base=$(basename "$FILE" .lua)" >> "$GITHUB_OUTPUT"
+      - name: Syntax compile and normalize
+        run: |
+          set -euo pipefail
+          FILE="${{ steps.generate.outputs.file }}"
+          BASE="${{ steps.generate.outputs.base }}"
+          OUT="generations/scratch/$BASE"
+          mkdir -p "$OUT"
+          cp "$FILE" "$OUT/$BASE.lua"
+          luac5.3 -p "$OUT/$BASE.lua"
+          luac5.3 -s -o "$OUT/${BASE}_raw.luac" "$OUT/$BASE.lua"
+          cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
+          node toolchain/normalize_luac53_mt12.cjs "$OUT/${BASE}_raw.luac" "$OUT/$BASE.luac"
+          BYTES=$(wc -c < "$OUT/$BASE.luac" | tr -d ' ')
+          MARGIN=$((MT12_LIMIT-BYTES))
+          test "$BYTES" -le "$MT12_LIMIT"
+          SHA_LUA=$(sha256sum "$OUT/$BASE.lua" | awk '{print $1}')
+          SHA_LUAC=$(sha256sum "$OUT/$BASE.luac" | awk '{print $1}')
+          cat > "$OUT/build.json" <<JSON
+          {"status":"PASS","name":"$BASE","source":"$OUT/$BASE.lua","luac":"$OUT/$BASE.luac","bytes":$BYTES,"limit":$MT12_LIMIT,"margin":$MARGIN,"source_sha256":"$SHA_LUA","luac_sha256":"$SHA_LUAC","built":"$(date -u +%FT%TZ)"}
+          JSON
+          rm "$OUT/${BASE}_raw.luac"
+      - name: Run MT12 audit factory
+        run: |
+          BASE="${{ steps.generate.outputs.base }}"
+          python3 tools/mt12_factory.py "generations/scratch/$BASE/$BASE.lua" --release "$BASE" --out "generations/scratch/$BASE/audit" --normalizer toolchain/normalize_luac53_mt12.cjs || true
+      - name: Publish latest scratch build report
+        run: |
+          BASE="${{ steps.generate.outputs.base }}"
+          cp "generations/scratch/$BASE/build.json" reports/scratch-latest.json
+          node - <<'NODE'
+          const fs=require('fs');const p='reports/scratch-catalog.json';let d={updated:'',builds:[]};try{d=JSON.parse(fs.readFileSync(p))}catch{}
+          const b=JSON.parse(fs.readFileSync('reports/scratch-latest.json'));d.builds=(d.builds||[]).filter(x=>x.name!==b.name);d.builds.unshift(b);d.builds=d.builds.slice(0,50);d.updated=new Date().toISOString();fs.writeFileSync(p,JSON.stringify(d,null,2));
+          NODE
+      - name: Commit complete Lua and normalized LUAC
+        run: |
+          git config user.name "MT12 Scratch Factory"
+          git config user.email "actions@users.noreply.github.com"
+          git add generations/scratch reports/scratch-latest.json reports/scratch-catalog.json
+          git commit -m "Build complete scratch MT12 Lua ${{ steps.generate.outputs.base }} [skip factory]" || exit 0
+          git pull --rebase origin main
+          git push origin main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mt12-scratch-${{ steps.generate.outputs.base }}
+          path: |
+            generations/scratch/${{ steps.generate.outputs.base }}/${{ steps.generate.outputs.base }}.lua
+            generations/scratch/${{ steps.generate.outputs.base }}/${{ steps.generate.outputs.base }}.luac
+            generations/scratch/${{ steps.generate.outputs.base }}/build.json
