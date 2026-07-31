@@ -1,6 +1,6 @@
 # MT12 Reasoning Mission
 
-Controller: 0116-c116a
+Controller: 0116-w116a
 Phase: preflight
 
 ## Leading hypothesis
