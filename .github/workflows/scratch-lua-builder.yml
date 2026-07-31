@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       spec_path:
-        description: Repository path to scratch build JSON specification
-        required: true
+        description: Optional repository path to one scratch JSON specification
+        required: false
         type: string
   push:
     branches: [main]
@@ -15,7 +15,7 @@ on:
       - 'scripts/scratch-lua-generator.mjs'
       - 'toolchain/normalize_luac53_mt12.js'
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/10 * * * *'
 
 permissions:
   contents: write
@@ -30,7 +30,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,120 +38,111 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Resolve queued specification
-        id: spec
-        shell: bash
+      - name: Install Lua 5.3
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            SPEC="${{ inputs.spec_path }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            SPEC=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'factory_inbox/scratch-*.json' | tail -n 1 || true)
-          else
-            SPEC=""
-          fi
-          if [ -z "${SPEC:-}" ]; then
-            SPEC=$(node - <<'NODE'
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends lua5.3
+          command -v lua5.3
+          command -v luac5.3
+      - name: Build every pending scratch request
+        id: build
+        shell: bash
+        env:
+          REQUESTED_SPEC: ${{ inputs.spec_path || '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports generations/scratch generations/scratch-source
+          cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
+          mapfile -t SPECS < <(node - <<'NODE'
           const fs=require('fs'),path=require('path');
-          const dir='factory_inbox';
-          const files=fs.existsSync(dir)?fs.readdirSync(dir).filter(x=>/^scratch-.*\.json$/.test(x)):[];
-          files.sort((a,b)=>fs.statSync(path.join(dir,b)).mtimeMs-fs.statSync(path.join(dir,a)).mtimeMs);
+          const requested=process.env.REQUESTED_SPEC||'';
+          let files=[];
+          if(requested){files=[requested]}
+          else if(fs.existsSync('factory_inbox')){
+            files=fs.readdirSync('factory_inbox').filter(x=>/^scratch-.*\.json$/.test(x)).map(x=>path.join('factory_inbox',x)).sort();
+          }
           for(const f of files){
             try{
-              const s=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8'));
+              const s=JSON.parse(fs.readFileSync(f,'utf8'));
               const n=String(s.name||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,6).toLowerCase();
-              if(n && !fs.existsSync(`generations/scratch/${n}/build.json`)){console.log(path.join(dir,f));break}
-            }catch{}
+              if(n && !fs.existsSync(`generations/scratch/${n}/build.json`)) console.log(f);
+            }catch(e){console.error(`Ignoring invalid request ${f}: ${e.message}`)}
           }
           NODE
           )
-          fi
-          if [ -z "${SPEC:-}" ]; then
-            echo "No unbuilt scratch requests found"
-            echo "found=false" >> "$GITHUB_OUTPUT"
+          if [ "${#SPECS[@]}" -eq 0 ]; then
+            echo "built=false" >> "$GITHUB_OUTPUT"
+            echo "No pending scratch requests"
             exit 0
           fi
-          test -f "$SPEC"
-          echo "found=true" >> "$GITHUB_OUTPUT"
-          echo "path=$SPEC" >> "$GITHUB_OUTPUT"
-          echo "Building $SPEC"
-      - name: Install Lua 5.3
-        if: steps.spec.outputs.found == 'true'
-        run: |
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends lua5.3
-          command -v luac5.3
-      - name: Validate specification
-        if: steps.spec.outputs.found == 'true'
-        run: |
-          SPEC="${{ steps.spec.outputs.path }}"
-          node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(!/^[a-zA-Z0-9_-]{1,6}$/.test(s.name||''))throw Error('name must be 1-6 safe characters');if(!s.mission)throw Error('mission required')" "$SPEC"
-      - name: Generate complete Lua from scratch
-        if: steps.spec.outputs.found == 'true'
-        id: generate
-        run: |
-          FILE=$(node scripts/scratch-lua-generator.mjs "${{ steps.spec.outputs.path }}")
-          test -f "$FILE"
-          echo "file=$FILE" >> "$GITHUB_OUTPUT"
-          echo "base=$(basename "$FILE" .lua)" >> "$GITHUB_OUTPUT"
-      - name: Syntax compile and normalize
-        if: steps.spec.outputs.found == 'true'
-        run: |
-          set -euo pipefail
-          FILE="${{ steps.generate.outputs.file }}"
-          BASE="${{ steps.generate.outputs.base }}"
-          OUT="generations/scratch/$BASE"
-          mkdir -p "$OUT" reports
-          cp "$FILE" "$OUT/$BASE.lua"
-          luac5.3 -p "$OUT/$BASE.lua"
-          luac5.3 -s -o "$OUT/${BASE}_raw.luac" "$OUT/$BASE.lua"
-          cp toolchain/normalize_luac53_mt12.js toolchain/normalize_luac53_mt12.cjs
-          node toolchain/normalize_luac53_mt12.cjs "$OUT/${BASE}_raw.luac" "$OUT/$BASE.luac"
-          BYTES=$(wc -c < "$OUT/$BASE.luac" | tr -d ' ')
-          MARGIN=$((MT12_LIMIT-BYTES))
-          test "$BYTES" -le "$MT12_LIMIT"
-          SHA_LUA=$(sha256sum "$OUT/$BASE.lua" | awk '{print $1}')
-          SHA_LUAC=$(sha256sum "$OUT/$BASE.luac" | awk '{print $1}')
-          cat > "$OUT/build.json" <<JSON
-          {"status":"PASS","name":"$BASE","source":"$OUT/$BASE.lua","luac":"$OUT/$BASE.luac","bytes":$BYTES,"limit":$MT12_LIMIT,"margin":$MARGIN,"source_sha256":"$SHA_LUA","luac_sha256":"$SHA_LUAC","spec":"${{ steps.spec.outputs.path }}","built":"$(date -u +%FT%TZ)"}
-          JSON
-          rm -f "$OUT/${BASE}_raw.luac"
-      - name: Run MT12 audit factory
-        if: steps.spec.outputs.found == 'true'
-        run: |
-          BASE="${{ steps.generate.outputs.base }}"
-          python3 tools/mt12_factory.py "generations/scratch/$BASE/$BASE.lua" --release "$BASE" --out "generations/scratch/$BASE/audit" --normalizer toolchain/normalize_luac53_mt12.cjs || true
-      - name: Publish latest scratch build report
-        if: steps.spec.outputs.found == 'true'
-        run: |
-          BASE="${{ steps.generate.outputs.base }}"
-          mkdir -p reports
-          cp "generations/scratch/$BASE/build.json" reports/scratch-latest.json
-          node - <<'NODE'
-          const fs=require('fs');const p='reports/scratch-catalog.json';let d={updated:'',builds:[]};try{d=JSON.parse(fs.readFileSync(p))}catch{}
-          const b=JSON.parse(fs.readFileSync('reports/scratch-latest.json'));d.builds=(d.builds||[]).filter(x=>x.name!==b.name);d.builds.unshift(b);d.builds=d.builds.slice(0,50);d.updated=new Date().toISOString();fs.writeFileSync(p,JSON.stringify(d,null,2)+'\n');
+          echo "built=true" >> "$GITHUB_OUTPUT"
+          for SPEC in "${SPECS[@]}"; do
+            echo "Processing $SPEC"
+            node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(!/^[A-Za-z0-9_-]{1,6}$/.test(s.name||''))throw Error('name must be 1-6 safe characters');if(!String(s.mission||'').trim())throw Error('mission required')" "$SPEC"
+            FILE=$(node scripts/scratch-lua-generator.mjs "$SPEC")
+            test -f "$FILE"
+            BASE=$(basename "$FILE" .lua)
+            OUT="generations/scratch/$BASE"
+            mkdir -p "$OUT"
+            cp "$FILE" "$OUT/$BASE.lua"
+            luac5.3 -p "$OUT/$BASE.lua"
+            luac5.3 -s -o "$OUT/${BASE}_raw.luac" "$OUT/$BASE.lua"
+            node toolchain/normalize_luac53_mt12.cjs "$OUT/${BASE}_raw.luac" "$OUT/$BASE.luac"
+            BYTES=$(wc -c < "$OUT/$BASE.luac" | tr -d ' ')
+            MARGIN=$((MT12_LIMIT-BYTES))
+            if [ "$BYTES" -gt "$MT12_LIMIT" ]; then
+              echo "Normalized LUAC exceeds MT12 limit: $BYTES > $MT12_LIMIT" >&2
+              exit 1
+            fi
+            SHA_LUA=$(sha256sum "$OUT/$BASE.lua" | awk '{print $1}')
+            SHA_LUAC=$(sha256sum "$OUT/$BASE.luac" | awk '{print $1}')
+            node - "$OUT/build.json" "$BASE" "$OUT/$BASE.lua" "$OUT/$BASE.luac" "$BYTES" "$MARGIN" "$SHA_LUA" "$SHA_LUAC" "$SPEC" <<'NODE'
+          const fs=require('fs');
+          const [p,name,source,luac,bytes,margin,sourceSha,luacSha,spec]=process.argv.slice(2);
+          fs.writeFileSync(p,JSON.stringify({status:'PASS',name,source,luac,bytes:Number(bytes),limit:88944,margin:Number(margin),source_sha256:sourceSha,luac_sha256:luacSha,spec,built:new Date().toISOString()},null,2)+'\n');
           NODE
-      - name: Commit complete Lua and normalized LUAC
-        if: steps.spec.outputs.found == 'true'
+            rm -f "$OUT/${BASE}_raw.luac"
+            python3 tools/mt12_factory.py "$OUT/$BASE.lua" --release "$BASE" --out "$OUT/audit" --normalizer toolchain/normalize_luac53_mt12.cjs || true
+          done
+      - name: Rebuild scratch catalog
+        if: steps.build.outputs.built == 'true'
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const root='generations/scratch',builds=[];
+          if(fs.existsSync(root)) for(const n of fs.readdirSync(root)){
+            const p=path.join(root,n,'build.json');
+            try{builds.push(JSON.parse(fs.readFileSync(p,'utf8')))}catch{}
+          }
+          builds.sort((a,b)=>Date.parse(b.built||0)-Date.parse(a.built||0));
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/scratch-catalog.json',JSON.stringify({updated:new Date().toISOString(),builds:builds.slice(0,50)},null,2)+'\n');
+          if(builds[0])fs.writeFileSync('reports/scratch-latest.json',JSON.stringify(builds[0],null,2)+'\n');
+          NODE
+      - name: Commit complete source, normalized LUAC and reports
+        if: steps.build.outputs.built == 'true'
+        shell: bash
         run: |
           set -euo pipefail
-          git config user.name "MT12 Scratch Factory"
-          git config user.email "actions@users.noreply.github.com"
-          git add generations/scratch reports/scratch-latest.json reports/scratch-catalog.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Build complete scratch MT12 Lua ${{ steps.generate.outputs.base }} [skip factory]"
-          for attempt in 1 2 3; do
+          git config user.name 'MT12 Scratch Factory'
+          git config user.email 'actions@users.noreply.github.com'
+          git add generations/scratch reports/scratch-catalog.json reports/scratch-latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Build complete scratch MT12 Lua batch [skip factory]"
+          for attempt in 1 2 3 4; do
             git pull --rebase origin main && git push origin HEAD:main && exit 0
             git rebase --abort 2>/dev/null || true
-            sleep $((attempt * 3))
+            sleep $((attempt * 4))
           done
           exit 1
-      - uses: actions/upload-artifact@v4
-        if: steps.spec.outputs.found == 'true'
+      - name: Upload scratch outputs
+        if: steps.build.outputs.built == 'true'
+        uses: actions/upload-artifact@v4
         with:
-          name: mt12-scratch-${{ steps.generate.outputs.base }}
+          name: mt12-scratch-builds-${{ github.run_number }}
           path: |
-            generations/scratch/${{ steps.generate.outputs.base }}/${{ steps.generate.outputs.base }}.lua
-            generations/scratch/${{ steps.generate.outputs.base }}/${{ steps.generate.outputs.base }}.luac
-            generations/scratch/${{ steps.generate.outputs.base }}/build.json
+            generations/scratch/
+            reports/scratch-catalog.json
+            reports/scratch-latest.json
           retention-days: 30
