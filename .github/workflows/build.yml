@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       mission:
-        description: Optional programming mission
+        description: Programming mission for the AI factory
         required: false
-        default: Build the brightest safe next generation
+        default: Build the brightest safe next generation while preserving every proven behavior
+      model:
+        description: GitHub Models model ID
+        required: false
+        default: openai/gpt-4.1
   push:
     branches: [main]
     paths:
@@ -20,6 +24,7 @@ on:
 permissions:
   contents: read
   actions: read
+  models: read
 
 concurrency:
   group: mt12-master-factory-${{ github.ref }}
@@ -28,7 +33,11 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FACTORY_MISSION: ${{ inputs.mission || 'Build the brightest safe next generation while preserving every proven behavior' }}
+      FACTORY_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
     steps:
       - name: Checkout complete lineage
         uses: actions/checkout@v4
@@ -45,8 +54,9 @@ jobs:
       - name: Record mission
         run: |
           mkdir -p dist
-          printf '%s\n' '${{ inputs.mission }}' > dist/MISSION.txt
-      - name: Run self-seeding master factory
+          printf '%s\n' "$FACTORY_MISSION" > dist/MISSION.txt
+          printf '%s\n' "$FACTORY_MODEL" > dist/MODEL.txt
+      - name: Invent, compile, normalize and audit candidates
         run: node scripts/master-factory.mjs
       - name: Package verified outputs and diagnostics
         if: always()
