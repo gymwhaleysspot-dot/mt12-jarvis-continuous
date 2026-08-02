@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const root=process.cwd(),dir=path.join(root,'completion','evidence'),out=path.join(root,'public','completion-data');fs.mkdirSync(dir,{recursive:true});fs.mkdirSync(out,{recursive:true});
+const types=['FULL_MISSION','MT12_RUNTIME','MEMORY_STRESS','RESTORE','IOS_RELEASE','ANDROID_HARDWARE','ELRS_BUILD','POST_FLASH','NOTIFICATION'];
+const sha=s=>/^[a-f0-9]{64}$/.test(String(s||''));const certs=[];
+for(const f of fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort()){const p=path.join(dir,f);let j;try{j=JSON.parse(fs.readFileSync(p,'utf8'))}catch(e){throw Error(`${f}: invalid JSON: ${e.message}`)}if(!types.includes(j.type))throw Error(`${f}: invalid type`);if(!['PASS','FAIL','BLOCKED','PENDING'].includes(j.status))throw Error(`${f}: invalid status`);if(!sha(j.subject?.sourceSha256))throw Error(`${f}: sourceSha256 required`);if(j.subject?.luacSha256&&!sha(j.subject.luacSha256))throw Error(`${f}: invalid luacSha256`);const bytes=fs.readFileSync(p);certs.push({...j,file:`completion/evidence/${f}`,certificateSha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
+const latest={};for(const t of types){const x=certs.filter(c=>c.type===t).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0];latest[t]=x||{type:t,status:'PENDING',createdAt:null,evidence:{}}}
+const required=['FULL_MISSION','MT12_RUNTIME','MEMORY_STRESS','RESTORE','ANDROID_HARDWARE','ELRS_BUILD','POST_FLASH'];const ready=required.every(t=>latest[t].status==='PASS');
+const dashboard={generatedAt:new Date().toISOString(),readyForTrustedRelease:ready,latest,counts:Object.fromEntries(types.map(t=>[t,certs.filter(c=>c.type===t).length])),blocking:required.filter(t=>latest[t].status!=='PASS')};
+fs.writeFileSync(path.join(out,'dashboard.json'),JSON.stringify(dashboard,null,2));fs.writeFileSync(path.join(out,'certificates.json'),JSON.stringify(certs,null,2));console.log(`Completion index: ${certs.length} certificates; ready=${ready}`);

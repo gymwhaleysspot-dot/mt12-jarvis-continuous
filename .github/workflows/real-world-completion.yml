@@ -1,0 +1,123 @@
+name: A17Y Real-World Completion
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Completion action
+        required: true
+        type: choice
+        options: [INDEX, FULL_MISSION, VALIDATE_CERTIFICATES, PACKAGE_BENCH, NOTIFY]
+        default: INDEX
+      mission_question:
+        description: Question for a full production mission
+        required: false
+        default: Validate the complete A17Y engineering workflow against all recorded evidence
+      certificate_path:
+        description: Optional repository certificate path
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths:
+      - completion/**
+      - radio/mt12cert.lua
+      - public/completion-data/**
+      - .github/workflows/real-world-completion.yml
+permissions:
+  contents: write
+  actions: write
+  issues: write
+concurrency:
+  group: a17y-real-world-completion
+  cancel-in-progress: false
+jobs:
+  completion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate completion tools
+        run: |
+          set -euo pipefail
+          node --check completion/run.mjs
+          node --check completion/verify-restore.mjs
+          node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
+          lua5.3 -v >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y lua5.3)
+          lua5.3 -e "assert(loadfile('radio/mt12cert.lua'))"
+      - name: Dispatch and wait for full production mission
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.action == 'FULL_MISSION' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUESTION: ${{ inputs.mission_question }}
+        run: |
+          set -euo pipefail
+          BEFORE=$(date -u +%s)
+          gh workflow run engineering-mission.yml -f question="$QUESTION" -f hypothesis='A complete evidence-bounded mission can finish without authority or packaging failures' -f tournament=true -f fuzz_cases=10000
+          sleep 8
+          RUN=''
+          for i in $(seq 1 90); do
+            RUN=$(gh run list --workflow engineering-mission.yml --event workflow_dispatch --limit 10 --json databaseId,createdAt --jq ".[]|select((.createdAt|fromdateiso8601)>=$BEFORE)|.databaseId" | head -1)
+            [ -n "$RUN" ] && break
+            sleep 5
+          done
+          test -n "$RUN"
+          gh run watch "$RUN" --exit-status
+          mkdir -p completion/full-mission
+          gh run download "$RUN" -D completion/full-mission
+          find completion/full-mission -type f -maxdepth 4 -print
+          test -n "$(find completion/full-mission -type f -name '*.zip' -o -name 'MISSION.json' | head -1)"
+          printf '{"type":"FULL_MISSION","createdAt":"%s","status":"PASS","subject":{"sourceSha256":"%s","missionId":"run-%s"},"evidence":{"workflowRunId":%s,"artifactDirectory":"completion/full-mission"}}\n' "$(date -u +%FT%TZ)" "$(sha256sum a17y.lua|cut -d' ' -f1)" "$RUN" "$RUN" > completion/evidence/full-mission-$RUN.json
+      - name: Validate supplied certificate
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.certificate_path != '' }}
+        env: {CERT: '${{ inputs.certificate_path }}'}
+        run: |
+          set -euo pipefail
+          test -f "$CERT"
+          cp "$CERT" "completion/evidence/$(basename "$CERT")"
+      - name: Build bench and recovery package
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.action == 'PACKAGE_BENCH' }}
+        run: |
+          set -euo pipefail
+          mkdir -p completion/bench-package
+          cp radio/mt12cert.lua completion/bench-package/
+          cp completion/schema.json completion/bench-package/
+          cp completion/verify-restore.mjs completion/bench-package/
+          cat > completion/bench-package/README.txt <<'TXT'
+          Run mt12cert.lua on the real MT12 with the exact candidate installed. Test blank, current, legacy, truncated, oversized and repeated memory load/save states. Return mt12cert.csv plus a certificate JSON containing exact source and normalized LUAC SHA-256 values. Restore testing must start with a pre-restore backup and must pass every manifest hash.
+          TXT
+          tar -czf a17y-mt12-bench-and-recovery.tar.gz -C completion bench-package
+      - name: Index and validate all certificates
+        run: node completion/run.mjs
+      - name: Publish completion data
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add completion/evidence public/completion-data
+          git commit -m 'Update real-world completion evidence' || exit 0
+          git push
+      - name: Upload completion package
+        uses: actions/upload-artifact@v6
+        with:
+          name: a17y-real-world-completion
+          path: |
+            public/completion-data
+            completion/evidence
+            completion/full-mission
+            a17y-mt12-bench-and-recovery.tar.gz
+          if-no-files-found: warn
+          retention-days: 180
+      - name: Create important notification
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.action == 'NOTIFY' || inputs.action == 'FULL_MISSION') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTIFY_URL: ${{ secrets.A17Y_NOTIFY_URL }}
+        run: |
+          set -euo pipefail
+          BODY="A17Y completion action ${{ inputs.action }} finished for commit $GITHUB_SHA. Review completion.html and the workflow artifact."
+          gh issue create --title "A17Y completion: ${{ inputs.action }}" --body "$BODY" || true
+          if [ -n "${NOTIFY_URL:-}" ]; then curl --fail --silent --show-error -X POST -H 'Content-Type: text/plain' --data "$BODY" "$NOTIFY_URL"; fi
