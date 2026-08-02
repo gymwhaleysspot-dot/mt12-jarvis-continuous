@@ -1,15 +1,20 @@
-name: A17Y Engineering Workbench
+name: A17Y LUAC AI Builder
 on:
   workflow_dispatch:
     inputs:
       child:
-        description: Child Lua path; blank builds exact A17Y
+        description: Existing repository Lua path; blank lets the Director generate from A17Y
         required: false
         default: ''
       mission:
-        description: One narrowly scoped engineering mission
-        required: false
-        default: Exact deterministic release
+        description: Evidence-bounded engineering mission
+        required: true
+        default: Build the strongest verified MT12 LUAC without regressions
+      generate:
+        description: Run AI diagnosis, candidate generation, repair and audit
+        required: true
+        type: boolean
+        default: true
   push:
     branches: [main]
     paths:
@@ -17,19 +22,22 @@ on:
       - candidates/**
       - protected/**
       - workbench/**
+      - director/**
       - toolchain/**
       - scripts/mt12-harness.lua
+      - tests/replays/**
       - .github/workflows/workbench.yml
 permissions:
   contents: read
   actions: read
+  models: read
 concurrency:
-  group: a17y-workbench-${{ github.ref }}
+  group: a17y-luac-ai-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -41,26 +49,64 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Verify workbench
+      - name: Verify pipeline source
         run: |
+          set -euo pipefail
           test -f a17y.lua
+          node --check director/run.mjs
           node --check workbench/run.mjs
+          node --check workbench/rcos.mjs
           node --check toolchain/normalize_luac53_mt12.js
           bash -n toolchain/compile_mt12.sh
-      - name: Build and compare
+      - name: Discover replay evidence
+        id: logs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=[str(x) for x in Path('tests/replays').rglob('*.csv')] if Path('tests/replays').exists() else []
+          with open('/tmp/logs.txt','w') as f: f.write('\n'.join(p))
+          with open(__import__('os').environ['GITHUB_OUTPUT'],'a') as f: f.write('count=%d\n'%len(p))
+          print('Discovered',len(p),'replay logs')
+          PY
+      - name: AI diagnosis, generation and repair
+        if: ${{ inputs.generate != false && inputs.child == '' }}
         env:
-          CHILD: ${{ inputs.child }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DIRECTOR_MISSION: ${{ inputs.mission }}
+        run: |
+          set -euo pipefail
+          export DIRECTOR_LOGS="$(tr '\n' ' ' </tmp/logs.txt)"
+          node director/run.mjs
+      - name: Select immutable candidate
+        id: candidate
+        env:
+          REQUESTED_CHILD: ${{ inputs.child }}
+        run: |
+          set -euo pipefail
+          if [ -n "$REQUESTED_CHILD" ]; then C="$REQUESTED_CHILD";
+          elif [ -f dist-director/WINNER.lua ]; then C=dist-director/WINNER.lua;
+          else C=a17y.lua; fi
+          test -f "$C"
+          echo "path=$C" >> "$GITHUB_OUTPUT"
+          echo "Selected $C"
+      - name: Compile, normalize, execute bytecode, replay and score
+        env:
+          CHILD: ${{ steps.candidate.outputs.path }}
           MISSION: ${{ inputs.mission }}
+          WORKBENCH_LOG_FILE: /tmp/logs.txt
+        run: node workbench/run.mjs a17y.lua "$CHILD" "$MISSION"
+      - name: Package complete evidence
         run: |
-          C="${CHILD:-a17y.lua}"
-          node workbench/run.mjs a17y.lua "$C" "$MISSION"
-      - name: Package evidence
-        run: |
-          cd dist-workbench
-          zip -9 -r ../a17y-workbench-result.zip .
+          set -euo pipefail
+          mkdir -p dist-package
+          cp -a dist-workbench/. dist-package/
+          if [ -d dist-director ]; then mkdir -p dist-package/director; cp -a dist-director/. dist-package/director/; fi
+          cp /tmp/logs.txt dist-package/REPLAY-INPUTS.txt
+          cd dist-package
+          zip -9 -r ../a17y-luac-ai-result.zip .
       - uses: actions/upload-artifact@v6
         with:
-          name: a17y-workbench-result
-          path: a17y-workbench-result.zip
+          name: a17y-luac-ai-result
+          path: a17y-luac-ai-result.zip
           if-no-files-found: error
           retention-days: 90
