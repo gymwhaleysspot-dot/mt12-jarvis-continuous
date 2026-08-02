@@ -1,34 +1,33 @@
-name: Publish One-Button Factory Page
-
+name: Publish A17Y Engineering OS
 on:
   push:
     branches: [main]
     paths:
-      - 'index.html'
-      - '.github/workflows/pages.yml'
+      - index.html
+      - research.html
+      - .github/workflows/pages.yml
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          enablement: true
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
