@@ -1,6 +1,10 @@
 name: Build A17Y MT12 Mobile Companions
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - mobile/**
+      - .github/workflows/mobile-companions.yml
   push:
     branches: [main]
     paths:
@@ -9,10 +13,27 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: a17y-mobile-companions
+  group: a17y-mobile-companions-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  wiring-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify end-to-end mobile wiring
+        run: |
+          set -euo pipefail
+          grep -R 'api.github.com/repos' mobile/android mobile/ios
+          grep -R 'importedHashes' mobile/android mobile/ios
+          grep -R 'firmware-catalog.json' mobile/android mobile/ios
+          grep -R 'EDGETX_UF2' mobile/android mobile/ios
+          grep -R 'EncryptedSharedPreferences' mobile/android
+          grep -R 'kSecClassGenericPassword' mobile/ios
+          grep -R 'USB_DEVICE_ATTACHED' mobile/android
+          grep -R 'scenePhase' mobile/ios
+          grep -R 'GitHub did not confirm' mobile/android mobile/ios
   android:
+    needs: wiring-audit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -26,6 +47,8 @@ jobs:
       - name: Build Android APK
         working-directory: mobile/android
         run: gradle :app:assembleDebug --stacktrace
+      - name: Verify APK
+        run: test -s mobile/android/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v6
         with:
           name: a17y-mt12-android-apk
@@ -33,6 +56,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   ios:
+    needs: wiring-audit
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
@@ -44,9 +68,11 @@ jobs:
       - name: Build unsigned iOS Simulator app
         working-directory: mobile/ios
         run: |
+          set -euo pipefail
           xcodebuild -project A17YMT12Companion.xcodeproj -scheme A17YMT12Companion -sdk iphonesimulator -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          test -d 'build/Build/Products/Release-iphonesimulator/A17Y MT12.app'
           cd build/Build/Products/Release-iphonesimulator
-          zip -9 -r ../../../../../a17y-mt12-ios-simulator.zip "A17Y MT12.app"
+          zip -9 -r ../../../../../a17y-mt12-ios-simulator.zip 'A17Y MT12.app'
       - uses: actions/upload-artifact@v6
         with:
           name: a17y-mt12-ios-source-and-simulator
