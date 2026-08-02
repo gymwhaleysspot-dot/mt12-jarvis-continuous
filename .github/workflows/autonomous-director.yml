@@ -1,0 +1,99 @@
+name: A17Y Autonomous Engineering Director
+on:
+  workflow_dispatch:
+    inputs:
+      mission:
+        description: Optional engineering objective; blank lets the Director choose from evidence
+        required: false
+        default: Autonomously diagnose and improve the highest-value evidence-supported weakness
+      logs:
+        description: Space-separated replay CSV paths
+        required: false
+        default: ''
+      model:
+        description: GitHub Models model ID
+        required: false
+        default: openai/gpt-4.1
+  schedule:
+    - cron: '17 9 * * *'
+  push:
+    branches: [main]
+    paths:
+      - a17y.lua
+      - tests/replays/**
+      - director/config.json
+      - director/run.mjs
+      - workbench/rcos.mjs
+      - protected/a17y-contract.json
+      - toolchain/**
+      - scripts/mt12-harness.lua
+      - .github/workflows/autonomous-director.yml
+permissions:
+  contents: write
+  actions: read
+  models: read
+concurrency:
+  group: a17y-autonomous-director
+  cancel-in-progress: false
+jobs:
+  direct:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DIRECTOR_MISSION: ${{ inputs.mission || 'Autonomously diagnose and improve the highest-value evidence-supported weakness' }}
+      DIRECTOR_LOGS: ${{ inputs.logs || '' }}
+      DIRECTOR_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate intelligence and deterministic layers
+        run: |
+          test -f a17y.lua
+          test -f director/memory.json
+          node --check director/run.mjs
+          node --check workbench/rcos.mjs
+          node --check toolchain/normalize_luac53_mt12.js
+          bash -n toolchain/compile_mt12.sh
+          luac5.3 -p a17y.lua
+          luac5.3 -p scripts/mt12-harness.lua
+      - name: Observe, diagnose, hypothesize, engineer, test, repair and decide
+        run: node director/run.mjs
+      - name: Package complete engineering evidence
+        if: always()
+        run: |
+          mkdir -p dist-director
+          cp director/memory.json dist-director/ENGINEERING-MEMORY.json
+          cd dist-director
+          zip -9 -r ../a17y-autonomous-director.zip .
+      - name: Publish Director result
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: a17y-autonomous-director
+          path: a17y-autonomous-director.zip
+          if-no-files-found: error
+          retention-days: 90
+      - name: Persist engineering memory
+        if: always() && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          if git diff --quiet -- director/memory.json; then
+            echo 'Engineering memory unchanged.'
+            exit 0
+          fi
+          git config user.name 'A17Y Engineering Director'
+          git config user.email 'actions@users.noreply.github.com'
+          git add director/memory.json
+          git commit -m 'Record autonomous engineering evidence [skip ci]'
+          git push
