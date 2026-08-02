@@ -20,18 +20,23 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Verify end-to-end mobile wiring
+      - name: Verify complete mobile wiring
         run: |
           set -euo pipefail
           grep -R 'api.github.com/repos' mobile/android mobile/ios
           grep -R 'importedHashes' mobile/android mobile/ios
+          grep -R 'public/control-data/log-hashes.json' mobile/android mobile/ios
           grep -R 'public/device-data/releases.json' mobile/android mobile/ios
-          grep -R 'EDGETX_UF2' mobile/android mobile/ios
+          grep -R 'officialFirmwareMatch' mobile/android mobile/ios
+          grep -R 'generate' mobile/android mobile/ios
+          grep -R 'AI diagnosis, generation and repair' mobile/android mobile/ios
           grep -R 'EncryptedSharedPreferences' mobile/android
           grep -R 'kSecClassGenericPassword' mobile/ios
           grep -R 'USB_DEVICE_ATTACHED' mobile/android
           grep -R 'scenePhase' mobile/ios
           grep -R 'GitHub did not confirm' mobile/android mobile/ios
+          grep -R 'versionName = "1.2.0"' mobile/android
+          grep -R 'MARKETING_VERSION: 1.2.0' mobile/ios
   android:
     needs: wiring-audit
     runs-on: ubuntu-24.04
@@ -51,7 +56,7 @@ jobs:
         run: test -s mobile/android/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v6
         with:
-          name: a17y-mt12-android-apk
+          name: a17y-mt12-android-apk-v1.2.0
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
@@ -72,13 +77,13 @@ jobs:
           xcodebuild -project A17YMT12Companion.xcodeproj -scheme A17YMT12Companion -sdk iphonesimulator -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
           test -d 'build/Build/Products/Release-iphonesimulator/A17Y MT12.app'
           cd build/Build/Products/Release-iphonesimulator
-          zip -9 -r ../../../../../a17y-mt12-ios-simulator.zip 'A17Y MT12.app'
+          zip -9 -r ../../../../../a17y-mt12-ios-simulator-v1.2.0.zip 'A17Y MT12.app'
       - uses: actions/upload-artifact@v6
         with:
-          name: a17y-mt12-ios-source-and-simulator
+          name: a17y-mt12-ios-v1.2.0-source-and-simulator
           path: |
             mobile/ios/A17YMT12Companion.xcodeproj
             mobile/ios/Sources
-            a17y-mt12-ios-simulator.zip
+            a17y-mt12-ios-simulator-v1.2.0.zip
           if-no-files-found: error
           retention-days: 90
