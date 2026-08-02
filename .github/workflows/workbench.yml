@@ -1,0 +1,66 @@
+name: A17Y Engineering Workbench
+on:
+  workflow_dispatch:
+    inputs:
+      child:
+        description: Child Lua path; blank builds exact A17Y
+        required: false
+        default: ''
+      mission:
+        description: One narrowly scoped engineering mission
+        required: false
+        default: Exact deterministic release
+  push:
+    branches: [main]
+    paths:
+      - a17y.lua
+      - candidates/**
+      - protected/**
+      - workbench/**
+      - toolchain/**
+      - scripts/mt12-harness.lua
+      - .github/workflows/workbench.yml
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: a17y-workbench-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install deterministic toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Verify workbench
+        run: |
+          test -f a17y.lua
+          node --check workbench/run.mjs
+          node --check toolchain/normalize_luac53_mt12.js
+          bash -n toolchain/compile_mt12.sh
+      - name: Build and compare
+        env:
+          CHILD: ${{ inputs.child }}
+          MISSION: ${{ inputs.mission }}
+        run: |
+          C="${CHILD:-a17y.lua}"
+          node workbench/run.mjs a17y.lua "$C" "$MISSION"
+      - name: Package evidence
+        run: |
+          cd dist-workbench
+          zip -9 -r ../a17y-workbench-result.zip .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-workbench-result
+          path: a17y-workbench-result.zip
+          if-no-files-found: error
+          retention-days: 90

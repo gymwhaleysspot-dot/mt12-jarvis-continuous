@@ -1,0 +1,15 @@
+{
+  "name": "A17Y Protected Parent",
+  "parent": "a17y.lua",
+  "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+  "maxNormalizedBytes": 87000,
+  "required": [
+    "return{init=init,run=run,background=background}",
+    "io.read(",
+    "setgv(7,1024)",
+    "MEMPATH",
+    "GPS_LOST"
+  ],
+  "forbidden": [":read(", "io.popen(", "os.execute(", "function fo()fo()end"],
+  "promotionStages": ["COMPILES", "SIMULATION PASSED", "BENCH PASSED", "ROAD PASSED"]
+}
