@@ -1,0 +1,299 @@
+{
+  "mission": {
+    "id": "20260802072328-18d2d36b",
+    "question": "Automatically investigate new evidence",
+    "hypothesis": "New evidence may reveal a safe measurable improvement",
+    "createdAt": "2026-08-02T07:23:28.284Z",
+    "updatedAt": "2026-08-02T07:23:28.284Z",
+    "stage": "GENERATED",
+    "hardwareFingerprint": {
+      "radio": "RadioMaster MT12",
+      "edgeTx": "unknown",
+      "elrs": "unknown",
+      "modelYamlSha256": "",
+      "luaSha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+      "luacSha256": "",
+      "vehicle": "MJX Hyper Go 7303",
+      "gearing": "unknown",
+      "tires": "stock/unknown",
+      "battery": "unknown",
+      "surface": "unknown",
+      "weather": "unknown",
+      "driver": "Michael"
+    },
+    "evidence": {
+      "logs": [],
+      "labels": [],
+      "research": [],
+      "bench": [],
+      "road": []
+    },
+    "baseline": {
+      "controller": "a17y.lua",
+      "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+      "logs": [],
+      "eventCounts": {
+        "launch": 0,
+        "tc": 0,
+        "abs": 0,
+        "jump": 0,
+        "landing": 0,
+        "gps-loss": 0,
+        "rpm-lag": 0,
+        "dropout": 0,
+        "corner-entry": 0,
+        "corner-exit": 0,
+        "calm": 0
+      },
+      "fresh": true,
+      "generatedAt": "2026-08-02T07:23:28.284Z"
+    },
+    "events": [],
+    "counterfactuals": [
+      {
+        "id": "gps-early",
+        "mutation": "remove GPS 500 ms before each observed loss",
+        "status": "planned"
+      },
+      {
+        "id": "rpm-freeze",
+        "mutation": "freeze RPM for bounded windows",
+        "status": "planned"
+      },
+      {
+        "id": "throttle-drop",
+        "mutation": "drop throttle for one frame",
+        "status": "planned"
+      },
+      {
+        "id": "short-jump",
+        "mutation": "shorten airborne evidence",
+        "status": "planned"
+      },
+      {
+        "id": "steered-landing",
+        "mutation": "inject steering during landing",
+        "status": "planned"
+      },
+      {
+        "id": "memory-corrupt",
+        "mutation": "load truncated and corrupt memory",
+        "status": "planned"
+      }
+    ],
+    "fuzz": {
+      "seed": 20260802,
+      "cases": 10000,
+      "domains": [
+        "extreme-values",
+        "rapid-transitions",
+        "missing-fields",
+        "non-finite-substitutes",
+        "sensor-freezes",
+        "restart-sequences",
+        "low-speed-noise",
+        "high-speed-dropouts"
+      ],
+      "invariants": [
+        "no-crash",
+        "finite-gvars",
+        "car-off-safe",
+        "fail-open",
+        "protected-channel-map"
+      ],
+      "status": "planned"
+    },
+    "candidates": [
+      {
+        "id": "20260802072328-18d2d36b-c1",
+        "profile": "conservative",
+        "status": "QUEUED",
+        "mission": "Automatically investigate new evidence. Strategy: conservative",
+        "metrics": {},
+        "artifacts": []
+      },
+      {
+        "id": "20260802072328-18d2d36b-c2",
+        "profile": "performance",
+        "status": "QUEUED",
+        "mission": "Automatically investigate new evidence. Strategy: performance",
+        "metrics": {},
+        "artifacts": []
+      },
+      {
+        "id": "20260802072328-18d2d36b-c3",
+        "profile": "learning",
+        "status": "QUEUED",
+        "mission": "Automatically investigate new evidence. Strategy: learning",
+        "metrics": {},
+        "artifacts": []
+      },
+      {
+        "id": "20260802072328-18d2d36b-c4",
+        "profile": "memory-efficient",
+        "status": "QUEUED",
+        "mission": "Automatically investigate new evidence. Strategy: memory-efficient",
+        "metrics": {},
+        "artifacts": []
+      },
+      {
+        "id": "20260802072328-18d2d36b-c5",
+        "profile": "alternative-algorithm",
+        "status": "QUEUED",
+        "mission": "Automatically investigate new evidence. Strategy: alternative-algorithm",
+        "metrics": {},
+        "artifacts": []
+      }
+    ],
+    "adversarialReview": {
+      "status": "QUEUED",
+      "checks": [
+        "overfit",
+        "hidden-regression",
+        "unreachable-protection",
+        "false-confidence",
+        "sensor-state-gaps",
+        "memory-risk",
+        "dashboard-breakage",
+        "persistence-breakage"
+      ]
+    },
+    "memoryCompatibility": {
+      "cases": [
+        "empty",
+        "current-schema",
+        "older-schema",
+        "truncated",
+        "corrupt-row",
+        "oversized-values",
+        "partial-write",
+        "repeated-load-save"
+      ],
+      "required": true,
+      "status": "planned"
+    },
+    "runtimeProfile": {
+      "radioCertificateRequired": true,
+      "metrics": [
+        "free-before-load",
+        "after-init",
+        "after-car-connect",
+        "after-memory-load",
+        "event-peak",
+        "logging-peak",
+        "ten-minute-memory",
+        "gc-pressure",
+        "average-frame-time",
+        "worst-frame-time",
+        "allocations-per-frame"
+      ],
+      "status": "AWAITING_BENCH"
+    },
+    "driverPreference": {
+      "smoothVsAggressive": "balanced",
+      "earlyVsLate": "balanced",
+      "launch": "strong-smooth",
+      "landing": "soft-stable"
+    },
+    "surfaceProfile": {
+      "requested": "auto-cluster",
+      "clusters": []
+    },
+    "calibration": {
+      "watch": [
+        "rpm-to-mph",
+        "gps-lag",
+        "rpm-lag",
+        "tire-diameter",
+        "battery-sag",
+        "steering-center",
+        "dropout-rate"
+      ],
+      "status": "MONITOR"
+    },
+    "protectedTests": [
+      "TCT=1024 pass-through",
+      "CH15 TCT preserved",
+      "CH16 GYR preserved",
+      "car-off safe",
+      "no static brake",
+      "dropout fail-open",
+      "dashboard contract",
+      "io.read(fileHandle,...)",
+      "memory schema compatibility"
+    ],
+    "releaseLadder": [
+      {
+        "stage": "GENERATED",
+        "passed": true,
+        "evidence": [
+          "mission:20260802072328-18d2d36b"
+        ]
+      },
+      {
+        "stage": "STATIC_CHECKED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "COMPILED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "NORMALIZED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "SIMULATION_PASSED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "LOG_REPLAY_PASSED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "ADVERSARIAL_REVIEW_PASSED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "MT12_BENCH_PASSED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "ROAD_TESTED",
+        "passed": false,
+        "evidence": []
+      },
+      {
+        "stage": "TRUSTED_RELEASE",
+        "passed": false,
+        "evidence": []
+      }
+    ],
+    "rollback": {
+      "recommended": false,
+      "reason": "No road comparison yet"
+    },
+    "notifications": [],
+    "audit": {
+      "claimsMustLinkMetrics": true,
+      "offlineQueueSupported": true,
+      "retention": {
+        "trusted": "permanent",
+        "rejected": "keep-reason",
+        "intermediateDays": 90
+      }
+    }
+  },
+  "analyses": [],
+  "generatedAt": "2026-08-02T07:23:28.284Z",
+  "sourceHashes": {
+    "missionEngine": "69fdfa12eb52351fa7f4cb7dd634c346f5ead8835ae323be4646c202194143f5"
+  }
+}
