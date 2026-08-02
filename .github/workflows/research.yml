@@ -1,0 +1,80 @@
+name: A17Y Continuous Research Lab
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: Optional research question or topic
+        required: false
+        default: ''
+      model:
+        description: Primary GitHub Models model ID
+        required: false
+        default: openai/gpt-4.1
+  schedule:
+    - cron: '23 * * * *'
+permissions:
+  contents: write
+  models: read
+  actions: read
+concurrency:
+  group: a17y-continuous-research
+  cancel-in-progress: true
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RESEARCH_TOPIC: ${{ inputs.topic || '' }}
+      RESEARCH_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate Research Lab
+        run: |
+          node --check research/run.mjs
+          node -e "JSON.parse(require('fs').readFileSync('research/config.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('research/questions.json'))"
+      - name: Publish visible running state
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const now=new Date().toISOString();const s=JSON.parse(fs.readFileSync('research/state.json'));s.status='RUNNING';s.phase='COLLECTING';s.currentTopic=process.env.RESEARCH_TOPIC||'Highest-priority open engineering question';s.startedAt=now;s.updatedAt=now;s.message='Collecting and reading public engineering sources.';s.recentActivity=[{at:now,phase:'START',message:'Research workflow started.'}];fs.writeFileSync('research/state.json',JSON.stringify(s,null,2)+'\n');
+          NODE
+          git config user.name 'A17Y Research Lab'
+          git config user.email 'actions@users.noreply.github.com'
+          git add research/state.json
+          git commit -m 'Research Lab started [skip ci]' || true
+          git pull --rebase origin main
+          git push
+      - name: Collect, read, challenge and synthesize research
+        run: node research/run.mjs | tee research/research-run.log
+      - name: Validate cited findings
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync('research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('Accepted finding has invalid citations');}console.log(`validated ${r.acceptedFindings.length} accepted findings against ${ids.size} sources`);
+          NODE
+      - name: Commit transparent research record
+        shell: bash
+        run: |
+          git add research/state.json research/current.json research/questions.json research/history research/research-run.log
+          git commit -m 'Record continuous engineering research [skip ci]' || true
+          git pull --rebase origin main
+          git push
+      - name: Publish research evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: a17y-research-lab
+          path: |
+            research/state.json
+            research/current.json
+            research/questions.json
+            research/research-run.log
+          if-no-files-found: error
+          retention-days: 90
