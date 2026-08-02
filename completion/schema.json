@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"A17Y Real-World Completion Certificate",
+  "type":"object",
+  "required":["type","createdAt","status","subject","evidence"],
+  "properties":{
+    "type":{"enum":["FULL_MISSION","MT12_RUNTIME","MEMORY_STRESS","RESTORE","IOS_RELEASE","ANDROID_HARDWARE","ELRS_BUILD","POST_FLASH","NOTIFICATION"]},
+    "createdAt":{"type":"string"},
+    "status":{"enum":["PASS","FAIL","BLOCKED","PENDING"]},
+    "subject":{"type":"object","required":["sourceSha256"],"properties":{"sourceSha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"luacSha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"hardwareFingerprint":{"type":"string"},"missionId":{"type":"string"}}},
+    "evidence":{"type":"object"},
+    "notes":{"type":"array","items":{"type":"string"}}
+  }
+}
