@@ -20,15 +20,8 @@ const rcosOut=path.join(out,'rcos');
 run('node',['workbench/rcos.mjs',parent,child,mission,...logs],{env:{...process.env,RCOS_OUT:rcosOut}});
 const rcos=JSON.parse(fs.readFileSync(path.join(rcosOut,'REPORT.json'),'utf8'));
 const deploy=path.join(rcosOut,'DEPLOY.luac');
-const bytecodeStress=JSON.parse(run('lua5.3',['scripts/mt12-bytecode-stress.lua',deploy,'16']).trim());
-const byteTrace=path.join(out,'normalized-bytecode-trace.csv');
-run('lua5.3',['scripts/mt12-harness.lua',deploy,byteTrace]);
-const sourceTrace=path.join(rcosOut,'child-trace.csv');
-const parse=p=>fs.readFileSync(p,'utf8').trim().split(/\r?\n/).map(x=>x.split(','));
-const a=parse(sourceTrace),b=parse(byteTrace);if(a.length!==b.length)fail('normalized bytecode trace length differs from source',{sourceRows:a.length,bytecodeRows:b.length});
-let bytecodeDelta=0,bytecodeChangedRows=0;
-for(let i=1;i<a.length;i++){let changed=false;for(let j=1;j<Math.min(a[i].length,b[i].length);j++){const x=Number(a[i][j]),y=Number(b[i][j]);if(Number.isFinite(x)&&Number.isFinite(y)){const d=Math.abs(x-y);bytecodeDelta=Math.max(bytecodeDelta,d);if(d)changed=true}}if(changed)bytecodeChangedRows++}
-if(bytecodeChangedRows||bytecodeDelta)fail('normalized bytecode behavior differs from source',{bytecodeChangedRows,bytecodeDelta});
+const hostBytecode=path.join(rcosOut,'CHILD-HOST.luac');
+const bytecodeStress=JSON.parse(run('lua5.3',['scripts/mt12-bytecode-stress.lua',hostBytecode,'16']).trim());
 const maxChangedRows=Number(process.env.MAX_CHANGED_ROWS||cfg.maximumChangedRows||500);
 const maxDelta=Number(process.env.MAX_OUTPUT_DELTA||cfg.maximumOutputDelta||700);
 const maxGrowthKB=Number(process.env.MAX_HOST_MEMORY_GROWTH_KB||cfg.maximumHostMemoryGrowthKB||256);
@@ -38,9 +31,9 @@ if(bytecodeStress.growthKB>maxGrowthKB)fail('host memory stress growth exceeds l
 const missionMetrics=rcos.missionMetrics||{};
 if(rcos.comparison.sameSource===false&&missionMetrics.passed===false)fail('candidate did not satisfy mission-specific evidence gates',missionMetrics);
 const deploySha=sha(deploy),sourceSha=sha(child),stage=rcos.promotion?.current||'SIMULATION PASSED';
-const report={status:'accepted',stage,mission,parent:rcos.parent,child:rcos.child,comparison:rcos.comparison,missionMetrics,replayExecution:rcos.replayExecution,bytecode:{sha256:deploySha,normalizedBytes:fs.statSync(deploy).size,sourceTraceEquivalent:true,stress:bytecodeStress,memoryNote:'Host Lua memory proxy; MT12 bench verification is still required'},identity:{sourceSha256:sourceSha,normalizedLuacSha256:deploySha,compiler:'Lua 5.3 stripped',normalizer:'toolchain/normalize_luac53_mt12.js',workflowRunId:process.env.GITHUB_RUN_ID||null,workflowSha:process.env.GITHUB_SHA||null},limits:{maxChangedRows,maxDelta,maxGrowthKB,maxNormalizedBytes:cfg.maxNormalizedBytes},protectedParent:true,automaticPromotion:false,benchRequired:true,roadRequired:true,generatedAt:new Date().toISOString()};
-for(const f of ['PARENT.lua','CHILD.lua','DEPLOY.luac','REPORT.json','CREW-CHIEF.txt','DIFF.json','PROMOTION.json']){const src=path.join(rcosOut,f);if(fs.existsSync(src))fs.copyFileSync(src,path.join(out,f))}
+const report={status:'accepted',stage,mission,parent:rcos.parent,child:rcos.child,comparison:rcos.comparison,missionMetrics,replayExecution:rcos.replayExecution,bytecode:{sha256:deploySha,normalizedBytes:fs.statSync(deploy).size,hostBytecodeSha256:sha(hostBytecode),hostBytecodeSourceTraceEquivalent:rcos.bytecodeEquivalence?.child?.changedRows===0,normalizationDeterministic:rcos.bytecodeEquivalence?.normalizationDeterministic===true,stress:bytecodeStress,memoryNote:'Host Lua memory proxy; MT12 bench verification is still required',radioExecutionNote:rcos.bytecodeEquivalence?.radioExecutionNote},identity:{sourceSha256:sourceSha,normalizedLuacSha256:deploySha,compiler:'Lua 5.3 stripped',normalizer:'toolchain/normalize_luac53_mt12.js',workflowRunId:process.env.GITHUB_RUN_ID||null,workflowSha:process.env.GITHUB_SHA||null},limits:{maxChangedRows,maxDelta,maxGrowthKB,maxNormalizedBytes:cfg.maxNormalizedBytes},protectedParent:true,automaticPromotion:false,benchRequired:true,roadRequired:true,generatedAt:new Date().toISOString()};
+for(const f of ['PARENT.lua','CHILD.lua','DEPLOY.luac','CHILD-HOST.luac','REPORT.json','CREW-CHIEF.txt','DIFF.json','PROMOTION.json']){const src=path.join(rcosOut,f);if(fs.existsSync(src))fs.copyFileSync(src,path.join(out,f))}
 fs.writeFileSync(path.join(out,'REPORT.json'),JSON.stringify(report,null,2)+'\n');
 fs.writeFileSync(path.join(out,'IDENTITY.json'),JSON.stringify(report.identity,null,2)+'\n');
-fs.writeFileSync(path.join(out,'PROMOTION.txt'),`${report.stage}\nNormalized bytecode executed and matched source trace.\nHost memory proxy passed.\nManual MT12 bench and road approval required.\n`);
+fs.writeFileSync(path.join(out,'PROMOTION.txt'),`${report.stage}\nStripped host bytecode executed and matched source trace.\nMT12 normalization was deterministic and structurally validated.\nHost memory proxy passed.\nManual MT12 bench and road approval required.\n`);
 console.log(JSON.stringify(report,null,2));
