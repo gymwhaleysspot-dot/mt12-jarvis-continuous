@@ -1,0 +1,38 @@
+name: Build A17Y MT12 Native Helper
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - desktop-helper/**
+      - .github/workflows/native-helper.yml
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate helper
+        run: |
+          node --check desktop-helper/helper.mjs
+          node --check desktop-helper/server.mjs
+          node -e "JSON.parse(require('fs').readFileSync('desktop-helper/package.json'))"
+      - name: Package portable helper
+        run: |
+          mkdir -p dist-native-helper
+          cp -r desktop-helper dist-native-helper/A17Y-MT12-Helper
+          printf '%s\n' '#!/bin/sh' 'cd "$(dirname "$0")/A17Y-MT12-Helper"' 'node server.mjs' > dist-native-helper/start-linux-macos.sh
+          printf '%s\r\n' '@echo off' 'cd /d %~dp0\A17Y-MT12-Helper' 'node server.mjs' > dist-native-helper/start-windows.cmd
+          chmod +x dist-native-helper/start-linux-macos.sh
+          cd dist-native-helper && zip -9 -r ../a17y-mt12-native-helper.zip .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-mt12-native-helper
+          path: a17y-mt12-native-helper.zip
+          if-no-files-found: error
+          retention-days: 90
