@@ -27,6 +27,7 @@ on:
       - protected/**
       - toolchain/**
       - scripts/mt12-harness.lua
+      - scripts/mt12-replay.lua
       - .github/workflows/autonomous-director.yml
 permissions:
   contents: write
@@ -60,10 +61,11 @@ jobs:
       - name: Validate v2 architecture
         run: |
           test -f a17y.lua
-          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/finalize.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
+          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/replay.mjs director/v2/finalize.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
           bash -n toolchain/compile_mt12.sh
           luac5.3 -p a17y.lua
           luac5.3 -p scripts/mt12-harness.lua
+          luac5.3 -p scripts/mt12-replay.lua
       - name: Discover and parse all engineering evidence
         run: node director/v2/prepare.mjs
       - name: Generate repeatable Digital Twin scenarios
@@ -86,6 +88,9 @@ jobs:
           if [[ "$ok" != 1 ]]; then
             echo 'NO CHANGE RECOMMENDED: AI service unavailable or all model attempts failed.' > dist-director/STATUS.txt
           fi
+      - name: Replay recorded telemetry through parent and children
+        if: always()
+        run: node director/v2/replay.mjs
       - name: Calibrate scores, verification authority and memory
         if: always()
         run: node director/v2/finalize.mjs
