@@ -15,6 +15,7 @@ on:
       - discovery.html
       - v3.html
       - site-nav.js
+      - site-nav.css
       - scripts/prepare-pages.mjs
       - public/v3-data/**
       - public/control-data/**
@@ -49,12 +50,13 @@ jobs:
       - name: Verify published applications
         run: |
           set -euo pipefail
-          for f in index.html home/home.css home/api.js home/replay.js home/app.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html home/home.css home/api.js home/replay.js home/app.js home/enhancements.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js site-nav.css public/device-data/releases.json; do test -f "$f"; done
           for f in index.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; done
           grep -q 'home/app.js' index.html
           grep -q 'RUN FULL BUILDER' index.html
           grep -q 'UPLOAD WITH MANIFEST' index.html
           grep -q 'Direct artifact downloads' index.html
+          grep -q 'home/enhancements.js' site-nav.js
           grep -q 'RUN FULL AI PIPELINE' builder.html
           grep -q 'RUN FULL AI PIPELINE' device.html
           grep -q 'RUN FULL ENGINEERING MISSION' mission.html
@@ -67,6 +69,7 @@ jobs:
           node --check home/api.js
           node --check home/replay.js
           node --check home/app.js
+          node --check home/enhancements.js
           node --check scripts/prepare-pages.mjs
           node --check completion/run.mjs
           node --check completion/verify-restore.mjs
