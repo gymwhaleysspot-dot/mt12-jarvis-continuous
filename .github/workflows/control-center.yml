@@ -1,0 +1,98 @@
+name: A17Y OS Control Center
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Lifecycle action
+        required: true
+        type: choice
+        options: [INDEX, AUDIT, PROMOTE, ROLLBACK]
+        default: INDEX
+      candidate_source:
+        description: Candidate Lua path for PROMOTE
+        required: false
+        default: ''
+      evidence_record:
+        description: Hash-bound evidence JSON path for PROMOTE
+        required: false
+        default: ''
+      rollback_ref:
+        description: Git tag or commit for ROLLBACK
+        required: false
+        default: ''
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: a17y-control-center
+  cancel-in-progress: false
+jobs:
+  operate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate control plane
+        run: |
+          node --check operations/build-index.mjs
+          node -e "JSON.parse(require('fs').readFileSync('operations/config.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('operations/state.json'))"
+      - name: Build catalog, cleanup and truth audit
+        run: node operations/build-index.mjs
+      - name: Controlled promotion
+        if: inputs.action == 'PROMOTE'
+        env:
+          SOURCE: ${{ inputs.candidate_source }}
+          EVIDENCE: ${{ inputs.evidence_record }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$SOURCE" -a -f "$SOURCE"
+          test -n "$EVIDENCE" -a -f "$EVIDENCE"
+          node - <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const src=process.env.SOURCE,ev=JSON.parse(fs.readFileSync(process.env.EVIDENCE));
+          const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          if(ev.controllerSha!==sha(src))throw Error('candidate source SHA does not match evidence');
+          if(ev.replayVerified!==true||ev.benchVerified!==true||ev.roadVerified!==true)throw Error('replay, bench and road verification are all required');
+          if(ev.unresolvedSafetyObjections?.length)throw Error('unresolved safety objection blocks promotion');
+          const state=JSON.parse(fs.readFileSync('operations/state.json'));
+          state.rollbacks.push({at:new Date().toISOString(),parent:state.trustedParent,parentSha:state.trustedParentSha,gitRef:process.env.GITHUB_SHA});
+          state.trustedParent=src;state.trustedParentSha=sha(src);state.trustedDeploySha=ev.deploySha||null;state.lastTrustedTag=`trusted-${Date.now()}`;
+          fs.writeFileSync('operations/state.json',JSON.stringify(state,null,2)+'\n');
+          NODE
+          git tag "$(node -p "require('./operations/state.json').lastTrustedTag")"
+      - name: Controlled rollback record
+        if: inputs.action == 'ROLLBACK'
+        env:
+          REF: ${{ inputs.rollback_ref }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$REF"
+          git rev-parse --verify "$REF^{commit}"
+          node - <<'NODE'
+          const fs=require('fs');const s=JSON.parse(fs.readFileSync('operations/state.json'));s.notifications.push({at:new Date().toISOString(),severity:'critical',message:`Rollback approved to ${process.env.REF}. Apply through reviewed PR; automatic destructive checkout is intentionally disabled.`});fs.writeFileSync('operations/state.json',JSON.stringify(s,null,2)+'\n');
+          NODE
+      - name: Commit control records
+        if: always()
+        shell: bash
+        run: |
+          git config user.name 'A17Y OS Control Center'
+          git config user.email 'actions@users.noreply.github.com'
+          git add operations public/control-data
+          git commit -m "Control Center ${{ inputs.action }} [skip ci]" || true
+          git pull --rebase origin main
+          git push --follow-tags
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: a17y-control-center
+          path: public/control-data
+          if-no-files-found: error
+          retention-days: 90
