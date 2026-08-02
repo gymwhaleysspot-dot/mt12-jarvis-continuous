@@ -15,6 +15,14 @@ on:
         required: true
         type: boolean
         default: true
+  pull_request:
+    paths:
+      - protected/**
+      - workbench/**
+      - director/**
+      - toolchain/**
+      - scripts/mt12-*.lua
+      - .github/workflows/workbench.yml
   push:
     branches: [main]
     paths:
@@ -24,7 +32,7 @@ on:
       - workbench/**
       - director/**
       - toolchain/**
-      - scripts/mt12-harness.lua
+      - scripts/mt12-*.lua
       - tests/replays/**
       - .github/workflows/workbench.yml
 permissions:
@@ -57,19 +65,20 @@ jobs:
           node --check workbench/run.mjs
           node --check workbench/rcos.mjs
           node --check toolchain/normalize_luac53_mt12.js
+          lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
+          lua5.3 -e "assert(loadfile('scripts/mt12-csv-replay.lua'))"
+          lua5.3 -e "assert(loadfile('scripts/mt12-bytecode-stress.lua'))"
           bash -n toolchain/compile_mt12.sh
       - name: Discover replay evidence
-        id: logs
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=[str(x) for x in Path('tests/replays').rglob('*.csv')] if Path('tests/replays').exists() else []
           with open('/tmp/logs.txt','w') as f: f.write('\n'.join(p))
-          with open(__import__('os').environ['GITHUB_OUTPUT'],'a') as f: f.write('count=%d\n'%len(p))
           print('Discovered',len(p),'replay logs')
           PY
       - name: AI diagnosis, generation and repair
-        if: ${{ inputs.generate != false && inputs.child == '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate == true && inputs.child == '' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DIRECTOR_MISSION: ${{ inputs.mission }}
@@ -80,7 +89,7 @@ jobs:
       - name: Select immutable candidate
         id: candidate
         env:
-          REQUESTED_CHILD: ${{ inputs.child }}
+          REQUESTED_CHILD: ${{ github.event_name == 'workflow_dispatch' && inputs.child || '' }}
         run: |
           set -euo pipefail
           if [ -n "$REQUESTED_CHILD" ]; then C="$REQUESTED_CHILD";
@@ -92,7 +101,7 @@ jobs:
       - name: Compile, normalize, execute bytecode, replay and score
         env:
           CHILD: ${{ steps.candidate.outputs.path }}
-          MISSION: ${{ inputs.mission }}
+          MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Exact deterministic validation' }}
           WORKBENCH_LOG_FILE: /tmp/logs.txt
         run: node workbench/run.mjs a17y.lua "$CHILD" "$MISSION"
       - name: Package complete evidence
