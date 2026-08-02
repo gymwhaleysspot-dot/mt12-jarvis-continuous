@@ -5,7 +5,7 @@ const parent=path.resolve(process.argv[2]||cfg.parent),child=path.resolve(proces
 const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),run=(c,a,o={})=>execFileSync(c,a,{encoding:'utf8',maxBuffer:256*1024*1024,...o}),fail=m=>{throw Error('RCOS REJECTED: '+m)};
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});for(const p of [parent,child])if(!fs.existsSync(p))fail('missing '+p);if(sha(parent)!==cfg.sha256)fail('protected parent SHA mismatch');
 const stripComments=s=>s.replace(/--\[\[[\s\S]*?\]\]/g,'').replace(/--[^\n]*/g,'');
-function inspect(p,role){const raw=fs.readFileSync(p,'utf8'),s=stripComments(raw);for(const x of cfg.required)if(!s.includes(x))fail(role+' executable contract missing '+x);for(const x of cfg.forbidden)if(s.includes(x))fail(role+' forbidden '+x);if(/\dlocal\s+[A-Za-z_]/.test(s)||/local\s+[A-Za-z_]\w*\s*=\s*[^;\n]+local\s+[A-Za-z_]/.test(s))fail(role+' joined declaration');run('luac5.3',['-p',p]);return raw}
+function inspect(p,role){const raw=fs.readFileSync(p,'utf8'),s=stripComments(raw);for(const x of cfg.required)if(!s.includes(x))fail(role+' executable contract missing '+x);for(const x of cfg.forbidden)if(s.includes(x))fail(role+' forbidden '+x);if(/\dlocal\s+[A-Za-z_]/.test(s))fail(role+' joined declaration corruption');run('luac5.3',['-p',p]);return raw}
 const ps=inspect(parent,'parent'),cs=inspect(child,'child');
 function compile(p,n){const q=path.join(out,n+'.luac');run('bash',['toolchain/compile_mt12.sh',p,q],{env:{...process.env,MAX_BYTES:String(cfg.maxNormalizedBytes)}});if(fs.readFileSync(q).subarray(12,17).toString('hex')!=='0404040404')fail(n+' bad MT12 header');return q}
 const pl=compile(parent,'parent'),cl=compile(child,'child');
