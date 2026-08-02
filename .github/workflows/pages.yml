@@ -5,6 +5,7 @@ on:
     paths:
       - index.html
       - mission.html
+      - completion.html
       - control.html
       - device.html
       - builder.html
@@ -18,6 +19,8 @@ on:
       - public/control-data/**
       - public/device-data/**
       - public/mission-data/**
+      - public/completion-data/**
+      - completion/**
       - engineering-missions/**
       - device/**
       - director/v3/features.json
@@ -39,33 +42,37 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        with: {enablement: true}
       - name: Audit wiring and add global Home navigation
         run: node scripts/prepare-pages.mjs
       - name: Verify published applications
         run: |
           set -euo pipefail
-          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js public/device-data/releases.json; do test -f "$f"; done
-          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; done
+          for f in index.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; done
           grep -q 'RUN FULL AI PIPELINE' builder.html
           grep -q 'RUN FULL AI PIPELINE' device.html
           grep -q 'RUN FULL ENGINEERING MISSION' mission.html
+          grep -q 'RUN FULL MISSION' completion.html
+          grep -q 'Direct workflow artifacts' completion.html
           grep -q 'Synchronized dual-log viewer' mission.html
           grep -q 'BUILD TAR.GZ + MANIFEST' device.html
           grep -q 'VERIFY OFFICIAL FILENAME + SHA-256' device.html
           node --check site-nav.js
           node --check scripts/prepare-pages.mjs
+          node --check completion/run.mjs
+          node --check completion/verify-restore.mjs
           node --check engineering-missions/run.mjs
           node --check engineering-missions/tournament.mjs
           node --check engineering-missions/stress.mjs
           node --check engineering-missions/memory-lab.mjs
           node --check engineering-missions/finalize.mjs
+          node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
           if [ -f public/control-data/log-hashes.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/control-data/log-hashes.json'))"; fi
           if [ -f public/mission-data/current.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/mission-data/current.json'))"; fi
+          if [ -f public/completion-data/dashboard.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/completion-data/dashboard.json'))"; fi
       - uses: actions/upload-pages-artifact@v4
-        with:
-          path: .
+        with: {path: .}
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
