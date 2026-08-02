@@ -22,6 +22,7 @@ on:
       - director/**
       - toolchain/**
       - scripts/mt12-*.lua
+      - scripts/reconcile-director-authority.mjs
       - .github/workflows/workbench.yml
   push:
     branches: [main]
@@ -33,6 +34,7 @@ on:
       - director/**
       - toolchain/**
       - scripts/mt12-*.lua
+      - scripts/reconcile-director-authority.mjs
       - tests/replays/**
       - .github/workflows/workbench.yml
 permissions:
@@ -64,6 +66,7 @@ jobs:
           node --check director/run.mjs
           node --check workbench/run.mjs
           node --check workbench/rcos.mjs
+          node --check scripts/reconcile-director-authority.mjs
           node --check toolchain/normalize_luac53_mt12.js
           lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
           lua5.3 -e "assert(loadfile('scripts/mt12-csv-replay.lua'))"
@@ -104,6 +107,8 @@ jobs:
           MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Exact deterministic validation' }}
           WORKBENCH_LOG_FILE: /tmp/logs.txt
         run: node workbench/run.mjs a17y.lua "$CHILD" "$MISSION"
+      - name: Reconcile AI claims with deterministic authority
+        run: node scripts/reconcile-director-authority.mjs dist-director
       - name: Package complete evidence
         run: |
           set -euo pipefail
