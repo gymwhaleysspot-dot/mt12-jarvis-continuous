@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+import fs from'node:fs';import{discover,summarize}from'./evidence.mjs';import{analyze}from'./dependency.mjs';import{load,save}from'./memory.mjs';
+const files=discover(process.env.DIRECTOR_LOGS||'');fs.mkdirSync('dist-director',{recursive:true});fs.writeFileSync('dist-director/LOG-CATALOG.json',JSON.stringify(summarize(files),null,2)+'\n');fs.writeFileSync('dist-director/DEPENDENCY-MAP.json',JSON.stringify(analyze('a17y.lua'),null,2)+'\n');let m=load('director/memory.json');save('director/memory.json',m);if(process.env.GITHUB_ENV)fs.appendFileSync(process.env.GITHUB_ENV,`DIRECTOR_LOGS=${files.join(' ')}\nDIRECTOR_V2=1\n`);console.log(JSON.stringify({logs:files,memorySchema:m.schema}));
