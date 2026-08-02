@@ -13,7 +13,8 @@ for(const page of pages){
   if(!fs.existsSync(full)){errors.push(`Missing published page: ${page}`);continue;}
   let html=fs.readFileSync(full,'utf8');
   if(!/<html[\s>]/i.test(html)||!/<body[\s>]/i.test(html))errors.push(`${page}: invalid HTML shell`);
-  const localLinks=[...html.matchAll(/(?:href|location\.href)\s*=\s*["'`]([^"'`?#]+\.html)/gi)].map(m=>m[1]);
+  const localLinks=[...html.matchAll(/(?:href|location\.href)\s*=\s*["'`]([^"'`?#]+\.html)/gi)]
+    .map(m=>m[1]).filter(href=>!href.includes('${')&&!href.includes('}'));
   for(const href of localLinks){
     if(/^(?:https?:)?\/\//i.test(href))continue;
     const target=path.normalize(path.join(path.dirname(page),href));
