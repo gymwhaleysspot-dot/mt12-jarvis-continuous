@@ -13,7 +13,7 @@ import java.security.MessageDigest
 
 object CompanionCore {
     const val REPO = "gymwhaleysspot-dot/mt12-jarvis-continuous"
-    const val CATALOG = "https://raw.githubusercontent.com/$REPO/main/public/device-data/firmware-catalog.json"
+    const val CATALOG = "https://raw.githubusercontent.com/$REPO/main/public/device-data/releases.json"
 
     fun securePrefs(context: Context) = EncryptedSharedPreferences.create(
         context,
