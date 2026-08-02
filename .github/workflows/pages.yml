@@ -12,6 +12,8 @@ on:
       - research.html
       - discovery.html
       - v3.html
+      - site-nav.js
+      - scripts/prepare-pages.mjs
       - public/v3-data/**
       - public/control-data/**
       - public/device-data/**
@@ -39,16 +41,21 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Verify published pages
+      - name: Audit wiring and add global Home navigation
+        run: node scripts/prepare-pages.mjs
+      - name: Verify published applications
         run: |
           set -euo pipefail
-          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; done
           grep -q 'RUN FULL AI PIPELINE' builder.html
           grep -q 'RUN FULL AI PIPELINE' device.html
           grep -q 'RUN FULL ENGINEERING MISSION' mission.html
           grep -q 'Synchronized dual-log viewer' mission.html
           grep -q 'BUILD TAR.GZ + MANIFEST' device.html
           grep -q 'VERIFY OFFICIAL FILENAME + SHA-256' device.html
+          node --check site-nav.js
+          node --check scripts/prepare-pages.mjs
           node --check engineering-missions/run.mjs
           node --check engineering-missions/tournament.mjs
           node --check engineering-missions/stress.mjs
