@@ -6,11 +6,13 @@ on:
       - index.html
       - control.html
       - device.html
+      - updates.html
       - research.html
       - discovery.html
       - v3.html
       - public/v3-data/**
       - public/control-data/**
+      - public/device-data/**
       - device/**
       - director/v3/features.json
       - .github/workflows/pages.yml
@@ -38,9 +40,11 @@ jobs:
           test -f index.html
           test -f control.html
           test -f device.html
+          test -f updates.html
           test -f research.html
           test -f discovery.html
           test -f v3.html
+          test -f public/device-data/releases.json
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
