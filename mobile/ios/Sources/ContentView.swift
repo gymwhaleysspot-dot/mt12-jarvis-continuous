@@ -76,7 +76,7 @@ struct ContentView: View {
     private func bookmarkURL(_ key: String) throws -> URL {
         guard let data = UserDefaults.standard.data(forKey: key) else { throw NSError(domain: "A17Y", code: 22, userInfo: [NSLocalizedDescriptionKey: "Folder authorization missing"]) }
         var stale = false
-        let url = try URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &stale)
+        let url = try URL(resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &stale)
         if stale { UserDefaults.standard.removeObject(forKey: key) }
         return url
     }
