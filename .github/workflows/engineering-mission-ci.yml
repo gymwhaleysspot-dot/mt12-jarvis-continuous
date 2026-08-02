@@ -1,0 +1,42 @@
+name: Engineering Mission CI
+on:
+  pull_request:
+    paths:
+      - mission.html
+      - engineering-missions/**
+      - .github/workflows/engineering-mission.yml
+      - .github/workflows/engineering-mission-ci.yml
+      - .github/workflows/pages.yml
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Static validation
+        run: |
+          set -euo pipefail
+          node --check engineering-missions/run.mjs
+          node --check engineering-missions/tournament.mjs
+          node --check engineering-missions/stress.mjs
+          node --check engineering-missions/memory-lab.mjs
+          node --check engineering-missions/finalize.mjs
+          node -e "JSON.parse(require('fs').readFileSync('engineering-missions/schema.json'))"
+          grep -q 'RUN FULL ENGINEERING MISSION' mission.html
+          grep -q 'Synchronized dual-log viewer' mission.html
+          grep -q 'All 30 workflow capabilities' mission.html
+      - name: Mission lifecycle smoke test
+        run: |
+          set -euo pipefail
+          node engineering-missions/run.mjs id=ci-smoke out=dist-mission/ci-smoke question='Smoke mission' hypothesis='System remains deterministic' fuzz=200
+          node engineering-missions/tournament.mjs dist-mission/ci-smoke
+          node engineering-missions/stress.mjs dist-mission/ci-smoke a17y.lua
+          node engineering-missions/memory-lab.mjs dist-mission/ci-smoke a17y.lua
+          node engineering-missions/finalize.mjs dist-mission/ci-smoke
+          for f in MISSION.json BASELINE.json EVENTS.json TOURNAMENT-RESULT.json ADVERSARIAL-REVIEW.json FUZZ-RESULT.json MEMORY-LAB.json RELEASE.json NOTIFICATIONS.json AUDIT-MANIFEST.json RELEASE-NOTES.md BENCH-PACKAGE.json; do test -f "dist-mission/ci-smoke/$f"; done
+          node -e "const m=JSON.parse(require('fs').readFileSync('dist-mission/ci-smoke/MISSION.json')); if(m.candidates.length!==5) process.exit(1); if(m.releaseLadder.length!==10) process.exit(1)"

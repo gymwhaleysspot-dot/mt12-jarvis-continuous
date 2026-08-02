@@ -1,1 +1,47 @@
-{}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A17Y Engineering Mission",
+  "type": "object",
+  "required": ["id", "question", "hypothesis", "stage", "createdAt", "hardwareFingerprint", "evidence", "baseline", "candidates", "releaseLadder"],
+  "properties": {
+    "id": {"type": "string"},
+    "question": {"type": "string"},
+    "hypothesis": {"type": "string"},
+    "createdAt": {"type": "string"},
+    "updatedAt": {"type": "string"},
+    "stage": {"enum": ["GENERATED", "STATIC_CHECKED", "COMPILED", "NORMALIZED", "SIMULATION_PASSED", "LOG_REPLAY_PASSED", "ADVERSARIAL_REVIEW_PASSED", "MT12_BENCH_PASSED", "ROAD_TESTED", "TRUSTED_RELEASE", "REJECTED"]},
+    "hardwareFingerprint": {
+      "type": "object",
+      "properties": {
+        "radio": {"type": "string"}, "edgeTx": {"type": "string"}, "elrs": {"type": "string"},
+        "modelYamlSha256": {"type": "string"}, "luaSha256": {"type": "string"}, "luacSha256": {"type": "string"},
+        "vehicle": {"type": "string"}, "gearing": {"type": "string"}, "tires": {"type": "string"},
+        "battery": {"type": "string"}, "surface": {"type": "string"}, "weather": {"type": "string"}, "driver": {"type": "string"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["logs", "labels"],
+      "properties": {
+        "logs": {"type": "array", "items": {"type": "object", "required": ["path", "sha256"], "properties": {"path": {"type": "string"}, "sha256": {"type": "string"}, "role": {"type": "string"}, "offsetMs": {"type": "number"}}}},
+        "labels": {"type": "array", "items": {"type": "object", "required": ["log", "frame", "type"], "properties": {"log": {"type": "string"}, "frame": {"type": "integer"}, "endFrame": {"type": "integer"}, "type": {"type": "string"}, "note": {"type": "string"}}}},
+        "research": {"type": "array"}, "bench": {"type": "array"}, "road": {"type": "array"}
+      }
+    },
+    "baseline": {"type": "object"},
+    "events": {"type": "array"},
+    "counterfactuals": {"type": "array"},
+    "fuzz": {"type": "object"},
+    "candidates": {"type": "array"},
+    "adversarialReview": {"type": "object"},
+    "memoryCompatibility": {"type": "object"},
+    "runtimeProfile": {"type": "object"},
+    "driverPreference": {"type": "object"},
+    "surfaceProfile": {"type": "object"},
+    "calibration": {"type": "object"},
+    "releaseLadder": {"type": "array", "items": {"type": "object", "required": ["stage", "passed"], "properties": {"stage": {"type": "string"}, "passed": {"type": "boolean"}, "evidence": {"type": "array"}}}},
+    "rollback": {"type": "object"},
+    "notifications": {"type": "array"},
+    "audit": {"type": "object"}
+  }
+}
