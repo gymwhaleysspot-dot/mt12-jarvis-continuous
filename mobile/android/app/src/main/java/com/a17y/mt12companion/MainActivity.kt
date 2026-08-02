@@ -40,6 +40,8 @@ private fun CompanionApp(activity: Activity) {
     var uf2Source by remember { mutableStateOf<Uri?>(null) }
     var status by remember { mutableStateOf("Authorize the MT12 root, save a classic PAT, then sync.") }
     var token by remember { mutableStateOf(secure.getString("classicPat", "").orEmpty()) }
+    var child by remember { mutableStateOf(plain.getString("builderChild", "a17y.lua") ?: "a17y.lua") }
+    var mission by remember { mutableStateOf(plain.getString("builderMission", "Build the strongest verified MT12 LUAC without regressions") ?: "Build the strongest verified MT12 LUAC without regressions") }
     var catalog by remember { mutableStateOf<JSONObject?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -82,18 +84,18 @@ private fun CompanionApp(activity: Activity) {
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("A17Y MT12 Mobile Companion", style = MaterialTheme.typography.headlineMedium)
-        Text("Android · end-to-end sync", style = MaterialTheme.typography.labelLarge)
-        OutlinedTextField(
-            value = token,
-            onValueChange = { token = it; secure.edit().putString("classicPat", it).apply() },
-            label = { Text("Classic GitHub PAT (encrypted)") },
-            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Text("Android · sync, firmware and LUAC AI builder", style = MaterialTheme.typography.labelLarge)
+        OutlinedTextField(value = token, onValueChange = { token = it; secure.edit().putString("classicPat", it).apply() }, label = { Text("Classic GitHub PAT (encrypted)") }, visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
         Button({ mt12Picker.launch(mt12Tree) }, Modifier.fillMaxWidth()) { Text("AUTHORIZE & VERIFY MT12 ROOT") }
         Button({ sync() }, Modifier.fillMaxWidth()) { Text("SYNC LOGS TO GITHUB") }
         Button({ runWork { CompanionCore.backupManifest(activity, mt12Tree ?: error("Authorize MT12 first")).toString(2) } }, Modifier.fillMaxWidth()) { Text("BUILD VERIFIED BACKUP MANIFEST") }
         Button({ status = usbSummary() }, Modifier.fillMaxWidth()) { Text("CHECK USB DEVICES") }
+        HorizontalDivider()
+        Text("LUAC AI Builder", style = MaterialTheme.typography.titleMedium)
+        OutlinedTextField(value = child, onValueChange = { child = it; plain.edit().putString("builderChild", it).apply() }, label = { Text("Repository Lua path") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = mission, onValueChange = { mission = it; plain.edit().putString("builderMission", it).apply() }, label = { Text("AI engineering mission") }, minLines = 2, modifier = Modifier.fillMaxWidth())
+        Button({ runWork { CompanionCore.runLuacAiBuilder(token, child, mission) } }, Modifier.fillMaxWidth()) { Text("RUN LUAC AI BUILDER") }
+        Button({ activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CompanionCore.BUILDER_ACTIONS))) }, Modifier.fillMaxWidth()) { Text("OPEN LUAC BUILDER RESULTS") }
         HorizontalDivider()
         Button({ runWork { catalog = CompanionCore.fetchCatalog(); "Firmware catalog refreshed.\n${catalog.toString()}" } }, Modifier.fillMaxWidth()) { Text("GET LATEST EDGETX & ELRS") }
         Button({ firmwarePicker.launch(arrayOf("application/octet-stream", "*/*")) }, Modifier.fillMaxWidth()) { Text("SELECT OFFICIAL EDGETX UF2") }
@@ -106,6 +108,6 @@ private fun CompanionApp(activity: Activity) {
         Button({ activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://10.0.0.1"))) }, Modifier.fillMaxWidth()) { Text("OPEN ELRS WI-FI FLASHER") }
         Button({ activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.expresslrs.org/quick-start/transmitters/rm-internal/"))) }, Modifier.fillMaxWidth()) { Text("OPEN MT12 ELRS BUILD GUIDE") }
         Card(Modifier.fillMaxWidth()) { Text(status, Modifier.padding(14.dp)) }
-        Text("A log is marked imported only after GitHub confirms its blob SHA. The MT12 root and EDGETX_UF2 destination are independently validated. Sync retries on app resume when access and credentials are present.", style = MaterialTheme.typography.bodySmall)
+        Text("The LUAC AI builder runs the repository's deterministic A17Y Engineering Workbench, compiles with Lua 5.3, normalizes for MT12, compares the candidate, and packages the normalized .luac with evidence.", style = MaterialTheme.typography.bodySmall)
     }
 }
