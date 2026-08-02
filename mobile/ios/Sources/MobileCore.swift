@@ -19,12 +19,32 @@ struct KeychainStore {
 enum MobileCore {
     static let repo = "gymwhaleysspot-dot/mt12-jarvis-continuous"
     static let catalogURL = URL(string: "https://raw.githubusercontent.com/\(repo)/main/public/device-data/releases.json")!
+    static let builderResultsURL = URL(string: "https://github.com/\(repo)/actions/workflows/workbench.yml")!
 
     static func sha256(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
 
     static func validateMT12(_ root: URL) -> Bool {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: root.path).map { $0.uppercased() }) ?? []
         return names.contains("LOGS") && (names.contains("SCRIPTS") || names.contains("MODELS") || names.contains("RADIO"))
+    }
+
+    static func runLuacAIBuilder(token: String, child: String, mission: String) async throws -> String {
+        guard token.hasPrefix("ghp_") else { throw NSError(domain: "A17Y", code: 30, userInfo: [NSLocalizedDescriptionKey: "Classic GitHub PAT required"]) }
+        let source = child.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "a17y.lua" : child.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard source.lowercased().hasSuffix(".lua") else { throw NSError(domain: "A17Y", code: 31, userInfo: [NSLocalizedDescriptionKey: "Child must be a repository Lua path"]) }
+        let task = mission.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Exact deterministic MT12 LUAC release" : mission.trimmingCharacters(in: .whitespacesAndNewlines)
+        var request = URLRequest(url: URL(string: "https://api.github.com/repos/\(repo)/actions/workflows/workbench.yml/dispatches")!)
+        request.httpMethod = "POST"
+        request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["ref": "main", "inputs": ["child": source, "mission": task]])
+        let (reply, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 204 else {
+            throw NSError(domain: "A17Y", code: 32, userInfo: [NSLocalizedDescriptionKey: "LUAC builder dispatch failed: \(String(data: reply, encoding: .utf8) ?? "unknown")"])
+        }
+        return "LUAC AI builder started.\nSource: \(source)\nMission: \(task)\nOpen the newest A17Y Engineering Workbench run for the normalized MT12 .luac and evidence package."
     }
 
     static func fetchCatalog() async throws -> String {
