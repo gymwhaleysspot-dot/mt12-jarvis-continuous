@@ -1,14 +1,14 @@
 {
   "version": 3,
-  "generatedAt": "2026-08-02T02:53:34.460Z",
-  "count": 11,
+  "generatedAt": "2026-08-02T05:34:03.754Z",
+  "count": 12,
   "items": [
     {
       "id": "11e6e9041c228b45",
       "path": "research/current.json",
       "kind": "research",
       "bytes": 302,
-      "modifiedAt": "2026-08-02T02:53:30.497Z",
+      "modifiedAt": "2026-08-02T05:34:02.102Z",
       "sha256": "11e6e9041c228b454cc23544f32e2928087be6f728d5c1a0554e7d948880e096",
       "terms": [
         "schema",
@@ -38,7 +38,7 @@
       "path": "research/questions.json",
       "kind": "research",
       "bytes": 1174,
-      "modifiedAt": "2026-08-02T02:53:30.497Z",
+      "modifiedAt": "2026-08-02T05:34:02.102Z",
       "sha256": "336a805bb051f21f353fb9bc4c4bc70214e7db083a8c64d47bebfe39c61a558e",
       "terms": [
         "schema",
@@ -119,7 +119,7 @@
       "path": "research/state.json",
       "kind": "research",
       "bytes": 312,
-      "modifiedAt": "2026-08-02T02:53:30.497Z",
+      "modifiedAt": "2026-08-02T05:34:02.102Z",
       "sha256": "8b8569ffdf81ab5ac6487582cc479b92c54db70e78886bc7a11a4df723f68484",
       "terms": [
         "schema",
@@ -150,7 +150,7 @@
       "path": "tests/replays/README.md",
       "kind": "replay",
       "bytes": 825,
-      "modifiedAt": "2026-08-02T02:53:30.497Z",
+      "modifiedAt": "2026-08-02T05:34:02.102Z",
       "sha256": "df0363ad327499bbb94db8782886cf9609d6d42bdfb2913c3f4ad6062b7c1fe6",
       "terms": [
         "mt12",
@@ -235,7 +235,7 @@
       "path": "research/config.json",
       "kind": "research",
       "bytes": 845,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
+      "modifiedAt": "2026-08-02T05:34:02.101Z",
       "sha256": "cab67f10183c849318516de3f03e9f1892d7ab6eb5938f2046db205c749a1019",
       "terms": [
         "schema",
@@ -303,7 +303,7 @@
       "path": "evidence/README.md",
       "kind": "evidence",
       "bytes": 694,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
+      "modifiedAt": "2026-08-02T05:34:02.100Z",
       "sha256": "9a122a076d5c8bed349a98747068d1187f13484bd1e1a3813c7a7185e188331c",
       "terms": [
         "bench",
@@ -360,208 +360,40 @@
       "summary": "# Bench and road evidence\n\nPlace JSON evidence under `evidence/bench/` or `evidence/road/`. Every record must identify the exact source and normalized bytecode SHA-256.\n\n```json\n{\n  \"schema\": 1,\n  \"kind\": \"bench\",\n  \"controllerSourceSha256\": \"64 hex characters\",\n  \"normalizedLuacSha256\": \"64 hex characters\",\n  \"testedAt\": \"2026-08-02T00:00:00Z\",\n  \"vehicle\": \"MJX Hyper Go 7303\",\n  \"battery\": \"4S\",\n  \"surface\": \"dry pavement\",\n  \"weather\": \"indoor bench or road conditions\",\n  \"logs\": [\"tests/replays/example.csv\"],\n  \"driverVerdict\": \"pass\",\n  \"faults\": [],\n  \"notes\": \"observations\"\n}\n```\n\nAllowed `kind`: `bench`, `road`, `rejected-road`. Allowed verdict: `pass`, `fail`, `inconclusive`.\n"
     },
     {
-      "id": "640160847168ec06",
-      "path": "director/config.json",
-      "kind": "engineering",
-      "bytes": 886,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
-      "sha256": "640160847168ec061c4f57f7467cdccb7fc3ec5c5578768bc2741666ce012ccb",
-      "terms": [
-        "name",
-        "a17y",
-        "autonomous",
-        "engineering",
-        "director",
-        "version",
-        "parent",
-        "lua",
-        "model",
-        "openai",
-        "gpt-4",
-        "candidatecount",
-        "maxrepairrounds",
-        "maxpatches",
-        "minimumdiagnosisconfidence",
-        "minimumcandidateconfidence",
-        "minimumevidencescore",
-        "maximumchangedfraction",
-        "automaticpromotionceiling",
-        "replay",
-        "verified",
-        "protectedsystems",
-        "mt12",
-        "file",
-        "gv7",
-        "throttle",
-        "pass-through",
-        "car-off",
-        "guard",
-        "persistence",
-        "compatibility",
-        "dashboard",
-        "contract",
-        "logging",
-        "compiler",
-        "and",
-        "normalizer",
-        "prioritysystems",
-        "sensor",
-        "observability",
-        "truth",
-        "rpm",
-        "mph",
-        "jump",
-        "landing",
-        "classification",
-        "abs",
-        "release",
-        "quality",
-        "channel-drop",
-        "recovery",
-        "causal",
-        "episode",
-        "learning",
-        "decision",
-        "explainability",
-        "runtime",
-        "allocation",
-        "efficiency"
-      ],
-      "summary": "{\"name\":\"A17Y Autonomous Engineering Director\",\"version\":1,\"parent\":\"a17y.lua\",\"model\":\"openai/gpt-4.1\",\"candidateCount\":3,\"maxRepairRounds\":2,\"maxPatches\":10,\"minimumDiagnosisConfidence\":0.68,\"minimumCandidateConfidence\":0.76,\"minimumEvidenceScore\":78,\"maximumChangedFraction\":0.12,\"automaticPromotionCeiling\":\"REPLAY VERIFIED\",\"protectedSystems\":[\"MT12 file I/O\",\"GV7 throttle pass-through\",\"car-off guard\",\"persistence compatibility\",\"dashboard contract\",\"logging contract\",\"compiler and normalizer contract\"],\"prioritySystems\":[\"sensor observability\",\"truth RPM and MPH\",\"jump and landing classification\",\"TC and ABS release quality\",\"channel-drop recovery\",\"causal episode learning\",\"decision explainability\",\"runtime allocation efficiency\"]}"
-    },
-    {
-      "id": "c9e2f1386972b75b",
-      "path": "director/memory.json",
-      "kind": "memory",
-      "bytes": 1145,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
-      "sha256": "c9e2f1386972b75bf20b588b254b0bc7429523d35ff9f6dd7ce076691e8f1304",
+      "id": "1996c226f95f4d52",
+      "path": "evidence/promotion-template.json",
+      "kind": "evidence",
+      "bytes": 333,
+      "modifiedAt": "2026-08-02T05:34:02.100Z",
+      "sha256": "1996c226f95f4d52297d9bae3f732675badee2ed0911da7fb20c03679d902ea7",
       "terms": [
         "schema",
-        "parent",
-        "a17y",
+        "controllerpath",
+        "candidate",
         "lua",
-        "generations",
-        "v2-1785638711555",
-        "t02",
-        "parentsha",
-        "ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
-        "decision",
-        "simulation",
-        "only",
-        "evidence",
-        "lessons",
-        "claim",
-        "mission",
-        "general",
-        "ended",
-        "metrics",
-        "sessions",
-        "rows",
-        "abs",
-        "jump",
-        "landing",
-        "gpsloss",
-        "rpmdrop",
-        "channeldrop",
-        "restart",
-        "replaylogs",
-        "candidatesha",
-        "result",
-        "confidence",
-        "verification",
-        "rejectedhypotheses",
-        "successfulpatterns",
-        "lastdecision",
-        "status",
-        "missiontype",
-        "score"
+        "controllersha",
+        "deploysha",
+        "replayverified",
+        "false",
+        "benchverified",
+        "roadverified",
+        "unresolvedsafetyobjections",
+        "logs",
+        "benchrecords",
+        "roadrecords",
+        "driververdict",
+        "approvedby",
+        "approvedat",
+        "null"
       ],
-      "summary": "{\"schema\":2,\"parent\":\"a17y.lua\",\"generations\":[{\"id\":\"v2-1785638711555\",\"at\":\"2026-08-02T02:45:11.555Z\",\"parentSha\":\"340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0\",\"decision\":\"SIMULATION ONLY\",\"evidence\":[]}],\"lessons\":[{\"claim\":\"Mission general ended SIMULATION ONLY\",\"evidence\":[],\"metrics\":{\"sessions\":0,\"rows\":0,\"tc\":0,\"abs\":0,\"jump\":0,\"landing\":0,\"gpsLoss\":0,\"rpmDrop\":0,\"channelDrop\":0,\"restart\":0,\"replayLogs\":0},\"candidateSha\":\"\",\"parentSha\":\"340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0\",\"result\":\"SIMULATION ONLY\",\"confidence\":0.133,\"verification\":\"SIMULATION ONLY\",\"at\":\"2026-08-02T02:45:11.555Z\"}],\"rejectedHypotheses\":[],\"successfulPatterns\":[],\"lastDecision\":{\"at\":\"2026-08-02T02:45:11.555Z\",\"status\":\"SIMULATION ONLY\",\"missionType\":\"general\",\"score\":48,\"confidence\":0.133}}"
-    },
-    {
-      "id": "7a8a6a060e10c159",
-      "path": "director/v2/README.md",
-      "kind": "engineering",
-      "bytes": 153,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
-      "sha256": "7a8a6a060e10c15993ba68209abb22814ee40626492dab1f6d659d026bc9a708",
-      "terms": [
-        "engineering",
-        "this",
-        "directory",
-        "contains",
-        "the",
-        "evidence",
-        "replay",
-        "scoring",
-        "memory",
-        "and",
-        "reliability",
-        "modules",
-        "used",
-        "autonomous",
-        "director"
-      ],
-      "summary": "# Engineering OS v2\n\nThis directory contains the evidence, replay, scoring, memory, and reliability modules used by the Autonomous Engineering Director.\n"
-    },
-    {
-      "id": "1f99ee55b63abd4e",
-      "path": "director/v3/config.json",
-      "kind": "engineering",
-      "bytes": 655,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
-      "sha256": "1f99ee55b63abd4e68af1069720d534456b045d2953411cbdfb605abaee1e320",
-      "terms": [
-        "version",
-        "primarymodel",
-        "openai",
-        "gpt-4",
-        "reviewmodels",
-        "mini",
-        "gpt-4o",
-        "minimumconsensus",
-        "maximumresearchagedays",
-        "maximumknowledgeitems",
-        "roles",
-        "chief-engineer",
-        "causal-scientist",
-        "replay-analyst",
-        "safety-auditor",
-        "lua-optimizer",
-        "learning-specialist",
-        "research-librarian",
-        "release-manager",
-        "authority",
-        "aimay",
-        "diagnose",
-        "research",
-        "hypothesize",
-        "design",
-        "review",
-        "explain",
-        "aimaynot",
-        "override",
-        "deterministic",
-        "checks",
-        "overwrite",
-        "a17y",
-        "lua",
-        "claim",
-        "bench",
-        "road",
-        "verification",
-        "accept",
-        "uncited"
-      ],
-      "summary": "{\"version\":3,\"primaryModel\":\"openai/gpt-4.1\",\"reviewModels\":[\"openai/gpt-4.1-mini\",\"openai/gpt-4o\"],\"minimumConsensus\":0.67,\"maximumResearchAgeDays\":120,\"maximumKnowledgeItems\":2500,\"roles\":[\"chief-engineer\",\"causal-scientist\",\"replay-analyst\",\"safety-auditor\",\"lua-optimizer\",\"learning-specialist\",\"research-librarian\",\"release-manager\"],\"authority\":{\"aiMay\":[\"diagnose\",\"research\",\"hypothesize\",\"design\",\"review\",\"explain\"],\"aiMayNot\":[\"override deterministic checks\",\"overwrite a17y.lua\",\"claim bench or road verification\",\"accept uncited research\"]}}"
+      "summary": "{\"schema\":1,\"controllerPath\":\"candidate.lua\",\"controllerSha\":\"\",\"deploySha\":\"\",\"replayVerified\":false,\"benchVerified\":false,\"roadVerified\":false,\"unresolvedSafetyObjections\":[],\"logs\":[],\"benchRecords\":[],\"roadRecords\":[],\"driverVerdict\":\"\",\"approvedBy\":\"\",\"approvedAt\":null}"
     },
     {
       "id": "6466da74bda7a833",
       "path": "director/v3/features.json",
       "kind": "engineering",
       "bytes": 8507,
-      "modifiedAt": "2026-08-02T02:53:30.496Z",
+      "modifiedAt": "2026-08-02T05:34:02.100Z",
       "sha256": "6466da74bda7a8337c271fb6e9340813be5cbfe48eb1a5c9ae17c4506c23a222",
       "terms": [
         "version",
@@ -754,6 +586,203 @@
         "activity"
       ],
       "summary": "{\"version\":3,\"updatedAt\":\"2026-08-02T00:00:00Z\",\"features\":[{\"id\":1,\"name\":\"Multi-agent engineering team\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":2,\"name\":\"Chief Engineer\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":3,\"name\":\"Skeptical reviewer\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":4,\"name\":\"Safety reviewer\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":5,\"name\":\"Performance reviewer\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":6,\"name\":\"Replay analyst\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":7,\"name\":\"Learning specialist\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":8,\"name\":\"Lua optimizer\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":9,\"name\":\"Dashboard designer\",\"category\":\"AI Brain\",\"status\":\"planned\"},{\"id\":10,\"name\":\"Final arbitration AI\",\"category\":\"AI Brain\",\"status\":\"active\"},{\"id\":11,\"name\":\"Continuous literature research\",\"category\":\"Research\",\"status\":\"active\"},{\"id\":12,\"name\":\"Lua optimization research\",\"category\":\"Research\",\"status\":\"active\"},{\"id\":13,\"name\":\"EdgeTX change research\",\"category\":\"Research\",\"status\":\"active\"},{\"id\":14,\"name\":\"RC controller research\",\"category\":\"Research\",\"status\":\"active\"},{\"id\":15,\"name\":\"Sensor fusion"
+    },
+    {
+      "id": "640160847168ec06",
+      "path": "director/config.json",
+      "kind": "engineering",
+      "bytes": 886,
+      "modifiedAt": "2026-08-02T05:34:02.099Z",
+      "sha256": "640160847168ec061c4f57f7467cdccb7fc3ec5c5578768bc2741666ce012ccb",
+      "terms": [
+        "name",
+        "a17y",
+        "autonomous",
+        "engineering",
+        "director",
+        "version",
+        "parent",
+        "lua",
+        "model",
+        "openai",
+        "gpt-4",
+        "candidatecount",
+        "maxrepairrounds",
+        "maxpatches",
+        "minimumdiagnosisconfidence",
+        "minimumcandidateconfidence",
+        "minimumevidencescore",
+        "maximumchangedfraction",
+        "automaticpromotionceiling",
+        "replay",
+        "verified",
+        "protectedsystems",
+        "mt12",
+        "file",
+        "gv7",
+        "throttle",
+        "pass-through",
+        "car-off",
+        "guard",
+        "persistence",
+        "compatibility",
+        "dashboard",
+        "contract",
+        "logging",
+        "compiler",
+        "and",
+        "normalizer",
+        "prioritysystems",
+        "sensor",
+        "observability",
+        "truth",
+        "rpm",
+        "mph",
+        "jump",
+        "landing",
+        "classification",
+        "abs",
+        "release",
+        "quality",
+        "channel-drop",
+        "recovery",
+        "causal",
+        "episode",
+        "learning",
+        "decision",
+        "explainability",
+        "runtime",
+        "allocation",
+        "efficiency"
+      ],
+      "summary": "{\"name\":\"A17Y Autonomous Engineering Director\",\"version\":1,\"parent\":\"a17y.lua\",\"model\":\"openai/gpt-4.1\",\"candidateCount\":3,\"maxRepairRounds\":2,\"maxPatches\":10,\"minimumDiagnosisConfidence\":0.68,\"minimumCandidateConfidence\":0.76,\"minimumEvidenceScore\":78,\"maximumChangedFraction\":0.12,\"automaticPromotionCeiling\":\"REPLAY VERIFIED\",\"protectedSystems\":[\"MT12 file I/O\",\"GV7 throttle pass-through\",\"car-off guard\",\"persistence compatibility\",\"dashboard contract\",\"logging contract\",\"compiler and normalizer contract\"],\"prioritySystems\":[\"sensor observability\",\"truth RPM and MPH\",\"jump and landing classification\",\"TC and ABS release quality\",\"channel-drop recovery\",\"causal episode learning\",\"decision explainability\",\"runtime allocation efficiency\"]}"
+    },
+    {
+      "id": "c9e2f1386972b75b",
+      "path": "director/memory.json",
+      "kind": "memory",
+      "bytes": 1145,
+      "modifiedAt": "2026-08-02T05:34:02.099Z",
+      "sha256": "c9e2f1386972b75bf20b588b254b0bc7429523d35ff9f6dd7ce076691e8f1304",
+      "terms": [
+        "schema",
+        "parent",
+        "a17y",
+        "lua",
+        "generations",
+        "v2-1785638711555",
+        "t02",
+        "parentsha",
+        "ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+        "decision",
+        "simulation",
+        "only",
+        "evidence",
+        "lessons",
+        "claim",
+        "mission",
+        "general",
+        "ended",
+        "metrics",
+        "sessions",
+        "rows",
+        "abs",
+        "jump",
+        "landing",
+        "gpsloss",
+        "rpmdrop",
+        "channeldrop",
+        "restart",
+        "replaylogs",
+        "candidatesha",
+        "result",
+        "confidence",
+        "verification",
+        "rejectedhypotheses",
+        "successfulpatterns",
+        "lastdecision",
+        "status",
+        "missiontype",
+        "score"
+      ],
+      "summary": "{\"schema\":2,\"parent\":\"a17y.lua\",\"generations\":[{\"id\":\"v2-1785638711555\",\"at\":\"2026-08-02T02:45:11.555Z\",\"parentSha\":\"340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0\",\"decision\":\"SIMULATION ONLY\",\"evidence\":[]}],\"lessons\":[{\"claim\":\"Mission general ended SIMULATION ONLY\",\"evidence\":[],\"metrics\":{\"sessions\":0,\"rows\":0,\"tc\":0,\"abs\":0,\"jump\":0,\"landing\":0,\"gpsLoss\":0,\"rpmDrop\":0,\"channelDrop\":0,\"restart\":0,\"replayLogs\":0},\"candidateSha\":\"\",\"parentSha\":\"340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0\",\"result\":\"SIMULATION ONLY\",\"confidence\":0.133,\"verification\":\"SIMULATION ONLY\",\"at\":\"2026-08-02T02:45:11.555Z\"}],\"rejectedHypotheses\":[],\"successfulPatterns\":[],\"lastDecision\":{\"at\":\"2026-08-02T02:45:11.555Z\",\"status\":\"SIMULATION ONLY\",\"missionType\":\"general\",\"score\":48,\"confidence\":0.133}}"
+    },
+    {
+      "id": "7a8a6a060e10c159",
+      "path": "director/v2/README.md",
+      "kind": "engineering",
+      "bytes": 153,
+      "modifiedAt": "2026-08-02T05:34:02.099Z",
+      "sha256": "7a8a6a060e10c15993ba68209abb22814ee40626492dab1f6d659d026bc9a708",
+      "terms": [
+        "engineering",
+        "this",
+        "directory",
+        "contains",
+        "the",
+        "evidence",
+        "replay",
+        "scoring",
+        "memory",
+        "and",
+        "reliability",
+        "modules",
+        "used",
+        "autonomous",
+        "director"
+      ],
+      "summary": "# Engineering OS v2\n\nThis directory contains the evidence, replay, scoring, memory, and reliability modules used by the Autonomous Engineering Director.\n"
+    },
+    {
+      "id": "1f99ee55b63abd4e",
+      "path": "director/v3/config.json",
+      "kind": "engineering",
+      "bytes": 655,
+      "modifiedAt": "2026-08-02T05:34:02.099Z",
+      "sha256": "1f99ee55b63abd4e68af1069720d534456b045d2953411cbdfb605abaee1e320",
+      "terms": [
+        "version",
+        "primarymodel",
+        "openai",
+        "gpt-4",
+        "reviewmodels",
+        "mini",
+        "gpt-4o",
+        "minimumconsensus",
+        "maximumresearchagedays",
+        "maximumknowledgeitems",
+        "roles",
+        "chief-engineer",
+        "causal-scientist",
+        "replay-analyst",
+        "safety-auditor",
+        "lua-optimizer",
+        "learning-specialist",
+        "research-librarian",
+        "release-manager",
+        "authority",
+        "aimay",
+        "diagnose",
+        "research",
+        "hypothesize",
+        "design",
+        "review",
+        "explain",
+        "aimaynot",
+        "override",
+        "deterministic",
+        "checks",
+        "overwrite",
+        "a17y",
+        "lua",
+        "claim",
+        "bench",
+        "road",
+        "verification",
+        "accept",
+        "uncited"
+      ],
+      "summary": "{\"version\":3,\"primaryModel\":\"openai/gpt-4.1\",\"reviewModels\":[\"openai/gpt-4.1-mini\",\"openai/gpt-4o\"],\"minimumConsensus\":0.67,\"maximumResearchAgeDays\":120,\"maximumKnowledgeItems\":2500,\"roles\":[\"chief-engineer\",\"causal-scientist\",\"replay-analyst\",\"safety-auditor\",\"lua-optimizer\",\"learning-specialist\",\"research-librarian\",\"release-manager\"],\"authority\":{\"aiMay\":[\"diagnose\",\"research\",\"hypothesize\",\"design\",\"review\",\"explain\"],\"aiMayNot\":[\"override deterministic checks\",\"overwrite a17y.lua\",\"claim bench or road verification\",\"accept uncited research\"]}}"
     }
   ],
   "links": [
@@ -765,6 +794,7 @@
         "8b8569ffdf81ab5a",
         "cab67f10183c8493",
         "9a122a076d5c8bed",
+        "1996c226f95f4d52",
         "c9e2f1386972b75b"
       ]
     },
@@ -772,7 +802,8 @@
       "term": "null",
       "ids": [
         "11e6e9041c228b45",
-        "8b8569ffdf81ab5a"
+        "8b8569ffdf81ab5a",
+        "1996c226f95f4d52"
       ]
     },
     {
@@ -794,8 +825,8 @@
       "ids": [
         "11e6e9041c228b45",
         "8b8569ffdf81ab5a",
-        "1f99ee55b63abd4e",
-        "6466da74bda7a833"
+        "6466da74bda7a833",
+        "1f99ee55b63abd4e"
       ]
     },
     {
@@ -825,8 +856,8 @@
       "ids": [
         "336a805bb051f21f",
         "8b8569ffdf81ab5a",
-        "c9e2f1386972b75b",
-        "6466da74bda7a833"
+        "6466da74bda7a833",
+        "c9e2f1386972b75b"
       ]
     },
     {
@@ -959,8 +990,8 @@
       "ids": [
         "336a805bb051f21f",
         "cab67f10183c8493",
-        "640160847168ec06",
-        "6466da74bda7a833"
+        "6466da74bda7a833",
+        "640160847168ec06"
       ]
     },
     {
@@ -996,10 +1027,11 @@
       "ids": [
         "336a805bb051f21f",
         "cab67f10183c8493",
+        "1996c226f95f4d52",
+        "6466da74bda7a833",
         "640160847168ec06",
         "c9e2f1386972b75b",
-        "1f99ee55b63abd4e",
-        "6466da74bda7a833"
+        "1f99ee55b63abd4e"
       ]
     },
     {
@@ -1049,9 +1081,9 @@
       "term": "replay",
       "ids": [
         "df0363ad327499bb",
+        "6466da74bda7a833",
         "640160847168ec06",
-        "7a8a6a060e10c159",
-        "6466da74bda7a833"
+        "7a8a6a060e10c159"
       ]
     },
     {
@@ -1073,6 +1105,7 @@
       "ids": [
         "df0363ad327499bb",
         "9a122a076d5c8bed",
+        "1996c226f95f4d52",
         "6466da74bda7a833"
       ]
     },
@@ -1263,8 +1296,8 @@
       "term": "learning",
       "ids": [
         "cab67f10183c8493",
-        "640160847168ec06",
-        "6466da74bda7a833"
+        "6466da74bda7a833",
+        "640160847168ec06"
       ]
     },
     {
@@ -1275,10 +1308,69 @@
       ]
     },
     {
+      "term": "false",
+      "ids": [
+        "cab67f10183c8493",
+        "1996c226f95f4d52"
+      ]
+    },
+    {
+      "term": "driververdict",
+      "ids": [
+        "9a122a076d5c8bed",
+        "1996c226f95f4d52"
+      ]
+    },
+    {
+      "term": "version",
+      "ids": [
+        "6466da74bda7a833",
+        "640160847168ec06",
+        "1f99ee55b63abd4e"
+      ]
+    },
+    {
       "term": "name",
       "ids": [
+        "6466da74bda7a833",
+        "640160847168ec06"
+      ]
+    },
+    {
+      "term": "engineering",
+      "ids": [
+        "6466da74bda7a833",
         "640160847168ec06",
-        "6466da74bda7a833"
+        "7a8a6a060e10c159"
+      ]
+    },
+    {
+      "term": "dashboard",
+      "ids": [
+        "6466da74bda7a833",
+        "640160847168ec06"
+      ]
+    },
+    {
+      "term": "confidence",
+      "ids": [
+        "6466da74bda7a833",
+        "c9e2f1386972b75b"
+      ]
+    },
+    {
+      "term": "score",
+      "ids": [
+        "6466da74bda7a833",
+        "c9e2f1386972b75b"
+      ]
+    },
+    {
+      "term": "decision",
+      "ids": [
+        "6466da74bda7a833",
+        "640160847168ec06",
+        "c9e2f1386972b75b"
       ]
     },
     {
@@ -1297,33 +1389,10 @@
       ]
     },
     {
-      "term": "engineering",
-      "ids": [
-        "640160847168ec06",
-        "7a8a6a060e10c159",
-        "6466da74bda7a833"
-      ]
-    },
-    {
       "term": "director",
       "ids": [
         "640160847168ec06",
         "7a8a6a060e10c159"
-      ]
-    },
-    {
-      "term": "version",
-      "ids": [
-        "640160847168ec06",
-        "1f99ee55b63abd4e",
-        "6466da74bda7a833"
-      ]
-    },
-    {
-      "term": "dashboard",
-      "ids": [
-        "640160847168ec06",
-        "6466da74bda7a833"
       ]
     },
     {
@@ -1334,14 +1403,6 @@
       ]
     },
     {
-      "term": "decision",
-      "ids": [
-        "640160847168ec06",
-        "c9e2f1386972b75b",
-        "6466da74bda7a833"
-      ]
-    },
-    {
       "term": "claim",
       "ids": [
         "c9e2f1386972b75b",
@@ -1349,24 +1410,10 @@
       ]
     },
     {
-      "term": "confidence",
-      "ids": [
-        "c9e2f1386972b75b",
-        "6466da74bda7a833"
-      ]
-    },
-    {
       "term": "verification",
       "ids": [
         "c9e2f1386972b75b",
         "1f99ee55b63abd4e"
-      ]
-    },
-    {
-      "term": "score",
-      "ids": [
-        "c9e2f1386972b75b",
-        "6466da74bda7a833"
       ]
     }
   ]
