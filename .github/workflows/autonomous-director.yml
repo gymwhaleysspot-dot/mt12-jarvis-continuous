@@ -1,17 +1,17 @@
-name: A17Y Autonomous Engineering Director
+name: A17Y Engineering OS v2
 on:
   workflow_dispatch:
     inputs:
       mission:
-        description: Optional engineering objective; blank lets the Director choose from evidence
+        description: Optional objective; blank lets the Director choose from evidence
         required: false
         default: Autonomously diagnose and improve the highest-value evidence-supported weakness
       logs:
-        description: Space-separated replay CSV paths
+        description: Optional extra CSV paths; repository evidence is discovered automatically
         required: false
         default: ''
       model:
-        description: GitHub Models model ID
+        description: Primary GitHub Models model ID
         required: false
         default: openai/gpt-4.1
   schedule:
@@ -21,10 +21,10 @@ on:
     paths:
       - a17y.lua
       - tests/replays/**
-      - director/config.json
-      - director/run.mjs
-      - workbench/rcos.mjs
-      - protected/a17y-contract.json
+      - evidence/**
+      - director/**
+      - workbench/**
+      - protected/**
       - toolchain/**
       - scripts/mt12-harness.lua
       - .github/workflows/autonomous-director.yml
@@ -33,12 +33,12 @@ permissions:
   actions: read
   models: read
 concurrency:
-  group: a17y-autonomous-director
-  cancel-in-progress: false
+  group: a17y-engineering-os-v2
+  cancel-in-progress: true
 jobs:
   direct:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 150
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DIRECTOR_MISSION: ${{ inputs.mission || 'Autonomously diagnose and improve the highest-value evidence-supported weakness' }}
@@ -57,43 +57,64 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Validate intelligence and deterministic layers
+      - name: Validate v2 architecture
         run: |
           test -f a17y.lua
-          test -f director/memory.json
-          node --check director/run.mjs
-          node --check workbench/rcos.mjs
-          node --check toolchain/normalize_luac53_mt12.js
+          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/finalize.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
           bash -n toolchain/compile_mt12.sh
           luac5.3 -p a17y.lua
           luac5.3 -p scripts/mt12-harness.lua
-      - name: Observe, diagnose, hypothesize, engineer, test, repair and decide
-        run: node director/run.mjs
-      - name: Package complete engineering evidence
+      - name: Discover and parse all engineering evidence
+        run: node director/v2/prepare.mjs
+      - name: Generate repeatable Digital Twin scenarios
+        run: node director/v2/digital-twin.mjs dist-director/DIGITAL-TWIN.json
+      - name: Run intelligent closed loop with service fallback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          MODELS=("${DIRECTOR_MODEL}" "openai/gpt-4.1-mini" "openai/gpt-4o")
+          : > dist-director/AI-ATTEMPTS.log
+          ok=0
+          for model in "${MODELS[@]}"; do
+            for attempt in 1 2 3; do
+              echo "model=$model attempt=$attempt" | tee -a dist-director/AI-ATTEMPTS.log
+              export DIRECTOR_MODEL="$model"
+              if node director/run.mjs >>dist-director/DIRECTOR-STDOUT.log 2>>dist-director/DIRECTOR-STDERR.log; then ok=1; break 2; fi
+              sleep $((attempt*20))
+            done
+          done
+          if [[ "$ok" != 1 ]]; then
+            echo 'NO CHANGE RECOMMENDED: AI service unavailable or all model attempts failed.' > dist-director/STATUS.txt
+          fi
+      - name: Calibrate scores, verification authority and memory
+        if: always()
+        run: node director/v2/finalize.mjs
+      - name: Capture complete diagnostics
         if: always()
         run: |
           mkdir -p dist-director
           cp director/memory.json dist-director/ENGINEERING-MEMORY.json
+          sha256sum a17y.lua > dist-director/PARENT-SHA256.txt
+          git status --short > dist-director/GIT-STATUS.txt
+          env | grep -E '^(DIRECTOR_|GITHUB_RUN_|GITHUB_SHA)' | sed 's/GITHUB_TOKEN=.*/GITHUB_TOKEN=REDACTED/' > dist-director/RUN-ENV.txt || true
           cd dist-director
-          zip -9 -r ../a17y-autonomous-director.zip .
-      - name: Publish Director result
+          zip -9 -r ../a17y-engineering-os-v2.zip .
+      - name: Publish complete evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: a17y-autonomous-director
-          path: a17y-autonomous-director.zip
+          name: a17y-engineering-os-v2
+          path: a17y-engineering-os-v2.zip
           if-no-files-found: error
           retention-days: 90
-      - name: Persist engineering memory
+      - name: Persist validated engineering memory
         if: always() && github.ref == 'refs/heads/main'
         shell: bash
         run: |
-          if git diff --quiet -- director/memory.json; then
-            echo 'Engineering memory unchanged.'
-            exit 0
-          fi
+          node -e "import('./director/v2/memory.mjs').then(m=>m.load('director/memory.json'))"
+          if git diff --quiet -- director/memory.json; then exit 0; fi
           git config user.name 'A17Y Engineering Director'
           git config user.email 'actions@users.noreply.github.com'
           git add director/memory.json
-          git commit -m 'Record autonomous engineering evidence [skip ci]'
+          git commit -m 'Record validated engineering evidence [skip ci]'
           git push
