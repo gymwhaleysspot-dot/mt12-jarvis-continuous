@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - mission.html
       - control.html
       - device.html
       - builder.html
@@ -14,6 +15,8 @@ on:
       - public/v3-data/**
       - public/control-data/**
       - public/device-data/**
+      - public/mission-data/**
+      - engineering-missions/**
       - device/**
       - director/v3/features.json
       - .github/workflows/pages.yml
@@ -39,12 +42,20 @@ jobs:
       - name: Verify published pages
         run: |
           set -euo pipefail
-          for f in index.html control.html device.html builder.html updates.html research.html discovery.html v3.html public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html mission.html control.html device.html builder.html updates.html research.html discovery.html v3.html public/device-data/releases.json; do test -f "$f"; done
           grep -q 'RUN FULL AI PIPELINE' builder.html
           grep -q 'RUN FULL AI PIPELINE' device.html
+          grep -q 'RUN FULL ENGINEERING MISSION' mission.html
+          grep -q 'Synchronized dual-log viewer' mission.html
           grep -q 'BUILD TAR.GZ + MANIFEST' device.html
           grep -q 'VERIFY OFFICIAL FILENAME + SHA-256' device.html
+          node --check engineering-missions/run.mjs
+          node --check engineering-missions/tournament.mjs
+          node --check engineering-missions/stress.mjs
+          node --check engineering-missions/memory-lab.mjs
+          node --check engineering-missions/finalize.mjs
           if [ -f public/control-data/log-hashes.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/control-data/log-hashes.json'))"; fi
+          if [ -f public/mission-data/current.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/mission-data/current.json'))"; fi
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
