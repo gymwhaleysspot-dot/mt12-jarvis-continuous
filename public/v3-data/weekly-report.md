@@ -1,20 +1,20 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-02T05:40:29.175Z
+Generated: 2026-08-02T11:50:29.766Z
 
 ## System health
 
 - Status: **HEALTHY**
 - Active roadmap features: **85/100**
 - Planned features: **15**
-- Knowledge items indexed: **12**
+- Knowledge items indexed: **15**
 
 ## Research
 
-- Current topic: None
+- Current topic: Which recorded signals best distinguish launch wheelspin from true airborne motion?
 - Accepted findings: 0
 - Conflicts: 0
-- Sources: 0
+- Sources: 40
 
 ## Engineering council
 
