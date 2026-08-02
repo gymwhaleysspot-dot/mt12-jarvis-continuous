@@ -14,6 +14,7 @@ import java.security.MessageDigest
 object CompanionCore {
     const val REPO = "gymwhaleysspot-dot/mt12-jarvis-continuous"
     const val CATALOG = "https://raw.githubusercontent.com/$REPO/main/public/device-data/releases.json"
+    const val BUILDER_ACTIONS = "https://github.com/$REPO/actions/workflows/workbench.yml"
 
     fun securePrefs(context: Context) = EncryptedSharedPreferences.create(
         context,
@@ -50,6 +51,20 @@ object CompanionCore {
         return code to bytes
     }
 
+    fun runLuacAiBuilder(token: String, child: String, mission: String): String {
+        require(token.startsWith("ghp_")) { "A classic GitHub PAT is required." }
+        val cleanChild = child.trim().ifBlank { "a17y.lua" }
+        require(cleanChild.endsWith(".lua", true)) { "Child must be a repository Lua path." }
+        val cleanMission = mission.trim().ifBlank { "Exact deterministic MT12 LUAC release" }
+        val body = JSONObject()
+            .put("ref", "main")
+            .put("inputs", JSONObject().put("child", cleanChild).put("mission", cleanMission))
+            .toString().toByteArray()
+        val (code, response) = request("https://api.github.com/repos/$REPO/actions/workflows/workbench.yml/dispatches", "POST", token, body)
+        require(code == 204) { "LUAC builder dispatch HTTP $code: ${response.toString(Charsets.UTF_8).take(300)}" }
+        return "LUAC AI builder started.\nSource: $cleanChild\nMission: $cleanMission\nThe normalized MT12 .luac and evidence package will appear in the newest A17Y Engineering Workbench run."
+    }
+
     fun fetchCatalog(): JSONObject {
         val (code, bytes) = request(CATALOG)
         require(code in 200..299) { "Firmware catalog HTTP $code" }
@@ -60,11 +75,7 @@ object CompanionCore {
         require(token.startsWith("ghp_")) { "A classic GitHub PAT is required." }
         val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_")
         val path = "tests/replays/mobile-${System.currentTimeMillis()}-$safe"
-        val body = JSONObject()
-            .put("message", "Import MT12 log $safe [$hash]")
-            .put("content", Base64.encodeToString(bytes, Base64.NO_WRAP))
-            .put("branch", "main")
-            .toString().toByteArray()
+        val body = JSONObject().put("message", "Import MT12 log $safe [$hash]").put("content", Base64.encodeToString(bytes, Base64.NO_WRAP)).put("branch", "main").toString().toByteArray()
         val (code, response) = request("https://api.github.com/repos/$REPO/contents/$path", "PUT", token, body)
         require(code == 201) { "GitHub upload HTTP $code: ${response.toString(Charsets.UTF_8).take(300)}" }
         val obj = JSONObject(response.toString(Charsets.UTF_8))
