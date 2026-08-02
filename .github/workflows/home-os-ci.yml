@@ -41,11 +41,7 @@ jobs:
           grep -q 'PROMOTION / ROLLBACK' index.html
       - name: Validate workflow contracts
         run: |
-          python3 - <<'PY'
-          import yaml
-          for p in ['.github/workflows/workbench.yml','.github/workflows/autonomous-director.yml']:
-              with open(p) as f: yaml.safe_load(f)
-          PY
+          ruby -e "require 'yaml'; YAML.load_file('.github/workflows/workbench.yml'); YAML.load_file('.github/workflows/autonomous-director.yml')"
           for key in logs model request_id; do grep -q "$key:" .github/workflows/workbench.yml; done
           grep -q 'run-name: LUAC AI' .github/workflows/workbench.yml
           grep -q 'run-name: Director' .github/workflows/autonomous-director.yml
