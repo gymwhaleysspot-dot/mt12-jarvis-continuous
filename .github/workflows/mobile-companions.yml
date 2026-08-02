@@ -1,0 +1,58 @@
+name: Build A17Y MT12 Mobile Companions
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - mobile/**
+      - .github/workflows/mobile-companions.yml
+permissions:
+  contents: read
+concurrency:
+  group: a17y-mobile-companions
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Build Android APK
+        working-directory: mobile/android
+        run: gradle :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-mt12-android-apk
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 90
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        working-directory: mobile/ios
+        run: xcodegen generate
+      - name: Build unsigned iOS Simulator app
+        working-directory: mobile/ios
+        run: |
+          xcodebuild -project A17YMT12Companion.xcodeproj -scheme A17YMT12Companion -sdk iphonesimulator -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          cd build/Build/Products/Release-iphonesimulator
+          zip -9 -r ../../../../../a17y-mt12-ios-simulator.zip "A17Y MT12.app"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-mt12-ios-source-and-simulator
+          path: |
+            mobile/ios/A17YMT12Companion.xcodeproj
+            mobile/ios/Sources
+            a17y-mt12-ios-simulator.zip
+          if-no-files-found: error
+          retention-days: 90
