@@ -33,6 +33,14 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Verify published pages
+        run: |
+          test -f index.html
+          test -f control.html
+          test -f device.html
+          test -f research.html
+          test -f discovery.html
+          test -f v3.html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
