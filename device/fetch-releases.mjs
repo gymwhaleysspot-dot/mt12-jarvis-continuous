@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+
+const token=process.env.GITHUB_TOKEN||'';
+const headers={Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(token?{Authorization:`Bearer ${token}`}:{})};
+const get=async url=>{const r=await fetch(url,{headers});if(!r.ok)throw new Error(`${r.status} ${url}: ${await r.text()}`);return r.json()};
+const clean=s=>String(s||'').replace(/^v/i,'');
+const classify=r=>r.prerelease?'prerelease':r.draft?'draft':'stable';
+const asset=a=>({name:a.name,size:a.size,downloadUrl:a.browser_download_url,contentType:a.content_type,updatedAt:a.updated_at,digest:a.digest||null});
+const firmwareAsset=a=>/\.(bin|dfu|uf2|zip)$/i.test(a.name);
+const checksumAsset=a=>/(sha256|checksums?|digest)/i.test(a.name);
+const mt12Asset=a=>/(mt12|radiomaster[-_ ]?mt12)/i.test(a.name);
+
+async function releases(repo){
+ const all=await get(`https://api.github.com/repos/${repo}/releases?per_page=30`);
+ return all.filter(r=>!r.draft).map(r=>({
+  id:r.id,tag:r.tag_name,version:clean(r.tag_name),name:r.name||r.tag_name,channel:classify(r),publishedAt:r.published_at,notesUrl:r.html_url,
+  assets:r.assets.map(asset)
+ }));
+}
+
+const [edgeAll,elrsAll]=await Promise.all([releases('EdgeTX/edgetx'),releases('ExpressLRS/ExpressLRS')]);
+const latest=(arr,kind)=>arr.find(x=>x.channel===kind)||null;
+const edgeDecorated=edgeAll.map(r=>({...r,
+ mt12Firmware:r.assets.filter(a=>firmwareAsset(a)&&mt12Asset(a)),
+ checksums:r.assets.filter(checksumAsset),
+ targetMatched:r.assets.some(a=>firmwareAsset(a)&&mt12Asset(a))
+}));
+const elrsDecorated=elrsAll.map(r=>({...r,
+ firmwareAssets:r.assets.filter(firmwareAsset),
+ configuratorAssets:r.assets.filter(a=>/(configurator|setup|installer|dmg|appimage|exe)/i.test(a.name)),
+ checksums:r.assets.filter(checksumAsset)
+}));
+const out={
+ schema:2,
+ generatedAt:new Date().toISOString(),
+ sources:{
+  edgeTx:{repository:'EdgeTX/edgetx',api:'https://api.github.com/repos/EdgeTX/edgetx/releases'},
+  expressLrs:{repository:'ExpressLRS/ExpressLRS',api:'https://api.github.com/repos/ExpressLRS/ExpressLRS/releases'}
+ },
+ target:{radio:'RadioMaster MT12',edgeTxMatch:['mt12','radiomaster-mt12'],elrsTarget:'RadioMaster MT12 Internal 2.4GHz TX'},
+ edgeTx:{stable:latest(edgeDecorated,'stable'),prerelease:latest(edgeDecorated,'prerelease'),releases:edgeDecorated.slice(0,12)},
+ expressLrs:{stable:latest(elrsDecorated,'stable'),prerelease:latest(elrsDecorated,'prerelease'),releases:elrsDecorated.slice(0,12)},
+ policy:{automaticDownload:false,automaticFlash:false,requireTargetConfirmation:true,requireChecksumOrDigest:true,retainRollback:true}
+};
+fs.mkdirSync('public/device-data',{recursive:true});
+fs.writeFileSync('public/device-data/releases.json',JSON.stringify(out,null,2)+'\n');
+console.log(JSON.stringify({generatedAt:out.generatedAt,edgeTxStable:out.edgeTx.stable?.version||null,edgeTxMt12Assets:out.edgeTx.stable?.mt12Firmware?.length||0,elrsStable:out.expressLrs.stable?.version||null},null,2));
