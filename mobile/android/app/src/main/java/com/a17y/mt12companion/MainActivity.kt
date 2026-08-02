@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import java.security.MessageDigest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +45,7 @@ private fun CompanionApp(activity: Activity) {
         }
     }
     val firmwarePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) status = "Firmware selected: $uri. Use the EDGETX_UF2 folder authorization before copying."
+        if (uri != null) status = "Firmware selected: $uri. Authorize the EDGETX_UF2 folder before copying."
     }
 
     fun usbSummary(): String {
@@ -52,7 +53,7 @@ private fun CompanionApp(activity: Activity) {
         return manager.deviceList.values.joinToString("\n") { "USB ${it.vendorId}:${it.productId} ${it.deviceName}" }.ifBlank { "No USB devices enumerated." }
     }
 
-    suspend fun scanAndUpload() {
+    suspend fun scanLogs() {
         val rootUri = treeUri ?: run { status = "Authorize the MT12 folder first."; return }
         val root = DocumentFile.fromTreeUri(activity, rootUri) ?: run { status = "Authorized folder is unavailable."; return }
         val logs = root.findFile("LOGS") ?: root
@@ -66,8 +67,6 @@ private fun CompanionApp(activity: Activity) {
             if (seen.add(hash)) {
                 fresh++
                 report += "NEW ${file.name} ${bytes.size} bytes $hash"
-                // Upload is intentionally delegated to the repository API only when a classic PAT is present.
-                // The UI records the file and can send it through the same tests/replays path used by the web OS.
             } else report += "KNOWN ${file.name}"
         }
         prefs.edit().putStringSet("seenHashes", seen).apply()
@@ -79,12 +78,12 @@ private fun CompanionApp(activity: Activity) {
         Text("A17Y MT12 Mobile Companion", style = MaterialTheme.typography.headlineMedium)
         Text("Android", style = MaterialTheme.typography.labelLarge)
         Button(onClick = { folderPicker.launch(treeUri) }, modifier = Modifier.fillMaxWidth()) { Text("AUTHORIZE MT12 FOLDER") }
-        Button(onClick = { scope.launch { scanAndUpload() } }, modifier = Modifier.fillMaxWidth()) { Text("SYNC MT12 LOGS") }
+        Button(onClick = { scope.launch { scanLogs() } }, modifier = Modifier.fillMaxWidth()) { Text("SYNC MT12 LOGS") }
         Button(onClick = { status = usbSummary() }, modifier = Modifier.fillMaxWidth()) { Text("CHECK USB DEVICES") }
         Button(onClick = { firmwarePicker.launch(arrayOf("application/octet-stream", "*/*")) }, modifier = Modifier.fillMaxWidth()) { Text("SELECT EDGETX UF2") }
         Button(onClick = { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://10.0.0.1"))) }, modifier = Modifier.fillMaxWidth()) { Text("OPEN ELRS WI-FI FLASHER") }
         OutlinedTextField(value = token, onValueChange = { token = it; prefs.edit().putString("classicPat", it).apply() }, label = { Text("Classic GitHub PAT") }, modifier = Modifier.fillMaxWidth())
         Card(Modifier.fillMaxWidth()) { Text(status, Modifier.padding(14.dp)) }
-        Text("The app keeps persistent folder permission, SHA-deduplicates logs, and exposes Android USB-host awareness. Firmware copy remains gated by target, backup, checksum, battery, and explicit approval.", style = MaterialTheme.typography.bodySmall)
+        Text("Persistent folder access and SHA deduplication are supported. Direct firmware writing remains gated by target, backup, checksum, battery and explicit approval.", style = MaterialTheme.typography.bodySmall)
     }
 }
