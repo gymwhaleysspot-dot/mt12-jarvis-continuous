@@ -18,6 +18,8 @@ struct ContentView: View {
     @State private var firmwareURL: URL?
     @State private var status = "Authorize the MT12 root and save a classic PAT."
     @State private var token = KeychainStore.get("classicPat")
+    @State private var builderChild = UserDefaults.standard.string(forKey: "builderChild") ?? "a17y.lua"
+    @State private var builderMission = UserDefaults.standard.string(forKey: "builderMission") ?? "Build the strongest verified MT12 LUAC without regressions"
     @State private var catalog = "Not loaded"
     @State private var busy = false
 
@@ -28,13 +30,26 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 13) {
                     Text("A17Y MT12 Mobile Companion").font(.largeTitle.bold()).frame(maxWidth: .infinity, alignment: .leading)
-                    Text("iPhone · verified sync and update handoff").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
+                    Text("iPhone · sync, firmware and LUAC AI builder").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
                     SecureField("Classic GitHub PAT (Keychain)", text: $token)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: token) { _, value in KeychainStore.set(value, key: "classicPat") }
                     Button("AUTHORIZE & VERIFY MT12 ROOT") { folderMode = .mt12 }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity)
                     Button("SYNC LOGS TO GITHUB") { Task { await sync() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).disabled(busy)
                     Button("EXPORT VERIFIED BACKUP MANIFEST") { buildBackup() }.buttonStyle(.bordered).frame(maxWidth: .infinity)
+                    Divider()
+                    Text("LUAC AI Builder").font(.title3.bold()).frame(maxWidth: .infinity, alignment: .leading)
+                    TextField("Repository Lua path", text: $builderChild)
+                        .textFieldStyle(.roundedBorder)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .onChange(of: builderChild) { _, value in UserDefaults.standard.set(value, forKey: "builderChild") }
+                    TextField("AI engineering mission", text: $builderMission, axis: .vertical)
+                        .textFieldStyle(.roundedBorder)
+                        .lineLimit(2...5)
+                        .onChange(of: builderMission) { _, value in UserDefaults.standard.set(value, forKey: "builderMission") }
+                    Button("RUN LUAC AI BUILDER") { Task { await runBuilder() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).disabled(busy)
+                    Link("OPEN LUAC BUILDER RESULTS", destination: MobileCore.builderResultsURL).buttonStyle(.bordered).frame(maxWidth: .infinity)
                     Divider()
                     Button("GET LATEST EDGETX & ELRS") { Task { await refreshCatalog() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity)
                     Text(catalog).font(.caption.monospaced()).frame(maxWidth: .infinity, alignment: .leading).lineLimit(12)
@@ -44,7 +59,7 @@ struct ContentView: View {
                     Button("OPEN ELRS WI-FI FLASHER") { UIApplication.shared.open(URL(string: "http://10.0.0.1")!) }.buttonStyle(.bordered).frame(maxWidth: .infinity)
                     Link("MT12 ELRS BUILD & FLASH GUIDE", destination: URL(string: "https://www.expresslrs.org/quick-start/transmitters/rm-internal/")!).buttonStyle(.bordered).frame(maxWidth: .infinity)
                     Text(status).font(.system(.footnote, design: .monospaced)).frame(maxWidth: .infinity, alignment: .leading).padding().background(.thinMaterial).clipShape(RoundedRectangle(cornerRadius: 14))
-                    Text("Logs are marked imported only after GitHub confirms the uploaded blob. iOS syncs on app activation after you authorize the MT12 folder. UF2 source and destination hashes must match.").font(.caption).foregroundStyle(.secondary)
+                    Text("The LUAC AI builder runs the deterministic A17Y Engineering Workbench, compiles with Lua 5.3, normalizes the bytecode for MT12, compares the candidate, and packages the normalized .luac with evidence.").font(.caption).foregroundStyle(.secondary)
                 }.padding()
             }
             .fileImporter(isPresented: Binding(get: { folderMode != nil }, set: { if !$0 { folderMode = nil } }), allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
@@ -90,6 +105,12 @@ struct ContentView: View {
         guard !busy else { return }; busy = true; defer { busy = false }
         do { status = "Syncing…"; status = try await MobileCore.sync(root: bookmarkURL("mt12Bookmark"), token: token) }
         catch { status = "Sync failed: \(error.localizedDescription)" }
+    }
+
+    @MainActor private func runBuilder() async {
+        guard !busy else { return }; busy = true; defer { busy = false }
+        do { status = "Starting LUAC AI builder…"; status = try await MobileCore.runLuacAIBuilder(token: token, child: builderChild, mission: builderMission) }
+        catch { status = "Builder failed: \(error.localizedDescription)" }
     }
 
     @MainActor private func refreshCatalog() async {
