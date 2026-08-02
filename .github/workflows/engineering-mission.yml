@@ -30,7 +30,12 @@ on:
       - evidence/labels/**
       - evidence/bench/**
       - evidence/road/**
-      - engineering-missions/**
+      - engineering-missions/schema.json
+      - engineering-missions/run.mjs
+      - engineering-missions/tournament.mjs
+      - engineering-missions/stress.mjs
+      - engineering-missions/memory-lab.mjs
+      - engineering-missions/finalize.mjs
       - .github/workflows/engineering-mission.yml
 permissions:
   contents: write
@@ -60,11 +65,19 @@ jobs:
         run: |
           set -euo pipefail
           node --check engineering-missions/run.mjs
+          node --check engineering-missions/tournament.mjs
+          node --check engineering-missions/stress.mjs
+          node --check engineering-missions/memory-lab.mjs
+          node --check engineering-missions/finalize.mjs
           node --check director/run.mjs
           node --check workbench/run.mjs
           node --check workbench/rcos.mjs
           lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
           lua5.3 -e "assert(loadfile('scripts/mt12-csv-replay.lua'))"
+      - name: Build replay input list
+        run: |
+          find tests/replays -type f -iname '*.csv' -print 2>/dev/null > /tmp/logs.txt || true
+          echo "Replay files: $(wc -l </tmp/logs.txt)"
       - name: Create permanent mission, fresh baseline and event windows
         id: mission
         env:
@@ -86,35 +99,29 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "dist-mission/$MISSION_ID/tournament"
+          LOGS="$(tr '\n' ' ' </tmp/logs.txt)"
           for PROFILE in conservative performance learning memory-efficient alternative-algorithm; do
-            export DIRECTOR_MISSION="$MISSION_QUESTION. Generate a $PROFILE candidate. Preserve all protected behavior. Return NO CHANGE RECOMMENDED when evidence does not justify a modification."
+            export DIRECTOR_MISSION="$MISSION_QUESTION. Generate a $PROFILE candidate. Preserve every protected behavior. Return NO CHANGE RECOMMENDED when evidence does not justify modification."
             export DIRECTOR_OUT="dist-mission/$MISSION_ID/tournament/$PROFILE/director"
-            export DIRECTOR_LOGS="$(find tests/replays -type f -iname '*.csv' -print 2>/dev/null | tr '\n' ' ')"
+            export DIRECTOR_LOGS="$LOGS"
             mkdir -p "$DIRECTOR_OUT"
             node director/run.mjs || true
             C="$DIRECTOR_OUT/WINNER.lua"
             if [ ! -f "$C" ]; then C=a17y.lua; fi
             WORKBENCH_OUT="dist-mission/$MISSION_ID/tournament/$PROFILE/workbench" WORKBENCH_LOG_FILE=/tmp/logs.txt node workbench/run.mjs a17y.lua "$C" "$DIRECTOR_MISSION" || true
           done
-        shell: bash
-      - name: Build replay input list
-        run: |
-          find tests/replays -type f -iname '*.csv' -print 2>/dev/null > /tmp/logs.txt || true
       - name: Deterministic tournament arbitration and adversarial review
         env:
           MISSION_ID: ${{ steps.mission.outputs.id }}
-        run: |
-          node engineering-missions/tournament.mjs "dist-mission/$MISSION_ID"
+        run: node engineering-missions/tournament.mjs "dist-mission/$MISSION_ID"
       - name: Counterfactual and fuzz execution
         env:
           MISSION_ID: ${{ steps.mission.outputs.id }}
-        run: |
-          node engineering-missions/stress.mjs "dist-mission/$MISSION_ID" a17y.lua
+        run: node engineering-missions/stress.mjs "dist-mission/$MISSION_ID" a17y.lua
       - name: Memory compatibility laboratory
         env:
           MISSION_ID: ${{ steps.mission.outputs.id }}
-        run: |
-          node engineering-missions/memory-lab.mjs "dist-mission/$MISSION_ID" a17y.lua
+        run: node engineering-missions/memory-lab.mjs "dist-mission/$MISSION_ID" a17y.lua
       - name: Build release package, rollback recommendation and audit export
         env:
           MISSION_ID: ${{ steps.mission.outputs.id }}
