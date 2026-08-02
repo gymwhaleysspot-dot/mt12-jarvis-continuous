@@ -1,4 +1,5 @@
 name: A17Y Engineering OS v3
+run-name: Director ${{ inputs.request_id || github.sha }}
 on:
   workflow_dispatch:
     inputs:
@@ -7,13 +8,17 @@ on:
         required: false
         default: Autonomously diagnose and improve the highest-value evidence-supported weakness
       logs:
-        description: Optional extra CSV paths; repository evidence is discovered automatically
+        description: Optional selected CSV paths; repository evidence is discovered when blank
         required: false
         default: ''
       model:
         description: Primary GitHub Models model ID
         required: false
         default: openai/gpt-4.1
+      request_id:
+        description: Unique UI request identifier
+        required: false
+        default: manual
   schedule:
     - cron: '17 9 * * *'
   push:
@@ -36,8 +41,8 @@ permissions:
   actions: read
   models: read
 concurrency:
-  group: a17y-engineering-os-v3
-  cancel-in-progress: true
+  group: a17y-engineering-os-v3-${{ inputs.request_id || github.ref }}
+  cancel-in-progress: false
 jobs:
   direct:
     runs-on: ubuntu-24.04
@@ -47,6 +52,7 @@ jobs:
       DIRECTOR_MISSION: ${{ inputs.mission || 'Autonomously diagnose and improve the highest-value evidence-supported weakness' }}
       DIRECTOR_LOGS: ${{ inputs.logs || '' }}
       DIRECTOR_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+      A17Y_REQUEST_ID: ${{ inputs.request_id || github.sha }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -69,6 +75,10 @@ jobs:
           luac5.3 -p a17y.lua
           luac5.3 -p scripts/mt12-harness.lua
           luac5.3 -p scripts/mt12-replay.lua
+      - name: Validate selected replay paths
+        run: |
+          set -euo pipefail
+          for p in $DIRECTOR_LOGS; do case "$p" in tests/replays/*.csv) test -f "$p";; *) echo "Rejected replay path: $p" >&2; exit 1;; esac; done
       - name: Validate hash-bound bench and road evidence
         run: node director/v2/validate-evidence.mjs
       - name: Discover logs, dependencies and cited research
@@ -84,15 +94,13 @@ jobs:
           ok=0
           for model in "${MODELS[@]}"; do
             for attempt in 1 2 3; do
-              echo "model=$model attempt=$attempt" | tee -a dist-director/AI-ATTEMPTS.log
+              echo "model=$model attempt=$attempt request=$A17Y_REQUEST_ID" | tee -a dist-director/AI-ATTEMPTS.log
               export DIRECTOR_MODEL="$model"
               if node director/run.mjs >>dist-director/DIRECTOR-STDOUT.log 2>>dist-director/DIRECTOR-STDERR.log; then ok=1; break 2; fi
               sleep $((attempt*20))
             done
           done
-          if [[ "$ok" != 1 ]]; then
-            echo 'NO CHANGE RECOMMENDED: AI service unavailable or all model attempts failed.' > dist-director/STATUS.txt
-          fi
+          if [[ "$ok" != 1 ]]; then echo 'NO CHANGE RECOMMENDED: AI service unavailable or all model attempts failed.' > dist-director/STATUS.txt; fi
       - name: Replay recorded telemetry through parent and children
         if: always()
         run: node director/v2/replay.mjs
@@ -106,15 +114,17 @@ jobs:
           cp director/memory.json dist-director/ENGINEERING-MEMORY.json
           cp research/current.json dist-director/RESEARCH-CURRENT.json
           sha256sum a17y.lua > dist-director/PARENT-SHA256.txt
+          printf '%s\n' "$A17Y_REQUEST_ID" > dist-director/REQUEST-ID.txt
+          printf '%s\n' "$DIRECTOR_MODEL" > dist-director/REQUESTED-MODEL.txt
           git status --short > dist-director/GIT-STATUS.txt
-          env | grep -E '^(DIRECTOR_|GITHUB_RUN_|GITHUB_SHA)' | sed 's/GITHUB_TOKEN=.*/GITHUB_TOKEN=REDACTED/' > dist-director/RUN-ENV.txt || true
+          env | grep -E '^(DIRECTOR_|A17Y_REQUEST_ID|GITHUB_RUN_|GITHUB_SHA)' | sed 's/GITHUB_TOKEN=.*/GITHUB_TOKEN=REDACTED/' > dist-director/RUN-ENV.txt || true
           cd dist-director
           zip -9 -r ../a17y-engineering-os-v3.zip .
       - name: Publish v3 evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: a17y-engineering-os-v3
+          name: a17y-engineering-${{ inputs.request_id || github.run_id }}
           path: a17y-engineering-os-v3.zip
           if-no-files-found: error
           retention-days: 90
@@ -122,7 +132,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: a17y-autonomous-director
+          name: a17y-autonomous-director-${{ inputs.request_id || github.run_id }}
           path: a17y-engineering-os-v3.zip
           if-no-files-found: error
           retention-days: 90
