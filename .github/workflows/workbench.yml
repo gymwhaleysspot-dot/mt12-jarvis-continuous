@@ -1,4 +1,5 @@
 name: A17Y LUAC AI Builder
+run-name: LUAC AI ${{ inputs.request_id || github.sha }}
 on:
   workflow_dispatch:
     inputs:
@@ -15,6 +16,18 @@ on:
         required: true
         type: boolean
         default: true
+      logs:
+        description: Space-separated selected replay paths; blank discovers all repository replay CSVs
+        required: false
+        default: ''
+      model:
+        description: Primary GitHub Models model ID
+        required: false
+        default: openai/gpt-4.1
+      request_id:
+        description: Unique UI request identifier for exact run correlation
+        required: false
+        default: manual
   pull_request:
     paths:
       - protected/**
@@ -36,20 +49,27 @@ on:
       - scripts/mt12-*.lua
       - scripts/reconcile-director-authority.mjs
       - tests/replays/**
+      - evidence/**
       - .github/workflows/workbench.yml
 permissions:
   contents: read
   actions: read
   models: read
 concurrency:
-  group: a17y-luac-ai-${{ github.ref }}
-  cancel-in-progress: true
+  group: a17y-luac-ai-${{ inputs.request_id || github.ref }}
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      A17Y_REQUEST_ID: ${{ inputs.request_id || github.sha }}
+      DIRECTOR_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
@@ -72,14 +92,21 @@ jobs:
           lua5.3 -e "assert(loadfile('scripts/mt12-csv-replay.lua'))"
           lua5.3 -e "assert(loadfile('scripts/mt12-bytecode-stress.lua'))"
           bash -n toolchain/compile_mt12.sh
-      - name: Discover replay evidence
+      - name: Resolve selected replay evidence
+        env:
+          REQUESTED_LOGS: ${{ inputs.logs || '' }}
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=[str(x) for x in Path('tests/replays').rglob('*.csv')] if Path('tests/replays').exists() else []
-          with open('/tmp/logs.txt','w') as f: f.write('\n'.join(p))
-          print('Discovered',len(p),'replay logs')
-          PY
+          set -euo pipefail
+          : > /tmp/logs.txt
+          if [ -n "$REQUESTED_LOGS" ]; then
+            for p in $REQUESTED_LOGS; do
+              test -f "$p" || { echo "Selected replay does not exist: $p" >&2; exit 1; }
+              case "$p" in tests/replays/*.csv) printf '%s\n' "$p" >> /tmp/logs.txt;; *) echo "Rejected replay path: $p" >&2; exit 1;; esac
+            done
+          else
+            find tests/replays -type f -name '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
+          fi
+          echo "Resolved $(wc -l </tmp/logs.txt) replay logs for request $A17Y_REQUEST_ID"
       - name: AI diagnosis, generation and repair
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate == true && inputs.child == '' }}
         env:
@@ -99,6 +126,7 @@ jobs:
           elif [ -f dist-director/WINNER.lua ]; then C=dist-director/WINNER.lua;
           else C=a17y.lua; fi
           test -f "$C"
+          case "$C" in a17y.lua|candidates/*|dist-director/*) ;; *) echo "Candidate path outside approved roots: $C" >&2; exit 1;; esac
           echo "path=$C" >> "$GITHUB_OUTPUT"
           echo "Selected $C"
       - name: Compile, normalize, execute bytecode, replay and score
@@ -116,11 +144,13 @@ jobs:
           cp -a dist-workbench/. dist-package/
           if [ -d dist-director ]; then mkdir -p dist-package/director; cp -a dist-director/. dist-package/director/; fi
           cp /tmp/logs.txt dist-package/REPLAY-INPUTS.txt
+          printf '%s\n' "$A17Y_REQUEST_ID" > dist-package/REQUEST-ID.txt
+          printf '%s\n' "$DIRECTOR_MODEL" > dist-package/MODEL.txt
           cd dist-package
           zip -9 -r ../a17y-luac-ai-result.zip .
       - uses: actions/upload-artifact@v6
         with:
-          name: a17y-luac-ai-result
+          name: a17y-luac-ai-${{ inputs.request_id || github.run_id }}
           path: a17y-luac-ai-result.zip
           if-no-files-found: error
           retention-days: 90
