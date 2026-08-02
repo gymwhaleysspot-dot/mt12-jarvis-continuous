@@ -1,18 +1,8 @@
 (()=>{
   'use strict';
-  const pages=[
-    ['Home','index.html'],
-    ['Missions','mission.html'],
-    ['Completion','completion.html'],
-    ['Device','device.html'],
-    ['Control','control.html'],
-    ['Research','research.html'],
-    ['Discovery','discovery.html'],
-    ['OS v3','v3.html'],
-    ['Updates','updates.html'],
-    ['Builder Lite','builder.html']
-  ];
+  const pages=[['Home','index.html'],['Missions','mission.html'],['Completion','completion.html'],['Device','device.html'],['Control','control.html'],['Research','research.html'],['Discovery','discovery.html'],['OS v3','v3.html'],['Updates','updates.html'],['Builder Lite','builder.html']];
   const current=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  if(current==='index.html')import('./home/enhancements.js').catch(e=>console.error('Home enhancements failed',e));
   if(document.getElementById('a17y-global-nav'))return;
   const style=document.createElement('style');
   style.textContent=`#a17y-global-nav{position:fixed;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:2147483646;display:flex;gap:7px;align-items:center;padding:8px;border:1px solid #46627f;background:#07111bea;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;box-shadow:0 12px 40px #000b;overflow-x:auto;overscroll-behavior-x:contain}#a17y-global-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 12px;border:1px solid #39536d;border-radius:11px;background:#142438;color:#eef7ff!important;text-decoration:none!important;white-space:nowrap;font:800 12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.02em}#a17y-global-nav a.home{background:linear-gradient(135deg,#ffe36d,#ff9d42);border:0;color:#171006!important;font-size:13px}#a17y-global-nav a[aria-current=page]{outline:2px solid #78c4ff;outline-offset:-2px;background:#213a55}#a17y-nav-toggle{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(72px,calc(env(safe-area-inset-bottom) + 72px));z-index:2147483647;width:46px;height:46px;border-radius:50%;border:1px solid #496783;background:#10243a;color:#fff;font:900 18px system-ui;box-shadow:0 8px 25px #000a}body{padding-bottom:max(78px,calc(env(safe-area-inset-bottom) + 78px))!important}@media(min-width:900px){#a17y-global-nav{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100vw - 30px)}#a17y-nav-toggle{display:none}}`;
