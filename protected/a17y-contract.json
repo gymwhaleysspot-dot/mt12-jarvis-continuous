@@ -3,6 +3,9 @@
   "parent": "a17y.lua",
   "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
   "maxNormalizedBytes": 87000,
+  "maximumChangedRows": 500,
+  "maximumOutputDelta": 700,
+  "maximumHostMemoryGrowthKB": 256,
   "required": [
     "return{init=init,run=run,background=background}",
     "io.read(",
@@ -11,5 +14,7 @@
     "GPS_LOST"
   ],
   "forbidden": [":read(", "io.popen(", "os.execute(", "function fo()fo()end"],
-  "promotionStages": ["COMPILES", "SIMULATION PASSED", "BENCH PASSED", "ROAD PASSED"]
+  "protectedPaths": ["a17y.lua", "protected/", ".github/workflows/", "toolchain/"],
+  "candidateRoots": ["candidates/", "uploads/"],
+  "promotionStages": ["COMPILES", "LOG EVIDENCE REVIEWED", "REPLAY VERIFIED", "BENCH PASSED", "ROAD PASSED"]
 }

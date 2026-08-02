@@ -38,17 +38,13 @@ jobs:
           enablement: true
       - name: Verify published pages
         run: |
-          test -f index.html
-          test -f control.html
-          test -f device.html
-          test -f builder.html
-          test -f updates.html
-          test -f research.html
-          test -f discovery.html
-          test -f v3.html
-          test -f public/device-data/releases.json
-          grep -q 'LUAC AI Builder' device.html
-          grep -q 'RUN LUAC AI BUILDER' builder.html
+          set -euo pipefail
+          for f in index.html control.html device.html builder.html updates.html research.html discovery.html v3.html public/device-data/releases.json; do test -f "$f"; done
+          grep -q 'RUN FULL AI PIPELINE' builder.html
+          grep -q 'RUN FULL AI PIPELINE' device.html
+          grep -q 'BUILD TAR.GZ + MANIFEST' device.html
+          grep -q 'VERIFY OFFICIAL FILENAME + SHA-256' device.html
+          if [ -f public/control-data/log-hashes.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/control-data/log-hashes.json'))"; fi
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .

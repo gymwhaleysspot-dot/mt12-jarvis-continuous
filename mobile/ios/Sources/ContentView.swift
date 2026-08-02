@@ -1,142 +1,36 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct JSONDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json] }
-    var data: Data
-    init(data: Data) { self.data = data }
-    init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
-}
+struct JSONDocument:FileDocument{static var readableContentTypes:[UTType]{[.json]};var data:Data;init(data:Data){self.data=data};init(configuration:ReadConfiguration)throws{data=configuration.file.regularFileContents ?? Data()};func fileWrapper(configuration:WriteConfiguration)throws->FileWrapper{FileWrapper(regularFileWithContents:data)}}
 
-struct ContentView: View {
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var folderMode: FolderMode?
-    @State private var showingFirmwarePicker = false
-    @State private var showingBackupExporter = false
-    @State private var backupDocument = JSONDocument(data: Data("{}".utf8))
-    @State private var firmwareURL: URL?
-    @State private var status = "Authorize the MT12 root and save a classic PAT."
-    @State private var token = KeychainStore.get("classicPat")
-    @State private var builderChild = UserDefaults.standard.string(forKey: "builderChild") ?? "a17y.lua"
-    @State private var builderMission = UserDefaults.standard.string(forKey: "builderMission") ?? "Build the strongest verified MT12 LUAC without regressions"
-    @State private var catalog = "Not loaded"
-    @State private var busy = false
-
-    enum FolderMode: Identifiable { case mt12, uf2; var id: Int { self == .mt12 ? 1 : 2 } }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 13) {
-                    Text("A17Y MT12 Mobile Companion").font(.largeTitle.bold()).frame(maxWidth: .infinity, alignment: .leading)
-                    Text("iPhone · sync, firmware and LUAC AI builder").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                    SecureField("Classic GitHub PAT (Keychain)", text: $token)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: token) { _, value in KeychainStore.set(value, key: "classicPat") }
-                    Button("AUTHORIZE & VERIFY MT12 ROOT") { folderMode = .mt12 }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity)
-                    Button("SYNC LOGS TO GITHUB") { Task { await sync() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).disabled(busy)
-                    Button("EXPORT VERIFIED BACKUP MANIFEST") { buildBackup() }.buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Divider()
-                    Text("LUAC AI Builder").font(.title3.bold()).frame(maxWidth: .infinity, alignment: .leading)
-                    TextField("Repository Lua path", text: $builderChild)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onChange(of: builderChild) { _, value in UserDefaults.standard.set(value, forKey: "builderChild") }
-                    TextField("AI engineering mission", text: $builderMission, axis: .vertical)
-                        .textFieldStyle(.roundedBorder)
-                        .lineLimit(2...5)
-                        .onChange(of: builderMission) { _, value in UserDefaults.standard.set(value, forKey: "builderMission") }
-                    Button("RUN LUAC AI BUILDER") { Task { await runBuilder() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).disabled(busy)
-                    Link("OPEN LUAC BUILDER RESULTS", destination: MobileCore.builderResultsURL).buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Divider()
-                    Button("GET LATEST EDGETX & ELRS") { Task { await refreshCatalog() } }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity)
-                    Text(catalog).font(.caption.monospaced()).frame(maxWidth: .infinity, alignment: .leading).lineLimit(12)
-                    Button("SELECT OFFICIAL EDGETX UF2") { showingFirmwarePicker = true }.buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Button("AUTHORIZE EDGETX_UF2 FOLDER") { folderMode = .uf2 }.buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Button("COPY UF2 & VERIFY") { copyUF2() }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity)
-                    Button("OPEN ELRS WI-FI FLASHER") { UIApplication.shared.open(URL(string: "http://10.0.0.1")!) }.buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Link("MT12 ELRS BUILD & FLASH GUIDE", destination: URL(string: "https://www.expresslrs.org/quick-start/transmitters/rm-internal/")!).buttonStyle(.bordered).frame(maxWidth: .infinity)
-                    Text(status).font(.system(.footnote, design: .monospaced)).frame(maxWidth: .infinity, alignment: .leading).padding().background(.thinMaterial).clipShape(RoundedRectangle(cornerRadius: 14))
-                    Text("The LUAC AI builder runs the deterministic A17Y Engineering Workbench, compiles with Lua 5.3, normalizes the bytecode for MT12, compares the candidate, and packages the normalized .luac with evidence.").font(.caption).foregroundStyle(.secondary)
-                }.padding()
-            }
-            .fileImporter(isPresented: Binding(get: { folderMode != nil }, set: { if !$0 { folderMode = nil } }), allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
-                let mode = folderMode; folderMode = nil
-                do {
-                    let url = try result.get().first!
-                    if mode == .mt12 && !MobileCore.validateMT12(url) { throw NSError(domain: "A17Y", code: 20, userInfo: [NSLocalizedDescriptionKey: "Choose the MT12 root containing LOGS and SCRIPTS/MODELS/RADIO."]) }
-                    let bookmark = try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
-                    UserDefaults.standard.set(bookmark, forKey: mode == .mt12 ? "mt12Bookmark" : "uf2Bookmark")
-                    status = mode == .mt12 ? "Verified MT12 root authorized." : "UF2 destination authorized; it will be validated during copy."
-                } catch { status = "Folder authorization failed: \(error.localizedDescription)" }
-            }
-            .fileImporter(isPresented: $showingFirmwarePicker, allowedContentTypes: [UTType(filenameExtension: "uf2") ?? .data], allowsMultipleSelection: false) { result in
-                do {
-                    firmwareURL = try result.get().first!
-                    let data = try Data(contentsOf: firmwareURL!)
-                    guard data.count > 100_000 else { throw NSError(domain: "A17Y", code: 21, userInfo: [NSLocalizedDescriptionKey: "UF2 is unexpectedly small"]) }
-                    status = "Selected \(firmwareURL!.lastPathComponent)\nSHA-256: \(MobileCore.sha256(data))"
-                } catch { status = "Firmware selection failed: \(error.localizedDescription)" }
-            }
-            .fileExporter(isPresented: $showingBackupExporter, document: backupDocument, contentType: .json, defaultFilename: "mt12-backup-manifest") { result in
-                if case .failure(let error) = result { status = "Backup export failed: \(error.localizedDescription)" }
-            }
-            .task { await refreshCatalog(); await syncIfReady() }
-            .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await syncIfReady() } } }
-        }
-    }
-
-    private func bookmarkURL(_ key: String) throws -> URL {
-        guard let data = UserDefaults.standard.data(forKey: key) else { throw NSError(domain: "A17Y", code: 22, userInfo: [NSLocalizedDescriptionKey: "Folder authorization missing"]) }
-        var stale = false
-        let url = try URL(resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &stale)
-        if stale { UserDefaults.standard.removeObject(forKey: key) }
-        return url
-    }
-
-    @MainActor private func syncIfReady() async {
-        guard !token.isEmpty, UserDefaults.standard.data(forKey: "mt12Bookmark") != nil else { return }
-        await sync()
-    }
-
-    @MainActor private func sync() async {
-        guard !busy else { return }; busy = true; defer { busy = false }
-        do { status = "Syncing…"; status = try await MobileCore.sync(root: bookmarkURL("mt12Bookmark"), token: token) }
-        catch { status = "Sync failed: \(error.localizedDescription)" }
-    }
-
-    @MainActor private func runBuilder() async {
-        guard !busy else { return }; busy = true; defer { busy = false }
-        do { status = "Starting LUAC AI builder…"; status = try await MobileCore.runLuacAIBuilder(token: token, child: builderChild, mission: builderMission) }
-        catch { status = "Builder failed: \(error.localizedDescription)" }
-    }
-
-    @MainActor private func refreshCatalog() async {
-        do { catalog = try await MobileCore.fetchCatalog(); status = "Official firmware catalog refreshed." }
-        catch { catalog = "Catalog error: \(error.localizedDescription)" }
-    }
-
-    private func buildBackup() {
-        do { backupDocument = JSONDocument(data: try MobileCore.backupManifest(root: bookmarkURL("mt12Bookmark"))); showingBackupExporter = true; status = "Backup manifest ready to export." }
-        catch { status = "Backup failed: \(error.localizedDescription)" }
-    }
-
-    private func copyUF2() {
-        do {
-            guard let source = firmwareURL else { throw NSError(domain: "A17Y", code: 23, userInfo: [NSLocalizedDescriptionKey: "Select a UF2 first"]) }
-            let target = try bookmarkURL("uf2Bookmark")
-            guard source.startAccessingSecurityScopedResource(), target.startAccessingSecurityScopedResource() else { throw NSError(domain: "A17Y", code: 24, userInfo: [NSLocalizedDescriptionKey: "UF2 permission unavailable"]) }
-            defer { source.stopAccessingSecurityScopedResource(); target.stopAccessingSecurityScopedResource() }
-            let names = (try? FileManager.default.contentsOfDirectory(atPath: target.path)) ?? []
-            guard target.lastPathComponent.uppercased().contains("EDGETX") || names.contains(where: { $0.uppercased() == "INFO_UF2.TXT" }) else { throw NSError(domain: "A17Y", code: 25, userInfo: [NSLocalizedDescriptionKey: "Destination is not EDGETX_UF2"]) }
-            let sourceData = try Data(contentsOf: source)
-            let destination = target.appendingPathComponent("firmware.uf2")
-            try sourceData.write(to: destination, options: .atomic)
-            let copied = try Data(contentsOf: destination)
-            guard MobileCore.sha256(sourceData) == MobileCore.sha256(copied) else { throw NSError(domain: "A17Y", code: 26, userInfo: [NSLocalizedDescriptionKey: "UF2 verification failed"]) }
-            status = "UF2 copied and verified: \(MobileCore.sha256(sourceData))"
-        } catch { status = "UF2 copy failed: \(error.localizedDescription)" }
-    }
+struct ContentView:View{
+ @Environment(\.scenePhase)private var scenePhase
+ @State private var folderMode:FolderMode?;@State private var showingFirmwarePicker=false;@State private var showingBackupExporter=false;@State private var backupDocument=JSONDocument(data:Data("{}".utf8));@State private var firmwareURL:URL?;@State private var status="Authorize the MT12 root and save a classic PAT.";@State private var token=KeychainStore.get("classicPat");@State private var builderChild=UserDefaults.standard.string(forKey:"builderChild") ?? "";@State private var builderMission=UserDefaults.standard.string(forKey:"builderMission") ?? "Build the strongest verified MT12 LUAC without regressions using uploaded replay evidence";@State private var catalog="Not loaded";@State private var catalogData=Data();@State private var busy=false
+ enum FolderMode:Identifiable{case mt12,uf2;var id:Int{self == .mt12 ? 1:2}}
+ var body:some View{NavigationStack{ScrollView{VStack(spacing:13){
+  Text("A17Y MT12 Mobile Companion").font(.largeTitle.bold()).frame(maxWidth:.infinity,alignment:.leading);Text("iPhone · sync, firmware and full LUAC AI pipeline").font(.headline).frame(maxWidth:.infinity,alignment:.leading)
+  SecureField("Classic GitHub PAT (Keychain)",text:$token).textFieldStyle(.roundedBorder).onChange(of:token){_,v in KeychainStore.set(v,key:"classicPat")}
+  Button("AUTHORIZE & VERIFY MT12 ROOT"){folderMode = .mt12}.buttonStyle(.borderedProminent).frame(maxWidth:.infinity);Button("SYNC LOGS TO GITHUB"){Task{await sync()}}.buttonStyle(.borderedProminent).frame(maxWidth:.infinity).disabled(busy);Button("EXPORT VERIFIED BACKUP MANIFEST"){buildBackup()}.buttonStyle(.bordered).frame(maxWidth:.infinity)
+  Divider();Text("LUAC AI Builder").font(.title3.bold()).frame(maxWidth:.infinity,alignment:.leading)
+  TextField("Existing candidate path (blank = AI generate)",text:$builderChild).textFieldStyle(.roundedBorder).textInputAutocapitalization(.never).autocorrectionDisabled().onChange(of:builderChild){_,v in UserDefaults.standard.set(v,forKey:"builderChild")}
+  TextField("AI engineering mission",text:$builderMission,axis:.vertical).textFieldStyle(.roundedBorder).lineLimit(3...7).onChange(of:builderMission){_,v in UserDefaults.standard.set(v,forKey:"builderMission")}
+  Button("RUN FULL LUAC AI PIPELINE"){Task{await runBuilder()}}.buttonStyle(.borderedProminent).frame(maxWidth:.infinity).disabled(busy);Link("OPEN LUAC BUILDER RESULTS",destination:MobileCore.builderResultsURL).buttonStyle(.bordered).frame(maxWidth:.infinity)
+  Text("Blank candidate path runs AI diagnosis, competing hypotheses, bounded generation, repair, recorded replay, Lua 5.3 compile, MT12 normalization, bytecode execution, memory proxy and mission gates.").font(.caption).foregroundStyle(.secondary)
+  Divider();Button("GET LATEST EDGETX & ELRS"){Task{await refreshCatalog()}}.buttonStyle(.borderedProminent).frame(maxWidth:.infinity);Text(catalog).font(.caption.monospaced()).frame(maxWidth:.infinity,alignment:.leading).lineLimit(12)
+  Button("SELECT OFFICIAL EDGETX UF2"){showingFirmwarePicker=true}.buttonStyle(.bordered).frame(maxWidth:.infinity);Button("AUTHORIZE EDGETX_UF2 FOLDER"){folderMode = .uf2}.buttonStyle(.bordered).frame(maxWidth:.infinity);Button("VERIFY OFFICIAL DIGEST, COPY UF2 & VERIFY"){copyUF2()}.buttonStyle(.borderedProminent).frame(maxWidth:.infinity)
+  Button("OPEN ELRS WI-FI FLASHER"){UIApplication.shared.open(URL(string:"http://10.0.0.1")!)}.buttonStyle(.bordered).frame(maxWidth:.infinity);Link("MT12 ELRS BUILD & FLASH GUIDE",destination:URL(string:"https://www.expresslrs.org/quick-start/transmitters/rm-internal/")!).buttonStyle(.bordered).frame(maxWidth:.infinity)
+  Text(status).font(.system(.footnote,design:.monospaced)).frame(maxWidth:.infinity,alignment:.leading).padding().background(.thinMaterial).clipShape(RoundedRectangle(cornerRadius:14))
+ }.padding()}
+ .fileImporter(isPresented:Binding(get:{folderMode != nil},set:{if !$0{folderMode=nil}}),allowedContentTypes:[.folder],allowsMultipleSelection:false){result in let mode=folderMode;folderMode=nil;do{let url=try result.get().first!;if mode == .mt12 && !MobileCore.validateMT12(url){throw NSError(domain:"A17Y",code:20,userInfo:[NSLocalizedDescriptionKey:"Choose the MT12 root containing LOGS and SCRIPTS/MODELS/RADIO."])};let bookmark=try url.bookmarkData(options:.minimalBookmark,includingResourceValuesForKeys:nil,relativeTo:nil);UserDefaults.standard.set(bookmark,forKey:mode == .mt12 ? "mt12Bookmark":"uf2Bookmark");status=mode == .mt12 ? "Verified MT12 root authorized.":"UF2 destination authorized; it will be validated during copy."}catch{status="Folder authorization failed: \(error.localizedDescription)"}}
+ .fileImporter(isPresented:$showingFirmwarePicker,allowedContentTypes:[UTType(filenameExtension:"uf2") ?? .data],allowsMultipleSelection:false){result in do{firmwareURL=try result.get().first!;let data=try Data(contentsOf:firmwareURL!);guard data.count>100_000 else{throw NSError(domain:"A17Y",code:21,userInfo:[NSLocalizedDescriptionKey:"UF2 is unexpectedly small"])};status="Selected \(firmwareURL!.lastPathComponent)\nSHA-256: \(MobileCore.sha256(data))\nOfficial catalog match is checked before copy."}catch{status="Firmware selection failed: \(error.localizedDescription)"}}
+ .fileExporter(isPresented:$showingBackupExporter,document:backupDocument,contentType:.json,defaultFilename:"mt12-backup-manifest"){result in if case .failure(let e)=result{status="Backup export failed: \(e.localizedDescription)"}}
+ .task{await refreshCatalog();await syncIfReady()}.onChange(of:scenePhase){_,phase in if phase == .active{Task{await syncIfReady()}}}}
+ }
+ private func bookmarkURL(_ key:String)throws->URL{guard let data=UserDefaults.standard.data(forKey:key)else{throw NSError(domain:"A17Y",code:22,userInfo:[NSLocalizedDescriptionKey:"Folder authorization missing"])};var stale=false;let url=try URL(resolvingBookmarkData:data,options:[],relativeTo:nil,bookmarkDataIsStale:&stale);if stale{UserDefaults.standard.removeObject(forKey:key)};return url}
+ @MainActor private func syncIfReady()async{guard !token.isEmpty,UserDefaults.standard.data(forKey:"mt12Bookmark") != nil else{return};await sync()}
+ @MainActor private func sync()async{guard !busy else{return};busy=true;defer{busy=false};do{status="Syncing…";status=try await MobileCore.sync(root:bookmarkURL("mt12Bookmark"),token:token)}catch{status="Sync failed: \(error.localizedDescription)"}}
+ @MainActor private func runBuilder()async{guard !busy else{return};busy=true;defer{busy=false};do{status="Starting full LUAC AI pipeline…";status=try await MobileCore.runLuacAIBuilder(token:token,child:builderChild,mission:builderMission)}catch{status="Builder failed: \(error.localizedDescription)"}}
+ @MainActor private func refreshCatalog()async{do{catalogData=try await MobileCore.fetchCatalogData();catalog=String(data:catalogData,encoding:.utf8) ?? "{}";status="Official firmware catalog refreshed."}catch{catalogData=Data();catalog="Catalog error: \(error.localizedDescription)"}}
+ private func buildBackup(){do{backupDocument=JSONDocument(data:try MobileCore.backupManifest(root:bookmarkURL("mt12Bookmark")));showingBackupExporter=true;status="Backup manifest ready to export."}catch{status="Backup failed: \(error.localizedDescription)"}}
+ private func copyUF2(){do{guard let source=firmwareURL else{throw NSError(domain:"A17Y",code:23,userInfo:[NSLocalizedDescriptionKey:"Select a UF2 first"])};guard !catalogData.isEmpty else{throw NSError(domain:"A17Y",code:27,userInfo:[NSLocalizedDescriptionKey:"Refresh official catalog first"])};let target=try bookmarkURL("uf2Bookmark");guard source.startAccessingSecurityScopedResource(),target.startAccessingSecurityScopedResource()else{throw NSError(domain:"A17Y",code:24,userInfo:[NSLocalizedDescriptionKey:"UF2 permission unavailable"])};defer{source.stopAccessingSecurityScopedResource();target.stopAccessingSecurityScopedResource()};let names=(try?FileManager.default.contentsOfDirectory(atPath:target.path)) ?? [];guard target.lastPathComponent.uppercased().contains("EDGETX")||names.contains(where:{$0.uppercased()=="INFO_UF2.TXT"})else{throw NSError(domain:"A17Y",code:25,userInfo:[NSLocalizedDescriptionKey:"Destination is not EDGETX_UF2"])};let sourceData=try Data(contentsOf:source),hash=MobileCore.sha256(sourceData);guard MobileCore.officialFirmwareMatch(catalog:catalogData,fileName:source.lastPathComponent,hash:hash)else{throw NSError(domain:"A17Y",code:28,userInfo:[NSLocalizedDescriptionKey:"Firmware does not match an official catalog filename and SHA-256"])};let destination=target.appendingPathComponent("firmware.uf2");try sourceData.write(to:destination,options:.atomic);let copied=try Data(contentsOf:destination);guard hash==MobileCore.sha256(copied)else{throw NSError(domain:"A17Y",code:26,userInfo:[NSLocalizedDescriptionKey:"UF2 verification failed"])};status="Official UF2 copied and verified: \(hash)"}catch{status="UF2 copy failed: \(error.localizedDescription)"}}
 }
