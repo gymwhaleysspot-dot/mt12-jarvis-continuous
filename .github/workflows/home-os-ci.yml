@@ -1,0 +1,59 @@
+name: Home Engineering OS CI
+on:
+  pull_request:
+    paths:
+      - index.html
+      - home/**
+      - .github/workflows/workbench.yml
+      - .github/workflows/autonomous-director.yml
+      - .github/workflows/home-os-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - home/**
+      - .github/workflows/workbench.yml
+      - .github/workflows/autonomous-director.yml
+      - .github/workflows/home-os-ci.yml
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate modular application
+        run: |
+          set -euo pipefail
+          node --check home/api.js
+          node --check home/replay.js
+          node --check home/app.js
+          test -f home/home.css
+          grep -q 'Content-Security-Policy' index.html
+          grep -q 'type="module" src="home/app.js"' index.html
+          grep -q 'UPLOAD WITH MANIFEST' index.html
+          grep -q 'QUEUE LABEL' index.html
+          grep -q 'RUN FULL BUILDER' index.html
+          grep -q 'CREATE & BUILD' index.html
+          grep -q 'Direct artifact downloads' index.html
+          grep -q 'PROMOTION / ROLLBACK' index.html
+      - name: Validate workflow contracts
+        run: |
+          python3 - <<'PY'
+          import yaml
+          for p in ['.github/workflows/workbench.yml','.github/workflows/autonomous-director.yml']:
+              with open(p) as f: yaml.safe_load(f)
+          PY
+          for key in logs model request_id; do grep -q "$key:" .github/workflows/workbench.yml; done
+          grep -q 'run-name: LUAC AI' .github/workflows/workbench.yml
+          grep -q 'run-name: Director' .github/workflows/autonomous-director.yml
+          grep -q 'Resolved.*replay logs' .github/workflows/workbench.yml
+          grep -q 'Candidate path outside approved roots' .github/workflows/workbench.yml
+      - name: Prohibit old monolith regressions
+        run: |
+          ! grep -q "token.oninput=save" index.html
+          ! grep -q "branch=main&per_page=20" index.html
+          ! grep -q "data.slice(0,150)" index.html
+          ! grep -q "onclick=\"window.open" index.html
