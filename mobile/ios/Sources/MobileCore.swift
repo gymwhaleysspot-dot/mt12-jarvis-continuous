@@ -18,7 +18,7 @@ struct KeychainStore {
 
 enum MobileCore {
     static let repo = "gymwhaleysspot-dot/mt12-jarvis-continuous"
-    static let catalogURL = URL(string: "https://raw.githubusercontent.com/\(repo)/main/public/device-data/firmware-catalog.json")!
+    static let catalogURL = URL(string: "https://raw.githubusercontent.com/\(repo)/main/public/device-data/releases.json")!
 
     static func sha256(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
 
