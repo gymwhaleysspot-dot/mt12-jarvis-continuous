@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const cfg=JSON.parse(fs.readFileSync('protected/a17y-contract.json','utf8'));
+const parent=path.resolve(process.argv[2]||cfg.parent);
+const child=process.argv[3]?path.resolve(process.argv[3]):parent;
+const mission=(process.argv[4]||process.env.WORKBENCH_MISSION||'Exact deterministic release').trim();
+const out=path.resolve(process.env.WORKBENCH_OUT||'dist-workbench');
+const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const run=(c,a,o={})=>execFileSync(c,a,{encoding:'utf8',maxBuffer:128*1024*1024,...o});
+const fail=m=>{throw new Error(`WORKBENCH REJECTED: ${m}`)};
+fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
+for(const p of [parent,child])if(!fs.existsSync(p))fail(`missing ${p}`);
+const childText=fs.readFileSync(child,'utf8');
+if(sha(parent)!==cfg.sha256)fail('parent SHA-256 does not match protected A17Y');
+for(const s of cfg.required)if(!childText.includes(s))fail(`required contract missing: ${s}`);
+for(const s of cfg.forbidden)if(childText.includes(s))fail(`forbidden construct: ${s}`);
+if(/\dlocal\s+[A-Za-z_]/.test(childText)||/local\s+[A-Za-z_]\w*\s*=\s*[^;\n]+local\s+[A-Za-z_]/.test(childText))fail('joined declaration hazard');
+run('luac5.3',['-p',parent]);run('luac5.3',['-p',child]);
+const compile=(src,name)=>{const dst=path.join(out,`${name}.luac`);run('bash',['toolchain/compile_mt12.sh',src,dst],{env:{...process.env,MAX_BYTES:String(cfg.maxNormalizedBytes)}});return dst};
+const pLuac=compile(parent,'parent'),cLuac=compile(child,'child');
+const header=fs.readFileSync(cLuac).subarray(12,17).toString('hex');if(header!=='0404040404')fail(`wrong MT12 header ${header}`);
+const pTrace=path.join(out,'parent-trace.csv'),cTrace=path.join(out,'child-trace.csv');
+run('lua5.3',['scripts/mt12-harness.lua',parent,pTrace]);run('lua5.3',['scripts/mt12-harness.lua',child,cTrace]);
+const parse=p=>fs.readFileSync(p,'utf8').trim().split(/\r?\n/).map(x=>x.split(','));
+const pa=parse(pTrace),ca=parse(cTrace);if(pa.length!==ca.length)fail('trace length changed');
+let changedRows=0,maxDelta=0;for(let i=1;i<pa.length;i++){let row=false;for(let j=1;j<Math.min(pa[i].length,ca[i].length);j++){const a=Number(pa[i][j]),b=Number(ca[i][j]);if(Number.isFinite(a)&&Number.isFinite(b)){const d=Math.abs(a-b);if(d){row=true;maxDelta=Math.max(maxDelta,d)}}}if(row)changedRows++}
+const report={status:'accepted',stage:'SIMULATION PASSED',mission,parent:{file:path.basename(parent),sha256:sha(parent),bytes:fs.statSync(parent).size,normalizedBytes:fs.statSync(pLuac).size},child:{file:path.basename(child),sha256:sha(child),bytes:fs.statSync(child).size,normalizedBytes:fs.statSync(cLuac).size,header},comparison:{sameSource:sha(parent)===sha(child),sameBytecode:sha(pLuac)===sha(cLuac),changedRows,maxDelta},protectedParent:true,automaticPromotion:false,generatedAt:new Date().toISOString()};
+fs.copyFileSync(parent,path.join(out,'PARENT.lua'));fs.copyFileSync(child,path.join(out,'CHILD.lua'));fs.copyFileSync(cLuac,path.join(out,'DEPLOY.luac'));
+fs.writeFileSync(path.join(out,'REPORT.json'),JSON.stringify(report,null,2)+'\n');
+fs.writeFileSync(path.join(out,'PROMOTION.txt'),'SIMULATION PASSED\nManual bench and road approval required.\n');
+console.log(JSON.stringify(report,null,2));
