@@ -6,6 +6,7 @@ on:
       - index.html
       - control.html
       - device.html
+      - builder.html
       - updates.html
       - research.html
       - discovery.html
@@ -40,11 +41,14 @@ jobs:
           test -f index.html
           test -f control.html
           test -f device.html
+          test -f builder.html
           test -f updates.html
           test -f research.html
           test -f discovery.html
           test -f v3.html
           test -f public/device-data/releases.json
+          grep -q 'LUAC AI Builder' device.html
+          grep -q 'RUN LUAC AI BUILDER' builder.html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
