@@ -1,0 +1,57 @@
+name: A17Y Deterministic Release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - a17y.lua
+      - scripts/a17y-release-factory.mjs
+      - spec/a17y-release.json
+      - toolchain/**
+      - scripts/mt12-harness.lua
+      - .github/workflows/a17y-release.yml
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: a17y-release-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+      - name: Verify factory files
+        run: |
+          test -f a17y.lua
+          node --check scripts/a17y-release-factory.mjs
+          node --check toolchain/normalize_luac53_mt12.js
+          bash -n toolchain/compile_mt12.sh
+          chmod +x toolchain/compile_mt12.sh
+      - name: Build exact A17Y release
+        run: node scripts/a17y-release-factory.mjs
+      - name: Reproduce byte-for-byte
+        run: |
+          MAX_BYTES=87000 toolchain/compile_mt12.sh a17y.lua dist-a17y/rebuilt.luac
+          cmp dist-a17y/a17y.luac dist-a17y/rebuilt.luac
+          cmp dist-a17y/a17y.luac dist-a17y/DEPLOY.luac
+          rm dist-a17y/rebuilt.luac
+      - name: Package
+        run: |
+          cd dist-a17y
+          zip -9 -r ../a17y-mt12-release.zip .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-mt12-release
+          path: a17y-mt12-release.zip
+          if-no-files-found: error
+          retention-days: 90
