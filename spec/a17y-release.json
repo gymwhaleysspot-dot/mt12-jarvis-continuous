@@ -1,0 +1,19 @@
+{
+  "name": "A17Y Deterministic Release Factory",
+  "version": 1,
+  "seed": "a17y.lua",
+  "output": "dist-a17y",
+  "max_bytes": 87000,
+  "required": [
+    "return{init=init,run=run,background=background}",
+    "io.read(",
+    "setgv(7,1024)",
+    "MEMPATH"
+  ],
+  "forbidden": [
+    ":read(",
+    "io.popen(",
+    "os.execute(",
+    "function fo()fo()end"
+  ]
+}
