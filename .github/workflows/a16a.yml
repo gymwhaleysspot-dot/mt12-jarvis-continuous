@@ -16,6 +16,15 @@ on:
       - 'scripts/evaluate-fitness.mjs'
       - 'toolchain/**'
       - '.github/workflows/a16a.yml'
+  pull_request:
+    paths:
+      - 'a15ya.lua'
+      - 'scripts/build-a16a.mjs'
+      - 'spec/a16a-upgrade.json'
+      - 'scripts/mt12-harness.lua'
+      - 'scripts/evaluate-fitness.mjs'
+      - 'toolchain/**'
+      - '.github/workflows/a16a.yml'
 permissions:
   contents: read
   actions: read
@@ -30,11 +39,12 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       A16_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
+      MAX_BYTES: '87000'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Install Lua 5.3
@@ -42,25 +52,33 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           luac5.3 -v
-      - name: Check builder syntax
-        run: node --check scripts/build-a16a.mjs
+          node --version
+      - name: Check builder and toolchain syntax
+        run: |
+          node --check scripts/build-a16a.mjs
+          node --check toolchain/normalize_luac53_mt12.js
+          bash -n toolchain/compile_mt12.sh
+          chmod +x toolchain/compile_mt12.sh
       - name: Build complete A16A
         run: node scripts/build-a16a.mjs
-      - name: Verify deploy bytecode
+      - name: Independently rebuild with shared MT12 compiler
         run: |
           test -f dist-a16a/a16a.lua
           test -f dist-a16a/a16a.luac
           test -f dist-a16a/DEPLOY.luac
+          toolchain/compile_mt12.sh dist-a16a/a16a.lua dist-a16a/a16a-rebuilt.luac
+          cmp dist-a16a/a16a.luac dist-a16a/a16a-rebuilt.luac
           cmp dist-a16a/a16a.luac dist-a16a/DEPLOY.luac
-          luac5.3 -p dist-a16a/a16a.lua
-          test "$(stat -c%s dist-a16a/a16a.luac)" -le 87000
+          test "$(od -An -tx1 -j12 -N5 dist-a16a/DEPLOY.luac | tr -d ' \n')" = 0404040404
           grep -q 'SIMULATION VERIFIED' dist-a16a/A16A-BUILD.json
+          sha256sum dist-a16a/a16a.lua dist-a16a/a16a.luac dist-a16a/DEPLOY.luac > dist-a16a/SHA256SUMS.txt
+          rm -f dist-a16a/a16a-rebuilt.luac
       - name: Package A16A
         run: |
           cd dist-a16a
           zip -9 -r ../a16a-simulation-verified.zip . -x '*_raw.luac' 'phase-*'
       - name: Upload A16A
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: a16a-simulation-verified
           path: a16a-simulation-verified.zip
@@ -68,7 +86,7 @@ jobs:
           retention-days: 90
       - name: Upload diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: a16a-diagnostics
           path: dist-a16a/
