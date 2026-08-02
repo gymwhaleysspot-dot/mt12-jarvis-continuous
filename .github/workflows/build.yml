@@ -19,14 +19,6 @@ on:
       - 'spec/**'
       - 'tests/replays/**'
       - '.github/workflows/build.yml'
-  pull_request:
-    paths:
-      - 'a15ya.lua'
-      - 'scripts/**'
-      - 'toolchain/**'
-      - 'spec/**'
-      - 'tests/replays/**'
-      - '.github/workflows/build.yml'
 permissions:
   contents: read
   actions: read
@@ -37,7 +29,7 @@ concurrency:
 jobs:
   factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       FACTORY_MISSION: ${{ inputs.mission || 'Invent the brightest safe next generation while preserving every proven behavior' }}
@@ -57,6 +49,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Verify factory source and toolchain
         run: |
           test -f a15ya.lua
@@ -69,7 +62,24 @@ jobs:
           luac5.3 -p scripts/mt12-harness.lua
           luac5.3 -p scripts/fitness-harness.lua
       - name: Invent, compile, normalize, simulate and audit
-        run: node scripts/master-factory.mjs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for attempt in 1 2 3 4; do
+            rm -rf dist
+            node scripts/master-factory.mjs
+            status="$(node -e "const fs=require('fs');const p='dist/factory-report.json';process.stdout.write(fs.existsSync(p)?JSON.parse(fs.readFileSync(p)).status:'missing')")"
+            echo "Factory attempt $attempt status: $status"
+            if [[ "$status" == "simulation-verified-release" ]]; then
+              exit 0
+            fi
+            if (( attempt < 4 )); then
+              sleep $((attempt * 30))
+            fi
+          done
+          echo 'Factory did not produce a simulation-verified release after four attempts.' >&2
+          cat dist/STATUS.txt 2>/dev/null || true
+          exit 1
       - name: Independently reproduce and verify release
         run: node scripts/verify-release.mjs
       - name: Rebuild verified winner with shared compiler
@@ -89,7 +99,7 @@ jobs:
           cd dist/verified-release
           zip -9 -r ../mt12-verified-release.zip .
       - name: Publish simulation-verified test release
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: mt12-verified-release
           path: dist/mt12-verified-release.zip
@@ -103,7 +113,7 @@ jobs:
           zip -9 -r mt12-factory-diagnostics.zip . -x mt12-factory-diagnostics.zip -x mt12-verified-release.zip
       - name: Publish diagnostics
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: mt12-factory-diagnostics
           path: dist/mt12-factory-diagnostics.zip

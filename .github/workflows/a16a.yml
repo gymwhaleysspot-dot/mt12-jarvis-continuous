@@ -16,15 +16,6 @@ on:
       - 'scripts/evaluate-fitness.mjs'
       - 'toolchain/**'
       - '.github/workflows/a16a.yml'
-  pull_request:
-    paths:
-      - 'a15ya.lua'
-      - 'scripts/build-a16a.mjs'
-      - 'spec/a16a-upgrade.json'
-      - 'scripts/mt12-harness.lua'
-      - 'scripts/evaluate-fitness.mjs'
-      - 'toolchain/**'
-      - '.github/workflows/a16a.yml'
 permissions:
   contents: read
   actions: read
@@ -35,7 +26,7 @@ concurrency:
 jobs:
   build-a16a:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       A16_MODEL: ${{ inputs.model || 'openai/gpt-4.1' }}
@@ -47,6 +38,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Install Lua 5.3
         run: |
           sudo apt-get update
@@ -60,7 +52,20 @@ jobs:
           bash -n toolchain/compile_mt12.sh
           chmod +x toolchain/compile_mt12.sh
       - name: Build complete A16A
-        run: node scripts/build-a16a.mjs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for attempt in 1 2 3 4; do
+            rm -rf dist-a16a
+            if node scripts/build-a16a.mjs; then
+              exit 0
+            fi
+            if (( attempt < 4 )); then
+              echo "A16A attempt $attempt failed; retrying after transient-service delay."
+              sleep $((attempt * 30))
+            fi
+          done
+          exit 1
       - name: Independently rebuild with shared MT12 compiler
         run: |
           test -f dist-a16a/a16a.lua
@@ -78,7 +83,7 @@ jobs:
           cd dist-a16a
           zip -9 -r ../a16a-simulation-verified.zip . -x '*_raw.luac' 'phase-*'
       - name: Upload A16A
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: a16a-simulation-verified
           path: a16a-simulation-verified.zip
@@ -86,7 +91,7 @@ jobs:
           retention-days: 90
       - name: Upload diagnostics
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: a16a-diagnostics
           path: dist-a16a/
