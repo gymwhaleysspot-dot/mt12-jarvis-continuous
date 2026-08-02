@@ -61,11 +61,13 @@ jobs:
       - name: Validate v2 architecture
         run: |
           test -f a17y.lua
-          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/replay.mjs director/v2/finalize.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
+          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/replay.mjs director/v2/finalize.mjs director/v2/validate-evidence.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
           bash -n toolchain/compile_mt12.sh
           luac5.3 -p a17y.lua
           luac5.3 -p scripts/mt12-harness.lua
           luac5.3 -p scripts/mt12-replay.lua
+      - name: Validate hash-bound bench and road evidence
+        run: node director/v2/validate-evidence.mjs
       - name: Discover and parse all engineering evidence
         run: node director/v2/prepare.mjs
       - name: Generate repeatable Digital Twin scenarios
@@ -104,11 +106,19 @@ jobs:
           env | grep -E '^(DIRECTOR_|GITHUB_RUN_|GITHUB_SHA)' | sed 's/GITHUB_TOKEN=.*/GITHUB_TOKEN=REDACTED/' > dist-director/RUN-ENV.txt || true
           cd dist-director
           zip -9 -r ../a17y-engineering-os-v2.zip .
-      - name: Publish complete evidence
+      - name: Publish v2 evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: a17y-engineering-os-v2
+          path: a17y-engineering-os-v2.zip
+          if-no-files-found: error
+          retention-days: 90
+      - name: Publish console-compatible evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: a17y-autonomous-director
           path: a17y-engineering-os-v2.zip
           if-no-files-found: error
           retention-days: 90
