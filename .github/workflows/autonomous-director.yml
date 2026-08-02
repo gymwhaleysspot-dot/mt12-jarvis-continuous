@@ -1,4 +1,4 @@
-name: A17Y Engineering OS v2
+name: A17Y Engineering OS v3
 on:
   workflow_dispatch:
     inputs:
@@ -22,6 +22,8 @@ on:
       - a17y.lua
       - tests/replays/**
       - evidence/**
+      - research/current.json
+      - research/questions.json
       - director/**
       - workbench/**
       - protected/**
@@ -34,7 +36,7 @@ permissions:
   actions: read
   models: read
 concurrency:
-  group: a17y-engineering-os-v2
+  group: a17y-engineering-os-v3
   cancel-in-progress: true
 jobs:
   direct:
@@ -58,17 +60,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Validate v2 architecture
+      - name: Validate v3 architecture
         run: |
           test -f a17y.lua
-          for f in director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/replay.mjs director/v2/finalize.mjs director/v2/validate-evidence.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
+          test -f research/current.json
+          for f in research/run.mjs director/run.mjs director/v2/evidence.mjs director/v2/scoring.mjs director/v2/memory.mjs director/v2/model-client.mjs director/v2/dependency.mjs director/v2/digital-twin.mjs director/v2/prepare.mjs director/v2/replay.mjs director/v2/finalize.mjs director/v2/validate-evidence.mjs workbench/rcos.mjs toolchain/normalize_luac53_mt12.js; do node --check "$f"; done
           bash -n toolchain/compile_mt12.sh
           luac5.3 -p a17y.lua
           luac5.3 -p scripts/mt12-harness.lua
           luac5.3 -p scripts/mt12-replay.lua
       - name: Validate hash-bound bench and road evidence
         run: node director/v2/validate-evidence.mjs
-      - name: Discover and parse all engineering evidence
+      - name: Discover logs, dependencies and cited research
         run: node director/v2/prepare.mjs
       - name: Generate repeatable Digital Twin scenarios
         run: node director/v2/digital-twin.mjs dist-director/DIGITAL-TWIN.json
@@ -93,7 +96,7 @@ jobs:
       - name: Replay recorded telemetry through parent and children
         if: always()
         run: node director/v2/replay.mjs
-      - name: Calibrate scores, verification authority and memory
+      - name: Calibrate scores, authority and validated memory
         if: always()
         run: node director/v2/finalize.mjs
       - name: Capture complete diagnostics
@@ -101,17 +104,18 @@ jobs:
         run: |
           mkdir -p dist-director
           cp director/memory.json dist-director/ENGINEERING-MEMORY.json
+          cp research/current.json dist-director/RESEARCH-CURRENT.json
           sha256sum a17y.lua > dist-director/PARENT-SHA256.txt
           git status --short > dist-director/GIT-STATUS.txt
           env | grep -E '^(DIRECTOR_|GITHUB_RUN_|GITHUB_SHA)' | sed 's/GITHUB_TOKEN=.*/GITHUB_TOKEN=REDACTED/' > dist-director/RUN-ENV.txt || true
           cd dist-director
-          zip -9 -r ../a17y-engineering-os-v2.zip .
-      - name: Publish v2 evidence
+          zip -9 -r ../a17y-engineering-os-v3.zip .
+      - name: Publish v3 evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: a17y-engineering-os-v2
-          path: a17y-engineering-os-v2.zip
+          name: a17y-engineering-os-v3
+          path: a17y-engineering-os-v3.zip
           if-no-files-found: error
           retention-days: 90
       - name: Publish console-compatible evidence
@@ -119,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: a17y-autonomous-director
-          path: a17y-engineering-os-v2.zip
+          path: a17y-engineering-os-v3.zip
           if-no-files-found: error
           retention-days: 90
       - name: Persist validated engineering memory
@@ -132,4 +136,5 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add director/memory.json
           git commit -m 'Record validated engineering evidence [skip ci]'
+          git pull --rebase origin main
           git push
