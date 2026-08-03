@@ -1,0 +1,74 @@
+{
+  "status": "STATIC_CHECKED",
+  "staticChecks": {
+    "controller": "a17y.lua",
+    "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+    "usesMT12GlobalIoRead": true,
+    "containsLoadPath": true,
+    "containsSavePath": true,
+    "sourceBytes": 84849
+  },
+  "cases": [
+    {
+      "name": "empty",
+      "status": "PLANNED",
+      "expected": "clean defaults",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "current-schema",
+      "status": "PLANNED",
+      "expected": "lossless load",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "older-schema",
+      "status": "PLANNED",
+      "expected": "compatible migration",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "truncated",
+      "status": "PLANNED",
+      "expected": "safe rejection or bounded recovery",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "corrupt-row",
+      "status": "PLANNED",
+      "expected": "safe rejection or bounded recovery",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "oversized-values",
+      "status": "PLANNED",
+      "expected": "safe rejection or bounded recovery",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "partial-write",
+      "status": "PLANNED",
+      "expected": "safe rejection or bounded recovery",
+      "authority": "MT12 bench required"
+    },
+    {
+      "name": "repeated-load-save",
+      "status": "PLANNED",
+      "expected": "safe rejection or bounded recovery",
+      "authority": "MT12 bench required"
+    }
+  ],
+  "benchScenarios": [
+    "empty memory boot",
+    "valid memory boot",
+    "old schema boot",
+    "truncated row boot",
+    "corrupt numeric values",
+    "oversized values",
+    "partial-write recovery",
+    "100 repeated load/save cycles",
+    "car-on memory load",
+    "logging plus memory save"
+  ],
+  "note": "Host checks cannot certify EdgeTX heap behavior. Bench evidence must record free memory and peak GC pressure."
+}
