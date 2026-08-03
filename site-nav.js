@@ -1,6 +1,6 @@
 (()=>{
   'use strict';
-  const pages=[['Home','index.html'],['Missions','mission.html'],['Completion','completion.html'],['Device','device.html'],['Control','control.html'],['Research','research.html'],['Discovery','discovery.html'],['OS v3','v3.html'],['Updates','updates.html'],['Builder Lite','builder.html']];
+  const pages=[['Home','index.html'],['Chief Engineer','chief.html'],['Missions','mission.html'],['Completion','completion.html'],['Device','device.html'],['Control','control.html'],['Research','research.html'],['Discovery','discovery.html'],['OS v3','v3.html'],['Updates','updates.html'],['Builder Lite','builder.html']];
   const current=(location.pathname.split('/').pop()||'index.html').toLowerCase();
   if(current==='index.html')import('./home/enhancements.js').catch(e=>console.error('Home enhancements failed',e));
   if(document.getElementById('a17y-global-nav'))return;
