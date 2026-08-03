@@ -56,8 +56,9 @@ jobs:
           set -euo pipefail
           for f in index.html chief.html chief-engineer/chief.css chief-engineer/app.js chief-engineer/engine.mjs home/home.css home/api.js home/replay.js home/app.js home/enhancements.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js site-nav.css classic-token.js public/device-data/releases.json; do test -f "$f"; done
           for f in index.html chief.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; grep -q 'classic-token.js' "$f"; done
-          grep -q 'CHIEF' chief.html
-          grep -q 'RUN CHIEF ENGINEER' chief.html
+          grep -q 'AEGIS' chief.html
+          grep -q 'RUN AEGIS ANALYSIS' chief.html
+          grep -q "['Aegis','chief.html']" site-nav.js
           grep -q 'a17y_classic_pat' classic-token.js
           grep -q 'A17YToken' home/api.js
           grep -q 'home/app.js' index.html
@@ -85,7 +86,7 @@ jobs:
           node --check engineering-missions/stress.mjs
           node --check engineering-missions/memory-lab.mjs
           node --check engineering-missions/finalize.mjs
-          node -e "JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'))"
+          node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'));if(m.identity?.name!=='Aegis')throw Error('Aegis identity missing')"
           node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
