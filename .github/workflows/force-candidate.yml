@@ -25,6 +25,10 @@ jobs:
   force:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
+    env:
+      FORCE_ID: forced-${{ github.run_id }}-${{ github.run_attempt }}
+      FORCE_MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Force a bounded experimental candidate using all current replay evidence' }}
+      FORCE_MODEL: ${{ github.event_name == 'workflow_dispatch' && inputs.model || 'openai/gpt-4.1' }}
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
@@ -33,7 +37,7 @@ jobs:
       - name: Install deterministic MT12 toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.3 zip
+          sudo apt-get install -y lua5.3 zip jq
           chmod +x toolchain/compile_mt12.sh
       - name: Validate forced builder
         run: |
@@ -44,29 +48,36 @@ jobs:
       - name: Resolve all replay evidence
         run: |
           find tests/replays -type f -iname '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
-          echo "Replay files: $(wc -l </tmp/logs.txt)"
-      - name: Build and publish forced experimental candidate
+          echo "Replay files: $(wc -l </tmp/logs.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Build forced experimental candidate
+        id: build
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          FORCE_MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Force a bounded experimental candidate using all current replay evidence' }}
-          FORCE_MODEL: ${{ github.event_name == 'workflow_dispatch' && inputs.model || 'openai/gpt-4.1' }}
-          FORCE_ID: forced-${{ github.run_id }}-${{ github.run_attempt }}
+        run: node engineering-missions/force-candidate.mjs
+      - name: Package candidate or failure diagnostics
+        if: ${{ always() }}
         run: |
-          node engineering-missions/force-candidate.mjs
           BUILD="public/builds/$FORCE_ID"
-          test -f "$BUILD/candidate.lua"
-          test -f "$BUILD/candidate.luac"
-          test -f "$BUILD/STATUS.json"
-          test -f "$BUILD/SHA256SUMS.txt"
+          mkdir -p "$BUILD"
+          if [ ! -f "$BUILD/STATUS.json" ]; then
+            printf '{"schema":3,"mission":"%s","authority":"FORCED_BUILD_FAILED","hardGatesPassed":false,"error":"Builder exited without STATUS.json"}\n' "$FORCE_ID" > "$BUILD/STATUS.json"
+          fi
+          cp -f public/builds/forced-status.json "$BUILD/LIVE-STATUS.json" 2>/dev/null || true
           (cd "$BUILD" && zip -9 -r mission-build.zip . -x mission-build.zip)
+          echo "### Final forced-build status" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat "$BUILD/STATUS.json" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v6
+        if: ${{ always() }}
         with:
           name: forced-experimental-candidate-${{ github.run_id }}-${{ github.run_attempt }}
           path: public/builds/forced-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: error
           retention-days: 180
-      - name: Commit permanent phone downloads
-        if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Commit permanent phone downloads and diagnostics
+        if: ${{ always() && github.ref == 'refs/heads/main' }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
@@ -74,3 +85,20 @@ jobs:
           git commit -m "Publish forced experimental candidate ${{ github.run_id }}-${{ github.run_attempt }}" || exit 0
           git pull --rebase origin main
           git push
+      - name: Enforce final result
+        if: ${{ always() }}
+        run: |
+          BUILD="public/builds/$FORCE_ID"
+          AUTHORITY="$(jq -r '.authority // "FORCED_BUILD_FAILED"' "$BUILD/STATUS.json")"
+          echo "Authority: $AUTHORITY"
+          case "$AUTHORITY" in
+            FORCED_UNVERIFIED_DRIVE_CANDIDATE|FORCED_CONTROL_NO_BEHAVIOR_CHANGE)
+              test -f "$BUILD/candidate.lua"
+              test -f "$BUILD/candidate.luac"
+              test -f "$BUILD/SHA256SUMS.txt"
+              ;;
+            *)
+              echo "Forced pipeline failed; diagnostics were still permanently published." >&2
+              exit 1
+              ;;
+          esac
