@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       launch_mission:
-        description: Dispatch the highest-value/full requested engineering mission after analysis
+        description: Dispatch the highest-value full engineering mission after analysis
         required: true
         type: boolean
         default: false
@@ -79,10 +79,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MISSION: ${{ steps.mission.outputs.mission }}
         run: |
-          gh workflow run engineering-mission.yml --ref main -f mission="$MISSION"
+          gh workflow run engineering-mission.yml --ref main \
+            -f question="$MISSION" \
+            -f hypothesis='A bounded evidence-supported controller change can improve the target without regressions' \
+            -f tournament=true \
+            -f fuzz_cases=10000
       - name: Package Chief Engineer evidence
-        run: |
-          zip -9 -r a17y-chief-engineer.zip public/chief-data chief-engineer/memory.json
+        run: zip -9 -r a17y-chief-engineer.zip public/chief-data chief-engineer/memory.json
       - uses: actions/upload-artifact@v6
         with:
           name: a17y-chief-engineer
