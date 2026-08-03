@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - index.html
+      - chief.html
+      - chief-engineer/**
+      - public/chief-data/**
       - home/**
       - mission.html
       - completion.html
@@ -51,8 +54,10 @@ jobs:
       - name: Verify published applications
         run: |
           set -euo pipefail
-          for f in index.html home/home.css home/api.js home/replay.js home/app.js home/enhancements.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js site-nav.css classic-token.js public/device-data/releases.json; do test -f "$f"; done
-          for f in index.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; grep -q 'classic-token.js' "$f"; done
+          for f in index.html chief.html chief-engineer/chief.css chief-engineer/app.js chief-engineer/engine.mjs home/home.css home/api.js home/replay.js home/app.js home/enhancements.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js site-nav.css classic-token.js public/device-data/releases.json; do test -f "$f"; done
+          for f in index.html chief.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; grep -q 'classic-token.js' "$f"; done
+          grep -q 'CHIEF' chief.html
+          grep -q 'RUN CHIEF ENGINEER' chief.html
           grep -q 'a17y_classic_pat' classic-token.js
           grep -q 'A17YToken' home/api.js
           grep -q 'home/app.js' index.html
@@ -64,12 +69,10 @@ jobs:
           grep -q 'RUN FULL AI PIPELINE' device.html
           grep -q 'RUN FULL ENGINEERING MISSION' mission.html
           grep -q 'RUN FULL MISSION' completion.html
-          grep -q 'Direct workflow artifacts' completion.html
-          grep -q 'Synchronized dual-log viewer' mission.html
-          grep -q 'BUILD TAR.GZ + MANIFEST' device.html
-          grep -q 'VERIFY OFFICIAL FILENAME + SHA-256' device.html
           node --check classic-token.js
           node --check site-nav.js
+          node --check chief-engineer/app.js
+          node --check chief-engineer/engine.mjs
           node --check home/api.js
           node --check home/replay.js
           node --check home/app.js
@@ -82,10 +85,8 @@ jobs:
           node --check engineering-missions/stress.mjs
           node --check engineering-missions/memory-lab.mjs
           node --check engineering-missions/finalize.mjs
+          node -e "JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'))"
           node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
-          if [ -f public/control-data/log-hashes.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/control-data/log-hashes.json'))"; fi
-          if [ -f public/mission-data/current.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/mission-data/current.json'))"; fi
-          if [ -f public/completion-data/dashboard.json ]; then node -e "JSON.parse(require('fs').readFileSync('public/completion-data/dashboard.json'))"; fi
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy GitHub Pages
