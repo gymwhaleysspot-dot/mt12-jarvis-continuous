@@ -1,13 +1,13 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-03T13:33:08.318Z
+Generated: 2026-08-03T14:02:46.999Z
 
 ## System health
 
-- Status: **HEALTHY**
+- Status: **UNKNOWN**
 - Active roadmap features: **85/100**
 - Planned features: **15**
-- Knowledge items indexed: **28**
+- Knowledge items indexed: **32**
 
 ## Research
 
@@ -18,9 +18,9 @@ Generated: 2026-08-03T13:33:08.318Z
 
 ## Engineering council
 
-- Decision: **REQUEST_EVIDENCE**
-- Consensus: 100%
-- Mission: Review the highest-value engineering opportunity
+- Decision: **NOT RUN**
+- Consensus: 0%
+- Mission: None
 
 ## Engineering memory
 
