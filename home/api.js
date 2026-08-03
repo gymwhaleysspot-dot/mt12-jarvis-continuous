@@ -1,11 +1,11 @@
 export const OWNER='gymwhaleysspot-dot',REPO='mt12-jarvis-continuous',BASE=`https://api.github.com/repos/${OWNER}/${REPO}`;
-const KEY='a17y_classic_pat',REM='a17y_remember_pat';
+const KEY='a17y_classic_pat',REM='a17y_remember_pat',broker=()=>window.A17YToken;
 export class GitHubClient{
- constructor(){this.token=sessionStorage.getItem(KEY)||localStorage.getItem(KEY)||'';this.rate={remaining:null,reset:null};}
- setToken(token,remember=false){this.token=token.trim();sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);localStorage.setItem(REM,remember?'1':'0');(remember?localStorage:sessionStorage).setItem(KEY,this.token);}
- clear(){this.token='';sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);localStorage.removeItem(REM);}
- remembered(){return localStorage.getItem(REM)==='1';}
- headers(json=true){if(!/^ghp_[A-Za-z0-9_]{20,}$/.test(this.token))throw Error('Enter a valid classic PAT beginning with ghp_.');const h={Accept:'application/vnd.github+json',Authorization:`Bearer ${this.token}`,'X-GitHub-Api-Version':'2022-11-28'};if(json)h['Content-Type']='application/json';return h;}
+ constructor(){this.token=broker()?.get()||sessionStorage.getItem(KEY)||localStorage.getItem(KEY)||'';this.rate={remaining:null,reset:null};window.addEventListener('a17y-token-change',e=>{this.token=e.detail?.token||''});}
+ setToken(token,remember=false){const b=broker();if(b)b.set(token,remember);else{this.token=token.trim();sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);localStorage.setItem(REM,remember?'1':'0');(remember?localStorage:sessionStorage).setItem(KEY,this.token)}this.token=token.trim();}
+ clear(){const b=broker();if(b)b.clear();else{sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);localStorage.removeItem(REM)}this.token='';}
+ remembered(){return broker()?.remembered()??localStorage.getItem(REM)==='1';}
+ headers(json=true){this.token=broker()?.get()||this.token;if(!/^(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}$/.test(this.token))throw Error('Enter a valid classic GitHub token.');const h={Accept:'application/vnd.github+json',Authorization:`Bearer ${this.token}`,'X-GitHub-Api-Version':'2022-11-28'};if(json)h['Content-Type']='application/json';return h;}
  async request(url,opt={},attempt=0){const r=await fetch(url,{...opt,headers:{...this.headers(opt.json!==false),...(opt.headers||{})}});this.rate.remaining=r.headers.get('x-ratelimit-remaining');this.rate.reset=r.headers.get('x-ratelimit-reset');if((r.status===403||r.status===429)&&attempt<3){const wait=Math.min(30000,1000*2**attempt);await new Promise(x=>setTimeout(x,wait));return this.request(url,opt,attempt+1);}const text=await r.text();if(!r.ok){let msg=text.slice(0,800);try{msg=JSON.parse(text).message||msg}catch{}const e=Error(`${r.status}: ${msg}`);e.status=r.status;throw e;}return r.status===204?null:(text?JSON.parse(text):null);}
  api(path,opt={}){return this.request(path.startsWith('http')?path:`${BASE}${path}`,opt);}
  async testPermissions(){const repo=await this.api('');const actions=await this.api('/actions/permissions');const ref=await this.api('/git/ref/heads/main');return{repo:repo.full_name,private:repo.private,actions:actions.enabled,sha:ref.object.sha,rate:this.rate};}
