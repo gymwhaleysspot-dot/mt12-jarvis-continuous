@@ -2,27 +2,11 @@ name: A17Y Full Engineering Mission
 on:
   workflow_dispatch:
     inputs:
-      question:
-        description: Engineering question
-        required: true
-        default: Find and improve the highest-value evidence-supported weakness
-      hypothesis:
-        description: Testable hypothesis
-        required: true
-        default: A bounded controller change can improve the target without regressions
-      logs:
-        description: Optional space-separated replay paths; blank uses all tests/replays CSVs
-        required: false
-        default: ''
-      tournament:
-        description: Run five strategy candidates through the LUAC AI pipeline
-        required: true
-        type: boolean
-        default: true
-      fuzz_cases:
-        description: Bounded fuzz plan case count
-        required: true
-        default: '10000'
+      question: {description: Engineering question, required: true, default: Find and improve the highest-value evidence-supported weakness}
+      hypothesis: {description: Testable hypothesis, required: true, default: A bounded controller change can improve the target without regressions}
+      logs: {description: Optional space-separated replay paths; blank uses all tests/replays CSVs, required: false, default: ''}
+      tournament: {description: Run five strategy candidates through the LUAC AI pipeline, required: true, type: boolean, default: true}
+      fuzz_cases: {description: Bounded fuzz plan case count, required: true, default: '10000'}
   push:
     branches: [main]
     paths:
@@ -30,17 +14,9 @@ on:
       - evidence/labels/**
       - evidence/bench/**
       - evidence/road/**
-      - engineering-missions/schema.json
-      - engineering-missions/run.mjs
-      - engineering-missions/tournament.mjs
-      - engineering-missions/stress.mjs
-      - engineering-missions/memory-lab.mjs
-      - engineering-missions/finalize.mjs
+      - engineering-missions/**
       - .github/workflows/engineering-mission.yml
-permissions:
-  contents: write
-  actions: write
-  models: read
+permissions: {contents: write, actions: write, models: read}
 concurrency:
   group: a17y-engineering-mission-${{ github.ref }}
   cancel-in-progress: true
@@ -50,12 +26,9 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+        with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-          package-manager-cache: false
+        with: {node-version: '22', package-manager-cache: false}
       - name: Install deterministic toolchain
         run: |
           sudo apt-get update
@@ -64,14 +37,7 @@ jobs:
       - name: Validate mission engine and protected tools
         run: |
           set -euo pipefail
-          node --check engineering-missions/run.mjs
-          node --check engineering-missions/tournament.mjs
-          node --check engineering-missions/stress.mjs
-          node --check engineering-missions/memory-lab.mjs
-          node --check engineering-missions/finalize.mjs
-          node --check director/run.mjs
-          node --check workbench/run.mjs
-          node --check workbench/rcos.mjs
+          for f in engineering-missions/run.mjs engineering-missions/tournament.mjs engineering-missions/stress.mjs engineering-missions/memory-lab.mjs engineering-missions/finalize.mjs engineering-missions/publish-build.mjs director/run.mjs workbench/run.mjs workbench/rcos.mjs; do node --check "$f"; done
           lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
           lua5.3 -e "assert(loadfile('scripts/mt12-csv-replay.lua'))"
       - name: Build replay input list
@@ -106,39 +72,34 @@ jobs:
             export DIRECTOR_LOGS="$LOGS"
             mkdir -p "$DIRECTOR_OUT"
             node director/run.mjs || true
-            C="$DIRECTOR_OUT/WINNER.lua"
-            if [ ! -f "$C" ]; then C=a17y.lua; fi
+            C="$DIRECTOR_OUT/WINNER.lua"; if [ ! -f "$C" ]; then C=a17y.lua; fi
             WORKBENCH_OUT="dist-mission/$MISSION_ID/tournament/$PROFILE/workbench" WORKBENCH_LOG_FILE=/tmp/logs.txt node workbench/run.mjs a17y.lua "$C" "$DIRECTOR_MISSION" || true
           done
       - name: Deterministic tournament arbitration and adversarial review
-        env:
-          MISSION_ID: ${{ steps.mission.outputs.id }}
+        env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: node engineering-missions/tournament.mjs "dist-mission/$MISSION_ID"
       - name: Counterfactual and fuzz execution
-        env:
-          MISSION_ID: ${{ steps.mission.outputs.id }}
+        env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: node engineering-missions/stress.mjs "dist-mission/$MISSION_ID" a17y.lua
       - name: Memory compatibility laboratory
-        env:
-          MISSION_ID: ${{ steps.mission.outputs.id }}
+        env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: node engineering-missions/memory-lab.mjs "dist-mission/$MISSION_ID" a17y.lua
-      - name: Build release package, rollback recommendation and audit export
-        env:
-          MISSION_ID: ${{ steps.mission.outputs.id }}
+      - name: Build release and permanent drive candidate
+        env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: |
           node engineering-missions/finalize.mjs "dist-mission/$MISSION_ID"
-          cd "dist-mission/$MISSION_ID"
-          zip -9 -r "../../a17y-engineering-mission-$MISSION_ID.zip" .
+          node engineering-missions/publish-build.mjs "dist-mission/$MISSION_ID" public/builds
+          if [ -d "public/builds/$MISSION_ID" ]; then (cd "public/builds/$MISSION_ID" && zip -9 -r "mission-build.zip" . -x mission-build.zip); fi
+          (cd "dist-mission/$MISSION_ID" && zip -9 -r "../../a17y-engineering-mission-$MISSION_ID.zip" .)
       - uses: actions/upload-artifact@v6
         with:
           name: a17y-engineering-mission-${{ steps.mission.outputs.id }}
           path: a17y-engineering-mission-${{ steps.mission.outputs.id }}.zip
           if-no-files-found: error
           retention-days: 180
-      - name: Publish mission record and notifications
+      - name: Publish mission, candidate downloads and notifications
         if: ${{ github.ref == 'refs/heads/main' }}
-        env:
-          MISSION_ID: ${{ steps.mission.outputs.id }}
+        env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: |
           set -euo pipefail
           mkdir -p engineering-missions/history public/mission-data
@@ -147,6 +108,7 @@ jobs:
           cp "dist-mission/$MISSION_ID/NOTIFICATIONS.json" public/mission-data/notifications.json
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add engineering-missions/history public/mission-data
-          git commit -m "Record engineering mission $MISSION_ID" || exit 0
+          git add engineering-missions/history public/mission-data public/builds
+          git commit -m "Publish drive candidate and mission $MISSION_ID" || exit 0
+          git pull --rebase origin main
           git push
