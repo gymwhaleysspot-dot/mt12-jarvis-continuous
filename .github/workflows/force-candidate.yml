@@ -1,0 +1,76 @@
+name: A17Y Forced Experimental Candidate
+on:
+  workflow_dispatch:
+    inputs:
+      mission:
+        description: Forced experimental mission
+        required: true
+        default: Build a bounded experimental candidate from the latest replay evidence
+      model:
+        description: GitHub Models model ID
+        required: true
+        default: openai/gpt-4.1
+  push:
+    branches: [main]
+    paths:
+      - evidence/labels/force-candidate-*.json
+permissions:
+  contents: write
+  actions: write
+  models: read
+concurrency:
+  group: a17y-forced-candidate
+  cancel-in-progress: false
+jobs:
+  force:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate forced builder
+        run: |
+          node --check engineering-missions/force-candidate.mjs
+          node --check workbench/run.mjs
+          node --check workbench/rcos.mjs
+          lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
+      - name: Resolve all replay evidence
+        run: |
+          find tests/replays -type f -iname '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
+          echo "Replay files: $(wc -l </tmp/logs.txt)"
+      - name: Build and publish forced experimental candidate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FORCE_MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Force a bounded experimental candidate using all current replay evidence' }}
+          FORCE_MODEL: ${{ github.event_name == 'workflow_dispatch' && inputs.model || 'openai/gpt-4.1' }}
+          FORCE_ID: forced-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          node engineering-missions/force-candidate.mjs
+          BUILD="public/builds/$FORCE_ID"
+          test -f "$BUILD/candidate.lua"
+          test -f "$BUILD/candidate.luac"
+          test -f "$BUILD/STATUS.json"
+          test -f "$BUILD/SHA256SUMS.txt"
+          (cd "$BUILD" && zip -9 -r mission-build.zip . -x mission-build.zip)
+      - uses: actions/upload-artifact@v6
+        with:
+          name: forced-experimental-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: public/builds/forced-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 180
+      - name: Commit permanent phone downloads
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/builds
+          git commit -m "Publish forced experimental candidate ${{ github.run_id }}-${{ github.run_attempt }}" || exit 0
+          git pull --rebase origin main
+          git push
