@@ -1,13 +1,13 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-02T11:50:29.766Z
+Generated: 2026-08-03T13:33:08.318Z
 
 ## System health
 
 - Status: **HEALTHY**
 - Active roadmap features: **85/100**
 - Planned features: **15**
-- Knowledge items indexed: **15**
+- Knowledge items indexed: **28**
 
 ## Research
 
