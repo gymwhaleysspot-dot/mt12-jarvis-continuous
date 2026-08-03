@@ -1,0 +1,90 @@
+name: A17Y Chief Engineer
+run-name: Chief Engineer ${{ github.event_name }} ${{ inputs.mission || 'autonomous-priority-cycle' }}
+on:
+  workflow_dispatch:
+    inputs:
+      launch_mission:
+        description: Dispatch the highest-value/full requested engineering mission after analysis
+        required: true
+        type: boolean
+        default: false
+      mission:
+        description: Optional explicit mission; blank uses the top evidence-ranked backlog item
+        required: false
+        default: ''
+  schedule:
+    - cron: '41 10 * * *'
+  push:
+    branches: [main]
+    paths:
+      - tests/replays/**
+      - evidence/**
+      - research/current.json
+      - engineering-missions/**
+      - public/mission-data/**
+      - public/completion-data/**
+      - chief-engineer/**
+      - .github/workflows/chief-engineer.yml
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: a17y-chief-engineer
+  cancel-in-progress: true
+jobs:
+  coordinate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate Chief Engineer architecture
+        run: |
+          set -euo pipefail
+          node --check chief-engineer/engine.mjs
+          node --check chief-engineer/app.js
+          node -e "JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'))"
+      - name: Build engineering graph, confidence, contradictions and backlog
+        run: node chief-engineer/engine.mjs | tee /tmp/chief-summary.json
+      - name: Persist Chief Engineer memory and dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'A17Y Chief Engineer'
+          git config user.email 'actions@users.noreply.github.com'
+          git add chief-engineer/memory.json public/chief-data/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Update Chief Engineer intelligence [skip ci]'
+          git pull --rebase origin main
+          git push
+      - name: Resolve recommended mission
+        id: mission
+        env:
+          REQUESTED: ${{ inputs.mission || '' }}
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('public/chief-data/dashboard.json'));
+          const requested=process.env.REQUESTED.trim();const mission=requested||d.topRecommendation?.recommendedMission||'';
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`mission<<EOF\n${mission}\nEOF\n`);
+          console.log(mission||'No mission available');
+          NODE
+      - name: Dispatch full engineering mission
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.launch_mission == true && steps.mission.outputs.mission != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MISSION: ${{ steps.mission.outputs.mission }}
+        run: |
+          gh workflow run engineering-mission.yml --ref main -f mission="$MISSION"
+      - name: Package Chief Engineer evidence
+        run: |
+          zip -9 -r a17y-chief-engineer.zip public/chief-data chief-engineer/memory.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-chief-engineer
+          path: a17y-chief-engineer.zip
+          retention-days: 90
