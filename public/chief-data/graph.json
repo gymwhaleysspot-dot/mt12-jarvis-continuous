@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-03T13:22:40.133Z",
+  "generatedAt": "2026-08-03T13:58:30.546Z",
   "identity": {
     "name": "Aegis",
     "role": "Chief Engineer",
@@ -7,9 +7,39 @@
   },
   "nodes": [
     {
+      "id": "1bedd1a8de4825a6",
+      "type": "drive-log",
+      "path": "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv"
+    },
+    {
+      "id": "41a0e298ee9eda55",
+      "type": "drive-log",
+      "path": "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv"
+    },
+    {
       "id": "d878649409b9f7b6",
       "type": "mission",
       "path": "engineering-missions/history/20260802072328-18d2d36b/MISSION.json"
+    },
+    {
+      "id": "1619765bd536d38b",
+      "type": "mission",
+      "path": "engineering-missions/history/20260803135016-f70d2cdf/MISSION.json"
+    },
+    {
+      "id": "2f7ba7959a15b861",
+      "type": "mission",
+      "path": "engineering-missions/history/20260803135344-001e4758/MISSION.json"
+    },
+    {
+      "id": "cacf538b909342c4",
+      "type": "evidence",
+      "path": "evidence/logs/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e.json"
+    },
+    {
+      "id": "04d23aee50b8af8c",
+      "type": "evidence",
+      "path": "evidence/logs/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d.json"
     },
     {
       "id": "e867b8e4ff7385af",
@@ -21,10 +51,10 @@
       "type": "subsystem",
       "name": "memory",
       "confidence": 40,
-      "risk": 73,
-      "expectedGain": 39,
+      "risk": 100,
+      "expectedGain": 46,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "PENDING"
     },
     {
@@ -32,10 +62,10 @@
       "type": "subsystem",
       "name": "logging",
       "confidence": 40,
-      "risk": 71,
-      "expectedGain": 39,
+      "risk": 100,
+      "expectedGain": 46,
       "evidenceLogs": 0,
-      "mentions": 2,
+      "mentions": 6,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -43,10 +73,10 @@
       "type": "subsystem",
       "name": "jump",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -54,10 +84,10 @@
       "type": "subsystem",
       "name": "traction",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -65,10 +95,10 @@
       "type": "subsystem",
       "name": "braking",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -76,21 +106,10 @@
       "type": "subsystem",
       "name": "gps",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
-      "physicalAuthority": "AVAILABLE"
-    },
-    {
-      "id": "subsystem:rpm",
-      "type": "subsystem",
-      "name": "rpm",
-      "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
-      "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -98,10 +117,10 @@
       "type": "subsystem",
       "name": "dropout",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
@@ -109,14 +128,35 @@
       "type": "subsystem",
       "name": "gyro",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
+      "physicalAuthority": "AVAILABLE"
+    },
+    {
+      "id": "subsystem:rpm",
+      "type": "subsystem",
+      "name": "rpm",
+      "confidence": 45,
+      "risk": 85,
+      "expectedGain": 41,
+      "evidenceLogs": 1,
+      "mentions": 5,
       "physicalAuthority": "AVAILABLE"
     }
   ],
   "edges": [
+    {
+      "from": "1bedd1a8de4825a6",
+      "to": "subsystem:rpm",
+      "relation": "observes"
+    },
+    {
+      "from": "41a0e298ee9eda55",
+      "to": "subsystem:rpm",
+      "relation": "observes"
+    },
     {
       "from": "d878649409b9f7b6",
       "to": "subsystem:memory",
@@ -149,17 +189,107 @@
     },
     {
       "from": "d878649409b9f7b6",
-      "to": "subsystem:rpm",
-      "relation": "evaluates"
-    },
-    {
-      "from": "d878649409b9f7b6",
       "to": "subsystem:dropout",
       "relation": "evaluates"
     },
     {
       "from": "d878649409b9f7b6",
       "to": "subsystem:gyro",
+      "relation": "evaluates"
+    },
+    {
+      "from": "d878649409b9f7b6",
+      "to": "subsystem:rpm",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:memory",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:logging",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:jump",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:traction",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:braking",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:gps",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:dropout",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:gyro",
+      "relation": "evaluates"
+    },
+    {
+      "from": "1619765bd536d38b",
+      "to": "subsystem:rpm",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:memory",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:logging",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:jump",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:traction",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:braking",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:gps",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:dropout",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:gyro",
+      "relation": "evaluates"
+    },
+    {
+      "from": "2f7ba7959a15b861",
+      "to": "subsystem:rpm",
       "relation": "evaluates"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "generatedAt": "2026-08-03T13:22:40.133Z",
+  "generatedAt": "2026-08-03T13:58:30.546Z",
   "identity": {
     "name": "Aegis",
     "role": "Chief Engineer",
@@ -18,9 +18,9 @@
     "autoPromotion": false
   },
   "score": {
-    "overall": 40,
-    "safety": 47,
-    "evidence": 3,
+    "overall": 41,
+    "safety": 11,
+    "evidence": 17,
     "hardware": 55,
     "release": 65
   },
@@ -28,82 +28,82 @@
     {
       "name": "memory",
       "confidence": 40,
-      "risk": 73,
-      "expectedGain": 39,
+      "risk": 100,
+      "expectedGain": 46,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "PENDING"
     },
     {
       "name": "logging",
       "confidence": 40,
-      "risk": 71,
-      "expectedGain": 39,
+      "risk": 100,
+      "expectedGain": 46,
       "evidenceLogs": 0,
-      "mentions": 2,
+      "mentions": 6,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "jump",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "traction",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "braking",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "gps",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
-      "physicalAuthority": "AVAILABLE"
-    },
-    {
-      "name": "rpm",
-      "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
-      "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "dropout",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
       "physicalAuthority": "AVAILABLE"
     },
     {
       "name": "gyro",
       "confidence": 40,
-      "risk": 53,
-      "expectedGain": 34,
+      "risk": 89,
+      "expectedGain": 43,
       "evidenceLogs": 0,
-      "mentions": 1,
+      "mentions": 3,
+      "physicalAuthority": "AVAILABLE"
+    },
+    {
+      "name": "rpm",
+      "confidence": 45,
+      "risk": 85,
+      "expectedGain": 41,
+      "evidenceLogs": 1,
+      "mentions": 5,
       "physicalAuthority": "AVAILABLE"
     }
   ],
@@ -112,171 +112,171 @@
       "id": "aegis-logging",
       "title": "Improve logging intelligence",
       "topic": "logging",
-      "priority": 57,
+      "priority": 71,
       "confidence": 40,
-      "expectedGain": 39,
+      "expectedGain": 46,
       "complexity": "Low",
-      "reason": "Risk 71; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 100; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve logging using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-gps",
       "title": "Improve gps intelligence",
       "topic": "gps",
-      "priority": 47,
+      "priority": 66,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "Low",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve gps using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
-    },
-    {
-      "id": "aegis-rpm",
-      "title": "Improve rpm intelligence",
-      "topic": "rpm",
-      "priority": 47,
-      "confidence": 40,
-      "expectedGain": 34,
-      "complexity": "Low",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
-      "recommendedMission": "Aegis mission: diagnose and improve rpm using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-gyro",
       "title": "Improve gyro intelligence",
       "topic": "gyro",
-      "priority": 47,
+      "priority": 66,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "Low",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve gyro using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
+    },
+    {
+      "id": "aegis-rpm",
+      "title": "Improve rpm intelligence",
+      "topic": "rpm",
+      "priority": 62,
+      "confidence": 45,
+      "expectedGain": 41,
+      "complexity": "Low",
+      "reason": "Risk 85; confidence 45%; 1 replay log(s) provide direct observability.",
+      "recommendedMission": "Aegis mission: diagnose and improve rpm using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-jump",
       "title": "Improve jump intelligence",
       "topic": "jump",
-      "priority": 24,
+      "priority": 33,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "Medium",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve jump using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-traction",
       "title": "Improve traction intelligence",
       "topic": "traction",
-      "priority": 24,
+      "priority": 33,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "Medium",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve traction using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-braking",
       "title": "Improve braking intelligence",
       "topic": "braking",
-      "priority": 24,
+      "priority": 33,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "Medium",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve braking using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-memory",
       "title": "Improve memory intelligence",
       "topic": "memory",
-      "priority": 19,
+      "priority": 24,
       "confidence": 40,
-      "expectedGain": 39,
+      "expectedGain": 46,
       "complexity": "High",
-      "reason": "Risk 73; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 100; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve memory using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     },
     {
       "id": "aegis-dropout",
       "title": "Improve dropout intelligence",
       "topic": "dropout",
-      "priority": 16,
+      "priority": 22,
       "confidence": 40,
-      "expectedGain": 34,
+      "expectedGain": 43,
       "complexity": "High",
-      "reason": "Risk 53; confidence 40%; 0 replay log(s) provide direct observability.",
+      "reason": "Risk 89; confidence 40%; 0 replay log(s) provide direct observability.",
       "recommendedMission": "Aegis mission: diagnose and improve dropout using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
     }
   ],
   "contradictions": [
     {
       "topic": "memory",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for memory.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "logging",
-      "severity": 55,
+      "severity": 85,
       "statement": "Aegis found both successful and adverse outcomes for logging.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "jump",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for jump.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "traction",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for traction.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "braking",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for braking.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "gps",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for gps.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
-      "topic": "rpm",
-      "severity": 40,
-      "statement": "Aegis found both successful and adverse outcomes for rpm.",
-      "action": "Create a targeted mission using the newest contradictory sessions."
-    },
-    {
       "topic": "dropout",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for dropout.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     },
     {
       "topic": "gyro",
-      "severity": 40,
+      "severity": 70,
       "statement": "Aegis found both successful and adverse outcomes for gyro.",
+      "action": "Create a targeted mission using the newest contradictory sessions."
+    },
+    {
+      "topic": "rpm",
+      "severity": 70,
+      "statement": "Aegis found both successful and adverse outcomes for rpm.",
       "action": "Create a targeted mission using the newest contradictory sessions."
     }
   ],
   "graph": {
-    "nodes": 11,
-    "edges": 9
+    "nodes": 17,
+    "edges": 29
   },
   "topRecommendation": {
     "id": "aegis-logging",
     "title": "Improve logging intelligence",
     "topic": "logging",
-    "priority": 57,
+    "priority": 71,
     "confidence": 40,
-    "expectedGain": 39,
+    "expectedGain": 46,
     "complexity": "Low",
-    "reason": "Risk 71; confidence 40%; 0 replay log(s) provide direct observability.",
+    "reason": "Risk 100; confidence 40%; 0 replay log(s) provide direct observability.",
     "recommendedMission": "Aegis mission: diagnose and improve logging using the latest selected evidence. Preserve all protected behavior and require replay, bench, and road authority before promotion."
   },
   "currentMission": null,
