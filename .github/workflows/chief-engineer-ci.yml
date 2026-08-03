@@ -1,4 +1,4 @@
-name: Chief Engineer CI
+name: Aegis Chief Engineer CI
 on:
   pull_request:
     paths:
@@ -19,36 +19,38 @@ jobs:
         with:
           node-version: '22'
           package-manager-cache: false
-      - name: Validate Chief Engineer source
+      - name: Validate Aegis source
         run: |
           set -euo pipefail
           node --check chief-engineer/engine.mjs
           node --check chief-engineer/app.js
-          node -e "JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'))"
+          node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'));if(m.identity?.name!=='Aegis')throw Error('Aegis memory identity missing')"
           node -e "JSON.parse(require('fs').readFileSync('public/chief-data/dashboard.json'))"
           grep -q 'RECOMMEND_AND_DISPATCH_ONLY' chief-engineer/engine.mjs
           grep -q 'autoPromotion:false' chief-engineer/engine.mjs
           grep -q "engineering-mission.yml" .github/workflows/chief-engineer.yml
           grep -q "question=\"\$MISSION\"" .github/workflows/chief-engineer.yml
-      - name: Execute intelligence engine
+          grep -q 'A17Y Aegis Chief Engineer' .github/workflows/chief-engineer.yml
+      - name: Execute Aegis intelligence engine
         run: |
           set -euo pipefail
-          node chief-engineer/engine.mjs > /tmp/chief-output.json
+          node chief-engineer/engine.mjs > /tmp/aegis-output.json
           for f in dashboard graph backlog contradictions; do test -f "public/chief-data/$f.json"; done
           node - <<'NODE'
           const fs=require('fs');const d=JSON.parse(fs.readFileSync('public/chief-data/dashboard.json'));
+          if(d.identity?.name!=='Aegis'||d.identity?.role!=='Chief Engineer')throw Error('Aegis identity missing');
           if(!Array.isArray(d.subsystems)||d.subsystems.length<5)throw Error('Subsystem confidence missing');
           if(!Array.isArray(d.backlog)||!d.backlog.length)throw Error('Ranked backlog missing');
           if(!d.topRecommendation?.recommendedMission)throw Error('Top mission missing');
-          if(d.chiefEngineer.autoPromotion!==false)throw Error('Automatic promotion must remain disabled');
-          if(d.chiefEngineer.authority!=='RECOMMEND_AND_DISPATCH_ONLY')throw Error('Authority boundary changed');
+          if(d.aegis.autoPromotion!==false)throw Error('Automatic promotion must remain disabled');
+          if(d.aegis.authority!=='RECOMMEND_AND_DISPATCH_ONLY')throw Error('Authority boundary changed');
           const priorities=d.backlog.map(x=>x.priority);for(let i=1;i<priorities.length;i++)if(priorities[i]>priorities[i-1])throw Error('Backlog not ranked');
-          console.log(`Chief Engineer verified: ${d.graph.nodes} nodes, ${d.graph.edges} edges, score ${d.score.overall}`);
+          console.log(`Aegis verified: ${d.graph.nodes} nodes, ${d.graph.edges} edges, score ${d.score.overall}`);
           NODE
       - name: Validate page and global wiring
         run: |
           node scripts/prepare-pages.mjs
-          grep -q "['Chief Engineer','chief.html']" site-nav.js
+          grep -q "['Aegis','chief.html']" site-nav.js
           grep -q 'classic-token.js' chief.html
           grep -q 'site-nav.js' chief.html
-          grep -q 'RUN CHIEF ENGINEER' chief.html
+          grep -q 'RUN AEGIS ANALYSIS' chief.html

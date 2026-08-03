@@ -1,15 +1,15 @@
-name: A17Y Chief Engineer
-run-name: Chief Engineer ${{ github.event_name }} ${{ inputs.mission || 'autonomous-priority-cycle' }}
+name: A17Y Aegis Chief Engineer
+run-name: Aegis ${{ github.event_name }} ${{ inputs.mission || 'autonomous-priority-cycle' }}
 on:
   workflow_dispatch:
     inputs:
       launch_mission:
-        description: Dispatch the highest-value full engineering mission after analysis
+        description: Dispatch the highest-value full engineering mission after Aegis analysis
         required: true
         type: boolean
         default: false
       mission:
-        description: Optional explicit mission; blank uses the top evidence-ranked backlog item
+        description: Optional explicit mission; blank uses the top Aegis evidence-ranked backlog item
         required: false
         default: ''
   schedule:
@@ -29,7 +29,7 @@ permissions:
   contents: write
   actions: write
 concurrency:
-  group: a17y-chief-engineer
+  group: a17y-aegis-chief-engineer
   cancel-in-progress: true
 jobs:
   coordinate:
@@ -43,26 +43,26 @@ jobs:
         with:
           node-version: '22'
           package-manager-cache: false
-      - name: Validate Chief Engineer architecture
+      - name: Validate Aegis architecture
         run: |
           set -euo pipefail
           node --check chief-engineer/engine.mjs
           node --check chief-engineer/app.js
-          node -e "JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'))"
-      - name: Build engineering graph, confidence, contradictions and backlog
-        run: node chief-engineer/engine.mjs | tee /tmp/chief-summary.json
-      - name: Persist Chief Engineer memory and dashboard
+          node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json')); if(m.identity&&m.identity.name!=='Aegis')throw Error('Invalid Chief Engineer identity')"
+      - name: Build Aegis graph, confidence, contradictions and backlog
+        run: node chief-engineer/engine.mjs | tee /tmp/aegis-summary.json
+      - name: Persist Aegis memory and dashboard
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'A17Y Chief Engineer'
+          git config user.name 'Aegis Chief Engineer'
           git config user.email 'actions@users.noreply.github.com'
           git add chief-engineer/memory.json public/chief-data/
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Update Chief Engineer intelligence [skip ci]'
+          git commit -m 'Update Aegis engineering intelligence [skip ci]'
           git pull --rebase origin main
           git push
-      - name: Resolve recommended mission
+      - name: Resolve Aegis recommended mission
         id: mission
         env:
           REQUESTED: ${{ inputs.mission || '' }}
@@ -71,7 +71,7 @@ jobs:
           const fs=require('fs');const d=JSON.parse(fs.readFileSync('public/chief-data/dashboard.json'));
           const requested=process.env.REQUESTED.trim();const mission=requested||d.topRecommendation?.recommendedMission||'';
           fs.appendFileSync(process.env.GITHUB_OUTPUT,`mission<<EOF\n${mission}\nEOF\n`);
-          console.log(mission||'No mission available');
+          console.log(mission||'Aegis has no mission available');
           NODE
       - name: Dispatch full engineering mission
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.launch_mission == true && steps.mission.outputs.mission != '' }}
@@ -84,10 +84,10 @@ jobs:
             -f hypothesis='A bounded evidence-supported controller change can improve the target without regressions' \
             -f tournament=true \
             -f fuzz_cases=10000
-      - name: Package Chief Engineer evidence
-        run: zip -9 -r a17y-chief-engineer.zip public/chief-data chief-engineer/memory.json
+      - name: Package Aegis evidence
+        run: zip -9 -r a17y-aegis-chief-engineer.zip public/chief-data chief-engineer/memory.json
       - uses: actions/upload-artifact@v6
         with:
-          name: a17y-chief-engineer
-          path: a17y-chief-engineer.zip
+          name: a17y-aegis-chief-engineer
+          path: a17y-aegis-chief-engineer.zip
           retention-days: 90
