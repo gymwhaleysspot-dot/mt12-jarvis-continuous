@@ -1,0 +1,71 @@
+name: A17Z Rewrite Gate
+on:
+  pull_request:
+    paths:
+      - tools/build_a17z_rewrite.py
+      - .github/workflows/a17z-rewrite-gate.yml
+      - a17y.lua
+      - toolchain/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Generate unified A17Z source
+        run: |
+          set -Eeuo pipefail
+          python3 tools/build_a17z_rewrite.py
+          test -s a17z.lua
+          lua5.3 -e "assert(loadfile('a17z.lua'))"
+          grep -q '^--a17z unified world-model controller' a17z.lua
+          grep -q 'local function zBrain' a17z.lua
+          ! grep -q 'local function neural' a17z.lua
+          ! grep -q 'local function evo' a17z.lua
+          ! grep -q 'local function superBrain' a17z.lua
+          ! grep -q 'local function aiGate' a17z.lua
+          ! grep -q 'local function learn' a17z.lua
+          ! grep -q 'local function condBrain' a17z.lua
+      - name: Verify architectural rewrite
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import difflib,json
+          p=Path('a17y.lua').read_text();c=Path('a17z.lua').read_text()
+          ratio=difflib.SequenceMatcher(None,p,c).ratio()
+          removed=['neural','evo','superBrain','aiGate','learn','condBrain']
+          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'removedSubsystems':removed,'unifiedEngine':'zBrain','classification':'ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
+          Path('REWRITE-AUDIT.json').write_text(json.dumps(report,indent=2))
+          assert ratio < .97, ratio
+          assert len(c) > 65000
+          PY
+      - name: Compile and normalize A17Z
+        run: |
+          set -Eeuo pipefail
+          MAX_BYTES=87050 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          test -s a17z.luac
+          test "$(wc -c < a17z.luac)" -le 87050
+          sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
+          printf 'A17Z unified world-model rewrite\nReplaces neural/evo/superBrain/aiGate/learn/condBrain with zBrain\nExperimental: bench and road validation required\nApproved byte ceiling: 87050\n' > BUILD-AUDIT.txt
+          zip -9 a17z-rewrite.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt REWRITE-AUDIT.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17z-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            a17z.lua
+            a17z.luac
+            SHA256SUMS.txt
+            BUILD-AUDIT.txt
+            REWRITE-AUDIT.json
+            a17z-rewrite.zip
+          if-no-files-found: error
+          retention-days: 180
