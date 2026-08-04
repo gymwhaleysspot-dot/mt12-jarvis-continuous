@@ -1,0 +1,54 @@
+{
+  "schema": 3,
+  "requestedAt": "2026-08-04T14:33:00Z",
+  "requestedBy": "user",
+  "mode": "FORCED_UNVERIFIED_DRIVE_CANDIDATE",
+  "mission": "Generate one real bounded A17Y drive candidate based on Aegis priorities. Improve logging intelligence and observability first, then strengthen GPS, gyro, and RPM truth/disagreement handling using the two current replay logs. Preserve every existing function and driving behavior unless a bounded evidence-supported correction is required. Do not simplify or remove mood, personality, dashboard, logging, learning, persistence, TC, ABS, jump, gyro, GPS, RPM, dropout, or diagnostic systems.",
+  "aegisPriorities": [
+    {
+      "topic": "logging",
+      "priority": 71,
+      "expectedGain": 45,
+      "instruction": "Add low-allocation observability so future logs clearly expose sensor confidence, disagreement, dropout cause, correction source, and event reasoning without increasing normal logging churn."
+    },
+    {
+      "topic": "gps",
+      "priority": 66,
+      "expectedGain": 43,
+      "instruction": "Improve GPS validity, lag, and disagreement handling while preserving fail-open behavior and current speed truth consumers."
+    },
+    {
+      "topic": "gyro",
+      "priority": 66,
+      "expectedGain": 43,
+      "instruction": "Improve gyro confidence and observability without changing CH3 mapping or allowing coast gain to collapse."
+    },
+    {
+      "topic": "rpm",
+      "priority": 62,
+      "expectedGain": 41,
+      "instruction": "Improve RPM truth confidence and GPS/RPM arbitration using the replay with direct RPM observability; preserve continuous learning."
+    }
+  ],
+  "logs": [
+    "tests/replays/gvbb.csv",
+    "tests/replays/C3AI4H-2026-07-31-203326.csv"
+  ],
+  "hardRequirements": [
+    "Lua 5.3 syntax",
+    "MT12 normalized bytecode",
+    "maximum 87000 bytes",
+    "global io.read(fileHandle, ...) compatibility",
+    "GV7 remains 1024 pass-through",
+    "CH3 gyro, CH15 TCT, CH16 GYR preserved",
+    "car-off guard preserved",
+    "persistence schema compatibility preserved",
+    "dashboard and voice preserved",
+    "fail-open on bad or missing sensors",
+    "no automatic promotion",
+    "publish candidate.lua, candidate.luac, hashes, report, and ZIP even if AI improvement falls back to a control build"
+  ],
+  "automaticPromotion": false,
+  "benchRequired": true,
+  "roadRequired": true
+}
