@@ -39,16 +39,43 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip jq
           chmod +x toolchain/compile_mt12.sh
+      - name: Resolve exact Aegis request
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -Eeuo pipefail
+          REQUEST="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^evidence/labels/force-candidate-.*\.json$' | head -n1 || true)"
+          test -n "$REQUEST"
+          test -f "$REQUEST"
+          MISSION="$(jq -r '.mission // empty' "$REQUEST")"
+          test -n "$MISSION"
+          CONTEXT="$(jq -c '{aegisPriorities:(.aegisPriorities // []),hardRequirements:(.hardRequirements // .requirements // []),requestedLogs:(.logs // [])}' "$REQUEST")"
+          {
+            echo 'FORCE_MISSION<<AEGIS_EOF'
+            printf '%s\n\nAegis request context: %s\n' "$MISSION" "$CONTEXT"
+            echo 'AEGIS_EOF'
+            echo "FORCE_REQUEST_FILE=$REQUEST"
+          } >> "$GITHUB_ENV"
+          echo "Using Aegis request: $REQUEST" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Validate forced builder
         run: |
           node --check engineering-missions/force-candidate.mjs
           node --check workbench/run.mjs
           node --check workbench/rcos.mjs
           lua5.3 -e "assert(loadfile('scripts/mt12-harness.lua'))"
-      - name: Resolve all replay evidence
+      - name: Resolve replay evidence
         run: |
-          find tests/replays -type f -iname '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
+          set -Eeuo pipefail
+          : > /tmp/logs.txt
+          if [ -n "${FORCE_REQUEST_FILE:-}" ]; then
+            jq -r '.logs[]? // empty' "$FORCE_REQUEST_FILE" | while IFS= read -r p; do
+              [ -f "$p" ] && printf '%s\n' "$p"
+            done > /tmp/logs.txt
+          fi
+          if [ ! -s /tmp/logs.txt ]; then
+            find tests/replays -type f -iname '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
+          fi
           echo "Replay files: $(wc -l </tmp/logs.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
+          cat /tmp/logs.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Build forced experimental candidate
         id: build
         continue-on-error: true
@@ -64,6 +91,7 @@ jobs:
             printf '{"schema":3,"mission":"%s","authority":"FORCED_BUILD_FAILED","hardGatesPassed":false,"error":"Builder exited without STATUS.json"}\n' "$FORCE_ID" > "$BUILD/STATUS.json"
           fi
           cp -f public/builds/forced-status.json "$BUILD/LIVE-STATUS.json" 2>/dev/null || true
+          [ -n "${FORCE_REQUEST_FILE:-}" ] && cp -f "$FORCE_REQUEST_FILE" "$BUILD/AEGIS-REQUEST.json" || true
           (cd "$BUILD" && zip -9 -r mission-build.zip . -x mission-build.zip)
           echo "### Final forced-build status" >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
