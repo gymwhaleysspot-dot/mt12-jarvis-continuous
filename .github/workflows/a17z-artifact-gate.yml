@@ -1,0 +1,57 @@
+name: A17Z Aegis Artifact Gate
+on:
+  pull_request:
+    paths:
+      - .github/workflows/a17z-artifact-gate.yml
+      - a17y.lua
+      - toolchain/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Create Aegis observability candidate
+        run: |
+          set -Eeuo pipefail
+          test "$(wc -c < a17y.lua)" -gt 80000
+          cp a17y.lua a17z.lua
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('a17z.lua');s=p.read_text()
+          a='local bc,bm,bi=0,0,0'
+          b='local bc,bm,bi=0,0,0;local aoSrc,aoObs,aoMis=-1,-1,-1'
+          assert s.count(a)==1;s=s.replace(a,b,1)
+          a='if unsafePending>0 then bb_line(108,p2221(V[588],V[589],V[590],V[593]),0);bb_line(109,p2221(V[591],V[592],V[168],V[169]),0);unsafePending=0 end;if (V[594])>0 then bb_line(116,V[594],0);V[594]=0 end;if X[24]>0 then bb_line(130,X[24],0);bb_line(131,X[25],0);X[24]=0;X[25]=0 end;if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end'
+          b=a+';local as=V[248]or 0;local ao=V[168]or 0;local am=V[232]or 0;if as~=aoSrc or m_abs(ao-aoObs)>=12 or am~=aoMis or (V[237]or 0)>42 then bb_line(142,p2221(as,am,ao,(V[237]or 0)/10),0);bb_line(143,p2221(V[166]or 0,V[167]or 0,V[179]or 0,(V[266]or 0)/10),0);aoSrc=as;aoObs=ao;aoMis=am end'
+          assert s.count(a)==1;s=s.replace(a,b,1);p.write_text(s)
+          PY
+          lua5.3 -e "assert(loadfile('a17z.lua'))"
+      - name: Compile and normalize A17Z
+        run: |
+          set -Eeuo pipefail
+          MAX_BYTES=87000 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          test -s a17z.luac
+          test "$(wc -c < a17z.luac)" -le 87000
+          sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
+          printf 'A17Z Aegis observability candidate\nNew BB 142: source/anomaly/observability/mismatch\nNew BB 143: GPS/RPM/fused confidence/dropout\nControl behavior unchanged\n' > BUILD-AUDIT.txt
+          zip -9 a17z-aegis.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17z-aegis-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            a17z.lua
+            a17z.luac
+            SHA256SUMS.txt
+            BUILD-AUDIT.txt
+            a17z-aegis.zip
+          if-no-files-found: error
+          retention-days: 180
