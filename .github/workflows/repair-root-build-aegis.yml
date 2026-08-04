@@ -3,8 +3,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - evidence/labels/repair-aegis-build-*.json
 permissions:
   contents: write
 concurrency:
@@ -12,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    if: github.actor != 'github-actions[bot]' && github.actor != 'actions'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -68,21 +67,12 @@ jobs:
           python3 - <<'PY'
           import hashlib,json,os
           from pathlib import Path
+          from datetime import datetime,timezone
           rid=os.environ['GITHUB_RUN_ID']; att=os.environ['GITHUB_RUN_ATTEMPT']
           mid=f'aegis-observability-{rid}-{att}'
           b=Path('public/builds')/mid
           h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-          status={
-            'schema':4,'mission':mid,'profile':'aegis-observability','authority':'UNVERIFIED_AEGIS_DRIVE_CANDIDATE',
-            'createdAt':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
-            'automaticPromotion':False,'hardGatesPassed':True,'behaviorChanged':True,'benchRequired':True,'roadRequired':True,
-            'parentSource':'engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua',
-            'ideas':['event-driven truth-source logging','GPS/RPM confidence logging','mismatch and anomaly-class logging','low-allocation state-change gating'],
-            'protected':['GV7=1024','MT12 io.read(handle,...)','car-off guard','AIC9Z 18/24 persistence','dashboard','TC/ABS/gyro/throttle behavior','channel mapping'],
-            'source':{'file':'candidate.lua','bytes':(b/'candidate.lua').stat().st_size,'sha256':h(b/'candidate.lua')},
-            'luac':{'file':'candidate.luac','bytes':(b/'candidate.luac').stat().st_size,'sha256':h(b/'candidate.luac'),'format':'MT12 normalized Lua 5.3'},
-            'warnings':['Experimental logging-observability candidate. Keep the prior trusted LUAC ready for rollback.','Controller behavior was intentionally preserved; new blackbox groups 142 and 143 provide Aegis evidence.']
-          }
+          status={'schema':4,'mission':mid,'profile':'aegis-observability','authority':'UNVERIFIED_AEGIS_DRIVE_CANDIDATE','createdAt':datetime.now(timezone.utc).isoformat(),'automaticPromotion':False,'hardGatesPassed':True,'behaviorChanged':True,'benchRequired':True,'roadRequired':True,'parentSource':'engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua','ideas':['event-driven truth-source logging','GPS/RPM confidence logging','mismatch and anomaly-class logging','low-allocation state-change gating'],'protected':['GV7=1024','MT12 io.read(handle,...)','car-off guard','AIC9Z 18/24 persistence','dashboard','TC/ABS/gyro/throttle behavior','channel mapping'],'source':{'file':'candidate.lua','bytes':(b/'candidate.lua').stat().st_size,'sha256':h(b/'candidate.lua')},'luac':{'file':'candidate.luac','bytes':(b/'candidate.luac').stat().st_size,'sha256':h(b/'candidate.luac'),'format':'MT12 normalized Lua 5.3'},'warnings':['Experimental logging-observability candidate. Keep the prior trusted LUAC ready for rollback.','Controller behavior was intentionally preserved; new blackbox groups 142 and 143 provide Aegis evidence.']}
           (b/'STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
           (b/'BUILD-AUDIT.txt').write_text('A17Z AEGIS OBSERVABILITY BUILD\n\nRestored full canonical parent from mission history.\nAdded blackbox group 142: truth source, anomaly class, observability, mismatch.\nAdded blackbox group 143: GPS confidence, RPM confidence, fused truth confidence, dropout score.\nNo control-output formulas or protected contracts changed.\n')
           files=sorted(p for p in b.iterdir() if p.is_file())
@@ -95,7 +85,6 @@ jobs:
           idx.parent.mkdir(parents=True,exist_ok=True);idx.write_text(json.dumps(data,indent=2)+'\n')
           PY
           (cd "$B" && zip -9 -r mission-build.zip . -x mission-build.zip)
-          echo "BUILD_ID=$ID" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v6
         with:
           name: a17z-aegis-observability-${{ github.run_id }}-${{ github.run_attempt }}
