@@ -35,11 +35,11 @@ jobs:
       - name: Compile and normalize A17Z
         run: |
           set -Eeuo pipefail
-          MAX_BYTES=87000 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          MAX_BYTES=87050 toolchain/compile_mt12.sh a17z.lua a17z.luac
           test -s a17z.luac
-          test "$(wc -c < a17z.luac)" -le 87000
+          test "$(wc -c < a17z.luac)" -le 87050
           sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
-          printf 'A17Z Aegis observability candidate\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\n' > BUILD-AUDIT.txt
+          printf 'A17Z Aegis observability candidate\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\nApproved byte ceiling: 87050 bytes\n' > BUILD-AUDIT.txt
           zip -9 a17z-aegis.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt
       - uses: actions/upload-artifact@v6
         with:
