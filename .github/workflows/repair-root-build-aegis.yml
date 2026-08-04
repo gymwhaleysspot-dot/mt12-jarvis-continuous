@@ -1,0 +1,120 @@
+name: Repair A17Y Root and Build Aegis Candidate
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - evidence/labels/repair-aegis-build-*.json
+permissions:
+  contents: write
+concurrency:
+  group: repair-root-build-aegis
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Restore canonical full parent and create Aegis candidate
+        run: |
+          set -Eeuo pipefail
+          P='engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua'
+          test -f "$P"
+          test "$(wc -c < "$P")" -gt 80000
+          cp "$P" a17y.lua
+          cp "$P" a17z.lua
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('a17z.lua')
+          s=p.read_text()
+          old='local bc,bm,bi=0,0,0'
+          new='local bc,bm,bi=0,0,0;local aoSrc,aoObs,aoMis=-1,-1,-1'
+          assert old in s and s.count(old)==1
+          s=s.replace(old,new,1)
+          old='if unsafePending>0 then bb_line(108,p2221(V[588],V[589],V[590],V[593]),0);bb_line(109,p2221(V[591],V[592],V[168],V[169]),0);unsafePending=0 end;if (V[594])>0 then bb_line(116,V[594],0);V[594]=0 end;if X[24]>0 then bb_line(130,X[24],0);bb_line(131,X[25],0);X[24]=0;X[25]=0 end;if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end'
+          new=old+';local as=V[248]or 0;local ao=V[168]or 0;local am=V[232]or 0;if as~=aoSrc or m_abs(ao-aoObs)>=12 or am~=aoMis or (V[237]or 0)>42 then bb_line(142,p2221(as,am,ao,(V[237]or 0)/10),0);bb_line(143,p2221(V[166]or 0,V[167]or 0,V[179]or 0,(V[266]or 0)/10),0);aoSrc=as;aoObs=ao;aoMis=am end'
+          assert old in s and s.count(old)==1
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          lua5.3 -e "assert(loadfile('a17y.lua'))"
+          lua5.3 -e "assert(loadfile('a17z.lua'))"
+      - name: Compile and normalize both files
+        run: |
+          set -Eeuo pipefail
+          MAX_BYTES=87000 toolchain/compile_mt12.sh a17y.lua a17y.luac
+          MAX_BYTES=87000 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          test -s a17y.luac
+          test -s a17z.luac
+          test "$(wc -c < a17z.luac)" -le 87000
+      - name: Build permanent package and audit
+        run: |
+          set -Eeuo pipefail
+          ID="aegis-observability-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          B="public/builds/$ID"
+          mkdir -p "$B"
+          cp a17z.lua "$B/candidate.lua"
+          cp a17z.luac "$B/candidate.luac"
+          cp a17y.lua "$B/parent.lua"
+          cp a17y.luac "$B/parent.luac"
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          rid=os.environ['GITHUB_RUN_ID']; att=os.environ['GITHUB_RUN_ATTEMPT']
+          mid=f'aegis-observability-{rid}-{att}'
+          b=Path('public/builds')/mid
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          status={
+            'schema':4,'mission':mid,'profile':'aegis-observability','authority':'UNVERIFIED_AEGIS_DRIVE_CANDIDATE',
+            'createdAt':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
+            'automaticPromotion':False,'hardGatesPassed':True,'behaviorChanged':True,'benchRequired':True,'roadRequired':True,
+            'parentSource':'engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua',
+            'ideas':['event-driven truth-source logging','GPS/RPM confidence logging','mismatch and anomaly-class logging','low-allocation state-change gating'],
+            'protected':['GV7=1024','MT12 io.read(handle,...)','car-off guard','AIC9Z 18/24 persistence','dashboard','TC/ABS/gyro/throttle behavior','channel mapping'],
+            'source':{'file':'candidate.lua','bytes':(b/'candidate.lua').stat().st_size,'sha256':h(b/'candidate.lua')},
+            'luac':{'file':'candidate.luac','bytes':(b/'candidate.luac').stat().st_size,'sha256':h(b/'candidate.luac'),'format':'MT12 normalized Lua 5.3'},
+            'warnings':['Experimental logging-observability candidate. Keep the prior trusted LUAC ready for rollback.','Controller behavior was intentionally preserved; new blackbox groups 142 and 143 provide Aegis evidence.']
+          }
+          (b/'STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
+          (b/'BUILD-AUDIT.txt').write_text('A17Z AEGIS OBSERVABILITY BUILD\n\nRestored full canonical parent from mission history.\nAdded blackbox group 142: truth source, anomaly class, observability, mismatch.\nAdded blackbox group 143: GPS confidence, RPM confidence, fused truth confidence, dropout score.\nNo control-output formulas or protected contracts changed.\n')
+          files=sorted(p for p in b.iterdir() if p.is_file())
+          (b/'SHA256SUMS.txt').write_text(''.join(f'{h(p)}  {p.name}\n' for p in files))
+          idx=Path('public/builds/index.json')
+          try:data=json.loads(idx.read_text())
+          except:data={'schema':2,'builds':[]}
+          entry={'mission':mid,'profile':status['profile'],'authority':status['authority'],'createdAt':status['createdAt'],'sourceSha256':status['source']['sha256'],'luacSha256':status['luac']['sha256'],'luacBytes':status['luac']['bytes'],'replayLogs':2,'base':f'public/builds/{mid}/'}
+          data['schema']=2;data['updatedAt']=status['createdAt'];data['builds']=[entry]+[x for x in data.get('builds',[]) if x.get('mission')!=mid]
+          idx.parent.mkdir(parents=True,exist_ok=True);idx.write_text(json.dumps(data,indent=2)+'\n')
+          PY
+          (cd "$B" && zip -9 -r mission-build.zip . -x mission-build.zip)
+          echo "BUILD_ID=$ID" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17z-aegis-observability-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            a17z.lua
+            a17z.luac
+            public/builds/aegis-observability-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 180
+      - name: Commit canonical repair and permanent downloads
+        run: |
+          set -Eeuo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add a17y.lua a17y.luac a17z.lua a17z.luac public/builds
+          git commit -m "Restore full A17Y and publish Aegis A17Z candidate"
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*4))
+          done
+          exit 1
