@@ -19,7 +19,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Create compact Aegis observability candidate
+      - name: Create minimal Aegis observability candidate
         run: |
           set -Eeuo pipefail
           test "$(wc -c < a17y.lua)" -gt 80000
@@ -27,8 +27,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           p=Path('a17z.lua');s=p.read_text()
-          a='if unsafePending>0 then bb_line(108,p2221(V[588],V[589],V[590],V[593]),0);bb_line(109,p2221(V[591],V[592],V[168],V[169]),0);unsafePending=0 end;if (V[594])>0 then bb_line(116,V[594],0);V[594]=0 end;if X[24]>0 then bb_line(130,X[24],0);bb_line(131,X[25],0);X[24]=0;X[25]=0 end;if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end'
-          b=a+';if(V[237]or 0)>42 then bb_line(142,p2221(V[248],V[232],V[166],V[167]),0)end;if(V[266]or 0)>50 then bb_line(143,p2221(V[168],V[179],(V[237]or 0)/10,(V[266]or 0)/10),0)end'
+          a='if X[29]>0 then bb_line(135,X[29],0);'
+          b='if X[29]>0 then bb_line(135,X[29],0);bb_line(142,p2221(V[248],V[232],V[166],V[167]),0);'
           assert s.count(a)==1;s=s.replace(a,b,1);p.write_text(s)
           PY
           lua5.3 -e "assert(loadfile('a17z.lua'))"
@@ -39,7 +39,7 @@ jobs:
           test -s a17z.luac
           test "$(wc -c < a17z.luac)" -le 87000
           sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
-          printf 'A17Z Aegis observability candidate\nBB 142 on severe disagreement: truth source, anomaly class, GPS confidence, RPM confidence\nBB 143 on severe dropout: observability, fused confidence, mismatch, dropout score\nControl behavior unchanged\n' > BUILD-AUDIT.txt
+          printf 'A17Z Aegis observability candidate\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\n' > BUILD-AUDIT.txt
           zip -9 a17z-aegis.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt
       - uses: actions/upload-artifact@v6
         with:
