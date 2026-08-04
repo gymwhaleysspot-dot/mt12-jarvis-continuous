@@ -1,0 +1,54 @@
+name: A17Z Aegis Artifact Gate
+on:
+  pull_request:
+    paths:
+      - .github/workflows/a17z-artifact-gate.yml
+      - a17y.lua
+      - toolchain/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Create minimal Aegis observability candidate
+        run: |
+          set -Eeuo pipefail
+          test "$(wc -c < a17y.lua)" -gt 80000
+          cp a17y.lua a17z.lua
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('a17z.lua');s=p.read_text()
+          a='if X[29]>0 then bb_line(135,X[29],0);'
+          b='if X[29]>0 then bb_line(135,X[29],0);bb_line(142,p2221(V[248],V[232],V[166],V[167]),0);'
+          assert s.count(a)==1;s=s.replace(a,b,1);p.write_text(s)
+          PY
+          lua5.3 -e "assert(loadfile('a17z.lua'))"
+      - name: Compile and normalize A17Z
+        run: |
+          set -Eeuo pipefail
+          MAX_BYTES=87050 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          test -s a17z.luac
+          test "$(wc -c < a17z.luac)" -le 87050
+          sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
+          printf 'A17Z Aegis observability candidate\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\nApproved byte ceiling: 87050 bytes\n' > BUILD-AUDIT.txt
+          zip -9 a17z-aegis.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17z-aegis-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            a17z.lua
+            a17z.luac
+            SHA256SUMS.txt
+            BUILD-AUDIT.txt
+            a17z-aegis.zip
+          if-no-files-found: error
+          retention-days: 180
