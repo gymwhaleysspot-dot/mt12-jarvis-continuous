@@ -5,6 +5,7 @@ on:
       - .github/workflows/a17z-artifact-gate.yml
       - a17y.lua
       - toolchain/**
+      - evidence/labels/a17z-identity-rebuild-*.json
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,6 +28,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           p=Path('a17z.lua');s=p.read_text()
+          assert s.startswith('--a17x transactional memory loader')
+          s=s.replace('--a17x transactional memory loader','--a17z transactional memory loader',1)
+          assert '"A17Y"' in s
+          s=s.replace('"A17Y"','"A17Z"',1)
           a='if X[29]>0 then bb_line(135,X[29],0);'
           b='if X[29]>0 then bb_line(135,X[29],0);bb_line(142,p2221(V[248],V[232],V[166],V[167]),0);'
           assert s.count(a)==1;s=s.replace(a,b,1);p.write_text(s)
@@ -39,7 +44,7 @@ jobs:
           test -s a17z.luac
           test "$(wc -c < a17z.luac)" -le 87050
           sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
-          printf 'A17Z Aegis observability candidate\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\nApproved byte ceiling: 87050 bytes\n' > BUILD-AUDIT.txt
+          printf 'A17Z Aegis observability candidate\nHeader and dashboard identity corrected to A17Z\nBB 142 is emitted with anomaly events: truth source, anomaly class, GPS confidence, RPM confidence\nNo controller-output formulas or protected contracts changed\nApproved byte ceiling: 87050 bytes\n' > BUILD-AUDIT.txt
           zip -9 a17z-aegis.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt
       - uses: actions/upload-artifact@v6
         with:
