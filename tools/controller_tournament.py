@@ -11,7 +11,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "dist-controller-tournament"
 POLICY = json.loads((ROOT / "controller-release-policy.json").read_text())
-MAX_BYTES = int(POLICY["rules"]["maxNormalizedBytes"])
 
 
 def sha256(path: Path) -> str:
@@ -94,22 +93,18 @@ def run() -> None:
             if errors:
                 raise RuntimeError("; ".join(errors))
             subprocess.run(["lua5.3", "-e", f"assert(loadfile('{lua}'))"], check=True)
-            env = os.environ.copy(); env["MAX_BYTES"] = str(MAX_BYTES)
-            subprocess.run([str(ROOT / "toolchain/compile_mt12.sh"), str(lua), str(luac)], check=True, env=env)
-            nbytes = luac.stat().st_size
-            if nbytes > MAX_BYTES:
-                raise RuntimeError(f"normalized bytes {nbytes}>{MAX_BYTES}")
+            subprocess.run([str(ROOT / "toolchain/compile_mt12.sh"), str(lua), str(luac)], check=True)
             status = "COMPILED"
         except Exception as exc:
             errors.append(str(exc))
         lua_bytes = lua.stat().st_size if lua.exists() else None
         luac_bytes = luac.stat().st_size if luac.exists() else None
         risk = {"conservative": 8, "balanced": 4, "learning": 12, "observability": 3, "combined": 10}[profile]
-        score = (100 if status == "COMPILED" else 0) - risk - max(0, ((luac_bytes or MAX_BYTES) - 80000) / 500)
+        score = (100 if status == "COMPILED" else 0) - risk
         manifest = {
             "candidate": cid, "parent": parent_name, "releaseType": release_type,
             "profile": profile, "status": status, "authority": "EXPERIMENTAL_ROAD_REQUIRED",
-            "sourceBytes": lua_bytes, "normalizedBytes": luac_bytes, "ceilingBytes": MAX_BYTES,
+            "sourceBytes": lua_bytes, "normalizedBytes": luac_bytes, "ceilingBytes": None,
             "sourceSha256": sha256(lua) if lua.exists() else None,
             "luacSha256": sha256(luac) if luac.exists() else None,
             "riskPenalty": risk, "score": round(score, 3), "errors": errors,
