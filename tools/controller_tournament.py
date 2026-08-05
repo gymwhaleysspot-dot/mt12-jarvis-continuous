@@ -36,6 +36,31 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
+def runtime_identity(parent_source_sha: str, candidate: str, profile: str) -> tuple[str, list[int]]:
+    token = hashlib.sha256(f"MT12-LUAC-ID|{parent_source_sha}|{candidate}|{profile}".encode()).hexdigest()[:16]
+    return token, [int(token[i:i + 4], 16) for i in range(0, 16, 4)]
+
+
+def imprint_runtime_identity(text: str, token: str, chunks: list[int]) -> str:
+    # The final LUAC SHA cannot literally be embedded in itself without a circular hash.
+    # Instead, an immutable build token is embedded and the manifest maps it to the final
+    # source/LUAC SHA-256 values. Four <=65535 numeric records remain float-exact on MT12.
+    decl = "local bc,bm,bi=0,0,0"
+    values = ",".join(str(x) for x in chunks)
+    text = replace_once(
+        text,
+        decl,
+        decl + f";local li=599;local li1,li2,li3,li4={values}",
+        "runtime identity declaration",
+    )
+    marker = "if unsafePending>0 then bb_line(108,p2221(V[588],V[589],V[590],V[593]),0);bb_line(109,p2221(V[591],V[592],V[168],V[169]),0);unsafePending=0 end"
+    emit = "li=li+1;if li>=600 then bb_line(144,li1,0);bb_line(145,li2,0);bb_line(146,li3,0);bb_line(147,li4,0);li=0 end;"
+    text = replace_once(text, marker, emit + marker, "runtime identity logger")
+    if token in text:
+        raise RuntimeError("runtime token must remain numeric-only in deployed Lua")
+    return text
+
+
 def make_candidate(base: str, profile: str) -> str:
     s = base
     if profile == "conservative":
@@ -60,7 +85,8 @@ def protected_checks(text: str) -> list[str]:
     required = [
         "local function zBrain", "X[41]", "X[42]", "X[43]", "X[46]",
         "V[179]*", "V[740+km]", "local bk=750+km", "V[760+km]",
-        "V[720]=ac", "setgv(3,m_min(V[35],ac))", "io.read(", "A17Z"
+        "V[720]=ac", "setgv(3,m_min(V[35],ac))", "io.read(", "A17Z",
+        "bb_line(144,li1,0)", "bb_line(145,li2,0)", "bb_line(146,li3,0)", "bb_line(147,li4,0)"
     ]
     missing = [x for x in required if x not in text]
     forbidden = [x for x in ["setgv(3,V[35])", "local function neural", "local function evo", "local function superBrain", "local function aiGate", "local function condBrain"] if x in text]
@@ -109,6 +135,7 @@ def candidate_bonus(profile: str, text: str) -> dict[str, float]:
 def run() -> None:
     parent_name, src_path = latest_release()
     base = src_path.read_text()
+    parent_source_sha = sha256(src_path)
     parent_intelligence = feature_score(base)
     release_type = os.environ.get("RELEASE_TYPE", "X").upper()
     series = re.sub(r"[^a-z0-9]", "", os.environ.get("SERIES", parent_name + "x"))[:8]
@@ -125,9 +152,11 @@ def run() -> None:
         status = "REJECTED"
         errors: list[str] = []
         text = ""
+        token, chunks = runtime_identity(parent_source_sha, cid, profile)
         try:
             text = make_candidate(base, profile)
             text = text.replace('T(2,1,"A17Z",Z+INVERS)', f'T(2,1,"{cid.upper()}",Z+INVERS)', 1)
+            text = imprint_runtime_identity(text, token, chunks)
             lua.write_text(text)
             errors.extend(protected_checks(text))
             if errors:
@@ -149,6 +178,15 @@ def run() -> None:
             "normalizedBytes": luac.stat().st_size if luac.exists() else None,
             "sourceSha256": sha256(lua) if lua.exists() else None,
             "luacSha256": sha256(luac) if luac.exists() else None,
+            "runtimeIdentity": {
+                "schema": "MT12BBID1",
+                "token": token,
+                "groups": [144, 145, 146, 147],
+                "chunks": chunks,
+                "emitPolicy": "first logger cycle and every 600 logger cycles",
+                "floatExact": True,
+                "mapsToFinalHashesInManifest": True
+            },
             "parentIntelligence": parent_intelligence,
             "candidateIntelligence": intelligence,
             "intelligenceBonus": bonus,
@@ -159,8 +197,18 @@ def run() -> None:
             "replayAuthority": "STATIC_SELF_EVALUATION_ONLY; ROAD_LOGS_STILL_REQUIRED"
         }
         (d / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        (d / "IDENTITY.json").write_text(json.dumps({
+            "schema": "MT12BBID1",
+            "controller": cid,
+            "parent": parent_name,
+            "runtimeToken": token,
+            "blackboxGroups": [144, 145, 146, 147],
+            "numericChunks": chunks,
+            "sourceSha256": manifest["sourceSha256"],
+            "luacSha256": manifest["luacSha256"]
+        }, indent=2) + "\n")
         if status == "COMPILED":
-            subprocess.run(["zip", "-9", f"{cid}.zip", lua.name, luac.name, "MANIFEST.json"], cwd=d, check=True)
+            subprocess.run(["zip", "-9", f"{cid}.zip", lua.name, luac.name, "MANIFEST.json", "IDENTITY.json"], cwd=d, check=True)
         rows.append(manifest)
     rows.sort(key=lambda x: x["score"], reverse=True)
     improved = [r for r in rows if r["status"] == "COMPILED" and r["intelligenceDelta"] > 0]
@@ -171,6 +219,7 @@ def run() -> None:
         "winner": improved[0]["candidate"] if improved else None,
         "runnerUp": improved[1]["candidate"] if len(improved) > 1 else None,
         "candidates": rows,
+        "runtimeIdentitySchema": "MT12BBID1",
         "verdict": "IMPROVEMENT_FOUND" if improved else "NO_PROVEN_IMPROVEMENT",
         "promotion": "NEVER_AUTOMATIC; self-evaluation plus bench and returned road logs required"
     }
