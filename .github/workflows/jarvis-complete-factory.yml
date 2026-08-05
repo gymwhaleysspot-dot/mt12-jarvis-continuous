@@ -1,0 +1,132 @@
+name: Jarvis Complete Autonomous Factory
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: scout, deep, architecture, or full
+        required: false
+        default: full
+        type: choice
+        options: [scout, deep, architecture, full]
+permissions:
+  contents: write
+  actions: read
+  models: read
+concurrency:
+  group: jarvis-complete-factory
+  cancel-in-progress: false
+jobs:
+  plan-build-rank:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      mission: ${{ steps.meta.outputs.mission }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install deterministic toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - id: meta
+        run: echo "mission=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Validate factory architecture
+        run: |
+          python3 -m json.tool factory/config.json >/dev/null
+          python3 -m json.tool factory/benchmarks.json >/dev/null
+          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py
+          bash -n toolchain/compile_mt12.sh
+      - name: Run unified observe-research-build-learn cycle
+        env:
+          FACTORY_MODE: ${{ inputs.mode || 'full' }}
+          RELEASE_TYPE: X
+          SERIES: a17zx
+        run: python3 tools/jarvis_factory.py
+      - name: Upload factory plan and candidates
+        uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-factory-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist-jarvis-factory/
+            dist-controller-tournament/
+          if-no-files-found: error
+          retention-days: 90
+  parallel-evaluation:
+    needs: plan-build-rank
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [core, sensors, airborne, persistence, adversarial]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
+        with:
+          name: jarvis-factory-plan-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Normalize artifact layout
+        run: |
+          test -f dist-jarvis-factory/FACTORY-RESULT.json || find . -name FACTORY-RESULT.json -print
+      - name: Evaluate scenario group
+        env:
+          EVAL_GROUP: ${{ matrix.group }}
+        run: python3 tools/factory_matrix_eval.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-eval-${{ matrix.group }}-${{ github.run_id }}
+          path: dist-eval-${{ matrix.group }}.json
+          if-no-files-found: error
+          retention-days: 90
+  aggregate-publish-learn:
+    needs: [plan-build-rank, parallel-evaluation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v6
+        with:
+          path: dist-factory-artifacts
+      - name: Aggregate evidence and preserve tracks
+        run: |
+          set -Eeuo pipefail
+          M="${{ needs.plan-build-rank.outputs.mission }}"
+          D="public/builds/factory/$M"
+          mkdir -p "$D"
+          cp -R dist-factory-artifacts/. "$D/"
+          python3 - <<'PY'
+          import json,glob,os
+          from pathlib import Path
+          root=Path('dist-factory-artifacts')
+          result=next(root.rglob('FACTORY-RESULT.json'))
+          r=json.loads(result.read_text())
+          evals=[]
+          for p in root.rglob('dist-eval-*.json'): evals.append(json.loads(p.read_text()))
+          summary={'schema':1,'mission':os.environ.get('GITHUB_RUN_ID'),'decision':r.get('decision'),'winner':r.get('winner'),'promotionLevel':r.get('promotionLevel'),'tracks':next((json.loads(p.read_text()) for p in root.rglob('TRACKS.json')),{}),'evaluationGroups':evals,'physicalEvidenceRequired':True}
+          Path('factory').mkdir(exist_ok=True)
+          Path('factory/latest-cycle.json').write_text(json.dumps(summary,indent=2)+'\n')
+          if summary['tracks']: Path('factory/tracks.json').write_text(json.dumps(summary['tracks'],indent=2)+'\n')
+          PY
+      - name: Persist factory memory, tracks, KPIs and complete cycle
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Factory'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- factory public/builds/factory
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Record autonomous Jarvis factory cycle [skip ci]"
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
