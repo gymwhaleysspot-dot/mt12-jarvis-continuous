@@ -1,0 +1,77 @@
+name: Jarvis Historical Log Re-ingestion
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/historical_log_reingest.py
+      - tools/episode_learning.py
+      - tools/adaptive_digital_twin.py
+      - tools/active_experiment_planner.py
+      - tools/controller_genome.py
+      - tools/log_identity_*.py
+      - tests/replays/**
+      - evidence/**
+      - .github/workflows/historical-log-reingest.yml
+  push:
+    branches: [main]
+    paths:
+      - tests/replays/**
+      - evidence/**
+permissions:
+  contents: write
+concurrency:
+  group: jarvis-historical-log-reingest-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  relearn:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate historical learning tools
+        run: python3 -m py_compile tools/historical_log_reingest.py tools/episode_learning.py tools/adaptive_digital_twin.py tools/active_experiment_planner.py tools/controller_genome.py tools/log_identity_attribution.py tools/log_identity_imprint.py
+      - name: Catalog, deduplicate, pair and attribute every historical CSV
+        run: python3 tools/historical_log_reingest.py
+      - name: Rebuild attributed episodes and counterfactual outcomes
+        run: python3 tools/episode_learning.py
+      - name: Recalibrate the adaptive vehicle and EdgeTX digital twin
+        run: python3 tools/adaptive_digital_twin.py
+      - name: Rebuild controller behavioral genomes
+        run: python3 tools/controller_genome.py
+      - name: Select next highest-information experiment
+        run: python3 tools/active_experiment_planner.py
+      - name: Build full-history learning summary
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          def load(name):
+              p=Path('dist-jarvis-factory')/name
+              return json.loads(p.read_text()) if p.exists() else {}
+          cat=load('HISTORICAL-LOG-CATALOG.json');eps=load('ATTRIBUTED-EPISODES.json');cf=load('COUNTERFACTUALS.json');twin=load('ADAPTIVE-DIGITAL-TWIN.json');nxt=load('NEXT-EXPERIMENT.json');gen=load('CONTROLLER-GENOMES.json')
+          out={'schema':1,'historicalLogs':cat.get('uniqueLogs',0),'duplicateUploadsRemoved':cat.get('duplicates',0),'sessions':cat.get('sessions',0),'pairedSessions':cat.get('pairedSessions',0),'exactAttribution':cat.get('exactlyAttributed',0),'episodesLearned':eps.get('count',0),'counterfactuals':cf.get('count',0),'twinRuns':twin.get('monteCarloRuns',0),'genomes':len(gen.get('genomes',[])),'nextExperiment':nxt}
+          Path('dist-jarvis-factory/HISTORICAL-LEARNING-SUMMARY.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-historical-learning-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist-jarvis-factory/
+          if-no-files-found: error
+          retention-days: 180
+      - name: Persist learned history on main
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Historical Learner'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- factory/memory factory/vehicle-model-calibrated.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Relearn from complete historical log archive [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main
