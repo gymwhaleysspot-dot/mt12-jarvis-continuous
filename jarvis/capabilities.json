@@ -1,29 +1,14 @@
 {
-  "schema": 2,
-  "identity": {
-    "name": "Jarvis",
-    "role": "RadioMaster MT12 engineering, firmware, controller and device intelligence",
-    "repository": "gymwhaleysspot-dot/mt12-jarvis-continuous"
-  },
-  "domains": [
-    "Jarvis autonomous engineering",
-    "EdgeTX firmware discovery and update planning",
-    "ExpressLRS firmware discovery and update planning",
-    "RadioMaster MT12 backup, restore and recovery",
-    "Lua and normalized Lua 5.3 bytecode construction",
-    "Controller simulation, replay and adversarial evaluation",
-    "Vehicle telemetry, blackbox and radio-log intelligence",
-    "Controller release, promotion, rollback and certification",
-    "Mobile companions and native helper tooling",
-    "Repository, workflow, artifact and system-health operations"
-  ],
+  "schema": 3,
+  "identity": {"name":"Jarvis","role":"RadioMaster MT12 engineering, firmware, controller and device intelligence","repository":"gymwhaleysspot-dot/mt12-jarvis-continuous"},
+  "domains": ["Jarvis autonomous engineering","EdgeTX firmware discovery, named packaging and flashing","ExpressLRS discovery, named secure builds and flashing","RadioMaster MT12 backup, restore and recovery","Lua and normalized Lua 5.3 bytecode construction","Controller simulation, replay and adversarial evaluation","Vehicle telemetry, blackbox and radio-log intelligence","Controller release, promotion, rollback and certification","Mobile companions and native helper tooling","Repository, workflow, artifact and system-health operations"],
   "workspaces": [
     {"id":"command","label":"Command","description":"Assign objectives and follow Jarvis mission execution."},
     {"id":"vehicle","label":"Vehicle AI","description":"LUAC brains, controller genomes, simulation, replay, learning and tuning."},
     {"id":"evidence","label":"Evidence","description":"Upload, identify, pair, replay, label and learn from radio and blackbox logs."},
     {"id":"intelligence","label":"Intelligence","description":"Research, memory, hypotheses, episodes, counterfactuals, knowledge graph and digital twin."},
     {"id":"factory","label":"Factory","description":"Generate, compile, normalize, test, red-team and rank Lua and LUAC candidates."},
-    {"id":"firmware","label":"Firmware","description":"EdgeTX and ExpressLRS versions, compatibility, update planning, packages and safeguards."},
+    {"id":"firmware","label":"Firmware","description":"Named EdgeTX and ExpressLRS builds, compatibility, packages, flashing and recovery."},
     {"id":"radio","label":"MT12","description":"Radio backups, models, YAML, SD-card files, device state, restore, flash and recovery."},
     {"id":"releases","label":"Releases","description":"Controller and device artifacts, authority, promotion, rollback and certification."},
     {"id":"tools","label":"Tools","description":"Mobile companions, native helper, viewers, tuners and support utilities."},
@@ -46,6 +31,7 @@
     {"id":"log-index","label":"Reindex uploaded logs","workflow":"log-index.yml","workspace":"evidence","inputs":{}},
     {"id":"discovery","label":"Discover repository capabilities and dependencies","workflow":"discovery.yml","workspace":"system","inputs":{}},
     {"id":"firmware-catalog","label":"Refresh EdgeTX and ExpressLRS firmware catalog","workflow":"firmware-catalog.yml","workspace":"firmware","inputs":{}},
+    {"id":"firmware-build-flash","label":"Prepare or flash a named firmware build","workflow":"firmware-build-flash.yml","workspace":"firmware","inputs":{}},
     {"id":"mobile-companions","label":"Build mobile companion tools","workflow":"mobile-companions.yml","workspace":"tools","inputs":{}},
     {"id":"native-helper","label":"Build desktop/native helper","workflow":"native-helper.yml","workspace":"tools","inputs":{}},
     {"id":"rcos","label":"Run RC operating-system pipeline","workflow":"rcos.yml","workspace":"system","inputs":{}},
@@ -72,14 +58,14 @@
     {"id":"controller-builds","path":"public/builds/index.json","workspace":"vehicle"},
     {"id":"completion-dashboard","path":"public/completion-data/dashboard.json","workspace":"releases"},
     {"id":"device-releases","path":"public/device-data/releases.json","workspace":"radio"},
-    {"id":"firmware-catalog-data","path":"public/firmware-data/catalog.json","workspace":"firmware"},
+    {"id":"firmware-catalog-data","path":"public/device-data/releases.json","workspace":"firmware"},
     {"id":"control-state","path":"public/control-data/state.json","workspace":"releases"},
     {"id":"mission-state","path":"public/mission-data/state.json","workspace":"command"},
     {"id":"v3-council","path":"public/v3-data/council.json","workspace":"system"}
   ],
   "authority": {
-    "controller": ["GENERATED","COMPILED","STATICALLY_VALIDATED","SIMULATION_TESTED","SIMULATION_PROVEN","REPLAY_PROVEN","BENCH_PROVEN","ROAD_PROVEN"],
-    "firmware": ["DISCOVERED","COMPATIBILITY_CHECKED","PACKAGE_BUILT","BACKUP_VERIFIED","READY_TO_FLASH","FLASH_CONFIRMED","POST_FLASH_CERTIFIED"],
-    "device": ["INVENTORIED","BACKED_UP","RESTORABLE","RELEASE_PACKAGED","DEPLOYED","RECOVERY_VERIFIED"]
+    "controller":["GENERATED","COMPILED","STATICALLY_VALIDATED","SIMULATION_TESTED","SIMULATION_PROVEN","REPLAY_PROVEN","BENCH_PROVEN","ROAD_PROVEN"],
+    "firmware":["DISCOVERED","COMPATIBILITY_CHECKED","PACKAGE_BUILT","BACKUP_VERIFIED","READY_TO_FLASH","FLASH_CONFIRMED","POST_FLASH_CERTIFIED"],
+    "device":["INVENTORIED","BACKED_UP","RESTORABLE","RELEASE_PACKAGED","DEPLOYED","RECOVERY_VERIFIED"]
   }
 }
