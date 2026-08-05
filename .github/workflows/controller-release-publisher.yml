@@ -1,0 +1,143 @@
+name: Controller Release Publisher
+on:
+  push:
+    branches: [main]
+    paths:
+      - a17y.lua
+      - tools/build_a17z_rewrite.py
+      - tools/restore_a17z_causal.py
+      - toolchain/**
+      - controller-release.txt
+      - .github/workflows/controller-release-publisher.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: controller-release-publisher
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install deterministic toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Resolve immutable release identity
+        id: rel
+        run: |
+          set -Eeuo pipefail
+          RELEASE="$(tr -d '[:space:]' < controller-release.txt)"
+          [[ "$RELEASE" =~ ^[a-z0-9]{1,10}$ ]]
+          echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+      - name: Generate controller source
+        run: |
+          set -Eeuo pipefail
+          python3 tools/build_a17z_rewrite.py
+          python3 tools/restore_a17z_causal.py
+          mv a17z.lua "$RELEASE.lua"
+          lua5.3 -e "assert(loadfile('$RELEASE.lua'))"
+      - name: Enforce protected architecture
+        run: |
+          set -Eeuo pipefail
+          F="$RELEASE.lua"
+          grep -Fq 'local function zBrain' "$F"
+          grep -Fq 'X[41]' "$F"
+          grep -Fq 'X[42]' "$F"
+          grep -Fq 'X[43]' "$F"
+          grep -Fq 'X[46]' "$F"
+          grep -Fq '.0045' "$F"
+          grep -Fq 'V[740+km]' "$F"
+          grep -Fq 'local bk=750+km' "$F"
+          grep -Fq 'V[760+km]' "$F"
+          grep -Fq 'V[720]=ac' "$F"
+          grep -Fq 'setgv(3,m_min(V[35],ac))' "$F"
+          ! grep -Fq 'setgv(3,V[35])' "$F"
+          for n in neural evo superBrain aiGate learn condBrain; do ! grep -Fq "local function $n" "$F"; done
+      - name: Compile and normalize MT12 bytecode
+        run: |
+          set -Eeuo pipefail
+          MAX_BYTES=87050 toolchain/compile_mt12.sh "$RELEASE.lua" "$RELEASE.luac"
+          test -s "$RELEASE.luac"
+          test "$(wc -c < "$RELEASE.luac")" -le 87050
+      - name: Create immutable release package
+        run: |
+          set -Eeuo pipefail
+          mkdir -p release
+          cp "$RELEASE.lua" "$RELEASE.luac" release/
+          sha256sum "$RELEASE.lua" "$RELEASE.luac" > release/SHA256SUMS.txt
+          LUA_BYTES=$(wc -c < "$RELEASE.lua")
+          LUAC_BYTES=$(wc -c < "$RELEASE.luac")
+          LUA_SHA=$(sha256sum "$RELEASE.lua" | cut -d' ' -f1)
+          LUAC_SHA=$(sha256sum "$RELEASE.luac" | cut -d' ' -f1)
+          python3 - <<PY
+          import json,os
+          r=os.environ['RELEASE']
+          m={
+            'release':r,
+            'authority':'EXPERIMENTAL_BENCH_AND_ROAD_REQUIRED',
+            'source':f'{r}.lua',
+            'deploy':f'{r}.luac',
+            'sourceBytes':int('${LUA_BYTES}'),
+            'normalizedBytes':int('${LUAC_BYTES}'),
+            'ceilingBytes':87050,
+            'sourceSha256':'${LUA_SHA}',
+            'luacSha256':'${LUAC_SHA}',
+            'commit':'${GITHUB_SHA}',
+            'architecture':'unified zBrain with causal champion learning and authority ceiling',
+            'immutable':True
+          }
+          open('release/MANIFEST.json','w').write(json.dumps(m,indent=2)+'\n')
+          open('release/BUILD-AUDIT.txt','w').write(
+            f'{r} normalized MT12 release\n'
+            'Lua 5.3 syntax: PASS\nMT12 normalization: PASS\n'
+            'Causal champion learning: PRESENT\nAuthority ceiling: PRESENT\n'
+            'Status: EXPERIMENTAL — bench and road validation required\n')
+          PY
+          (cd release && zip -9 "$RELEASE.zip" "$RELEASE.lua" "$RELEASE.luac" SHA256SUMS.txt MANIFEST.json BUILD-AUDIT.txt)
+      - name: Publish permanent immutable download
+        run: |
+          set -Eeuo pipefail
+          DEST="public/builds/releases/$RELEASE"
+          if [ -e "$DEST/MANIFEST.json" ]; then
+            OLD=$(python3 -c "import json;print(json.load(open('$DEST/MANIFEST.json'))['luacSha256'])")
+            NEW=$(python3 -c "import json;print(json.load(open('release/MANIFEST.json'))['luacSha256'])")
+            if [ "$OLD" != "$NEW" ]; then
+              echo "ERROR: immutable release $RELEASE already exists with a different LUAC hash" >&2
+              exit 1
+            fi
+            echo "Identical immutable release already published; leaving it unchanged."
+            exit 0
+          fi
+          mkdir -p "$DEST"
+          cp release/* "$DEST/"
+          mkdir -p public/builds
+          python3 - <<'PY'
+          import json,glob,os
+          rows=[]
+          for p in glob.glob('public/builds/releases/*/MANIFEST.json'):
+            try: rows.append(json.load(open(p)))
+            except Exception: pass
+          rows.sort(key=lambda x:x.get('release',''),reverse=True)
+          open('public/builds/index.json','w').write(json.dumps({'latest':os.environ['RELEASE'],'builds':rows},indent=2)+'\n')
+          open('public/builds/latest.json','w').write(json.dumps(json.load(open('release/MANIFEST.json')),indent=2)+'\n')
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/builds
+          git commit -m "Publish immutable controller release $RELEASE"
+          git push
+      - name: Upload redundant Actions artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.rel.outputs.release }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 180
