@@ -9,6 +9,7 @@ on:
       - tools/jarvis_evolution_gate.py
       - public/builds/**
       - public/jarvis-data/**
+      - public/evidence-data/**
       - scripts/prepare-pages.mjs
       - .github/workflows/**
   pull_request:
@@ -40,11 +41,14 @@ jobs:
           node --check scripts/prepare-pages.mjs
           python3 -m py_compile tools/jarvis_evolution_gate.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
+          python3 -m json.tool public/evidence-data/sync.json >/dev/null
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Intelligence' index.html
           grep -q 'LUAC Downloads' jarvis/app.js
+          grep -q 'JARVIS SYNC' jarvis/app.js
           grep -q 'BACKUP & FLASH' jarvis/app.js
           grep -q 'active-mission.json' jarvis/state.js
+          grep -q 'evidence-data/sync.json' jarvis/state.js
           grep -q 'recommended.json' jarvis/state.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
       - name: Validate every UI mission points to a real active workflow file
@@ -83,7 +87,7 @@ jobs:
           if(b.recommended&&!b.builds.some(x=>x.name===b.recommended&&x.promotionEligible))throw Error('Invalid recommendation');
           console.log({unique:b.uniqueBuilds,rejected:b.duplicatesRejected,recommended:b.recommended});
           NODE
-      - name: Validate firmware and physical-helper wiring
+      - name: Validate firmware sync and physical-helper wiring
         run: |
           set -euo pipefail
           test -f .github/workflows/firmware-build-flash.yml
@@ -91,3 +95,10 @@ jobs:
           grep -q 'a17y-mt12-backup' .github/workflows/firmware-build-flash.yml
           grep -q 'a17y-mt12-flash' .github/workflows/firmware-build-flash.yml
           grep -q 'public/device-data/releases.json' jarvis/state.js
+          test -f .github/workflows/mt12-sync.yml
+          grep -q 'self-hosted, mt12-sync' .github/workflows/mt12-sync.yml
+          grep -q 'a17y-mt12-detect' .github/workflows/mt12-sync.yml
+          grep -q 'a17y-mt12-backup' .github/workflows/mt12-sync.yml
+          grep -q 'a17y-mt12-sync-logs' .github/workflows/mt12-sync.yml
+          grep -q 'historical-log-reingest.yml' .github/workflows/mt12-sync.yml
+          grep -q 'jarvis-knowledge-graph.yml' .github/workflows/mt12-sync.yml
