@@ -1,13 +1,13 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-04T21:25:09.525Z
+Generated: 2026-08-05T12:31:45.867Z
 
 ## System health
 
 - Status: **HEALTHY**
 - Active roadmap features: **85/100**
 - Planned features: **15**
-- Knowledge items indexed: **55**
+- Knowledge items indexed: **61**
 
 ## Research
 
@@ -24,10 +24,10 @@ Generated: 2026-08-04T21:25:09.525Z
 
 ## Engineering memory
 
-- Generations: 1
-- Lessons: 1
+- Generations: 2
+- Lessons: 2
 - Rejected hypotheses: 0
-- Last decision: {"at":"2026-08-02T02:45:11.555Z","status":"SIMULATION ONLY","missionType":"general","score":48,"confidence":0.133}
+- Last decision: {"at":"2026-08-05T11:37:47.097Z","status":"LOG EVIDENCE REVIEWED","missionType":"jump","score":78,"confidence":0.758}
 
 ## Authority
 
