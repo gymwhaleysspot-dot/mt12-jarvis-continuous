@@ -15,15 +15,24 @@ async function request(url,opt={}){
   if(!response.ok)throw Error(`${response.status}: ${typeof data==='string'?data:(data?.message||text)}`);
   return data;
 }
+function safePath(path){return path.split('/').map(encodeURIComponent).join('/')}
+async function content(path,ref='main'){return request(`${BASE}/contents/${safePath(path)}?ref=${encodeURIComponent(ref)}`)}
 async function file(path,ref='main'){
-  const safe=path.split('/').map(encodeURIComponent).join('/');
-  const result=await request(`${BASE}/contents/${safe}?ref=${encodeURIComponent(ref)}`);
+  const result=await content(path,ref);
   const raw=atob((result.content||'').replace(/\s/g,''));
   return JSON.parse(new TextDecoder().decode(Uint8Array.from(raw,c=>c.charCodeAt(0))));
 }
 async function optionalFile(path,ref='main'){try{return await file(path,ref)}catch(error){if(String(error.message).startsWith('404:'))return null;throw error}}
+function bytesToBase64(bytes){let out='';const step=0x8000;for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,i+step));return btoa(out)}
+async function putBytes(path,bytes,message,branch='main'){
+  if(!token())throw Error('Connect the classic GitHub token before syncing.');
+  const body={message,content:bytesToBase64(bytes instanceof Uint8Array?bytes:new Uint8Array(bytes)),branch};
+  try{const old=await content(path,branch);if(old?.sha)body.sha=old.sha}catch(error){if(!String(error.message).startsWith('404:'))throw error}
+  return request(`${BASE}/contents/${safePath(path)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+}
+async function putText(path,text,message,branch='main'){return putBytes(path,new TextEncoder().encode(text),message,branch)}
 async function dispatch(workflow,inputs={}){return request(`${BASE}/actions/workflows/${workflow}/dispatches`,{method:'POST',body:JSON.stringify({ref:'main',inputs})})}
-export const GitHubAPI={OWNER,REPO,BASE,token,request,file,optionalFile,dispatch,
+export const GitHubAPI={OWNER,REPO,BASE,token,request,file,optionalFile,content,putBytes,putText,dispatch,
   user:()=>request('https://api.github.com/user'),
   rate:()=>request('https://api.github.com/rate_limit'),
   workflows:()=>request(`${BASE}/actions/workflows?per_page=100`),
