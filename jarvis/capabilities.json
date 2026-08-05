@@ -1,5 +1,5 @@
 {
-  "schema": 3,
+  "schema": 4,
   "identity": {"name":"Jarvis","role":"RadioMaster MT12 engineering, firmware, controller and device intelligence","repository":"gymwhaleysspot-dot/mt12-jarvis-continuous"},
   "domains": ["Jarvis autonomous engineering","EdgeTX firmware discovery, named packaging and flashing","ExpressLRS discovery, named secure builds and flashing","RadioMaster MT12 backup, restore and recovery","Lua and normalized Lua 5.3 bytecode construction","Controller simulation, replay and adversarial evaluation","Vehicle telemetry, blackbox and radio-log intelligence","Controller release, promotion, rollback and certification","Mobile companions and native helper tooling","Repository, workflow, artifact and system-health operations"],
   "workspaces": [
@@ -24,6 +24,7 @@
     {"id":"force-candidate","label":"Force targeted controller candidate","workflow":"force-candidate.yml","workspace":"factory","inputs":{}},
     {"id":"guaranteed-luac","label":"Build guaranteed MT12 LUAC","workflow":"guaranteed-luac.yml","workspace":"factory","inputs":{}},
     {"id":"aegis-build","label":"Build Aegis controller candidate","workflow":"repair-root-build-aegis.yml","workspace":"factory","inputs":{}},
+    {"id":"evolution-gate","label":"Run novelty, lineage and promotion authority","workflow":"jarvis-evolution-gate.yml","workspace":"releases","inputs":{}},
     {"id":"completion","label":"Evaluate real-world completion","workflow":"real-world-completion.yml","workspace":"releases","inputs":{}},
     {"id":"device-release","label":"Build MT12 device release package","workflow":"device-release.yml","workspace":"radio","inputs":{}},
     {"id":"control-center","label":"Run promotion, rollback or recovery operation","workflow":"control-center.yml","workspace":"releases","inputs":{}},
@@ -41,6 +42,7 @@
     {"id":"rewrite-gate","label":"Validate controller rewrite contract","workflow":"a17z-rewrite-gate.yml","workspace":"factory","inputs":{}}
   ],
   "dataSources": [
+    {"id":"active-mission","path":"public/jarvis-data/active-mission.json","workspace":"command"},
     {"id":"factory-cycle","path":"factory/latest-cycle.json","workspace":"factory"},
     {"id":"tracks","path":"factory/tracks.json","workspace":"vehicle"},
     {"id":"vehicle-model","path":"factory/vehicle-model-calibrated.json","workspace":"intelligence"},
@@ -56,6 +58,7 @@
     {"id":"research-questions","path":"research/questions.json","workspace":"intelligence"},
     {"id":"chief-dashboard","path":"public/chief-data/dashboard.json","workspace":"intelligence"},
     {"id":"controller-builds","path":"public/builds/index.json","workspace":"vehicle"},
+    {"id":"recommended-controller","path":"public/builds/recommended.json","workspace":"releases"},
     {"id":"completion-dashboard","path":"public/completion-data/dashboard.json","workspace":"releases"},
     {"id":"device-releases","path":"public/device-data/releases.json","workspace":"radio"},
     {"id":"firmware-catalog-data","path":"public/device-data/releases.json","workspace":"firmware"},
