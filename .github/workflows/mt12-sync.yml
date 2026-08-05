@@ -1,0 +1,164 @@
+name: Jarvis MT12 Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_radio_logs:
+        description: Copy new EdgeTX radio CSV logs
+        required: true
+        default: 'true'
+        type: boolean
+      include_blackbox:
+        description: Copy new Jarvis blackbox and memory logs
+        required: true
+        default: 'true'
+        type: boolean
+      backup_first:
+        description: Create MT12 rollback backup before importing logs
+        required: true
+        default: 'true'
+        type: boolean
+      start_learning:
+        description: Start attribution, replay ingestion and learning
+        required: true
+        default: 'true'
+        type: boolean
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: jarvis-mt12-sync
+  cancel-in-progress: false
+
+jobs:
+  request:
+    runs-on: ubuntu-24.04
+    outputs:
+      sync_id: ${{ steps.identity.outputs.sync_id }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - id: identity
+        shell: bash
+        run: echo "sync_id=sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Publish waiting-for-helper state
+        env:
+          SYNC_ID: ${{ steps.identity.outputs.sync_id }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from datetime import datetime,timezone
+          from pathlib import Path
+          p=Path('public/evidence-data/sync.json');p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps({
+            'schema':1,'syncId':os.environ['SYNC_ID'],'state':'WAITING_FOR_HELPER',
+            'stage':'connect-mt12','updatedAt':datetime.now(timezone.utc).isoformat(),
+            'message':'Connect the RadioMaster MT12 by USB to an online Jarvis helper.',
+            'backupFirst':${{ inputs.backup_first }},'radioLogs':${{ inputs.include_radio_logs }},
+            'blackbox':${{ inputs.include_blackbox }},'startLearning':${{ inputs.start_learning }}
+          },indent=2)+'\n')
+          PY
+          git config user.name 'Jarvis MT12 Sync'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/evidence-data/sync.json
+          git commit -m 'Record MT12 sync request [skip ci]' || true
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+  sync:
+    needs: request
+    runs-on: [self-hosted, mt12-sync]
+    timeout-minutes: 45
+    env:
+      SYNC_ID: ${{ needs.request.outputs.sync_id }}
+      BACKUP_FIRST: ${{ inputs.backup_first }}
+      INCLUDE_RADIO: ${{ inputs.include_radio_logs }}
+      INCLUDE_BLACKBOX: ${{ inputs.include_blackbox }}
+      START_LEARNING: ${{ inputs.start_learning }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - name: Verify helper commands
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for cmd in a17y-mt12-detect a17y-mt12-backup a17y-mt12-sync-logs; do
+            command -v "$cmd" >/dev/null || { echo "Missing required helper command: $cmd"; exit 1; }
+          done
+      - name: Detect exact MT12 target
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .jarvis-sync
+          a17y-mt12-detect --require-model 'RadioMaster MT12' --json > .jarvis-sync/device.json
+          jq -e '.connected == true and (.model|ascii_downcase|contains("mt12"))' .jarvis-sync/device.json >/dev/null
+      - name: Create rollback backup
+        if: ${{ inputs.backup_first }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "backups/$SYNC_ID"
+          a17y-mt12-backup --output "backups/$SYNC_ID" --include-radio --include-models --include-sd --manifest "backups/$SYNC_ID/BACKUP-MANIFEST.json"
+          test -s "backups/$SYNC_ID/BACKUP-MANIFEST.json"
+      - name: Copy only new logs with hashes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "logs/imported/$SYNC_ID"
+          a17y-mt12-sync-logs \
+            --destination "logs/imported/$SYNC_ID" \
+            --state-file factory/memory/mt12-sync-state.json \
+            --manifest "logs/imported/$SYNC_ID/SYNC-MANIFEST.json" \
+            $([[ "$INCLUDE_RADIO" == 'true' ]] && echo --radio-csv) \
+            $([[ "$INCLUDE_BLACKBOX" == 'true' ]] && echo --blackbox) \
+            --deduplicate-sha256 --preserve-paths
+          test -s "logs/imported/$SYNC_ID/SYNC-MANIFEST.json"
+      - name: Publish imported evidence and sync result
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import json,os
+          from datetime import datetime,timezone
+          from pathlib import Path
+          manifest=Path(f"logs/imported/{os.environ['SYNC_ID']}/SYNC-MANIFEST.json")
+          m=json.loads(manifest.read_text())
+          status={
+            'schema':1,'syncId':os.environ['SYNC_ID'],'state':'IMPORTED','stage':'learning-queued',
+            'updatedAt':datetime.now(timezone.utc).isoformat(),'device':json.loads(Path('.jarvis-sync/device.json').read_text()),
+            'newFiles':m.get('newFiles',m.get('files',[])),'newFileCount':m.get('newFileCount',len(m.get('files',[]))),
+            'duplicatesSkipped':m.get('duplicatesSkipped',0),'backupCreated':os.environ['BACKUP_FIRST']=='true',
+            'startLearning':os.environ['START_LEARNING']=='true'
+          }
+          p=Path('public/evidence-data/sync.json');p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(status,indent=2)+'\n')
+          PY
+          git config user.name 'Jarvis MT12 Sync'
+          git config user.email 'actions@users.noreply.github.com'
+          git add logs/imported factory/memory/mt12-sync-state.json public/evidence-data/sync.json
+          [[ "$BACKUP_FIRST" == 'true' ]] && git add "backups/$SYNC_ID/BACKUP-MANIFEST.json" || true
+          git commit -m "Import MT12 evidence $SYNC_ID [skip ci]"
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true;sleep $((n*5))
+          done
+          exit 1
+      - name: Start attribution and learning
+        if: ${{ inputs.start_learning }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh workflow run log-index.yml --repo "$GITHUB_REPOSITORY" --ref main
+          gh workflow run historical-log-reingest.yml --repo "$GITHUB_REPOSITORY" --ref main
+          gh workflow run jarvis-knowledge-graph.yml --repo "$GITHUB_REPOSITORY" --ref main
+      - uses: actions/upload-artifact@v6
+        with:
+          name: mt12-sync-${{ needs.request.outputs.sync_id }}
+          path: |
+            logs/imported/${{ needs.request.outputs.sync_id }}/SYNC-MANIFEST.json
+            backups/${{ needs.request.outputs.sync_id }}/BACKUP-MANIFEST.json
+            public/evidence-data/sync.json
+          if-no-files-found: warn
+          retention-days: 90
