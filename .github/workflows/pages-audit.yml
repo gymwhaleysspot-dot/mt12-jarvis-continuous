@@ -3,7 +3,8 @@ on:
   pull_request:
     paths:
       - '*.html'
-      - site-nav.js
+      - assets/jarvis-os.*
+      - classic-token.js
       - scripts/prepare-pages.mjs
       - .github/workflows/*.yml
   workflow_dispatch:
@@ -15,15 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-          package-manager-cache: false
-      - name: Validate all pages, links, workflows and Home routes
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate unified shell and compatibility routes
         run: |
           set -euo pipefail
-          node --check site-nav.js
+          node --check assets/jarvis-os.js
+          node --check classic-token.js
           node --check scripts/prepare-pages.mjs
           node scripts/prepare-pages.mjs
-          for f in index.html mission.html device.html control.html research.html discovery.html v3.html updates.html builder.html; do
-            grep -q 'site-nav.js' "$f"
-          done
+          grep -q 'Jarvis Engineering Intelligence' index.html
+          for route in command evidence intelligence factory controllers system; do grep -q "data-route=\"$route\"" index.html; done
+          grep -q 'index.html#intelligence' research.html
+          grep -q 'index.html#factory' builder.html
+          grep -q 'index.html#controllers' builds.html
+          grep -q 'index.html#system' device.html
