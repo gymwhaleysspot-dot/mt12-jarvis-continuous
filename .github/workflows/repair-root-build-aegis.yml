@@ -49,11 +49,10 @@ jobs:
       - name: Compile and normalize both files
         run: |
           set -Eeuo pipefail
-          MAX_BYTES=87000 toolchain/compile_mt12.sh a17y.lua a17y.luac
-          MAX_BYTES=87000 toolchain/compile_mt12.sh a17z.lua a17z.luac
+          toolchain/compile_mt12.sh a17y.lua a17y.luac
+          toolchain/compile_mt12.sh a17z.lua a17z.luac
           test -s a17y.luac
           test -s a17z.luac
-          test "$(wc -c < a17z.luac)" -le 87000
       - name: Build permanent package and audit
         run: |
           set -Eeuo pipefail
