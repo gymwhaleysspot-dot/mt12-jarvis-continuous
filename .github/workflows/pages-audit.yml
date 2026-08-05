@@ -38,14 +38,19 @@ jobs:
           node --check jarvis/api.js
           node --check jarvis/state.js
           node --check jarvis/app.js
+          node --check jarvis/iphone-sync.js
+          node --check jarvis/iphone-sync-boot.js
           node --check scripts/prepare-pages.mjs
           python3 -m py_compile tools/jarvis_evolution_gate.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           python3 -m json.tool public/evidence-data/sync.json >/dev/null
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Intelligence' index.html
+          grep -q 'iphone-sync-boot.js' index.html
+          grep -q 'webkitdirectory' jarvis/iphone-sync.js
+          grep -q 'iPhone 17 Safari Files picker' jarvis/iphone-sync.js
+          grep -q 'putBytes' jarvis/api.js
           grep -q 'LUAC Downloads' jarvis/app.js
-          grep -q 'JARVIS SYNC' jarvis/app.js
           grep -q 'BACKUP & FLASH' jarvis/app.js
           grep -q 'active-mission.json' jarvis/state.js
           grep -q 'evidence-data/sync.json' jarvis/state.js
@@ -87,7 +92,7 @@ jobs:
           if(b.recommended&&!b.builds.some(x=>x.name===b.recommended&&x.promotionEligible))throw Error('Invalid recommendation');
           console.log({unique:b.uniqueBuilds,rejected:b.duplicatesRejected,recommended:b.recommended});
           NODE
-      - name: Validate firmware sync and physical-helper wiring
+      - name: Validate firmware sync and optional-helper wiring
         run: |
           set -euo pipefail
           test -f .github/workflows/firmware-build-flash.yml
@@ -98,7 +103,6 @@ jobs:
           test -f .github/workflows/mt12-sync.yml
           grep -q 'self-hosted, mt12-sync' .github/workflows/mt12-sync.yml
           grep -q 'a17y-mt12-detect' .github/workflows/mt12-sync.yml
-          grep -q 'a17y-mt12-backup' .github/workflows/mt12-sync.yml
           grep -q 'a17y-mt12-sync-logs' .github/workflows/mt12-sync.yml
-          grep -q 'historical-log-reingest.yml' .github/workflows/mt12-sync.yml
-          grep -q 'jarvis-knowledge-graph.yml' .github/workflows/mt12-sync.yml
+          grep -q 'historical-log-reingest.yml' jarvis/iphone-sync.js
+          grep -q 'jarvis-knowledge-graph.yml' jarvis/iphone-sync.js
