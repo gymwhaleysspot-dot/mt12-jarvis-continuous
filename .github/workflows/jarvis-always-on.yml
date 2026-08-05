@@ -126,3 +126,5 @@ jobs:
           gh run list --repo "$REPO" --limit 20 \
             --json databaseId,status,conclusion,workflowName,createdAt \
             --jq '.[] | select(.status!="completed") | "- \(.workflowName) #\(.databaseId): \(.status)"'
+
+# Manual bootstrap marker: 2026-08-05T17:44-04:00
