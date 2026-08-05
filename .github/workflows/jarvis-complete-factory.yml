@@ -43,7 +43,7 @@ jobs:
           python3 -m json.tool factory/config.json >/dev/null
           python3 -m json.tool factory/benchmarks.json >/dev/null
           python3 -m json.tool factory/vehicle-model.json >/dev/null
-          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py tools/adaptive_digital_twin.py tools/log_identity_imprint.py tools/controller_genome.py
+          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py tools/adaptive_digital_twin.py tools/log_identity_imprint.py tools/controller_genome.py tools/episode_learning.py tools/active_experiment_planner.py
           bash -n toolchain/compile_mt12.sh
       - name: Run unified observe-research-build-learn cycle
         env:
@@ -55,6 +55,10 @@ jobs:
         run: python3 tools/adaptive_digital_twin.py
       - name: Imprint candidates and attribute uploaded logs
         run: python3 tools/log_identity_imprint.py
+      - name: Learn attributed episodes and counterfactual outcomes
+        run: python3 tools/episode_learning.py
+      - name: Choose next highest-information experiment
+        run: python3 tools/active_experiment_planner.py
       - name: Build controller engineering genomes
         run: python3 tools/controller_genome.py
       - name: Upload factory plan and candidates
@@ -117,8 +121,10 @@ jobs:
           twin=next((json.loads(p.read_text()) for p in root.rglob('ADAPTIVE-DIGITAL-TWIN.json')),{})
           genomes=next((json.loads(p.read_text()) for p in root.rglob('CONTROLLER-GENOMES.json')),{})
           attribution=next((json.loads(p.read_text()) for p in root.rglob('LOG-IDENTITY-ATTRIBUTION.json')),{})
+          episodes=next((json.loads(p.read_text()) for p in root.rglob('ATTRIBUTED-EPISODES.json')),{})
+          next_exp=next((json.loads(p.read_text()) for p in root.rglob('NEXT-EXPERIMENT.json')),{})
           tracks=next((json.loads(p.read_text()) for p in root.rglob('TRACKS.json')), {})
-          summary={'schema':2,'mission':os.environ.get('GITHUB_RUN_ID'),'decision':r.get('decision'),'winner':r.get('winner'),'promotionLevel':r.get('promotionLevel'),'simulationAuthority':'SIMULATION_PROVEN' if r.get('winner') else 'SIMULATION_TESTED','tracks':tracks,'evaluationGroups':evals,'digitalTwin':{'scenarioCount':twin.get('scenarioCount',0),'monteCarloRuns':twin.get('monteCarloRuns',0),'calibration':twin.get('calibration',{})},'controllerGenomes':genomes.get('genomes',[]),'logAttribution':{'exact':attribution.get('exactMatches',0),'unknown':attribution.get('unknown',0)},'physicalEvidenceRequiredFor':['BENCH_PROVEN','ROAD_PROVEN']}
+          summary={'schema':3,'mission':os.environ.get('GITHUB_RUN_ID'),'decision':r.get('decision'),'winner':r.get('winner'),'promotionLevel':r.get('promotionLevel'),'simulationAuthority':'SIMULATION_PROVEN' if r.get('winner') else 'SIMULATION_TESTED','tracks':tracks,'evaluationGroups':evals,'digitalTwin':{'scenarioCount':twin.get('scenarioCount',0),'monteCarloRuns':twin.get('monteCarloRuns',0),'calibration':twin.get('calibration',{})},'controllerGenomes':genomes.get('genomes',[]),'logAttribution':{'exact':attribution.get('exactMatches',0),'unknown':attribution.get('unknown',0)},'episodeLearning':{'count':episodes.get('count',0)},'nextExperiment':next_exp.get('nextExperiment'),'physicalEvidenceRequiredFor':['BENCH_PROVEN','ROAD_PROVEN']}
           Path('factory').mkdir(exist_ok=True);Path('factory/latest-cycle.json').write_text(json.dumps(summary,indent=2)+'\n')
           if tracks:Path('factory/tracks.json').write_text(json.dumps(tracks,indent=2)+'\n')
           PY
@@ -129,7 +135,7 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add -- factory public/builds/factory
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Record adaptive autonomous Jarvis factory cycle [skip ci]"
+          git commit -m "Record closed-loop autonomous Jarvis learning cycle [skip ci]"
           for n in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin HEAD:main && exit 0
             git rebase --abort || true
