@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - tools/build_a17z_rewrite.py
+      - tools/upgrade_a17z_r1.py
       - .github/workflows/a17z-rewrite-gate.yml
       - a17y.lua
       - toolchain/**
@@ -20,52 +21,56 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Generate unified A17Z source
+      - name: Generate A17Z-R1
         run: |
           set -Eeuo pipefail
           python3 tools/build_a17z_rewrite.py
-          test -s a17z.lua
+          python3 tools/upgrade_a17z_r1.py
           lua5.3 -e "assert(loadfile('a17z.lua'))"
-          grep -q '^--a17z unified world-model controller' a17z.lua
-          grep -q 'local function zBrain' a17z.lua
-          ! grep -q 'local function neural' a17z.lua
-          ! grep -q 'local function evo' a17z.lua
-          ! grep -q 'local function superBrain' a17z.lua
-          ! grep -q 'local function aiGate' a17z.lua
-          ! grep -q 'local function learn' a17z.lua
-          ! grep -q 'local function condBrain' a17z.lua
-      - name: Verify architectural rewrite
+      - name: Verify architecture and restored protections
         run: |
           set -Eeuo pipefail
+          grep -q '^--a17z unified world-model controller' a17z.lua
+          grep -q 'local function zBrain' a17z.lua
+          grep -q 'local function zChampion' a17z.lua
+          grep -q 'X\[41\]' a17z.lua
+          grep -q 'X\[42\]' a17z.lua
+          grep -q 'X\[43\]' a17z.lua
+          grep -q 'X\[46\]' a17z.lua
+          grep -q '\.0045' a17z.lua
+          grep -q 'V\[696\]' a17z.lua
+          grep -q 'V\[697\]' a17z.lua
+          grep -q 'V\[698\]' a17z.lua
+          ! grep -q 'setgv(3,100)' a17z.lua
+          ! grep -q 'setgv(3,V\[35\])' a17z.lua
+          for n in neural evo superBrain aiGate learn condBrain; do ! grep -q "local function $n" a17z.lua; done
           python3 - <<'PY'
           from pathlib import Path
           import difflib,json
           p=Path('a17y.lua').read_text();c=Path('a17z.lua').read_text()
           ratio=difflib.SequenceMatcher(None,p,c).ratio()
-          removed=['neural','evo','superBrain','aiGate','learn','condBrain']
-          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'removedSubsystems':removed,'unifiedEngine':'zBrain','classification':'ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
+          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'unifiedEngine':'zBrain','championEngine':'zChampion','confidenceStreak':'X[43] with .0045 decay','rollback':'X[46] / V[698]','authorityCeiling':'V[696] applied to zBrain authority and finalA GVar writes','classification':'A17Z_R1_ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
           Path('REWRITE-AUDIT.json').write_text(json.dumps(report,indent=2))
-          assert ratio < .97, ratio
-          assert len(c) > 65000
+          assert ratio < .97 and len(c)>65000
           PY
-      - name: Compile and normalize A17Z
+      - name: Compile and normalize A17Z-R1
         run: |
           set -Eeuo pipefail
           MAX_BYTES=87050 toolchain/compile_mt12.sh a17z.lua a17z.luac
           test -s a17z.luac
           test "$(wc -c < a17z.luac)" -le 87050
           sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
-          printf 'A17Z unified world-model rewrite\nReplaces neural/evo/superBrain/aiGate/learn/condBrain with zBrain\nExperimental: bench and road validation required\nApproved byte ceiling: 87050\n' > BUILD-AUDIT.txt
-          zip -9 a17z-rewrite.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt REWRITE-AUDIT.json
+          printf 'A17Z-R1 unified world-model rewrite\nChampion/challenger learning, confidence streak, hysteresis, rollback, and authority-decay ceiling restored\nExperimental: bench and road validation required\n' > BUILD-AUDIT.txt
+          zip -9 a17z-r1.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt REWRITE-AUDIT.json
       - uses: actions/upload-artifact@v6
         with:
-          name: a17z-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
+          name: a17z-r1-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             a17z.lua
             a17z.luac
             SHA256SUMS.txt
             BUILD-AUDIT.txt
             REWRITE-AUDIT.json
-            a17z-rewrite.zip
+            a17z-r1.zip
           if-no-files-found: error
           retention-days: 180
