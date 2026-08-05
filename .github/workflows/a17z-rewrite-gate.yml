@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - tools/build_a17z_rewrite.py
-      - tools/upgrade_a17z_r1.py
+      - tools/restore_a17z_causal.py
       - .github/workflows/a17z-rewrite-gate.yml
       - a17y.lua
       - toolchain/**
@@ -25,31 +25,31 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 tools/build_a17z_rewrite.py
-          python3 tools/upgrade_a17z_r1.py
+          python3 tools/restore_a17z_causal.py
           lua5.3 -e "assert(loadfile('a17z.lua'))"
       - name: Verify architecture and restored protections
         run: |
           set -Eeuo pipefail
           grep -q '^--a17z unified world-model controller' a17z.lua
           grep -q 'local function zBrain' a17z.lua
-          grep -q 'local function zChampion' a17z.lua
+          for n in neural evo superBrain aiGate learn condBrain; do ! grep -q "local function $n" a17z.lua; done
           grep -q 'X\[41\]' a17z.lua
           grep -q 'X\[42\]' a17z.lua
           grep -q 'X\[43\]' a17z.lua
           grep -q 'X\[46\]' a17z.lua
           grep -q '\.0045' a17z.lua
-          grep -q 'V\[696\]' a17z.lua
-          grep -q 'V\[697\]' a17z.lua
-          grep -q 'V\[698\]' a17z.lua
-          ! grep -q 'setgv(3,100)' a17z.lua
+          grep -q 'V\[740+km\]' a17z.lua
+          grep -q 'V\[750+km\]' a17z.lua
+          grep -q 'V\[760+km\]' a17z.lua
+          grep -q 'V\[720\]=ac' a17z.lua
+          grep -q 'setgv(3,m_min(V\[35\],ac))' a17z.lua
           ! grep -q 'setgv(3,V\[35\])' a17z.lua
-          for n in neural evo superBrain aiGate learn condBrain; do ! grep -q "local function $n" a17z.lua; done
           python3 - <<'PY'
           from pathlib import Path
           import difflib,json
           p=Path('a17y.lua').read_text();c=Path('a17z.lua').read_text()
           ratio=difflib.SequenceMatcher(None,p,c).ratio()
-          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'unifiedEngine':'zBrain','championEngine':'zChampion','confidenceStreak':'X[43] with .0045 decay','rollback':'X[46] / V[698]','authorityCeiling':'V[696] applied to zBrain authority and finalA GVar writes','classification':'A17Z_R1_ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
+          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'unifiedEngine':'zBrain','championState':['X[41]','X[42]','X[43]','X[46]'],'confidenceWeight':'.0045','perModeChampion':'V[740+mode]','rollbackBackup':'V[750+mode]','outcomeStreak':'V[760+mode]','authorityCeiling':'V[720], applied at final GVar output','classification':'A17Z_R1_ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
           Path('REWRITE-AUDIT.json').write_text(json.dumps(report,indent=2))
           assert ratio < .97 and len(c)>65000
           PY
@@ -60,7 +60,7 @@ jobs:
           test -s a17z.luac
           test "$(wc -c < a17z.luac)" -le 87050
           sha256sum a17z.lua a17z.luac > SHA256SUMS.txt
-          printf 'A17Z-R1 unified world-model rewrite\nChampion/challenger learning, confidence streak, hysteresis, rollback, and authority-decay ceiling restored\nExperimental: bench and road validation required\n' > BUILD-AUDIT.txt
+          printf 'A17Z-R1 unified world-model rewrite\nPer-mode causal champion learning, confidence streaks, consecutive-outcome hysteresis, rollback backups, and final authority ceiling restored\nExperimental: bench and road validation required\n' > BUILD-AUDIT.txt
           zip -9 a17z-r1.zip a17z.lua a17z.luac SHA256SUMS.txt BUILD-AUDIT.txt REWRITE-AUDIT.json
       - uses: actions/upload-artifact@v6
         with:
