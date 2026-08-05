@@ -46,18 +46,23 @@ jobs:
       - name: Publish waiting-for-helper state
         env:
           SYNC_ID: ${{ steps.identity.outputs.sync_id }}
+          BACKUP_FIRST: ${{ inputs.backup_first }}
+          INCLUDE_RADIO: ${{ inputs.include_radio_logs }}
+          INCLUDE_BLACKBOX: ${{ inputs.include_blackbox }}
+          START_LEARNING: ${{ inputs.start_learning }}
         run: |
           python3 - <<'PY'
           import json,os
           from datetime import datetime,timezone
           from pathlib import Path
+          yes=lambda key: os.environ.get(key,'false').lower()=='true'
           p=Path('public/evidence-data/sync.json');p.parent.mkdir(parents=True,exist_ok=True)
           p.write_text(json.dumps({
             'schema':1,'syncId':os.environ['SYNC_ID'],'state':'WAITING_FOR_HELPER',
             'stage':'connect-mt12','updatedAt':datetime.now(timezone.utc).isoformat(),
             'message':'Connect the RadioMaster MT12 by USB to an online Jarvis helper.',
-            'backupFirst':${{ inputs.backup_first }},'radioLogs':${{ inputs.include_radio_logs }},
-            'blackbox':${{ inputs.include_blackbox }},'startLearning':${{ inputs.start_learning }}
+            'backupFirst':yes('BACKUP_FIRST'),'radioLogs':yes('INCLUDE_RADIO'),
+            'blackbox':yes('INCLUDE_BLACKBOX'),'startLearning':yes('START_LEARNING')
           },indent=2)+'\n')
           PY
           git config user.name 'Jarvis MT12 Sync'
@@ -107,13 +112,10 @@ jobs:
         run: |
           set -Eeuo pipefail
           mkdir -p "logs/imported/$SYNC_ID"
-          a17y-mt12-sync-logs \
-            --destination "logs/imported/$SYNC_ID" \
-            --state-file factory/memory/mt12-sync-state.json \
-            --manifest "logs/imported/$SYNC_ID/SYNC-MANIFEST.json" \
-            $([[ "$INCLUDE_RADIO" == 'true' ]] && echo --radio-csv) \
-            $([[ "$INCLUDE_BLACKBOX" == 'true' ]] && echo --blackbox) \
-            --deduplicate-sha256 --preserve-paths
+          args=(--destination "logs/imported/$SYNC_ID" --state-file factory/memory/mt12-sync-state.json --manifest "logs/imported/$SYNC_ID/SYNC-MANIFEST.json" --deduplicate-sha256 --preserve-paths)
+          [[ "$INCLUDE_RADIO" == 'true' ]] && args+=(--radio-csv)
+          [[ "$INCLUDE_BLACKBOX" == 'true' ]] && args+=(--blackbox)
+          a17y-mt12-sync-logs "${args[@]}"
           test -s "logs/imported/$SYNC_ID/SYNC-MANIFEST.json"
       - name: Publish imported evidence and sync result
         shell: bash
@@ -130,7 +132,8 @@ jobs:
             'updatedAt':datetime.now(timezone.utc).isoformat(),'device':json.loads(Path('.jarvis-sync/device.json').read_text()),
             'newFiles':m.get('newFiles',m.get('files',[])),'newFileCount':m.get('newFileCount',len(m.get('files',[]))),
             'duplicatesSkipped':m.get('duplicatesSkipped',0),'backupCreated':os.environ['BACKUP_FIRST']=='true',
-            'startLearning':os.environ['START_LEARNING']=='true'
+            'startLearning':os.environ['START_LEARNING']=='true',
+            'message':'New MT12 evidence imported. Attribution and learning have been queued.'
           }
           p=Path('public/evidence-data/sync.json');p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(status,indent=2)+'\n')
           PY
