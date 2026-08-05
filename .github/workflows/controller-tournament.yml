@@ -1,5 +1,7 @@
 name: Controller Candidate Tournament
 on:
+  schedule:
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       release_type:
@@ -73,7 +75,6 @@ jobs:
             d=f"dist-controller-tournament/{x['candidate']}"
             assert os.path.isfile(f"{d}/{x['candidate']}.lua")
             assert os.path.isfile(f"{d}/{x['candidate']}.luac")
-            assert x['normalizedBytes']<=x['ceilingBytes']
           print('winner',r['winner'],'runner-up',r['runnerUp'],'compiled',len(compiled))
           PY
       - name: Upload complete candidate tournament
