@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "vehicle": {
+    "massKg": 4.94,
+    "wheelbaseM": 0.375,
+    "trackM": 0.265,
+    "tireDiameterM": 0.103,
+    "motorKv": 2500,
+    "escCurrentA": 120,
+    "nominalCells": 4,
+    "maxRpm": 37000,
+    "scriptHz": 33
+  },
+  "priors": {
+    "gpsLagFrames": {
+      "mean": 8,
+      "sigma": 3,
+      "min": 0,
+      "max": 35
+    },
+    "rpmLagFrames": {
+      "mean": 45,
+      "sigma": 12,
+      "min": 1,
+      "max": 90
+    },
+    "sensorNoiseMph": {
+      "mean": 0.45,
+      "sigma": 0.2,
+      "min": 0.05,
+      "max": 2.0
+    },
+    "dropoutProbability": {
+      "mean": 0.2545,
+      "sigma": 0.004,
+      "min": 0,
+      "max": 0.08
+    },
+    "batterySag": {
+      "mean": 0.12,
+      "sigma": 0.06,
+      "min": 0,
+      "max": 0.35
+    },
+    "drivetrainEfficiency": {
+      "mean": 0.82,
+      "sigma": 0.06,
+      "min": 0.6,
+      "max": 0.95
+    },
+    "brakeGain": {
+      "mean": 0.72,
+      "sigma": 0.12,
+      "min": 0.35,
+      "max": 1.2
+    },
+    "surfaceGrip": {
+      "dry": 1.0,
+      "wet": 0.56,
+      "loose": 0.39,
+      "mixed": 0.72
+    },
+    "suspensionLandingDamping": {
+      "mean": 0.68,
+      "sigma": 0.12,
+      "min": 0.3,
+      "max": 0.95
+    }
+  },
+  "calibration": {
+    "minimumRows": 100,
+    "maximumLogWeight": 0.25,
+    "outlierSigma": 4.0,
+    "retainPriorWeight": 0.75
+  },
+  "simulation": {
+    "monteCarloRunsPerScenario": 250,
+    "framesPerRun": 990,
+    "seed": 7303,
+    "authorityLevels": [
+      "SIMULATION_PROVEN",
+      "REPLAY_PROVEN",
+      "BENCH_PROVEN",
+      "ROAD_PROVEN"
+    ]
+  }
+}
