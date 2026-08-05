@@ -1,29 +1,33 @@
-name: Pages Wiring Audit
+name: Jarvis Platform Audit
 on:
   pull_request:
     paths:
-      - '*.html'
-      - site-nav.js
+      - index.html
+      - jarvis/**
+      - classic-token.js
       - scripts/prepare-pages.mjs
-      - .github/workflows/*.yml
+      - .github/workflows/pages*.yml
   workflow_dispatch:
-permissions:
-  contents: read
+permissions: {contents: read}
 jobs:
   audit:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-          package-manager-cache: false
-      - name: Validate all pages, links, workflows and Home routes
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate clean application, capabilities and redirects
         run: |
           set -euo pipefail
-          node --check site-nav.js
+          node --check classic-token.js
+          node --check jarvis/api.js
+          node --check jarvis/state.js
+          node --check jarvis/app.js
           node --check scripts/prepare-pages.mjs
+          node -e "const c=require('./jarvis/capabilities.json');if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');if(c.missions.length<20)throw Error('Mission coverage incomplete');"
           node scripts/prepare-pages.mjs
-          for f in index.html mission.html device.html control.html research.html discovery.html v3.html updates.html builder.html; do
-            grep -q 'site-nav.js' "$f"
-          done
+          grep -q 'Jarvis MT12 Engineering Intelligence' index.html
+          grep -q 'EdgeTX' jarvis/capabilities.json
+          grep -q 'ExpressLRS' jarvis/capabilities.json
+          grep -q 'RadioMaster MT12' jarvis/capabilities.json
+          for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done

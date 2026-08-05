@@ -1,37 +1,15 @@
-name: Publish A17Y Engineering OS
+name: Publish Jarvis MT12 Platform
 on:
   push:
     branches: [main]
     paths:
       - index.html
-      - chief.html
-      - builds.html
-      - chief-engineer/**
-      - public/chief-data/**
-      - public/builds/**
-      - home/**
-      - mission.html
-      - completion.html
-      - control.html
-      - device.html
-      - builder.html
-      - updates.html
-      - research.html
-      - discovery.html
-      - v3.html
-      - site-nav.js
-      - site-nav.css
+      - jarvis/**
       - classic-token.js
       - scripts/prepare-pages.mjs
-      - public/v3-data/**
-      - public/control-data/**
-      - public/device-data/**
-      - public/mission-data/**
-      - public/completion-data/**
-      - completion/**
-      - engineering-missions/**
-      - device/**
-      - director/v3/features.json
+      - factory/**
+      - research/**
+      - public/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
@@ -39,7 +17,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: jarvis-pages
   cancel-in-progress: true
 jobs:
   deploy:
@@ -49,51 +27,24 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Audit wiring and add global Home navigation
-        run: node scripts/prepare-pages.mjs
-      - name: Verify published applications
+      - name: Validate clean Jarvis application
         run: |
           set -euo pipefail
-          for f in index.html chief.html builds.html chief-engineer/chief.css chief-engineer/app.js chief-engineer/engine.mjs home/home.css home/api.js home/replay.js home/app.js home/enhancements.js mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html site-nav.js site-nav.css classic-token.js public/device-data/releases.json; do test -f "$f"; done
-          for f in index.html chief.html builds.html mission.html completion.html control.html device.html builder.html updates.html research.html discovery.html v3.html; do grep -q 'site-nav.js' "$f"; grep -q 'classic-token.js' "$f"; done
-          grep -q 'PERMANENT CANDIDATE DOWNLOADS' builds.html
-          grep -q 'candidate.luac' builds.html
-          grep -q "['Drive Builds','builds.html']" site-nav.js
-          grep -q 'AEGIS' chief.html
-          grep -q 'RUN AEGIS ANALYSIS' chief.html
-          grep -q "['Aegis','chief.html']" site-nav.js
-          grep -q 'a17y_classic_pat' classic-token.js
-          grep -q 'A17YToken' home/api.js
-          grep -q 'home/app.js' index.html
-          grep -q 'RUN FULL BUILDER' index.html
-          grep -q 'UPLOAD WITH MANIFEST' index.html
-          grep -q 'Direct artifact downloads' index.html
-          grep -q 'home/enhancements.js' site-nav.js
-          grep -q 'RUN FULL AI PIPELINE' builder.html
-          grep -q 'RUN FULL AI PIPELINE' device.html
-          grep -q 'RUN FULL ENGINEERING MISSION' mission.html
-          grep -q 'RUN FULL MISSION' completion.html
           node --check classic-token.js
-          node --check site-nav.js
-          node --check chief-engineer/app.js
-          node --check chief-engineer/engine.mjs
-          node --check home/api.js
-          node --check home/replay.js
-          node --check home/app.js
-          node --check home/enhancements.js
+          node --check jarvis/api.js
+          node --check jarvis/state.js
+          node --check jarvis/app.js
           node --check scripts/prepare-pages.mjs
-          node --check completion/run.mjs
-          node --check completion/verify-restore.mjs
-          node --check engineering-missions/run.mjs
-          node --check engineering-missions/tournament.mjs
-          node --check engineering-missions/stress.mjs
-          node --check engineering-missions/memory-lab.mjs
-          node --check engineering-missions/finalize.mjs
-          node --check engineering-missions/publish-build.mjs
-          node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'));if(m.identity?.name!=='Aegis')throw Error('Aegis identity missing')"
-          node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
+          node -e "const c=require('./jarvis/capabilities.json');if(c.workspaces.length<10||c.missions.length<20)throw Error('Capability contract incomplete');if(!c.domains.some(x=>x.includes('EdgeTX'))||!c.domains.some(x=>x.includes('ExpressLRS')))throw Error('Firmware scope missing')"
+          node scripts/prepare-pages.mjs
+          grep -q 'Jarvis MT12 Engineering Intelligence' index.html
+          grep -q 'jarvis/app.js' index.html
+          grep -q 'classic-token.js' index.html
+          for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy GitHub Pages

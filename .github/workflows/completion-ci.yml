@@ -1,16 +1,12 @@
-name: Real-World Completion CI
+name: Real-World Completion Backend CI
 on:
   pull_request:
     paths:
-      - completion.html
       - completion/**
       - radio/mt12cert.lua
-      - site-nav.js
-      - scripts/prepare-pages.mjs
       - .github/workflows/real-world-completion.yml
       - .github/workflows/device-release.yml
       - .github/workflows/completion-ci.yml
-      - .github/workflows/pages.yml
 permissions: {contents: read}
 jobs:
   audit:
@@ -21,24 +17,18 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - name: Install Lua
         run: sudo apt-get update && sudo apt-get install -y lua5.3
-      - name: Validate all completion layers
+      - name: Validate completion and device-release backend contracts
         run: |
           set -euo pipefail
           node --check completion/run.mjs
           node --check completion/verify-restore.mjs
-          node --check site-nav.js
-          node --check scripts/prepare-pages.mjs
           lua5.3 -e "assert(loadfile('radio/mt12cert.lua'))"
           node -e "JSON.parse(require('fs').readFileSync('completion/schema.json'))"
-          ruby -e "require 'yaml'; %w[.github/workflows/real-world-completion.yml .github/workflows/device-release.yml .github/workflows/pages.yml].each{|f| YAML.load_file(f, aliases: true)}"
+          ruby -e "require 'yaml'; %w[.github/workflows/real-world-completion.yml .github/workflows/device-release.yml].each{|f| YAML.load_file(f, aliases: true)}"
           rm -rf public/completion-data completion/evidence
           node completion/run.mjs
           test -f public/completion-data/dashboard.json
           node -e "let j=require('./public/completion-data/dashboard.json');if(j.readyForTrustedRelease)throw Error('empty evidence must not pass')"
-          grep -q 'RUN FULL MISSION' completion.html
-          grep -q 'DOWNLOAD ZIP' completion.html
           grep -q 'IOS_SIGNED_RELEASE' .github/workflows/device-release.yml
           grep -q 'ELRS_SECURE_BUILD' .github/workflows/device-release.yml
           grep -q 'POST_FLASH_CERTIFY' .github/workflows/device-release.yml
-          node scripts/prepare-pages.mjs
-          grep -q 'site-nav.js' completion.html

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-import fs from 'node:fs';import path from 'node:path';
-const root=process.cwd();const pages=['index.html','chief.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html'];const errors=[];const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-for(const required of ['site-nav.js','classic-token.js'])if(!fs.existsSync(path.join(root,required)))errors.push(`Missing ${required}`);
-for(const page of pages){const full=path.join(root,page);if(!fs.existsSync(full)){errors.push(`Missing published page: ${page}`);continue}let html=fs.readFileSync(full,'utf8');if(!/<html[\s>]/i.test(html)||!/<body[\s>]/i.test(html))errors.push(`${page}: invalid HTML shell`);const localLinks=[...html.matchAll(/(?:href|location\.href)\s*=\s*["'`]([^"'`?#]+\.html)/gi)].map(m=>m[1]).filter(href=>!href.includes('${')&&!href.includes('}'));for(const href of localLinks){if(/^(?:https?:)?\/\//i.test(href))continue;const target=path.normalize(path.join(path.dirname(page),href));if(!fs.existsSync(path.join(root,target)))errors.push(`${page}: broken local page link → ${href}`)}const workflowRefs=[...html.matchAll(/actions\/workflows\/([A-Za-z0-9._-]+\.ya?ml)|workflows\/([A-Za-z0-9._-]+\.ya?ml)\/dispatches/gi)].map(m=>m[1]||m[2]).filter(Boolean);for(const wf of workflowRefs)if(!fs.existsSync(path.join(root,'.github/workflows',wf)))errors.push(`${page}: missing workflow → ${wf}`);
-if(!html.includes('classic-token.js')){const tag='<script src="classic-token.js"></script>';html=/<head[^>]*>/i.test(html)?html.replace(/<head([^>]*)>/i,`<head$1>${tag}`):tag+html}
-if(!html.includes('site-nav.js')){const tag='<script src="site-nav.js"></script>';html=/<\/body>/i.test(html)?html.replace(/<\/body>/i,`${tag}</body>`):html+tag}
-fs.writeFileSync(full,html)}
-const nav=read('site-nav.js');for(const page of pages)if(!nav.includes(`'${page}'`))errors.push(`site-nav.js: missing route ${page}`);if(!nav.includes("['Home','index.html']"))errors.push('site-nav.js: explicit Home route missing');
-if(errors.length){console.error('PAGES WIRING AUDIT FAILED');for(const e of errors)console.error(`- ${e}`);process.exit(1)}for(const page of pages){const html=read(page);if(!html.includes('site-nav.js'))throw Error(`${page}: navigation injection failed`);if(!html.includes('classic-token.js'))throw Error(`${page}: shared token injection failed`)}console.log(`Pages wiring audit passed: ${pages.length} pages, shared classic token, Home route, local links and workflow references verified.`);
+import fs from'node:fs';
+const required=['index.html','classic-token.js','jarvis/app.css','jarvis/api.js','jarvis/state.js','jarvis/app.js','jarvis/capabilities.json'];
+for(const file of required)if(!fs.existsSync(file))throw Error(`Missing ${file}`);
+const index=fs.readFileSync('index.html','utf8');
+for(const marker of ['JARVIS','jarvis/app.css','classic-token.js','jarvis/app.js','workspaceBody'])if(!index.includes(marker))throw Error(`index.html missing ${marker}`);
+const routes={
+  'chief.html':'intelligence','research.html':'intelligence','discovery.html':'intelligence','v3.html':'system',
+  'mission.html':'command','builder.html':'factory','builds.html':'vehicle','completion.html':'releases',
+  'control.html':'releases','device.html':'radio','updates.html':'firmware','web/index.html':'command'
+};
+const redirect=(route)=>`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=index.html#${route}"><title>Opening Jarvis</title></head><body><script>location.replace('index.html#${route}')</script><p>Opening Jarvis…</p></body></html>`;
+for(const[path,route]of Object.entries(routes)){fs.mkdirSync(path.split('/').slice(0,-1).join('/')||'.',{recursive:true});fs.writeFileSync(path,redirect(route))}
+console.log(`Jarvis platform prepared: ${required.length} core files and ${Object.keys(routes).length} compatibility routes.`);
