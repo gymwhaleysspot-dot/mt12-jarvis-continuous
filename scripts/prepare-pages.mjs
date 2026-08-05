@@ -1,10 +1,18 @@
 #!/usr/bin/env node
 import fs from 'node:fs';import path from 'node:path';
-const root=process.cwd();const pages=['index.html','chief.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html'];const errors=[];const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-for(const required of ['site-nav.js','classic-token.js'])if(!fs.existsSync(path.join(root,required)))errors.push(`Missing ${required}`);
-for(const page of pages){const full=path.join(root,page);if(!fs.existsSync(full)){errors.push(`Missing published page: ${page}`);continue}let html=fs.readFileSync(full,'utf8');if(!/<html[\s>]/i.test(html)||!/<body[\s>]/i.test(html))errors.push(`${page}: invalid HTML shell`);const localLinks=[...html.matchAll(/(?:href|location\.href)\s*=\s*["'`]([^"'`?#]+\.html)/gi)].map(m=>m[1]).filter(href=>!href.includes('${')&&!href.includes('}'));for(const href of localLinks){if(/^(?:https?:)?\/\//i.test(href))continue;const target=path.normalize(path.join(path.dirname(page),href));if(!fs.existsSync(path.join(root,target)))errors.push(`${page}: broken local page link → ${href}`)}const workflowRefs=[...html.matchAll(/actions\/workflows\/([A-Za-z0-9._-]+\.ya?ml)|workflows\/([A-Za-z0-9._-]+\.ya?ml)\/dispatches/gi)].map(m=>m[1]||m[2]).filter(Boolean);for(const wf of workflowRefs)if(!fs.existsSync(path.join(root,'.github/workflows',wf)))errors.push(`${page}: missing workflow → ${wf}`);
-if(!html.includes('classic-token.js')){const tag='<script src="classic-token.js"></script>';html=/<head[^>]*>/i.test(html)?html.replace(/<head([^>]*)>/i,`<head$1>${tag}`):tag+html}
-if(!html.includes('site-nav.js')){const tag='<script src="site-nav.js"></script>';html=/<\/body>/i.test(html)?html.replace(/<\/body>/i,`${tag}</body>`):html+tag}
-fs.writeFileSync(full,html)}
-const nav=read('site-nav.js');for(const page of pages)if(!nav.includes(`'${page}'`))errors.push(`site-nav.js: missing route ${page}`);if(!nav.includes("['Home','index.html']"))errors.push('site-nav.js: explicit Home route missing');
-if(errors.length){console.error('PAGES WIRING AUDIT FAILED');for(const e of errors)console.error(`- ${e}`);process.exit(1)}for(const page of pages){const html=read(page);if(!html.includes('site-nav.js'))throw Error(`${page}: navigation injection failed`);if(!html.includes('classic-token.js'))throw Error(`${page}: shared token injection failed`)}console.log(`Pages wiring audit passed: ${pages.length} pages, shared classic token, Home route, local links and workflow references verified.`);
+const root=process.cwd();
+const routes={
+  'chief.html':'intelligence','research.html':'intelligence','discovery.html':'intelligence','v3.html':'intelligence',
+  'builds.html':'controllers','updates.html':'controllers',
+  'mission.html':'command','completion.html':'controllers','builder.html':'factory',
+  'control.html':'system','device.html':'system'
+};
+const required=['index.html','assets/jarvis-os.css','assets/jarvis-os.js','classic-token.js'];
+const errors=[];for(const f of required)if(!fs.existsSync(path.join(root,f)))errors.push(`Missing ${f}`);
+const redirect=(route,title)=>`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=index.html#${route}"><title>${title} · Jarvis</title><script>location.replace('index.html#${route}')</script></head><body><p>Opening <a href="index.html#${route}">Jarvis ${title}</a>…</p></body></html>`;
+for(const [file,route] of Object.entries(routes)){const full=path.join(root,file);fs.writeFileSync(full,redirect(route,route[0].toUpperCase()+route.slice(1)))}
+const index=fs.existsSync(path.join(root,'index.html'))?fs.readFileSync(path.join(root,'index.html'),'utf8'):'';
+for(const marker of ['Jarvis Engineering Intelligence','assets/jarvis-os.css','assets/jarvis-os.js','classic-token.js','data-route="command"','data-route="system"'])if(!index.includes(marker))errors.push(`index.html missing ${marker}`);
+for(const [file,route] of Object.entries(routes)){const html=fs.readFileSync(path.join(root,file),'utf8');if(!html.includes(`index.html#${route}`))errors.push(`${file} redirect missing ${route}`)}
+if(errors.length){console.error('JARVIS OS AUDIT FAILED');for(const e of errors)console.error(`- ${e}`);process.exit(1)}
+console.log(`Jarvis OS audit passed: unified shell plus ${Object.keys(routes).length} compatibility redirects.`);
