@@ -58,19 +58,58 @@ def make_candidate(base: str, profile: str) -> str:
 
 def protected_checks(text: str) -> list[str]:
     required = [
-        "local function zBrain",
-        "X[41]", "X[42]", "X[43]", "X[46]", ".0045" if "*.0045" in text else "V[179]*",
-        "V[740+km]", "local bk=750+km", "V[760+km]", "V[720]=ac",
-        "setgv(3,m_min(V[35],ac))", "io.read(", "A17Z"
+        "local function zBrain", "X[41]", "X[42]", "X[43]", "X[46]",
+        "V[179]*", "V[740+km]", "local bk=750+km", "V[760+km]",
+        "V[720]=ac", "setgv(3,m_min(V[35],ac))", "io.read(", "A17Z"
     ]
     missing = [x for x in required if x not in text]
     forbidden = [x for x in ["setgv(3,V[35])", "local function neural", "local function evo", "local function superBrain", "local function aiGate", "local function condBrain"] if x in text]
     return [f"missing:{x}" for x in missing] + [f"forbidden:{x}" for x in forbidden]
 
 
+def feature_score(text: str) -> dict[str, float]:
+    groups = {
+        "adaptiveLearning": ["V[740+km]", "V[760+km]", "V[179]*", "V[720]=ac", "zBrain"],
+        "sensorTruth": ["GPS_OK", "GPS_COAST", "GPS_LOST", "V[166]", "V[167]", "V[179]"],
+        "faultTolerance": ["io.read(", "car", "drop", "mismatch", "unsafePending"],
+        "causalReasoning": ["reason", "cause", "X[29]", "X[30]", "bb_line(135", "bb_line(136"],
+        "observability": ["bb_line(", "X[24]", "X[25]", "X[29]", "X[30]"],
+        "controlCoordination": ["setgv(3,m_min(V[35],ac))", "TC", "ABS", "gyro", "throttle"],
+    }
+    weights = {
+        "adaptiveLearning": 24.0,
+        "sensorTruth": 20.0,
+        "faultTolerance": 18.0,
+        "causalReasoning": 14.0,
+        "observability": 12.0,
+        "controlCoordination": 12.0,
+    }
+    scores: dict[str, float] = {}
+    for name, tokens in groups.items():
+        hits = sum(1 for token in tokens if token in text)
+        scores[name] = round(weights[name] * hits / len(tokens), 3)
+    scores["total"] = round(sum(scores.values()), 3)
+    return scores
+
+
+def candidate_bonus(profile: str, text: str) -> dict[str, float]:
+    bonus = {"learningGain": 0.0, "safetyGain": 0.0, "observabilityGain": 0.0}
+    if profile == "learning":
+        bonus["learningGain"] = 3.0 if ".0050" in text and "V[760+km]>3" in text else 0.0
+    elif profile == "conservative":
+        bonus["safetyGain"] = 2.5 if "X[46]<140" in text and "m_min(ac,92)" in text else 0.0
+    elif profile == "observability":
+        bonus["observabilityGain"] = 3.0 if "bb_line(143" in text else 0.0
+    elif profile == "combined":
+        bonus["learningGain"] = 1.5 if ".0048" in text else 0.0
+        bonus["safetyGain"] = 1.5 if "X[46]<130" in text and "m_min(ac,93)" in text else 0.0
+    return bonus
+
+
 def run() -> None:
     parent_name, src_path = latest_release()
     base = src_path.read_text()
+    parent_intelligence = feature_score(base)
     release_type = os.environ.get("RELEASE_TYPE", "X").upper()
     series = re.sub(r"[^a-z0-9]", "", os.environ.get("SERIES", parent_name + "x"))[:8]
     profiles = POLICY["candidateProfiles"]
@@ -85,6 +124,7 @@ def run() -> None:
         luac = d / f"{cid}.luac"
         status = "REJECTED"
         errors: list[str] = []
+        text = ""
         try:
             text = make_candidate(base, profile)
             text = text.replace('T(2,1,"A17Z",Z+INVERS)', f'T(2,1,"{cid.upper()}",Z+INVERS)', 1)
@@ -97,35 +137,46 @@ def run() -> None:
             status = "COMPILED"
         except Exception as exc:
             errors.append(str(exc))
-        lua_bytes = lua.stat().st_size if lua.exists() else None
-        luac_bytes = luac.stat().st_size if luac.exists() else None
-        risk = {"conservative": 8, "balanced": 4, "learning": 12, "observability": 3, "combined": 10}[profile]
-        score = (100 if status == "COMPILED" else 0) - risk
+        intelligence = feature_score(text) if text else {"total": 0.0}
+        bonus = candidate_bonus(profile, text)
+        risk = {"conservative": 2.0, "balanced": 0.5, "learning": 3.0, "observability": 1.0, "combined": 2.5}[profile]
+        raw_delta = intelligence.get("total", 0.0) - parent_intelligence["total"] + sum(bonus.values())
+        score = (100.0 if status == "COMPILED" else 0.0) + raw_delta - risk
         manifest = {
             "candidate": cid, "parent": parent_name, "releaseType": release_type,
             "profile": profile, "status": status, "authority": "EXPERIMENTAL_ROAD_REQUIRED",
-            "sourceBytes": lua_bytes, "normalizedBytes": luac_bytes, "ceilingBytes": None,
+            "sourceBytes": lua.stat().st_size if lua.exists() else None,
+            "normalizedBytes": luac.stat().st_size if luac.exists() else None,
             "sourceSha256": sha256(lua) if lua.exists() else None,
             "luacSha256": sha256(luac) if luac.exists() else None,
-            "riskPenalty": risk, "score": round(score, 3), "errors": errors,
-            "replayAuthority": "NOT_CLAIMED_BY_STATIC_TOURNAMENT"
+            "parentIntelligence": parent_intelligence,
+            "candidateIntelligence": intelligence,
+            "intelligenceBonus": bonus,
+            "intelligenceDelta": round(raw_delta, 3),
+            "riskPenalty": risk,
+            "score": round(score, 3),
+            "errors": errors,
+            "replayAuthority": "STATIC_SELF_EVALUATION_ONLY; ROAD_LOGS_STILL_REQUIRED"
         }
         (d / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
         if status == "COMPILED":
             subprocess.run(["zip", "-9", f"{cid}.zip", lua.name, luac.name, "MANIFEST.json"], cwd=d, check=True)
         rows.append(manifest)
     rows.sort(key=lambda x: x["score"], reverse=True)
-    passing = [r for r in rows if r["status"] == "COMPILED"]
+    improved = [r for r in rows if r["status"] == "COMPILED" and r["intelligenceDelta"] > 0]
     result = {
-        "parent": parent_name, "releaseType": release_type,
-        "winner": passing[0]["candidate"] if passing else None,
-        "runnerUp": passing[1]["candidate"] if len(passing) > 1 else None,
+        "parent": parent_name,
+        "releaseType": release_type,
+        "parentIntelligence": parent_intelligence,
+        "winner": improved[0]["candidate"] if improved else None,
+        "runnerUp": improved[1]["candidate"] if len(improved) > 1 else None,
         "candidates": rows,
-        "promotion": "NEVER_AUTOMATIC; bench and returned road logs required"
+        "verdict": "IMPROVEMENT_FOUND" if improved else "NO_PROVEN_IMPROVEMENT",
+        "promotion": "NEVER_AUTOMATIC; self-evaluation plus bench and returned road logs required"
     }
     (OUT / "TOURNAMENT.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
-    if not passing:
+    if not any(r["status"] == "COMPILED" for r in rows):
         raise SystemExit("no candidate compiled")
 
 
