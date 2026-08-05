@@ -1,0 +1,89 @@
+name: Jarvis Controller Evolution Gate
+
+on:
+  workflow_run:
+    workflows:
+      - Jarvis Complete Autonomous Factory
+      - A17Y LUAC AI Builder
+      - A17Y Evidence-Driven Controller Workbench
+      - Guaranteed MT12 LUAC Builder
+      - Force Controller Candidate
+      - Repair A17Y Root and Build Aegis Candidate
+      - Controller Candidate Tournament
+    types: [completed]
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: jarvis-controller-evolution-gate
+  cancel-in-progress: false
+
+jobs:
+  novelty-lineage-promotion:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Validate evolution authority engine
+        run: python3 -m py_compile tools/jarvis_evolution_gate.py
+      - name: Reject duplicates assign names and evaluate promotion
+        run: python3 tools/jarvis_evolution_gate.py
+      - name: Validate publication contract
+        run: |
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          index=json.loads(Path('public/builds/index.json').read_text())
+          assert index['schema'] >= 3
+          hashes=set(); names=set()
+          for b in index['builds']:
+            assert re.fullmatch(r'[a-z][a-z0-9]{0,5}',b['name'])
+            assert b['name'] not in names; names.add(b['name'])
+            assert b['luacSha256'] not in hashes; hashes.add(b['luacSha256'])
+            base=Path(b['base'])
+            assert (base/b['deploy']).is_file()
+            assert (base/'BUILD-MANIFEST.json').is_file()
+            assert (base/'LINEAGE.json').is_file()
+            assert (base/'NOVELTY.json').is_file()
+            assert (base/'PROMOTION.json').is_file()
+            assert (base/b['bundle']).is_file()
+          if index.get('recommended'):
+            chosen=[b for b in index['builds'] if b['name']==index['recommended']]
+            assert len(chosen)==1 and chosen[0]['promotionEligible']
+          print({'unique':len(index['builds']),'duplicates':index['duplicatesRejected'],'recommended':index.get('recommended')})
+          PY
+      - name: Persist authoritative evolution index
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Evolution Authority'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- public/builds factory/evolution-registry.json public/jarvis-data/active-mission.json
+          if git diff --cached --quiet; then
+            echo 'No new build state to publish.'
+            exit 0
+          fi
+          git commit -m 'Publish novel named controller builds and promotion state [skip ci]'
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-evolution-authority-${{ github.run_id }}
+          path: |
+            public/builds/index.json
+            public/builds/recommended.json
+            factory/evolution-registry.json
+            public/jarvis-data/active-mission.json
+          if-no-files-found: warn
+          retention-days: 90
