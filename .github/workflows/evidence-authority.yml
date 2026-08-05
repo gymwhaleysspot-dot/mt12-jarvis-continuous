@@ -1,0 +1,71 @@
+name: Jarvis Evidence Authority
+on:
+  workflow_dispatch:
+    inputs:
+      session_id:
+        description: Evidence session ID or certification
+        required: true
+        default: certification
+  push:
+    branches: [main]
+    paths:
+      - evidence/raw/**
+      - evidence/certifications/**
+      - tools/evidence_authority.py
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: jarvis-evidence-authority
+  cancel-in-progress: false
+jobs:
+  authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SESSION_ID: ${{ inputs.session_id || 'all' }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - name: Pair attribute score calibrate and enforce mutation contract
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile tools/evidence_authority.py
+          python3 tools/evidence_authority.py | tee /tmp/evidence-authority.json
+          python3 -m json.tool public/evidence-data/sessions.json >/dev/null
+          python3 -m json.tool public/evidence-data/mutation-contract.json >/dev/null
+      - name: Security and storage policy checks
+        run: |
+          set -Eeuo pipefail
+          find evidence/raw -type f -size +90M -print -quit 2>/dev/null | grep -q . && { echo 'Evidence file exceeds 90 MB policy'; exit 1; } || true
+          find evidence/raw -type f 2>/dev/null | grep -Ev '\.(csv|log|txt|json|lua|luac|yml|yaml)$|MANIFEST\.json$' | grep -q . && { echo 'Unsupported evidence type'; exit 1; } || true
+          ! grep -RIE 'ghp_[A-Za-z0-9_]{20,}' evidence public/evidence-data 2>/dev/null
+      - name: Publish authority state
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Evidence Authority'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/evidence-data factory/vehicle-model-calibrated.json
+          git commit -m "Publish evidence authority for ${SESSION_ID} [skip ci]" || true
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*4))
+          done
+          exit 1
+      - name: Start learning and controller evolution
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          gh workflow run log-index.yml --repo "$GITHUB_REPOSITORY" --ref main || true
+          gh workflow run historical-log-reingest.yml --repo "$GITHUB_REPOSITORY" --ref main || true
+          gh workflow run jarvis-knowledge-graph.yml --repo "$GITHUB_REPOSITORY" --ref main || true
+          gh workflow run controller-tournament.yml --repo "$GITHUB_REPOSITORY" --ref main || true
+          gh workflow run jarvis-complete-factory.yml --repo "$GITHUB_REPOSITORY" --ref main -f mode=full || true
+      - uses: actions/upload-artifact@v6
+        with:
+          name: evidence-authority-${{ github.run_id }}
+          path: |
+            public/evidence-data/sessions.json
+            public/evidence-data/mutation-contract.json
+            public/evidence-data/authority-status.json
+          retention-days: 90
