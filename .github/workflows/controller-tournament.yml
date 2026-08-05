@@ -13,6 +13,15 @@ on:
         required: true
         default: a17zx
         type: string
+  push:
+    branches: [main]
+    paths:
+      - tools/controller_tournament.py
+      - controller-release-policy.json
+      - .github/workflows/controller-tournament.yml
+      - toolchain/**
+      - controller-release.txt
+      - public/builds/latest.json
   pull_request:
     paths:
       - tools/controller_tournament.py
@@ -27,6 +36,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   tournament:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -54,7 +64,7 @@ jobs:
           set -Eeuo pipefail
           test -s dist-controller-tournament/TOURNAMENT.json
           python3 - <<'PY'
-          import json,glob,os
+          import json,os
           r=json.load(open('dist-controller-tournament/TOURNAMENT.json'))
           assert r['winner']
           compiled=[x for x in r['candidates'] if x['status']=='COMPILED']
@@ -74,7 +84,7 @@ jobs:
           if-no-files-found: error
           retention-days: 180
       - name: Publish permanent candidate downloads
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'pull_request'
         run: |
           set -Eeuo pipefail
           DEST="public/builds/tournaments/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
