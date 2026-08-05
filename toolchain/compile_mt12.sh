@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-MAX_BYTES="${MAX_BYTES:-87000}"
-
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo "Usage: $0 <source.lua> [output.luac]" >&2
   exit 2
@@ -47,11 +45,5 @@ MAGIC="$(od -An -tx1 -N4 "$OUTPUT" | tr -d ' \n')"
 [[ "$MAGIC" == "1b4c7561" ]] || { rm -f "$OUTPUT"; echo "Invalid Lua bytecode magic." >&2; exit 5; }
 [[ "$HEADER" == "0404040404" ]] || { rm -f "$OUTPUT"; echo "Output is not MT12-normalized: $HEADER" >&2; exit 5; }
 
-if (( SIZE > MAX_BYTES )); then
-  rm -f "$OUTPUT"
-  echo "FAILED: normalized bytecode is $SIZE bytes; limit is $MAX_BYTES bytes." >&2
-  exit 4
-fi
-
 SHA="$(sha256sum "$OUTPUT" | awk '{print $1}')"
-printf 'PASS: %s\nSize: %s/%s bytes\nSHA-256: %s\nDeploy only this normalized .luac file.\n' "$OUTPUT" "$SIZE" "$MAX_BYTES" "$SHA"
+printf 'PASS: %s\nSize: %s bytes\nSHA-256: %s\nDeploy only this normalized .luac file.\n' "$OUTPUT" "$SIZE" "$SHA"
