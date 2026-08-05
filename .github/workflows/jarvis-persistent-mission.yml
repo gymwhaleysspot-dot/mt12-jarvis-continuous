@@ -1,0 +1,61 @@
+name: Jarvis Persistent Mission Engine
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_run:
+    workflows:
+      - Jarvis Complete Autonomous Factory
+      - Guaranteed MT12 LUAC Output
+      - Jarvis Evidence Authority
+      - Jarvis Historical Log Reingest
+      - Jarvis Persistent Engineering Knowledge Graph
+      - Jarvis Controller Tournament
+      - A17Y Aegis Chief Engineer
+      - Jarvis Controller Evolution Gate
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - tools/jarvis_persistent_mission.py
+      - .github/workflows/jarvis-persistent-mission.yml
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: jarvis-persistent-mission
+  cancel-in-progress: true
+jobs:
+  advance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - name: Advance durable mission and dispatch next tasks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile tools/jarvis_persistent_mission.py
+          python3 tools/jarvis_persistent_mission.py
+      - name: Persist mission state
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Persistent Mission Engine'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/jarvis-data/persistent-mission.json public/jarvis-data/active-mission.json
+          git commit -m 'Advance persistent Jarvis engineering mission [skip ci]' || exit 0
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*4))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-persistent-mission-${{ github.run_id }}
+          path: |
+            public/jarvis-data/persistent-mission.json
+            public/jarvis-data/active-mission.json
+          retention-days: 90
