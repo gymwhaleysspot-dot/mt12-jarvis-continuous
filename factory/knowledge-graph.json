@@ -1,20 +1,50 @@
 {
   "counts": {
-    "digital_twin": 1
+    "controller": 1,
+    "digital_twin": 1,
+    "track": 2
   },
-  "currentDecision": "NOT_RUN",
-  "currentWinner": null,
-  "generatedAt": "2026-08-05T13:59:54.590992+00:00",
-  "mission": null,
-  "nodeCount": 1,
+  "currentDecision": "PROVEN_STATIC_IMPROVEMENT",
+  "currentWinner": "a17zx4",
+  "generatedAt": "2026-08-05T14:42:47.866085+00:00",
+  "mission": "31016045625",
+  "nodeCount": 4,
   "nodes": [
+    {
+      "id": "track:1e276dd9f4348b97",
+      "kind": "track",
+      "label": "Challenger"
+    },
+    {
+      "id": "controller:a5f84fb6dd812514",
+      "kind": "controller",
+      "label": "a17zx4"
+    },
+    {
+      "id": "track:4e1e92defd18e46b",
+      "kind": "track",
+      "label": "Experimental"
+    },
     {
       "id": "digital_twin:ff3f1dd1d3a16fed",
       "kind": "digital_twin",
       "label": "Adaptive MT12 Vehicle Twin"
     }
   ],
-  "relationshipCount": 0,
-  "relationships": [],
+  "relationshipCount": 2,
+  "relationships": [
+    {
+      "id": "edge:ca187dd498684da2",
+      "relation": "CURRENTLY_HOLDS",
+      "source": "track:1e276dd9f4348b97",
+      "target": "controller:a5f84fb6dd812514"
+    },
+    {
+      "id": "edge:be0558e7d8761c4b",
+      "relation": "CURRENTLY_HOLDS",
+      "source": "track:4e1e92defd18e46b",
+      "target": "controller:a5f84fb6dd812514"
+    }
+  ],
   "schema": "JARVIS-KG-1"
 }
