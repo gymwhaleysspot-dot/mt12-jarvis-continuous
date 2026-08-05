@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Inspect activity and dispatch next useful task
+      - name: Keep file production and intelligence lanes active
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -30,9 +30,61 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          # Productive workflows that count as Jarvis actively working.
-          PRODUCTIVE=(
+          active_count() {
+            local wf="$1" json
+            json="$(gh api -H 'Accept: application/vnd.github+json' \
+              "/repos/$REPO/actions/workflows/$wf/runs?per_page=12" 2>/dev/null || printf '{"workflow_runs":[]}')"
+            jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending")] | length' <<<"$json"
+          }
+
+          dispatch() {
+            local wf="$1"
+            shift
+            echo "Dispatching $wf $*"
+            gh workflow run "$wf" --repo "$REPO" --ref main "$@"
+          }
+
+          # Lane 1: at least one workflow must be producing deployable controller files.
+          FILE_PRODUCERS=(
             jarvis-complete-factory.yml
+            guaranteed-luac.yml
+            workbench.yml
+          )
+
+          producer_active=0
+          producer_names=()
+          for wf in "${FILE_PRODUCERS[@]}"; do
+            n="$(active_count "$wf")"
+            if (( n > 0 )); then
+              producer_active=$((producer_active+n))
+              producer_names+=("$wf:$n")
+            fi
+          done
+
+          if (( producer_active == 0 )); then
+            # Factory receives most slots because it builds, compiles, normalizes,
+            # simulates, replays, ranks and publishes complete candidate sets.
+            BUILD_QUEUE=(
+              jarvis-complete-factory.yml
+              jarvis-complete-factory.yml
+              guaranteed-luac.yml
+              jarvis-complete-factory.yml
+              workbench.yml
+              jarvis-complete-factory.yml
+            )
+            slot=$(( $(date -u +%s) / 300 % ${#BUILD_QUEUE[@]} ))
+            selected="${BUILD_QUEUE[$slot]}"
+            case "$selected" in
+              jarvis-complete-factory.yml) dispatch "$selected" -f mode=full ;;
+              *) dispatch "$selected" ;;
+            esac
+            echo "File-production lane started: $selected"
+          else
+            echo "File-production lane active: ${producer_names[*]}"
+          fi
+
+          # Lane 2: intelligence and maintenance may run beside file production.
+          INTELLIGENCE=(
             controller-tournament.yml
             historical-log-reingest.yml
             jarvis-knowledge-graph.yml
@@ -40,61 +92,37 @@ jobs:
             chief-engineer.yml
             firmware-catalog.yml
             discovery.yml
-            workbench.yml
-            guaranteed-luac.yml
-            force-candidate.yml
-            device-release.yml
-            real-world-completion.yml
-            control-center.yml
-            rcos.yml
-            v3-operations.yml
           )
 
-          active=0
-          active_names=()
-          for wf in "${PRODUCTIVE[@]}"; do
-            json="$(gh api -H 'Accept: application/vnd.github+json' \
-              "/repos/$REPO/actions/workflows/$wf/runs?per_page=10" 2>/dev/null || printf '{\"workflow_runs\":[]}')"
-            count="$(jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending")] | length' <<<"$json")"
-            if (( count > 0 )); then
-              active=$((active + count))
-              active_names+=("$wf:$count")
+          intelligence_active=0
+          intelligence_names=()
+          for wf in "${INTELLIGENCE[@]}"; do
+            n="$(active_count "$wf")"
+            if (( n > 0 )); then
+              intelligence_active=$((intelligence_active+n))
+              intelligence_names+=("$wf:$n")
             fi
           done
 
-          if (( active > 0 )); then
-            echo "Jarvis is active: $active productive run(s): ${active_names[*]}"
-            exit 0
+          if (( intelligence_active == 0 )); then
+            INTELLIGENCE_QUEUE=(
+              historical-log-reingest.yml
+              jarvis-knowledge-graph.yml
+              controller-tournament.yml
+              firmware-catalog.yml
+              chief-engineer.yml
+              discovery.yml
+            )
+            slot=$(( $(date -u +%s) / 300 % ${#INTELLIGENCE_QUEUE[@]} ))
+            selected="${INTELLIGENCE_QUEUE[$slot]}"
+            dispatch "$selected"
+            echo "Intelligence lane started: $selected"
+          else
+            echo "Intelligence lane active: ${intelligence_names[*]}"
           fi
 
-          # No productive work is running. Rotate through useful autonomous tasks.
-          # The full factory appears multiple times because it is Jarvis's primary brain loop.
-          QUEUE=(
-            jarvis-complete-factory.yml
-            jarvis-knowledge-graph.yml
-            historical-log-reingest.yml
-            jarvis-complete-factory.yml
-            controller-tournament.yml
-            firmware-catalog.yml
-            jarvis-complete-factory.yml
-            discovery.yml
-            chief-engineer.yml
-          )
-
-          slot=$(( $(date -u +%s) / 300 % ${#QUEUE[@]} ))
-          selected="${QUEUE[$slot]}"
-          echo "Jarvis is idle. Selected autonomous task: $selected"
-
-          case "$selected" in
-            jarvis-complete-factory.yml)
-              gh workflow run "$selected" --repo "$REPO" --ref main -f mode=full
-              ;;
-            *)
-              gh workflow run "$selected" --repo "$REPO" --ref main
-              ;;
-          esac
-
           sleep 3
-          gh run list --repo "$REPO" --workflow "$selected" --limit 1 \
+          echo 'Current productive runs:'
+          gh run list --repo "$REPO" --limit 20 \
             --json databaseId,status,conclusion,workflowName,createdAt \
-            --jq '.[0] | "Dispatched: \(.workflowName) run #\(.databaseId), status=\(.status), created=\(.createdAt)"'
+            --jq '.[] | select(.status!="completed") | "- \(.workflowName) #\(.databaseId): \(.status)"'
