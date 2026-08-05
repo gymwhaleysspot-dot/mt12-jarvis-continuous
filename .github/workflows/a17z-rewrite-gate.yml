@@ -31,19 +31,19 @@ jobs:
         run: |
           set -Eeuo pipefail
           grep -q '^--a17z unified world-model controller' a17z.lua
-          grep -q 'local function zBrain' a17z.lua
-          for n in neural evo superBrain aiGate learn condBrain; do ! grep -q "local function $n" a17z.lua; done
-          grep -q 'X\[41\]' a17z.lua
-          grep -q 'X\[42\]' a17z.lua
-          grep -q 'X\[43\]' a17z.lua
-          grep -q 'X\[46\]' a17z.lua
-          grep -q '\.0045' a17z.lua
-          grep -q 'V\[740+km\]' a17z.lua
-          grep -q 'V\[750+km\]' a17z.lua
-          grep -q 'V\[760+km\]' a17z.lua
-          grep -q 'V\[720\]=ac' a17z.lua
-          grep -q 'setgv(3,m_min(V\[35\],ac))' a17z.lua
-          ! grep -q 'setgv(3,V\[35\])' a17z.lua
+          grep -Fq 'local function zBrain' a17z.lua
+          for n in neural evo superBrain aiGate learn condBrain; do ! grep -Fq "local function $n" a17z.lua; done
+          grep -Fq 'X[41]' a17z.lua
+          grep -Fq 'X[42]' a17z.lua
+          grep -Fq 'X[43]' a17z.lua
+          grep -Fq 'X[46]' a17z.lua
+          grep -Fq '.0045' a17z.lua
+          grep -Fq 'V[740+km]' a17z.lua
+          grep -Fq 'V[750+km]' a17z.lua
+          grep -Fq 'V[760+km]' a17z.lua
+          grep -Fq 'V[720]=ac' a17z.lua
+          grep -Fq 'setgv(3,m_min(V[35],ac))' a17z.lua
+          ! grep -Fq 'setgv(3,V[35])' a17z.lua
           python3 - <<'PY'
           from pathlib import Path
           import difflib,json
