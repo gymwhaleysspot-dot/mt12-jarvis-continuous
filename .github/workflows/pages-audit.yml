@@ -1,22 +1,36 @@
-name: Jarvis Platform Audit
+name: Jarvis Complete Wiring Audit
 on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - jarvis/**
+      - classic-token.js
+      - tools/jarvis_evolution_gate.py
+      - public/builds/**
+      - public/jarvis-data/**
+      - scripts/prepare-pages.mjs
+      - .github/workflows/**
   pull_request:
     paths:
       - index.html
       - jarvis/**
       - classic-token.js
+      - tools/jarvis_evolution_gate.py
       - scripts/prepare-pages.mjs
-      - .github/workflows/pages*.yml
+      - .github/workflows/**
   workflow_dispatch:
-permissions: {contents: read}
+permissions: {contents: read, actions: read}
+concurrency: {group: jarvis-complete-wiring-audit, cancel-in-progress: true}
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Validate clean application, capabilities and redirects
+      - name: Validate JavaScript Python JSON and Pages shell
         run: |
           set -euo pipefail
           node --check classic-token.js
@@ -24,10 +38,56 @@ jobs:
           node --check jarvis/state.js
           node --check jarvis/app.js
           node --check scripts/prepare-pages.mjs
-          node -e "const c=require('./jarvis/capabilities.json');if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');if(c.missions.length<20)throw Error('Mission coverage incomplete');"
+          python3 -m py_compile tools/jarvis_evolution_gate.py
+          python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Intelligence' index.html
-          grep -q 'EdgeTX' jarvis/capabilities.json
-          grep -q 'ExpressLRS' jarvis/capabilities.json
-          grep -q 'RadioMaster MT12' jarvis/capabilities.json
+          grep -q 'LUAC Downloads' jarvis/app.js
+          grep -q 'BACKUP & FLASH' jarvis/app.js
+          grep -q 'active-mission.json' jarvis/state.js
+          grep -q 'recommended.json' jarvis/state.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
+      - name: Validate every UI mission points to a real active workflow file
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const c=require('./jarvis/capabilities.json');
+          if(c.workspaces.length!==10)throw Error('Expected ten workspaces');
+          const ids=new Set,paths=new Set;
+          for(const m of c.missions){
+            if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
+            if(!c.workspaces.some(w=>w.id===m.workspace))throw Error('Unknown workspace '+m.workspace);
+            const p='.github/workflows/'+m.workflow;if(!fs.existsSync(p))throw Error('Missing workflow '+p);paths.add(p);
+            const y=fs.readFileSync(p,'utf8');if(!/workflow_dispatch\s*:/.test(y))throw Error('Not dispatchable '+p);
+          }
+          const sources=new Set(c.dataSources.map(x=>x.path));
+          const state=fs.readFileSync('jarvis/state.js','utf8');
+          for(const p of sources)if(!state.includes(`'${p}'`))throw Error('Data source not loaded by state.js: '+p);
+          console.log({missions:ids.size,workflows:paths.size,dataSources:sources.size});
+          NODE
+      - name: Exercise evolution persistence and publication contract twice
+        run: |
+          set -euo pipefail
+          python3 tools/jarvis_evolution_gate.py > /tmp/gate1.json
+          cp public/builds/index.json /tmp/index1.json
+          python3 tools/jarvis_evolution_gate.py > /tmp/gate2.json
+          node - <<'NODE'
+          const fs=require('fs'),a=require('/tmp/index1.json'),b=require('./public/builds/index.json');
+          if(a.uniqueBuilds!==b.uniqueBuilds)throw Error(`Unique builds vanished across rerun: ${a.uniqueBuilds} -> ${b.uniqueBuilds}`);
+          if(a.builds.length!==b.builds.length)throw Error('Build list is not persistent');
+          const names=new Set,hashes=new Set;
+          for(const x of b.builds){
+            if(!/^[a-z][a-z0-9]{0,5}$/.test(x.name))throw Error('Bad deploy identity '+x.name);
+            if(names.has(x.name)||hashes.has(x.luacSha256))throw Error('Duplicate accepted controller');names.add(x.name);hashes.add(x.luacSha256);
+            const base=x.base;if(!fs.existsSync(base+x.deploy)||!fs.existsSync(base+x.bundle)||!fs.existsSync(base+x.audit))throw Error('Broken download wiring '+x.name);
+          }
+          if(b.recommended&&!b.builds.some(x=>x.name===b.recommended&&x.promotionEligible))throw Error('Invalid recommendation');
+          console.log({unique:b.uniqueBuilds,rejected:b.duplicatesRejected,recommended:b.recommended});
+          NODE
+      - name: Validate firmware and physical-helper wiring
+        run: |
+          set -euo pipefail
+          test -f .github/workflows/firmware-build-flash.yml
+          grep -q 'self-hosted, mt12-flasher' .github/workflows/firmware-build-flash.yml
+          grep -q 'a17y-mt12-backup' .github/workflows/firmware-build-flash.yml
+          grep -q 'a17y-mt12-flash' .github/workflows/firmware-build-flash.yml
+          grep -q 'public/device-data/releases.json' jarvis/state.js
