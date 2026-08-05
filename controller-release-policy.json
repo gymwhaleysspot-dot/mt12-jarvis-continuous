@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "types": {
+    "R": {"name": "patch", "architecturalRewrite": false, "maxBehavioralDelta": "small"},
+    "F": {"name": "feature", "architecturalRewrite": false, "maxBehavioralDelta": "bounded"},
+    "X": {"name": "research", "architecturalRewrite": false, "maxBehavioralDelta": "experimental"},
+    "G": {"name": "generation", "architecturalRewrite": true, "maxBehavioralDelta": "architectural"}
+  },
+  "rules": {
+    "immutableNames": true,
+    "normalizedLua53Required": true,
+    "maxNormalizedBytes": 87050,
+    "publishSourceAndLuac": true,
+    "publishHashesManifestAuditZip": true,
+    "benchAndRoadRequiredForPromotion": true,
+    "generationRequiresArchitectureGate": true
+  },
+  "candidateProfiles": [
+    "conservative",
+    "balanced",
+    "learning",
+    "observability",
+    "combined"
+  ]
+}

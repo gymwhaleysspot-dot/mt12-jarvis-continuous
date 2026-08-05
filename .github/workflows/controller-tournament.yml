@@ -1,0 +1,89 @@
+name: Controller Candidate Tournament
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: R patch, F feature, X research, or G generation
+        required: true
+        default: X
+        type: choice
+        options: [R, F, X, G]
+      series:
+        description: Five-character candidate prefix; digit is appended
+        required: true
+        default: a17zx
+        type: string
+  pull_request:
+    paths:
+      - tools/controller_tournament.py
+      - controller-release-policy.json
+      - .github/workflows/controller-tournament.yml
+      - toolchain/**
+      - public/builds/latest.json
+permissions:
+  contents: write
+concurrency:
+  group: controller-candidate-tournament-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RELEASE_TYPE: ${{ inputs.release_type || 'X' }}
+      SERIES: ${{ inputs.series || 'a17zx' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install deterministic Lua toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate release request
+        run: |
+          set -Eeuo pipefail
+          [[ "$RELEASE_TYPE" =~ ^[RFXG]$ ]]
+          [[ "$SERIES" =~ ^[a-z0-9]{1,5}$ ]]
+          python3 -m json.tool controller-release-policy.json >/dev/null
+      - name: Generate, compile, normalize, and rank five candidates
+        run: python3 tools/controller_tournament.py
+      - name: Verify tournament output
+        run: |
+          set -Eeuo pipefail
+          test -s dist-controller-tournament/TOURNAMENT.json
+          python3 - <<'PY'
+          import json,glob,os
+          r=json.load(open('dist-controller-tournament/TOURNAMENT.json'))
+          assert r['winner']
+          compiled=[x for x in r['candidates'] if x['status']=='COMPILED']
+          assert compiled
+          for x in compiled:
+            d=f"dist-controller-tournament/{x['candidate']}"
+            assert os.path.isfile(f"{d}/{x['candidate']}.lua")
+            assert os.path.isfile(f"{d}/{x['candidate']}.luac")
+            assert x['normalizedBytes']<=x['ceilingBytes']
+          print('winner',r['winner'],'runner-up',r['runnerUp'],'compiled',len(compiled))
+          PY
+      - name: Upload complete candidate tournament
+        uses: actions/upload-artifact@v6
+        with:
+          name: controller-tournament-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist-controller-tournament/
+          if-no-files-found: error
+          retention-days: 180
+      - name: Publish permanent candidate downloads
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -Eeuo pipefail
+          DEST="public/builds/tournaments/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          test ! -e "$DEST"
+          mkdir -p "$DEST"
+          cp -R dist-controller-tournament/. "$DEST/"
+          cp dist-controller-tournament/TOURNAMENT.json public/builds/latest-tournament.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/builds
+          git commit -m "Publish typed controller tournament ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git push
