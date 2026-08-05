@@ -2,6 +2,24 @@ name: Jarvis Complete Autonomous Factory
 on:
   schedule:
     - cron: '7 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/jarvis-complete-factory.yml
+      - factory/config.json
+      - factory/benchmarks.json
+      - factory/vehicle-model.json
+      - tools/jarvis_factory.py
+      - tools/factory_matrix_eval.py
+      - tools/controller_tournament.py
+      - tools/adaptive_digital_twin.py
+      - tools/log_identity_imprint.py
+      - tools/log_identity_attribution.py
+      - tools/historical_log_reingest.py
+      - tools/controller_genome.py
+      - tools/episode_learning.py
+      - tools/active_experiment_planner.py
+      - toolchain/compile_mt12.sh
   workflow_dispatch:
     inputs:
       mode:
