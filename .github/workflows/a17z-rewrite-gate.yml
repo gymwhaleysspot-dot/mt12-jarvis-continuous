@@ -39,7 +39,8 @@ jobs:
           grep -Fq 'X[46]' a17z.lua
           grep -Fq '.0045' a17z.lua
           grep -Fq 'V[740+km]' a17z.lua
-          grep -Fq 'V[750+km]' a17z.lua
+          grep -Fq 'local bk=750+km' a17z.lua
+          grep -Fq 'V[bk]' a17z.lua
           grep -Fq 'V[760+km]' a17z.lua
           grep -Fq 'V[720]=ac' a17z.lua
           grep -Fq 'setgv(3,m_min(V[35],ac))' a17z.lua
@@ -49,7 +50,7 @@ jobs:
           import difflib,json
           p=Path('a17y.lua').read_text();c=Path('a17z.lua').read_text()
           ratio=difflib.SequenceMatcher(None,p,c).ratio()
-          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'unifiedEngine':'zBrain','championState':['X[41]','X[42]','X[43]','X[46]'],'confidenceWeight':'.0045','perModeChampion':'V[740+mode]','rollbackBackup':'V[750+mode]','outcomeStreak':'V[760+mode]','authorityCeiling':'V[720], applied at final GVar output','classification':'A17Z_R1_ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
+          report={'parentBytes':len(p),'childBytes':len(c),'similarity':ratio,'unifiedEngine':'zBrain','championState':['X[41]','X[42]','X[43]','X[46]'],'confidenceWeight':'.0045','perModeChampion':'V[740+mode]','rollbackBackup':'V[750+mode] via bk','outcomeStreak':'V[760+mode]','authorityCeiling':'V[720], applied at final GVar output','classification':'A17Z_R1_ARCHITECTURAL_REWRITE_EXPERIMENTAL'}
           Path('REWRITE-AUDIT.json').write_text(json.dumps(report,indent=2))
           assert ratio < .97 and len(c)>65000
           PY
