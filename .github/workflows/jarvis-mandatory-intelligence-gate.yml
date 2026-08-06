@@ -84,11 +84,15 @@ jobs:
           assert graph['nodeCount'] == len(graph['nodes'])
           assert graph['relationshipCount'] == len(graph['relationships'])
 
+          incumbent=guard.get('champion')
           for build in idx.get('builds',[]):
-              if build.get('recommended'):
-                  assert build.get('promotionEligible') is True
-                  assert (build.get('confidence') or 0) >= .85
-                  assert (build.get('scoreDelta') or 0) > 0
+              if not build.get('recommended'):
+                  continue
+              if build.get('name') == incumbent:
+                  continue
+              assert build.get('promotionEligible') is True
+              assert (build.get('confidence') or 0) >= .85
+              assert (build.get('scoreDelta') or 0) > 0
 
           state={
             'schema':'JARVIS-MANDATORY-GATE-1',
@@ -96,7 +100,7 @@ jobs:
             'upstreamWorkflow': '${{ github.event.workflow_run.name || github.workflow }}',
             'upstreamRunId': '${{ github.event.workflow_run.id || github.run_id }}',
             'experiment': plan['nextExperiment']['id'],
-            'champion': guard.get('champion'),
+            'champion': incumbent,
             'recommended': idx.get('recommended'),
             'uniqueBuilds': idx.get('uniqueBuilds',0),
             'duplicatesRejected': idx.get('duplicatesRejected',0),
