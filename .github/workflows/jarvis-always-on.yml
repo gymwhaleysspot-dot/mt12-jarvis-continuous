@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Keep file production and intelligence lanes active
+      - name: Keep complete-rewrite production and intelligence lanes active
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -33,7 +33,7 @@ jobs:
           active_count() {
             local wf="$1" json
             json="$(gh api -H 'Accept: application/vnd.github+json' \
-              "/repos/$REPO/actions/workflows/$wf/runs?per_page=12" 2>/dev/null || printf '{"workflow_runs":[]}')"
+              "/repos/$REPO/actions/workflows/$wf/runs?per_page=20" 2>/dev/null || printf '{"workflow_runs":[]}')"
             jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending")] | length' <<<"$json"
           }
 
@@ -44,56 +44,43 @@ jobs:
             gh workflow run "$wf" --repo "$REPO" --ref main "$@"
           }
 
-          # Lane 1: at least one workflow must be producing deployable controller files.
-          FILE_PRODUCERS=(
-            jarvis-complete-factory.yml
-            guaranteed-luac.yml
-            workbench.yml
-          )
-
-          producer_active=0
-          producer_names=()
-          for wf in "${FILE_PRODUCERS[@]}"; do
-            n="$(active_count "$wf")"
-            if (( n > 0 )); then
-              producer_active=$((producer_active+n))
-              producer_names+=("$wf:$n")
-            fi
-          done
-
-          if (( producer_active == 0 )); then
-            # Factory receives most slots because it builds, compiles, normalizes,
-            # simulates, replays, ranks and publishes complete candidate sets.
-            BUILD_QUEUE=(
-              jarvis-complete-factory.yml
-              jarvis-complete-factory.yml
-              guaranteed-luac.yml
-              jarvis-complete-factory.yml
-              workbench.yml
-              jarvis-complete-factory.yml
-            )
-            slot=$(( $(date -u +%s) / 300 % ${#BUILD_QUEUE[@]} ))
-            selected="${BUILD_QUEUE[$slot]}"
-            case "$selected" in
-              jarvis-complete-factory.yml) dispatch "$selected" -f mode=full ;;
-              *) dispatch "$selected" ;;
-            esac
-            echo "File-production lane started: $selected"
+          # PRIMARY FILE LANE: the canonical-parent complete rewrite factory must
+          # always have one executing or queued generation. Older builders are
+          # supplemental only; they cannot satisfy this requirement.
+          primary='jarvis-complete-rewrite-factory.yml'
+          primary_active="$(active_count "$primary")"
+          if (( primary_active == 0 )); then
+            dispatch "$primary"
+            echo 'Primary LUAC rewrite lane restarted.'
           else
-            echo "File-production lane active: ${producer_names[*]}"
+            echo "Primary LUAC rewrite lane active: $primary_active run(s)."
           fi
 
-          # Lane 2: intelligence and maintenance may run beside file production.
-          INTELLIGENCE=(
-            controller-tournament.yml
-            historical-log-reingest.yml
-            jarvis-knowledge-graph.yml
-            research.yml
-            chief-engineer.yml
-            firmware-catalog.yml
-            discovery.yml
-          )
+          # Supplemental file builders may run beside the rewrite lane, but they
+          # never replace it as proof that production is alive.
+          SUPPLEMENTAL=(jarvis-complete-factory.yml guaranteed-luac.yml workbench.yml)
+          supplemental_active=0
+          supplemental_names=()
+          for wf in "${SUPPLEMENTAL[@]}"; do
+            n="$(active_count "$wf")"
+            if (( n > 0 )); then
+              supplemental_active=$((supplemental_active+n))
+              supplemental_names+=("$wf:$n")
+            fi
+          done
+          if (( supplemental_active == 0 )); then
+            slot=$(( $(date -u +%s) / 300 % 3 ))
+            case "$slot" in
+              0) dispatch jarvis-complete-factory.yml -f mode=full ;;
+              1) dispatch guaranteed-luac.yml ;;
+              2) dispatch workbench.yml ;;
+            esac
+          else
+            echo "Supplemental production active: ${supplemental_names[*]}"
+          fi
 
+          # Intelligence runs in parallel with file production.
+          INTELLIGENCE=(controller-tournament.yml historical-log-reingest.yml jarvis-knowledge-graph.yml research.yml chief-engineer.yml firmware-catalog.yml discovery.yml)
           intelligence_active=0
           intelligence_names=()
           for wf in "${INTELLIGENCE[@]}"; do
@@ -103,28 +90,16 @@ jobs:
               intelligence_names+=("$wf:$n")
             fi
           done
-
           if (( intelligence_active == 0 )); then
-            INTELLIGENCE_QUEUE=(
-              historical-log-reingest.yml
-              jarvis-knowledge-graph.yml
-              controller-tournament.yml
-              firmware-catalog.yml
-              chief-engineer.yml
-              discovery.yml
-            )
+            INTELLIGENCE_QUEUE=(historical-log-reingest.yml jarvis-knowledge-graph.yml controller-tournament.yml firmware-catalog.yml chief-engineer.yml discovery.yml)
             slot=$(( $(date -u +%s) / 300 % ${#INTELLIGENCE_QUEUE[@]} ))
-            selected="${INTELLIGENCE_QUEUE[$slot]}"
-            dispatch "$selected"
-            echo "Intelligence lane started: $selected"
+            dispatch "${INTELLIGENCE_QUEUE[$slot]}"
           else
             echo "Intelligence lane active: ${intelligence_names[*]}"
           fi
 
           sleep 3
           echo 'Current productive runs:'
-          gh run list --repo "$REPO" --limit 20 \
+          gh run list --repo "$REPO" --limit 30 \
             --json databaseId,status,conclusion,workflowName,createdAt \
             --jq '.[] | select(.status!="completed") | "- \(.workflowName) #\(.databaseId): \(.status)"'
-
-# Manual bootstrap marker: 2026-08-05T17:44-04:00
