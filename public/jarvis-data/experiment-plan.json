@@ -1,13 +1,13 @@
 {
   "buildState": {
-    "duplicatesRejected": 39,
+    "duplicatesRejected": 40,
     "unique": 2
   },
   "champion": "j00002",
-  "generatedAt": "2026-08-06T06:15:12.366769+00:00",
+  "generatedAt": "2026-08-06T09:29:29.657112+00:00",
   "graphState": {
-    "nodes": 8,
-    "relationships": 3
+    "nodes": 62,
+    "relationships": 57
   },
   "nextExperiment": {
     "acceptanceCriteria": {
@@ -18,20 +18,20 @@
       "mustCompareAgainstChampion": true,
       "noRegression": true
     },
-    "area": "jump-landing-classification",
-    "createdAt": "2026-08-06T06:15:12.366763+00:00",
-    "expectedInformationGain": 0.8188,
-    "hypothesis": "A controller derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-    "id": "EXP-20260806061512",
-    "measurement": "reduce jump false positives while preserving true jump recall",
+    "area": "sensor-dropout-recovery",
+    "createdAt": "2026-08-06T09:29:29.657086+00:00",
+    "expectedInformationGain": 0.816,
+    "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+    "id": "EXP-20260806092929",
+    "measurement": "reduce recovery frames and prevent channel/control discontinuities",
     "mutations": [
-      "separate airborne and landing evidence",
-      "adaptive post-landing confirmation window"
+      "graded fail-open sensor confidence",
+      "state-preserving dropout recovery"
     ],
-    "name": "Improve jump landing classification",
+    "name": "Improve sensor dropout recovery",
     "parent": "j00002",
-    "priority": 0.8188,
-    "reason": "Highest expected information gain; uncertainty=0.6, evidence coverage=0, prior experiments=0.",
+    "priority": 0.816,
+    "reason": "Highest expected information gain; uncertainty=0.62, evidence coverage=0, prior experiments=0.",
     "requiredTests": [
       "Lua 5.3 compile",
       "MT12 normalization",
@@ -41,24 +41,9 @@
       "adversarial regression suite",
       "runtime memory check"
     ],
-    "uncertainty": 0.6
+    "uncertainty": 0.62
   },
   "rankedUnknowns": [
-    {
-      "area": "jump-landing-classification",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.8188,
-      "impact": 0.94,
-      "measure": "reduce jump false positives while preserving true jump recall",
-      "mutation": [
-        "separate airborne and landing evidence",
-        "adaptive post-landing confirmation window"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.8188,
-      "recentSelections": 0,
-      "uncertainty": 0.6
-    },
     {
       "area": "sensor-dropout-recovery",
       "evidenceCoverage": 0,
@@ -118,6 +103,21 @@
       "priority": 0.7996,
       "recentSelections": 0,
       "uncertainty": 0.57
+    },
+    {
+      "area": "jump-landing-classification",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.7988,
+      "impact": 0.94,
+      "measure": "reduce jump false positives while preserving true jump recall",
+      "mutation": [
+        "separate airborne and landing evidence",
+        "adaptive post-landing confirmation window"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.7988,
+      "recentSelections": 1,
+      "uncertainty": 0.6
     },
     {
       "area": "digital-twin-transfer",
