@@ -122,6 +122,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          # Scheduled runs can wait behind the concurrency lock while earlier
+          # factory runs advance main. Publish from the current branch head so
+          # generated latest-cycle/tracks state never rebases from a stale SHA.
+          ref: main
           fetch-depth: 0
       - uses: actions/download-artifact@v6
         with:
