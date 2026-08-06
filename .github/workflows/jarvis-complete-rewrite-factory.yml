@@ -153,17 +153,22 @@ jobs:
           exit 1
 
       - uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: jarvis-complete-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             dist-controller-tournament/
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 90
 
-      - name: Continue autonomous mission
+      - name: Continue autonomous intelligence and queue next LUAC generation
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh workflow run jarvis-mandatory-intelligence-gate.yml --ref main || true
-          gh workflow run jarvis-persistent-mission.yml --ref main || true
+          set +e
+          gh workflow run jarvis-mandatory-intelligence-gate.yml --ref main
+          gh workflow run jarvis-persistent-mission.yml --ref main
+          gh workflow run jarvis-complete-rewrite-factory.yml --ref main
+          echo "Next serialized LUAC rewrite generation queued."
