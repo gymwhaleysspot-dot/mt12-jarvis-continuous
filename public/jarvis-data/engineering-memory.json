@@ -8,13 +8,13 @@
     "mission": 2,
     "mutation": 2,
     "next_experiment": 1,
-    "rejection": 54,
+    "rejection": 56,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260806115035",
-  "generatedAt": "2026-08-06T13:44:30.373709+00:00",
-  "nodeCount": 76,
+  "currentExperiment": "EXP-20260806143408",
+  "generatedAt": "2026-08-06T14:34:28.376059+00:00",
+  "nodeCount": 78,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -95,6 +95,13 @@
       "id": "mission:f060d9dc6a37cae9",
       "kind": "mission",
       "label": "aegis-observability-30990941172-1"
+    },
+    {
+      "id": "rejection:623c29941642fc60",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
     },
     {
       "id": "rejection:259d5137865961b4",
@@ -193,6 +200,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:b2055a955f031f4b",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:57a871a6d8e2283a",
@@ -475,24 +489,24 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.811,
-      "hypothesis": "A controller derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "id": "experiment:978b674c618acf4b",
+      "expectedInformationGain": 0.7996,
+      "hypothesis": "A controller derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+      "id": "experiment:86c02d6780ce9175",
       "kind": "experiment",
-      "label": "Improve truth speed fusion",
-      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+      "label": "Improve abs control",
+      "measurement": "reduce lock duration without increasing stopping distance proxy",
       "status": "PLANNED",
-      "uncertainty": 0.55
+      "uncertainty": 0.57
     },
     {
-      "id": "mutation:3d53a3d9623490be",
+      "id": "mutation:35fec75f0c96621e",
       "kind": "mutation",
-      "label": "adaptive GPS/RPM lag estimator"
+      "label": "adaptive lock target confidence"
     },
     {
-      "id": "mutation:280d7a2eb3f92442",
+      "id": "mutation:18f553d0fc6d0c7e",
       "kind": "mutation",
-      "label": "confidence-weighted truth-speed handoff"
+      "label": "linear release/reapply timing"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -530,7 +544,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 71,
+  "relationshipCount": 73,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -573,6 +587,12 @@
       "id": "edge:1f2c75ea900fcff2",
       "relation": "CHALLENGES",
       "source": "controller:a0206f4b0721cac1",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:de5094eb9b0b6a72",
+      "relation": "DUPLICATES",
+      "source": "rejection:623c29941642fc60",
       "target": "controller:1d3e9c9125494516"
     },
     {
@@ -658,6 +678,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:01def95861baee2d",
+      "relation": "DUPLICATES",
+      "source": "rejection:b2055a955f031f4b",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:fbe9f5276ac9f16a",
@@ -900,63 +926,63 @@
       "target": "controller:a0206f4b0721cac1"
     },
     {
-      "id": "edge:c2e100a233c3b3aa",
+      "id": "edge:5710c77870ad3784",
       "relation": "USES_PARENT",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "controller:1d3e9c9125494516"
     },
     {
-      "id": "edge:cd20b5952ac55b03",
+      "id": "edge:fb44d992b6b40d25",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:978b674c618acf4b",
-      "target": "mutation:3d53a3d9623490be"
+      "source": "experiment:86c02d6780ce9175",
+      "target": "mutation:35fec75f0c96621e"
     },
     {
-      "id": "edge:c43127a819a30699",
+      "id": "edge:fea567e2d84e90c9",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:978b674c618acf4b",
-      "target": "mutation:280d7a2eb3f92442"
+      "source": "experiment:86c02d6780ce9175",
+      "target": "mutation:18f553d0fc6d0c7e"
     },
     {
-      "id": "edge:5b267e927789ee97",
+      "id": "edge:0497fa139be411e2",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:d0ceba208d208f3d"
     },
     {
-      "id": "edge:094ec6d98e4594a2",
+      "id": "edge:ebf227c1571a9081",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:af354b232c193ef9"
     },
     {
-      "id": "edge:aef4cce4d277f739",
+      "id": "edge:7081c36987518778",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:9e7a610f94776e69"
     },
     {
-      "id": "edge:1c92f364e4e9b89d",
+      "id": "edge:7af9dc6ddfe77019",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:822439754733430f"
     },
     {
-      "id": "edge:efb21b6a9e3cd132",
+      "id": "edge:8ac4c77f823cfa27",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:529343bd009a7dd8"
     },
     {
-      "id": "edge:64adbf58281f6108",
+      "id": "edge:1acd8b5af2f44705",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:b1b2a0420869a06b"
     },
     {
-      "id": "edge:b377462b7a35eda1",
+      "id": "edge:54640931a143c450",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:978b674c618acf4b",
+      "source": "experiment:86c02d6780ce9175",
       "target": "test:006110a1594843d9"
     }
   ],
