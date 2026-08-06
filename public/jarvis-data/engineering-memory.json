@@ -1,19 +1,19 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 4,
+    "controller": 3,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 3,
+    "mission": 2,
     "mutation": 2,
     "next_experiment": 1,
-    "rejection": 49,
+    "rejection": 51,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260806115035",
-  "generatedAt": "2026-08-06T13:13:32.593761+00:00",
+  "generatedAt": "2026-08-06T13:18:22.149343+00:00",
   "nodeCount": 73,
   "nodes": [
     {
@@ -72,23 +72,9 @@
       "kind": "controller",
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": false,
+      "recommended": true,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "authority": "FORCED_CONTROL_NO_BEHAVIOR_CHANGE",
-      "bytes": 86982,
-      "id": "controller:7ee22193964bb59c",
-      "kind": "controller",
-      "label": "None",
-      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "id": "mission:d6e392265fbd3c2a",
-      "kind": "mission",
-      "label": "forced-31101573329-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -174,6 +160,13 @@
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
     },
     {
+      "id": "rejection:45279ea9c6b5a0b0",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
       "id": "rejection:730d57cfd37067bd",
       "kind": "rejection",
       "label": "BYTE_IDENTICAL_DUPLICATE",
@@ -200,6 +193,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:1018749c41e87535",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:7dd01887730a067f",
@@ -530,19 +530,6 @@
       "target": "next_experiment:641545a22a61e9ef"
     },
     {
-      "id": "edge:3d45ba27ec9335fe",
-      "relation": "BUILT_BY",
-      "source": "controller:7ee22193964bb59c",
-      "target": "mission:d6e392265fbd3c2a"
-    },
-    {
-      "eligible": false,
-      "id": "edge:73624fd6054b3b53",
-      "relation": "CHALLENGES",
-      "source": "controller:7ee22193964bb59c",
-      "target": "controller:1d3e9c9125494516"
-    },
-    {
       "id": "edge:a58931769be09d64",
       "relation": "DERIVED_FROM",
       "source": "controller:1d3e9c9125494516",
@@ -622,6 +609,12 @@
       "target": "controller:1d3e9c9125494516"
     },
     {
+      "id": "edge:3be1db37ecec83c1",
+      "relation": "DUPLICATES",
+      "source": "rejection:45279ea9c6b5a0b0",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
       "id": "edge:b8c9d1c24041ba02",
       "relation": "DUPLICATES",
       "source": "rejection:730d57cfd37067bd",
@@ -644,6 +637,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:11ff74e0c9a1318b",
+      "relation": "DUPLICATES",
+      "source": "rejection:1018749c41e87535",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:3925a621f0e0ba25",
