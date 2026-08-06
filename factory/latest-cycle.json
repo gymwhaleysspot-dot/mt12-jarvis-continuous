@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "mission": "31061765636",
+  "mission": "31067820671",
   "decision": "PROVEN_STATIC_IMPROVEMENT",
   "winner": "a17zx4",
   "promotionLevel": "BENCH_CANDIDATE",
@@ -10,7 +10,7 @@
     "champion": null,
     "experimental": "a17zx4",
     "schema": 1,
-    "updatedAt": "2026-08-06T01:06:33.006581+00:00"
+    "updatedAt": "2026-08-06T03:13:23.536677+00:00"
   },
   "evaluationGroups": [
     {
@@ -182,20 +182,27 @@
     },
     {
       "schema": 1,
-      "group": "sensors",
+      "group": "adversarial",
       "scenarios": [
-        "gps_dropout",
-        "rpm_delay",
-        "sensor_disagreement",
-        "telemetry_freeze",
-        "reconnect"
+        "impossible_gps_jump",
+        "rpm_stuck",
+        "opposed_sensor_disagreement",
+        "throttle_spike",
+        "temporary_zero",
+        "duplicate_timestamp",
+        "delayed_stream",
+        "alternating_traction",
+        "corrupt_memory",
+        "partial_memory",
+        "reconnect_storm",
+        "clamp_boundaries"
       ],
       "candidates": [
         {
           "candidate": "a17zx4",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 5,
-          "evidenceDigest": "292475fb455ddf9c41ca8e13f041a491c0759a817ded16109f19f782f70ce9b9",
+          "scenarioCount": 12,
+          "evidenceDigest": "5cdcd23e19b041d4024f4f72a93e9164e19c66b95e74de523677bad2141928a8",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -208,8 +215,8 @@
         {
           "candidate": "a17zx1",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 5,
-          "evidenceDigest": "b3a2f915c51e720c0de502c9e96bc79ac1610618bcd8594650f28a0f93355801",
+          "scenarioCount": 12,
+          "evidenceDigest": "95397b63528938be21095c5192c1b509ff8fc9cd14f3f19594fc342012fd03cf",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -222,8 +229,8 @@
         {
           "candidate": "a17zx5",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 5,
-          "evidenceDigest": "1708626f777a5f4752b694edf89b2c2d2631849bd65d665251f28b6dc842b915",
+          "scenarioCount": 12,
+          "evidenceDigest": "286d8673b5b7b92c73ba77721cead468c8ada7a509de669f7d313b26ff28dde4",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -236,8 +243,8 @@
         {
           "candidate": "a17zx3",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 5,
-          "evidenceDigest": "d4fcf75b227a35c836bf8730b4e5cc05239f8d5ea49865fd0591cb6e93f1ed6b",
+          "scenarioCount": 12,
+          "evidenceDigest": "f6e22dc0482caa69acfcc04bea7ae2ba316d3045f28f038f7689091f1b796dd3",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -250,8 +257,8 @@
         {
           "candidate": "a17zx2",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 5,
-          "evidenceDigest": "6044efbca54c9b7312b1d04e1cd7307cc8c9880d67befb6f6f4d1bda869fdf7f",
+          "scenarioCount": 12,
+          "evidenceDigest": "44cd0bd126bfbf5712a95062efe6065b91d7fdc2e6640f46da95553197a0cf2b",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -346,27 +353,20 @@
     },
     {
       "schema": 1,
-      "group": "adversarial",
+      "group": "sensors",
       "scenarios": [
-        "impossible_gps_jump",
-        "rpm_stuck",
-        "opposed_sensor_disagreement",
-        "throttle_spike",
-        "temporary_zero",
-        "duplicate_timestamp",
-        "delayed_stream",
-        "alternating_traction",
-        "corrupt_memory",
-        "partial_memory",
-        "reconnect_storm",
-        "clamp_boundaries"
+        "gps_dropout",
+        "rpm_delay",
+        "sensor_disagreement",
+        "telemetry_freeze",
+        "reconnect"
       ],
       "candidates": [
         {
           "candidate": "a17zx4",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 12,
-          "evidenceDigest": "5cdcd23e19b041d4024f4f72a93e9164e19c66b95e74de523677bad2141928a8",
+          "scenarioCount": 5,
+          "evidenceDigest": "292475fb455ddf9c41ca8e13f041a491c0759a817ded16109f19f782f70ce9b9",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -379,8 +379,8 @@
         {
           "candidate": "a17zx1",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 12,
-          "evidenceDigest": "95397b63528938be21095c5192c1b509ff8fc9cd14f3f19594fc342012fd03cf",
+          "scenarioCount": 5,
+          "evidenceDigest": "b3a2f915c51e720c0de502c9e96bc79ac1610618bcd8594650f28a0f93355801",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -393,8 +393,8 @@
         {
           "candidate": "a17zx5",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 12,
-          "evidenceDigest": "286d8673b5b7b92c73ba77721cead468c8ada7a509de669f7d313b26ff28dde4",
+          "scenarioCount": 5,
+          "evidenceDigest": "1708626f777a5f4752b694edf89b2c2d2631849bd65d665251f28b6dc842b915",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -407,8 +407,8 @@
         {
           "candidate": "a17zx3",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 12,
-          "evidenceDigest": "f6e22dc0482caa69acfcc04bea7ae2ba316d3045f28f038f7689091f1b796dd3",
+          "scenarioCount": 5,
+          "evidenceDigest": "d4fcf75b227a35c836bf8730b4e5cc05239f8d5ea49865fd0591cb6e93f1ed6b",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
@@ -421,8 +421,8 @@
         {
           "candidate": "a17zx2",
           "status": "QUEUED_FOR_REPLAY",
-          "scenarioCount": 12,
-          "evidenceDigest": "44cd0bd126bfbf5712a95062efe6065b91d7fdc2e6640f46da95553197a0cf2b",
+          "scenarioCount": 5,
+          "evidenceDigest": "6044efbca54c9b7312b1d04e1cd7307cc8c9880d67befb6f6f4d1bda869fdf7f",
           "requiredMetrics": [
             "truthAccuracy",
             "interventionCorrectness",
