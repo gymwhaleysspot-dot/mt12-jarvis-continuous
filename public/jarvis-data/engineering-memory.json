@@ -1,20 +1,20 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 4,
+    "controller": 3,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 3,
+    "mission": 2,
     "mutation": 2,
     "next_experiment": 1,
-    "rejection": 46,
+    "rejection": 49,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260806115035",
-  "generatedAt": "2026-08-06T12:14:56.305560+00:00",
-  "nodeCount": 70,
+  "generatedAt": "2026-08-06T12:28:40.417769+00:00",
+  "nodeCount": 71,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -77,20 +77,6 @@
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
     },
     {
-      "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
-      "bytes": 86982,
-      "id": "controller:7ee22193964bb59c",
-      "kind": "controller",
-      "label": "None",
-      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "id": "mission:ff5667b3f9ce8694",
-      "kind": "mission",
-      "label": "guaranteed-31100214727-1"
-    },
-    {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
       "bytes": 87337,
       "id": "controller:a0206f4b0721cac1",
@@ -109,6 +95,20 @@
       "id": "mission:f060d9dc6a37cae9",
       "kind": "mission",
       "label": "aegis-observability-30990941172-1"
+    },
+    {
+      "id": "rejection:259d5137865961b4",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:86302c8d1108bf54",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
     },
     {
       "id": "rejection:655a7bb4c05dff45",
@@ -186,6 +186,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:7dd01887730a067f",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:f94998f42be27056",
@@ -488,7 +495,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 65,
+  "relationshipCount": 66,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -507,19 +514,6 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:641545a22a61e9ef"
-    },
-    {
-      "id": "edge:29e31240a80daf7b",
-      "relation": "BUILT_BY",
-      "source": "controller:7ee22193964bb59c",
-      "target": "mission:ff5667b3f9ce8694"
-    },
-    {
-      "eligible": false,
-      "id": "edge:73624fd6054b3b53",
-      "relation": "CHALLENGES",
-      "source": "controller:7ee22193964bb59c",
-      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -544,6 +538,18 @@
       "id": "edge:1f2c75ea900fcff2",
       "relation": "CHALLENGES",
       "source": "controller:a0206f4b0721cac1",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:d4eee9d3014b0b89",
+      "relation": "DUPLICATES",
+      "source": "rejection:259d5137865961b4",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:df35b8523434d3e2",
+      "relation": "DUPLICATES",
+      "source": "rejection:86302c8d1108bf54",
       "target": "controller:1d3e9c9125494516"
     },
     {
@@ -611,6 +617,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:3925a621f0e0ba25",
+      "relation": "DUPLICATES",
+      "source": "rejection:7dd01887730a067f",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:58fab0753798a20f",
