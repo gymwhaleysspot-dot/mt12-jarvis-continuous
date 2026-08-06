@@ -1,0 +1,169 @@
+{
+  "buildState": {
+    "duplicatesRejected": 33,
+    "unique": 2
+  },
+  "champion": "j00002",
+  "generatedAt": "2026-08-06T03:15:39.780465+00:00",
+  "graphState": {
+    "nodes": 7,
+    "relationships": 2
+  },
+  "nextExperiment": {
+    "acceptanceCriteria": {
+      "behaviorallyNovel": true,
+      "byteNovel": true,
+      "minimumConfidence": 0.85,
+      "minimumScoreDelta": 0.001,
+      "mustCompareAgainstChampion": true,
+      "noRegression": true
+    },
+    "area": "sensor-dropout-recovery",
+    "createdAt": "2026-08-06T03:15:39.780459+00:00",
+    "expectedInformationGain": 0.836,
+    "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+    "id": "EXP-20260806031539",
+    "measurement": "reduce recovery frames and prevent channel/control discontinuities",
+    "mutations": [
+      "graded fail-open sensor confidence",
+      "state-preserving dropout recovery"
+    ],
+    "name": "Improve sensor dropout recovery",
+    "parent": "j00002",
+    "priority": 0.836,
+    "reason": "Highest expected information gain; uncertainty=0.62, evidence coverage=0, prior experiments=0.",
+    "requiredTests": [
+      "Lua 5.3 compile",
+      "MT12 normalization",
+      "static safety audit",
+      "digital-twin simulation",
+      "identical-input replay",
+      "adversarial regression suite",
+      "runtime memory check"
+    ],
+    "uncertainty": 0.62
+  },
+  "rankedUnknowns": [
+    {
+      "area": "sensor-dropout-recovery",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.836,
+      "impact": 0.98,
+      "measure": "reduce recovery frames and prevent channel/control discontinuities",
+      "mutation": [
+        "graded fail-open sensor confidence",
+        "state-preserving dropout recovery"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.836,
+      "recentSelections": 0,
+      "uncertainty": 0.62
+    },
+    {
+      "area": "jump-landing-classification",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.8188,
+      "impact": 0.94,
+      "measure": "reduce jump false positives while preserving true jump recall",
+      "mutation": [
+        "separate airborne and landing evidence",
+        "adaptive post-landing confirmation window"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.8188,
+      "recentSelections": 0,
+      "uncertainty": 0.6
+    },
+    {
+      "area": "traction-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.8148,
+      "impact": 0.96,
+      "measure": "reduce excess slip and intervention harshness",
+      "mutation": [
+        "contextual slip severity blend",
+        "surface-conditioned intervention release"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.8148,
+      "recentSelections": 0,
+      "uncertainty": 0.58
+    },
+    {
+      "area": "truth-speed-fusion",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.811,
+      "impact": 1.0,
+      "measure": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+      "mutation": [
+        "adaptive GPS/RPM lag estimator",
+        "confidence-weighted truth-speed handoff"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.811,
+      "recentSelections": 0,
+      "uncertainty": 0.55
+    },
+    {
+      "area": "abs-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.7996,
+      "impact": 0.91,
+      "measure": "reduce lock duration without increasing stopping distance proxy",
+      "mutation": [
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.7996,
+      "recentSelections": 0,
+      "uncertainty": 0.57
+    },
+    {
+      "area": "digital-twin-transfer",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.7636,
+      "impact": 0.88,
+      "measure": "increase replay-to-road transfer confidence",
+      "mutation": [
+        "recalibrate lag/grip distributions from newest sessions",
+        "increase adversarial parameter coverage"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.7636,
+      "recentSelections": 0,
+      "uncertainty": 0.5
+    },
+    {
+      "area": "controller-observability",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.7504,
+      "impact": 0.82,
+      "measure": "increase explained-event coverage without runtime instability",
+      "mutation": [
+        "publish causal event explanation fields",
+        "link decisions to evidence and confidence"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.7504,
+      "recentSelections": 0,
+      "uncertainty": 0.5
+    },
+    {
+      "area": "runtime-memory",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.747,
+      "impact": 0.9,
+      "measure": "reduce peak runtime memory and LUAC size with zero behavioral regression",
+      "mutation": [
+        "allocation reduction with behavior equivalence",
+        "deduplicate hot-path calculations"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.747,
+      "recentSelections": 0,
+      "uncertainty": 0.45
+    }
+  ],
+  "schema": "JARVIS-EXPERIMENT-PLAN-1"
+}
