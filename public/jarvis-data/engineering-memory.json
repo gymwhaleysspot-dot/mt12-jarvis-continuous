@@ -1,5 +1,5 @@
 {
-  "champion": null,
+  "champion": "j00002",
   "counts": {
     "controller": 3,
     "digital_twin": 1,
@@ -7,13 +7,14 @@
     "log": 3,
     "mission": 2,
     "mutation": 2,
-    "rejection": 33,
+    "next_experiment": 1,
+    "rejection": 37,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260806031539",
-  "generatedAt": "2026-08-06T03:15:58.050203+00:00",
-  "nodeCount": 54,
+  "generatedAt": "2026-08-06T04:48:16.371313+00:00",
+  "nodeCount": 59,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -57,6 +58,14 @@
       "label": "Adaptive MT12 Vehicle Twin"
     },
     {
+      "expectedInformationGain": 0.836,
+      "id": "next_experiment:a98e885f58c11792",
+      "kind": "next_experiment",
+      "label": "Improve sensor dropout recovery",
+      "reason": "Highest expected information gain; uncertainty=0.62, evidence coverage=0, prior experiments=0.",
+      "uncertainty": 0.62
+    },
+    {
       "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
       "bytes": 86982,
       "id": "controller:1d3e9c9125494516",
@@ -64,6 +73,7 @@
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
       "recommended": false,
+      "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
     },
     {
@@ -122,11 +132,39 @@
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
     },
     {
+      "id": "rejection:359cd0c894e3a0d3",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
       "id": "rejection:9e0a491d7b22c998",
       "kind": "rejection",
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:e4714e2b83825bf4",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:c2cae919a3d90da8",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:e751266aaa41b70a",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:3b713bfc568a1906",
@@ -373,7 +411,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 48,
+  "relationshipCount": 54,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -386,6 +424,12 @@
       "relation": "CURRENTLY_HOLDS",
       "source": "track:4e1e92defd18e46b",
       "target": "controller:a5f84fb6dd812514"
+    },
+    {
+      "id": "edge:34ed5eaf63357728",
+      "relation": "REQUESTS",
+      "source": "digital_twin:ff3f1dd1d3a16fed",
+      "target": "next_experiment:a98e885f58c11792"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -404,6 +448,13 @@
       "relation": "BUILT_BY",
       "source": "controller:a0206f4b0721cac1",
       "target": "mission:f060d9dc6a37cae9"
+    },
+    {
+      "eligible": false,
+      "id": "edge:1f2c75ea900fcff2",
+      "relation": "CHALLENGES",
+      "source": "controller:a0206f4b0721cac1",
+      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:19764e8ef3e98382",
@@ -436,10 +487,34 @@
       "target": "controller:1d3e9c9125494516"
     },
     {
+      "id": "edge:080c0b2a2a8d2648",
+      "relation": "DUPLICATES",
+      "source": "rejection:359cd0c894e3a0d3",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
       "id": "edge:c7e9521eee3e0826",
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:bac1261ab8c7fcc5",
+      "relation": "DUPLICATES",
+      "source": "rejection:e4714e2b83825bf4",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:735d93c06b1f82a9",
+      "relation": "DUPLICATES",
+      "source": "rejection:c2cae919a3d90da8",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:2b688801b04dab1b",
+      "relation": "DUPLICATES",
+      "source": "rejection:e751266aaa41b70a",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:9df67a192ebf810b",
