@@ -19,7 +19,7 @@ on:
       - tools/jarvis_intelligence_planner.py
       - tools/jarvis_evolution_gate.py
       - tools/jarvis_champion_guard.py
-      - tools/jarvis_causal_memory.py
+      - tools/jarvis_graph_intelligence.py
 
 permissions:
   contents: write
@@ -51,7 +51,7 @@ jobs:
             tools/jarvis_intelligence_planner.py \
             tools/jarvis_evolution_gate.py \
             tools/jarvis_champion_guard.py \
-            tools/jarvis_causal_memory.py
+            tools/jarvis_graph_intelligence.py
 
       - name: Select highest-information experiment
         run: python3 tools/jarvis_intelligence_planner.py
@@ -63,7 +63,7 @@ jobs:
         run: python3 tools/jarvis_champion_guard.py
 
       - name: Rebuild causal engineering memory
-        run: python3 tools/jarvis_causal_memory.py
+        run: python3 tools/jarvis_graph_intelligence.py
 
       - name: Prove no candidate bypassed the authority chain
         run: |
@@ -74,12 +74,13 @@ jobs:
           idx=json.loads(Path('public/builds/index.json').read_text())
           plan=json.loads(Path('public/jarvis-data/experiment-plan.json').read_text())
           guard=json.loads(Path('public/jarvis-data/champion-protection.json').read_text())
-          graph=json.loads(Path('factory/causal-memory.json').read_text())
+          graph=json.loads(Path('public/jarvis-data/engineering-memory.json').read_text())
 
           assert idx.get('championProtected') is True
           assert guard['rules']['directComparisonRequired'] is True
           assert guard['rules']['regressionsAllowed'] is False
           assert plan['nextExperiment']['acceptanceCriteria']['mustCompareAgainstChampion'] is True
+          assert graph['schema'] == 'JARVIS-KG-2'
           assert graph['nodeCount'] == len(graph['nodes'])
           assert graph['relationshipCount'] == len(graph['relationships'])
 
@@ -115,10 +116,11 @@ jobs:
             factory/next-experiment.json \
             factory/memory/planner-history.json \
             factory/memory/champion-history.json \
-            factory/causal-memory.json \
+            factory/knowledge-graph.json \
             public/builds \
             public/jarvis-data/experiment-plan.json \
             public/jarvis-data/champion-protection.json \
+            public/jarvis-data/engineering-memory.json \
             public/jarvis-data/mandatory-gate.json
           if git diff --cached --quiet; then
             echo 'Authority state already current.'
@@ -144,7 +146,8 @@ jobs:
             public/jarvis-data/mandatory-gate.json
             public/jarvis-data/experiment-plan.json
             public/jarvis-data/champion-protection.json
-            factory/causal-memory.json
+            public/jarvis-data/engineering-memory.json
+            factory/knowledge-graph.json
             public/builds/index.json
           if-no-files-found: error
           retention-days: 90
