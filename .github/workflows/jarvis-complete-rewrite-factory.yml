@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - tools/controller_rewrite_factory.py
+      - tools/controller_rewrite_hotfix.py
       - tools/controller_tournament.py
       - factory/next-experiment.json
       - public/jarvis-data/experiment-plan.json
@@ -44,6 +45,7 @@ jobs:
           python3 -m py_compile \
             tools/controller_tournament.py \
             tools/controller_rewrite_factory.py \
+            tools/controller_rewrite_hotfix.py \
             tools/jarvis_intelligence_planner.py \
             tools/jarvis_evolution_gate.py
 
@@ -54,7 +56,7 @@ jobs:
         env:
           RELEASE_TYPE: R
           SERIES: jrw
-        run: python3 tools/controller_rewrite_factory.py
+        run: python3 tools/controller_rewrite_hotfix.py
 
       - name: Prove every compiled file is unique
         run: |
@@ -83,7 +85,7 @@ jobs:
       - name: Publish every rewrite candidate
         run: |
           python3 - <<'PY'
-          import json,os,shutil,hashlib
+          import json,os,shutil
           from pathlib import Path
           src=Path('dist-controller-tournament')
           result=json.loads((src/'TOURNAMENT.json').read_text())
