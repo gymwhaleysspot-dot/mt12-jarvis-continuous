@@ -1,20 +1,20 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 4,
+    "controller": 3,
     "digital_twin": 1,
-    "experiment": 2,
+    "experiment": 1,
     "log": 3,
-    "mission": 3,
-    "mutation": 4,
+    "mission": 2,
+    "mutation": 2,
     "next_experiment": 1,
-    "rejection": 44,
+    "rejection": 45,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260806115035",
-  "generatedAt": "2026-08-06T11:50:54.665667+00:00",
-  "nodeCount": 71,
+  "generatedAt": "2026-08-06T12:07:50.934499+00:00",
+  "nodeCount": 67,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -58,12 +58,12 @@
       "label": "Adaptive MT12 Vehicle Twin"
     },
     {
-      "expectedInformationGain": 0.8148,
-      "id": "next_experiment:81abfa303b0bca48",
+      "expectedInformationGain": 0.811,
+      "id": "next_experiment:641545a22a61e9ef",
       "kind": "next_experiment",
-      "label": "Improve traction control",
-      "reason": "Highest expected information gain; uncertainty=0.58, evidence coverage=0, prior experiments=0.",
-      "uncertainty": 0.58
+      "label": "Improve truth speed fusion",
+      "reason": "Highest expected information gain; uncertainty=0.55, evidence coverage=0, prior experiments=0.",
+      "uncertainty": 0.55
     },
     {
       "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
@@ -75,21 +75,6 @@
       "recommended": false,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
-      "bytes": 86982,
-      "id": "controller:7ee22193964bb59c",
-      "kind": "controller",
-      "label": "None",
-      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": false,
-      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "id": "mission:e8bf2b7e811f5db8",
-      "kind": "mission",
-      "label": "guaranteed-31095800700-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -110,6 +95,13 @@
       "id": "mission:f060d9dc6a37cae9",
       "kind": "mission",
       "label": "aegis-observability-30990941172-1"
+    },
+    {
+      "id": "rejection:655a7bb4c05dff45",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
     },
     {
       "id": "rejection:8a83dfa68cd17321",
@@ -180,6 +172,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:553cb0e3531f4014",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:db8aba2af2745065",
@@ -413,24 +412,24 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.8148,
-      "hypothesis": "A controller derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-      "id": "experiment:3b024f9f9dcc53d2",
+      "expectedInformationGain": 0.811,
+      "hypothesis": "A controller derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "id": "experiment:978b674c618acf4b",
       "kind": "experiment",
-      "label": "Improve traction control",
-      "measurement": "reduce excess slip and intervention harshness",
+      "label": "Improve truth speed fusion",
+      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
       "status": "PLANNED",
-      "uncertainty": 0.58
+      "uncertainty": 0.55
     },
     {
-      "id": "mutation:815b1274c28658ed",
+      "id": "mutation:3d53a3d9623490be",
       "kind": "mutation",
-      "label": "contextual slip severity blend"
+      "label": "adaptive GPS/RPM lag estimator"
     },
     {
-      "id": "mutation:45f7e0cb0e6c5f80",
+      "id": "mutation:280d7a2eb3f92442",
       "kind": "mutation",
-      "label": "surface-conditioned intervention release"
+      "label": "confidence-weighted truth-speed handoff"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -466,36 +465,9 @@
       "id": "test:006110a1594843d9",
       "kind": "test",
       "label": "runtime memory check"
-    },
-    {
-      "id": "rejection:655a7bb4c05dff45",
-      "kind": "rejection",
-      "label": "BYTE_IDENTICAL_DUPLICATE",
-      "reason": "BYTE_IDENTICAL_DUPLICATE",
-      "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
-    },
-    {
-      "expectedInformationGain": 0.811,
-      "hypothesis": "A controller derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "id": "experiment:978b674c618acf4b",
-      "kind": "experiment",
-      "label": "Improve truth speed fusion",
-      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
-      "status": "PLANNED",
-      "uncertainty": 0.55
-    },
-    {
-      "id": "mutation:3d53a3d9623490be",
-      "kind": "mutation",
-      "label": "adaptive GPS/RPM lag estimator"
-    },
-    {
-      "id": "mutation:280d7a2eb3f92442",
-      "kind": "mutation",
-      "label": "confidence-weighted truth-speed handoff"
     }
   ],
-  "relationshipCount": 73,
+  "relationshipCount": 62,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -510,23 +482,10 @@
       "target": "controller:a5f84fb6dd812514"
     },
     {
-      "id": "edge:7f82380dac67ae88",
+      "id": "edge:9c150f5259361796",
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
-      "target": "next_experiment:81abfa303b0bca48"
-    },
-    {
-      "id": "edge:9c017b86918a5a4f",
-      "relation": "BUILT_BY",
-      "source": "controller:7ee22193964bb59c",
-      "target": "mission:e8bf2b7e811f5db8"
-    },
-    {
-      "eligible": false,
-      "id": "edge:73624fd6054b3b53",
-      "relation": "CHALLENGES",
-      "source": "controller:7ee22193964bb59c",
-      "target": "controller:1d3e9c9125494516"
+      "target": "next_experiment:641545a22a61e9ef"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -551,6 +510,12 @@
       "id": "edge:1f2c75ea900fcff2",
       "relation": "CHALLENGES",
       "source": "controller:a0206f4b0721cac1",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:d403412c8d0d00cb",
+      "relation": "DUPLICATES",
+      "source": "rejection:655a7bb4c05dff45",
       "target": "controller:1d3e9c9125494516"
     },
     {
@@ -612,6 +577,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:f1a80b13c185671b",
+      "relation": "DUPLICATES",
+      "source": "rejection:553cb0e3531f4014",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:bcf0b3def576e59a",
@@ -810,72 +781,6 @@
       "relation": "DUPLICATES",
       "source": "rejection:e747f1c11700a70c",
       "target": "controller:a0206f4b0721cac1"
-    },
-    {
-      "id": "edge:206cbb9992a75503",
-      "relation": "USES_PARENT",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "controller:1d3e9c9125494516"
-    },
-    {
-      "id": "edge:83ca6eee2e079f96",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "mutation:815b1274c28658ed"
-    },
-    {
-      "id": "edge:e44433e3f0babfca",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "mutation:45f7e0cb0e6c5f80"
-    },
-    {
-      "id": "edge:d9650b0db755c2fd",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:d0ceba208d208f3d"
-    },
-    {
-      "id": "edge:0145a286d2647df3",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:af354b232c193ef9"
-    },
-    {
-      "id": "edge:5a81faa0d183020f",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:9e7a610f94776e69"
-    },
-    {
-      "id": "edge:92859609725576af",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:822439754733430f"
-    },
-    {
-      "id": "edge:214512f7bb35e396",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:529343bd009a7dd8"
-    },
-    {
-      "id": "edge:bdc335a0fa98693d",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:b1b2a0420869a06b"
-    },
-    {
-      "id": "edge:3e695ceeb17af06c",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:3b024f9f9dcc53d2",
-      "target": "test:006110a1594843d9"
-    },
-    {
-      "id": "edge:d403412c8d0d00cb",
-      "relation": "DUPLICATES",
-      "source": "rejection:655a7bb4c05dff45",
-      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:c2e100a233c3b3aa",
