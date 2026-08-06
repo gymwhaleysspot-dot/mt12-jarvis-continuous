@@ -3,18 +3,18 @@
   "counts": {
     "controller": 3,
     "digital_twin": 1,
-    "experiment": 2,
+    "experiment": 1,
     "log": 3,
     "mission": 2,
-    "mutation": 4,
+    "mutation": 2,
     "next_experiment": 1,
     "rejection": 40,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260806092929",
-  "generatedAt": "2026-08-06T09:29:54.362683+00:00",
-  "nodeCount": 65,
+  "generatedAt": "2026-08-06T09:47:55.550569+00:00",
+  "nodeCount": 62,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -58,12 +58,12 @@
       "label": "Adaptive MT12 Vehicle Twin"
     },
     {
-      "expectedInformationGain": 0.8188,
-      "id": "next_experiment:7b7e64cdfbc1f586",
+      "expectedInformationGain": 0.816,
+      "id": "next_experiment:a98e885f58c11792",
       "kind": "next_experiment",
-      "label": "Improve jump landing classification",
-      "reason": "Highest expected information gain; uncertainty=0.6, evidence coverage=0, prior experiments=0.",
-      "uncertainty": 0.6
+      "label": "Improve sensor dropout recovery",
+      "reason": "Highest expected information gain; uncertainty=0.62, evidence coverage=0, prior experiments=0.",
+      "uncertainty": 0.62
     },
     {
       "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
@@ -72,7 +72,7 @@
       "kind": "controller",
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": true,
+      "recommended": false,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
     },
@@ -377,24 +377,24 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.8188,
-      "hypothesis": "A controller derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-      "id": "experiment:76a4da5e64449a44",
+      "expectedInformationGain": 0.816,
+      "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+      "id": "experiment:0ec21caeeed46722",
       "kind": "experiment",
-      "label": "Improve jump landing classification",
-      "measurement": "reduce jump false positives while preserving true jump recall",
+      "label": "Improve sensor dropout recovery",
+      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
       "status": "PLANNED",
-      "uncertainty": 0.6
+      "uncertainty": 0.62
     },
     {
-      "id": "mutation:6c110f9626d9d4ce",
+      "id": "mutation:3fa263a6223e98fc",
       "kind": "mutation",
-      "label": "separate airborne and landing evidence"
+      "label": "graded fail-open sensor confidence"
     },
     {
-      "id": "mutation:6ec99fb4521921a0",
+      "id": "mutation:5a7c6e240bcab7e6",
       "kind": "mutation",
-      "label": "adaptive post-landing confirmation window"
+      "label": "state-preserving dropout recovery"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -430,29 +430,9 @@
       "id": "test:006110a1594843d9",
       "kind": "test",
       "label": "runtime memory check"
-    },
-    {
-      "expectedInformationGain": 0.816,
-      "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
-      "id": "experiment:0ec21caeeed46722",
-      "kind": "experiment",
-      "label": "Improve sensor dropout recovery",
-      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
-      "status": "PLANNED",
-      "uncertainty": 0.62
-    },
-    {
-      "id": "mutation:3fa263a6223e98fc",
-      "kind": "mutation",
-      "label": "graded fail-open sensor confidence"
-    },
-    {
-      "id": "mutation:5a7c6e240bcab7e6",
-      "kind": "mutation",
-      "label": "state-preserving dropout recovery"
     }
   ],
-  "relationshipCount": 67,
+  "relationshipCount": 57,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -467,10 +447,10 @@
       "target": "controller:a5f84fb6dd812514"
     },
     {
-      "id": "edge:e893eea9393e7eee",
+      "id": "edge:34ed5eaf63357728",
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
-      "target": "next_experiment:7b7e64cdfbc1f586"
+      "target": "next_experiment:a98e885f58c11792"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -736,66 +716,6 @@
       "relation": "DUPLICATES",
       "source": "rejection:e747f1c11700a70c",
       "target": "controller:a0206f4b0721cac1"
-    },
-    {
-      "id": "edge:35a9696fc78d6401",
-      "relation": "USES_PARENT",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "controller:1d3e9c9125494516"
-    },
-    {
-      "id": "edge:7548e27f4d936137",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "mutation:6c110f9626d9d4ce"
-    },
-    {
-      "id": "edge:073c13b97098ff72",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "mutation:6ec99fb4521921a0"
-    },
-    {
-      "id": "edge:7d89eac9b96cd451",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:d0ceba208d208f3d"
-    },
-    {
-      "id": "edge:b429540f63a9b60b",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:af354b232c193ef9"
-    },
-    {
-      "id": "edge:d976892d80f6825d",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:9e7a610f94776e69"
-    },
-    {
-      "id": "edge:61f634584173cee6",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:822439754733430f"
-    },
-    {
-      "id": "edge:874f07ecbfb7946c",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:529343bd009a7dd8"
-    },
-    {
-      "id": "edge:93616d8c5dfe40e7",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:b1b2a0420869a06b"
-    },
-    {
-      "id": "edge:303c13a76ad687d3",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:76a4da5e64449a44",
-      "target": "test:006110a1594843d9"
     },
     {
       "id": "edge:1d4469c360f9b60a",
