@@ -1,11 +1,11 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 3,
+    "controller": 4,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 2,
+    "mission": 3,
     "mutation": 2,
     "next_experiment": 1,
     "rejection": 49,
@@ -13,8 +13,8 @@
     "track": 2
   },
   "currentExperiment": "EXP-20260806115035",
-  "generatedAt": "2026-08-06T12:28:40.417769+00:00",
-  "nodeCount": 71,
+  "generatedAt": "2026-08-06T13:13:32.593761+00:00",
+  "nodeCount": 73,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -75,6 +75,20 @@
       "recommended": false,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "authority": "FORCED_CONTROL_NO_BEHAVIOR_CHANGE",
+      "bytes": 86982,
+      "id": "controller:7ee22193964bb59c",
+      "kind": "controller",
+      "label": "None",
+      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
+      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "id": "mission:d6e392265fbd3c2a",
+      "kind": "mission",
+      "label": "forced-31101573329-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -495,7 +509,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 66,
+  "relationshipCount": 68,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -514,6 +528,19 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:641545a22a61e9ef"
+    },
+    {
+      "id": "edge:3d45ba27ec9335fe",
+      "relation": "BUILT_BY",
+      "source": "controller:7ee22193964bb59c",
+      "target": "mission:d6e392265fbd3c2a"
+    },
+    {
+      "eligible": false,
+      "id": "edge:73624fd6054b3b53",
+      "relation": "CHALLENGES",
+      "source": "controller:7ee22193964bb59c",
+      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:a58931769be09d64",
