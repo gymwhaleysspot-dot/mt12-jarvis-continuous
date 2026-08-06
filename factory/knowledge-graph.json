@@ -3,18 +3,18 @@
   "counts": {
     "controller": 3,
     "digital_twin": 1,
-    "experiment": 1,
+    "experiment": 2,
     "log": 3,
     "mission": 2,
-    "mutation": 2,
+    "mutation": 4,
     "next_experiment": 1,
     "rejection": 40,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260806061512",
-  "generatedAt": "2026-08-06T09:16:52.087931+00:00",
-  "nodeCount": 62,
+  "currentExperiment": "EXP-20260806092929",
+  "generatedAt": "2026-08-06T09:29:54.362683+00:00",
+  "nodeCount": 65,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -430,9 +430,29 @@
       "id": "test:006110a1594843d9",
       "kind": "test",
       "label": "runtime memory check"
+    },
+    {
+      "expectedInformationGain": 0.816,
+      "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+      "id": "experiment:0ec21caeeed46722",
+      "kind": "experiment",
+      "label": "Improve sensor dropout recovery",
+      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
+      "status": "PLANNED",
+      "uncertainty": 0.62
+    },
+    {
+      "id": "mutation:3fa263a6223e98fc",
+      "kind": "mutation",
+      "label": "graded fail-open sensor confidence"
+    },
+    {
+      "id": "mutation:5a7c6e240bcab7e6",
+      "kind": "mutation",
+      "label": "state-preserving dropout recovery"
     }
   ],
-  "relationshipCount": 57,
+  "relationshipCount": 67,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -775,6 +795,66 @@
       "id": "edge:303c13a76ad687d3",
       "relation": "REQUIRES_TEST",
       "source": "experiment:76a4da5e64449a44",
+      "target": "test:006110a1594843d9"
+    },
+    {
+      "id": "edge:1d4469c360f9b60a",
+      "relation": "USES_PARENT",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:ac5016ba575fa5e5",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "mutation:3fa263a6223e98fc"
+    },
+    {
+      "id": "edge:0beafd33013d7fed",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "mutation:5a7c6e240bcab7e6"
+    },
+    {
+      "id": "edge:ed414b72b79f8562",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:d0ceba208d208f3d"
+    },
+    {
+      "id": "edge:8dfb8ee8e19c5284",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:af354b232c193ef9"
+    },
+    {
+      "id": "edge:8d86f39523056311",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:9e7a610f94776e69"
+    },
+    {
+      "id": "edge:a12fba00f4567ee8",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:822439754733430f"
+    },
+    {
+      "id": "edge:d17a3ef95953a01b",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:529343bd009a7dd8"
+    },
+    {
+      "id": "edge:f68a284c47830fb4",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
+      "target": "test:b1b2a0420869a06b"
+    },
+    {
+      "id": "edge:e3c1d2960d2a5e71",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:0ec21caeeed46722",
       "target": "test:006110a1594843d9"
     }
   ],
