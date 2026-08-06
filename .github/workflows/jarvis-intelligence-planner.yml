@@ -1,0 +1,65 @@
+name: Jarvis Intelligence Planner
+on:
+  schedule:
+    - cron: '12,42 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/jarvis_intelligence_planner.py
+      - tools/jarvis_evolution_gate.py
+      - factory/memory/**
+      - factory/vehicle-model-calibrated.json
+      - public/builds/index.json
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: jarvis-intelligence-planner
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - name: Build uncertainty-ranked experiment plan
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/jarvis_intelligence_planner.py
+          python3 tools/jarvis_intelligence_planner.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('public/jarvis-data/experiment-plan.json').read_text())
+          e=p['nextExperiment']
+          assert p['schema']=='JARVIS-EXPERIMENT-PLAN-1'
+          assert e['hypothesis'] and e['mutations'] and e['measurement']
+          assert e['acceptanceCriteria']['mustCompareAgainstChampion'] is True
+          assert 0 <= e['expectedInformationGain'] <= 1
+          print(e['id'], e['area'], e['expectedInformationGain'])
+          PY
+      - name: Persist planner decision
+        run: |
+          git config user.name 'Jarvis Intelligence Planner'
+          git config user.email 'actions@users.noreply.github.com'
+          git add factory/next-experiment.json factory/memory/planner-history.json public/jarvis-data/experiment-plan.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Select highest-information Jarvis experiment [skip ci]'
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
+      - name: Keep mission engine moving
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh workflow run jarvis-persistent-mission.yml --ref main || true
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-experiment-plan
+          path: |
+            public/jarvis-data/experiment-plan.json
+            factory/next-experiment.json
+          retention-days: 90
