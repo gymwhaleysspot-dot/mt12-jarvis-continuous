@@ -1,11 +1,11 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 3,
+    "controller": 4,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 2,
+    "mission": 3,
     "mutation": 2,
     "next_experiment": 1,
     "rejection": 43,
@@ -13,8 +13,8 @@
     "track": 2
   },
   "currentExperiment": "EXP-20260806104750",
-  "generatedAt": "2026-08-06T11:04:40.625680+00:00",
-  "nodeCount": 65,
+  "generatedAt": "2026-08-06T11:32:01.082301+00:00",
+  "nodeCount": 67,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -75,6 +75,21 @@
       "recommended": true,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
+      "bytes": 86982,
+      "id": "controller:7ee22193964bb59c",
+      "kind": "controller",
+      "label": "None",
+      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
+      "recommended": false,
+      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "id": "mission:e8bf2b7e811f5db8",
+      "kind": "mission",
+      "label": "guaranteed-31095800700-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -453,7 +468,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 60,
+  "relationshipCount": 62,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -472,6 +487,19 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:81abfa303b0bca48"
+    },
+    {
+      "id": "edge:9c017b86918a5a4f",
+      "relation": "BUILT_BY",
+      "source": "controller:7ee22193964bb59c",
+      "target": "mission:e8bf2b7e811f5db8"
+    },
+    {
+      "eligible": false,
+      "id": "edge:73624fd6054b3b53",
+      "relation": "CHALLENGES",
+      "source": "controller:7ee22193964bb59c",
+      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:a58931769be09d64",
