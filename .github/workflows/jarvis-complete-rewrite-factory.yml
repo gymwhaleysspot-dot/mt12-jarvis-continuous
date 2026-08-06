@@ -1,0 +1,144 @@
+name: Jarvis Complete Rewrite LUAC Factory
+
+on:
+  schedule:
+    - cron: '3,13,23,33,43,53 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/controller_rewrite_factory.py
+      - tools/controller_tournament.py
+      - factory/next-experiment.json
+      - public/jarvis-data/experiment-plan.json
+      - .github/workflows/jarvis-complete-rewrite-factory.yml
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: jarvis-complete-rewrite-luac-factory
+  cancel-in-progress: false
+
+jobs:
+  rewrite-build-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Synchronize current Jarvis state
+        run: git pull --rebase origin main
+
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+
+      - name: Validate complete-rewrite authority
+        run: |
+          python3 -m py_compile \
+            tools/controller_tournament.py \
+            tools/controller_rewrite_factory.py \
+            tools/jarvis_intelligence_planner.py \
+            tools/jarvis_evolution_gate.py
+
+      - name: Refresh highest-information experiment
+        run: python3 tools/jarvis_intelligence_planner.py
+
+      - name: Generate complete source rewrites and novel LUACs
+        env:
+          RELEASE_TYPE: R
+          SERIES: jrw
+        run: python3 tools/controller_rewrite_factory.py
+
+      - name: Prove every compiled file is unique
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('dist-controller-tournament')
+          result=json.loads((root/'TOURNAMENT.json').read_text())
+          authority=result['rewriteAuthority']
+          assert authority['schema']=='JARVIS-COMPLETE-REWRITE-1'
+          assert not authority['failures']
+          compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
+          assert compiled
+          source=[c['sourceSha256'] for c in compiled]
+          luac=[c['luacSha256'] for c in compiled]
+          assert len(source)==len(set(source))
+          assert len(luac)==len(set(luac))
+          for c in compiled:
+              rc=c['rewriteContract']
+              assert rc['sourceNovel'] is True
+              assert rc['bytecodeNovel'] is True
+              assert rc['duplicatePolicy']=='HARD_FAIL_AND_REPLAN'
+          print(json.dumps({'compiled':len(compiled),'sources':source,'luacs':luac},indent=2))
+          PY
+
+      - name: Publish every rewrite candidate
+        run: |
+          python3 - <<'PY'
+          import json,os,shutil,hashlib
+          from pathlib import Path
+          src=Path('dist-controller-tournament')
+          result=json.loads((src/'TOURNAMENT.json').read_text())
+          mission=f"rewrite-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+          base=Path('public/builds')/mission
+          base.mkdir(parents=True,exist_ok=True)
+          published=[]
+          for c in result['candidates']:
+              if c.get('status')!='COMPILED': continue
+              cid=c['candidate']; origin=src/cid; target=base/cid
+              shutil.copytree(origin,target,dirs_exist_ok=True)
+              published.append({'candidate':cid,'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-1','mission':mission,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN'}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n')
+          (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
+          print(json.dumps(manifest,indent=2))
+          PY
+
+      - name: Apply evolution and champion authorities
+        run: |
+          python3 tools/jarvis_evolution_gate.py
+          python3 tools/jarvis_champion_guard.py
+          python3 tools/jarvis_graph_intelligence.py
+
+      - name: Persist novel rewrites
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Complete Rewrite Factory'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- public/builds public/jarvis-data factory
+          if git diff --cached --quiet; then
+            echo 'ERROR: rewrite factory produced no persistent change'
+            exit 1
+          fi
+          git commit -m 'Publish novel complete-rewrite MT12 LUAC generation [skip ci]'
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-complete-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist-controller-tournament/
+            public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Continue autonomous mission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run jarvis-mandatory-intelligence-gate.yml --ref main || true
+          gh workflow run jarvis-persistent-mission.yml --ref main || true
