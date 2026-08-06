@@ -1,0 +1,150 @@
+name: Jarvis Mandatory Controller Intelligence Gate
+
+on:
+  workflow_run:
+    workflows:
+      - Jarvis Complete Autonomous Factory
+      - Guaranteed MT12 LUAC Output
+      - Evidence-driven LUAC Workbench
+      - A17Y LUAC AI Builder
+      - Repair A17Y Root and Build Aegis Candidate
+    types: [completed]
+  schedule:
+    - cron: '22,52 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/jarvis-mandatory-intelligence-gate.yml
+      - tools/jarvis_intelligence_planner.py
+      - tools/jarvis_evolution_gate.py
+      - tools/jarvis_champion_guard.py
+      - tools/jarvis_causal_memory.py
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: jarvis-mandatory-controller-intelligence
+  cancel-in-progress: false
+
+jobs:
+  enforce:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Synchronize latest producer output
+        run: |
+          set -Eeuo pipefail
+          git pull --rebase origin main
+
+      - name: Validate all intelligence authorities
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile \
+            tools/jarvis_intelligence_planner.py \
+            tools/jarvis_evolution_gate.py \
+            tools/jarvis_champion_guard.py \
+            tools/jarvis_causal_memory.py
+
+      - name: Select highest-information experiment
+        run: python3 tools/jarvis_intelligence_planner.py
+
+      - name: Enforce novelty lineage and publication authority
+        run: python3 tools/jarvis_evolution_gate.py
+
+      - name: Protect champion with direct comparative evidence
+        run: python3 tools/jarvis_champion_guard.py
+
+      - name: Rebuild causal engineering memory
+        run: python3 tools/jarvis_causal_memory.py
+
+      - name: Prove no candidate bypassed the authority chain
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          idx=json.loads(Path('public/builds/index.json').read_text())
+          plan=json.loads(Path('public/jarvis-data/experiment-plan.json').read_text())
+          guard=json.loads(Path('public/jarvis-data/champion-protection.json').read_text())
+          graph=json.loads(Path('factory/causal-memory.json').read_text())
+
+          assert idx.get('championProtected') is True
+          assert guard['rules']['directComparisonRequired'] is True
+          assert guard['rules']['regressionsAllowed'] is False
+          assert plan['nextExperiment']['acceptanceCriteria']['mustCompareAgainstChampion'] is True
+          assert graph['nodeCount'] == len(graph['nodes'])
+          assert graph['relationshipCount'] == len(graph['relationships'])
+
+          for build in idx.get('builds',[]):
+              if build.get('recommended'):
+                  assert build.get('promotionEligible') is True
+                  assert (build.get('confidence') or 0) >= .85
+                  assert (build.get('scoreDelta') or 0) > 0
+
+          state={
+            'schema':'JARVIS-MANDATORY-GATE-1',
+            'state':'ACTIVE',
+            'upstreamWorkflow': '${{ github.event.workflow_run.name || github.workflow }}',
+            'upstreamRunId': '${{ github.event.workflow_run.id || github.run_id }}',
+            'experiment': plan['nextExperiment']['id'],
+            'champion': guard.get('champion'),
+            'recommended': idx.get('recommended'),
+            'uniqueBuilds': idx.get('uniqueBuilds',0),
+            'duplicatesRejected': idx.get('duplicatesRejected',0),
+            'causalNodes': graph['nodeCount'],
+            'causalRelationships': graph['relationshipCount'],
+          }
+          Path('public/jarvis-data/mandatory-gate.json').write_text(json.dumps(state,indent=2)+'\n')
+          print(json.dumps(state,indent=2))
+          PY
+
+      - name: Persist authoritative controller state
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Jarvis Mandatory Intelligence Authority'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- \
+            factory/next-experiment.json \
+            factory/memory/planner-history.json \
+            factory/memory/champion-history.json \
+            factory/causal-memory.json \
+            public/builds \
+            public/jarvis-data/experiment-plan.json \
+            public/jarvis-data/champion-protection.json \
+            public/jarvis-data/mandatory-gate.json
+          if git diff --cached --quiet; then
+            echo 'Authority state already current.'
+          else
+            git commit -m 'Apply mandatory Jarvis intelligence authority [skip ci]'
+            for n in 1 2 3 4 5; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              git rebase --abort || true
+              sleep $((n*5))
+            done
+          fi
+
+      - name: Continue persistent mission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run jarvis-persistent-mission.yml --ref main || true
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-mandatory-intelligence-${{ github.run_id }}
+          path: |
+            public/jarvis-data/mandatory-gate.json
+            public/jarvis-data/experiment-plan.json
+            public/jarvis-data/champion-protection.json
+            factory/causal-memory.json
+            public/builds/index.json
+          if-no-files-found: error
+          retention-days: 90
