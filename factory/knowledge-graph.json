@@ -8,13 +8,13 @@
     "mission": 2,
     "mutation": 2,
     "next_experiment": 1,
-    "rejection": 106,
+    "rejection": 107,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260807065242",
-  "generatedAt": "2026-08-07T08:36:47.403730+00:00",
-  "nodeCount": 128,
+  "generatedAt": "2026-08-07T08:40:58.051290+00:00",
+  "nodeCount": 129,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -892,9 +892,16 @@
       "id": "test:006110a1594843d9",
       "kind": "test",
       "label": "runtime memory check"
+    },
+    {
+      "id": "rejection:1b8c3e31c7f73aa7",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     }
   ],
-  "relationshipCount": 123,
+  "relationshipCount": 124,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -1634,6 +1641,12 @@
       "relation": "REQUIRES_TEST",
       "source": "experiment:1424e0925a5510f9",
       "target": "test:006110a1594843d9"
+    },
+    {
+      "id": "edge:b77afa74a069a5f0",
+      "relation": "DUPLICATES",
+      "source": "rejection:1b8c3e31c7f73aa7",
+      "target": "controller:a0206f4b0721cac1"
     }
   ],
   "schema": "JARVIS-KG-2"
