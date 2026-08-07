@@ -16,10 +16,18 @@ def protected_checks(text: str) -> list[str]:
     required = (
         "local function zBrain", "V[704]", "X[46]", "V[720]=ac",
         "setgv(3,m_min(V[35],ac))", "V[740+km]", "V[760+km]",
+        "local pc=pcall", "pc(getFieldInfo", "pc(getValue",
+        "pc(model.getGlobalVariable", "pc(model.setGlobalVariable",
+        "/LOGS/m0", "/LOGS/m1", "local function memOpt", "local function watch",
+        "V[179]*.0045", "92+4*dc",
+        "bb_line(144,li1,0)", "bb_line(147,li4,0)",
+        "bb_line(148,rg1,0)", "bb_line(151,rg4,0)",
     )
     errors.extend(f"missing-lineage-floor:{token}" for token in required if token not in text)
     if "setgv(3,V[35])" in text:
         errors.append("forbidden-stale-authority:setgv(3,V[35])")
+    if "V[179]*(.00435" in text:
+        errors.append("forbidden-causal-ramp:restore-fixed-.0045")
     has_runtime_identity = all(
         token in text for token in (
             "bb_line(144,li1,0)", "bb_line(145,li2,0)",
