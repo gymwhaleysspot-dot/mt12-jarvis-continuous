@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "name": "A17YA-grade defended MT12 release",
+  "default_size_limit": 87000,
+  "absolute_size_limit": 87000,
+  "preserve_parent_local_functions": true,
+  "required_tokens": [
+    "local function evo",
+    "local function superBrain",
+    "X[41]",
+    "X[42]",
+    "X[43]",
+    "X[46]",
+    "V[179]*.0045",
+    "V[704]",
+    "local function memOpt",
+    "local function watch",
+    "/LOGS/m0",
+    "/LOGS/m1",
+    "setgv(7,1024)",
+    "setgv(3,m_min(V[35],ac))",
+    "io.read(f,",
+    "local pc=pcall"
+  ],
+  "forbidden_tokens": [
+    ":read(",
+    "setgv(3,V[35])"
+  ],
+  "required_regex": [
+    "local function fid\\([^)]*\\).*pc\\(getFieldInfo",
+    "local function val\\([^)]*\\).*pc\\(getValue",
+    "local function gv\\([^)]*\\).*pc\\(model\\.getGlobalVariable",
+    "local function setgv\\([^)]*\\).*pc\\(model\\.setGlobalVariable"
+  ],
+  "forbidden_regex": []
+}
