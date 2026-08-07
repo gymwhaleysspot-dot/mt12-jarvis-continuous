@@ -42,36 +42,29 @@ def advance(mission:str,run_number:int|None=None)->dict:
  base=ROOT/'public/builds'/mission
  tournament=json.loads((base/'TOURNAMENT.json').read_text())
  winner=tournament.get('winner')
- if winner!='jrw6':
-  current=json.loads(POINTER.read_text())
-  hold={
-   'schema':'JARVIS-EVOLUTION-HOLD-1','advanced':False,'reason':'individual-winner-needs-synthesis',
-   'winner':winner,'mission':mission,'generationRun':int(run_number or 0) or None,
-   'evolutionParent':current.get('release'),'canonicalFloor':canonical_name(),
-   'policy':'VALID_GENERATION; KEEP_SYNTHESIS_PARENT; FEED_WINNER_INTO_NEXT_SYNTHESIS'
-  }
-  (base/'EVOLUTION-HOLD.json').write_text(json.dumps(hold,indent=2)+'\n')
-  return hold
- manifest=json.loads((base/winner/'MANIFEST.json').read_text())
+ if not winner:raise RuntimeError('tournament has no winner')
+ manifest_path=base/winner/'MANIFEST.json'
+ if not manifest_path.is_file():raise RuntimeError(f'winner manifest missing: {winner}')
+ manifest=json.loads(manifest_path.read_text())
  candidate=next((c for c in tournament.get('candidates',[]) if c.get('candidate')==winner),{})
  contract=manifest.get('rewriteContract') or candidate.get('rewriteContract') or {}
- if manifest.get('status')!='COMPILED' or manifest.get('errors'):raise RuntimeError('synthesis winner is not cleanly compiled')
- if manifest.get('profile')!='synthesis':raise RuntimeError('winner is not synthesis profile')
- if int(manifest.get('normalizedBytes',10**9))>MAX_BYTES:raise RuntimeError('synthesis winner exceeds MT12 size ceiling')
- if not contract.get('sourceNovel') or not contract.get('bytecodeNovel'):raise RuntimeError('synthesis winner failed novelty contract')
+ if manifest.get('status')!='COMPILED' or manifest.get('errors'):raise RuntimeError('tournament winner is not cleanly compiled')
+ if candidate.get('promotionEfficiencyEligible') is False:raise RuntimeError('tournament winner failed promotion-efficiency gate')
+ if int(manifest.get('normalizedBytes',10**9))>MAX_BYTES:raise RuntimeError('tournament winner exceeds MT12 size ceiling')
+ if not contract.get('sourceNovel') or not contract.get('bytecodeNovel'):raise RuntimeError('tournament winner failed novelty contract')
  source=base/winner/f'{winner}.lua';deploy=base/winner/f'{winner}.luac'
- if digest(source)!=manifest.get('sourceSha256') or digest(deploy)!=manifest.get('luacSha256'):raise RuntimeError('synthesis winner hash does not match manifest')
+ if digest(source)!=manifest.get('sourceSha256') or digest(deploy)!=manifest.get('luacSha256'):raise RuntimeError('tournament winner hash does not match manifest')
  text=source.read_text();missing=[x for x in REQUIRED if x not in text];bad=[x for x in FORBIDDEN if x in text]
- if missing or bad:raise RuntimeError(f'synthesis winner violated canonical floor missing={missing} forbidden={bad}')
+ if missing or bad:raise RuntimeError(f'tournament winner violated canonical floor missing={missing} forbidden={bad}')
  run_number=int(run_number or 0)
  doc={
-  'schema':'JARVIS-EVOLUTION-PARENT-1','release':f'jrw6-{run_number}' if run_number else f'jrw6-{mission}',
-  'candidate':'jrw6','generationRun':run_number or None,'mission':mission,
+  'schema':'JARVIS-EVOLUTION-PARENT-2','release':f'{winner}-{run_number}' if run_number else f'{winner}-{mission}',
+  'candidate':winner,'generationRun':run_number or None,'mission':mission,
   'sourcePath':str(source.relative_to(ROOT)),'deployPath':str(deploy.relative_to(ROOT)),
   'sourceSha256':digest(source),'luacSha256':digest(deploy),'normalizedBytes':deploy.stat().st_size,
   'authority':'STATIC_EVOLUTION_PARENT_ROAD_UNPROVEN','canonicalFloor':canonical_name(),
-  'promotionPolicy':'AUTO_FOR_EXPERIMENTAL_EVOLUTION_ONLY; NEVER_AUTO_CANONICAL',
-  'requiredForAdvance':['synthesis winner','Lua 5.3 compile','MT12 normalization','defended canonical floor preserved','source and bytecode novelty','zero candidate errors','normalized size <= 87000']
+  'promotionPolicy':'TOURNAMENT_WINNER_AUTO_FOR_EXPERIMENTAL_EVOLUTION_ONLY; NEVER_AUTO_CANONICAL',
+  'requiredForAdvance':['tournament winner','Lua 5.3 compile','MT12 normalization','defended canonical floor preserved','source and bytecode novelty','zero candidate errors','promotion-efficiency eligible','normalized size <= 87000']
  }
  POINTER.write_text(json.dumps(doc,indent=2)+'\n')
  return doc
