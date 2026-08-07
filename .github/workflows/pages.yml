@@ -51,30 +51,40 @@ jobs:
           if(c.missions.length<15)throw Error('Capability mission contract incomplete');
           if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
           if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
-          for(const p of ['racing-mjx7303-v15.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v15.js','jarvis/mjx7303-asset-v13.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing V15 asset missing: '+p);
+          for(const p of ['racing-mjx7303-v15.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v15.js','jarvis/mjx7303-asset-v13.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing V16 asset missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
-          grep -q 'Jarvis MT12 Engineering Workstation' index.html
-          grep -q 'jarvis/app.js' index.html
-          grep -q 'classic-token.js' index.html
-          grep -q 'jarvis/firmware-center.js' index.html
-          grep -q 'public/device-data/releases.json' jarvis/state.js
-          grep -q 'EdgeTX' jarvis/firmware-center.js
-          grep -q 'ExpressLRS' jarvis/firmware-center.js
-          grep -q 'firmware-catalog' jarvis/firmware-center.js
-          grep -q 'firmware-build-flash' jarvis/firmware-center.js
-          grep -q 'MJX 7303 MT12 AI3D V15' racing-mjx7303-v15.html
-          grep -q 'body\[data-mode="garage"\] .controls' racing-mjx7303-v15.html
-          grep -q 'mjx7303-physics-v4.js' racing-mjx7303-v15.html
-          grep -q 'mjx7303-game-v11.js' racing-mjx7303-v15.html
-          grep -q 'racing-mjx7303-v15.html' jarvis/racing-tab.js
-          grep -q "AI3D_VERSION='15.0.0'" jarvis/ai3d-engine-v15.js
-          grep -q 'WebGL2 required' jarvis/ai3d-engine-v15.js
-          grep -q 'AIQualityGovernor' jarvis/ai3d-engine-v15.js
-          grep -q 'MJX7303_ASSET_V13' jarvis/mjx7303-asset-v13.js
-          grep -q 'ai3d-engine-v15.js' jarvis/mjx7303-game-v11.js
-          ! grep -q 'three.module.js' racing-mjx7303-v15.html
-          for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
+          node - <<'NODE'
+          const fs=require('fs');
+          const check=(file,token,label=token)=>{const s=fs.readFileSync(file,'utf8');if(!s.includes(token))throw Error(`Validation missing ${label} in ${file}`)};
+          check('index.html','Jarvis MT12 Engineering Workstation');
+          check('index.html','jarvis/app.js');
+          check('index.html','classic-token.js');
+          check('index.html','jarvis/firmware-center.js');
+          check('jarvis/state.js','public/device-data/releases.json');
+          check('jarvis/firmware-center.js','EdgeTX');
+          check('jarvis/firmware-center.js','ExpressLRS');
+          check('jarvis/firmware-center.js','firmware-catalog');
+          check('jarvis/firmware-center.js','firmware-build-flash');
+          check('racing-mjx7303-v15.html','MJX 7303 MT12 AI3D V15');
+          check('racing-mjx7303-v15.html','body[data-mode="garage"] .controls');
+          check('racing-mjx7303-v15.html','mjx7303-physics-v4.js');
+          check('racing-mjx7303-v15.html','mjx7303-game-v11.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v15.html');
+          check('jarvis/racing-tab.js','portrait16','V16 portrait cache token');
+          check('jarvis/ai3d-engine-v15.js',"AI3D_VERSION='15.0.0'");
+          check('jarvis/ai3d-engine-v15.js','WebGL2 required');
+          check('jarvis/ai3d-engine-v15.js','AIQualityGovernor');
+          check('jarvis/mjx7303-asset-v13.js','MJX7303_ASSET_V13');
+          check('jarvis/mjx7303-game-v11.js','ai3d-engine-v15.js');
+          check('jarvis/mjx7303-game-v11.js','portraitBase','V16 portrait-aware camera');
+          if(fs.readFileSync('racing-mjx7303-v15.html','utf8').includes('three.module.js'))throw Error('Three.js unexpectedly present in active Racing shell');
+          for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html']){
+            if(!fs.existsSync(f))throw Error('Compatibility route missing: '+f);
+            check(f,'Opening Jarvis','Opening Jarvis compatibility marker');
+          }
+          console.log('Jarvis Pages validation: PASS — Racing V16 portrait contract and compatibility routes verified.');
+          NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy GitHub Pages
