@@ -1,15 +1,9 @@
 {
-  "schema": 1,
+  "schema": 2,
   "missionId": "J-1785967020",
   "createdAt": "2026-08-05T21:57:00.828813+00:00",
-  "cycle": 539,
+  "cycle": 540,
   "history": [
-    {
-      "cycle": 440,
-      "at": "2026-08-07T02:39:41.814056+00:00",
-      "objective": "Continuously improve the current MT12 controller through evidence, simulation, replay and controlled mutation.",
-      "dispatches": []
-    },
     {
       "cycle": 441,
       "at": "2026-08-07T02:41:13.409920+00:00",
@@ -827,23 +821,36 @@
           "dispatchedAt": "2026-08-07T03:37:47.238489+00:00"
         }
       ]
+    },
+    {
+      "cycle": 540,
+      "at": "2026-08-07T03:40:07.802031+00:00",
+      "objective": "Strengthen evidence, simulation and causal knowledge for the authoritative controller producer.",
+      "dispatches": [
+        {
+          "task": "discovery",
+          "lane": "intelligence",
+          "workflow": "discovery.yml",
+          "dispatchedAt": "2026-08-07T03:40:07.802005+00:00"
+        }
+      ]
     }
   ],
   "tasks": [],
-  "objective": "Continuously improve the current MT12 controller through evidence, simulation, replay and controlled mutation.",
+  "objective": "Strengthen evidence, simulation and causal knowledge for the authoritative controller producer.",
   "state": "ACTIVE",
-  "updatedAt": "2026-08-07T03:37:43.455879+00:00",
+  "updatedAt": "2026-08-07T03:40:04.379608+00:00",
   "activeLanes": {
-    "file": true,
+    "controller": "owned-by-always-on",
     "intelligence": true
   },
   "lastDispatches": [
     {
-      "task": "evidence-review",
+      "task": "discovery",
       "lane": "intelligence",
-      "workflow": "evidence-authority.yml",
-      "dispatchedAt": "2026-08-07T03:37:47.238489+00:00"
+      "workflow": "discovery.yml",
+      "dispatchedAt": "2026-08-07T03:40:07.802005+00:00"
     }
   ],
-  "nextAction": "Evaluate completed task outputs, update evidence and create the next highest-value task."
+  "nextAction": "Evaluate intelligence output and feed evidence to the single authoritative rewrite producer."
 }
