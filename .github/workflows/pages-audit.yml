@@ -173,10 +173,10 @@ jobs:
           if(!s.includes("buildName:`${String(c.candidate||'').toUpperCase()}-${g.runNumber}`"))throw Error('Run-qualified buildName is not constructed in state');
           if(!a.includes('esc(c.buildName)'))throw Error('Run-qualified buildName is not rendered by UI');
           if(!a.includes('runtimeIdentity?.token'))throw Error('Runtime identity missing from UI');
-          if(!a.includes('TOURNAMENT'))throw Error('Tournament download missing');
+          if(!s.includes("api.optionalFile(base+'TOURNAMENT.json')"))throw Error('Tournament data loader missing');
           if(!w.includes("lua.textContent='LUA'"))throw Error('Winner LUA source download missing');
           if(!c.includes('CADENCE_MINUTES=15'))throw Error('15-minute countdown contract missing');
-          console.log({fixedJsonReferences:fixed,generationHistory:20,publicBudget:'bounded',winnerIdentity:'candidate-run',winnerDownloads:'lua+luac',countdownMinutes:15});
+          console.log({fixedJsonReferences:fixed,generationHistory:20,publicBudget:'bounded',winnerIdentity:'candidate-run',tournamentData:'loaded',winnerDownloads:'lua+luac',countdownMinutes:15});
           NODE
 
       - name: Validate repository JSON syntax
