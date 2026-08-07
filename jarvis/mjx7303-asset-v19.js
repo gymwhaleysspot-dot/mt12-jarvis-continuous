@@ -1,0 +1,39 @@
+// JARVIS MJX 7303 Asset V19 - solid body-first rally hatchback with enclosed cabin
+import {Mesh,Node,boxMeshData,normals,colorArray} from './ai3d-engine-v15.js?v=20260807renderer151body19';
+export const ASSET_VERSION='19.0.0';
+const C={white:[.91,.93,.95],red:[.84,.02,.035],black:[.008,.01,.014],glass:[.018,.055,.085],rubber:[.012,.012,.014],metal:[.42,.46,.52],dark:[.025,.03,.038],seat:[.06,.025,.03]};
+const M={paint:{rough:.14,metal:.12,clearcoat:.98,reflect:.86},accent:{rough:.18,metal:.14,clearcoat:.88,reflect:.68},glass:{rough:.03,metal:.02,clearcoat:.92,reflect:.94,alpha:.30,doubleSide:true},rubber:{rough:.96,metal:.01,clearcoat:.01,reflect:.02},metal:{rough:.22,metal:.88,clearcoat:.08,reflect:.68},trim:{rough:.52,metal:.2,clearcoat:.04,reflect:.14},interior:{rough:.78,metal:.03,clearcoat:.01,reflect:.03},lamp:{rough:.04,metal:.02,clearcoat:.9,reflect:.84,emissive:1.1}};
+const mesh=(gl,d,m)=>new Mesh(gl,{...d,material:m});
+function box(gl,p,w,h,d,pos,col,m=M.trim,tag=''){const n=new Node(mesh(gl,boxMeshData(w,h,d,col),m));n.position.set(pos);n.tag=tag;return p.add(n)}
+function quad(a,b,c,d,col){const p=[...a,...b,...c,...d],i=[0,1,2,0,2,3];return{positions:p,normals:normals(p,i),colors:colorArray(4,col),indices:i}}
+function torusX(R,r,segR,segT,col){const p=[],i=[];for(let a=0;a<segR;a++){const u=a*Math.PI*2/segR,cu=Math.cos(u),su=Math.sin(u);for(let b=0;b<segT;b++){const v=b*Math.PI*2/segT,cv=Math.cos(v),sv=Math.sin(v);p.push(r*cv,(R+r*sv)*cu,(R+r*sv)*su)}}for(let a=0;a<segR;a++)for(let b=0;b<segT;b++){const n=(a+1)%segR,m=(b+1)%segT,A=a*segT+b,B=a*segT+m,Cc=n*segT+m,D=n*segT+b;i.push(A,B,D,B,Cc,D)}return{positions:p,normals:normals(p,i),colors:colorArray(p.length/3,col),indices:i}}
+function cylX(r,w,seg,col){const p=[],i=[];for(const x of[-w/2,w/2])for(let k=0;k<seg;k++){const a=k*Math.PI*2/seg;p.push(x,Math.cos(a)*r,Math.sin(a)*r)}for(let k=0;k<seg;k++){const n=(k+1)%seg,a=k,b=n,c=seg+n,d=seg+k;i.push(a,b,d,b,c,d)}return{positions:p,normals:normals(p,i),colors:colorArray(p.length/3,col),indices:i}}
+function wheel(gl,lod=0){const g=new Node(),sr=lod===0?52:36;g.tag='wheel';g.add(new Node(mesh(gl,torusX(.285,.082,sr,12,C.rubber),M.rubber)));g.add(new Node(mesh(gl,cylX(.215,.13,Math.max(28,sr-8),[.12,.13,.15]),M.metal)));g.add(new Node(mesh(gl,cylX(.125,.14,24,C.metal),M.metal)));for(let k=0;k<8;k++){const a=k*Math.PI/4,s=box(gl,g,.14,.018,.025,[.073,Math.cos(a)*.095,Math.sin(a)*.095],C.white,M.metal,'spoke');s.rotation[0]=a}box(gl,g,.025,.10,.07,[.085,.02,.12],C.red,{rough:.3,metal:.35},'caliper');return g}
+function seat(gl,p,x,z){box(gl,p,.46,.16,.48,[x,.51,z],C.seat,M.interior,'seat-base');const b=box(gl,p,.46,.62,.15,[x,.82,z+.14],C.seat,M.interior,'seat-back');b.rotation[0]=-.08;box(gl,p,.30,.10,.08,[x,1.14,z+.20],C.red,M.accent,'headrest')}
+function steering(gl,p){const g=new Node();g.tag='steering-wheel';g.add(new Node(mesh(gl,torusX(.16,.024,32,10,C.black),M.rubber)));g.rotation[1]=Math.PI/2;g.position.set([-.34,1.01,-.48]);p.add(g);box(gl,g,.07,.07,.045,[0,0,0],C.red,M.accent,'steer-hub')}
+function glass(gl,p,d,tag){const n=new Node(mesh(gl,d,M.glass));n.tag=tag;p.add(n);return n}
+export class AI7303Modeler{constructor(gl){this.gl=gl;this.root=null;this.lastLOD=-1;this.damage={front:0,rear:0,left:0,right:0}}build(lod=0){const gl=this.gl,car=new Node();car.tag='MJX7303_ASSET_V19';
+// SOLID EXTERIOR MASSES: no open-frame side architecture
+box(gl,car,1.94,.62,3.52,[0,.63,.06],C.white,M.paint,'main-body');
+box(gl,car,1.78,.34,1.10,[0,.92,-1.42],C.white,M.paint,'hood');
+box(gl,car,1.82,.54,.92,[0,.82,1.56],C.white,M.paint,'rear-quarter');
+box(gl,car,1.60,.16,1.72,[0,1.47,.32],C.white,M.paint,'roof');
+// full opaque side skins: front fender + doors + rear quarter
+for(const sx of[-1,1]){box(gl,car,.11,.64,.82,[sx*.98,.79,-1.18],C.white,M.paint,'front-fender');box(gl,car,.10,.70,1.44,[sx*.99,.86,.02],C.white,M.paint,'door-skin');box(gl,car,.11,.68,.92,[sx*.97,.82,1.22],C.white,M.paint,'rear-quarter-skin');box(gl,car,.12,.24,2.78,[sx*.99,.49,.10],C.black,M.trim,'rocker');}
+// greenhouse frame kept close to body, not cage-like
+for(const sx of[-1,1]){const a=box(gl,car,.10,.72,.12,[sx*.73,1.18,-.48],C.white,M.paint,'a-pillar');a.rotation[0]=-.30;box(gl,car,.08,.68,.10,[sx*.75,1.18,.28],C.black,M.trim,'b-pillar');const c=box(gl,car,.11,.70,.12,[sx*.70,1.17,1.02],C.white,M.paint,'c-pillar');c.rotation[0]=.30;}
+// cabin is fully enclosed behind glass
+box(gl,car,1.55,.18,2.25,[0,.47,.18],C.dark,M.interior,'cabin-floor');box(gl,car,1.45,.36,.18,[0,.78,-.72],C.dark,M.interior,'dashboard');box(gl,car,1.42,.14,.34,[0,.72,-.50],C.black,M.interior,'dash-top');box(gl,car,.34,.16,.72,[0,.55,.14],C.black,M.interior,'console');seat(gl,car,-.42,.02);seat(gl,car,.42,.02);steering(gl,car);
+// windows sit ON the finished body rather than replacing it
+ glass(gl,car,quad([-.67,.93,-.76],[.67,.93,-.76],[.55,1.41,-.47],[-.55,1.41,-.47],C.glass),'glass-front');
+ glass(gl,car,quad([-.56,1.40,.88],[.56,1.40,.88],[.68,.94,1.34],[-.68,.94,1.34],C.glass),'glass-rear');
+for(const sx of[-1,1]){glass(gl,car,quad([sx*1.045,.96,-.58],[sx*1.045,1.38,-.34],[sx*1.045,1.39,.25],[sx*1.045,.96,.25],C.glass),'glass-side-front');glass(gl,car,quad([sx*1.045,.96,.34],[sx*1.045,1.39,.34],[sx*1.045,1.34,.82],[sx*1.045,.96,1.18],C.glass),'glass-side-rear')}
+// fascia / aero / trim
+box(gl,car,1.82,.22,.22,[0,.53,-1.86],C.white,M.paint,'front-bumper');box(gl,car,1.76,.20,.20,[0,.54,1.85],C.white,M.paint,'rear-bumper');box(gl,car,1.02,.20,.06,[0,.62,-1.99],C.black,M.trim,'grille');for(const sx of[-1,1]){box(gl,car,.40,.11,.06,[sx*.55,.79,-1.98],C.white,M.lamp,'headlamp');box(gl,car,.28,.08,.055,[sx*.56,.76,1.96],C.red,M.lamp,'tail');box(gl,car,.15,.10,.20,[sx*.96,1.16,-.26],C.red,M.accent,'mirror')}
+box(gl,car,1.86,.055,.30,[0,.34,-1.97],C.black,M.trim,'splitter');box(gl,car,.46,.05,.20,[0,1.56,-.08],C.black,M.trim,'roof-scoop');box(gl,car,1.54,.065,.27,[0,1.43,1.72],C.black,M.trim,'wing');for(const sx of[-1,1])box(gl,car,.045,.22,.08,[sx*.56,1.25,1.64],C.black,M.trim,'wing-stay');
+// red rally graphics as raised painted panels
+for(const sx of[-1,1]){box(gl,car,.055,.30,.92,[sx*1.055,.78,-.18],C.red,M.accent,'livery-door');box(gl,car,.055,.26,.54,[sx*1.055,.76,1.10],C.red,M.accent,'livery-quarter')}
+const wheels=[];for(const pos of[[-1.04,.50,-1.15],[1.04,.50,-1.15],[-1.04,.50,1.15],[1.04,.50,1.15]]){const w=wheel(gl,lod);w.position.set(pos);car.add(w);wheels.push(w)}car.wheels=wheels;
+this.root=car;this.lastLOD=lod;this.applyDamage(this.damage);return car}applyDamage(v){this.damage={...this.damage,...v};if(!this.root)return;const f=Math.min(1,this.damage.front||0),r=Math.min(1,this.damage.rear||0),l=Math.min(1,this.damage.left||0),rr=Math.min(1,this.damage.right||0);for(const c of this.root.children){if(['front-bumper','splitter','grille','headlamp'].includes(c.tag))c.position[1]-=.035*f;if(['rear-bumper','wing','wing-stay'].includes(c.tag))c.rotation[2]+=.035*r;if(c.tag==='mirror'&&c.position[0]<0)c.scale[0]=1-l*.55;if(c.tag==='mirror'&&c.position[0]>0)c.scale[0]=1-rr*.55}if(this.root.wheels){this.root.wheels[0].rotation[2]=l*.12+f*.04;this.root.wheels[1].rotation[2]=-rr*.12-f*.04}}}
+export function buildGarageEnvironment(gl){const r=new Node();const floor=new Node(mesh(gl,boxMeshData(18,.08,18,[.018,.022,.029]),{rough:.18,metal:.70,clearcoat:.20,reflect:.70}));floor.position[1]=-.04;r.add(floor);box(gl,r,5.8,.025,5.8,[0,.015,0],[.055,.063,.078],{rough:.12,metal:.82,clearcoat:.36,reflect:.90},'turntable');for(const x of[-6.4,6.4])for(const z of[-4.5,0,4.5])box(gl,r,.04,3.0,.04,[x,1.5,z],[.03,.35,.55],{rough:.2,metal:.2,emissive:.8,reflect:.25},'studio-light');return r}
+export const semanticRegions={body:2.0,doors:1.8,fenders:1.8,cabin:1.7,glass:1.5,wheels:1.8,interior:1.4,aero:1.2};
