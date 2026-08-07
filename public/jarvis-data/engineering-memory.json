@@ -6,15 +6,15 @@
     "experiment": 1,
     "log": 3,
     "mission": 2,
-    "mutation": 2,
+    "mutation": 10,
     "next_experiment": 1,
     "rejection": 108,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260807065242",
-  "generatedAt": "2026-08-07T09:14:36.080909+00:00",
-  "nodeCount": 130,
+  "currentExperiment": "EXP-20260807092910",
+  "generatedAt": "2026-08-07T09:34:28.611581+00:00",
+  "nodeCount": 138,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -58,12 +58,11 @@
       "label": "Adaptive MT12 Vehicle Twin"
     },
     {
-      "expectedInformationGain": 0.791,
-      "id": "next_experiment:641545a22a61e9ef",
+      "expectedInformationGain": 0.7127,
+      "id": "next_experiment:eda27b80e980b1e2",
       "kind": "next_experiment",
-      "label": "Improve truth speed fusion",
-      "reason": "Highest expected information gain; uncertainty=0.55, evidence coverage=0, prior experiments=0.",
-      "uncertainty": 0.55
+      "label": "Research-aware five-hypothesis generation plus synthesis",
+      "reason": "Portfolio combines real vehicle evidence with source-backed external engineering research while keeping research advisory and experimentally falsifiable."
     },
     {
       "authority": "GUARANTEED_BASELINE_DRIVE_BUILD",
@@ -207,6 +206,20 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:6c739a58ff4f086c",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:1b8c3e31c7f73aa7",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:fff741841fa87b8e",
@@ -839,14 +852,43 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.791,
-      "hypothesis": "A controller derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "id": "experiment:1424e0925a5510f9",
+      "expectedInformationGain": 0.7127,
+      "hypothesis": "Run five independent hypotheses informed by vehicle evidence and verified outside research, then build a sixth synthesis.",
+      "id": "experiment:2ce46f4879790adb",
       "kind": "experiment",
-      "label": "Improve truth speed fusion",
-      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
-      "status": "PLANNED",
-      "uncertainty": 0.55
+      "label": "Research-aware five-hypothesis generation plus synthesis",
+      "measurement": "maximize information gained per generation while preserving defended behavior",
+      "status": "PLANNED"
+    },
+    {
+      "id": "mutation:35fec75f0c96621e",
+      "kind": "mutation",
+      "label": "adaptive lock target confidence"
+    },
+    {
+      "id": "mutation:18f553d0fc6d0c7e",
+      "kind": "mutation",
+      "label": "linear release/reapply timing"
+    },
+    {
+      "id": "mutation:6c110f9626d9d4ce",
+      "kind": "mutation",
+      "label": "separate airborne and landing evidence"
+    },
+    {
+      "id": "mutation:6ec99fb4521921a0",
+      "kind": "mutation",
+      "label": "adaptive post-landing confirmation window"
+    },
+    {
+      "id": "mutation:815b1274c28658ed",
+      "kind": "mutation",
+      "label": "contextual slip severity blend"
+    },
+    {
+      "id": "mutation:45f7e0cb0e6c5f80",
+      "kind": "mutation",
+      "label": "surface-conditioned intervention release"
     },
     {
       "id": "mutation:3d53a3d9623490be",
@@ -857,6 +899,16 @@
       "id": "mutation:280d7a2eb3f92442",
       "kind": "mutation",
       "label": "confidence-weighted truth-speed handoff"
+    },
+    {
+      "id": "mutation:3fa263a6223e98fc",
+      "kind": "mutation",
+      "label": "graded fail-open sensor confidence"
+    },
+    {
+      "id": "mutation:5a7c6e240bcab7e6",
+      "kind": "mutation",
+      "label": "state-preserving dropout recovery"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -874,41 +926,27 @@
       "label": "static safety audit"
     },
     {
-      "id": "test:822439754733430f",
+      "id": "test:46a7939a0bb91296",
       "kind": "test",
-      "label": "digital-twin simulation"
+      "label": "historical novelty audit"
     },
     {
-      "id": "test:529343bd009a7dd8",
+      "id": "test:7bc4563e7245335a",
       "kind": "test",
-      "label": "identical-input replay"
+      "label": "defended-lineage gate"
     },
     {
-      "id": "test:b1b2a0420869a06b",
+      "id": "test:0dc8b008f43f14a0",
       "kind": "test",
-      "label": "adversarial regression suite"
+      "label": "runtime memory/size check"
     },
     {
-      "id": "test:006110a1594843d9",
+      "id": "test:93c3291786836d0b",
       "kind": "test",
-      "label": "runtime memory check"
-    },
-    {
-      "id": "rejection:1b8c3e31c7f73aa7",
-      "kind": "rejection",
-      "label": "BYTE_IDENTICAL_DUPLICATE",
-      "reason": "BYTE_IDENTICAL_DUPLICATE",
-      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
-    },
-    {
-      "id": "rejection:6c739a58ff4f086c",
-      "kind": "rejection",
-      "label": "BYTE_IDENTICAL_DUPLICATE",
-      "reason": "BYTE_IDENTICAL_DUPLICATE",
-      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+      "label": "bench and road evidence before promotion"
     }
   ],
-  "relationshipCount": 125,
+  "relationshipCount": 133,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -923,10 +961,10 @@
       "target": "controller:a5f84fb6dd812514"
     },
     {
-      "id": "edge:9c150f5259361796",
+      "id": "edge:88b867477a0e0beb",
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
-      "target": "next_experiment:641545a22a61e9ef"
+      "target": "next_experiment:eda27b80e980b1e2"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -1048,6 +1086,18 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:09f57637b17745ff",
+      "relation": "DUPLICATES",
+      "source": "rejection:6c739a58ff4f086c",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:b77afa74a069a5f0",
+      "relation": "DUPLICATES",
+      "source": "rejection:1b8c3e31c7f73aa7",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:77726258bcbd14ce",
@@ -1590,76 +1640,112 @@
       "target": "controller:a0206f4b0721cac1"
     },
     {
-      "id": "edge:298a3ac1da8321fe",
+      "id": "edge:e23d370aa03fd683",
       "relation": "USES_PARENT",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
       "target": "controller:1d3e9c9125494516"
     },
     {
-      "id": "edge:414cfc11899ed54a",
+      "id": "edge:1f67ff692de06b8c",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:35fec75f0c96621e"
+    },
+    {
+      "id": "edge:eeca0e26c6fceaa1",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:18f553d0fc6d0c7e"
+    },
+    {
+      "id": "edge:f86f8d911ac957d3",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:6c110f9626d9d4ce"
+    },
+    {
+      "id": "edge:0b06283b41c00722",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:6ec99fb4521921a0"
+    },
+    {
+      "id": "edge:5926c3015429b851",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:815b1274c28658ed"
+    },
+    {
+      "id": "edge:d738b782492e5b0f",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:45f7e0cb0e6c5f80"
+    },
+    {
+      "id": "edge:c48bcd4d04e625f6",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
       "target": "mutation:3d53a3d9623490be"
     },
     {
-      "id": "edge:e5cb443443fc1bb2",
+      "id": "edge:1b1c7aad51999734",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
       "target": "mutation:280d7a2eb3f92442"
     },
     {
-      "id": "edge:0c4b24a8c22454ef",
+      "id": "edge:320b23ae8dbbc1be",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:3fa263a6223e98fc"
+    },
+    {
+      "id": "edge:1d6699a7b1523e47",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2ce46f4879790adb",
+      "target": "mutation:5a7c6e240bcab7e6"
+    },
+    {
+      "id": "edge:22a4c9f564baed25",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
       "target": "test:d0ceba208d208f3d"
     },
     {
-      "id": "edge:555f074979a95cb7",
+      "id": "edge:d4a0dcd9a9b8e6fd",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
       "target": "test:af354b232c193ef9"
     },
     {
-      "id": "edge:9639d3acbb4e450a",
+      "id": "edge:ff5ba9c998a5cd58",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
+      "source": "experiment:2ce46f4879790adb",
       "target": "test:9e7a610f94776e69"
     },
     {
-      "id": "edge:89030cc300c934e3",
+      "id": "edge:5171c3feaeb9f248",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
-      "target": "test:822439754733430f"
+      "source": "experiment:2ce46f4879790adb",
+      "target": "test:46a7939a0bb91296"
     },
     {
-      "id": "edge:63684ebb6693e7ad",
+      "id": "edge:6f2e68081a89379f",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
-      "target": "test:529343bd009a7dd8"
+      "source": "experiment:2ce46f4879790adb",
+      "target": "test:7bc4563e7245335a"
     },
     {
-      "id": "edge:fabcd70ff82f5f6b",
+      "id": "edge:3d0c0b90e414fc58",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
-      "target": "test:b1b2a0420869a06b"
+      "source": "experiment:2ce46f4879790adb",
+      "target": "test:0dc8b008f43f14a0"
     },
     {
-      "id": "edge:fd9cd5b6ec62dbe4",
+      "id": "edge:5f3e57d1ce5aff45",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:1424e0925a5510f9",
-      "target": "test:006110a1594843d9"
-    },
-    {
-      "id": "edge:b77afa74a069a5f0",
-      "relation": "DUPLICATES",
-      "source": "rejection:1b8c3e31c7f73aa7",
-      "target": "controller:a0206f4b0721cac1"
-    },
-    {
-      "id": "edge:09f57637b17745ff",
-      "relation": "DUPLICATES",
-      "source": "rejection:6c739a58ff4f086c",
-      "target": "controller:a0206f4b0721cac1"
+      "source": "experiment:2ce46f4879790adb",
+      "target": "test:93c3291786836d0b"
     }
   ],
   "schema": "JARVIS-KG-2"
