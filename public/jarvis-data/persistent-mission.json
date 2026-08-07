@@ -2,14 +2,8 @@
   "schema": 2,
   "missionId": "J-1785967020",
   "createdAt": "2026-08-05T21:57:00.828813+00:00",
-  "cycle": 562,
+  "cycle": 563,
   "history": [
-    {
-      "cycle": 463,
-      "at": "2026-08-07T02:54:06.081215+00:00",
-      "objective": "Continuously improve the current MT12 controller through evidence, simulation, replay and controlled mutation.",
-      "dispatches": []
-    },
     {
       "cycle": 464,
       "at": "2026-08-07T02:54:27.244640+00:00",
@@ -932,22 +926,35 @@
           "dispatchedAt": "2026-08-07T06:24:30.366182+00:00"
         }
       ]
+    },
+    {
+      "cycle": 563,
+      "at": "2026-08-07T06:26:03.730439+00:00",
+      "objective": "Continuously improve controller intelligence through evidence, simulation, replay and causal evaluation.",
+      "dispatches": [
+        {
+          "task": "knowledge-graph",
+          "lane": "intelligence",
+          "workflow": "jarvis-knowledge-graph.yml",
+          "dispatchedAt": "2026-08-07T06:26:03.730411+00:00"
+        }
+      ]
     }
   ],
   "tasks": [],
   "objective": "Continuously improve controller intelligence through evidence, simulation, replay and causal evaluation.",
   "state": "ACTIVE",
-  "updatedAt": "2026-08-07T06:24:22.049438+00:00",
+  "updatedAt": "2026-08-07T06:25:57.068987+00:00",
   "activeLanes": {
     "controller": "owned-by-always-on",
     "intelligence": true
   },
   "lastDispatches": [
     {
-      "task": "historical-learning",
+      "task": "knowledge-graph",
       "lane": "intelligence",
-      "workflow": "historical-log-reingest.yml",
-      "dispatchedAt": "2026-08-07T06:24:30.366182+00:00"
+      "workflow": "jarvis-knowledge-graph.yml",
+      "dispatchedAt": "2026-08-07T06:26:03.730411+00:00"
     }
   ],
   "nextAction": "Evaluate intelligence output and feed evidence to the single authoritative rewrite producer."
