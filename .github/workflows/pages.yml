@@ -48,18 +48,18 @@ jobs:
           if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
           const ids=new Set(c.workspaces.map(x=>x.id));for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
-          for(const p of ['racing-mjx7303-v20.html','racing-mjx7303-v19.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-playcanvas-v22.js'])if(!fs.existsSync(p))throw Error('Racing V22 asset missing: '+p);
+          for(const p of ['racing-mjx7303-v20.html','racing-mjx7303-v19.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-playcanvas-v23.js'])if(!fs.existsSync(p))throw Error('Racing V23 asset missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','jarvis/app.js');check('index.html','classic-token.js');check('jarvis/state.js','public/device-data/releases.json');
-          check('racing-mjx7303-v20.html','V22 Automotive');check('racing-mjx7303-v20.html','mjx7303-physics-v4.js');check('racing-mjx7303-v20.html','mjx7303-playcanvas-v22.js');
-          check('jarvis/racing-tab.js','racing-mjx7303-v20.html');check('jarvis/racing-tab.js','V22 Automotive');
-          check('jarvis/mjx7303-playcanvas-v22.js','playcanvas@2.21.3');check('jarvis/mjx7303-playcanvas-v22.js','continuous-body-shell');check('jarvis/mjx7303-playcanvas-v22.js','pc.calculateNormals');check('jarvis/mjx7303-playcanvas-v22.js','__V22_READY');
-          if(fs.readFileSync('jarvis/mjx7303-playcanvas-v22.js','utf8').includes('assets/mjx7303/mjx7303.glb'))throw Error('V22 must not load placeholder GLB');
+          check('racing-mjx7303-v20.html','V23 Automotive');check('racing-mjx7303-v20.html','mjx7303-physics-v4.js');check('racing-mjx7303-v20.html','mjx7303-playcanvas-v23.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v20.html');check('jarvis/racing-tab.js','V23 C3 WRC');
+          check('jarvis/mjx7303-playcanvas-v23.js','playcanvas@2.21.3');check('jarvis/mjx7303-playcanvas-v23.js','continuous-body-shell');check('jarvis/mjx7303-playcanvas-v23.js','glasshouse-shell');check('jarvis/mjx7303-playcanvas-v23.js','pc.calculateNormals');check('jarvis/mjx7303-playcanvas-v23.js','__V23_READY');
+          if(fs.readFileSync('jarvis/mjx7303-playcanvas-v23.js','utf8').includes('assets/mjx7303/mjx7303.glb'))throw Error('V23 must not load placeholder GLB');
           for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html']){if(!fs.existsSync(f))throw Error('Compatibility route missing '+f);check(f,'Opening Jarvis')}
-          console.log({pages:'PASS',racing:'V22 Automotive',renderer:'PlayCanvas 2.21.3',physics:'V4',body:'SMOOTH_PARAMETRIC_MESH'});
+          console.log({pages:'PASS',racing:'V23 C3 WRC',renderer:'PlayCanvas 2.21.3',physics:'V4',body:'C3_WRC_PARAMETRIC_MESH'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
