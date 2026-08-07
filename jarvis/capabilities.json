@@ -1,103 +1,36 @@
 {
-  "schema": 6,
-  "identity": {
-    "name": "Jarvis",
-    "role": "RadioMaster MT12 closed-loop controller engineering OS",
-    "repository": "gymwhaleysspot-dot/mt12-jarvis-continuous"
-  },
-  "orchestration": {
-    "scheduler": "jarvis-always-on.yml",
-    "controllerProducer": "jarvis-complete-rewrite-factory.yml",
-    "policy": "ONE_SCHEDULER_ONE_PRODUCER",
-    "secondaryBuilders": "MANUAL_ONLY",
-    "historicalDedup": true,
-    "selfRequeue": false,
-    "immutableGenerationPattern": "public/builds/rewrite-<run-id>-<attempt>/"
-  },
-  "controllerLineage": {
-    "canonicalParent": "jrw6d",
-    "canonicalManifest": "public/builds/releases/jrw6d/MANIFEST.json",
-    "defendedFloor": [
-      "protected EdgeTX and GVar API calls",
-      "dual checksummed /LOGS/m0 and /LOGS/m1 persistence",
-      "memOpt memory-pressure management",
-      "watch GVar watchdog",
-      "fixed V[179]*.0045 causal term",
-      "92-to-96 progressive authority ceiling",
-      "V[704] and X[46] causal state",
-      "blackbox runtime identity groups 144-151"
-    ],
-    "candidateIdentity": "<candidate>-<rewrite run number>",
-    "promotion": "NEVER_AUTOMATIC; bench and returned road evidence required"
-  },
-  "generationModel": {
-    "source": "successful Jarvis Complete Rewrite LUAC Factory runs",
-    "tournament": "TOURNAMENT.json",
-    "publication": "BUILD-MANIFEST.json",
-    "candidateFiles": ["<candidate>.lua", "<candidate>.luac", "MANIFEST.json", "IDENTITY.json"],
-    "displayHistory": 6,
-    "publicReadBudgeted": true
-  },
+  "schema": 7,
+  "identity": {"name":"Jarvis","role":"RadioMaster MT12 closed-loop engineering workstation","repository":"gymwhaleysspot-dot/mt12-jarvis-continuous"},
+  "orchestration": {"scheduler":"jarvis-always-on.yml","controllerProducer":"jarvis-complete-rewrite-factory.yml","policy":"ONE_SCHEDULER_ONE_PRODUCER","historicalDedup":true,"immutableGenerationPattern":"public/builds/rewrite-<run-id>-<attempt>/"},
+  "controllerLineage": {"canonicalAuthority":"factory/canonical-controller.json","canonicalManifestPattern":"public/builds/releases/<release>/MANIFEST.json","candidateIdentity":"<candidate>-<rewrite run number>","promotion":"NEVER_AUTOMATIC; bench and returned road evidence required"},
+  "generationModel": {"architecture":"FIVE_INDEPENDENT_HYPOTHESES_PLUS_SYNTHESIS","hypotheses":["sensor-dropout-recovery","traction-control","jump-landing-classification","truth-speed-fusion","abs-control"],"synthesis":"JRW6 combines all five compatible mutations","tournament":"TOURNAMENT.json","publication":"BUILD-MANIFEST.json","displayHistory":20,"inheritedCapabilityBonusForbidden":true},
   "workspaces": [
-    {"id":"command","label":"Command","description":"Live lineage, latest winner and engineering objectives."},
-    {"id":"vehicle","label":"Vehicle AI","description":"Canonical parent, autonomous winner, defended floor and tournament comparison."},
-    {"id":"evidence","label":"Evidence","description":"MT12 log sync, identity attribution, replay and historical learning."},
-    {"id":"intelligence","label":"Intelligence","description":"Research, memory, knowledge graph and highest-information experiments."},
-    {"id":"factory","label":"Factory","description":"Single rewrite producer, immutable generations, novelty gates and manual tools."},
-    {"id":"firmware","label":"Firmware","description":"EdgeTX and ExpressLRS catalog, verified builds, flashing and recovery."},
-    {"id":"radio","label":"MT12","description":"Radio backup, deploy, YAML, SD-card state and recovery."},
-    {"id":"releases","label":"Releases","description":"Canonical and experimental artifacts, authority, promotion and rollback."},
-    {"id":"tools","label":"Tools","description":"iPhone sync, mobile companions, desktop helper, viewers and tuners."},
-    {"id":"system","label":"System","description":"Scheduler, producer, workflows, runs, data contracts and GitHub health."}
+    {"id":"command","label":"Command"},{"id":"factory","label":"Factory"},{"id":"evidence","label":"Evidence"},{"id":"intelligence","label":"Intelligence"},{"id":"vehicle","label":"Vehicle AI"},{"id":"releases","label":"Releases"},{"id":"radio","label":"MT12"},{"id":"firmware","label":"Firmware"},{"id":"system","label":"System"},{"id":"tools","label":"Tools"}
   ],
   "missions": [
-    {"id":"rewrite-factory","label":"AUTOMATIC PRODUCER · Build novel MT12 LUAC generation","workflow":"jarvis-complete-rewrite-factory.yml","workspace":"factory","inputs":{},"mode":"automatic-producer"},
-    {"id":"complete-factory","label":"MANUAL · Run complete autonomous factory experiment","workflow":"jarvis-complete-factory.yml","workspace":"factory","inputs":{"mode":"full"},"mode":"manual"},
+    {"id":"rewrite-factory","label":"Build new 5+1 synthesis generation","workflow":"jarvis-complete-rewrite-factory.yml","workspace":"factory","inputs":{},"mode":"automatic-producer"},
     {"id":"engineering-mission","label":"Run Jarvis engineering intelligence mission","workflow":"research.yml","workspace":"command","inputs":{"topic":""}},
     {"id":"historical-learning","label":"Relearn all historical logs","workflow":"historical-log-reingest.yml","workspace":"intelligence","inputs":{}},
-    {"id":"controller-tournament","label":"MANUAL · Run controller tournament","workflow":"controller-tournament.yml","workspace":"factory","inputs":{},"mode":"manual"},
     {"id":"chief-engineer","label":"Run chief engineer analysis","workflow":"chief-engineer.yml","workspace":"intelligence","inputs":{}},
-    {"id":"workbench","label":"MANUAL · Build evidence-driven controller","workflow":"workbench.yml","workspace":"factory","inputs":{},"mode":"manual"},
-    {"id":"force-candidate","label":"MANUAL · Force targeted controller candidate","workflow":"force-candidate.yml","workspace":"factory","inputs":{},"mode":"manual"},
-    {"id":"guaranteed-luac","label":"MANUAL FALLBACK · Build guaranteed MT12 LUAC","workflow":"guaranteed-luac.yml","workspace":"factory","inputs":{},"mode":"manual-fallback"},
-    {"id":"aegis-build","label":"MANUAL · Build Aegis controller candidate","workflow":"repair-root-build-aegis.yml","workspace":"factory","inputs":{},"mode":"manual"},
-    {"id":"evolution-gate","label":"Run novelty, lineage and promotion authority","workflow":"jarvis-evolution-gate.yml","workspace":"releases","inputs":{}},
-    {"id":"completion","label":"Evaluate real-world completion","workflow":"real-world-completion.yml","workspace":"releases","inputs":{}},
-    {"id":"device-release","label":"Build MT12 device release package","workflow":"device-release.yml","workspace":"radio","inputs":{}},
-    {"id":"control-center","label":"Run promotion, rollback or recovery operation","workflow":"control-center.yml","workspace":"releases","inputs":{}},
     {"id":"knowledge-graph","label":"Rebuild engineering knowledge graph","workflow":"jarvis-knowledge-graph.yml","workspace":"intelligence","inputs":{}},
     {"id":"log-index","label":"Reindex uploaded logs","workflow":"log-index.yml","workspace":"evidence","inputs":{}},
-    {"id":"discovery","label":"Discover repository capabilities and dependencies","workflow":"discovery.yml","workspace":"system","inputs":{}},
-    {"id":"firmware-catalog","label":"Refresh EdgeTX and ExpressLRS firmware catalog","workflow":"firmware-catalog.yml","workspace":"firmware","inputs":{}},
-    {"id":"firmware-build-flash","label":"Prepare or flash a named firmware build","workflow":"firmware-build-flash.yml","workspace":"firmware","inputs":{}},
+    {"id":"evolution-gate","label":"Run lineage and promotion authority","workflow":"jarvis-evolution-gate.yml","workspace":"releases","inputs":{}},
+    {"id":"completion","label":"Evaluate real-world completion","workflow":"real-world-completion.yml","workspace":"releases","inputs":{}},
+    {"id":"device-release","label":"Build MT12 device release package","workflow":"device-release.yml","workspace":"radio","inputs":{}},
+    {"id":"control-center","label":"Promotion, rollback or recovery","workflow":"control-center.yml","workspace":"releases","inputs":{}},
+    {"id":"firmware-catalog","label":"Refresh firmware catalog","workflow":"firmware-catalog.yml","workspace":"firmware","inputs":{}},
+    {"id":"firmware-build-flash","label":"Prepare or flash firmware","workflow":"firmware-build-flash.yml","workspace":"firmware","inputs":{}},
     {"id":"mobile-companions","label":"Build mobile companion tools","workflow":"mobile-companions.yml","workspace":"tools","inputs":{}},
     {"id":"native-helper","label":"Build desktop/native helper","workflow":"native-helper.yml","workspace":"tools","inputs":{}},
-    {"id":"rcos","label":"Run RC operating-system validation pipeline","workflow":"rcos.yml","workspace":"system","inputs":{}},
-    {"id":"v3-operations","label":"Run advanced MT12 operations","workflow":"v3-operations.yml","workspace":"system","inputs":{}},
-    {"id":"artifact-gate","label":"Validate controller artifacts","workflow":"a17z-artifact-gate.yml","workspace":"releases","inputs":{}},
-    {"id":"rewrite-gate","label":"Validate controller rewrite contract","workflow":"a17z-rewrite-gate.yml","workspace":"factory","inputs":{}}
+    {"id":"discovery","label":"Discover repository capabilities","workflow":"discovery.yml","workspace":"system","inputs":{}}
   ],
   "dataSources": [
-    {"id":"canonical-parent","path":"public/builds/releases/jrw6d/MANIFEST.json","workspace":"vehicle","required":true},
-    {"id":"controller-build-index","path":"public/builds/index.json","workspace":"releases","required":true},
-    {"id":"active-mission","path":"public/jarvis-data/active-mission.json","workspace":"command","required":false},
-    {"id":"evidence-sync","path":"public/evidence-data/sync.json","workspace":"evidence","required":false},
-    {"id":"historical-log-index","path":"factory/memory/historical-log-index.json","workspace":"evidence","required":false},
-    {"id":"episode-memory","path":"factory/memory/episodes.json","workspace":"intelligence","required":false},
-    {"id":"knowledge-graph","path":"public/jarvis-data/knowledge-graph.json","workspace":"intelligence","required":false},
-    {"id":"knowledge-summary","path":"public/jarvis-data/summary.json","workspace":"intelligence","required":false},
-    {"id":"research-current","path":"research/current.json","workspace":"intelligence","required":false},
-    {"id":"research-questions","path":"research/questions.json","workspace":"intelligence","required":false},
-    {"id":"device-releases","path":"public/device-data/releases.json","workspace":"firmware","required":false}
-  ],
-  "dynamicDataSources": [
-    {"id":"rewrite-runs","api":"actions/workflows/jarvis-complete-rewrite-factory.yml/runs","workspace":"factory"},
-    {"id":"rewrite-tournaments","pathPattern":"public/builds/rewrite-<run-id>-<attempt>/TOURNAMENT.json","workspace":"factory"},
-    {"id":"rewrite-manifests","pathPattern":"public/builds/rewrite-<run-id>-<attempt>/BUILD-MANIFEST.json","workspace":"factory"}
-  ],
-  "authority": {
-    "controller":["GENERATED","COMPILED","STATICALLY_VALIDATED","SIMULATION_TESTED","SIMULATION_PROVEN","REPLAY_PROVEN","BENCH_PROVEN","ROAD_PROVEN"],
-    "firmware":["DISCOVERED","COMPATIBILITY_CHECKED","PACKAGE_BUILT","BACKUP_VERIFIED","READY_TO_FLASH","FLASH_CONFIRMED","POST_FLASH_CERTIFIED"],
-    "device":["INVENTORIED","BACKED_UP","RESTORABLE","RELEASE_PACKAGED","DEPLOYED","RECOVERY_VERIFIED"]
-  }
+    {"id":"canonical-authority","path":"factory/canonical-controller.json","required":true},
+    {"id":"controller-build-index","path":"public/builds/index.json","required":true},
+    {"id":"experiment-plan","path":"public/jarvis-data/experiment-plan.json","required":false},
+    {"id":"knowledge-graph","path":"public/jarvis-data/knowledge-graph.json","required":false},
+    {"id":"evidence-sync","path":"public/evidence-data/sync.json","required":false},
+    {"id":"historical-log-index","path":"factory/memory/historical-log-index.json","required":false},
+    {"id":"episode-memory","path":"factory/memory/episodes.json","required":false}
+  ]
 }
