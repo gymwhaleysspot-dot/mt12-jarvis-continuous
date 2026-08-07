@@ -59,6 +59,18 @@ def _restore_causal_floor(text: str) -> str:
     return text
 
 
+def _sanitize_inherited_bb_line(text: str) -> str:
+    """Remove the inherited pre-declaration group-143 call from the JRW6D source.
+
+    The call lives inside update(), before local function bb_line is declared, so Lua
+    resolves it as a global and the MT12 throws 'attempt to call a nil value'.
+    Observability adds the same record back later inside bb_tick(), where bb_line is local.
+    """
+    unsafe = "if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;"
+    text = text.replace(unsafe, "")
+    return text
+
+
 def _apply_profile(text: str, profile: str) -> str:
     """Apply profile diversity without mutating the defended causal coefficient or 92→96 floor."""
     fault = "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end"
@@ -152,6 +164,7 @@ def experiment_rewrite(text: str, profile: str, experiment: dict, generation: st
         rewritten = rewritten.replace(anchor, mutation + anchor, 1)
     rewritten = _restore_causal_floor(rewritten)
     rewritten = _reuse_generation_identity(rewritten)
+    rewritten = _sanitize_inherited_bb_line(rewritten)
     rewritten = _apply_defended_experiment(rewritten, area)
     rewritten = _apply_profile(rewritten, profile)
     return rewritten
