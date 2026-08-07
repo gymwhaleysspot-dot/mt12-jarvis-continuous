@@ -8,10 +8,11 @@ import jarvis_canonical_parent
 
 _original_checks = tournament.protected_checks
 _original_rewrite = rewrite_factory.experiment_rewrite
+_original_bonus = tournament.candidate_bonus
 
 
 def protected_checks(text: str) -> list[str]:
-    """Preserve the complete a17z lineage floor without hard-coding a display name."""
+    """Preserve the complete defended JRW6D lineage floor without hard-coding a display name."""
     errors = [error for error in _original_checks(text) if error != "missing:A17Z"]
     required = (
         "local function zBrain", "V[704]", "X[46]", "V[720]=ac",
@@ -26,8 +27,9 @@ def protected_checks(text: str) -> list[str]:
     errors.extend(f"missing-lineage-floor:{token}" for token in required if token not in text)
     if "setgv(3,V[35])" in text:
         errors.append("forbidden-stale-authority:setgv(3,V[35])")
-    if "V[179]*(.00435" in text:
-        errors.append("forbidden-causal-ramp:restore-fixed-.0045")
+    for bad in ("V[179]*(.00435", "V[179]*(.0044", "V[179]*.0048", "V[179]*.0050"):
+        if bad in text:
+            errors.append("forbidden-causal-mutation:restore-fixed-.0045")
     has_runtime_identity = all(
         token in text for token in (
             "bb_line(144,li1,0)", "bb_line(145,li2,0)",
@@ -42,35 +44,99 @@ def protected_checks(text: str) -> list[str]:
     return errors
 
 
+def _restore_causal_floor(text: str) -> str:
+    for old in (
+        "V[179]*.0050",
+        "V[179]*.0048",
+        "V[179]*(.0044+.0001*m_min(1,V[166]/100))",
+        "V[179]*(.00435+.00015*m_min(1,X[46]/120))",
+    ):
+        text = text.replace(old, "V[179]*.0045")
+    return text
+
+
+def _apply_profile(text: str, profile: str) -> str:
+    """Apply profile diversity without mutating the defended causal coefficient or 92→96 floor."""
+    fault = "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end"
+    if profile == "balanced":
+        return text
+    if profile == "learning":
+        return text.replace("V[760+km]>2", "V[760+km]>3", 1)
+    if profile == "observability":
+        anchor = "V[720]=ac;setgv(3,m_min(V[35],ac));"
+        add = "if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;"
+        return text.replace(anchor, anchor + add, 1)
+    if profile == "conservative":
+        return text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,92)end", 1)
+    if profile == "combined":
+        text = text.replace("V[760+km]>2", "V[760+km]>3", 1)
+        return text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,93)end", 1)
+    raise ValueError(profile)
+
+
+def _apply_defended_experiment(text: str, area: str) -> str:
+    """Move experiments off immutable JRW6D defense anchors when necessary."""
+    if area == "truth-speed-fusion":
+        old = "clamp(V[179]/250,0,.35)"
+        new = "clamp(V[179]/(245+10*V[119]),0,.35)"
+        if old in text:
+            return text.replace(old, new, 1)
+    elif area == "traction-control":
+        old = "md<.42 and V[119]<.45"
+        new = "md<(.40+.02*V[114]) and V[119]<.45"
+        if old in text:
+            return text.replace(old, new, 1)
+    return text
+
+
 def experiment_rewrite(text: str, profile: str, experiment: dict, generation: str) -> str:
-    """Use the primary mutation, then structural fallbacks for evolved source layouts."""
+    """Generate from the defended parent while keeping JRW6D protections immutable."""
+    area = str(experiment.get("area", ""))
+    # Use the structurally neutral profile inside the legacy rewrite engine. Profile
+    # diversity is reapplied below using defended-source anchors.
     try:
-        return _original_rewrite(text, profile, experiment, generation)
+        rewritten = _original_rewrite(text, "balanced", experiment, generation)
     except RuntimeError as exc:
         if "found no source target" not in str(exc):
             raise
-        area = str(experiment.get("area", ""))
-        fallback_experiment = dict(experiment)
-        fallback_experiment["area"] = "controller-observability"
-        rewritten = _original_rewrite(text, profile, fallback_experiment, generation)
+        fallback = dict(experiment)
+        fallback["area"] = "controller-observability"
+        rewritten = _original_rewrite(text, "balanced", fallback, generation)
         anchor = "V[720]=ac;setgv(3,m_min(V[35],ac));"
         if rewritten.count(anchor) != 1:
             raise RuntimeError(f"structural fallback expected one authority anchor, found {rewritten.count(anchor)}")
         if area == "jump-landing-classification":
             mutation = "if V[543]>0 and X[46]<120 then local jc=m_max(0,m_min(1,X[46]/120));ac=m_min(ac,94+2*jc)end;"
         elif area == "sensor-dropout-recovery":
-            mutation = "if X[46]<120 then local dc=m_max(0,m_min(1,X[46]/120));ac=m_min(ac,92+4*dc)end;"
+            # Preserve the canonical 92→96 floor; add only an event-conditioned cap.
+            mutation = "if V[119]>.45 and X[46]<120 then ac=m_min(ac,94)end;"
         else:
             mutation = "if X[46]<80 then ac=m_min(ac,94)end;"
         rewritten = rewritten.replace(anchor, mutation + anchor, 1)
-        if mutation not in rewritten:
-            raise RuntimeError(f"structural {area} mutation did not persist")
-        return rewritten
+    rewritten = _restore_causal_floor(rewritten)
+    rewritten = _apply_defended_experiment(rewritten, area)
+    rewritten = _apply_profile(rewritten, profile)
+    return rewritten
+
+
+def candidate_bonus(profile: str, text: str) -> dict[str, float]:
+    bonus = {"learningGain": 0.0, "safetyGain": 0.0, "observabilityGain": 0.0}
+    if profile == "learning":
+        bonus["learningGain"] = 3.0 if "V[760+km]>3" in text else 0.0
+    elif profile == "conservative":
+        bonus["safetyGain"] = 2.5 if "m_min(ac,92)" in text else 0.0
+    elif profile == "observability":
+        bonus["observabilityGain"] = 3.0 if "bb_line(143" in text else 0.0
+    elif profile == "combined":
+        bonus["learningGain"] = 1.5 if "V[760+km]>3" in text else 0.0
+        bonus["safetyGain"] = 1.5 if "m_min(ac,93)" in text else 0.0
+    return bonus
 
 
 def main() -> None:
     tournament.latest_release = jarvis_canonical_parent.resolve
     tournament.protected_checks = protected_checks
+    tournament.candidate_bonus = candidate_bonus
     rewrite_factory.experiment_rewrite = experiment_rewrite
     parent, source = jarvis_canonical_parent.resolve()
     print({"canonicalParent": parent, "source": str(source)})
