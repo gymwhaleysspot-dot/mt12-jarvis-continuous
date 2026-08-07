@@ -1,0 +1,154 @@
+[
+  {
+    "duplicate": false,
+    "expectedEffects": {
+      "confidenceCalibration": 2.5,
+      "truthAccuracy": 2.0
+    },
+    "fingerprint": "7fb56b5aa0f5e797406f53294955f7781deac766c9574ffd98d4eae6f9ad9aba",
+    "hypothesis": "Improve truth-source confidence calibration and mismatch recovery",
+    "id": "3387a22e11b2",
+    "mutationRecord": {
+      "changedSystems": [
+        "truth",
+        "confidence",
+        "recovery"
+      ],
+      "expectedWin": "confidenceCalibration",
+      "reason": "Improve truth-source confidence calibration and mismatch recovery",
+      "rollback": "parent SHA",
+      "unchangedSystems": [
+        "GV7 throttle contract",
+        "dashboard",
+        "channel mapping",
+        "persistence schema"
+      ]
+    },
+    "population": "repair",
+    "requiredTests": [
+      "gps_dropout",
+      "rpm_delay",
+      "sensor_disagreement"
+    ]
+  },
+  {
+    "duplicate": false,
+    "expectedEffects": {
+      "causalExplanation": 2.0,
+      "falsePositiveResistance": 2.5
+    },
+    "fingerprint": "b1aa4fbba1b1282eb28c900dbac1b9c63864b0a8c820b991e6d652e64bfcb079",
+    "hypothesis": "Reduce false intervention through causal episode outcome learning",
+    "id": "3d30d843c007",
+    "mutationRecord": {
+      "changedSystems": [
+        "causal"
+      ],
+      "expectedWin": "falsePositiveResistance",
+      "reason": "Reduce false intervention through causal episode outcome learning",
+      "rollback": "parent SHA",
+      "unchangedSystems": [
+        "GV7 throttle contract",
+        "dashboard",
+        "channel mapping",
+        "persistence schema"
+      ]
+    },
+    "population": "exploit",
+    "requiredTests": [
+      "wet_launch",
+      "corner_exit",
+      "throttle_release"
+    ]
+  },
+  {
+    "duplicate": false,
+    "expectedEffects": {
+      "faultTolerance": 3.0,
+      "recoverySpeed": 1.5
+    },
+    "fingerprint": "a3495bbb6f02e9c2877aecc01971c9e1bcb51be0bb41e48ed3f37c5a61092820",
+    "hypothesis": "Increase fault tolerance under frozen or corrupt telemetry",
+    "id": "3134089ac4c3",
+    "mutationRecord": {
+      "changedSystems": [
+        "telemetry"
+      ],
+      "expectedWin": "faultTolerance",
+      "reason": "Increase fault tolerance under frozen or corrupt telemetry",
+      "rollback": "parent SHA",
+      "unchangedSystems": [
+        "GV7 throttle contract",
+        "dashboard",
+        "channel mapping",
+        "persistence schema"
+      ]
+    },
+    "population": "repair",
+    "requiredTests": [
+      "telemetry_freeze",
+      "corrupt_memory",
+      "reconnect_storm"
+    ]
+  },
+  {
+    "duplicate": false,
+    "expectedEffects": {
+      "learningStability": 0.5,
+      "runtimeEfficiency": 3.0
+    },
+    "fingerprint": "a728d1375a2effe1b75f8d9b99fce3ac18465499472b7c90254e643f1abedcab",
+    "hypothesis": "Compress duplicated decision paths without reducing behavior",
+    "id": "9bfdc1625a9f",
+    "mutationRecord": {
+      "changedSystems": [
+        "controllerBrain"
+      ],
+      "expectedWin": "runtimeEfficiency",
+      "reason": "Compress duplicated decision paths without reducing behavior",
+      "rollback": "parent SHA",
+      "unchangedSystems": [
+        "GV7 throttle contract",
+        "dashboard",
+        "channel mapping",
+        "persistence schema"
+      ]
+    },
+    "population": "compression",
+    "requiredTests": [
+      "long_runtime",
+      "memory_load_save"
+    ]
+  },
+  {
+    "duplicate": false,
+    "expectedEffects": {
+      "causalExplanation": 2.5,
+      "interventionCorrectness": 2.0
+    },
+    "fingerprint": "1f093864c0992f287c02063de1c0358d54f4e0dd5bc1482efa23db231dee7c6c",
+    "hypothesis": "Explore competing-hypothesis arbitration for traction and airborne events",
+    "id": "3f7c412d8a6a",
+    "mutationRecord": {
+      "changedSystems": [
+        "traction",
+        "airborne"
+      ],
+      "expectedWin": "causalExplanation",
+      "reason": "Explore competing-hypothesis arbitration for traction and airborne events",
+      "rollback": "parent SHA",
+      "unchangedSystems": [
+        "GV7 throttle contract",
+        "dashboard",
+        "channel mapping",
+        "persistence schema"
+      ]
+    },
+    "population": "explore",
+    "requiredTests": [
+      "false_airborne",
+      "jump_landing",
+      "alternating_traction"
+    ]
+  }
+]
