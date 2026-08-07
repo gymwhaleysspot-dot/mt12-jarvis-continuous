@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - racing.html
       - jarvis/**
       - classic-token.js
       - tools/**
@@ -17,6 +18,7 @@ on:
   pull_request:
     paths:
       - index.html
+      - racing.html
       - jarvis/**
       - classic-token.js
       - tools/**
@@ -70,6 +72,8 @@ jobs:
           grep -q "factory/canonical-controller.json" jarvis/state.js
           grep -q 'public/builds/releases/${name}/' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
+          grep -q 'JARVIS RACING' racing.html
+          grep -q 'racing-physics-v2.js' racing.html
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
 
       - name: Validate UI contract and workflow topology
@@ -77,7 +81,10 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');const c=require('./jarvis/capabilities.json');const state=fs.readFileSync('jarvis/state.js','utf8');
           if(c.schema<7)throw Error('Jarvis UI contract must be v7+');
-          if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
+          const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
+          const workspaceIds=new Set(c.workspaces.map(w=>w.id));
+          for(const id of required)if(!workspaceIds.has(id))throw Error('Required workspace missing '+id);
+          if(c.workspaces.length<required.length)throw Error('Jarvis workspace contract incomplete');
           if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
           if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
           if(c.controllerLineage.canonicalAuthority!=='factory/canonical-controller.json')throw Error('Wrong canonical authority source');
@@ -85,12 +92,14 @@ jobs:
           const ids=new Set,paths=new Set;
           for(const m of c.missions){
             if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
-            if(!c.workspaces.some(w=>w.id===m.workspace))throw Error('Unknown workspace '+m.workspace);
+            if(!workspaceIds.has(m.workspace))throw Error('Unknown workspace '+m.workspace);
             const p='.github/workflows/'+m.workflow;if(!fs.existsSync(p))throw Error('Missing workflow '+p);paths.add(p);
             const y=fs.readFileSync(p,'utf8');if(!/workflow_dispatch\s*:/.test(y))throw Error('Not dispatchable '+p);
           }
           for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
           if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
+          if(!fs.existsSync('racing.html'))throw Error('Racing page missing');
+          if(!fs.existsSync('jarvis/racing-physics-v2.js'))throw Error('Racing physics core missing');
           console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority});
           NODE
 
