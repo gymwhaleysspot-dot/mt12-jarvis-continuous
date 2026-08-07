@@ -1,153 +1,34 @@
 name: Jarvis Continuous Mission Handoff
 
 on:
-  workflow_run:
-    workflows:
-      - Jarvis Complete Autonomous Factory
-      - A17Y LUAC AI Builder
-      - A17Y Evidence-Driven Controller Workbench
-      - Guaranteed MT12 LUAC Builder
-      - Force Controller Candidate
-      - Repair A17Y Root and Build Aegis Candidate
-      - Controller Candidate Tournament
-      - Historical Log Re-ingestion
-      - Jarvis Persistent Engineering Knowledge Graph
-      - Jarvis Engineering Intelligence Mission
-      - A17Y Aegis Chief Engineer
-      - MT12 Official Firmware Catalog
-      - A17Y Engineering Discovery Engine
-      - Jarvis Controller Evolution Gate
-    types: [completed]
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/jarvis-continuous-handoff.yml
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: write
+  actions: read
 
 concurrency:
   group: jarvis-continuous-mission-handoff
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  handoff:
+  inspect:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Select and launch successor missions
+      - name: Report authoritative Jarvis lanes without dispatching successors
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          TRIGGER_NAME: ${{ github.event.workflow_run.name || 'bootstrap' }}
-          TRIGGER_RESULT: ${{ github.event.workflow_run.conclusion || 'success' }}
-          TRIGGER_ID: ${{ github.event.workflow_run.id || github.run_id }}
         shell: bash
         run: |
           set -Eeuo pipefail
-
-          active_count() {
-            local wf="$1" json
-            json="$(gh api -H 'Accept: application/vnd.github+json' \
-              "/repos/$REPO/actions/workflows/$wf/runs?per_page=20" 2>/dev/null || printf '{"workflow_runs":[]}')"
-            jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="requested" or .status=="pending")] | length' <<<"$json"
-          }
-
-          dispatch() {
-            local wf="$1"
-            shift || true
-            echo "Dispatching successor: $wf $*"
-            gh workflow run "$wf" --repo "$REPO" --ref main "$@"
-          }
-
-          FILE_PRODUCERS=(
-            jarvis-complete-factory.yml
-            guaranteed-luac.yml
-            workbench.yml
-            force-candidate.yml
-            repair-root-build-aegis.yml
-          )
-          INTELLIGENCE=(
-            historical-log-reingest.yml
-            jarvis-knowledge-graph.yml
-            controller-tournament.yml
-            chief-engineer.yml
-            firmware-catalog.yml
-            discovery.yml
-          )
-
-          file_active=0
-          for wf in "${FILE_PRODUCERS[@]}"; do
-            n="$(active_count "$wf")"
-            file_active=$((file_active+n))
-          done
-
-          intel_active=0
-          for wf in "${INTELLIGENCE[@]}"; do
-            n="$(active_count "$wf")"
-            intel_active=$((intel_active+n))
-          done
-
-          echo "Trigger: $TRIGGER_NAME #$TRIGGER_ID => $TRIGGER_RESULT"
-          echo "Active lanes before handoff: file=$file_active intelligence=$intel_active"
-
-          # Failure recovery is deliberate rather than a blind rerun.
-          if [[ "$TRIGGER_RESULT" != "success" && "$TRIGGER_RESULT" != "neutral" && "$TRIGGER_RESULT" != "skipped" ]]; then
-            if (( intel_active == 0 )); then
-              dispatch chief-engineer.yml
-              intel_active=1
-              echo 'Failure routed to Chief Engineer diagnosis.'
-            fi
-            if (( file_active == 0 )); then
-              dispatch guaranteed-luac.yml
-              file_active=1
-              echo 'Failure routed to guaranteed safe builder.'
-            fi
-          else
-            # A completed productive mission immediately hands off to the next
-            # evolution mission. The sequence rotates by triggering run id so
-            # Jarvis does not repeat one workflow forever.
-            if (( file_active == 0 )); then
-              FILE_QUEUE=(
-                jarvis-complete-factory.yml
-                workbench.yml
-                jarvis-complete-factory.yml
-                force-candidate.yml
-                jarvis-complete-factory.yml
-                guaranteed-luac.yml
-              )
-              slot=$(( TRIGGER_ID % ${#FILE_QUEUE[@]} ))
-              selected="${FILE_QUEUE[$slot]}"
-              case "$selected" in
-                jarvis-complete-factory.yml) dispatch "$selected" -f mode=full ;;
-                *) dispatch "$selected" ;;
-              esac
-              echo "File-production successor started: $selected"
-            else
-              echo 'File-production successor not needed; lane already active.'
-            fi
-
-            if (( intel_active == 0 )); then
-              INTEL_QUEUE=(
-                historical-log-reingest.yml
-                jarvis-knowledge-graph.yml
-                controller-tournament.yml
-                chief-engineer.yml
-                firmware-catalog.yml
-                discovery.yml
-              )
-              slot=$(( (TRIGGER_ID / 7) % ${#INTEL_QUEUE[@]} ))
-              selected="${INTEL_QUEUE[$slot]}"
-              dispatch "$selected"
-              echo "Intelligence successor started: $selected"
-            else
-              echo 'Intelligence successor not needed; lane already active.'
-            fi
-          fi
-
-          sleep 3
-          gh run list --repo "$REPO" --limit 30 \
-            --json databaseId,status,workflowName,createdAt \
-            --jq '.[] | select(.status!="completed") | "- \(.workflowName) #\(.databaseId): \(.status)"'
+          echo 'Jarvis orchestration contract:'
+          echo '- Autonomous controller producer: jarvis-complete-rewrite-factory.yml'
+          echo '- Scheduler/health authority: jarvis-always-on.yml'
+          echo '- Intelligence lanes: analysis/evidence only; no controller publication'
+          echo '- Secondary builders: explicit/manual only'
+          echo
+          gh run list --repo "$REPO" --limit 40 \
+            --json databaseId,status,conclusion,workflowName,createdAt \
+            --jq '.[] | "- \(.workflowName) #\(.databaseId): \(.status) / \(.conclusion // "pending")"'
