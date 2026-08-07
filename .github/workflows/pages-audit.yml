@@ -67,7 +67,8 @@ jobs:
           grep -q 'rewrite-<run-id>-<attempt>' jarvis/capabilities.json
           grep -q 'workflowRuns' jarvis/api.js
           grep -q 'discoverGenerations' jarvis/state.js
-          grep -q 'public/builds/releases/jrw6d/MANIFEST.json' jarvis/state.js
+          grep -q "factory/canonical-controller.json" jarvis/state.js
+          grep -q 'public/builds/releases/${name}/' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
 
