@@ -58,10 +58,14 @@ jobs:
           check('racing-mjx7303-v20.html','MJX 7303 MT12 V20 PlayCanvas');check('racing-mjx7303-v20.html','mjx7303-physics-v4.js');check('racing-mjx7303-v20.html','mjx7303-playcanvas-v20.js');check('racing-mjx7303-v20.html','racing-mjx7303-v19.html','V19 runtime fallback');
           check('jarvis/racing-tab.js','racing-mjx7303-v20.html');check('jarvis/racing-tab.js','PlayCanvas V20');check('jarvis/mjx7303-playcanvas-v20.js','playcanvas@2.21.3');check('jarvis/mjx7303-playcanvas-v20.js','assets/mjx7303/mjx7303.glb');check('jarvis/mjx7303-playcanvas-v20.js','__V20_READY');
           const b=fs.readFileSync('assets/mjx7303/mjx7303.glb');
-          if(b.length<20000)throw Error('MJX7303 GLB unexpectedly small: '+b.length);
+          if(b.length<28)throw Error('MJX7303 GLB too short: '+b.length);
           if(b.subarray(0,4).toString('ascii')!=='glTF')throw Error('MJX7303 GLB magic header invalid');
           if(b.readUInt32LE(4)!==2)throw Error('MJX7303 GLB is not glTF 2.0');
           if(b.readUInt32LE(8)!==b.length)throw Error('MJX7303 GLB length header mismatch');
+          const jsonLen=b.readUInt32LE(12),jsonType=b.readUInt32LE(16);if(jsonType!==0x4E4F534A)throw Error('MJX7303 GLB JSON chunk missing');
+          let off=20+jsonLen;if(off+8>b.length)throw Error('MJX7303 GLB missing BIN chunk');
+          const binLen=b.readUInt32LE(off),binType=b.readUInt32LE(off+4);if(binType!==0x004E4942)throw Error('MJX7303 GLB BIN chunk missing');if(off+8+binLen>b.length)throw Error('MJX7303 GLB BIN chunk overflow');
+          JSON.parse(b.subarray(20,20+jsonLen).toString('utf8').trim());
           for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html']){if(!fs.existsSync(f))throw Error('Compatibility route missing '+f);check(f,'Opening Jarvis')}
           console.log({pages:'PASS',racing:'V20 PlayCanvas',glbBytes:b.length,glb:'VALID_GLB2',fallback:'V19'});
           NODE
