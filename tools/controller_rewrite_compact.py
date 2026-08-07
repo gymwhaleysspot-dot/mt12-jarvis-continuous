@@ -2,6 +2,11 @@ from __future__ import annotations
 import re
 import controller_rewrite_hotfix as base
 
+# Preserve the unpatched scorer before main() temporarily replaces base.candidate_bonus.
+# compact_candidate_bonus must call this saved function for JRW1-JRW5 or it recurses
+# through the monkey-patched base.candidate_bonus until Python exhausts the stack.
+_BASE_CANDIDATE_BONUS=base.candidate_bonus
+
 
 def _jas(text:str)->str:
  m=re.search(r"local function jAS\(a\).*?(?=local function bad\(x\))",text,re.S)
@@ -41,7 +46,7 @@ def compact_outcome_synth(text:str)->tuple[str,str]:
 
 
 def compact_candidate_bonus(profile:str,text:str)->dict[str,float]:
- if profile!="synthesis":return base.candidate_bonus(profile,text)
+ if profile!="synthesis":return _BASE_CANDIDATE_BONUS(profile,text)
  parent=base._parent_text();new=bool(_jas(text)) and _jas(text)!=_jas(parent)
  out={k:0.0 for k in("dropoutGain","tractionGain","jumpGain","truthGain","absGain")}
  if new:
