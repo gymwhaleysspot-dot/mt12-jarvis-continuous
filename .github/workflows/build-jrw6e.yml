@@ -1,0 +1,54 @@
+name: Build JRW6E MT12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/build_jrw6e_from_jrw6d.py
+      - .github/workflows/build-jrw6e.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 unzip zip
+      - name: Recover exact JRW4 parent artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p /tmp/jrw4
+          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8982339671/zip" > /tmp/jrw4.zip
+          unzip -q /tmp/jrw4.zip -d /tmp/jrw4
+          cp /tmp/jrw4/dist-controller-tournament/jrw4/jrw4.lua /tmp/jrw4_parent.lua
+      - name: Build JRW6E source
+        run: |
+          mkdir -p out
+          python3 tools/build_jrw6e_from_jrw6d.py /tmp/jrw4_parent.lua out/jrw6e.lua
+          python3 - <<'PY'
+          s=open('out/jrw6e.lua').read()
+          assert s.index('local function bb_line(g,dv,ev,gg,sc)') < s.index('local function update(gps,e,st,sats,thrAbs,th,btl,rq)')
+          PY
+      - name: Compile and normalize for MT12
+        run: |
+          chmod +x toolchain/compile_mt12.sh
+          toolchain/compile_mt12.sh out/jrw6e.lua out/jrw6e.luac | tee out/COMPILE.txt
+          size=$(wc -c < out/jrw6e.luac)
+          test "$size" -le 87000
+          test "$(od -An -tx1 -j12 -N5 out/jrw6e.luac | tr -d ' \n')" = '0404040404'
+          sha256sum out/jrw6e.lua out/jrw6e.luac > out/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jrw6e-mt12
+          path: out/
+          retention-days: 30
