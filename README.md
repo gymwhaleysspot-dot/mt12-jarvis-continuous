@@ -13,8 +13,17 @@ Jarvis continuously generates multiple controller architectures, compiles them w
 - **Current headroom:** **1,584 bytes**
 - **Authority:** experimental / road-unproven until real vehicle validation
 - **Autonomous cadence:** every **15 minutes**, with overlap protection
+- **Current resource policy:** compact synthesis + retained-capacity enforcement + always-on reclamation
 
 The active evolution pointer is stored in `factory/evolution-controller.json`.
+
+## Current lineage
+
+The active experimental line is now:
+
+`jr514f` defended canonical floor → cumulative JRW6 evolution → `jrw6-534` → `jrw6-536` → `jrw6-537`
+
+`jrw6-536` is the first compact-synthesis milestone that materially reduced the full synthesis controller while keeping the complete synthesis intelligence score. `jrw6-537` then reduced it again and is the current experimental parent.
 
 ## Evolution model
 
@@ -84,6 +93,8 @@ The synthesis lane has a retained-capacity policy so JRW6 is not allowed to recl
 
 Rewrite Factory **#536 attempt 2** validated the compact retained-capacity design after a tooling recursion bug was repaired.
 
+The tooling failure in attempt 1 was not a Lua/controller failure. `controller_rewrite_compact.py` had monkey-patched the candidate scorer and then recursively called the patched function for non-synthesis candidates. The wrapper now preserves the original scorer before patching, eliminating that recursion path.
+
 From parent `jrw6-534`:
 
 - Parent: **86,593 B**
@@ -95,11 +106,33 @@ From parent `jrw6-534`:
 - Intelligence delta: **+19**
 - Synthesis byte budget: **160 B**
 - Synthesis stayed within budget: **yes**
+- Reclaimed capacity retained: **59 B**
 - Promotion eligible: **yes**
+- Final efficiency-adjusted score: **123.361**
 
 This was the first generation where compact synthesis did more than preserve reclaimed space: it substantially reduced the complete winning controller while retaining the full synthesis score.
 
-The next autonomous generation, **#537**, built on #536 and reduced JRW6 again to **85,416 B**, leaving **1,584 B** of headroom. `jrw6-537` is the current experimental evolution parent.
+Specialist comparison in #536:
+
+- **JRW4 observability:** 86,968 B, promotion eligible
+- **JRW2 traction:** 87,030 B, over the hard ceiling and therefore not promotion eligible
+
+That is exactly the intended resource behavior: a specialist can remain competitive, but no candidate receives promotion authority merely because it compiles.
+
+## #537 follow-on generation
+
+The next autonomous generation, **#537**, started from `jrw6-536` and improved the compact line again:
+
+- Parent: **85,620 B**
+- JRW6 winner: **85,416 B**
+- Additional reduction: **204 B**
+- Headroom: **1,584 B**
+- Intelligence delta: **+19**
+- Promotion eligible: **yes**
+
+`jrw6-537` is the current experimental evolution parent.
+
+The important result is that reclaimed capacity is now accumulating instead of being consumed immediately. Jarvis moved from roughly 400 B of headroom before compact synthesis to **1,584 B** while preserving the full current synthesis score.
 
 ## Promotion rules
 
@@ -112,6 +145,7 @@ Experimental evolution advances only when the candidate satisfies the factory ga
 - source and bytecode novelty,
 - zero candidate errors,
 - normalized size ≤ 87,000 bytes,
+- synthesis retained-capacity compliance,
 - and resource-efficiency eligibility.
 
 **Experimental promotion does not automatically promote the canonical controller.** Real road testing is still required before treating an experimental JRW generation as proven vehicle behavior.
@@ -142,11 +176,12 @@ Core pipeline:
 6. generate six novel controller architectures,
 7. compile and normalize every candidate,
 8. run tournament and resource-efficiency scoring,
-9. reject duplicates, over-budget builds, and inefficient promotion candidates,
-10. publish the immutable generation,
-11. advance the experimental evolution parent only when eligible,
-12. persist the generation and pointer atomically,
-13. upload the complete workflow artifact.
+9. enforce compact-synthesis retained-capacity limits,
+10. reject duplicates, over-budget builds, and inefficient promotion candidates,
+11. publish the immutable generation,
+12. advance the experimental evolution parent only when eligible,
+13. persist the generation and pointer atomically,
+14. upload the complete workflow artifact.
 
 ## MT12 compile contract
 
