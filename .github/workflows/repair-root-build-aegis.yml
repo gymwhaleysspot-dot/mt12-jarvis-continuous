@@ -1,143 +1,155 @@
-name: Repair A17Y Root and Build Aegis Candidate
+name: Jarvis Aegis Evolution Stage
+
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Jarvis Complete Rewrite LUAC Factory"]
+    types: [completed]
+
 permissions:
   contents: write
+  actions: read
+
 concurrency:
-  group: repair-root-build-aegis
-  cancel-in-progress: false
+  group: jarvis-aegis-evolution
+  cancel-in-progress: true
+
+env:
+  MAX_BYTES: '87000'
+  MAX_GROWTH_BYTES: '600'
+
 jobs:
-  build:
-    if: github.actor != 'github-actions[bot]' && github.actor != 'actions'
+  evolve:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: main
           fetch-depth: 0
+
+      - name: Synchronize current Jarvis winner
+        run: git pull --rebase origin main
+
       - name: Install deterministic MT12 toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Restore canonical full parent and create Aegis candidate
+
+      - name: Validate active tournament evolution parent
         run: |
           set -Eeuo pipefail
-          P='engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua'
-          test -f "$P"
-          test "$(wc -c < "$P")" -gt 80000
-          cp "$P" a17y.lua
-          cp "$P" a17z.lua
+          python3 tools/jarvis_evolution_parent.py
           python3 - <<'PY'
+          import json
           from pathlib import Path
-          p=Path('a17z.lua')
-          s=p.read_text()
-          old='local bc,bm,bi=0,0,0'
-          new='local bc,bm,bi=0,0,0;local aoSrc,aoObs,aoMis=-1,-1,-1'
-          assert old in s and s.count(old)==1
-          s=s.replace(old,new,1)
-          old='if unsafePending>0 then bb_line(108,p2221(V[588],V[589],V[590],V[593]),0);bb_line(109,p2221(V[591],V[592],V[168],V[169]),0);unsafePending=0 end;if (V[594])>0 then bb_line(116,V[594],0);V[594]=0 end;if X[24]>0 then bb_line(130,X[24],0);bb_line(131,X[25],0);X[24]=0;X[25]=0 end;if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end'
-          new=old+';local as=V[248]or 0;local ao=V[168]or 0;local am=V[232]or 0;if as~=aoSrc or m_abs(ao-aoObs)>=12 or am~=aoMis or (V[237]or 0)>42 then bb_line(142,p2221(as,am,ao,(V[237]or 0)/10),0);bb_line(143,p2221(V[166]or 0,V[167]or 0,V[179]or 0,(V[266]or 0)/10),0);aoSrc=as;aoObs=ao;aoMis=am end'
-          assert old in s and s.count(old)==1
-          s=s.replace(old,new,1)
-          p.write_text(s)
+          p=json.loads(Path('factory/evolution-controller.json').read_text())
+          assert p['normalizedBytes'] <= 87000, p['normalizedBytes']
+          assert p['promotionPolicy'].startswith('TOURNAMENT_WINNER_AUTO'), p['promotionPolicy']
+          print({'release':p['release'],'candidate':p['candidate'],'generationRun':p['generationRun'],'bytes':p['normalizedBytes'],'canonicalFloor':p['canonicalFloor']})
           PY
-          lua5.3 -e "assert(loadfile('a17y.lua'))"
-          lua5.3 -e "assert(loadfile('a17z.lua'))"
-      - name: Compile and normalize both files
+
+      - name: Generate Aegis child from live winner
         run: |
           set -Eeuo pipefail
-          toolchain/compile_mt12.sh a17y.lua a17y.luac
-          toolchain/compile_mt12.sh a17z.lua a17z.luac
-          test -s a17y.luac
-          test -s a17z.luac
-      - name: Build permanent package and audit
+          python3 tools/aegis_evolution_stage.py
+          lua5.3 -e "assert(loadfile('aegis-next.lua'))"
+
+      - name: Compile normalize and enforce evolution gates
         run: |
           set -Eeuo pipefail
-          ID="aegis-observability-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          B="public/builds/$ID"
-          mkdir -p "$B"
-          cp a17z.lua "$B/candidate.lua"
-          cp a17z.luac "$B/candidate.luac"
-          cp a17y.lua "$B/parent.lua"
-          cp a17y.luac "$B/parent.luac"
+          toolchain/compile_mt12.sh aegis-next.lua aegis-next.luac
+          test -s aegis-next.luac
           python3 - <<'PY'
           import hashlib,json,os
           from pathlib import Path
-          from datetime import datetime,timezone
-          rid=os.environ['GITHUB_RUN_ID']; att=os.environ['GITHUB_RUN_ATTEMPT']
-          mid=f'aegis-observability-{rid}-{att}'
-          b=Path('public/builds')/mid
           h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-          status={'schema':4,'mission':mid,'profile':'aegis-observability','authority':'UNVERIFIED_AEGIS_DRIVE_CANDIDATE','createdAt':datetime.now(timezone.utc).isoformat(),'automaticPromotion':False,'hardGatesPassed':True,'behaviorChanged':True,'benchRequired':True,'roadRequired':True,'parentSource':'engineering-missions/history/20260803135344-001e4758/tournament/memory-efficient/workbench/PARENT.lua','ideas':['event-driven truth-source logging','GPS/RPM confidence logging','mismatch and anomaly-class logging','low-allocation state-change gating'],'protected':['GV7=1024','MT12 io.read(handle,...)','car-off guard','AIC9Z 18/24 persistence','dashboard','TC/ABS/gyro/throttle behavior','channel mapping'],'source':{'file':'candidate.lua','bytes':(b/'candidate.lua').stat().st_size,'sha256':h(b/'candidate.lua')},'luac':{'file':'candidate.luac','bytes':(b/'candidate.luac').stat().st_size,'sha256':h(b/'candidate.luac'),'format':'MT12 normalized Lua 5.3'},'warnings':['Experimental logging-observability candidate. Keep the prior trusted LUAC ready for rollback.','Controller behavior was intentionally preserved; new blackbox groups 142 and 143 provide Aegis evidence.']}
+          p=json.loads(Path('factory/evolution-controller.json').read_text())
+          m=json.loads(Path('aegis-next.json').read_text())
+          parent=Path(p['deployPath'])
+          child=Path('aegis-next.luac')
+          src=Path('aegis-next.lua')
+          size=child.stat().st_size
+          growth=size-parent.stat().st_size
+          assert size <= int(os.environ['MAX_BYTES']),(size,'MT12 ceiling')
+          assert growth <= int(os.environ['MAX_GROWTH_BYTES']),(growth,'Aegis growth budget')
+          assert h(src) != p['sourceSha256'],'source is not novel'
+          assert h(child) != p['luacSha256'],'bytecode is not novel'
+          s=src.read_text()
+          for token in ('AEGIS_EVOLVED_OBSERVABILITY','bb_line(142,','bb_line(143,','local pc=pcall','/LOGS/m0','/LOGS/m1','V[704]','setgv(3,m_min(V[35],ac))'):
+              assert token in s,token
+          m.update({'candidateSourceSha256':h(src),'candidateLuacSha256':h(child),'candidateNormalizedBytes':size,'growthBytes':growth,'headroomBytes':int(os.environ['MAX_BYTES'])-size,'hardGatesPassed':True})
+          Path('aegis-next.json').write_text(json.dumps(m,indent=2)+'\n')
+          print({'bytes':size,'growth':growth,'headroom':int(os.environ['MAX_BYTES'])-size})
+          PY
+
+      - name: Publish immutable Aegis evolution child
+        run: |
+          set -Eeuo pipefail
+          ID="aegis-evolution-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          B="public/builds/$ID"
+          mkdir -p "$B"
+          python3 - <<'PY'
+          import hashlib,json,os,shutil
+          from datetime import datetime,timezone
+          from pathlib import Path
+          rid=os.environ['GITHUB_RUN_ID'];att=os.environ['GITHUB_RUN_ATTEMPT']
+          mid=f'aegis-evolution-{rid}-{att}'
+          b=Path('public/builds')/mid
+          p=json.loads(Path('factory/evolution-controller.json').read_text())
+          meta=json.loads(Path('aegis-next.json').read_text())
+          shutil.copy2('aegis-next.lua',b/'candidate.lua')
+          shutil.copy2('aegis-next.luac',b/'candidate.luac')
+          shutil.copy2(p['sourcePath'],b/'parent.lua')
+          shutil.copy2(p['deployPath'],b/'parent.luac')
+          h=lambda q:hashlib.sha256(Path(q).read_bytes()).hexdigest()
+          status={
+            'schema':5,'mission':mid,'profile':'aegis-evolution','authority':'UNVERIFIED_AEGIS_CHILD_OF_TOURNAMENT_WINNER',
+            'createdAt':datetime.now(timezone.utc).isoformat(),'automaticPromotion':False,'hardGatesPassed':True,
+            'benchRequired':True,'roadRequired':True,'parentRelease':p['release'],'parentCandidate':p['candidate'],
+            'parentGenerationRun':p.get('generationRun'),'canonicalFloor':p['canonicalFloor'],
+            'mutation':meta['mutation'],'normalizedBytes':meta['candidateNormalizedBytes'],'growthBytes':meta['growthBytes'],
+            'headroomBytes':meta['headroomBytes'],'sourceSha256':meta['candidateSourceSha256'],'luacSha256':meta['candidateLuacSha256'],
+            'gates':['live tournament winner parent','defended canonical floor','Lua 5.3 load','MT12 normalization','source novelty','bytecode novelty','growth <= 600 bytes','normalized <= 87000 bytes'],
+            'observability':['group 142 truth source/anomaly/observability/mismatch','group 143 GPS/RPM/truth confidence context'],
+            'promotion':'EVIDENCE_REQUIRED; NEVER_AUTO_CANONICAL'
+          }
           (b/'STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
-          (b/'BUILD-AUDIT.txt').write_text('A17Z AEGIS OBSERVABILITY BUILD\n\nRestored full canonical parent from mission history.\nAdded blackbox group 142: truth source, anomaly class, observability, mismatch.\nAdded blackbox group 143: GPS confidence, RPM confidence, fused truth confidence, dropout score.\nNo control-output formulas or protected contracts changed.\n')
-          files=sorted(p for p in b.iterdir() if p.is_file())
-          (b/'SHA256SUMS.txt').write_text(''.join(f'{h(p)}  {p.name}\n' for p in files))
-          idx=Path('public/builds/index.json')
-          try:data=json.loads(idx.read_text())
-          except:data={'schema':2,'builds':[]}
-          entry={'mission':mid,'profile':status['profile'],'authority':status['authority'],'createdAt':status['createdAt'],'sourceSha256':status['source']['sha256'],'luacSha256':status['luac']['sha256'],'luacBytes':status['luac']['bytes'],'replayLogs':2,'base':f'public/builds/{mid}/'}
-          data['schema']=2;data['updatedAt']=status['createdAt'];data['builds']=[entry]+[x for x in data.get('builds',[]) if x.get('mission')!=mid]
-          idx.parent.mkdir(parents=True,exist_ok=True);idx.write_text(json.dumps(data,indent=2)+'\n')
+          (b/'BUILD-AUDIT.txt').write_text(
+            f"JARVIS AEGIS EVOLUTION STAGE\n\nParent: {p['release']} ({p['candidate']}) generation {p.get('generationRun')}\n"
+            f"Parent bytes: {p['normalizedBytes']}\nCandidate bytes: {meta['candidateNormalizedBytes']}\nGrowth: {meta['growthBytes']}\nHeadroom: {meta['headroomBytes']}\n"
+            "Aegis is now a child of the active tournament winner, not a frozen historical A17Y branch.\n"
+            "Control lineage remains experimental until bench/road evidence approves it.\n")
+          files=[q for q in b.iterdir() if q.is_file()]
+          (b/'SHA256SUMS.txt').write_text(''.join(f'{h(q)}  {q.name}\n' for q in sorted(files)))
+          latest={'schema':'JARVIS-AEGIS-LATEST-1','mission':mid,'base':f'public/builds/{mid}/','parentRelease':p['release'],'parentCandidate':p['candidate'],'generationRun':p.get('generationRun'),'normalizedBytes':meta['candidateNormalizedBytes'],'growthBytes':meta['growthBytes'],'headroomBytes':meta['headroomBytes'],'authority':status['authority'],'updatedAt':status['createdAt']}
+          Path('public/builds/aegis-latest.json').write_text(json.dumps(latest,indent=2)+'\n')
           PY
           (cd "$B" && zip -9 -r mission-build.zip . -x mission-build.zip)
+
       - uses: actions/upload-artifact@v6
         with:
-          name: a17z-aegis-observability-${{ github.run_id }}-${{ github.run_attempt }}
+          name: jarvis-aegis-evolution-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            a17z.lua
-            a17z.luac
-            public/builds/aegis-observability-${{ github.run_id }}-${{ github.run_attempt }}/
+            aegis-next.lua
+            aegis-next.luac
+            aegis-next.json
+            public/builds/aegis-evolution-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: error
           retention-days: 180
-      - name: Commit canonical repair and permanent downloads
+
+      - name: Commit gated Aegis child
         run: |
           set -Eeuo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add a17y.lua a17y.luac a17z.lua a17z.luac public/builds
-          git add -u
-          git commit -m "Restore full A17Y and publish Aegis A17Z candidate"
-
-          merge_build_index() {
-            python3 - <<'PY'
-          import json, os
-          from pathlib import Path
-          rid=os.environ['GITHUB_RUN_ID']; att=os.environ['GITHUB_RUN_ATTEMPT']
-          mid=f'aegis-observability-{rid}-{att}'
-          b=Path('public/builds')/mid
-          status=json.loads((b/'STATUS.json').read_text())
-          idx=Path('public/builds/index.json')
-          try:data=json.loads(idx.read_text())
-          except:data={'schema':2,'builds':[]}
-          entry={'mission':mid,'profile':status['profile'],'authority':status['authority'],'createdAt':status['createdAt'],'sourceSha256':status['source']['sha256'],'luacSha256':status['luac']['sha256'],'luacBytes':status['luac']['bytes'],'replayLogs':2,'base':f'public/builds/{mid}/'}
-          data['schema']=2
-          data['updatedAt']=status['createdAt']
-          data['builds']=[entry]+[x for x in data.get('builds',[]) if x.get('mission')!=mid]
-          idx.write_text(json.dumps(data,indent=2)+'\n')
-          PY
-          }
-
+          ID="aegis-evolution-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git add "public/builds/$ID" public/builds/aegis-latest.json
+          git commit -m "Publish Aegis evolution child from current tournament winner [skip ci]"
           for n in 1 2 3 4 5; do
-            if git pull --rebase origin main; then
-              if git push origin HEAD:main; then exit 0; fi
-            else
-              conflicts="$(git diff --name-only --diff-filter=U)"
-              if [ "$conflicts" = "public/builds/index.json" ]; then
-                echo "Resolving expected shared build-index race against latest main."
-                git checkout --ours public/builds/index.json
-                merge_build_index
-                git add public/builds/index.json
-                GIT_EDITOR=true git rebase --continue
-                if git push origin HEAD:main; then exit 0; fi
-              else
-                echo "Unexpected rebase conflict(s):"
-                printf '%s\n' "$conflicts"
-              fi
-            fi
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
             git rebase --abort || true
             sleep $((n*4))
           done
