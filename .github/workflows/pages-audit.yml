@@ -78,17 +78,29 @@ jobs:
           grep -q "factory/canonical-controller.json" jarvis/state.js
           grep -q 'public/builds/releases/${name}/' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
-          grep -q 'MJX 7303 // MT12 DIGITAL TWIN V15' racing-mjx7303-v15.html
-          grep -q 'body\[data-mode="garage"\] .controls' racing-mjx7303-v15.html
-          grep -q 'mjx7303-physics-v4.js' racing-mjx7303-v15.html
-          grep -q 'mjx7303-game-v11.js' racing-mjx7303-v15.html
-          grep -q 'racing-mjx7303-v15.html' jarvis/racing-tab.js
-          grep -q 'AI3D_VERSION=.15.0.0' jarvis/ai3d-engine-v15.js
-          grep -q 'AIQualityGovernor' jarvis/ai3d-engine-v15.js
-          grep -q 'ASSET_VERSION=.13.0.0' jarvis/mjx7303-asset-v13.js
-          grep -q 'portrait' jarvis/mjx7303-game-v11.js
-          grep -q 'AI3DEngine' jarvis/mjx7303-game-v11.js
-          ! grep -q 'three.module.js' racing-mjx7303-v15.html
+          node - <<'NODE'
+          const fs=require('fs');
+          const check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${t} in ${f}`)};
+          check('racing-mjx7303-v15.html','MJX 7303 // MT12 DIGITAL TWIN V18');
+          check('racing-mjx7303-v15.html','body[data-mode="garage"] .controls');
+          check('racing-mjx7303-v15.html','mjx7303-physics-v4.js');
+          check('racing-mjx7303-v15.html','mjx7303-game-v11.js');
+          check('racing-mjx7303-v15.html','body18');
+          check('jarvis/racing-tab.js','racing-mjx7303-v15.html');
+          check('jarvis/racing-tab.js','AI3D V18');
+          check('jarvis/ai3d-engine-v15.js',"AI3D_VERSION='15.1.0'");
+          check('jarvis/ai3d-engine-v15.js','uAlpha');
+          check('jarvis/ai3d-engine-v15.js','AIQualityGovernor');
+          check('jarvis/mjx7303-asset-v13.js','mjx7303-asset-v18.js');
+          check('jarvis/mjx7303-asset-v18.js',"ASSET_VERSION='18.0.0'");
+          check('jarvis/mjx7303-asset-v18.js','body-shell-closed');
+          check('jarvis/mjx7303-asset-v18.js','dashboard');
+          check('jarvis/mjx7303-asset-v18.js','steering-wheel');
+          check('jarvis/mjx7303-asset-v18.js','glass-front');
+          check('jarvis/mjx7303-game-v11.js','portrait');
+          check('jarvis/mjx7303-game-v11.js','AI3DEngine');
+          if(fs.readFileSync('racing-mjx7303-v15.html','utf8').includes('three.module.js'))throw Error('Three.js unexpectedly present');
+          NODE
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
 
       - name: Validate UI contract and workflow topology
@@ -113,7 +125,7 @@ jobs:
           }
           for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
           if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
-          for(const p of ['racing-mjx7303-v15.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v15.js','jarvis/mjx7303-asset-v13.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing simulator asset missing '+p);
+          for(const p of ['racing-mjx7303-v15.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v15.js','jarvis/mjx7303-asset-v13.js','jarvis/mjx7303-asset-v18.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing simulator asset missing '+p);
           console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority});
           NODE
 
