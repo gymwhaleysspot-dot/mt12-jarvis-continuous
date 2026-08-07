@@ -5,6 +5,7 @@ on:
     paths:
       - index.html
       - racing.html
+      - racing-v2.html
       - jarvis/**
       - classic-token.js
       - scripts/prepare-pages.mjs
@@ -39,7 +40,7 @@ jobs:
           node --check classic-token.js
           for f in jarvis/*.js scripts/*.mjs device/*.mjs; do [ -f "$f" ] && node --check "$f"; done
           node - <<'NODE'
-          const c=require('./jarvis/capabilities.json');
+          const fs=require('fs');const c=require('./jarvis/capabilities.json');
           if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
           const ids=new Set(c.workspaces.map(x=>x.id));
@@ -48,7 +49,8 @@ jobs:
           if(c.missions.length<15)throw Error('Capability mission contract incomplete');
           if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
           if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
-          if(!require('fs').existsSync('racing.html'))throw Error('Racing page missing');
+          if(!fs.existsSync('racing-v2.html'))throw Error('Racing v2 page missing');
+          if(!fs.existsSync('jarvis/racing-physics-v2.js'))throw Error('Racing physics v2 missing');
           NODE
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Workstation' index.html
@@ -60,8 +62,9 @@ jobs:
           grep -q 'ExpressLRS' jarvis/firmware-center.js
           grep -q 'firmware-catalog' jarvis/firmware-center.js
           grep -q 'firmware-build-flash' jarvis/firmware-center.js
-          grep -q 'JARVIS RACING' racing.html
-          grep -q 'racing-physics-v2.js' racing.html
+          grep -q 'JARVIS RACING V2' racing-v2.html
+          grep -q 'racing-physics-v2.js' racing-v2.html
+          grep -q 'racing-v2.html' jarvis/racing-tab.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
