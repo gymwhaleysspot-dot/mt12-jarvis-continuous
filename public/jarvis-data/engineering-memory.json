@@ -1,20 +1,20 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 3,
+    "controller": 4,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 2,
+    "mission": 4,
     "mutation": 2,
     "next_experiment": 1,
     "rejection": 57,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260807003034",
-  "generatedAt": "2026-08-07T03:34:52.360568+00:00",
-  "nodeCount": 79,
+  "currentExperiment": "EXP-20260807033832",
+  "generatedAt": "2026-08-07T03:38:47.406713+00:00",
+  "nodeCount": 82,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -75,6 +75,25 @@
       "recommended": true,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "authority": "FORCED_CONTROL_NO_BEHAVIOR_CHANGE",
+      "bytes": 86982,
+      "id": "controller:7ee22193964bb59c",
+      "kind": "controller",
+      "label": "None",
+      "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
+      "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "id": "mission:7f0dc82f51d9bd3d",
+      "kind": "mission",
+      "label": "aegis-observability-31144945861-1"
+    },
+    {
+      "id": "mission:8c1c519e4bfa6cab",
+      "kind": "mission",
+      "label": "forced-31144787654-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -496,24 +515,24 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.7988,
-      "hypothesis": "A controller derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-      "id": "experiment:9711fd8dc540d1a2",
+      "expectedInformationGain": 0.796,
+      "hypothesis": "A controller derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+      "id": "experiment:940796867e2c2ded",
       "kind": "experiment",
-      "label": "Improve jump landing classification",
-      "measurement": "reduce jump false positives while preserving true jump recall",
+      "label": "Improve sensor dropout recovery",
+      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
       "status": "PLANNED",
-      "uncertainty": 0.6
+      "uncertainty": 0.62
     },
     {
-      "id": "mutation:6c110f9626d9d4ce",
+      "id": "mutation:3fa263a6223e98fc",
       "kind": "mutation",
-      "label": "separate airborne and landing evidence"
+      "label": "graded fail-open sensor confidence"
     },
     {
-      "id": "mutation:6ec99fb4521921a0",
+      "id": "mutation:5a7c6e240bcab7e6",
       "kind": "mutation",
-      "label": "adaptive post-landing confirmation window"
+      "label": "state-preserving dropout recovery"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -551,7 +570,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 74,
+  "relationshipCount": 77,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -570,6 +589,25 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:7b7e64cdfbc1f586"
+    },
+    {
+      "id": "edge:e142f5e4fba0dfbb",
+      "relation": "BUILT_BY",
+      "source": "controller:7ee22193964bb59c",
+      "target": "mission:7f0dc82f51d9bd3d"
+    },
+    {
+      "eligible": false,
+      "id": "edge:73624fd6054b3b53",
+      "relation": "CHALLENGES",
+      "source": "controller:7ee22193964bb59c",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:89b61810c1b23745",
+      "relation": "BUILT_BY",
+      "source": "controller:7ee22193964bb59c",
+      "target": "mission:8c1c519e4bfa6cab"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -939,63 +977,63 @@
       "target": "controller:a0206f4b0721cac1"
     },
     {
-      "id": "edge:3ce911ee5af6852d",
+      "id": "edge:de73a978462ed10f",
       "relation": "USES_PARENT",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "controller:1d3e9c9125494516"
     },
     {
-      "id": "edge:5a8f8b7bbd7a8a4c",
+      "id": "edge:2d5a5398427ef9c4",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:9711fd8dc540d1a2",
-      "target": "mutation:6c110f9626d9d4ce"
+      "source": "experiment:940796867e2c2ded",
+      "target": "mutation:3fa263a6223e98fc"
     },
     {
-      "id": "edge:683c896ab4276d16",
+      "id": "edge:7bde72428f21e0f3",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:9711fd8dc540d1a2",
-      "target": "mutation:6ec99fb4521921a0"
+      "source": "experiment:940796867e2c2ded",
+      "target": "mutation:5a7c6e240bcab7e6"
     },
     {
-      "id": "edge:a44d50bbab76d04b",
+      "id": "edge:2f6604ac9dfb290d",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:d0ceba208d208f3d"
     },
     {
-      "id": "edge:3b3018b71067ff05",
+      "id": "edge:0eb49fa984f212fb",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:af354b232c193ef9"
     },
     {
-      "id": "edge:0a85a0f1b4ed79e9",
+      "id": "edge:254327d6d1f2e471",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:9e7a610f94776e69"
     },
     {
-      "id": "edge:6f64993a5a819f26",
+      "id": "edge:7b003f20faaa8421",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:822439754733430f"
     },
     {
-      "id": "edge:3b1b1478bad2b04b",
+      "id": "edge:fbc53511fd950049",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:529343bd009a7dd8"
     },
     {
-      "id": "edge:f0e555e5b026ad2b",
+      "id": "edge:d97e7d14d409acb2",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:b1b2a0420869a06b"
     },
     {
-      "id": "edge:e5f5541bf325036d",
+      "id": "edge:dd02fe38f718799e",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:9711fd8dc540d1a2",
+      "source": "experiment:940796867e2c2ded",
       "target": "test:006110a1594843d9"
     }
   ],
