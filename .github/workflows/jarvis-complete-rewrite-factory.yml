@@ -30,11 +30,13 @@ jobs:
         run: |
           python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
-          import sys
+          import json,sys
+          from pathlib import Path
           sys.path.insert(0,'tools')
           import jarvis_canonical_parent as c
           name,path=c.resolve()
-          assert name=='jrw6d'
+          authority=json.loads(Path('factory/canonical-controller.json').read_text())
+          assert name==authority['release']
           print({'canonicalParent':name,'source':str(path)})
           PY
       - name: Refresh highest-information experiment
@@ -106,8 +108,6 @@ jobs:
           for n in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            # reset --hard does not remove untracked files. Remove any runner-local
-            # copy before deciding whether this immutable generation exists remotely.
             rm -rf -- "public/builds/${mission}"
 
             if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
