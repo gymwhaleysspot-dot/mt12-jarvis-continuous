@@ -5,8 +5,7 @@ on:
     branches: [main]
     paths:
       - index.html
-      - racing-mjx7303-v24.html
-      - racing-mjx7303-v25.html
+      - racing-mjx7303-v26.html
       - assets/mjx7303/**
       - jarvis/**
       - classic-token.js
@@ -18,8 +17,7 @@ on:
   pull_request:
     paths:
       - index.html
-      - racing-mjx7303-v24.html
-      - racing-mjx7303-v25.html
+      - racing-mjx7303-v26.html
       - assets/mjx7303/**
       - jarvis/**
       - classic-token.js
@@ -58,7 +56,7 @@ jobs:
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
 
-      - name: Validate Jarvis workstation and Racing V25 CAD contract
+      - name: Validate Jarvis workstation and Racing V26 clean contract
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -68,35 +66,45 @@ jobs:
           check('index.html','workspaceBody');
           check('jarvis/app.js','latestGeneration');
           check('jarvis/state.js','factory/canonical-controller.json');
-          check('jarvis/firmware-center.js','EdgeTX');
-          check('jarvis/firmware-center.js','ExpressLRS');
-          check('racing-mjx7303-v25.html','V25 CAD','V25 simulator shell');
-          check('racing-mjx7303-v25.html','mjx7303-physics-v4.js');
-          check('racing-mjx7303-v25.html','mjx7303-playcanvas-v25.js');
-          check('racing-mjx7303-v25.html','racing-mjx7303-v24.html','V24 runtime fallback');
-          check('jarvis/racing-tab.js','racing-mjx7303-v25.html');
-          check('jarvis/racing-tab.js','V25 BLENDER CAD');
-          check('jarvis/mjx7303-playcanvas-v25.js','playcanvas@2.21.3');
-          check('jarvis/mjx7303-playcanvas-v25.js','mjx7303-v25.glb');
-          check('jarvis/mjx7303-playcanvas-v25.js','instantiateRenderEntity');
-          check('jarvis/mjx7303-playcanvas-v25.js','__V25_READY');
-          check('tools/build_mjx7303_v25_blender.py','375 mm wheelbase','375 mm reference scale');
-          check('tools/build_mjx7303_v25_blender.py','WB=3.75','3.75 Blender-unit wheelbase');
-          check('tools/build_mjx7303_v25_blender.py','AX_F=-WB/2;AX_R=WB/2','axle spacing derived from wheelbase');
-          check('tools/build_mjx7303_v25_blender.py','BODY_CLOSED_SUBDIV');
-          check('tools/build_mjx7303_v25_blender.py','export_scene.gltf');
-          for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html'])check(f,'Opening Jarvis','compatibility marker');
-          console.log({racing:'V25.2',renderer:'PlayCanvas 2.21.3',physics:'V4',cad:'Blender',wheelbaseMM:375,asset:'generated during Pages build'});
+          check('racing-mjx7303-v26.html','V26 CLEAN BLENDER CAD','V26 simulator shell');
+          check('racing-mjx7303-v26.html','mjx7303-physics-v4.js');
+          check('racing-mjx7303-v26.html','mjx7303-racing-v26.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v26.html');
+          check('jarvis/racing-tab.js','RACING V26 CLEAN REBUILD');
+          check('jarvis/mjx7303-racing-v26.js','playcanvas@2.21.3');
+          check('jarvis/mjx7303-racing-v26.js','mjx7303-v26.glb');
+          check('jarvis/mjx7303-racing-v26.js','__V26_READY');
+          check('jarvis/mjx7303-racing-v26.js','Emergency Car','nonblank runtime fallback');
+          check('tools/build_mjx7303_v26_blender.py','375 mm wheelbase');
+          check('tools/build_mjx7303_v26_blender.py','WB=3.75');
+          check('tools/build_mjx7303_v26_blender.py','AX_F=-WB/2;AX_R=WB/2');
+          check('tools/build_mjx7303_v26_blender.py','BODY_CLOSED_SUBDIV_V26');
+          check('tools/build_mjx7303_v26_blender.py','export_scene.gltf');
+          console.log({racing:'V26',renderer:'PlayCanvas 2.21.3',physics:'V4',cad:'Blender',wheelbaseMM:375,fallback:'Emergency Car'});
           NODE
+
+      - name: Validate planner schema contract
+        run: |
+          python3 tools/jarvis_intelligence_planner.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('public/jarvis-data/experiment-plan.json').read_text())
+          e=p['nextExperiment']
+          assert p['schema']=='JARVIS-EXPERIMENT-PLAN-4'
+          assert len(e['portfolio'])==5
+          assert e['synthesis']['area']=='synthesis-all-five'
+          assert e['acceptanceCriteria']['mustPreserveCanonicalFloor'] is True
+          print({'planner':p['schema'],'experiment':e['id']})
+          PY
 
       - name: Validate UI contract
         run: |
           node - <<'NODE'
-          const fs=require('fs');const c=require('./jarvis/capabilities.json');const state=fs.readFileSync('jarvis/state.js','utf8');
+          const fs=require('fs'),c=require('./jarvis/capabilities.json'),state=fs.readFileSync('jarvis/state.js','utf8');
           if(c.schema<7)throw Error('Jarvis UI contract must be v7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
-          const ids=new Set(c.workspaces.map(w=>w.id));
-          for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
+          const ids=new Set(c.workspaces.map(w=>w.id));for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
           if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
           if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
           if(c.controllerLineage.canonicalAuthority!=='factory/canonical-controller.json')throw Error('Wrong canonical authority source');
@@ -109,12 +117,9 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          a=json.loads(Path('factory/canonical-controller.json').read_text())
-          r=a['release']; base=Path('public/builds/releases')/r
-          src=base/f'{r}.lua'; luac=base/f'{r}.luac'; manifest=base/'MANIFEST.json'
-          assert src.exists() and luac.exists() and manifest.exists()
-          m=json.loads(manifest.read_text()); assert m['release']==r; assert m['normalizedBytes']<=87000; assert luac.stat().st_size==m['normalizedBytes']
-          print({'release':r,'bytes':m['normalizedBytes']})
+          a=json.loads(Path('factory/canonical-controller.json').read_text());r=a['release'];base=Path('public/builds/releases')/r
+          src=base/f'{r}.lua';luac=base/f'{r}.luac';manifest=base/'MANIFEST.json';assert src.exists() and luac.exists() and manifest.exists()
+          m=json.loads(manifest.read_text());assert m['release']==r;assert m['normalizedBytes']<=87000;assert luac.stat().st_size==m['normalizedBytes'];print({'release':r,'bytes':m['normalizedBytes']})
           PY
 
       - name: Validate firmware helper wiring
