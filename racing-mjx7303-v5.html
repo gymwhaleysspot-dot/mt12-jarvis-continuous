@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05080d">
+<title>Jarvis MJX 7303 Simulator V5</title>
+<style>
+:root{--bg:#05080d;--panel:#0b121aee;--line:#29465a;--text:#edf8ff;--muted:#8099aa;--cyan:#65dbff;--green:#7be6a1;--amber:#ffd26b;--red:#ff6a7a}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:12px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,select,input{font:inherit}.app{height:100svh;display:grid;grid-template-rows:auto 1fr auto;gap:7px;padding:max(7px,env(safe-area-inset-top)) max(7px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left));background:radial-gradient(circle at 50% -20%,#1b3548,#05080d 54%)}.top{display:grid;grid-template-columns:minmax(200px,.7fr) 1.6fr auto;gap:7px;align-items:stretch}.brand,.hud,.modes,.card,.controls{border:1px solid var(--line);background:linear-gradient(180deg,#0e1822ee,#081019ee);border-radius:14px}.brand{padding:8px 10px}.brand b{display:block;font-size:13px;letter-spacing:.12em}.brand small{color:var(--muted)}.hud{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));overflow:hidden}.stat{padding:6px 5px;text-align:center;border-right:1px solid #1c3344}.stat:last-child{border:0}.stat span{display:block;font-size:7px;color:var(--muted);letter-spacing:.09em}.stat b{font-size:13px;white-space:nowrap}.modes{display:flex;padding:4px}.mode{border:0;border-radius:9px;padding:7px 9px;background:transparent;color:#9fb5c4;font-weight:900}.mode.active{background:#153047;color:white;box-shadow:0 0 22px #4fd7ff24}.stage{position:relative;min-height:0;overflow:hidden;border:1px solid #27475b;border-radius:20px;background:#020508;box-shadow:0 24px 80px #000a}.stage canvas{width:100%;height:100%;display:block;touch-action:none}.corner{position:absolute;z-index:5}.telemetry{left:10px;top:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:5px;width:190px}.pill{padding:6px 8px;border:1px solid #294b60;border-radius:10px;background:#020910d9;backdrop-filter:blur(12px)}.pill span{display:block;color:#7693a7;font-size:7px}.pill b{font-size:10px}.reason{right:10px;top:10px;padding:7px 10px;border:1px solid #315c74;border-radius:999px;background:#020910df;color:#9cecff;font-weight:900}.garage-ui{right:10px;bottom:10px;width:min(330px,40vw);padding:10px;border:1px solid #315770;border-radius:14px;background:#061019e8;backdrop-filter:blur(14px)}.garage-ui h3,.drive-ui h3{margin:0 0 7px;font-size:12px}.angles{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.sm{border:1px solid #31566e;border-radius:8px;background:#0e2231;color:white;padding:7px 4px;font-weight:850;font-size:9px}.sm:hover{background:#173248}.check{display:flex;align-items:center;gap:6px;color:var(--muted);margin-top:8px}.drive-ui{right:10px;bottom:10px;width:230px;padding:9px;border:1px solid #315770;border-radius:14px;background:#061019e8}.health{display:grid;gap:5px}.health-row{display:grid;grid-template-columns:70px 1fr;gap:6px;align-items:center;font-size:8px;color:var(--muted)}.bar{height:6px;border-radius:99px;background:#132835;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#72e9a1,#ffd46f,#ff687a)}.tires{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:7px}.tire{padding:5px;border:1px solid #203c4e;border-radius:8px;background:#08141d;color:#a9c0cf;font-size:8px}.radio{left:10px;bottom:10px;width:210px;padding:9px;border:1px solid #315770;border-radius:14px;background:#061019e8}.radio h3{margin:0 0 6px}.ch{display:grid;grid-template-columns:42px 1fr 38px;gap:5px;align-items:center;margin:4px 0;font-size:8px}.meter{height:6px;background:#132835;border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;background:#61dcff}.controls{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;padding:6px}.pad{display:grid;grid-template-columns:1fr 1fr;gap:6px}.ctrl{height:48px;border:1px solid #315a72;border-radius:11px;background:#0c1b27;color:white;font-weight:950}.ctrl.go{background:#123b25}.ctrl.brake{background:#38141a}.ctrl.boost{background:#302510;color:#ffe497}.tools{display:flex;gap:5px}.select,.tool{border:1px solid #315a72;border-radius:10px;background:#0b1924;color:white;padding:7px 8px;font-weight:800}.tuning{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:6px;margin-top:7px}.tuning label{font-size:8px;color:var(--muted)}.tuning input{width:100%}
+@media(max-width:900px){.top{grid-template-columns:1fr auto}.brand{display:none}.hud{grid-column:1/2;grid-template-columns:repeat(4,1fr)}.hud .stat:nth-child(n+5){display:none}.modes{grid-column:2}.telemetry{display:none}.garage-ui{width:calc(100% - 20px);max-width:none;bottom:9px;right:10px}.drive-ui{width:150px}.angles{grid-template-columns:repeat(5,1fr)}.radio{width:150px}.controls{grid-template-columns:1fr 1fr}.tools{grid-column:1/3}.select,.tool{flex:1}.tuning{display:none}}
+@media(max-width:560px){.app{gap:5px;padding:5px}.stage{border-radius:14px}.stat{padding:5px 2px}.stat b{font-size:11px}.ctrl{height:45px}.garage-ui{padding:8px}.angles .sm{font-size:8px;padding:6px 2px}.drive-ui{display:none}.radio{width:132px;padding:7px}.radio h3{font-size:9px}.ch{grid-template-columns:34px 1fr 30px}.tools{display:grid;grid-template-columns:1fr 1fr 1fr}.tool,.select{padding:6px 4px;font-size:9px}}
+</style>
+</head>
+<body data-mode="garage">
+<div class="app">
+<header class="top">
+  <div class="brand"><b>MJX HYPER GO 7303</b><small>Jarvis V5 visual digital twin · RadioMaster MT12</small></div>
+  <div class="hud">
+    <div class="stat"><span>TRUTH MPH</span><b id="mph">0</b></div><div class="stat"><span>MOTOR RPM</span><b id="rpm">900</b></div><div class="stat"><span>GEAR</span><b id="gear">1</b></div><div class="stat"><span>BATTERY</span><b id="bat">16.8V</b></div><div class="stat"><span>ESC CURRENT</span><b id="amps">0A</b></div><div class="stat"><span>CH15 TCT</span><b id="tct">1024</b></div><div class="stat"><span>CH16 GYR</span><b id="gyr">260</b></div><div class="stat"><span>STATE</span><b id="state">GROUND</b></div>
+  </div>
+  <div class="modes"><button id="modeGarage" class="mode active">GARAGE</button><button id="modeDrive" class="mode">DRIVE</button></div>
+</header>
+<main class="stage">
+  <canvas id="scene"></canvas>
+  <div class="corner reason" id="reason">READY</div>
+  <div class="corner telemetry"><div class="pill"><span>TC</span><b id="tcState">READY</b></div><div class="pill"><span>ABS</span><b id="absState">READY</b></div><div class="pill"><span>MT12 ST</span><b id="stOut">0</b></div><div class="pill"><span>MT12 TH</span><b id="thOut">0</b></div></div>
+  <section id="garagePanel" class="corner garage-ui">
+    <h3>7303 SHOWROOM</h3>
+    <div class="angles"><button class="sm" data-view="0">FRONT</button><button class="sm" data-view="-0.72">3/4</button><button class="sm" data-view="-1.57">SIDE</button><button class="sm" data-view="-2.42">REAR 3/4</button><button class="sm" data-view="3.14">REAR</button></div>
+    <div class="tuning"><label>GYR<input id="gy" type="range" min="120" max="460" value="260"></label><label>TC SLIP<input id="tc" type="range" min="5" max="60" value="25"></label><label>TIRE PSI<input id="pr" type="range" min="20" max="45" value="32"></label></div>
+    <label class="check"><input type="checkbox" id="wire"> show node-beam structure</label>
+  </section>
+  <section id="drivePanel" class="corner drive-ui" hidden>
+    <h3>MECHANICAL STATE</h3>
+    <div class="health"><div class="health-row"><span>STRUCTURE</span><div class="bar"><i id="structure" style="width:100%"></i></div></div><div class="health-row"><span>MOTOR</span><div class="bar"><i id="motor" style="width:100%"></i></div></div><div class="health-row"><span>STEERING</span><div class="bar"><i id="steering" style="width:100%"></i></div></div><div class="health-row"><span>SUSPENSION</span><div class="bar"><i id="suspension" style="width:100%"></i></div></div><div class="health-row"><span>BATTERY</span><div class="bar"><i id="soc" style="width:100%"></i></div></div></div>
+    <div class="tires"><div class="tire" id="w0">FL</div><div class="tire" id="w1">FR</div><div class="tire" id="w2">RL</div><div class="tire" id="w3">RR</div></div>
+  </section>
+  <section class="corner radio"><h3>MT12 LIVE OUTPUT</h3><div class="ch"><span>ST</span><div class="meter"><i style="width:50%"></i></div><b id="stOut2">—</b></div><div class="ch"><span>TH</span><div class="meter"><i></i></div><b>LIVE</b></div><div class="ch"><span>TCT</span><div class="meter"><i id="tctbar" style="width:100%"></i></div><b>15</b></div><div class="ch"><span>GYR</span><div class="meter"><i id="gyrbar" style="width:56%"></i></div><b>16</b></div></section>
+</main>
+<footer class="controls">
+  <div class="pad"><button class="ctrl" data-k="left">◀ STEER</button><button class="ctrl" data-k="right">STEER ▶</button></div>
+  <div class="pad"><button class="ctrl brake" data-k="brake">BRAKE</button><button class="ctrl go" data-k="gas">THROTTLE</button></div>
+  <div class="tools"><button class="ctrl boost" data-k="boost">BOOST</button><select class="select" id="surface"><option value="asphalt">ASPHALT</option><option value="wet">WET</option><option value="gravel">GRAVEL</option><option value="grass">GRASS</option></select><button class="tool" id="impact">CRASH TEST</button><button class="tool" id="repair">REPAIR</button><button class="tool" id="auto">AUTO ROTATE</button></div>
+</footer>
+</div>
+<script src="jarvis/mjx7303-physics-v4.js"></script>
+<script src="jarvis/mjx7303-render-v5.js"></script>
+<script src="jarvis/mjx7303-game-v5.js"></script>
+<script>
+setInterval(()=>{const c=window.__mjxCar;if(!c)return},500);
+</script>
+</body>
+</html>
