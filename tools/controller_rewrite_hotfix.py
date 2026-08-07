@@ -12,7 +12,7 @@ _original_bonus = tournament.candidate_bonus
 
 
 def protected_checks(text: str) -> list[str]:
-    """Preserve the complete defended JRW6D lineage floor without hard-coding a display name."""
+    """Preserve the defended JR514F lineage floor without hard-coding a display name."""
     errors = [error for error in _original_checks(text) if error != "missing:A17Z"]
     required = (
         "local function zBrain", "V[704]", "X[46]", "V[720]=ac",
@@ -23,6 +23,7 @@ def protected_checks(text: str) -> list[str]:
         "V[179]*.0045", "92+4*dc",
         "bb_line(144,li1,0)", "bb_line(147,li4,0)",
         "bb_line(148,rg1,0)", "bb_line(151,rg4,0)",
+        "local bv=cache[2]or 0", "local bv=rx;if mph>V[792]", '"BAT"',
     )
     errors.extend(f"missing-lineage-floor:{token}" for token in required if token not in text)
     decl = text.find("local function bb_line(")
@@ -31,9 +32,12 @@ def protected_checks(text: str) -> list[str]:
         errors.append("unsafe-bb-line-scope:call-before-local-declaration")
     if "setgv(3,V[35])" in text:
         errors.append("forbidden-stale-authority:setgv(3,V[35])")
-    for bad in ("V[179]*(.00435", "V[179]*(.0044", "V[179]*.0048", "V[179]*.0050"):
+    for bad in (
+        "V[179]*(.00435", "V[179]*(.0044", "V[179]*.0048", "V[179]*.0050",
+        'fid("VFAS")', 'fid("EscV")', 'fid("A4")',
+    ):
         if bad in text:
-            errors.append("forbidden-causal-mutation:restore-fixed-.0045")
+            errors.append(f"forbidden-lineage-regression:{bad}")
     has_runtime_identity = all(
         token in text for token in (
             "bb_line(144,li1,0)", "bb_line(145,li2,0)",
@@ -60,28 +64,22 @@ def _restore_causal_floor(text: str) -> str:
 
 
 def _sanitize_inherited_bb_line(text: str) -> str:
-    """Remove the inherited pre-declaration group-143 call from the JRW6D source.
-
-    The call lives inside update(), before local function bb_line is declared, so Lua
-    resolves it as a global and the MT12 throws 'attempt to call a nil value'.
-    Observability adds the same record back later inside bb_tick(), where bb_line is local.
-    """
     unsafe = "if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;"
-    text = text.replace(unsafe, "")
-    return text
+    return text.replace(unsafe, "")
 
 
 def _apply_profile(text: str, profile: str) -> str:
-    """Apply profile diversity without mutating the defended causal coefficient or 92→96 floor."""
+    """Apply profile diversity without mutating defended controller or dashboard anchors."""
     fault = "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end"
     if profile == "learning":
         text = text.replace("V[760+km]>2", "V[760+km]>3", 1)
     elif profile == "observability":
         anchor = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end"
         add = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;bb_line(143,p2221(V[720],V[704],V[114]*100,V[119]*100),0);X[29]=0;X[30]=0 end"
-        if text.count(anchor) != 1:
-            raise RuntimeError(f"observability bb_tick anchor expected one match, found {text.count(anchor)}")
-        text = text.replace(anchor, add, 1)
+        if anchor in text:
+            text = text.replace(anchor, add, 1)
+        elif "bb_line(143,p2221(V[720],V[704],V[114]*100,V[119]*100),0)" not in text:
+            raise RuntimeError("observability bb_tick anchor missing")
     elif profile == "conservative":
         text = text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,92)end", 1)
     elif profile == "combined":
@@ -93,12 +91,13 @@ def _apply_profile(text: str, profile: str) -> str:
         "conservative": "JRW1", "balanced": "JRW2", "learning": "JRW3",
         "observability": "JRW4", "combined": "JRW5",
     }[profile]
-    text = text.replace('T(2,1,"JRW6D",Z+INVERS)', f'T(2,1,"{label}",Z+INVERS)', 1)
+    text, count = re.subn(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)', f'T(2,1,"{label}",Z+INVERS)', text, count=1)
+    if count != 1:
+        raise RuntimeError("dashboard release label anchor missing")
     return text
 
 
 def _apply_defended_experiment(text: str, area: str) -> str:
-    """Move experiments off immutable JRW6D defense anchors when necessary."""
     if area == "truth-speed-fusion":
         old = "clamp(V[179]/250,0,.35)"
         new = "clamp(V[179]/(245+10*V[119]),0,.35)"
@@ -113,7 +112,6 @@ def _apply_defended_experiment(text: str, area: str) -> str:
 
 
 def _reuse_generation_identity(text: str) -> str:
-    """Keep the new rg identity values but remove inherited duplicate rg locals/logger emission."""
     pat = re.compile(r"local rg1,rg2,rg3,rg4=\d+,\d+,\d+,\d+")
     matches = list(pat.finditer(text))
     if not matches:
@@ -130,7 +128,6 @@ def _reuse_generation_identity(text: str) -> str:
 
 
 def imprint_runtime_identity(text: str, token: str, chunks: list[int]) -> str:
-    """Reuse JRW6D's existing li identity locals instead of allocating five more top-level locals."""
     values = ",".join(str(x) for x in chunks)
     pat = re.compile(r"local li1,li2,li3,li4=\d+,\d+,\d+,\d+")
     text, count = pat.subn("local li1,li2,li3,li4=" + values, text, count=1)
@@ -142,7 +139,7 @@ def imprint_runtime_identity(text: str, token: str, chunks: list[int]) -> str:
 
 
 def experiment_rewrite(text: str, profile: str, experiment: dict, generation: str) -> str:
-    """Generate from the defended parent while keeping JRW6D protections immutable."""
+    """Generate from JR514F while keeping the defended controller and RxBt dashboard floor immutable."""
     area = str(experiment.get("area", ""))
     try:
         rewritten = _original_rewrite(text, "balanced", experiment, generation)
