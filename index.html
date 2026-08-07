@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#05080d">
+  <meta name="theme-color" content="#03070b">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'">
-  <title>Jarvis MT12 Engineering OS</title>
+  <title>Jarvis MT12 Engineering Workstation</title>
   <link rel="stylesheet" href="jarvis/app.css">
 </head>
 <body>
@@ -13,57 +13,36 @@
     <header class="topbar">
       <button class="brand-button" id="homeButton" aria-label="Jarvis command overview">
         <span class="reactor" aria-hidden="true"><i></i></span>
-        <span class="brand-copy"><b>JARVIS</b><small>MT12 Engineering OS</small></span>
+        <span class="brand-copy"><b>JARVIS</b><small>MT12 Engineering Workstation</small></span>
       </button>
       <div class="live-strip">
         <span class="live-pill" id="producerPill"><i></i><b>PRODUCER</b><em>checking</em></span>
-        <span class="live-pill" id="parentPill"><i></i><b>PARENT</b><em>—</em></span>
-        <span class="live-pill" id="generationPill"><i></i><b>LATEST</b><em>—</em></span>
+        <span class="live-pill" id="parentPill"><i></i><b>CANONICAL</b><em>—</em></span>
+        <span class="live-pill" id="generationPill"><i></i><b>SYNTHESIS</b><em>—</em></span>
       </div>
       <div class="top-actions">
         <button class="btn compact" id="refresh">REFRESH</button>
         <button class="btn compact" id="connection"><span id="connectionState">GITHUB</span></button>
       </div>
     </header>
-
     <div class="page-grid">
-      <aside class="rail">
-        <div class="rail-title">ENGINEERING OS</div>
-        <nav id="sideNav"></nav>
-        <div class="rail-foot">
-          <span>Last sync</span>
-          <b id="updated">—</b>
-        </div>
-      </aside>
-
+      <aside class="rail"><div class="rail-title">ENGINEERING WORKSTATION</div><nav id="sideNav"></nav><div class="rail-foot"><span>Last sync</span><b id="updated">—</b></div></aside>
       <main class="main">
-        <div class="notice" id="loading" hidden>Synchronizing Jarvis state…</div>
+        <div class="notice" id="loading" hidden>Synchronizing Jarvis engineering state…</div>
         <div class="notice error" id="globalError" hidden></div>
-
-        <section class="command-hero">
-          <div>
-            <div class="kicker" id="workspaceKicker">CLOSED-LOOP CONTROLLER ENGINEERING</div>
-            <h1 id="workspaceTitle">Command</h1>
-            <p id="workspaceDescription">Live controller lineage, factory generations, evidence, promotion authority and MT12 operations.</p>
-          </div>
-          <div class="hero-facts" id="heroFacts"></div>
-        </section>
-
+        <section class="command-hero"><div><div class="kicker" id="workspaceKicker">CLOSED-LOOP MT12 ENGINEERING</div><h1 id="workspaceTitle">Command</h1><p id="workspaceDescription">What Jarvis is doing, what it believes, what changed, and what needs road evidence next.</p></div><div class="hero-facts" id="heroFacts"></div></section>
         <div id="workspaceBody"></div>
       </main>
     </div>
-
     <nav class="mobile-nav" id="mobileNav"></nav>
   </div>
-
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer" aria-label="GitHub connection">
     <div class="drawer-head"><div><div class="kicker">JARVIS ACCESS</div><h2>GitHub connection</h2></div><button class="btn" id="closeDrawer">CLOSE</button></div>
-    <p class="muted">Jarvis can read public engineering state without a token. A saved classic PAT is only required for dispatching workflows, uploads and write operations.</p>
+    <p class="muted">Public engineering state is readable without a token. A saved classic PAT is only needed for workflow dispatch and write operations.</p>
     <div class="stack-actions"><button class="btn primary" id="testToken">TEST CONNECTION</button><button class="btn danger" id="clearToken">CLEAR SAVED TOKEN</button></div>
     <div id="authMessage" class="console">Ready.</div>
   </aside>
-
   <script src="classic-token.js"></script>
   <script type="module" src="jarvis/iphone-sync-boot.js"></script>
   <script type="module" src="jarvis/app.js"></script>
