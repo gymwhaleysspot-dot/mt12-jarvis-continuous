@@ -1,11 +1,11 @@
 {
-  "schema": 2,
   "id": "forced-31144787654-1",
   "mission": "Build a bounded experimental candidate from the latest replay evidence",
   "model": "openai/gpt-4.1",
-  "phase": "FORCED_CONTROL_NO_BEHAVIOR_CHANGE",
-  "updatedAt": "2026-08-07T03:35:35.309Z",
-  "logs": 2,
+  "logs": [
+    "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+    "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv"
+  ],
   "attempts": [
     {
       "strategy": "conservative replay-targeted",
@@ -68,6 +68,9 @@
       "reason": "GitHub Models 410: {\"error\":{\"code\":\"github_models_retirement_brownout\",\"message\":\"GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.\"}}\n"
     }
   ],
-  "profile": "trusted-parent-control",
-  "luacBytes": 86982
+  "fallback": true,
+  "fallbackReason": "No behavioral candidate cleared every hard gate.",
+  "winner": {
+    "strategy": "trusted-parent-control"
+  }
 }
