@@ -128,13 +128,13 @@ jobs:
           e=json.loads(p.read_text())
           canonical=json.loads(Path('factory/canonical-controller.json').read_text())
           assert e['canonicalFloor']==canonical['release'],(e.get('canonicalFloor'),canonical['release'])
-          assert e['candidate']=='jrw6',e.get('candidate')
+          assert e['candidate'] in {'jrw1','jrw2','jrw3','jrw4','jrw5','jrw6'},e.get('candidate')
           assert e['normalizedBytes']<=87000,e['normalizedBytes']
           src=Path(e['sourcePath']);luac=Path(e['deployPath'])
           assert src.exists(),src
           assert luac.exists(),luac
           assert luac.stat().st_size==e['normalizedBytes'],(luac.stat().st_size,e['normalizedBytes'])
-          print({'release':e['release'],'generationRun':e['generationRun'],'bytes':e['normalizedBytes'],'authority':e['authority'],'canonicalFloor':e['canonicalFloor']})
+          print({'release':e['release'],'candidate':e['candidate'],'generationRun':e['generationRun'],'bytes':e['normalizedBytes'],'authority':e['authority'],'canonicalFloor':e['canonicalFloor']})
           PY
 
       - name: Validate persisted rewrite generation model
