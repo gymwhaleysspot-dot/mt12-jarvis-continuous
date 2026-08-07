@@ -14,11 +14,15 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Repair stale rewrite parent assertion
+      - name: Repair stale rewrite parent assertion race-safely
         run: |
           set -euo pipefail
-          git pull --rebase origin main
-          python3 - <<'PY'
+          git config user.name 'Jarvis Engineering Authority'
+          git config user.email 'actions@users.noreply.github.com'
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python3 - <<'PY'
           from pathlib import Path
           p=Path('.github/workflows/jarvis-complete-rewrite-factory.yml')
           s=p.read_text()
@@ -30,18 +34,21 @@ jobs:
           elif new not in s:
               raise SystemExit('rewrite parent assertion not recognized')
           PY
-          git config user.name 'Jarvis Engineering Authority'
-          git config user.email 'actions@users.noreply.github.com'
-          git add .github/workflows/jarvis-complete-rewrite-factory.yml
-          if ! git diff --cached --quiet; then
+            git add .github/workflows/jarvis-complete-rewrite-factory.yml
+            if git diff --cached --quiet; then
+              echo 'Rewrite Factory parent assertion already current.'
+              break
+            fi
             git commit -m 'Require JRW6D canonical parent in Rewrite Factory'
-            for n in 1 2 3 4 5; do
-              git pull --rebase origin main && git push origin HEAD:main && break
-              git rebase --abort || true
-              sleep $((n*3))
-            done
-          fi
-      - name: Verify live canonical parent
+            if git push origin HEAD:main; then
+              break
+            fi
+            echo "Rewrite workflow changed concurrently; recomputing from latest main (attempt $n/5)."
+            sleep $((n*3))
+          done
+          git fetch origin main
+          git show origin/main:.github/workflows/jarvis-complete-rewrite-factory.yml | grep -Fq "assert name=='jrw6d'"
+      - name: Verify live canonical parent and defended floor
         run: |
           git fetch origin main
           git reset --hard origin/main
@@ -61,4 +68,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api -X POST "repos/${GITHUB_REPOSITORY}/actions/workflows/jarvis-complete-rewrite-factory.yml/dispatches" -f ref=main
-          echo 'Dispatched Rewrite Factory from JRW6D defended parent.'
+          echo 'Dispatched Rewrite Factory from verified JRW6D defended parent.'
