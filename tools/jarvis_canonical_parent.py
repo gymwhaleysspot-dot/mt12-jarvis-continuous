@@ -17,8 +17,12 @@ REQUIRED = (
     "V[179]*.0045", "92+4*dc",
     "bb_line(144,li1,0)", "bb_line(145,li2,0)", "bb_line(146,li3,0)", "bb_line(147,li4,0)",
     "bb_line(148,rg1,0)", "bb_line(149,rg2,0)", "bb_line(150,rg3,0)", "bb_line(151,rg4,0)",
+    "local bv=cache[2]or 0", "local bv=rx;if mph>V[792]", '"BAT"',
 )
-FORBIDDEN = ("setgv(3,V[35])", "V[179]*(.00435")
+FORBIDDEN = (
+    "setgv(3,V[35])", "V[179]*(.00435",
+    'fid("VFAS")', 'fid("EscV")', 'fid("A4")',
+)
 
 
 def digest(path: Path) -> str:
