@@ -1,5 +1,6 @@
 name: A17Y Aegis Chief Engineer
 run-name: Aegis ${{ github.event_name }} ${{ inputs.mission || 'autonomous-priority-cycle' }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -25,12 +26,15 @@ on:
       - public/completion-data/**
       - chief-engineer/**
       - .github/workflows/chief-engineer.yml
+
 permissions:
   contents: write
   actions: write
+
 concurrency:
   group: a17y-aegis-chief-engineer
   cancel-in-progress: true
+
 jobs:
   coordinate:
     runs-on: ubuntu-24.04
@@ -49,7 +53,7 @@ jobs:
           node --check chief-engineer/engine.mjs
           node --check chief-engineer/app.js
           node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json')); if(m.identity&&m.identity.name!=='Aegis')throw Error('Invalid Chief Engineer identity')"
-      - name: Build Aegis graph, confidence, contradictions and backlog
+      - name: Build Aegis graph confidence contradictions and backlog
         run: node chief-engineer/engine.mjs | tee /tmp/aegis-summary.json
       - name: Persist Aegis memory and dashboard
         shell: bash
@@ -60,8 +64,22 @@ jobs:
           git add chief-engineer/memory.json public/chief-data/
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Update Aegis engineering intelligence [skip ci]'
-          git pull --rebase origin main
-          git push
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "Aegis persistence rebase failed on attempt $attempt" >&2
+              sleep $((attempt * 3))
+              continue
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Aegis persistence push raced with another writer; retrying ($attempt/5)" >&2
+            sleep $((attempt * 3))
+          done
+          echo 'Unable to persist Aegis state after five race-safe retries' >&2
+          exit 1
       - name: Resolve Aegis recommended mission
         id: mission
         env:
