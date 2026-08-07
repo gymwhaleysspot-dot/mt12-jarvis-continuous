@@ -1,20 +1,20 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 5,
+    "controller": 4,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 3,
+    "mission": 2,
     "mutation": 10,
     "next_experiment": 1,
-    "rejection": 146,
+    "rejection": 147,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260807134453",
-  "generatedAt": "2026-08-07T13:49:46.205611+00:00",
-  "nodeCount": 179,
+  "generatedAt": "2026-08-07T13:55:00.597847+00:00",
+  "nodeCount": 178,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -71,23 +71,9 @@
       "kind": "controller",
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": true,
+      "recommended": false,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
-    },
-    {
-      "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
-      "bytes": 87337,
-      "id": "controller:7ee22193964bb59c",
-      "kind": "controller",
-      "label": "None",
-      "luacSha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d",
-      "sourceSha": "225040b9aea4c5acf3cc7f0a85dddb8735b0bc95c444d8addc864459af9dcccf"
-    },
-    {
-      "id": "mission:420e1a68f0d27e61",
-      "kind": "mission",
-      "label": "aegis-observability-31184474018-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -220,6 +206,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:88509dde3f5a1cb7",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:bfd3d8a6679a2261",
@@ -1231,7 +1224,7 @@
       "label": "bench and road evidence before canonical promotion"
     }
   ],
-  "relationshipCount": 173,
+  "relationshipCount": 172,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -1250,19 +1243,6 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:1ca7e19c8550b0c6"
-    },
-    {
-      "id": "edge:5390ecdc887ae1f5",
-      "relation": "BUILT_BY",
-      "source": "controller:7ee22193964bb59c",
-      "target": "mission:420e1a68f0d27e61"
-    },
-    {
-      "eligible": false,
-      "id": "edge:73624fd6054b3b53",
-      "relation": "CHALLENGES",
-      "source": "controller:7ee22193964bb59c",
-      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -1384,6 +1364,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:087b97be2ca31709",
+      "relation": "DUPLICATES",
+      "source": "rejection:88509dde3f5a1cb7",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:7d6a8474211fa847",
