@@ -1,0 +1,47 @@
+{
+  "schema": "JARVIS-PREBUILD-RECLAIM-2",
+  "release": "jrw6-534",
+  "source": "public/builds/rewrite-31174828514-1/jrw6/jrw6.lua",
+  "seed": "factory/memory/reclaimed-evolution-seed.lua",
+  "parentNormalizedBytes": 86593,
+  "reclaimedNormalizedBytes": 86534,
+  "bytesReclaimed": 59,
+  "discoveryRounds": 4,
+  "acceptedChanges": 3,
+  "changes": [
+    {
+      "kind": "constant-fold",
+      "expression": ".12+.01*m_min(s,4)",
+      "replacement": ".13",
+      "count": 1,
+      "proof": "jAS local s is immutable constant 1",
+      "beforeNormalizedBytes": 86593,
+      "afterNormalizedBytes": 86568,
+      "bytesReclaimed": 25,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "constant-fold",
+      "expression": ".18+.01*m_min(s,5)",
+      "replacement": ".19",
+      "count": 1,
+      "proof": "jAS local s is immutable constant 1",
+      "beforeNormalizedBytes": 86568,
+      "afterNormalizedBytes": 86538,
+      "bytesReclaimed": 30,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-local-removal",
+      "local": "s",
+      "proof": "immutable synthesis-stage local has zero references after constant folding",
+      "beforeNormalizedBytes": 86538,
+      "afterNormalizedBytes": 86534,
+      "bytesReclaimed": 4,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    }
+  ],
+  "protectedContractErrors": [],
+  "policy": "DISCOVER+TRIAL_COMPILE; ONLY_BEHAVIOR_EQUIVALENT_PROVABLE_RECLAMATION; NEVER_REMOVE_LIVE_FEATURES",
+  "acceptanceRule": "EACH_CHANGE_MUST_LOAD_LUA53+PASS_PROTECTED_CONTRACT+NORMALIZE_MT12+STRICTLY_REDUCE_BYTES"
+}
