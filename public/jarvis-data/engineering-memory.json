@@ -1,20 +1,20 @@
 {
   "champion": "j00002",
   "counts": {
-    "controller": 4,
+    "controller": 5,
     "digital_twin": 1,
     "experiment": 1,
     "log": 3,
-    "mission": 2,
+    "mission": 3,
     "mutation": 10,
     "next_experiment": 1,
-    "rejection": 144,
+    "rejection": 146,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260807134453",
-  "generatedAt": "2026-08-07T13:47:31.750879+00:00",
-  "nodeCount": 175,
+  "generatedAt": "2026-08-07T13:49:46.205611+00:00",
+  "nodeCount": 179,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -71,9 +71,23 @@
       "kind": "controller",
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": false,
+      "recommended": true,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
+    },
+    {
+      "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
+      "bytes": 87337,
+      "id": "controller:7ee22193964bb59c",
+      "kind": "controller",
+      "label": "None",
+      "luacSha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d",
+      "sourceSha": "225040b9aea4c5acf3cc7f0a85dddb8735b0bc95c444d8addc864459af9dcccf"
+    },
+    {
+      "id": "mission:420e1a68f0d27e61",
+      "kind": "mission",
+      "label": "aegis-observability-31184474018-1"
     },
     {
       "authority": "UNVERIFIED_AEGIS_DRIVE_CANDIDATE",
@@ -206,6 +220,20 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:bfd3d8a6679a2261",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:a0d47ee2845bc883",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:8d6e834131bd3550",
@@ -1203,7 +1231,7 @@
       "label": "bench and road evidence before canonical promotion"
     }
   ],
-  "relationshipCount": 169,
+  "relationshipCount": 173,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -1222,6 +1250,19 @@
       "relation": "REQUESTS",
       "source": "digital_twin:ff3f1dd1d3a16fed",
       "target": "next_experiment:1ca7e19c8550b0c6"
+    },
+    {
+      "id": "edge:5390ecdc887ae1f5",
+      "relation": "BUILT_BY",
+      "source": "controller:7ee22193964bb59c",
+      "target": "mission:420e1a68f0d27e61"
+    },
+    {
+      "eligible": false,
+      "id": "edge:73624fd6054b3b53",
+      "relation": "CHALLENGES",
+      "source": "controller:7ee22193964bb59c",
+      "target": "controller:1d3e9c9125494516"
     },
     {
       "id": "edge:a58931769be09d64",
@@ -1343,6 +1384,18 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:7d6a8474211fa847",
+      "relation": "DUPLICATES",
+      "source": "rejection:bfd3d8a6679a2261",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:6940252ecf9057f4",
+      "relation": "DUPLICATES",
+      "source": "rejection:a0d47ee2845bc883",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:e5ac18dc0cd3adad",
