@@ -26,18 +26,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-      - name: Validate rewrite authority
+      - name: Validate canonical floor and evolution authority
         run: |
-          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
           import json,sys
           from pathlib import Path
           sys.path.insert(0,'tools')
           import jarvis_canonical_parent as c
-          name,path=c.resolve()
+          import jarvis_evolution_parent as e
+          canonical,cpath=c.resolve(); evolution,epath=e.resolve()
           authority=json.loads(Path('factory/canonical-controller.json').read_text())
-          assert name==authority['release']
-          print({'canonicalParent':name,'source':str(path)})
+          pointer=json.loads(Path('factory/evolution-controller.json').read_text())
+          assert canonical==authority['release']
+          assert evolution==pointer['release']
+          assert pointer['canonicalFloor']==canonical
+          print({'canonicalFloor':canonical,'canonicalSource':str(cpath),'evolutionParent':evolution,'evolutionSource':str(epath)})
           PY
       - name: Refresh verified research evidence and experiment portfolio
         run: |
@@ -90,21 +94,27 @@ jobs:
             if c.get('status')!='COMPILED': continue
             cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
-          plan=json.loads(Path('factory/next-experiment.json').read_text())
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-6','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          plan=json.loads(Path('factory/next-experiment.json').read_text()); canonical=json.loads(Path('factory/canonical-controller.json').read_text())['release']
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-7','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
           (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text())
           PY
+      - name: Advance experimental evolution parent
+        run: |
+          mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python3 tools/jarvis_evolution_parent.py advance "$mission" "$GITHUB_RUN_NUMBER"
+          python3 tools/jarvis_evolution_parent.py
       - name: Apply evolution and champion authorities
         run: |
           python3 tools/jarvis_evolution_gate.py
           python3 tools/jarvis_champion_guard.py
           python3 tools/jarvis_graph_intelligence.py
-      - name: Persist immutable rewrite directory atomically
+      - name: Persist immutable generation and evolution pointer atomically
         run: |
           set -Eeuo pipefail
           mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           stage="$(mktemp -d)"
           cp -a "public/builds/${mission}" "$stage/${mission}"
+          cp "factory/evolution-controller.json" "$stage/evolution-controller.json"
           git config user.name 'Jarvis Complete Rewrite Factory'
           git config user.email 'actions@users.noreply.github.com'
           for n in 1 2 3 4 5; do
@@ -113,23 +123,25 @@ jobs:
             rm -rf -- "public/builds/${mission}"
             if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
               git checkout origin/main -- "public/builds/${mission}"
-              if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then echo "Rewrite generation ${mission} is tracked identically on origin/main."; exit 0; fi
-              echo "ERROR: immutable mission collision for ${mission}; remote contents differ"; exit 1
+              if ! diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then echo "ERROR: immutable mission collision for ${mission}; remote contents differ"; exit 1; fi
+            else
+              cp -a "$stage/${mission}" "public/builds/${mission}"
             fi
-            cp -a "$stage/${mission}" "public/builds/${mission}"
-            git add -- "public/builds/${mission}"
-            git commit -m "Publish research-aware MT12 LUAC generation ${mission} [skip ci]"
+            cp "$stage/evolution-controller.json" factory/evolution-controller.json
+            git add -- "public/builds/${mission}" factory/evolution-controller.json
+            if git diff --cached --quiet; then echo "Generation and evolution pointer already tracked identically."; exit 0; fi
+            git commit -m "Publish evolutionary MT12 LUAC generation ${mission} [skip ci]"
             if git push origin HEAD:main; then
               git fetch origin main
-              git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"
               git reset --hard origin/main
-              git checkout origin/main -- "public/builds/${mission}"
+              git checkout origin/main -- "public/builds/${mission}" factory/evolution-controller.json
               diff -qr "$stage/${mission}" "public/builds/${mission}"
-              echo "Verified rewrite generation ${mission} is tracked and byte-identical on origin/main."; exit 0
+              diff -q "$stage/evolution-controller.json" factory/evolution-controller.json
+              echo "Verified ${mission} and evolution pointer are tracked byte-identically on origin/main."; exit 0
             fi
             echo "Publish race on attempt ${n}; retrying from current main."; sleep $((n*5))
           done
-          echo "ERROR: unable to persist ${mission} after 5 attempts"; exit 1
+          echo "ERROR: unable to persist ${mission} and evolution pointer after 5 attempts"; exit 1
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -139,5 +151,6 @@ jobs:
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
             factory/next-experiment.json
             factory/memory/external-research.json
+            factory/evolution-controller.json
           if-no-files-found: ignore
           retention-days: 30
