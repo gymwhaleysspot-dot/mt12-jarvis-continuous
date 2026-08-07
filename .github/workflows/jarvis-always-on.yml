@@ -3,6 +3,10 @@ name: Jarvis Always-On Orchestrator
 on:
   schedule:
     - cron: '*/5 * * * *'
+  workflow_run:
+    workflows:
+      - Jarvis Complete Rewrite LUAC Factory
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -16,8 +20,16 @@ concurrency:
 jobs:
   orchestrate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
+      - name: Enforce producer cooldown after a completed generation
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo 'Rewrite generation completed; waiting 5 minutes before considering the next generation.'
+          sleep 300
+
       - name: Keep one controller producer and one intelligence lane active
         env:
           GH_TOKEN: ${{ github.token }}
