@@ -1,5 +1,5 @@
 from __future__ import annotations
-import re
+import re,json
 from pathlib import Path
 import controller_rewrite_factory as rewrite_factory
 import controller_tournament as tournament
@@ -8,7 +8,7 @@ import jarvis_canonical_parent,jarvis_evolution_parent
 ROOT=Path(__file__).resolve().parents[1]
 _original_checks=tournament.protected_checks
 _original_rewrite=rewrite_factory.experiment_rewrite
-SLOT_AREA={"conservative":"dropout-state-machine","balanced":"traction-state-estimator","learning":"airborne-landing-observer","observability":"truth-fusion-observer","combined":"abs-state-controller","synthesis":"unified-causal-supervisor"}
+SLOT_AREA={"conservative":"dropout-state-machine","balanced":"traction-state-estimator","learning":"airborne-landing-observer","observability":"truth-fusion-observer","combined":"abs-state-controller","synthesis":"outcome-driven-causal-synthesis"}
 LABEL={"conservative":"JRW1","balanced":"JRW2","learning":"JRW3","observability":"JRW4","combined":"JRW5","synthesis":"JRW6"}
 ARCH={
 "conservative":"local function jA1(a)local u=c1(V[119]);local c=c1(V[114]);X[55]=lerp(X[55]or c,c,.08);if u>.45 then X[56]=m_min(60,(X[56]or 0)+1)else X[56]=m_max(0,(X[56]or 0)-2)end;local r=c1((X[55]or 0)*(1-u));local cap=91+5*r;if(X[56]or 0)>8 then cap=cap-2 end;X[57]=lerp(X[57]or cap,cap,.18);return m_min(a,X[57])end",
@@ -46,8 +46,53 @@ def imprint_runtime_identity(text:str,token:str,chunks:list[int])->str:
  if n!=1:raise RuntimeError("runtime identity declaration mismatch")
  return text
 
+def _latest_feedback()->tuple[str,str]:
+ best=(-1,"","")
+ for p in ROOT.glob("public/builds/rewrite-*/TOURNAMENT.json"):
+  m=re.search(r"rewrite-(\d+)-",str(p))
+  if not m:continue
+  try:d=json.loads(p.read_text())
+  except Exception:continue
+  n=int(m.group(1));w=d.get("winner")or"";r=d.get("runnerUp")or""
+  if w and n>best[0]:best=(n,w,r)
+ return best[1],best[2]
+
+def _outcome_synth(text:str)->tuple[str,str]:
+ winner,runner=_latest_feedback();stage=1
+ m=re.search(r"local function jAS\(a\)local s=(\d+);",text)
+ if m:stage=int(m.group(1))+1
+ # Compact learned synthesis: JRW2 traction derivative/severity + JRW4 observability/trust,
+ # wrapped around inherited JRW6 supervisor. Stage increases adaptation depth without stacking helpers.
+ k=min(stage,6)
+ fn=("local function jAS(a)local s="+str(stage)+";local b=jA6(a);local q=c1(V[114]);local u=c1(V[119]);local ca=c1((X[46]or 0)/200);local e=c1((V[161]+V[164])/2);"
+     "X[63]=lerp(X[63]or e,e,.12+.01*m_min(s,4));local d=m_abs(e-(X[63]or e));X[64]=lerp(X[64]or d,d,.18+.01*m_min(s,5));"
+     "local sev=c1(e*.52+(X[64]or 0)*1.9+u*.28);local obs=c1(q*.43+(1-u)*.34+ca*.23);X[65]=lerp(X[65]or obs,obs,obs<(X[65]or obs)and .24 or .065);"
+     "local trust=c1((X[65]or 0)*(1-u*.3));X[66]=lerp(X[66]or sev,sev,sev>.48 and .27 or .075);local cap=94.5-4.8*(X[66]or 0)+2.4*trust;return m_min(b,cap)end")
+ old=re.compile(r"local function jAS\(a\)local s=\d+;.*?return m_min\(b,cap\)end")
+ if old.search(text):text=old.sub(fn,text,count=1)
+ else:
+  anchor="local function bad(x)"
+  if anchor not in text:raise RuntimeError("outcome synthesis anchor missing")
+  text=text.replace(anchor,fn+"\n"+anchor,1)
+  gate="ac=jA6(ac);V[720]=ac;setgv(3,m_min(V[35],ac));"
+  if gate in text:text=text.replace(gate,"ac=jAS(ac);V[720]=ac;setgv(3,m_min(V[35],ac));",1)
+  else:
+   gate="V[720]=ac;setgv(3,m_min(V[35],ac));"
+   if gate not in text:raise RuntimeError("outcome synthesis authority gate missing")
+   text=text.replace(gate,"ac=jAS(ac);"+gate,1)
+ return text,f"feedback:{winner}>{runner};stage:{stage}"
+
 def _inject(text:str,profile:str)->str:
  fn=ARCH[profile];name="jA"+str(list(LABEL).index(profile)+1)
+ if profile=="synthesis":
+  if fn not in text:
+   anchor="local function bad(x)"
+   if anchor not in text:raise RuntimeError("architecture helper anchor missing")
+   text=text.replace(anchor,fn+"\n"+anchor,1)
+   gate="V[720]=ac;setgv(3,m_min(V[35],ac));"
+   if gate not in text:raise RuntimeError("authority gate anchor missing")
+   text=text.replace(gate,"ac=jA6(ac);"+gate,1)
+  text,_=_outcome_synth(text);return text
  if fn in text:return text
  anchor="local function bad(x)"
  if anchor not in text:raise RuntimeError("architecture helper anchor missing")
@@ -75,15 +120,16 @@ def _parent_text():
 def candidate_bonus(profile:str,text:str)->dict[str,float]:
  parent=_parent_text();keys={"conservative":"dropoutGain","balanced":"tractionGain","learning":"jumpGain","observability":"truthGain","combined":"absGain"};out={k:0.0 for k in("dropoutGain","tractionGain","jumpGain","truthGain","absGain")}
  if profile=="synthesis":
-  new="local function jA6" in text and "local function jA6" not in parent
+  m=re.search(r"local function jAS\(a\)local s=(\d+);",text);pm=re.search(r"local function jAS\(a\)local s=(\d+);",parent)
+  new=bool(m) and (not pm or m.group(1)!=pm.group(1))
   if new:
-   for k in out:out[k]=3.0
-  out["compositionGain"]=4.0 if new else 0.0
+   out["tractionGain"]=4.0;out["truthGain"]=4.0;out["dropoutGain"]=2.0;out["jumpGain"]=2.0;out["absGain"]=2.0
+  out["compositionGain"]=5.0 if new else 0.0
  else:
   k=keys[profile];marker="local function jA"+str(list(LABEL).index(profile)+1);out[k]=4.0 if marker in text and marker not in parent else 0.0;out["compositionGain"]=0.0
  return out
 
 def main():
  tournament.latest_release=jarvis_evolution_parent.resolve;tournament.protected_checks=protected_checks;tournament.candidate_bonus=candidate_bonus;tournament.imprint_runtime_identity=imprint_runtime_identity;rewrite_factory.experiment_rewrite=experiment_rewrite
- e,src=jarvis_evolution_parent.resolve();c,_=jarvis_canonical_parent.resolve();print({"evolutionParent":e,"canonicalFloor":c,"strategy":"STRUCTURAL_ARCHITECTURE_PORTFOLIO","architectures":SLOT_AREA,"source":str(src)});rewrite_factory.main()
+ e,src=jarvis_evolution_parent.resolve();c,_=jarvis_canonical_parent.resolve();w,r=_latest_feedback();print({"evolutionParent":e,"canonicalFloor":c,"strategy":"OUTCOME_DRIVEN_STRUCTURAL_SYNTHESIS","feedbackWinner":w,"feedbackRunnerUp":r,"architectures":SLOT_AREA,"source":str(src)});rewrite_factory.main()
 if __name__=="__main__":main()
