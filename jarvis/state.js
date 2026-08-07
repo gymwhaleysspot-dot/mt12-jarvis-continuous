@@ -1,55 +1,61 @@
 import{GitHubAPI as api}from'./api.js';
 const fixedPaths=[
-  'factory/memory/episodes.json','factory/memory/historical-log-index.json',
-  'public/jarvis-data/knowledge-graph.json','public/jarvis-data/summary.json','public/jarvis-data/active-mission.json',
-  'public/evidence-data/sync.json','research/current.json','research/questions.json','public/builds/index.json',
-  'public/device-data/releases.json','public/builds/releases/jrw6d/MANIFEST.json'
+ 'factory/canonical-controller.json','public/builds/index.json','public/jarvis-data/active-mission.json',
+ 'public/jarvis-data/knowledge-graph.json','public/jarvis-data/summary.json','public/jarvis-data/experiment-plan.json',
+ 'public/evidence-data/sync.json','factory/memory/historical-log-index.json','factory/memory/episodes.json',
+ 'factory/memory/planner-history.json','public/device-data/releases.json','research/current.json','research/questions.json'
 ];
 const listeners=new Set();
 export const state={capabilities:null,data:{},runs:[],rewriteRuns:[],workflows:[],releases:[],connected:false,user:null,rate:null,loading:false,error:null,updatedAt:null,workspace:'command',generations:[],canonical:null,selectedGeneration:null};
 export function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
 function emit(){for(const fn of listeners)fn(state)}
 export function setWorkspace(id){state.workspace=id;location.hash=id;emit()}
-export function selectGeneration(mission){state.selectedGeneration=mission;emit()}
-function missionForRun(run){return`rewrite-${run.id}-${run.run_attempt||1}`}
+export function selectGeneration(id){state.selectedGeneration=id;emit()}
+const missionForRun=r=>`rewrite-${r.id}-${r.run_attempt||1}`;
+async function loadCanonical(){
+ const authority=state.data['factory/canonical-controller.json'];if(!authority?.release)return null;
+ const name=authority.release,base=`public/builds/releases/${name}/`,manifest=await api.optionalFile(base+'MANIFEST.json');
+ return{...authority,...(manifest||{}),name,base,lineageFloor:authority.lineageFloor||[],manifest};
+}
 async function loadGeneration(run){
-  const mission=missionForRun(run),base=`public/builds/${mission}/`;
-  const [tournament,manifest]=await Promise.all([api.optionalFile(base+'TOURNAMENT.json'),api.optionalFile(base+'BUILD-MANIFEST.json')]);
-  if(!tournament&&!manifest)return null;
-  const winner=tournament?.candidates?.find(c=>c.candidate===tournament.winner)||null;
-  return{mission,runId:run.id,runNumber:Number(run.run_number||0),attempt:run.run_attempt||1,status:run.status,conclusion:run.conclusion,createdAt:run.created_at,updatedAt:run.updated_at,headSha:run.head_sha,htmlUrl:run.html_url,base,tournament,manifest,winner};
+ const mission=missionForRun(run),base=`public/builds/${mission}/`;
+ const[tournament,manifest]=await Promise.all([api.optionalFile(base+'TOURNAMENT.json'),api.optionalFile(base+'BUILD-MANIFEST.json')]);
+ if(!tournament&&!manifest)return null;
+ const candidates=tournament?.candidates||[];const winner=candidates.find(c=>c.candidate===tournament?.winner)||null;
+ const synthesis=candidates.find(c=>c.profile==='synthesis'||c.candidate==='jrw6')||null;
+ return{mission,runId:run.id,runNumber:Number(run.run_number||0),attempt:run.run_attempt||1,status:run.status,conclusion:run.conclusion,createdAt:run.created_at,updatedAt:run.updated_at,headSha:run.head_sha,htmlUrl:run.html_url,base,tournament,manifest,candidates,winner,synthesis};
 }
-async function discoverGenerations(rewriteRuns){
-  const eligible=rewriteRuns.filter(r=>r.status==='completed'&&r.conclusion==='success').slice(0,6);
-  const results=await Promise.allSettled(eligible.map(loadGeneration));
-  return results.map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean).sort((a,b)=>b.runNumber-a.runNumber||b.runId-a.runId);
-}
-function deriveCanonical(){
-  const manifest=state.data['public/builds/releases/jrw6d/MANIFEST.json'];
-  if(manifest)return{...manifest,name:manifest.release||'jrw6d',base:'public/builds/releases/jrw6d/'};
-  const parent=state.generations[0]?.tournament?.parent;
-  return parent?{name:parent,release:parent,authority:'CANONICAL_PARENT',normalizedBytes:null,base:`public/builds/releases/${parent}/`}:null;
+async function discoverGenerations(runs){
+ const eligible=runs.filter(r=>r.status==='completed'&&r.conclusion==='success').slice(0,20);
+ const out=await Promise.allSettled(eligible.map(loadGeneration));
+ return out.map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean).sort((a,b)=>b.runNumber-a.runNumber||b.runId-a.runId);
 }
 export async function refresh(){
-  state.loading=true;state.error=null;emit();
-  try{
-    state.capabilities=await fetch('jarvis/capabilities.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(`Capabilities ${r.status}`);return r.json()});
-    const calls=[api.runs(100),api.workflowRuns('jarvis-complete-rewrite-factory.yml',12),api.workflows(),api.releases(),api.user(),api.rate(),...fixedPaths.map(p=>api.optionalFile(p))];
-    const settled=await Promise.allSettled(calls),[runs,rewriteRuns,workflows,releases,user,rate,...files]=settled;
-    state.runs=runs.value?.workflow_runs||[];state.rewriteRuns=rewriteRuns.value?.workflow_runs||[];state.workflows=workflows.value?.workflows||[];state.releases=releases.value||[];
-    state.user=user.status==='fulfilled'?user.value:null;state.rate=rate.status==='fulfilled'?rate.value:null;state.connected=!!state.user;
-    fixedPaths.forEach((p,i)=>state.data[p]=files[i]?.status==='fulfilled'?files[i].value:null);
-    state.generations=await discoverGenerations(state.rewriteRuns);state.canonical=deriveCanonical();
-    if(!state.selectedGeneration||!state.generations.some(g=>g.mission===state.selectedGeneration))state.selectedGeneration=state.generations[0]?.mission||null;
-    state.updatedAt=new Date().toISOString();
-  }catch(error){state.error=error.message;state.connected=false}
-  finally{state.loading=false;emit()}
+ state.loading=true;state.error=null;emit();
+ try{
+  state.capabilities=await fetch('jarvis/capabilities.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(`Capabilities ${r.status}`);return r.json()});
+  const calls=[api.runs(100),api.workflowRuns('jarvis-complete-rewrite-factory.yml',30),api.workflows(),api.releases(),api.user(),api.rate(),...fixedPaths.map(p=>api.optionalFile(p))];
+  const s=await Promise.allSettled(calls),[runs,rewriteRuns,workflows,releases,user,rate,...files]=s;
+  state.runs=runs.value?.workflow_runs||[];state.rewriteRuns=rewriteRuns.value?.workflow_runs||[];state.workflows=workflows.value?.workflows||[];state.releases=releases.value||[];
+  state.user=user.status==='fulfilled'?user.value:null;state.rate=rate.status==='fulfilled'?rate.value:null;state.connected=!!state.user;
+  fixedPaths.forEach((p,i)=>state.data[p]=files[i]?.status==='fulfilled'?files[i].value:null);
+  state.generations=await discoverGenerations(state.rewriteRuns);state.canonical=await loadCanonical();
+  if(!state.selectedGeneration||!state.generations.some(g=>g.mission===state.selectedGeneration))state.selectedGeneration=state.generations[0]?.mission||null;
+  state.updatedAt=new Date().toISOString();
+ }catch(e){state.error=e.message;state.connected=false}finally{state.loading=false;emit()}
 }
-export async function runMission(id,inputs={}){const mission=state.capabilities?.missions?.find(x=>x.id===id);if(!mission)throw Error('Unknown mission');if(!state.workflows.some(w=>w.path===`.github/workflows/${mission.workflow}`))throw Error(`Workflow is not active: ${mission.workflow}`);await api.dispatch(mission.workflow,{...mission.inputs,...inputs});await refresh();return mission}
-export async function syncMT12(inputs={}){const workflow='mt12-sync.yml';if(!state.workflows.some(w=>w.path===`.github/workflows/${workflow}`))throw Error('Jarvis MT12 Sync workflow is not active.');await api.dispatch(workflow,{include_radio_logs:'true',include_blackbox:'true',backup_first:'true',start_learning:'true',...inputs});await refresh();return true}
 export function latestGeneration(){return state.generations[0]||null}
 export function selectedGeneration(){return state.generations.find(g=>g.mission===state.selectedGeneration)||latestGeneration()}
 export function producerState(){const active=state.rewriteRuns.find(r=>['queued','in_progress','waiting','pending'].includes(r.status)),latest=state.rewriteRuns[0];return active?{state:'RUNNING',run:active}:{state:latest?.conclusion==='success'?'READY':'ATTENTION',run:latest||null}}
-export function metrics(){const d=state.data,graph=d['public/jarvis-data/knowledge-graph.json']||{},summary=d['public/jarvis-data/summary.json']||{},episodes=d['factory/memory/episodes.json']||{},logs=d['factory/memory/historical-log-index.json']||{},builds=d['public/builds/index.json']||{},latest=latestGeneration(),winner=latest?.winner;return{facts:summary.evidenceFacts??summary.facts??0,nodes:graph.nodes?.length??graph.nodeCount??0,edges:graph.edges?.length??graph.edgeCount??0,episodes:episodes.episodes?.length??episodes.count??0,logs:logs.logs?.length??logs.uniqueLogs??0,uniqueBuilds:builds.uniqueBuilds??builds.builds?.length??0,duplicates:builds.duplicatesRejected??0,recommended:builds.recommended??null,canonical:state.canonical?.name||'—',latestRun:latest?.runNumber||null,winner:winner?.candidate||latest?.tournament?.winner||'—',winnerBytes:winner?.normalizedBytes||null,generations:state.generations.length}}
-export function health(){const p=producerState(),catalog=state.data['public/device-data/releases.json'],index=state.data['public/builds/index.json'],sync=state.data['public/evidence-data/sync.json'];return{github:state.connected?'connected':'public-read',producer:p.state,scheduler:state.runs.some(r=>r.name==='Jarvis Always-On Orchestrator'&&['queued','in_progress'].includes(r.status))?'running':'ready',firmware:catalog?.edgeTx?.stable&&catalog?.expressLrs?.stable?'ready':'unknown',evolution:index?'ready':'unknown',sync:sync?.state||'unknown'}}
+export function planner(){return state.data['public/jarvis-data/experiment-plan.json']||{}}
+export function evidence(){return{sync:state.data['public/evidence-data/sync.json']||{},logs:state.data['factory/memory/historical-log-index.json']||{},episodes:state.data['factory/memory/episodes.json']||{}}}
+export function intelligence(){return{graph:state.data['public/jarvis-data/knowledge-graph.json']||{},summary:state.data['public/jarvis-data/summary.json']||{},plan:planner(),history:state.data['factory/memory/planner-history.json']||{}}}
+export function hypothesisMap(g=selectedGeneration()){
+ const fallback={jrw1:'sensor-dropout-recovery',jrw2:'traction-control',jrw3:'jump-landing-classification',jrw4:'truth-speed-fusion',jrw5:'abs-control',jrw6:'synthesis'};
+ return(g?.candidates||[]).map(c=>({...c,hypothesis:c.hypothesisArea||fallback[c.candidate]||c.profile,buildName:`${String(c.candidate||'').toUpperCase()}-${g.runNumber}`}));
+}
+export function metrics(){const i=intelligence(),e=evidence(),g=latestGeneration(),w=g?.winner,s=g?.synthesis,b=state.data['public/builds/index.json']||{};return{canonical:state.canonical?.name||'—',latestRun:g?.runNumber||null,winner:w?.candidate||g?.tournament?.winner||'—',synthesis:s?.candidate||'—',winnerBytes:w?.normalizedBytes||null,generations:state.generations.length,facts:i.summary.evidenceFacts??i.summary.facts??0,nodes:i.graph.nodes?.length??i.graph.nodeCount??0,edges:i.graph.edges?.length??i.graph.edgeCount??0,logs:e.logs.logs?.length??e.logs.uniqueLogs??0,episodes:e.episodes.episodes?.length??e.episodes.count??0,uniqueBuilds:b.uniqueBuilds??b.builds?.length??0,duplicates:b.duplicatesRejected??0}}
+export function health(){const p=producerState(),latest=latestGeneration();return{producer:p.state,scheduler:state.runs.some(r=>r.name==='Jarvis Always-On Orchestrator'&&['queued','in_progress'].includes(r.status))?'RUNNING':'READY',generation:latest?.conclusion==='success'?'PUBLISHED':'UNKNOWN',github:state.connected?'CONNECTED':'PUBLIC',pages:state.runs.some(r=>r.name==='pages build and deployment'&&r.conclusion==='success')?'READY':'UNKNOWN'}}
+export async function runMission(id,inputs={}){const m=state.capabilities?.missions?.find(x=>x.id===id);if(!m)throw Error('Unknown mission');if(!state.workflows.some(w=>w.path===`.github/workflows/${m.workflow}`))throw Error(`Workflow is not active: ${m.workflow}`);await api.dispatch(m.workflow,{...m.inputs,...inputs});await refresh();return m}
+export async function syncMT12(inputs={}){const workflow='mt12-sync.yml';if(!state.workflows.some(w=>w.path===`.github/workflows/${workflow}`))throw Error('Jarvis MT12 Sync workflow is not active.');await api.dispatch(workflow,{include_radio_logs:'true',include_blackbox:'true',backup_first:'true',start_learning:'true',...inputs});await refresh();return true}
 window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(state.capabilities?.workspaces?.some(x=>x.id===id)){state.workspace=id;emit()}});
