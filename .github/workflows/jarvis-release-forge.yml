@@ -1,0 +1,139 @@
+name: Jarvis Release Forge
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Lua source path to build
+        required: true
+        type: string
+      release:
+        description: Short release name (lowercase letters/numbers, max 10)
+        required: true
+        type: string
+      parent:
+        description: Parent Lua source path for function-preservation checks
+        required: false
+        type: string
+      size_limit:
+        description: Normalized MT12 byte ceiling (cannot exceed 87000)
+        required: false
+        default: '87000'
+        type: string
+      hardware_status:
+        description: Hardware validation label
+        required: false
+        default: NOT_HARDWARE_TESTED
+        type: string
+  workflow_call:
+    inputs:
+      source:
+        required: true
+        type: string
+      release:
+        required: true
+        type: string
+      parent:
+        required: false
+        type: string
+        default: ''
+      size_limit:
+        required: false
+        type: string
+        default: '87000'
+      hardware_status:
+        required: false
+        type: string
+        default: NOT_HARDWARE_TESTED
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jarvis-release-${{ inputs.release }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  forge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install deterministic MT12 toolchain
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lua5.3
+          node --version
+          luac5.3 -v
+
+      - name: Validate request
+        env:
+          SOURCE: ${{ inputs.source }}
+          RELEASE: ${{ inputs.release }}
+          PARENT: ${{ inputs.parent }}
+          LIMIT: ${{ inputs.size_limit }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$RELEASE" =~ ^[a-z0-9]{1,10}$ ]]
+          [[ "$LIMIT" =~ ^[0-9]+$ ]]
+          test "$LIMIT" -le 87000
+          test -f "$SOURCE"
+          case "$SOURCE" in /*|../*|*/../*) exit 2;; esac
+          if [ -n "$PARENT" ]; then
+            test -f "$PARENT"
+            case "$PARENT" in /*|../*|*/../*) exit 2;; esac
+          fi
+
+      - name: Forge A17YA-grade release
+        env:
+          SOURCE: ${{ inputs.source }}
+          RELEASE: ${{ inputs.release }}
+          PARENT: ${{ inputs.parent }}
+          LIMIT: ${{ inputs.size_limit }}
+          HW: ${{ inputs.hardware_status }}
+        run: |
+          set -Eeuo pipefail
+          ARGS=(--source "$SOURCE" --release "$RELEASE" --limit "$LIMIT" --hardware-status "$HW")
+          if [ -n "$PARENT" ]; then ARGS+=(--parent "$PARENT"); fi
+          python3 tools/jarvis_release.py "${ARGS[@]}"
+
+      - name: Verify complete release set
+        env:
+          RELEASE: ${{ inputs.release }}
+        run: |
+          set -Eeuo pipefail
+          test -s "release/$RELEASE.lua"
+          test -s "release/$RELEASE.luac"
+          test -s "release/${RELEASE^^}_BUILD_AUDIT.txt"
+          test -s release/SHA256SUMS.txt
+          test -s release/MANIFEST.json
+          test -s "release/${RELEASE}_MT12_BUILD.zip"
+          test "$(wc -c < "release/$RELEASE.luac")" -le 87000
+          ! test -e "release/${RELEASE}_raw.luac"
+          sha256sum -c release/SHA256SUMS.txt --ignore-missing
+
+      - name: Build summary
+        env:
+          RELEASE: ${{ inputs.release }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          r=json.load(open('release/MANIFEST.json'))
+          print(f"## Jarvis MT12 release: `{r['release']}`")
+          print(f"- Normalized LUAC: **{r['normalizedBytes']} bytes**")
+          print(f"- 87 KB margin: **{r['marginBytes']} bytes**")
+          print(f"- MT12 header: `{r['mt12Header']}`")
+          print(f"- Hardware: `{r['hardwareStatus']}`")
+          print(f"- SHA-256: `{r['luacSha256']}`")
+          print('- Deploy only the normalized `.luac`.')
+          PY
+
+      - name: Upload complete Jarvis release
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ inputs.release }}-mt12-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 180
