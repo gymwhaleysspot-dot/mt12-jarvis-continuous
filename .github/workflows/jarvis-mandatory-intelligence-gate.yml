@@ -3,27 +3,18 @@ name: Jarvis Mandatory Controller Intelligence Gate
 on:
   workflow_run:
     workflows:
+      - Jarvis Complete Rewrite LUAC Factory
       - Jarvis Complete Autonomous Factory
       - Guaranteed MT12 LUAC Output
       - Evidence-driven LUAC Workbench
       - A17Y LUAC AI Builder
       - Repair A17Y Root and Build Aegis Candidate
     types: [completed]
-  schedule:
-    - cron: '22,52 * * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/jarvis-mandatory-intelligence-gate.yml
-      - tools/jarvis_intelligence_planner.py
-      - tools/jarvis_evolution_gate.py
-      - tools/jarvis_champion_guard.py
-      - tools/jarvis_graph_intelligence.py
 
 permissions:
   contents: write
-  actions: write
+  actions: read
 
 concurrency:
   group: jarvis-mandatory-controller-intelligence
@@ -95,7 +86,7 @@ jobs:
               assert (build.get('scoreDelta') or 0) > 0
 
           state={
-            'schema':'JARVIS-MANDATORY-GATE-1',
+            'schema':'JARVIS-MANDATORY-GATE-2',
             'state':'ACTIVE',
             'upstreamWorkflow': '${{ github.event.workflow_run.name || github.workflow }}',
             'upstreamRunId': '${{ github.event.workflow_run.id || github.run_id }}',
@@ -136,12 +127,6 @@ jobs:
               sleep $((n*5))
             done
           fi
-
-      - name: Continue persistent mission
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run jarvis-persistent-mission.yml --ref main || true
 
       - uses: actions/upload-artifact@v6
         with:

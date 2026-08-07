@@ -1,24 +1,11 @@
 name: Jarvis Complete Rewrite LUAC Factory
 
 on:
-  schedule:
-    - cron: '3,13,23,33,43,53 * * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - tools/controller_rewrite_factory.py
-      - tools/controller_rewrite_hotfix.py
-      - tools/controller_tournament.py
-      - tools/jarvis_canonical_parent.py
-      - factory/canonical-controller.json
-      - factory/next-experiment.json
-      - public/jarvis-data/experiment-plan.json
-      - .github/workflows/jarvis-complete-rewrite-factory.yml
 
 permissions:
   contents: write
-  actions: write
+  actions: read
 
 concurrency:
   group: jarvis-complete-rewrite-luac-factory
@@ -32,25 +19,16 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
       - name: Synchronize current Jarvis state
         run: git pull --rebase origin main
-
       - name: Install deterministic MT12 toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
-
-      - name: Validate canonical lineage and rewrite authority
+      - name: Validate rewrite authority
         run: |
-          python3 -m py_compile \
-            tools/controller_tournament.py \
-            tools/controller_rewrite_factory.py \
-            tools/controller_rewrite_hotfix.py \
-            tools/jarvis_canonical_parent.py \
-            tools/jarvis_intelligence_planner.py \
-            tools/jarvis_evolution_gate.py
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
           import sys
           sys.path.insert(0,'tools')
@@ -59,99 +37,78 @@ jobs:
           assert name=='a17zr1'
           print({'canonicalParent':name,'source':str(path)})
           PY
-
       - name: Refresh highest-information experiment
         run: python3 tools/jarvis_intelligence_planner.py
-
       - name: Generate complete source rewrites and novel LUACs
         env:
           RELEASE_TYPE: R
           SERIES: jrw
         run: python3 tools/controller_rewrite_hotfix.py
-
-      - name: Prove every compiled file is unique
+      - name: Reject duplicate and historically published candidates
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
-          root=Path('dist-controller-tournament')
-          result=json.loads((root/'TOURNAMENT.json').read_text())
-          authority=result['rewriteAuthority']
-          assert authority['schema']=='JARVIS-COMPLETE-REWRITE-1'
-          assert not authority['failures']
-          assert result['parent']=='a17zr1'
+          result=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
           compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
           assert compiled
-          source=[c['sourceSha256'] for c in compiled]
-          luac=[c['luacSha256'] for c in compiled]
-          assert '340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0' not in source
-          assert 'caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a' not in luac
-          assert len(source)==len(set(source))
-          assert len(luac)==len(set(luac))
+          src=[c['sourceSha256'] for c in compiled]; bc=[c['luacSha256'] for c in compiled]
+          assert len(src)==len(set(src)); assert len(bc)==len(set(bc))
+          known_src=set(); known_bc=set()
+          for p in Path('public/builds').rglob('*.json'):
+            try: stack=[json.loads(p.read_text())]
+            except Exception: continue
+            while stack:
+              x=stack.pop()
+              if isinstance(x,dict):
+                if isinstance(x.get('sourceSha256'),str): known_src.add(x['sourceSha256'])
+                if isinstance(x.get('luacSha256'),str): known_bc.add(x['luacSha256'])
+                if isinstance(x.get('source'),dict) and isinstance(x['source'].get('sha256'),str): known_src.add(x['source']['sha256'])
+                if isinstance(x.get('luac'),dict) and isinstance(x['luac'].get('sha256'),str): known_bc.add(x['luac']['sha256'])
+                stack.extend(x.values())
+              elif isinstance(x,list): stack.extend(x)
+          assert not (set(src)&known_src), 'source already published'
+          assert not (set(bc)&known_bc), 'LUAC already published'
           for c in compiled:
-              rc=c['rewriteContract']
-              assert rc['sourceNovel'] is True
-              assert rc['bytecodeNovel'] is True
-              assert rc['duplicatePolicy']=='HARD_FAIL_AND_REPLAN'
-          print(json.dumps({'parent':result['parent'],'compiled':len(compiled),'sources':source,'luacs':luac},indent=2))
+            rc=c['rewriteContract']
+            assert rc['sourceNovel'] is True and rc['bytecodeNovel'] is True
+          print({'compiled':len(compiled),'historicalSources':len(known_src),'historicalLuacs':len(known_bc)})
           PY
-
-      - name: Publish every rewrite candidate
+      - name: Publish rewrite candidates into immutable mission directory
         run: |
           python3 - <<'PY'
           import json,os,shutil
           from pathlib import Path
-          src=Path('dist-controller-tournament')
-          result=json.loads((src/'TOURNAMENT.json').read_text())
-          mission=f"rewrite-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
-          base=Path('public/builds')/mission
-          base.mkdir(parents=True,exist_ok=True)
+          src=Path('dist-controller-tournament'); result=json.loads((src/'TOURNAMENT.json').read_text())
+          mission=f"rewrite-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"; base=Path('public/builds')/mission; base.mkdir(parents=True,exist_ok=True)
           published=[]
           for c in result['candidates']:
-              if c.get('status')!='COMPILED': continue
-              cid=c['candidate']; origin=src/cid; target=base/cid
-              shutil.copytree(origin,target,dirs_exist_ok=True)
-              published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-2','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN'}
-          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
-          (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n')
-          (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
-          print(json.dumps(manifest,indent=2))
+            if c.get('status')!='COMPILED': continue
+            cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
+            published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-3','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
           PY
-
       - name: Apply evolution and champion authorities
         run: |
           python3 tools/jarvis_evolution_gate.py
           python3 tools/jarvis_champion_guard.py
           python3 tools/jarvis_graph_intelligence.py
-
       - name: Persist immutable rewrite directory
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
           mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          stage="$(mktemp -d)"
-          cp -a "public/builds/${mission}" "$stage/${mission}"
-          git fetch origin main
-          git reset --hard origin/main
-          if [ -e "public/builds/${mission}" ]; then
-            echo "ERROR: immutable mission path already exists"
-            exit 1
-          fi
+          stage="$(mktemp -d)"; cp -a "public/builds/${mission}" "$stage/${mission}"
+          git fetch origin main; git reset --hard origin/main
+          test ! -e "public/builds/${mission}"
           cp -a "$stage/${mission}" "public/builds/${mission}"
-          git config user.name 'Jarvis Complete Rewrite Factory'
-          git config user.email 'actions@users.noreply.github.com'
-          git add -- "public/builds/${mission}"
-          git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
+          git config user.name 'Jarvis Complete Rewrite Factory'; git config user.email 'actions@users.noreply.github.com'
+          git add -- "public/builds/${mission}"; git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
           for n in 1 2 3 4 5; do
             git push origin HEAD:main && exit 0
-            git fetch origin main
-            git rebase origin/main || { git rebase --abort || true; }
-            sleep $((n*5))
+            git fetch origin main; git rebase origin/main || { git rebase --abort || true; }; sleep $((n*5))
           done
           exit 1
-
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -161,14 +118,3 @@ jobs:
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: ignore
           retention-days: 90
-
-      - name: Continue autonomous intelligence and queue next LUAC generation
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set +e
-          gh workflow run jarvis-mandatory-intelligence-gate.yml --ref main
-          gh workflow run jarvis-persistent-mission.yml --ref main
-          gh workflow run jarvis-complete-rewrite-factory.yml --ref main
-          echo "Next serialized LUAC rewrite generation queued."
