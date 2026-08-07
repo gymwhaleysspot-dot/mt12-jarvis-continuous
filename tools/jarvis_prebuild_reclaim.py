@@ -6,15 +6,12 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'factory/memory/prebuild-reclaim.json'
 SEED=ROOT/'factory/memory/reclaimed-evolution-seed.lua'
-RAW=ROOT/'factory/memory/reclaimed-evolution-seed_raw.luac'
 LUAC=ROOT/'factory/memory/reclaimed-evolution-seed.luac'
 
 
 def _compile(src:Path,out:Path)->None:
-    raw=RAW if out==LUAC else out.with_name(out.stem+'_raw.luac')
     subprocess.run(['lua5.3','-e',f"assert(loadfile('{src}'))"],check=True)
-    subprocess.run(['luac5.3','-s','-o',str(raw),str(src)],check=True)
-    subprocess.run(['node',str(ROOT/'normalize_luac53_mt12.js'),str(raw),str(out)],check=True)
+    subprocess.run([str(ROOT/'toolchain/compile_mt12.sh'),str(src),str(out)],check=True)
 
 
 def _constant_fold_outcome_stage(text:str)->tuple[str,list[dict]]:
@@ -23,9 +20,7 @@ def _constant_fold_outcome_stage(text:str)->tuple[str,list[dict]]:
     if not m:return text,changes
     stage=int(m.group(1))
     for limit,base in ((4,.12),(5,.18)):
-        old=f'{base:.2f}+.01*m_min(s,{limit})'.lstrip('0')
-        # deployed source uses .12/.18 spelling
-        old=old.replace('0.12','.12').replace('0.18','.18')
+        old=(f'{base:.2f}+.01*m_min(s,{limit})').replace('0.12','.12').replace('0.18','.18')
         val=base+.01*min(stage,limit)
         new=(f'{val:.2f}').rstrip('0').rstrip('.').replace('0.','.')
         count=text.count(old)
@@ -73,8 +68,7 @@ def install_seed()->dict:
     doc=reclaim()
     sys.path.insert(0,str(ROOT/'tools'))
     import jarvis_evolution_parent as evo
-    release=doc['release']
-    original=evo.resolve
+    release=doc['release'];original=evo.resolve
     def resolved():return release,SEED
     evo.resolve=resolved
     return {'doc':doc,'restore':lambda:setattr(evo,'resolve',original)}
