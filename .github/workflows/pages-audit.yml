@@ -1,0 +1,125 @@
+name: Jarvis Complete Wiring Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - racing-mjx7303-v19.html
+      - jarvis/**
+      - classic-token.js
+      - tools/**
+      - scripts/**
+      - factory/**
+      - public/**
+      - .github/workflows/**
+  pull_request:
+    paths:
+      - index.html
+      - racing-mjx7303-v19.html
+      - jarvis/**
+      - classic-token.js
+      - tools/**
+      - scripts/**
+      - factory/**
+      - .github/workflows/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: jarvis-complete-wiring-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Validate source syntax and workflow topology
+        run: |
+          set -euo pipefail
+          node --check classic-token.js
+          for f in jarvis/*.js scripts/*.mjs device/*.mjs; do [ -f "$f" ] && node --check "$f"; done
+          python3 -m compileall -q tools
+          python3 tools/audit_workflow_wiring.py
+          python3 -m json.tool jarvis/capabilities.json >/dev/null
+          node scripts/prepare-pages.mjs
+
+      - name: Validate Jarvis workstation and Racing V19 contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const check=(f,t,label=t)=>{if(!fs.existsSync(f))throw Error('Missing file '+f);const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${label} in ${f}`)};
+          check('index.html','Jarvis MT12 Engineering Workstation');
+          check('index.html','workspaceBody');
+          check('jarvis/app.js','latestGeneration');
+          check('jarvis/state.js','factory/canonical-controller.json');
+          check('jarvis/firmware-center.js','EdgeTX');
+          check('jarvis/firmware-center.js','ExpressLRS');
+          check('racing-mjx7303-v19.html','MJX 7303 MT12 AI3D V19','V19 simulator shell');
+          check('racing-mjx7303-v19.html','mjx7303-physics-v4.js');
+          check('racing-mjx7303-v19.html','mjx7303-game-v11.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v19.html');
+          check('jarvis/racing-tab.js','AI3D V19');
+          check('jarvis/ai3d-engine-v15.js',"AI3D_VERSION='15.1.0'",'transparent renderer version');
+          check('jarvis/ai3d-engine-v15.js','uAlpha');
+          check('jarvis/ai3d-engine-v15.js','gl.enable(gl.BLEND)');
+          check('jarvis/mjx7303-asset-v13.js','mjx7303-asset-v19.js','V13 to V19 bridge');
+          check('jarvis/mjx7303-asset-v19.js',"ASSET_VERSION='19.0.0'",'V19 asset version');
+          check('jarvis/mjx7303-asset-v19.js','MJX7303_ASSET_V19');
+          check('jarvis/mjx7303-asset-v19.js','door-skin');
+          check('jarvis/mjx7303-asset-v19.js','front-fender');
+          check('jarvis/mjx7303-asset-v19.js','rear-quarter');
+          check('jarvis/mjx7303-asset-v19.js','dashboard');
+          check('jarvis/mjx7303-asset-v19.js','glass-front');
+          check('jarvis/mjx7303-game-v11.js','fitDist');
+          check('jarvis/mjx7303-game-v11.js','AI3DEngine');
+          if(fs.readFileSync('racing-mjx7303-v19.html','utf8').includes('three.module.js'))throw Error('Three.js unexpectedly present');
+          for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html'])check(f,'Opening Jarvis','compatibility marker');
+          console.log('Jarvis Racing V19 solid-body contract: PASS');
+          NODE
+
+      - name: Validate UI contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const c=require('./jarvis/capabilities.json');const state=fs.readFileSync('jarvis/state.js','utf8');
+          if(c.schema<7)throw Error('Jarvis UI contract must be v7+');
+          const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
+          const ids=new Set(c.workspaces.map(w=>w.id));
+          for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
+          if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
+          if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
+          if(c.controllerLineage.canonicalAuthority!=='factory/canonical-controller.json')throw Error('Wrong canonical authority source');
+          if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
+          console.log({schema:c.schema,workspaces:c.workspaces.length});
+          NODE
+
+      - name: Validate canonical defended release
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('factory/canonical-controller.json').read_text())
+          r=a['release']; base=Path('public/builds/releases')/r
+          src=base/f'{r}.lua'; luac=base/f'{r}.luac'; manifest=base/'MANIFEST.json'
+          assert src.exists() and luac.exists() and manifest.exists()
+          m=json.loads(manifest.read_text()); assert m['release']==r; assert m['normalizedBytes']<=87000; assert luac.stat().st_size==m['normalizedBytes']
+          print({'release':r,'bytes':m['normalizedBytes']})
+          PY
+
+      - name: Validate firmware helper wiring
+        run: |
+          set -euo pipefail
+          test -f .github/workflows/firmware-build-flash.yml
+          grep -q 'mt12-flasher' .github/workflows/firmware-build-flash.yml
+          test -f .github/workflows/mt12-sync.yml
+          grep -q 'mt12-sync' .github/workflows/mt12-sync.yml
