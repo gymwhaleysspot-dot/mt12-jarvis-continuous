@@ -1,0 +1,83 @@
+{
+  "schema": "JARVIS-PREBUILD-RECLAIM-2",
+  "release": "jrw6-533",
+  "source": "public/builds/rewrite-31174289347-1/jrw6/jrw6.lua",
+  "seed": "factory/memory/reclaimed-evolution-seed.lua",
+  "parentNormalizedBytes": 86600,
+  "reclaimedNormalizedBytes": 85820,
+  "bytesReclaimed": 780,
+  "discoveryRounds": 8,
+  "acceptedChanges": 7,
+  "changes": [
+    {
+      "kind": "constant-fold",
+      "expression": ".12+.01*m_min(s,4)",
+      "replacement": ".16",
+      "count": 1,
+      "proof": "jAS local s is immutable constant 4",
+      "beforeNormalizedBytes": 86600,
+      "afterNormalizedBytes": 86580,
+      "bytesReclaimed": 20,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "constant-fold",
+      "expression": ".18+.01*m_min(s,5)",
+      "replacement": ".22",
+      "count": 1,
+      "proof": "jAS local s is immutable constant 4",
+      "beforeNormalizedBytes": 86580,
+      "afterNormalizedBytes": 86550,
+      "bytesReclaimed": 30,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-local-removal",
+      "local": "s",
+      "proof": "immutable synthesis-stage local has zero references after constant folding",
+      "beforeNormalizedBytes": 86550,
+      "afterNormalizedBytes": 86541,
+      "bytesReclaimed": 9,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-helper-removal",
+      "helper": "choose",
+      "proof": "one-line local function has zero call/reference sites in deployed source",
+      "beforeNormalizedBytes": 86541,
+      "afterNormalizedBytes": 86425,
+      "bytesReclaimed": 116,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-helper-removal",
+      "helper": "qs",
+      "proof": "one-line local function has zero call/reference sites in deployed source",
+      "beforeNormalizedBytes": 86425,
+      "afterNormalizedBytes": 86340,
+      "bytesReclaimed": 85,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-helper-removal",
+      "helper": "ol",
+      "proof": "one-line local function has zero call/reference sites in deployed source",
+      "beforeNormalizedBytes": 86340,
+      "afterNormalizedBytes": 86054,
+      "bytesReclaimed": 286,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    },
+    {
+      "kind": "dead-helper-removal",
+      "helper": "vl",
+      "proof": "one-line local function has zero call/reference sites in deployed source",
+      "beforeNormalizedBytes": 86054,
+      "afterNormalizedBytes": 85820,
+      "bytesReclaimed": 234,
+      "verified": "LUA53_LOAD+MT12_NORMALIZE+PROTECTED_CONTRACT+STRICT_SIZE_REDUCTION"
+    }
+  ],
+  "protectedContractErrors": [],
+  "policy": "DISCOVER+TRIAL_COMPILE; ONLY_BEHAVIOR_EQUIVALENT_PROVABLE_RECLAMATION; NEVER_REMOVE_LIVE_FEATURES",
+  "acceptanceRule": "EACH_CHANGE_MUST_LOAD_LUA53+PASS_PROTECTED_CONTRACT+NORMALIZE_MT12+STRICTLY_REDUCE_BYTES"
+}
