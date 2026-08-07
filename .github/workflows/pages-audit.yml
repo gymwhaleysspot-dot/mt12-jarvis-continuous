@@ -76,13 +76,16 @@ jobs:
           grep -q "factory/canonical-controller.json" jarvis/state.js
           grep -q 'public/builds/releases/${name}/' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
-          grep -q 'MJX 7303 MT12 Simulator V10' racing-mjx7303-v6.html
+          grep -q 'MJX 7303 MT12 Simulator V11 AI3D' racing-mjx7303-v6.html
           grep -q 'body\[data-mode="garage"\] .controls{display:none}' racing-mjx7303-v6.html
           grep -q 'mjx7303-physics-v4.js' racing-mjx7303-v6.html
-          grep -q 'mjx7303-game-v10.js' racing-mjx7303-v6.html
+          grep -q 'mjx7303-game-v11.js' racing-mjx7303-v6.html
           grep -q 'racing-mjx7303-v6.html' jarvis/racing-tab.js
-          grep -q 'mjx7303-render-v10.js' jarvis/mjx7303-game-v10.js
-          grep -q 'THREE' jarvis/mjx7303-render-v10.js
+          grep -q 'WebGL2 required' jarvis/ai3d-engine-v11.js
+          grep -q 'AIQualityGovernor' jarvis/ai3d-engine-v11.js
+          grep -q 'MJX7303_AI_V11' jarvis/mjx7303-ai-model-v11.js
+          grep -q 'AI3DEngine' jarvis/mjx7303-game-v11.js
+          ! grep -q 'three.module.js' racing-mjx7303-v6.html
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
 
       - name: Validate UI contract and workflow topology
@@ -107,7 +110,7 @@ jobs:
           }
           for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
           if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
-          for(const p of ['racing-mjx7303-v6.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-render-v10.js','jarvis/mjx7303-game-v10.js'])if(!fs.existsSync(p))throw Error('Racing simulator asset missing '+p);
+          for(const p of ['racing-mjx7303-v6.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v11.js','jarvis/mjx7303-ai-model-v11.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing simulator asset missing '+p);
           console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority});
           NODE
 
