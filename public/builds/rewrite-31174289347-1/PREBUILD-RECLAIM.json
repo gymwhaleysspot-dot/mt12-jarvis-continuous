@@ -1,0 +1,27 @@
+{
+  "schema": "JARVIS-PREBUILD-RECLAIM-1",
+  "release": "jrw6-532",
+  "source": "public/builds/rewrite-31173432107-1/jrw6/jrw6.lua",
+  "seed": "factory/memory/reclaimed-evolution-seed.lua",
+  "parentNormalizedBytes": 86605,
+  "reclaimedNormalizedBytes": 86550,
+  "bytesReclaimed": 55,
+  "changes": [
+    {
+      "kind": "constant-fold",
+      "expression": ".12+.01*m_min(s,4)",
+      "replacement": ".15",
+      "count": 1,
+      "proof": "s is immutable local constant 3"
+    },
+    {
+      "kind": "constant-fold",
+      "expression": ".18+.01*m_min(s,5)",
+      "replacement": ".21",
+      "count": 1,
+      "proof": "s is immutable local constant 3"
+    }
+  ],
+  "protectedContractErrors": [],
+  "policy": "ONLY_BEHAVIOR_EQUIVALENT_PROVABLE_RECLAMATION; NEVER_REMOVE_FEATURES"
+}
