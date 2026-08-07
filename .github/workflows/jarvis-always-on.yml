@@ -3,10 +3,6 @@ name: Jarvis Always-On Orchestrator
 on:
   schedule:
     - cron: '*/5 * * * *'
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/jarvis-always-on.yml
   workflow_dispatch:
 
 permissions:
@@ -15,14 +11,14 @@ permissions:
 
 concurrency:
   group: jarvis-always-on-orchestrator
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  keep-jarvis-working:
+  orchestrate:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Keep complete-rewrite production and intelligence lanes active
+      - name: Keep one controller producer and one intelligence lane active
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -39,9 +35,8 @@ jobs:
 
           dispatch() {
             local wf="$1"
-            shift
-            echo "Dispatching $wf $*"
-            gh workflow run "$wf" --repo "$REPO" --ref main "$@"
+            echo "Dispatching $wf"
+            gh workflow run "$wf" --repo "$REPO" --ref main
           }
 
           primary='jarvis-complete-rewrite-factory.yml'
@@ -53,28 +48,8 @@ jobs:
             echo "Primary LUAC rewrite lane active: $primary_active run(s)."
           fi
 
-          SUPPLEMENTAL=(jarvis-complete-factory.yml guaranteed-luac.yml workbench.yml)
-          supplemental_active=0
-          supplemental_names=()
-          for wf in "${SUPPLEMENTAL[@]}"; do
-            n="$(active_count "$wf")"
-            if (( n > 0 )); then
-              supplemental_active=$((supplemental_active+n))
-              supplemental_names+=("$wf:$n")
-            fi
-          done
-          if (( supplemental_active == 0 )); then
-            slot=$(( $(date -u +%s) / 300 % 3 ))
-            case "$slot" in
-              0) dispatch jarvis-complete-factory.yml -f mode=full ;;
-              1) dispatch guaranteed-luac.yml ;;
-              2) dispatch workbench.yml ;;
-            esac
-          else
-            echo "Supplemental production active: ${supplemental_names[*]}"
-          fi
-
-          INTELLIGENCE=(controller-tournament.yml historical-log-reingest.yml jarvis-knowledge-graph.yml research.yml chief-engineer.yml firmware-catalog.yml discovery.yml)
+          # These lanes learn/analyze only; standalone candidate builders are excluded.
+          INTELLIGENCE=(historical-log-reingest.yml jarvis-knowledge-graph.yml firmware-catalog.yml chief-engineer.yml discovery.yml evidence-authority.yml)
           intelligence_active=0
           intelligence_names=()
           for wf in "${INTELLIGENCE[@]}"; do
@@ -85,14 +60,12 @@ jobs:
             fi
           done
           if (( intelligence_active == 0 )); then
-            INTELLIGENCE_QUEUE=(historical-log-reingest.yml jarvis-knowledge-graph.yml controller-tournament.yml firmware-catalog.yml chief-engineer.yml discovery.yml)
-            slot=$(( $(date -u +%s) / 300 % ${#INTELLIGENCE_QUEUE[@]} ))
-            dispatch "${INTELLIGENCE_QUEUE[$slot]}"
+            slot=$(( $(date -u +%s) / 300 % ${#INTELLIGENCE[@]} ))
+            dispatch "${INTELLIGENCE[$slot]}"
           else
             echo "Intelligence lane active: ${intelligence_names[*]}"
           fi
 
-          sleep 3
           echo 'Current productive runs:'
           gh run list --repo "$REPO" --limit 30 \
             --json databaseId,status,conclusion,workflowName,createdAt \

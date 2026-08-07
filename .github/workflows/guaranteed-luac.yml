@@ -1,4 +1,5 @@
 name: Guaranteed MT12 LUAC Output
+
 on:
   workflow_dispatch:
     inputs:
@@ -6,15 +7,14 @@ on:
         description: Build label
         required: false
         default: guaranteed-baseline
-  push:
-    branches: [main]
-    paths:
-      - evidence/labels/guaranteed-luac-*.json
+
 permissions:
   contents: write
+
 concurrency:
   group: guaranteed-mt12-luac
-  cancel-in-progress: false
+  cancel-in-progress: true
+
 jobs:
   publish:
     runs-on: ubuntu-24.04
@@ -41,67 +41,51 @@ jobs:
           mkdir -p "$BUILD"
           cp a17y.lua "$BUILD/candidate.lua"
           MAX_BYTES=87000 toolchain/compile_mt12.sh "$BUILD/candidate.lua" "$BUILD/candidate.luac"
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import crypto from 'node:crypto';
-          const id=process.env.BUILD_ID;
-          const dir=`public/builds/${id}`;
-          const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
-          const stat=p=>fs.statSync(p).size;
-          const source=`${dir}/candidate.lua`, luac=`${dir}/candidate.luac`;
-          const status={
-            schema:3,
-            mission:id,
-            profile:'trusted-parent-guaranteed-build',
-            authority:'GUARANTEED_BASELINE_DRIVE_BUILD',
-            createdAt:new Date().toISOString(),
-            automaticPromotion:false,
-            behaviorChanged:false,
-            hardGatesPassed:true,
-            benchRequired:true,
-            roadRequired:true,
-            source:{file:'candidate.lua',sha256:hash(source),bytes:stat(source)},
-            luac:{file:'candidate.luac',sha256:hash(luac),bytes:stat(luac),format:'MT12 normalized Lua 5.3'},
-            warnings:[
-              'Guaranteed deployable build of the current trusted A17Y source.',
-              'This file guarantees delivery; it is not claimed as a new behavioral improvement.',
-              'Keep the previous trusted LUAC available for rollback.'
-            ]
-          };
-          fs.writeFileSync(`${dir}/STATUS.json`,JSON.stringify(status,null,2)+'\n');
-          fs.writeFileSync(`${dir}/BUILD-REPORT.json`,JSON.stringify({status,reason:'Published before AI candidate generation so every build request produces a usable normalized LUAC.'},null,2)+'\n');
-          let index={schema:2,updatedAt:null,builds:[]};
-          try{index=JSON.parse(fs.readFileSync('public/builds/index.json','utf8'))}catch{}
-          const entry={mission:id,profile:status.profile,authority:status.authority,createdAt:status.createdAt,sourceSha256:status.source.sha256,luacSha256:status.luac.sha256,luacBytes:status.luac.bytes,replayLogs:0,base:`public/builds/${id}/`};
-          index.schema=2;index.updatedAt=status.createdAt;index.builds=[entry,...(index.builds||[]).filter(x=>x.mission!==id)].slice(0,100);
-          fs.mkdirSync('public/builds',{recursive:true});
-          fs.writeFileSync('public/builds/index.json',JSON.stringify(index,null,2)+'\n');
-          const names=fs.readdirSync(dir).filter(n=>fs.statSync(`${dir}/${n}`).isFile()).sort();
-          fs.writeFileSync(`${dir}/SHA256SUMS.txt`,names.map(n=>`${hash(`${dir}/${n}`)}  ${n}`).join('\n')+'\n');
-          NODE
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          bid=os.environ['BUILD_ID']; d=Path('public/builds')/bid
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          status={'schema':4,'mission':bid,'profile':'trusted-parent-guaranteed-build','authority':'GUARANTEED_BASELINE_DRIVE_BUILD','automaticPromotion':False,'behaviorChanged':False,'hardGatesPassed':True,'benchRequired':True,'roadRequired':True,'source':{'file':'candidate.lua','sha256':h(d/'candidate.lua'),'bytes':(d/'candidate.lua').stat().st_size},'luac':{'file':'candidate.luac','sha256':h(d/'candidate.luac'),'bytes':(d/'candidate.luac').stat().st_size,'format':'MT12 normalized Lua 5.3'}}
+          (d/'STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
+          (d/'BUILD-REPORT.json').write_text(json.dumps({'status':status,'reason':'Manual fallback build only; autonomous production belongs to the complete rewrite factory.'},indent=2)+'\n')
+          (d/'SHA256SUMS.txt').write_text('\n'.join(f"{h(p)}  {p.name}" for p in sorted(d.iterdir()) if p.is_file())+'\n')
+          PY
           (cd "$BUILD" && zip -9 -r mission-build.zip . -x mission-build.zip)
-          test -s "$BUILD/candidate.luac"
-          test -s "$BUILD/candidate.lua"
-          test -s "$BUILD/STATUS.json"
+      - name: Reject duplicate permanent publication
+        id: dedup
+        env:
+          BUILD_ID: guaranteed-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          cur=json.loads((Path('public/builds')/os.environ['BUILD_ID']/'STATUS.json').read_text())['luac']['sha256']
+          duplicate=None
+          for p in Path('public/builds').glob('guaranteed-*/STATUS.json'):
+            if os.environ['BUILD_ID'] in str(p): continue
+            try:
+              if json.loads(p.read_text()).get('luac',{}).get('sha256')==cur:
+                duplicate=str(p.parent); break
+            except Exception: pass
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"duplicate={'true' if duplicate else 'false'}\n")
+          print('duplicate of '+duplicate if duplicate else 'novel fallback LUAC')
+          PY
       - uses: actions/upload-artifact@v6
         with:
           name: guaranteed-mt12-luac-${{ github.run_id }}-${{ github.run_attempt }}
           path: public/builds/guaranteed-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: error
           retention-days: 180
-      - name: Commit permanent phone downloads
+      - name: Commit permanent phone download only when hash is new
+        if: steps.dedup.outputs.duplicate != 'true'
         env:
           BUILD_ID: guaranteed-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -Eeuo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add "public/builds/$BUILD_ID" public/builds/index.json
-          git commit -m "Publish guaranteed MT12 LUAC $BUILD_ID"
-          for n in 1 2 3 4 5; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            git rebase --abort || true
-            sleep $((n*4))
-          done
-          echo 'Unable to publish permanent build after retries' >&2
-          exit 1
+          git add "public/builds/$BUILD_ID"
+          git commit -m "Publish unique guaranteed MT12 LUAC $BUILD_ID"
+          git pull --rebase origin main
+          git push origin HEAD:main

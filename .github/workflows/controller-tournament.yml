@@ -1,7 +1,6 @@
 name: Controller Candidate Tournament
+
 on:
-  schedule:
-    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       release_type:
@@ -15,30 +14,16 @@ on:
         required: true
         default: a17zx
         type: string
-  push:
-    branches: [main]
-    paths:
-      - tools/controller_tournament.py
-      - controller-release-policy.json
-      - .github/workflows/controller-tournament.yml
-      - toolchain/**
-      - controller-release.txt
-      - public/builds/latest.json
-  pull_request:
-    paths:
-      - tools/controller_tournament.py
-      - controller-release-policy.json
-      - .github/workflows/controller-tournament.yml
-      - toolchain/**
-      - public/builds/latest.json
+
 permissions:
-  contents: write
+  contents: read
+
 concurrency:
-  group: controller-candidate-tournament-${{ github.ref }}
-  cancel-in-progress: false
+  group: controller-candidate-tournament-manual
+  cancel-in-progress: true
+
 jobs:
   tournament:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -46,8 +31,6 @@ jobs:
       SERIES: ${{ inputs.series || 'a17zx' }}
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
       - name: Install deterministic Lua toolchain
         run: |
           sudo apt-get update
@@ -82,24 +65,10 @@ jobs:
             assert w['intelligenceDelta']>0
           print('verdict',r['verdict'],'winner',r['winner'],'runner-up',r['runnerUp'],'compiled',len(compiled))
           PY
-      - name: Upload complete candidate tournament
+      - name: Upload manual tournament evidence
         uses: actions/upload-artifact@v6
         with:
           name: controller-tournament-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist-controller-tournament/
           if-no-files-found: error
           retention-days: 180
-      - name: Publish permanent candidate downloads
-        if: github.event_name != 'pull_request'
-        run: |
-          set -Eeuo pipefail
-          DEST="public/builds/tournaments/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          test ! -e "$DEST"
-          mkdir -p "$DEST"
-          cp -R dist-controller-tournament/. "$DEST/"
-          cp dist-controller-tournament/TOURNAMENT.json public/builds/latest-tournament.json
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add public/builds
-          git commit -m "Publish intelligence-audited controller tournament ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git push

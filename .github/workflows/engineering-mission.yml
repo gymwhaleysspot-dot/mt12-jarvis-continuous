@@ -1,4 +1,5 @@
 name: A17Y Full Engineering Mission
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,25 +8,13 @@ on:
       logs: {description: Optional space-separated replay paths; blank uses all tests/replays CSVs, required: false, default: ''}
       tournament: {description: Run five strategy candidates through the LUAC AI pipeline, required: true, type: boolean, default: true}
       fuzz_cases: {description: Bounded fuzz plan case count, required: true, default: '10000'}
-  push:
-    branches: [main]
-    paths:
-      - tests/replays/**
-      - evidence/labels/**
-      - evidence/bench/**
-      - evidence/road/**
-      - engineering-missions/schema.json
-      - engineering-missions/run.mjs
-      - engineering-missions/tournament.mjs
-      - engineering-missions/stress.mjs
-      - engineering-missions/memory-lab.mjs
-      - engineering-missions/finalize.mjs
-      - engineering-missions/publish-build.mjs
-      - .github/workflows/engineering-mission.yml
-permissions: {contents: write, actions: write, models: read}
+
+permissions: {contents: write, actions: read, models: read}
+
 concurrency:
-  group: a17y-engineering-mission-${{ github.ref }}
+  group: a17y-engineering-mission-manual
   cancel-in-progress: true
+
 jobs:
   mission:
     runs-on: ubuntu-24.04
@@ -53,21 +42,21 @@ jobs:
       - name: Create permanent mission, fresh baseline and event windows
         id: mission
         env:
-          Q: ${{ github.event_name == 'workflow_dispatch' && inputs.question || 'Automatically investigate new evidence' }}
-          H: ${{ github.event_name == 'workflow_dispatch' && inputs.hypothesis || 'New evidence may reveal a safe measurable improvement' }}
-          L: ${{ github.event_name == 'workflow_dispatch' && inputs.logs || '' }}
-          F: ${{ github.event_name == 'workflow_dispatch' && inputs.fuzz_cases || '10000' }}
+          Q: ${{ inputs.question }}
+          H: ${{ inputs.hypothesis }}
+          L: ${{ inputs.logs || '' }}
+          F: ${{ inputs.fuzz_cases || '10000' }}
         run: |
           set -euo pipefail
           ID="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
           echo "id=$ID" >> "$GITHUB_OUTPUT"
           node engineering-missions/run.mjs "id=$ID" "question=$Q" "hypothesis=$H" "logs=$L" "fuzz=$F"
       - name: Build five-strategy candidate tournament
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.tournament == true }}
+        if: ${{ inputs.tournament == true }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           MISSION_ID: ${{ steps.mission.outputs.id }}
-          MISSION_QUESTION: ${{ github.event_name == 'workflow_dispatch' && inputs.question || 'Automatically investigate new evidence' }}
+          MISSION_QUESTION: ${{ inputs.question }}
         run: |
           set -euo pipefail
           mkdir -p "dist-mission/$MISSION_ID/tournament"
@@ -103,8 +92,7 @@ jobs:
           path: a17y-engineering-mission-${{ steps.mission.outputs.id }}.zip
           if-no-files-found: error
           retention-days: 180
-      - name: Publish mission, candidate downloads and notifications
-        if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Publish requested mission and candidate downloads
         env: {MISSION_ID: '${{ steps.mission.outputs.id }}'}
         run: |
           set -euo pipefail
@@ -115,6 +103,6 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add engineering-missions/history public/mission-data public/builds
-          git commit -m "Publish drive candidate and mission $MISSION_ID" || exit 0
+          git commit -m "Publish explicitly requested drive candidate and mission $MISSION_ID" || exit 0
           git pull --rebase origin main
-          git push
+          git push origin HEAD:main

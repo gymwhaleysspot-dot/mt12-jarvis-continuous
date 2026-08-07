@@ -1,35 +1,27 @@
-name: Jarvis Autonomous Mission Scheduler
+name: Jarvis Mission Planner
 
 on:
-  schedule:
-    - cron: '2,12,22,32,42,52 * * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/jarvis-mission-scheduler.yml
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
-  group: jarvis-autonomous-mission-scheduler
+  group: jarvis-mission-planner
   cancel-in-progress: true
 
 jobs:
-  choose-next-mission:
+  plan-next-mission:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - name: Select highest-value unfinished engineering mission
-        id: plan
         shell: bash
         run: |
           set -Eeuo pipefail
           python3 - <<'PY'
-          import json,os,time
+          import json,time
           from pathlib import Path
           def read(p):
             try:return json.loads(Path(p).read_text())
@@ -38,37 +30,18 @@ jobs:
           cycle=read('factory/latest-cycle.json')
           exp=nxt.get('nextExperiment') or cycle.get('nextExperiment') or {}
           objective=(exp.get('objective') if isinstance(exp,dict) else str(exp)) or 'Evolve the current controller against the full digital twin and replay archive.'
-          slot=int(time.time()//600)%6
-          modes=['full','deep','full','architecture','full','scout']
-          plan={'schema':1,'objective':objective,'mode':modes[slot],'selectedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'parentMission':cycle.get('mission'),'champion':cycle.get('winner') or cycle.get('tracks',{}).get('champion'),'reason':'highest-information autonomous continuation'}
+          plan={
+            'schema':2,
+            'objective':objective,
+            'selectedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
+            'parentMission':cycle.get('mission'),
+            'champion':cycle.get('winner') or cycle.get('tracks',{}).get('champion'),
+            'reason':'planning-only; autonomous controller dispatch is owned exclusively by Jarvis Always-On Orchestrator'
+          }
           Path('/tmp/mission.json').write_text(json.dumps(plan,indent=2)+'\n')
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-            f.write('mode='+plan['mode']+'\n')
-            f.write('objective<<EOF\n'+objective+'\nEOF\n')
           print(json.dumps(plan,indent=2))
           PY
-      - name: Check whether a controller mission is already active
-        id: active
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          active=0
-          for wf in jarvis-complete-factory.yml workbench.yml guaranteed-luac.yml; do
-            n=$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=12" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending")]|length' 2>/dev/null || echo 0)
-            active=$((active+n))
-          done
-          echo "count=$active" >> "$GITHUB_OUTPUT"
-      - name: Start next mission when controller evolution is idle
-        if: ${{ steps.active.outputs.count == '0' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          MODE: ${{ steps.plan.outputs.mode }}
-        run: gh workflow run jarvis-complete-factory.yml --repo "$REPO" --ref main -f mode="$MODE"
-      - name: Publish scheduler decision
+      - name: Publish planner decision
         uses: actions/upload-artifact@v6
         with:
           name: jarvis-next-mission-${{ github.run_id }}

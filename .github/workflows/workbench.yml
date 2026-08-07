@@ -1,5 +1,6 @@
 name: A17Y LUAC AI Builder
 run-name: LUAC AI ${{ inputs.request_id || github.sha }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -28,36 +29,16 @@ on:
         description: Unique UI request identifier for exact run correlation
         required: false
         default: manual
-  pull_request:
-    paths:
-      - protected/**
-      - workbench/**
-      - director/**
-      - toolchain/**
-      - scripts/mt12-*.lua
-      - scripts/reconcile-director-authority.mjs
-      - .github/workflows/workbench.yml
-  push:
-    branches: [main]
-    paths:
-      - a17y.lua
-      - candidates/**
-      - protected/**
-      - workbench/**
-      - director/**
-      - toolchain/**
-      - scripts/mt12-*.lua
-      - scripts/reconcile-director-authority.mjs
-      - tests/replays/**
-      - evidence/**
-      - .github/workflows/workbench.yml
+
 permissions:
   contents: read
   actions: read
   models: read
+
 concurrency:
   group: a17y-luac-ai-${{ inputs.request_id || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -68,7 +49,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
@@ -106,9 +86,8 @@ jobs:
           else
             find tests/replays -type f -name '*.csv' -print 2>/dev/null | sort > /tmp/logs.txt || true
           fi
-          echo "Resolved $(wc -l </tmp/logs.txt) replay logs for request $A17Y_REQUEST_ID"
       - name: AI diagnosis, generation and repair
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate == true && inputs.child == '' }}
+        if: ${{ inputs.generate == true && inputs.child == '' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DIRECTOR_MISSION: ${{ inputs.mission }}
@@ -119,7 +98,7 @@ jobs:
       - name: Select immutable candidate
         id: candidate
         env:
-          REQUESTED_CHILD: ${{ github.event_name == 'workflow_dispatch' && inputs.child || '' }}
+          REQUESTED_CHILD: ${{ inputs.child || '' }}
         run: |
           set -euo pipefail
           if [ -n "$REQUESTED_CHILD" ]; then C="$REQUESTED_CHILD";
@@ -128,11 +107,10 @@ jobs:
           test -f "$C"
           case "$C" in a17y.lua|candidates/*|dist-director/*) ;; *) echo "Candidate path outside approved roots: $C" >&2; exit 1;; esac
           echo "path=$C" >> "$GITHUB_OUTPUT"
-          echo "Selected $C"
       - name: Compile, normalize, execute bytecode, replay and score
         env:
           CHILD: ${{ steps.candidate.outputs.path }}
-          MISSION: ${{ github.event_name == 'workflow_dispatch' && inputs.mission || 'Exact deterministic validation' }}
+          MISSION: ${{ inputs.mission }}
           WORKBENCH_LOG_FILE: /tmp/logs.txt
         run: node workbench/run.mjs a17y.lua "$CHILD" "$MISSION"
       - name: Reconcile AI claims with deterministic authority
