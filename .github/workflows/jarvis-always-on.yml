@@ -3,6 +3,15 @@ name: Jarvis Always-On Orchestrator
 on:
   schedule:
     - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - tools/controller_rewrite_hotfix.py
+      - tools/controller_rewrite_factory.py
+      - tools/controller_tournament.py
+      - jarvis/canonical-parent.json
+      - public/builds/latest.json
+      - .github/workflows/jarvis-always-on.yml
   workflow_run:
     workflows:
       - Jarvis Complete Rewrite LUAC Factory
