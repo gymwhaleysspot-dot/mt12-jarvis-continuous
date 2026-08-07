@@ -11,8 +11,14 @@ STALE_LUAC = {"caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
 REQUIRED = (
     "local function zBrain", "V[704]", "X[46]", "V[720]=ac",
     "setgv(3,m_min(V[35],ac))", "V[740+km]", "V[760+km]",
+    "local pc=pcall", "pc(getFieldInfo", "pc(getValue",
+    "pc(model.getGlobalVariable", "pc(model.setGlobalVariable",
+    "/LOGS/m0", "/LOGS/m1", "local function memOpt", "local function watch",
+    "V[179]*.0045", "92+4*dc",
+    "bb_line(144,li1,0)", "bb_line(145,li2,0)", "bb_line(146,li3,0)", "bb_line(147,li4,0)",
+    "bb_line(148,rg1,0)", "bb_line(149,rg2,0)", "bb_line(150,rg3,0)", "bb_line(151,rg4,0)",
 )
-FORBIDDEN = ("setgv(3,V[35])",)
+FORBIDDEN = ("setgv(3,V[35])", "V[179]*(.00435")
 
 
 def digest(path: Path) -> str:
