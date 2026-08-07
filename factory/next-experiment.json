@@ -1,9 +1,11 @@
 {
   "buildState": {
-    "duplicatesRejected": 108,
+    "duplicatesRejected": 119,
     "unique": 2
   },
-  "champion": "j00002",
+  "canonicalFloor": "jr514f",
+  "champion": "jrw6-531",
+  "evolutionParent": "jrw6-531",
   "externalResearchState": {
     "acceptedBridgeFindings": 0,
     "policy": {
@@ -11,13 +13,13 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1786094847525",
+    "runId": "research-1786101089085",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-08-07T09:29:10.004020+00:00",
+  "generatedAt": "2026-08-07T11:13:16.070418+00:00",
   "graphState": {
-    "nodes": 130,
-    "relationships": 125
+    "nodes": 8,
+    "relationships": 3
   },
   "nextExperiment": {
     "acceptanceCriteria": {
@@ -28,11 +30,13 @@
       "inheritedCapabilityBonus": false,
       "minimumConfidence": 0.85,
       "mustCompareAgainstChampion": true,
+      "mustPreserveCanonicalFloor": true,
       "noRegression": true,
       "sixthSynthesisRequired": true
     },
     "area": "abs-control",
-    "createdAt": "2026-08-07T09:29:10.004011+00:00",
+    "canonicalFloor": "jr514f",
+    "createdAt": "2026-08-07T11:13:16.070413+00:00",
     "expectedInformationGain": 0.7127,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
@@ -41,11 +45,11 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1786094847525",
+      "runId": "research-1786101089085",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
-    "hypothesis": "Run five independent hypotheses informed by vehicle evidence and verified outside research, then build a sixth synthesis.",
-    "id": "EXP-20260807092910",
+    "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
+    "id": "EXP-20260807111316",
     "measurement": "maximize information gained per generation while preserving defended behavior",
     "mutations": [
       "adaptive lock target confidence",
@@ -59,20 +63,20 @@
       "graded fail-open sensor confidence",
       "state-preserving dropout recovery"
     ],
-    "name": "Research-aware five-hypothesis generation plus synthesis",
-    "parent": "j00002",
+    "name": "Research-aware evolutionary five-hypothesis generation plus synthesis",
+    "parent": "jrw6-531",
     "portfolio": [
       {
         "area": "abs-control",
-        "baselineHypothesis": "A abs-control candidate derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+        "baselineHypothesis": "A abs-control candidate derived from jrw6-531 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
         "expectedInformationGain": 0.7128,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786094847525",
+          "runId": "research-1786101089085",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A abs-control candidate derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+        "hypothesis": "A abs-control candidate derived from jrw6-531 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
         "measurement": "reduce lock duration without increasing stopping distance proxy",
         "mutations": [
           "adaptive lock target confidence",
@@ -85,15 +89,15 @@
       },
       {
         "area": "jump-landing-classification",
-        "baselineHypothesis": "A jump-landing-classification candidate derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
+        "baselineHypothesis": "A jump-landing-classification candidate derived from jrw6-531 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
         "expectedInformationGain": 0.7142,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786094847525",
+          "runId": "research-1786101089085",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A jump-landing-classification candidate derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
+        "hypothesis": "A jump-landing-classification candidate derived from jrw6-531 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
         "measurement": "reduce jump false positives while preserving true jump recall",
         "mutations": [
           "separate airborne and landing evidence",
@@ -106,15 +110,15 @@
       },
       {
         "area": "traction-control",
-        "baselineHypothesis": "A traction-control candidate derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
+        "baselineHypothesis": "A traction-control candidate derived from jrw6-531 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
         "expectedInformationGain": 0.7118,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786094847525",
+          "runId": "research-1786101089085",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A traction-control candidate derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
+        "hypothesis": "A traction-control candidate derived from jrw6-531 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
         "measurement": "reduce excess slip and intervention harshness",
         "mutations": [
           "contextual slip severity blend",
@@ -127,15 +131,15 @@
       },
       {
         "area": "truth-speed-fusion",
-        "baselineHypothesis": "A truth-speed-fusion candidate derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+        "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw6-531 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
         "expectedInformationGain": 0.7105,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786094847525",
+          "runId": "research-1786101089085",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A truth-speed-fusion candidate derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+        "hypothesis": "A truth-speed-fusion candidate derived from jrw6-531 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
         "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
         "mutations": [
           "adaptive GPS/RPM lag estimator",
@@ -148,15 +152,15 @@
       },
       {
         "area": "sensor-dropout-recovery",
-        "baselineHypothesis": "A sensor-dropout-recovery candidate derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+        "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw6-531 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
         "expectedInformationGain": 0.7144,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786094847525",
+          "runId": "research-1786101089085",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A sensor-dropout-recovery candidate derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+        "hypothesis": "A sensor-dropout-recovery candidate derived from jrw6-531 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
         "measurement": "reduce recovery frames and prevent channel/control discontinuities",
         "mutations": [
           "graded fail-open sensor confidence",
@@ -168,15 +172,15 @@
         "slot": 5
       }
     ],
-    "reason": "Portfolio combines real vehicle evidence with source-backed external engineering research while keeping research advisory and experimentally falsifiable.",
+    "reason": "Portfolio evolves cumulatively from the best static-validated synthesis while retaining a separate immutable safe canonical fallback.",
     "requiredTests": [
       "Lua 5.3 compile",
       "MT12 normalization",
       "static safety audit",
       "historical novelty audit",
-      "defended-lineage gate",
+      "canonical defended-lineage gate",
       "runtime memory/size check",
-      "bench and road evidence before promotion"
+      "bench and road evidence before canonical promotion"
     ],
     "synthesis": {
       "area": "synthesis-all-five",
@@ -189,22 +193,22 @@
       ],
       "measurement": "beat each constituent on aggregate benefit without new regressions",
       "name": "Synthesize all five hypotheses",
-      "rule": "compose only compatible, genuinely new mutations; external research is advisory evidence only; reject on defended-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
+      "rule": "compose only compatible, genuinely new mutations on the active evolution parent; external research is advisory evidence only; reject on canonical-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
       "slot": 6
     }
   },
   "portfolio": [
     {
       "area": "abs-control",
-      "baselineHypothesis": "A abs-control candidate derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+      "baselineHypothesis": "A abs-control candidate derived from jrw6-531 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
       "expectedInformationGain": 0.7128,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786094847525",
+        "runId": "research-1786101089085",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A abs-control candidate derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+      "hypothesis": "A abs-control candidate derived from jrw6-531 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
       "measurement": "reduce lock duration without increasing stopping distance proxy",
       "mutations": [
         "adaptive lock target confidence",
@@ -217,15 +221,15 @@
     },
     {
       "area": "jump-landing-classification",
-      "baselineHypothesis": "A jump-landing-classification candidate derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
+      "baselineHypothesis": "A jump-landing-classification candidate derived from jrw6-531 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
       "expectedInformationGain": 0.7142,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786094847525",
+        "runId": "research-1786101089085",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A jump-landing-classification candidate derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
+      "hypothesis": "A jump-landing-classification candidate derived from jrw6-531 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
       "measurement": "reduce jump false positives while preserving true jump recall",
       "mutations": [
         "separate airborne and landing evidence",
@@ -238,15 +242,15 @@
     },
     {
       "area": "traction-control",
-      "baselineHypothesis": "A traction-control candidate derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
+      "baselineHypothesis": "A traction-control candidate derived from jrw6-531 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
       "expectedInformationGain": 0.7118,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786094847525",
+        "runId": "research-1786101089085",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A traction-control candidate derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
+      "hypothesis": "A traction-control candidate derived from jrw6-531 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
       "measurement": "reduce excess slip and intervention harshness",
       "mutations": [
         "contextual slip severity blend",
@@ -259,15 +263,15 @@
     },
     {
       "area": "truth-speed-fusion",
-      "baselineHypothesis": "A truth-speed-fusion candidate derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw6-531 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
       "expectedInformationGain": 0.7105,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786094847525",
+        "runId": "research-1786101089085",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A truth-speed-fusion candidate derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "hypothesis": "A truth-speed-fusion candidate derived from jrw6-531 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
       "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
       "mutations": [
         "adaptive GPS/RPM lag estimator",
@@ -280,15 +284,15 @@
     },
     {
       "area": "sensor-dropout-recovery",
-      "baselineHypothesis": "A sensor-dropout-recovery candidate derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+      "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw6-531 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
       "expectedInformationGain": 0.7144,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786094847525",
+        "runId": "research-1786101089085",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A sensor-dropout-recovery candidate derived from j00002 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
+      "hypothesis": "A sensor-dropout-recovery candidate derived from jrw6-531 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
       "measurement": "reduce recovery frames and prevent channel/control discontinuities",
       "mutations": [
         "graded fail-open sensor confidence",
@@ -446,7 +450,7 @@
       "uncertainty": 0.62
     }
   ],
-  "schema": "JARVIS-EXPERIMENT-PLAN-3",
+  "schema": "JARVIS-EXPERIMENT-PLAN-4",
   "synthesis": {
     "area": "synthesis-all-five",
     "inputs": [
@@ -458,7 +462,7 @@
     ],
     "measurement": "beat each constituent on aggregate benefit without new regressions",
     "name": "Synthesize all five hypotheses",
-    "rule": "compose only compatible, genuinely new mutations; external research is advisory evidence only; reject on defended-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
+    "rule": "compose only compatible, genuinely new mutations on the active evolution parent; external research is advisory evidence only; reject on canonical-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
     "slot": 6
   }
 }
