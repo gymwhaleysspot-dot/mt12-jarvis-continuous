@@ -8,13 +8,13 @@
     "mission": 2,
     "mutation": 2,
     "next_experiment": 1,
-    "rejection": 88,
+    "rejection": 89,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260807052350",
-  "generatedAt": "2026-08-07T06:51:48.315273+00:00",
-  "nodeCount": 110,
+  "currentExperiment": "EXP-20260807065242",
+  "generatedAt": "2026-08-07T06:52:58.332948+00:00",
+  "nodeCount": 111,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -207,6 +207,13 @@
       "label": "BYTE_IDENTICAL_DUPLICATE",
       "reason": "BYTE_IDENTICAL_DUPLICATE",
       "sha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a"
+    },
+    {
+      "id": "rejection:5d7d8f71019c1dc7",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
       "id": "rejection:0d7288ec700156b4",
@@ -713,24 +720,24 @@
       "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     },
     {
-      "expectedInformationGain": 0.7948,
-      "hypothesis": "A controller derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-      "id": "experiment:2f53e77ec4fbfdbd",
+      "expectedInformationGain": 0.791,
+      "hypothesis": "A controller derived from j00002 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "id": "experiment:1424e0925a5510f9",
       "kind": "experiment",
-      "label": "Improve traction control",
-      "measurement": "reduce excess slip and intervention harshness",
+      "label": "Improve truth speed fusion",
+      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
       "status": "PLANNED",
-      "uncertainty": 0.58
+      "uncertainty": 0.55
     },
     {
-      "id": "mutation:815b1274c28658ed",
+      "id": "mutation:3d53a3d9623490be",
       "kind": "mutation",
-      "label": "contextual slip severity blend"
+      "label": "adaptive GPS/RPM lag estimator"
     },
     {
-      "id": "mutation:45f7e0cb0e6c5f80",
+      "id": "mutation:280d7a2eb3f92442",
       "kind": "mutation",
-      "label": "surface-conditioned intervention release"
+      "label": "confidence-weighted truth-speed handoff"
     },
     {
       "id": "test:d0ceba208d208f3d",
@@ -768,7 +775,7 @@
       "label": "runtime memory check"
     }
   ],
-  "relationshipCount": 105,
+  "relationshipCount": 106,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -908,6 +915,12 @@
       "relation": "DUPLICATES",
       "source": "rejection:9e0a491d7b22c998",
       "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:53dd20204ace9004",
+      "relation": "DUPLICATES",
+      "source": "rejection:5d7d8f71019c1dc7",
+      "target": "controller:a0206f4b0721cac1"
     },
     {
       "id": "edge:b5231180887cb8d0",
@@ -1342,63 +1355,63 @@
       "target": "controller:a0206f4b0721cac1"
     },
     {
-      "id": "edge:ed46f7fcefe60e8a",
+      "id": "edge:298a3ac1da8321fe",
       "relation": "USES_PARENT",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "controller:1d3e9c9125494516"
     },
     {
-      "id": "edge:49f241a7720b654c",
+      "id": "edge:414cfc11899ed54a",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:2f53e77ec4fbfdbd",
-      "target": "mutation:815b1274c28658ed"
+      "source": "experiment:1424e0925a5510f9",
+      "target": "mutation:3d53a3d9623490be"
     },
     {
-      "id": "edge:d4ce8845cd9a340e",
+      "id": "edge:e5cb443443fc1bb2",
       "relation": "PROPOSES_MUTATION",
-      "source": "experiment:2f53e77ec4fbfdbd",
-      "target": "mutation:45f7e0cb0e6c5f80"
+      "source": "experiment:1424e0925a5510f9",
+      "target": "mutation:280d7a2eb3f92442"
     },
     {
-      "id": "edge:f2156b8b781c96f6",
+      "id": "edge:0c4b24a8c22454ef",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:d0ceba208d208f3d"
     },
     {
-      "id": "edge:073e4ab2461c602c",
+      "id": "edge:555f074979a95cb7",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:af354b232c193ef9"
     },
     {
-      "id": "edge:b169d3323fa03b72",
+      "id": "edge:9639d3acbb4e450a",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:9e7a610f94776e69"
     },
     {
-      "id": "edge:f90bad54ef1591f8",
+      "id": "edge:89030cc300c934e3",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:822439754733430f"
     },
     {
-      "id": "edge:87f443a502bfb4f2",
+      "id": "edge:63684ebb6693e7ad",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:529343bd009a7dd8"
     },
     {
-      "id": "edge:bfa840fa661a35c9",
+      "id": "edge:fabcd70ff82f5f6b",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:b1b2a0420869a06b"
     },
     {
-      "id": "edge:f88c9b2b64c7b925",
+      "id": "edge:fd9cd5b6ec62dbe4",
       "relation": "REQUIRES_TEST",
-      "source": "experiment:2f53e77ec4fbfdbd",
+      "source": "experiment:1424e0925a5510f9",
       "target": "test:006110a1594843d9"
     }
   ],
