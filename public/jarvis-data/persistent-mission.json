@@ -2,14 +2,8 @@
   "schema": 2,
   "missionId": "J-1785967020",
   "createdAt": "2026-08-05T21:57:00.828813+00:00",
-  "cycle": 606,
+  "cycle": 607,
   "history": [
-    {
-      "cycle": 507,
-      "at": "2026-08-07T03:19:37.317276+00:00",
-      "objective": "Continuously improve the current MT12 controller through evidence, simulation, replay and controlled mutation.",
-      "dispatches": []
-    },
     {
       "cycle": 508,
       "at": "2026-08-07T03:20:08.023616+00:00",
@@ -1107,22 +1101,35 @@
           "dispatchedAt": "2026-08-07T13:17:14.517116+00:00"
         }
       ]
+    },
+    {
+      "cycle": 607,
+      "at": "2026-08-07T13:25:07.592669+00:00",
+      "objective": "Strengthen evidence, simulation and causal knowledge for the authoritative controller producer.",
+      "dispatches": [
+        {
+          "task": "historical-learning",
+          "lane": "intelligence",
+          "workflow": "historical-log-reingest.yml",
+          "dispatchedAt": "2026-08-07T13:25:07.592640+00:00"
+        }
+      ]
     }
   ],
   "tasks": [],
   "objective": "Strengthen evidence, simulation and causal knowledge for the authoritative controller producer.",
   "state": "ACTIVE",
-  "updatedAt": "2026-08-07T13:17:09.468273+00:00",
+  "updatedAt": "2026-08-07T13:25:03.955998+00:00",
   "activeLanes": {
     "controller": "owned-by-always-on",
     "intelligence": true
   },
   "lastDispatches": [
     {
-      "task": "evidence-review",
+      "task": "historical-learning",
       "lane": "intelligence",
-      "workflow": "evidence-authority.yml",
-      "dispatchedAt": "2026-08-07T13:17:14.517116+00:00"
+      "workflow": "historical-log-reingest.yml",
+      "dispatchedAt": "2026-08-07T13:25:07.592640+00:00"
     }
   ],
   "nextAction": "Evaluate intelligence output and feed evidence to the single authoritative rewrite producer."
