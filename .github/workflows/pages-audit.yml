@@ -76,11 +76,12 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');const c=require('./jarvis/capabilities.json');const state=fs.readFileSync('jarvis/state.js','utf8');
-          if(c.schema<6)throw Error('Jarvis UI contract must be v6+');
+          if(c.schema<7)throw Error('Jarvis UI contract must be v7+');
           if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
           if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
           if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
-          if(c.controllerLineage.canonicalParent!=='jrw6d')throw Error('Canonical defended floor is not JRW6D');
+          if(c.controllerLineage.canonicalAuthority!=='factory/canonical-controller.json')throw Error('Wrong canonical authority source');
+          if(c.controllerLineage.canonicalManifestPattern!=='public/builds/releases/<release>/MANIFEST.json')throw Error('Wrong canonical manifest pattern');
           const ids=new Set,paths=new Set;
           for(const m of c.missions){
             if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
@@ -89,27 +90,32 @@ jobs:
             const y=fs.readFileSync(p,'utf8');if(!/workflow_dispatch\s*:/.test(y))throw Error('Not dispatchable '+p);
           }
           for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
-          if(!c.dynamicDataSources.some(x=>x.id==='rewrite-runs'))throw Error('Missing dynamic rewrite-run source');
-          console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length});
+          if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
+          console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority});
           NODE
 
-      - name: Validate canonical JRW6D defended release
+      - name: Validate canonical defended release from authority
         run: |
-          set -euo pipefail
-          test -f public/builds/releases/jrw6d/jrw6d.lua
-          test -f public/builds/releases/jrw6d/jrw6d.luac
-          test -f public/builds/releases/jrw6d/MANIFEST.json
           python3 - <<'PY'
           import json
           from pathlib import Path
-          m=json.loads(Path('public/builds/releases/jrw6d/MANIFEST.json').read_text())
-          assert m['release']=='jrw6d'
-          assert m['normalizedBytes']<=87000
-          assert Path('public/builds/releases/jrw6d/jrw6d.luac').stat().st_size==m['normalizedBytes']
-          s=Path('public/builds/releases/jrw6d/jrw6d.lua').read_text()
+          authority=json.loads(Path('factory/canonical-controller.json').read_text())
+          release=authority['release']
+          base=Path('public/builds/releases')/release
+          src=base/f'{release}.lua'
+          luac=base/f'{release}.luac'
+          manifest=base/'MANIFEST.json'
+          assert src.exists(),src
+          assert luac.exists(),luac
+          assert manifest.exists(),manifest
+          m=json.loads(manifest.read_text())
+          assert m['release']==release,(m.get('release'),release)
+          assert m['normalizedBytes']<=87000,m['normalizedBytes']
+          assert luac.stat().st_size==m['normalizedBytes'],(luac.stat().st_size,m['normalizedBytes'])
+          s=src.read_text()
           for token in ('local pc=pcall','/LOGS/m0','/LOGS/m1','local function memOpt','local function watch','V[179]*.0045','92+4*dc','bb_line(151,rg4,0)'):
               assert token in s, token
-          print({'release':m['release'],'bytes':m['normalizedBytes'],'authority':m['authority']})
+          print({'release':release,'bytes':m['normalizedBytes'],'authority':m['authority']})
           PY
 
       - name: Validate active experimental evolution parent
@@ -120,14 +126,15 @@ jobs:
           p=Path('factory/evolution-controller.json')
           assert p.exists(),'Missing evolution-controller.json'
           e=json.loads(p.read_text())
-          assert e['canonicalFloor']=='jr514f',e.get('canonicalFloor')
+          canonical=json.loads(Path('factory/canonical-controller.json').read_text())
+          assert e['canonicalFloor']==canonical['release'],(e.get('canonicalFloor'),canonical['release'])
           assert e['candidate']=='jrw6',e.get('candidate')
           assert e['normalizedBytes']<=87000,e['normalizedBytes']
           src=Path(e['sourcePath']);luac=Path(e['deployPath'])
           assert src.exists(),src
           assert luac.exists(),luac
           assert luac.stat().st_size==e['normalizedBytes'],(luac.stat().st_size,e['normalizedBytes'])
-          print({'release':e['release'],'generationRun':e['generationRun'],'bytes':e['normalizedBytes'],'authority':e['authority']})
+          print({'release':e['release'],'generationRun':e['generationRun'],'bytes':e['normalizedBytes'],'authority':e['authority'],'canonicalFloor':e['canonicalFloor']})
           PY
 
       - name: Validate persisted rewrite generation model
@@ -162,13 +169,13 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');const s=fs.readFileSync('jarvis/state.js','utf8');const a=fs.readFileSync('jarvis/app.js','utf8');const w=fs.readFileSync('jarvis/winner-downloads.js','utf8');const c=fs.readFileSync('jarvis/countdown.js','utf8');
           const fixed=(s.match(/'[^']+\.json'/g)||[]).length;
-          if(!s.includes('.slice(0,6)'))throw Error('Generation history is not API-budget bounded');
+          if(!s.includes('.slice(0,20)'))throw Error('Generation history is not API-budget bounded');
           if(!a.includes('${w.candidate?.toUpperCase()}-${g.runNumber}'))throw Error('Winner identity is not run-qualified');
           if(!a.includes('runtimeIdentity?.token'))throw Error('Runtime identity missing from UI');
           if(!a.includes('TOURNAMENT'))throw Error('Tournament download missing');
           if(!w.includes("lua.textContent='LUA'"))throw Error('Winner LUA source download missing');
           if(!c.includes('CADENCE_MINUTES=15'))throw Error('15-minute countdown contract missing');
-          console.log({fixedJsonReferences:fixed,generationHistory:6,publicBudget:'bounded',winnerDownloads:'lua+luac',countdownMinutes:15});
+          console.log({fixedJsonReferences:fixed,generationHistory:20,publicBudget:'bounded',winnerDownloads:'lua+luac',countdownMinutes:15});
           NODE
 
       - name: Validate repository JSON syntax
