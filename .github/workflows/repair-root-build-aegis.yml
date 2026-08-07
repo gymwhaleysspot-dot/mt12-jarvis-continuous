@@ -101,9 +101,43 @@ jobs:
           git add a17y.lua a17y.luac a17z.lua a17z.luac public/builds
           git add -u
           git commit -m "Restore full A17Y and publish Aegis A17Z candidate"
-          git status --short
+
+          merge_build_index() {
+            python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          rid=os.environ['GITHUB_RUN_ID']; att=os.environ['GITHUB_RUN_ATTEMPT']
+          mid=f'aegis-observability-{rid}-{att}'
+          b=Path('public/builds')/mid
+          status=json.loads((b/'STATUS.json').read_text())
+          idx=Path('public/builds/index.json')
+          try:data=json.loads(idx.read_text())
+          except:data={'schema':2,'builds':[]}
+          entry={'mission':mid,'profile':status['profile'],'authority':status['authority'],'createdAt':status['createdAt'],'sourceSha256':status['source']['sha256'],'luacSha256':status['luac']['sha256'],'luacBytes':status['luac']['bytes'],'replayLogs':2,'base':f'public/builds/{mid}/'}
+          data['schema']=2
+          data['updatedAt']=status['createdAt']
+          data['builds']=[entry]+[x for x in data.get('builds',[]) if x.get('mission')!=mid]
+          idx.write_text(json.dumps(data,indent=2)+'\n')
+          PY
+          }
+
           for n in 1 2 3 4 5; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            if git pull --rebase origin main; then
+              if git push origin HEAD:main; then exit 0; fi
+            else
+              conflicts="$(git diff --name-only --diff-filter=U)"
+              if [ "$conflicts" = "public/builds/index.json" ]; then
+                echo "Resolving expected shared build-index race against latest main."
+                git checkout --ours public/builds/index.json
+                merge_build_index
+                git add public/builds/index.json
+                GIT_EDITOR=true git rebase --continue
+                if git push origin HEAD:main; then exit 0; fi
+              else
+                echo "Unexpected rebase conflict(s):"
+                printf '%s\n' "$conflicts"
+              fi
+            fi
             git rebase --abort || true
             sleep $((n*4))
           done
