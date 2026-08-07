@@ -1,1 +1,71 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'"><title>Jarvis MT12 Engineering Intelligence</title><link rel="stylesheet" href="jarvis/app.css"></head><body><div class="app"><header class="topbar"><div class="brand"><div class="orb"></div><div><h1>JARVIS</h1><small>RadioMaster MT12 engineering, firmware, controller and device intelligence</small></div></div><div class="top-actions"><button class="btn" id="refresh"><span>Refresh</span></button><button class="btn" id="connection"><span id="connectionState">OFFLINE</span></button></div></header><div class="layout"><aside class="sidebar"><div id="sideNav"></div><div class="navgroup"><div class="navlabel">State</div><div class="item"><div class="title">Last refresh</div><div class="meta" id="updated">—</div></div></div></aside><main class="content"><div id="loading" class="chip" hidden>Jarvis is synchronizing the platform…</div><div id="globalError" class="muted"></div><section class="hero"><article class="hero-main"><div class="eyebrow">COMPLETE CLOSED-LOOP MT12 PLATFORM</div><h2 id="workspaceTitle">Command</h2><p id="workspaceDescription">Assign objectives and watch Jarvis coordinate the entire platform.</p></article><article class="hero-main status-card"><div class="status-row"><span>Identity</span><b>JARVIS</b></div><div class="status-row"><span>Vehicle</span><b>MJX 7303 C3</b></div><div class="status-row"><span>Radio</span><b>RadioMaster MT12</b></div><div class="status-row"><span>Control runtime</span><b>EdgeTX Lua 5.3</b></div><div class="status-row"><span>Firmware</span><b>EdgeTX + ExpressLRS</b></div></article></section><div id="workspaceBody"></div></main></div><nav class="mobile-nav" id="mobileNav"></nav></div><div class="overlay" id="overlay"></div><aside class="drawer" id="drawer"><div class="row"><h2>GitHub connection</h2><button class="btn" id="closeDrawer">CLOSE</button></div><p class="muted">Jarvis uses the one classic PAT already stored by the shared credential vault. The credential is not displayed.</p><button class="btn primary" id="testToken">TEST CONNECTION</button><button class="btn danger" id="clearToken">CLEAR SAVED TOKEN</button><div id="authMessage" class="console">Ready.</div></aside><script src="classic-token.js"></script><script type="module" src="jarvis/iphone-sync-boot.js"></script><script type="module" src="jarvis/app.js"></script><script type="module" src="jarvis/evidence-os.js"></script><script type="module" src="jarvis/downloads.js"></script><script type="module" src="jarvis/integration.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05080d">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>Jarvis MT12 Engineering OS</title>
+  <link rel="stylesheet" href="jarvis/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand-button" id="homeButton" aria-label="Jarvis command overview">
+        <span class="reactor" aria-hidden="true"><i></i></span>
+        <span class="brand-copy"><b>JARVIS</b><small>MT12 Engineering OS</small></span>
+      </button>
+      <div class="live-strip">
+        <span class="live-pill" id="producerPill"><i></i><b>PRODUCER</b><em>checking</em></span>
+        <span class="live-pill" id="parentPill"><i></i><b>PARENT</b><em>—</em></span>
+        <span class="live-pill" id="generationPill"><i></i><b>LATEST</b><em>—</em></span>
+      </div>
+      <div class="top-actions">
+        <button class="btn compact" id="refresh">REFRESH</button>
+        <button class="btn compact" id="connection"><span id="connectionState">GITHUB</span></button>
+      </div>
+    </header>
+
+    <div class="page-grid">
+      <aside class="rail">
+        <div class="rail-title">ENGINEERING OS</div>
+        <nav id="sideNav"></nav>
+        <div class="rail-foot">
+          <span>Last sync</span>
+          <b id="updated">—</b>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="notice" id="loading" hidden>Synchronizing Jarvis state…</div>
+        <div class="notice error" id="globalError" hidden></div>
+
+        <section class="command-hero">
+          <div>
+            <div class="kicker" id="workspaceKicker">CLOSED-LOOP CONTROLLER ENGINEERING</div>
+            <h1 id="workspaceTitle">Command</h1>
+            <p id="workspaceDescription">Live controller lineage, factory generations, evidence, promotion authority and MT12 operations.</p>
+          </div>
+          <div class="hero-facts" id="heroFacts"></div>
+        </section>
+
+        <div id="workspaceBody"></div>
+      </main>
+    </div>
+
+    <nav class="mobile-nav" id="mobileNav"></nav>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="GitHub connection">
+    <div class="drawer-head"><div><div class="kicker">JARVIS ACCESS</div><h2>GitHub connection</h2></div><button class="btn" id="closeDrawer">CLOSE</button></div>
+    <p class="muted">Jarvis can read public engineering state without a token. A saved classic PAT is only required for dispatching workflows, uploads and write operations.</p>
+    <div class="stack-actions"><button class="btn primary" id="testToken">TEST CONNECTION</button><button class="btn danger" id="clearToken">CLEAR SAVED TOKEN</button></div>
+    <div id="authMessage" class="console">Ready.</div>
+  </aside>
+
+  <script src="classic-token.js"></script>
+  <script type="module" src="jarvis/iphone-sync-boot.js"></script>
+  <script type="module" src="jarvis/app.js"></script>
+</body>
+</html>
