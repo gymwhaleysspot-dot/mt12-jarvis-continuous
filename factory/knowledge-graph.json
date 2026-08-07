@@ -8,13 +8,13 @@
     "mission": 2,
     "mutation": 10,
     "next_experiment": 1,
-    "rejection": 116,
+    "rejection": 119,
     "test": 7,
     "track": 2
   },
   "currentExperiment": "EXP-20260807092910",
-  "generatedAt": "2026-08-07T10:38:43.140228+00:00",
-  "nodeCount": 146,
+  "generatedAt": "2026-08-07T11:06:03.654163+00:00",
+  "nodeCount": 149,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -71,7 +71,7 @@
       "kind": "controller",
       "label": "j00002",
       "luacSha": "caa07d88ad896bcffd65aac6020be2b410a16332367a933db8fc876f5d25283a",
-      "recommended": false,
+      "recommended": true,
       "role": "champion",
       "sourceSha": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0"
     },
@@ -1000,9 +1000,30 @@
       "id": "test:93c3291786836d0b",
       "kind": "test",
       "label": "bench and road evidence before promotion"
+    },
+    {
+      "id": "rejection:3f15883b38909c34",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:921468563a958c6f",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
+    },
+    {
+      "id": "rejection:e37e0b7ce1c47392",
+      "kind": "rejection",
+      "label": "BYTE_IDENTICAL_DUPLICATE",
+      "reason": "BYTE_IDENTICAL_DUPLICATE",
+      "sha": "3948acae9fcd56998880e0a55a6b3aa5c378fd7ae0691133c876a15318e70a6d"
     }
   ],
-  "relationshipCount": 141,
+  "relationshipCount": 144,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -1850,6 +1871,24 @@
       "relation": "REQUIRES_TEST",
       "source": "experiment:2ce46f4879790adb",
       "target": "test:93c3291786836d0b"
+    },
+    {
+      "id": "edge:6c5fb20e6b320ae5",
+      "relation": "DUPLICATES",
+      "source": "rejection:3f15883b38909c34",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:0dc2b2abd1e90063",
+      "relation": "DUPLICATES",
+      "source": "rejection:921468563a958c6f",
+      "target": "controller:a0206f4b0721cac1"
+    },
+    {
+      "id": "edge:89eab310887d6373",
+      "relation": "DUPLICATES",
+      "source": "rejection:e37e0b7ce1c47392",
+      "target": "controller:a0206f4b0721cac1"
     }
   ],
   "schema": "JARVIS-KG-2"
