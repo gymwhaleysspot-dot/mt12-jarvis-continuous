@@ -28,7 +28,7 @@ jobs:
           chmod +x toolchain/compile_mt12.sh
       - name: Validate canonical floor and evolution authority
         run: |
-          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_efficiency_cycle.py tools/jarvis_prebuild_reclaim.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/controller_rewrite_compact.py tools/jarvis_efficiency_cycle.py tools/jarvis_prebuild_reclaim.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
           import json,sys
           from pathlib import Path
@@ -52,7 +52,7 @@ jobs:
           RELEASE_TYPE: R
           SERIES: jrw
         run: python3 tools/jarvis_efficiency_cycle.py
-      - name: Reject duplicate, inefficient and historically published candidates
+      - name: Reject duplicate, inefficient, over-budget synthesis and historically published candidates
         run: |
           python3 - <<'PY'
           import json
@@ -61,8 +61,9 @@ jobs:
           compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
           assert compiled
           rp=result.get('resourcePolicy',{})
-          assert rp.get('rule')=='PREBUILD_RECLAMATION_AND_SIZE_EFFICIENCY_ALWAYS_ON'
+          assert rp.get('rule')=='PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON'
           assert rp.get('prebuildSeedNormalizedBytes',10**9)<=rp.get('parentNormalizedBytes',0)
+          assert 0 < rp.get('synthesisByteBudget',0) <= 420
           src=[c['sourceSha256'] for c in compiled]; bc=[c['luacSha256'] for c in compiled]
           assert len(src)==len(set(src)); assert len(bc)==len(set(bc))
           known_src=set(); known_bc=set()
@@ -99,7 +100,7 @@ jobs:
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract'],'resourceEfficiency':c.get('resourceEfficiency',{}),'promotionEfficiencyEligible':c.get('promotionEfficiencyEligible',False)})
           plan=json.loads(Path('factory/next-experiment.json').read_text()); canonical=json.loads(Path('factory/canonical-controller.json').read_text())['release']
           reclaim=json.loads(Path('factory/memory/prebuild-reclaim.json').read_text())
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-9','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'resourcePolicy':result.get('resourcePolicy',{}),'prebuildReclamation':reclaim,'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-10','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'resourcePolicy':result.get('resourcePolicy',{}),'prebuildReclamation':reclaim,'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
           (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text()); (base/'PREBUILD-RECLAIM.json').write_text(Path('factory/memory/prebuild-reclaim.json').read_text())
           PY
       - name: Advance experimental evolution parent
