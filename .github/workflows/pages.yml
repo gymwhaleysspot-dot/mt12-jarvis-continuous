@@ -10,6 +10,7 @@ on:
       - factory/**
       - research/**
       - public/**
+      - device/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
@@ -31,19 +32,30 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Validate clean Jarvis application
+      - name: Validate current Jarvis workstation
         run: |
           set -euo pipefail
           node --check classic-token.js
-          node --check jarvis/api.js
-          node --check jarvis/state.js
-          node --check jarvis/app.js
-          node --check scripts/prepare-pages.mjs
-          node -e "const c=require('./jarvis/capabilities.json');if(c.workspaces.length<10||c.missions.length<20)throw Error('Capability contract incomplete');if(!c.domains.some(x=>x.includes('EdgeTX'))||!c.domains.some(x=>x.includes('ExpressLRS')))throw Error('Firmware scope missing')"
+          for f in jarvis/*.js scripts/*.mjs device/*.mjs; do [ -f "$f" ] && node --check "$f"; done
+          node - <<'NODE'
+          const c=require('./jarvis/capabilities.json');
+          if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
+          if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
+          if(c.missions.length<15)throw Error('Capability mission contract incomplete');
+          if(!c.workspaces.some(x=>x.id==='firmware'))throw Error('Firmware workspace missing');
+          if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
+          if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
+          NODE
           node scripts/prepare-pages.mjs
-          grep -q 'Jarvis MT12 Engineering Intelligence' index.html
+          grep -q 'Jarvis MT12 Engineering Workstation' index.html
           grep -q 'jarvis/app.js' index.html
           grep -q 'classic-token.js' index.html
+          grep -q 'jarvis/firmware-center.js' index.html
+          grep -q 'public/device-data/releases.json' jarvis/state.js
+          grep -q 'EdgeTX' jarvis/firmware-center.js
+          grep -q 'ExpressLRS' jarvis/firmware-center.js
+          grep -q 'firmware-catalog' jarvis/firmware-center.js
+          grep -q 'firmware-build-flash' jarvis/firmware-center.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
