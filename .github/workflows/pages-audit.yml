@@ -78,10 +78,13 @@ jobs:
           check('jarvis/mjx7303-playcanvas-v20.js','playcanvas@2.21.3');
           check('jarvis/mjx7303-playcanvas-v20.js','assets/mjx7303/mjx7303.glb');
           check('jarvis/mjx7303-playcanvas-v20.js','__V20_READY');
-          if(!fs.existsSync('assets/mjx7303/mjx7303.glb'))throw Error('Missing MJX7303 GLB');
-          if(fs.statSync('assets/mjx7303/mjx7303.glb').size<100000)throw Error('MJX7303 GLB unexpectedly small');
+          const b=fs.readFileSync('assets/mjx7303/mjx7303.glb');
+          if(b.length<20000)throw Error('MJX7303 GLB unexpectedly small: '+b.length);
+          if(b.subarray(0,4).toString('ascii')!=='glTF')throw Error('MJX7303 GLB magic header invalid');
+          if(b.readUInt32LE(4)!==2)throw Error('MJX7303 GLB is not glTF 2.0');
+          if(b.readUInt32LE(8)!==b.length)throw Error('MJX7303 GLB length header mismatch');
           for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html'])check(f,'Opening Jarvis','compatibility marker');
-          console.log({racing:'V20',renderer:'PlayCanvas 2.21.3',glbBytes:fs.statSync('assets/mjx7303/mjx7303.glb').size,fallback:'V19'});
+          console.log({racing:'V20',renderer:'PlayCanvas 2.21.3',glbBytes:b.length,glb:'VALID_GLB2',fallback:'V19'});
           NODE
 
       - name: Validate UI contract
