@@ -7,6 +7,7 @@ on:
       - racing.html
       - racing-v2.html
       - racing-mjx7303-v6.html
+      - racing-mjx7303-v15.html
       - jarvis/**
       - classic-token.js
       - scripts/prepare-pages.mjs
@@ -50,7 +51,7 @@ jobs:
           if(c.missions.length<15)throw Error('Capability mission contract incomplete');
           if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
           if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
-          for(const p of ['racing-mjx7303-v6.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v11.js','jarvis/mjx7303-ai-model-v11.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('AI3D simulator asset missing: '+p);
+          for(const p of ['racing-mjx7303-v15.html','jarvis/mjx7303-physics-v4.js','jarvis/ai3d-engine-v15.js','jarvis/mjx7303-asset-v13.js','jarvis/mjx7303-game-v11.js'])if(!fs.existsSync(p))throw Error('Racing V15 asset missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Workstation' index.html
@@ -62,16 +63,17 @@ jobs:
           grep -q 'ExpressLRS' jarvis/firmware-center.js
           grep -q 'firmware-catalog' jarvis/firmware-center.js
           grep -q 'firmware-build-flash' jarvis/firmware-center.js
-          grep -q 'MJX 7303 MT12 Simulator V11 AI3D' racing-mjx7303-v6.html
-          grep -q 'body\[data-mode="garage"\] .controls{display:none}' racing-mjx7303-v6.html
-          grep -q 'mjx7303-physics-v4.js' racing-mjx7303-v6.html
-          grep -q 'mjx7303-game-v11.js' racing-mjx7303-v6.html
-          grep -q 'racing-mjx7303-v6.html' jarvis/racing-tab.js
-          grep -q 'WebGL2 required' jarvis/ai3d-engine-v11.js
-          grep -q 'AIQualityGovernor' jarvis/ai3d-engine-v11.js
-          grep -q 'MJX7303_AI_V11' jarvis/mjx7303-ai-model-v11.js
-          grep -q 'AI3DEngine' jarvis/mjx7303-game-v11.js
-          ! grep -q 'three.module.js' racing-mjx7303-v6.html
+          grep -q 'MJX 7303 MT12 AI3D V15' racing-mjx7303-v15.html
+          grep -q 'body\[data-mode="garage"\] .controls' racing-mjx7303-v15.html
+          grep -q 'mjx7303-physics-v4.js' racing-mjx7303-v15.html
+          grep -q 'mjx7303-game-v11.js' racing-mjx7303-v15.html
+          grep -q 'racing-mjx7303-v15.html' jarvis/racing-tab.js
+          grep -q "AI3D_VERSION='15.0.0'" jarvis/ai3d-engine-v15.js
+          grep -q 'WebGL2 required' jarvis/ai3d-engine-v15.js
+          grep -q 'AIQualityGovernor' jarvis/ai3d-engine-v15.js
+          grep -q 'MJX7303_ASSET_V13' jarvis/mjx7303-asset-v13.js
+          grep -q 'ai3d-engine-v15.js' jarvis/mjx7303-game-v11.js
+          ! grep -q 'three.module.js' racing-mjx7303-v15.html
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
