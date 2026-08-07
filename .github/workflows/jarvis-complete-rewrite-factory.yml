@@ -86,7 +86,7 @@ jobs:
             if c.get('status')!='COMPILED': continue
             cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-4','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'IDEMPOTENT_VERIFIED'}
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-5','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
           (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
           PY
       - name: Apply evolution and champion authorities
@@ -106,10 +106,14 @@ jobs:
           for n in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
+            # reset --hard does not remove untracked files. Remove any runner-local
+            # copy before deciding whether this immutable generation exists remotely.
+            rm -rf -- "public/builds/${mission}"
 
-            if [ -e "public/builds/${mission}" ]; then
+            if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
+              git checkout origin/main -- "public/builds/${mission}"
               if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then
-                echo "Rewrite generation ${mission} is already persisted identically on main."
+                echo "Rewrite generation ${mission} is tracked identically on origin/main."
                 exit 0
               fi
               echo "ERROR: immutable mission collision for ${mission}; remote contents differ"
@@ -123,7 +127,10 @@ jobs:
             if git push origin HEAD:main; then
               git fetch origin main
               git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"
-              echo "Verified rewrite generation ${mission} persisted on main."
+              git reset --hard origin/main
+              git checkout origin/main -- "public/builds/${mission}"
+              diff -qr "$stage/${mission}" "public/builds/${mission}"
+              echo "Verified rewrite generation ${mission} is tracked and byte-identical on origin/main."
               exit 0
             fi
 
