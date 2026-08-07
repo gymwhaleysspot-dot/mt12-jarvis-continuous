@@ -6,6 +6,7 @@ on:
       - index.html
       - racing.html
       - racing-v2.html
+      - racing-mjx7303.html
       - jarvis/**
       - classic-token.js
       - scripts/prepare-pages.mjs
@@ -49,8 +50,8 @@ jobs:
           if(c.missions.length<15)throw Error('Capability mission contract incomplete');
           if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
           if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
-          if(!fs.existsSync('racing-v2.html'))throw Error('Racing v2 page missing');
-          if(!fs.existsSync('jarvis/racing-physics-v2.js'))throw Error('Racing physics v2 missing');
+          if(!fs.existsSync('racing-mjx7303.html'))throw Error('MJX 7303 simulator page missing');
+          if(!fs.existsSync('jarvis/mjx7303-sim.js'))throw Error('MJX 7303 simulator core missing');
           NODE
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Workstation' index.html
@@ -62,9 +63,11 @@ jobs:
           grep -q 'ExpressLRS' jarvis/firmware-center.js
           grep -q 'firmware-catalog' jarvis/firmware-center.js
           grep -q 'firmware-build-flash' jarvis/firmware-center.js
-          grep -q 'JARVIS RACING V2' racing-v2.html
-          grep -q 'racing-physics-v2.js' racing-v2.html
-          grep -q 'racing-v2.html' jarvis/racing-tab.js
+          grep -q 'MJX HYPER GO 7303' racing-mjx7303.html
+          grep -q 'jarvis/mjx7303-sim.js' racing-mjx7303.html
+          grep -q 'racing-mjx7303.html' jarvis/racing-tab.js
+          grep -q 'CH15 TCT' racing-mjx7303.html
+          grep -q 'CH16 GYR' racing-mjx7303.html
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
