@@ -42,7 +42,16 @@ def advance(mission:str,run_number:int|None=None)->dict:
  base=ROOT/'public/builds'/mission
  tournament=json.loads((base/'TOURNAMENT.json').read_text())
  winner=tournament.get('winner')
- if winner!='jrw6':raise RuntimeError(f'evolution advance requires synthesis winner; got {winner}')
+ if winner!='jrw6':
+  current=json.loads(POINTER.read_text())
+  hold={
+   'schema':'JARVIS-EVOLUTION-HOLD-1','advanced':False,'reason':'individual-winner-needs-synthesis',
+   'winner':winner,'mission':mission,'generationRun':int(run_number or 0) or None,
+   'evolutionParent':current.get('release'),'canonicalFloor':canonical_name(),
+   'policy':'VALID_GENERATION; KEEP_SYNTHESIS_PARENT; FEED_WINNER_INTO_NEXT_SYNTHESIS'
+  }
+  (base/'EVOLUTION-HOLD.json').write_text(json.dumps(hold,indent=2)+'\n')
+  return hold
  manifest=json.loads((base/winner/'MANIFEST.json').read_text())
  candidate=next((c for c in tournament.get('candidates',[]) if c.get('candidate')==winner),{})
  contract=manifest.get('rewriteContract') or candidate.get('rewriteContract') or {}
