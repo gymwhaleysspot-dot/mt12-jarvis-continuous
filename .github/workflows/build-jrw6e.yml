@@ -1,93 +1,54 @@
-name: Build JR514F RxBt Dashboard
+name: Build JRW6E MT12
 
 on:
   push:
     branches: [main]
     paths:
+      - tools/build_jrw6e_from_jrw6d.py
       - .github/workflows/build-jrw6e.yml
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
       - name: Install Lua 5.3
         run: |
           sudo apt-get update
           sudo apt-get install -y lua5.3 unzip zip
-      - name: Recover exact JR514E artifact
+      - name: Recover exact JRW4 parent artifact
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          mkdir -p /tmp/jr514e
-          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8985209802/zip" > /tmp/jr514e.zip
-          unzip -q /tmp/jr514e.zip -d /tmp/jr514e
-          find /tmp/jr514e -type f -maxdepth 3 -print
-          cp "$(find /tmp/jr514e -name jr514e.lua -print -quit)" /tmp/jr514e.lua
-      - name: Apply RxBt battery contract only
+          mkdir -p /tmp/jrw4
+          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8982339671/zip" > /tmp/jrw4.zip
+          unzip -q /tmp/jrw4.zip -d /tmp/jrw4
+          cp /tmp/jrw4/dist-controller-tournament/jrw4/jrw4.lua /tmp/jrw4_parent.lua
+      - name: Build JRW6E source
         run: |
           mkdir -p out
-          cp /tmp/jr514e.lua out/jr514f.lua
+          python3 tools/build_jrw6e_from_jrw6d.py /tmp/jrw4_parent.lua out/jrw6e.lua
           python3 - <<'PY'
-          from pathlib import Path
-          p=Path('out/jr514f.lua');s=p.read_text()
-          s=s.replace('"J514E"','"J514F"',1)
-          s=s.replace('local bv=val(V[790],0);local src=', 'local bv=cache[2]or 0;local src=',1)
-          s=s.replace('V[790]=fid("VFAS")or fid("EscV")or fid("A4")or 0;', 'V[790]=0;',1)
-          s=s.replace('local bv=val(V[790],0);if mph>V[792]', 'local bv=rx;if mph>V[792]',1)
-          # Engineer footer already shows cache[2] as RXV; keep it as explicit confirmation of the same RxBt feed.
-          assert 'fid("VFAS")' not in s and 'fid("EscV")' not in s and 'fid("A4")' not in s
-          assert 'local bv=cache[2]or 0' in s
-          assert 'local bv=rx;if mph>V[792]' in s
-          assert s.index('local function bb_line(') < s.index('local function bootStep()')
-          assert 'bb_line(143' in s and s.index('bb_line(143') > s.index('local function bb_line(')
-          p.write_text(s)
+          s=open('out/jrw6e.lua').read()
+          assert s.index('local function bb_line(g,dv,ev,gg,sc)') < s.index('local function update(gps,e,st,sats,thrAbs,th,btl,rq)')
           PY
-          lua5.3 -e "assert(loadfile('out/jr514f.lua'))"
-      - name: Compile and normalize MT12
+      - name: Compile and normalize for MT12
         run: |
           chmod +x toolchain/compile_mt12.sh
-          MAX_BYTES=87000 toolchain/compile_mt12.sh out/jr514f.lua out/jr514f.luac | tee out/COMPILE.txt
-          test "$(wc -c < out/jr514f.luac)" -le 87000
-          test "$(od -An -tx1 -j12 -N5 out/jr514f.luac | tr -d ' \n')" = '0404040404'
-          sha256sum out/jr514f.lua out/jr514f.luac > out/SHA256SUMS.txt
-          (cd out && zip -9 JR514F_MT12.zip jr514f.lua jr514f.luac COMPILE.txt SHA256SUMS.txt)
-      - name: Publish immutable release and canonical parent
-        run: |
-          set -Eeuo pipefail
-          python3 - <<'PY'
-          import hashlib,json,shutil
-          from pathlib import Path
-          src=Path('out/jr514f.lua'); dep=Path('out/jr514f.luac')
-          base=Path('public/builds/releases/jr514f');base.mkdir(parents=True,exist_ok=True)
-          shutil.copy2(src,base/'jr514f.lua');shutil.copy2(dep,base/'jr514f.luac')
-          h=lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
-          man={'schema':'JARVIS-CONTROLLER-RELEASE-2','release':'jr514f','parent':'jrw4-514','source':'jr514f.lua','deploy':'jr514f.luac','sourceSha256':h(src),'luacSha256':h(dep),'normalizedBytes':dep.stat().st_size,'authority':'ENGINEERING_PARENT_BENCH_AND_ROAD_REQUIRED','behaviorChanged':False,'dashboardContract':{'battery':'RxBt','packProbe':False,'minMaxSag':'RxBt','pages':3},'notes':'JRW4-514/JR514E control lineage unchanged; dashboard battery source corrected to RxBt by design.'}
-          (base/'MANIFEST.json').write_text(json.dumps(man,indent=2)+'\n')
-          auth={'schema':'JARVIS-CANONICAL-CONTROLLER-2','release':'jr514f','sourceSha256':h(src),'luacSha256':h(dep),'architecture':'JRW4-514 defended controller plus three-page rally dashboard with RxBt-defined battery telemetry','lineageFloor':['zBrain/evo/superBrain causal controller lineage','V[704] persisted confidence authority','X[46] intervention/authority state','setgv(3,m_min(V[35],ac)) authority ceiling','92-to-96 progressive early authority ceiling','pcall protected getFieldInfo/getValue/GVar get/set','dual /LOGS/m0 + /LOGS/m1 checksum persistence with legacy migration','memOpt active GC pressure management','watch runtime GVar watchdog','fixed V[179]*.0045 causal weighting','JRW runtime identity/observability groups 144-151','three-page rally dashboard','BAT/min/max/sag use RxBt directly; no VFAS/EscV/A4 probe'], 'promotion':'NEVER_AUTOMATIC; bench and returned road logs required','immutable':True}
-          Path('factory/canonical-controller.json').write_text(json.dumps(auth,indent=2)+'\n')
-          PY
-          git config user.name "Jarvis Controller Publisher"
-          git config user.email "actions@users.noreply.github.com"
-          git add public/builds/releases/jr514f factory/canonical-controller.json
-          git commit -m "Promote JR514F RxBt dashboard engineering parent"
-          for i in 1 2 3 4 5; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            git rebase --abort || true
-            sleep $((i*2))
-          done
-          exit 1
+          toolchain/compile_mt12.sh out/jrw6e.lua out/jrw6e.luac | tee out/COMPILE.txt
+          size=$(wc -c < out/jrw6e.luac)
+          test "$size" -le 87000
+          test "$(od -An -tx1 -j12 -N5 out/jrw6e.luac | tr -d ' \n')" = '0404040404'
+          sha256sum out/jrw6e.lua out/jrw6e.luac > out/SHA256SUMS.txt
       - uses: actions/upload-artifact@v6
         with:
-          name: jr514f-mt12
+          name: jrw6e-mt12
           path: out/
           retention-days: 30
