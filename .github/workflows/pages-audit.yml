@@ -12,6 +12,7 @@ on:
       - public/builds/**
       - public/jarvis-data/**
       - public/evidence-data/**
+      - factory/**
       - .github/workflows/**
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - classic-token.js
       - tools/**
       - scripts/**
+      - factory/**
       - .github/workflows/**
   workflow_dispatch:
 
@@ -42,7 +44,7 @@ jobs:
           node-version: '22'
           package-manager-cache: false
 
-      - name: Validate rewritten HTML JavaScript Python JSON and compatibility routes
+      - name: Validate workstation HTML JavaScript Python JSON and compatibility routes
         run: |
           set -euo pipefail
           node --check classic-token.js
@@ -51,13 +53,17 @@ jobs:
           python3 tools/audit_workflow_wiring.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
-          grep -q 'Jarvis MT12 Engineering OS' index.html
+          grep -q 'Jarvis MT12 Engineering Workstation' index.html
           grep -q 'workspaceBody' index.html
           grep -q 'iphone-sync-boot.js' index.html
+          grep -q 'schedulePill' index.html
+          grep -q 'jarvis/countdown.js' index.html
+          grep -q 'jarvis/winner-downloads.js' index.html
           grep -q 'latestGeneration' jarvis/app.js
-          grep -q 'JRW6D DEFENDED FLOOR' jarvis/app.js
-          grep -q 'IMMUTABLE GENERATIONS' jarvis/app.js
           grep -q 'DOWNLOAD LUAC' jarvis/app.js
+          grep -q 'sourceLua' jarvis/winner-downloads.js
+          grep -q "lua.textContent='LUA'" jarvis/winner-downloads.js
+          grep -q 'CADENCE_MINUTES=15' jarvis/countdown.js
           grep -q 'rewrite-<run-id>-<attempt>' jarvis/capabilities.json
           grep -q 'workflowRuns' jarvis/api.js
           grep -q 'discoverGenerations' jarvis/state.js
@@ -73,7 +79,7 @@ jobs:
           if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
           if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
           if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
-          if(c.controllerLineage.canonicalParent!=='jrw6d')throw Error('Canonical parent is not JRW6D');
+          if(c.controllerLineage.canonicalParent!=='jrw6d')throw Error('Canonical defended floor is not JRW6D');
           const ids=new Set,paths=new Set;
           for(const m of c.missions){
             if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
@@ -105,6 +111,24 @@ jobs:
           print({'release':m['release'],'bytes':m['normalizedBytes'],'authority':m['authority']})
           PY
 
+      - name: Validate active experimental evolution parent
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('factory/evolution-controller.json')
+          assert p.exists(),'Missing evolution-controller.json'
+          e=json.loads(p.read_text())
+          assert e['canonicalFloor']=='jr514f',e.get('canonicalFloor')
+          assert e['candidate']=='jrw6',e.get('candidate')
+          assert e['normalizedBytes']<=87000,e['normalizedBytes']
+          src=Path(e['sourcePath']);luac=Path(e['deployPath'])
+          assert src.exists(),src
+          assert luac.exists(),luac
+          assert luac.stat().st_size==e['normalizedBytes'],(luac.stat().st_size,e['normalizedBytes'])
+          print({'release':e['release'],'generationRun':e['generationRun'],'bytes':e['normalizedBytes'],'authority':e['authority']})
+          PY
+
       - name: Validate persisted rewrite generation model
         run: |
           python3 - <<'PY'
@@ -117,8 +141,8 @@ jobs:
           assert roots,'No persisted rewrite generations found'
           _,_,p=max(roots)
           t=json.loads((p/'TOURNAMENT.json').read_text())
-          assert t['parent']=='jrw6d',t['parent']
-          assert t['winner']
+          assert t.get('parent'),t
+          assert t.get('winner'),t
           compiled=[c for c in t['candidates'] if c.get('status')=='COMPILED']
           assert compiled
           assert len({c['sourceSha256'] for c in compiled})==len(compiled)
@@ -129,19 +153,21 @@ jobs:
               assert (base/f'{cid}.luac').exists()
               assert (base/'MANIFEST.json').exists()
               assert c['normalizedBytes']<=87000
-          print({'generation':p.name,'winner':t['winner'],'compiled':len(compiled)})
+          print({'generation':p.name,'parent':t['parent'],'winner':t['winner'],'compiled':len(compiled)})
           PY
 
       - name: Validate public-read request budget and UI generation identity
         run: |
           node - <<'NODE'
-          const fs=require('fs');const s=fs.readFileSync('jarvis/state.js','utf8');const a=fs.readFileSync('jarvis/app.js','utf8');
+          const fs=require('fs');const s=fs.readFileSync('jarvis/state.js','utf8');const a=fs.readFileSync('jarvis/app.js','utf8');const w=fs.readFileSync('jarvis/winner-downloads.js','utf8');const c=fs.readFileSync('jarvis/countdown.js','utf8');
           const fixed=(s.match(/'[^']+\.json'/g)||[]).length;
           if(!s.includes('.slice(0,6)'))throw Error('Generation history is not API-budget bounded');
           if(!a.includes('${w.candidate?.toUpperCase()}-${g.runNumber}'))throw Error('Winner identity is not run-qualified');
           if(!a.includes('runtimeIdentity?.token'))throw Error('Runtime identity missing from UI');
           if(!a.includes('TOURNAMENT'))throw Error('Tournament download missing');
-          console.log({fixedJsonReferences:fixed,generationHistory:6,publicBudget:'bounded'});
+          if(!w.includes("lua.textContent='LUA'"))throw Error('Winner LUA source download missing');
+          if(!c.includes('CADENCE_MINUTES=15'))throw Error('15-minute countdown contract missing');
+          console.log({fixedJsonReferences:fixed,generationHistory:6,publicBudget:'bounded',winnerDownloads:'lua+luac',countdownMinutes:15});
           NODE
 
       - name: Validate repository JSON syntax
