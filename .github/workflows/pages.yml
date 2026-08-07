@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - racing.html
       - jarvis/**
       - classic-token.js
       - scripts/prepare-pages.mjs
@@ -40,11 +41,14 @@ jobs:
           node - <<'NODE'
           const c=require('./jarvis/capabilities.json');
           if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
-          if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
+          const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
+          const ids=new Set(c.workspaces.map(x=>x.id));
+          for(const id of required)if(!ids.has(id))throw Error('Required Jarvis workspace missing: '+id);
+          if(c.workspaces.length<required.length)throw Error('Jarvis workspace contract incomplete');
           if(c.missions.length<15)throw Error('Capability mission contract incomplete');
-          if(!c.workspaces.some(x=>x.id==='firmware'))throw Error('Firmware workspace missing');
           if(!c.missions.some(x=>x.id==='firmware-catalog'))throw Error('Firmware catalog mission missing');
           if(!c.missions.some(x=>x.id==='firmware-build-flash'))throw Error('Firmware build/flash mission missing');
+          if(!require('fs').existsSync('racing.html'))throw Error('Racing page missing');
           NODE
           node scripts/prepare-pages.mjs
           grep -q 'Jarvis MT12 Engineering Workstation' index.html
@@ -56,6 +60,8 @@ jobs:
           grep -q 'ExpressLRS' jarvis/firmware-center.js
           grep -q 'firmware-catalog' jarvis/firmware-center.js
           grep -q 'firmware-build-flash' jarvis/firmware-center.js
+          grep -q 'JARVIS RACING' racing.html
+          grep -q 'racing-physics-v2.js' racing.html
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do test -f "$f"; grep -q 'Opening Jarvis' "$f"; done
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
