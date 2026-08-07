@@ -28,7 +28,7 @@ jobs:
           chmod +x toolchain/compile_mt12.sh
       - name: Validate rewrite authority
         run: |
-          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_canonical_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
           import json,sys
           from pathlib import Path
@@ -39,8 +39,10 @@ jobs:
           assert name==authority['release']
           print({'canonicalParent':name,'source':str(path)})
           PY
-      - name: Refresh highest-information experiment
-        run: python3 tools/jarvis_intelligence_planner.py
+      - name: Refresh verified research evidence and experiment portfolio
+        run: |
+          python3 tools/jarvis_external_research_bridge.py
+          python3 tools/jarvis_intelligence_planner.py
       - name: Generate complete source rewrites and novel LUACs
         env:
           RELEASE_TYPE: R
@@ -88,8 +90,9 @@ jobs:
             if c.get('status')!='COMPILED': continue
             cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-5','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
-          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
+          plan=json.loads(Path('factory/next-experiment.json').read_text())
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-6','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text())
           PY
       - name: Apply evolution and champion authorities
         run: |
@@ -104,41 +107,29 @@ jobs:
           cp -a "public/builds/${mission}" "$stage/${mission}"
           git config user.name 'Jarvis Complete Rewrite Factory'
           git config user.email 'actions@users.noreply.github.com'
-
           for n in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             rm -rf -- "public/builds/${mission}"
-
             if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
               git checkout origin/main -- "public/builds/${mission}"
-              if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then
-                echo "Rewrite generation ${mission} is tracked identically on origin/main."
-                exit 0
-              fi
-              echo "ERROR: immutable mission collision for ${mission}; remote contents differ"
-              exit 1
+              if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then echo "Rewrite generation ${mission} is tracked identically on origin/main."; exit 0; fi
+              echo "ERROR: immutable mission collision for ${mission}; remote contents differ"; exit 1
             fi
-
             cp -a "$stage/${mission}" "public/builds/${mission}"
             git add -- "public/builds/${mission}"
-            git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
-
+            git commit -m "Publish research-aware MT12 LUAC generation ${mission} [skip ci]"
             if git push origin HEAD:main; then
               git fetch origin main
               git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"
               git reset --hard origin/main
               git checkout origin/main -- "public/builds/${mission}"
               diff -qr "$stage/${mission}" "public/builds/${mission}"
-              echo "Verified rewrite generation ${mission} is tracked and byte-identical on origin/main."
-              exit 0
+              echo "Verified rewrite generation ${mission} is tracked and byte-identical on origin/main."; exit 0
             fi
-
-            echo "Publish race on attempt ${n}; retrying from current main."
-            sleep $((n*5))
+            echo "Publish race on attempt ${n}; retrying from current main."; sleep $((n*5))
           done
-          echo "ERROR: unable to persist ${mission} after 5 attempts"
-          exit 1
+          echo "ERROR: unable to persist ${mission} after 5 attempts"; exit 1
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -146,5 +137,7 @@ jobs:
           path: |
             dist-controller-tournament/
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
+            factory/next-experiment.json
+            factory/memory/external-research.json
           if-no-files-found: ignore
           retention-days: 30
