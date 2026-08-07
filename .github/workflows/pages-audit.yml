@@ -7,6 +7,7 @@ on:
       - index.html
       - racing.html
       - racing-v2.html
+      - racing-v3.html
       - jarvis/**
       - classic-token.js
       - tools/**
@@ -21,6 +22,7 @@ on:
       - index.html
       - racing.html
       - racing-v2.html
+      - racing-v3.html
       - jarvis/**
       - classic-token.js
       - tools/**
@@ -74,9 +76,12 @@ jobs:
           grep -q "factory/canonical-controller.json" jarvis/state.js
           grep -q 'public/builds/releases/${name}/' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
-          grep -q 'JARVIS RACING V2' racing-v2.html
-          grep -q 'racing-physics-v2.js' racing-v2.html
-          grep -q 'racing-v2.html' jarvis/racing-tab.js
+          grep -q 'JARVIS RACING V3' racing-v3.html
+          grep -q 'racing-beamng-core.js' racing-v3.html
+          grep -q 'racing-v3.html' jarvis/racing-tab.js
+          grep -q 'makeVehicle' jarvis/racing-beamng-core.js
+          grep -q 'tireModel' jarvis/racing-beamng-core.js
+          grep -q 'drivetrain' jarvis/racing-beamng-core.js
           for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
 
       - name: Validate UI contract and workflow topology
@@ -101,9 +106,11 @@ jobs:
           }
           for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
           if(!state.includes("api.workflowRuns('jarvis-complete-rewrite-factory.yml'"))throw Error('Missing dynamic rewrite-run loader');
-          if(!fs.existsSync('racing-v2.html'))throw Error('Racing v2 page missing');
-          if(!fs.existsSync('jarvis/racing-physics-v2.js'))throw Error('Racing physics core missing');
-          console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority});
+          if(!fs.existsSync('racing-v3.html'))throw Error('Racing v3 page missing');
+          if(!fs.existsSync('jarvis/racing-beamng-core.js'))throw Error('Racing node-beam core missing');
+          const core=fs.readFileSync('jarvis/racing-beamng-core.js','utf8');
+          for(const token of ['wheelFL','suspension','controlArm','tireModel','drivetrain','wheelLoads','damageSubsystems'])if(!core.includes(token))throw Error('Racing V3 core missing '+token);
+          console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length,canonicalAuthority:c.controllerLineage.canonicalAuthority,racing:'node-beam-v3'});
           NODE
 
       - name: Validate canonical defended release from authority
