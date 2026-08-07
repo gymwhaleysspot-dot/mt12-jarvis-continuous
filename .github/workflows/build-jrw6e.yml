@@ -1,9 +1,10 @@
-name: Build JR514E Rally Dashboard Fix
+name: Build JRW6E MT12
 
 on:
   push:
     branches: [main]
     paths:
+      - tools/build_jrw6e_from_jrw6d.py
       - .github/workflows/build-jrw6e.yml
   workflow_dispatch:
 
@@ -21,47 +22,33 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lua5.3 unzip zip
-      - name: Recover JR514D source artifact
+      - name: Recover exact JRW4 parent artifact
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          mkdir -p /tmp/jr514d out
-          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8984908326/zip" > /tmp/jr514d.zip
-          unzip -q /tmp/jr514d.zip -d /tmp/jr514d
-          SRC=$(find /tmp/jr514d -name jr514d.lua -type f | head -1)
-          test -n "$SRC"
-          cp "$SRC" out/jr514e.lua
-      - name: Apply battery telemetry correction only
+          mkdir -p /tmp/jrw4
+          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8982339671/zip" > /tmp/jrw4.zip
+          unzip -q /tmp/jrw4.zip -d /tmp/jrw4
+          cp /tmp/jrw4/dist-controller-tournament/jrw4/jrw4.lua /tmp/jrw4_parent.lua
+      - name: Build JRW6E source
         run: |
+          mkdir -p out
+          python3 tools/build_jrw6e_from_jrw6d.py /tmp/jrw4_parent.lua out/jrw6e.lua
           python3 - <<'PY'
-          from pathlib import Path
-          p=Path('out/jr514e.lua'); s=p.read_text()
-          s=s.replace('local bv=val(V[790],0);if bv<=0 then bv=cache[2]or 0 end','local bv=val(V[790],0)',1)
-          s=s.replace('local bv=val(V[790],0);if bv<=0 then bv=rx end;','local bv=val(V[790],0);',1)
-          s=s.replace('T(2,1,"J514D",Z+INVERS)','T(2,1,"J514E",Z+INVERS)',1)
-          s=s.replace('T(2,36,"BAT",Z);D(22,36,n(bv*10+.5),Z);T(49,36,"V",Z);','T(2,36,"BAT",Z);if bv>0 then D(22,36,n(bv*10+.5),Z);T(49,36,"V",Z)else T(22,36,"--",Z)end;',1)
-          s=s.replace('bar(2,45,55,3,clamp((bv>9 and bv/16.8 or bv/8.4),0,1));','bar(2,45,55,3,bv>0 and clamp((bv>9 and bv/16.8 or bv/8.4),0,1)or 0);',1)
-          s=s.replace('lcd.drawFilledRectangle(0,57,128,7);T(2,57,(V[650]==2 and"BURST")or(V[650]==1 and"WATCH")or"CALM",Z+INVERS);T(55,57,"RQ",Z+INVERS);D(73,57,cache[3]or 0,Z+INVERS);T(97,57,"SAT",Z+INVERS);D(117,57,cache[4]or 0,Z+INVERS)','lcd.drawFilledRectangle(0,57,128,7);T(2,57,"RXV",Z+INVERS);D(23,57,n((cache[2]or 0)*10+.5),Z+INVERS);T(52,57,"RQ",Z+INVERS);D(68,57,cache[3]or 0,Z+INVERS);T(91,57,"SAT",Z+INVERS);D(113,57,cache[4]or 0,Z+INVERS)',1)
-          s=s.replace('T(2,29,"MIN BAT",Z);D(55,29,n(V[794]*10+.5),Z);T(83,29,"V",Z);T(95,29,"SAG",Z);D(116,29,n((V[795]-bv)*10+.5),Z)','T(2,29,"MIN BAT",Z);if V[794]>0 then D(55,29,n(V[794]*10+.5),Z);T(83,29,"V",Z)else T(55,29,"--",Z)end;T(95,29,"SAG",Z);if bv>0 and V[795]>0 then D(116,29,n((V[795]-bv)*10+.5),Z)else T(116,29,"-",Z)end',1)
-          s=s.replace('lcd.drawFilledRectangle(0,57,128,7);T(2,57,"SESSION",Z+INVERS);T(51,57,"BAT",Z+INVERS);D(73,57,n(bv*10+.5),Z+INVERS);T(102,57,"V",Z+INVERS)','lcd.drawFilledRectangle(0,57,128,7);T(2,57,"SESSION",Z+INVERS);T(51,57,"BAT",Z+INVERS);if bv>0 then D(73,57,n(bv*10+.5),Z+INVERS);T(102,57,"V",Z+INVERS)else T(73,57,"--",Z+INVERS)end',1)
-          assert 'if bv<=0' not in s
-          assert 'J514E' in s
-          assert s.index('local function bb_line(') < s.index('local function bootStep()')
-          assert s.index('bb_line(143') > s.index('local function bb_line(')
-          p.write_text(s)
+          s=open('out/jrw6e.lua').read()
+          assert s.index('local function bb_line(g,dv,ev,gg,sc)') < s.index('local function update(gps,e,st,sats,thrAbs,th,btl,rq)')
           PY
-          lua5.3 -e "assert(loadfile('out/jr514e.lua'))"
-      - name: Compile and normalize MT12
+      - name: Compile and normalize for MT12
         run: |
           chmod +x toolchain/compile_mt12.sh
-          MAX_BYTES=87000 toolchain/compile_mt12.sh out/jr514e.lua out/jr514e.luac | tee out/COMPILE.txt
-          test "$(wc -c < out/jr514e.luac)" -le 87000
-          test "$(od -An -tx1 -j12 -N5 out/jr514e.luac | tr -d ' \n')" = '0404040404'
-          sha256sum out/jr514e.lua out/jr514e.luac > out/SHA256SUMS.txt
-          (cd out && zip -9 JR514E_MT12.zip jr514e.lua jr514e.luac COMPILE.txt SHA256SUMS.txt)
+          toolchain/compile_mt12.sh out/jrw6e.lua out/jrw6e.luac | tee out/COMPILE.txt
+          size=$(wc -c < out/jrw6e.luac)
+          test "$size" -le 87000
+          test "$(od -An -tx1 -j12 -N5 out/jrw6e.luac | tr -d ' \n')" = '0404040404'
+          sha256sum out/jrw6e.lua out/jrw6e.luac > out/SHA256SUMS.txt
       - uses: actions/upload-artifact@v6
         with:
-          name: jr514e-mt12
+          name: jrw6e-mt12
           path: out/
           retention-days: 30
