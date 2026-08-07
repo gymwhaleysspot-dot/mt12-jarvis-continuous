@@ -3,18 +3,18 @@
   "counts": {
     "controller": 3,
     "digital_twin": 1,
-    "experiment": 1,
+    "experiment": 2,
     "log": 3,
     "mission": 2,
-    "mutation": 2,
+    "mutation": 4,
     "next_experiment": 1,
     "rejection": 68,
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260807033832",
-  "generatedAt": "2026-08-07T05:23:05.959578+00:00",
-  "nodeCount": 90,
+  "currentExperiment": "EXP-20260807052350",
+  "generatedAt": "2026-08-07T05:24:07.883566+00:00",
+  "nodeCount": 93,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -626,9 +626,29 @@
       "id": "test:006110a1594843d9",
       "kind": "test",
       "label": "runtime memory check"
+    },
+    {
+      "expectedInformationGain": 0.7948,
+      "hypothesis": "A controller derived from j00002 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
+      "id": "experiment:2f53e77ec4fbfdbd",
+      "kind": "experiment",
+      "label": "Improve traction control",
+      "measurement": "reduce excess slip and intervention harshness",
+      "status": "PLANNED",
+      "uncertainty": 0.58
+    },
+    {
+      "id": "mutation:815b1274c28658ed",
+      "kind": "mutation",
+      "label": "contextual slip severity blend"
+    },
+    {
+      "id": "mutation:45f7e0cb0e6c5f80",
+      "kind": "mutation",
+      "label": "surface-conditioned intervention release"
     }
   ],
-  "relationshipCount": 85,
+  "relationshipCount": 95,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -1139,6 +1159,66 @@
       "id": "edge:dd02fe38f718799e",
       "relation": "REQUIRES_TEST",
       "source": "experiment:940796867e2c2ded",
+      "target": "test:006110a1594843d9"
+    },
+    {
+      "id": "edge:ed46f7fcefe60e8a",
+      "relation": "USES_PARENT",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "controller:1d3e9c9125494516"
+    },
+    {
+      "id": "edge:49f241a7720b654c",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "mutation:815b1274c28658ed"
+    },
+    {
+      "id": "edge:d4ce8845cd9a340e",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "mutation:45f7e0cb0e6c5f80"
+    },
+    {
+      "id": "edge:f2156b8b781c96f6",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:d0ceba208d208f3d"
+    },
+    {
+      "id": "edge:073e4ab2461c602c",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:af354b232c193ef9"
+    },
+    {
+      "id": "edge:b169d3323fa03b72",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:9e7a610f94776e69"
+    },
+    {
+      "id": "edge:f90bad54ef1591f8",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:822439754733430f"
+    },
+    {
+      "id": "edge:87f443a502bfb4f2",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:529343bd009a7dd8"
+    },
+    {
+      "id": "edge:bfa840fa661a35c9",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
+      "target": "test:b1b2a0420869a06b"
+    },
+    {
+      "id": "edge:f88c9b2b64c7b925",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:2f53e77ec4fbfdbd",
       "target": "test:006110a1594843d9"
     }
   ],
