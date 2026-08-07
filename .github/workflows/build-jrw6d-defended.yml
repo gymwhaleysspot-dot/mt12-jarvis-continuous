@@ -1,0 +1,105 @@
+name: Build JRW6D Defended Controller
+
+on:
+  push:
+    branches: [build/jrw6d-defended-work]
+    paths:
+      - tools/build_jrw6d_from_artifact.py
+      - .github/workflows/build-jrw6d-defended.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 unzip zip
+      - name: Recover exact JRW4 parent artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p /tmp/jrw4
+          gh api -H 'Accept: application/vnd.github+json' "/repos/$REPO/actions/artifacts/8982339671/zip" > /tmp/jrw4.zip
+          unzip -q /tmp/jrw4.zip -d /tmp/jrw4
+          test -f /tmp/jrw4/dist-controller-tournament/jrw4/jrw4.lua
+          cp /tmp/jrw4/dist-controller-tournament/jrw4/jrw4.lua /tmp/jrw4_parent.lua
+          echo "Parent source bytes: $(wc -c </tmp/jrw4_parent.lua)"
+          sha256sum /tmp/jrw4_parent.lua
+      - name: Build defended JRW6D source
+        run: |
+          mkdir -p out
+          python3 tools/build_jrw6d_from_artifact.py /tmp/jrw4_parent.lua out/jrw6d.lua
+          grep -q 'V\[704\]=nx(50,0,99)' out/jrw6d.lua
+          grep -q 'setgv(3,m_min(V\[35\],ac))' out/jrw6d.lua
+          grep -q 'V\[179\]\*\.0045' out/jrw6d.lua
+          grep -q '92+4\*dc' out/jrw6d.lua
+          grep -q '/LOGS/m0' out/jrw6d.lua
+          grep -q '/LOGS/m1' out/jrw6d.lua
+          grep -q 'local function memOpt()' out/jrw6d.lua
+          grep -q 'local function watch()' out/jrw6d.lua
+          grep -q 'bb_line(144,li1,0)' out/jrw6d.lua
+          grep -q 'bb_line(148,rg1,0)' out/jrw6d.lua
+          ! grep -q 'local function fid(n)local f=getFieldInfo' out/jrw6d.lua
+          ! grep -q 'local v=getValue(id)' out/jrw6d.lua
+          ! grep -q 'local v=model.getGlobalVariable' out/jrw6d.lua
+      - name: Compile and normalize for MT12
+        run: |
+          chmod +x toolchain/compile_mt12.sh
+          toolchain/compile_mt12.sh out/jrw6d.lua out/jrw6d.luac | tee out/COMPILE.txt
+          size=$(wc -c < out/jrw6d.luac)
+          test "$size" -le 87000
+          test "$(od -An -tx1 -j12 -N5 out/jrw6d.luac | tr -d ' \n')" = '0404040404'
+      - name: Produce build audit and hashes
+        run: |
+          srcb=$(wc -c < out/jrw6d.lua)
+          binb=$(wc -c < out/jrw6d.luac)
+          srcsha=$(sha256sum out/jrw6d.lua | awk '{print $1}')
+          binsha=$(sha256sum out/jrw6d.luac | awk '{print $1}')
+          cat > out/JRW6D_BUILD_AUDIT.txt <<EOF
+          JRW6D DEFENDED OBSERVABILITY BUILD
+          ==================================
+          Parent: JRW4 from Actions run 31148352073 artifact 8982339671
+          Source bytes: $srcb
+          Normalized MT12 LUAC bytes: $binb
+          Source SHA-256: $srcsha
+          LUAC SHA-256: $binsha
+
+          RESTORED / PRESERVED
+          - V704 persistence fix preserved.
+          - Protected getFieldInfo/getValue/model GVar get/set wrappers via pcall.
+          - Dual generation /LOGS/m0 + /LOGS/m1 persistence with generation/checksum validation.
+          - Legacy /LOGS/aicmem.csv remains loadable for migration.
+          - memOpt() active memory-pressure GC management restored.
+          - watch() GVar watchdog restored; TCT reset to 1024, authority reset to 100, learning suspended on invalid state.
+          - Fixed V179*.0045 causal coefficient restored.
+          - Conservative X46 92-to-96 progressive authority ceiling restored.
+          - JRW observability logging and runtime identity groups 144-151 preserved.
+          - evo()/superBrain() lineage and controller systems preserved from JRW4 parent.
+
+          VALIDATION
+          - Lua 5.3 parse/compile: PASS.
+          - MT12 normalization header 4/4/4/4/4: PASS.
+          - <= 87,000 byte gate: PASS.
+          - Static protected-API and defense-contract checks: PASS.
+          - Hardware status: NOT YET CAR-ON TESTED.
+
+          DEPLOY
+          Use only jrw6d.luac on the MT12.
+          EOF
+          (cd out && sha256sum jrw6d.lua jrw6d.luac > SHA256SUMS.txt)
+          (cd out && zip -q JRW6D_MT12_BUILD.zip jrw6d.lua jrw6d.luac JRW6D_BUILD_AUDIT.txt SHA256SUMS.txt COMPILE.txt)
+          cat out/JRW6D_BUILD_AUDIT.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jrw6d-defended-mt12
+          path: out/
+          retention-days: 30
