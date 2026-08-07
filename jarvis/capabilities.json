@@ -1,26 +1,54 @@
 {
-  "schema": 5,
-  "identity": {"name":"Jarvis","role":"RadioMaster MT12 engineering, firmware, controller and device intelligence","repository":"gymwhaleysspot-dot/mt12-jarvis-continuous"},
-  "orchestration": {
-    "scheduler":"jarvis-always-on.yml",
-    "controllerProducer":"jarvis-complete-rewrite-factory.yml",
-    "policy":"ONE_SCHEDULER_ONE_PRODUCER",
-    "secondaryBuilders":"MANUAL_ONLY",
-    "historicalDedup":true,
-    "selfRequeue":false
+  "schema": 6,
+  "identity": {
+    "name": "Jarvis",
+    "role": "RadioMaster MT12 closed-loop controller engineering OS",
+    "repository": "gymwhaleysspot-dot/mt12-jarvis-continuous"
   },
-  "domains": ["Jarvis autonomous engineering","EdgeTX firmware discovery, named packaging and flashing","ExpressLRS discovery, named secure builds and flashing","RadioMaster MT12 backup, restore and recovery","Lua and normalized Lua 5.3 bytecode construction","Controller simulation, replay and adversarial evaluation","Vehicle telemetry, blackbox and radio-log intelligence","Controller release, promotion, rollback and certification","Mobile companions and native helper tooling","Repository, workflow, artifact and system-health operations"],
+  "orchestration": {
+    "scheduler": "jarvis-always-on.yml",
+    "controllerProducer": "jarvis-complete-rewrite-factory.yml",
+    "policy": "ONE_SCHEDULER_ONE_PRODUCER",
+    "secondaryBuilders": "MANUAL_ONLY",
+    "historicalDedup": true,
+    "selfRequeue": false,
+    "immutableGenerationPattern": "public/builds/rewrite-<run-id>-<attempt>/"
+  },
+  "controllerLineage": {
+    "canonicalParent": "jrw6d",
+    "canonicalManifest": "public/builds/releases/jrw6d/MANIFEST.json",
+    "defendedFloor": [
+      "protected EdgeTX and GVar API calls",
+      "dual checksummed /LOGS/m0 and /LOGS/m1 persistence",
+      "memOpt memory-pressure management",
+      "watch GVar watchdog",
+      "fixed V[179]*.0045 causal term",
+      "92-to-96 progressive authority ceiling",
+      "V[704] and X[46] causal state",
+      "blackbox runtime identity groups 144-151"
+    ],
+    "candidateIdentity": "<candidate>-<rewrite run number>",
+    "promotion": "NEVER_AUTOMATIC; bench and returned road evidence required"
+  },
+  "generationModel": {
+    "source": "successful Jarvis Complete Rewrite LUAC Factory runs",
+    "tournament": "TOURNAMENT.json",
+    "publication": "BUILD-MANIFEST.json",
+    "candidateFiles": ["<candidate>.lua", "<candidate>.luac", "MANIFEST.json", "IDENTITY.json"],
+    "displayHistory": 6,
+    "publicReadBudgeted": true
+  },
   "workspaces": [
-    {"id":"command","label":"Command","description":"Assign objectives and follow Jarvis mission execution."},
-    {"id":"vehicle","label":"Vehicle AI","description":"LUAC brains, controller genomes, simulation, replay, learning and tuning."},
-    {"id":"evidence","label":"Evidence","description":"Upload, identify, pair, replay, label and learn from radio and blackbox logs."},
-    {"id":"intelligence","label":"Intelligence","description":"Research, memory, hypotheses, episodes, counterfactuals, knowledge graph and digital twin."},
-    {"id":"factory","label":"Factory","description":"One autonomous rewrite producer plus explicit manual validation, fallback and experiment tools."},
-    {"id":"firmware","label":"Firmware","description":"Named EdgeTX and ExpressLRS builds, compatibility, packages, flashing and recovery."},
-    {"id":"radio","label":"MT12","description":"Radio backups, models, YAML, SD-card files, device state, restore, flash and recovery."},
-    {"id":"releases","label":"Releases","description":"Controller and device artifacts, authority, promotion, rollback and certification."},
-    {"id":"tools","label":"Tools","description":"Mobile companions, native helper, viewers, tuners and support utilities."},
-    {"id":"system","label":"System","description":"GitHub connection, workflows, runs, artifacts, errors, health and repository state."}
+    {"id":"command","label":"Command","description":"Live lineage, latest winner and engineering objectives."},
+    {"id":"vehicle","label":"Vehicle AI","description":"Canonical parent, autonomous winner, defended floor and tournament comparison."},
+    {"id":"evidence","label":"Evidence","description":"MT12 log sync, identity attribution, replay and historical learning."},
+    {"id":"intelligence","label":"Intelligence","description":"Research, memory, knowledge graph and highest-information experiments."},
+    {"id":"factory","label":"Factory","description":"Single rewrite producer, immutable generations, novelty gates and manual tools."},
+    {"id":"firmware","label":"Firmware","description":"EdgeTX and ExpressLRS catalog, verified builds, flashing and recovery."},
+    {"id":"radio","label":"MT12","description":"Radio backup, deploy, YAML, SD-card state and recovery."},
+    {"id":"releases","label":"Releases","description":"Canonical and experimental artifacts, authority, promotion and rollback."},
+    {"id":"tools","label":"Tools","description":"iPhone sync, mobile companions, desktop helper, viewers and tuners."},
+    {"id":"system","label":"System","description":"Scheduler, producer, workflows, runs, data contracts and GitHub health."}
   ],
   "missions": [
     {"id":"rewrite-factory","label":"AUTOMATIC PRODUCER · Build novel MT12 LUAC generation","workflow":"jarvis-complete-rewrite-factory.yml","workspace":"factory","inputs":{},"mode":"automatic-producer"},
@@ -46,34 +74,26 @@
     {"id":"native-helper","label":"Build desktop/native helper","workflow":"native-helper.yml","workspace":"tools","inputs":{}},
     {"id":"rcos","label":"Run RC operating-system validation pipeline","workflow":"rcos.yml","workspace":"system","inputs":{}},
     {"id":"v3-operations","label":"Run advanced MT12 operations","workflow":"v3-operations.yml","workspace":"system","inputs":{}},
-    {"id":"build-a16k","label":"MANUAL LEGACY · Build A16K release artifact","workflow":"build-a16k.yml","workspace":"factory","inputs":{},"mode":"manual-legacy"},
     {"id":"artifact-gate","label":"Validate controller artifacts","workflow":"a17z-artifact-gate.yml","workspace":"releases","inputs":{}},
     {"id":"rewrite-gate","label":"Validate controller rewrite contract","workflow":"a17z-rewrite-gate.yml","workspace":"factory","inputs":{}}
   ],
   "dataSources": [
-    {"id":"active-mission","path":"public/jarvis-data/active-mission.json","workspace":"command"},
-    {"id":"factory-cycle","path":"factory/latest-cycle.json","workspace":"factory"},
-    {"id":"tracks","path":"factory/tracks.json","workspace":"vehicle"},
-    {"id":"vehicle-model","path":"factory/vehicle-model-calibrated.json","workspace":"intelligence"},
-    {"id":"evidence-memory","path":"factory/memory/evidence.json","workspace":"intelligence"},
-    {"id":"experiment-memory","path":"factory/memory/experiments.json","workspace":"intelligence"},
-    {"id":"design-memory","path":"factory/memory/design.json","workspace":"intelligence"},
-    {"id":"episode-memory","path":"factory/memory/episodes.json","workspace":"intelligence"},
-    {"id":"historical-log-index","path":"factory/memory/historical-log-index.json","workspace":"evidence"},
-    {"id":"knowledge-graph","path":"public/jarvis-data/knowledge-graph.json","workspace":"intelligence"},
-    {"id":"knowledge-summary","path":"public/jarvis-data/summary.json","workspace":"intelligence"},
-    {"id":"research-state","path":"research/state.json","workspace":"intelligence"},
-    {"id":"research-current","path":"research/current.json","workspace":"intelligence"},
-    {"id":"research-questions","path":"research/questions.json","workspace":"intelligence"},
-    {"id":"chief-dashboard","path":"public/chief-data/dashboard.json","workspace":"intelligence"},
-    {"id":"controller-builds","path":"public/builds/index.json","workspace":"vehicle"},
-    {"id":"recommended-controller","path":"public/builds/recommended.json","workspace":"releases"},
-    {"id":"completion-dashboard","path":"public/completion-data/dashboard.json","workspace":"releases"},
-    {"id":"device-releases","path":"public/device-data/releases.json","workspace":"radio"},
-    {"id":"firmware-catalog-data","path":"public/device-data/releases.json","workspace":"firmware"},
-    {"id":"control-state","path":"public/control-data/state.json","workspace":"releases"},
-    {"id":"mission-state","path":"public/mission-data/state.json","workspace":"command"},
-    {"id":"v3-council","path":"public/v3-data/council.json","workspace":"system"}
+    {"id":"canonical-parent","path":"public/builds/releases/jrw6d/MANIFEST.json","workspace":"vehicle","required":true},
+    {"id":"controller-build-index","path":"public/builds/index.json","workspace":"releases","required":true},
+    {"id":"active-mission","path":"public/jarvis-data/active-mission.json","workspace":"command","required":false},
+    {"id":"evidence-sync","path":"public/evidence-data/sync.json","workspace":"evidence","required":false},
+    {"id":"historical-log-index","path":"factory/memory/historical-log-index.json","workspace":"evidence","required":false},
+    {"id":"episode-memory","path":"factory/memory/episodes.json","workspace":"intelligence","required":false},
+    {"id":"knowledge-graph","path":"public/jarvis-data/knowledge-graph.json","workspace":"intelligence","required":false},
+    {"id":"knowledge-summary","path":"public/jarvis-data/summary.json","workspace":"intelligence","required":false},
+    {"id":"research-current","path":"research/current.json","workspace":"intelligence","required":false},
+    {"id":"research-questions","path":"research/questions.json","workspace":"intelligence","required":false},
+    {"id":"device-releases","path":"public/device-data/releases.json","workspace":"firmware","required":false}
+  ],
+  "dynamicDataSources": [
+    {"id":"rewrite-runs","api":"actions/workflows/jarvis-complete-rewrite-factory.yml/runs","workspace":"factory"},
+    {"id":"rewrite-tournaments","pathPattern":"public/builds/rewrite-<run-id>-<attempt>/TOURNAMENT.json","workspace":"factory"},
+    {"id":"rewrite-manifests","pathPattern":"public/builds/rewrite-<run-id>-<attempt>/BUILD-MANIFEST.json","workspace":"factory"}
   ],
   "authority": {
     "controller":["GENERATED","COMPILED","STATICALLY_VALIDATED","SIMULATION_TESTED","SIMULATION_PROVEN","REPLAY_PROVEN","BENCH_PROVEN","ROAD_PROVEN"],
