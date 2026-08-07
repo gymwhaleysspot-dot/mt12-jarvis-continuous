@@ -42,14 +42,25 @@ jobs:
           PY
       - name: Persist protected champion state
         run: |
+          set -euo pipefail
           git config user.name 'Jarvis Champion Authority'
           git config user.email 'actions@users.noreply.github.com'
-          git add public/builds/index.json public/builds/recommended.json public/jarvis-data/champion-protection.json factory/memory/champion-history.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Enforce Jarvis champion protection [skip ci]'
+          # Recompute the champion state from the newest main on every attempt.
+          # Never rebase a stale generated index across another Jarvis writer.
           for n in 1 2 3 4 5; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            git rebase --abort || true
+            git fetch origin main
+            git reset --hard origin/main
+            python3 tools/jarvis_champion_guard.py
+            git add public/builds/index.json public/builds/recommended.json public/jarvis-data/champion-protection.json factory/memory/champion-history.json
+            if git diff --cached --quiet; then
+              echo 'Champion state already current on main.'
+              exit 0
+            fi
+            git commit -m 'Enforce Jarvis champion protection [skip ci]'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Champion state changed concurrently; recomputing from latest main (attempt $n/5)."
             sleep $((n*5))
           done
           exit 1
