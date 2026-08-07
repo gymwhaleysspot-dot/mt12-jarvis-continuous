@@ -80,8 +80,9 @@ jobs:
           check('jarvis/mjx7303-playcanvas-v25.js','mjx7303-v25.glb');
           check('jarvis/mjx7303-playcanvas-v25.js','instantiateRenderEntity');
           check('jarvis/mjx7303-playcanvas-v25.js','__V25_READY');
-          check('tools/build_mjx7303_v25_blender.py','REFERENCE_SCALE_375MM','375 mm reference scale');
-          check('tools/build_mjx7303_v25_blender.py','WHEELBASE=3.75','3.75 Blender-unit wheelbase');
+          check('tools/build_mjx7303_v25_blender.py','375 mm wheelbase','375 mm reference scale');
+          check('tools/build_mjx7303_v25_blender.py','WB=3.75','3.75 Blender-unit wheelbase');
+          check('tools/build_mjx7303_v25_blender.py','AX_F=-WB/2;AX_R=WB/2','axle spacing derived from wheelbase');
           check('tools/build_mjx7303_v25_blender.py','BODY_CLOSED_SUBDIV');
           check('tools/build_mjx7303_v25_blender.py','export_scene.gltf');
           for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html'])check(f,'Opening Jarvis','compatibility marker');
