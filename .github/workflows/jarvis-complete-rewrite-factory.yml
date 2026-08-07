@@ -28,7 +28,7 @@ jobs:
           chmod +x toolchain/compile_mt12.sh
       - name: Validate canonical floor and evolution authority
         run: |
-          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_efficiency_cycle.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/jarvis_efficiency_cycle.py tools/jarvis_prebuild_reclaim.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
           python3 - <<'PY'
           import json,sys
           from pathlib import Path
@@ -47,12 +47,12 @@ jobs:
         run: |
           python3 tools/jarvis_external_research_bridge.py
           python3 tools/jarvis_intelligence_planner.py
-      - name: Generate, reclaim, score and synthesize novel LUACs
+      - name: Reclaim, generate, score and synthesize novel LUACs
         env:
           RELEASE_TYPE: R
           SERIES: jrw
         run: python3 tools/jarvis_efficiency_cycle.py
-      - name: Reject duplicate and historically published candidates
+      - name: Reject duplicate, inefficient and historically published candidates
         run: |
           python3 - <<'PY'
           import json
@@ -60,7 +60,9 @@ jobs:
           result=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
           compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
           assert compiled
-          assert result.get('resourcePolicy',{}).get('rule')=='SIZE_EFFICIENCY_ALWAYS_SCORED_NOT_ONLY_NEAR_LIMIT'
+          rp=result.get('resourcePolicy',{})
+          assert rp.get('rule')=='PREBUILD_RECLAMATION_AND_SIZE_EFFICIENCY_ALWAYS_ON'
+          assert rp.get('prebuildSeedNormalizedBytes',10**9)<=rp.get('parentNormalizedBytes',0)
           src=[c['sourceSha256'] for c in compiled]; bc=[c['luacSha256'] for c in compiled]
           assert len(src)==len(set(src)); assert len(bc)==len(set(bc))
           known_src=set(); known_bc=set()
@@ -81,7 +83,7 @@ jobs:
           for c in compiled:
             rc=c['rewriteContract']
             assert rc['sourceNovel'] is True and rc['bytecodeNovel'] is True
-          print({'compiled':len(compiled),'historicalSources':len(known_src),'historicalLuacs':len(known_bc),'resourcePolicy':result['resourcePolicy']})
+          print({'compiled':len(compiled),'historicalSources':len(known_src),'historicalLuacs':len(known_bc),'resourcePolicy':rp})
           PY
       - name: Publish rewrite candidates into immutable mission directory
         run: |
@@ -96,8 +98,9 @@ jobs:
             cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract'],'resourceEfficiency':c.get('resourceEfficiency',{}),'promotionEfficiencyEligible':c.get('promotionEfficiencyEligible',False)})
           plan=json.loads(Path('factory/next-experiment.json').read_text()); canonical=json.loads(Path('factory/canonical-controller.json').read_text())['release']
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-8','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'resourcePolicy':result.get('resourcePolicy',{}),'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
-          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text())
+          reclaim=json.loads(Path('factory/memory/prebuild-reclaim.json').read_text())
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-9','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'resourcePolicy':result.get('resourcePolicy',{}),'prebuildReclamation':reclaim,'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text()); (base/'PREBUILD-RECLAIM.json').write_text(Path('factory/memory/prebuild-reclaim.json').read_text())
           PY
       - name: Advance experimental evolution parent
         run: |
@@ -152,6 +155,7 @@ jobs:
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
             factory/next-experiment.json
             factory/memory/external-research.json
+            factory/memory/prebuild-reclaim.json
             factory/evolution-controller.json
           if-no-files-found: ignore
           retention-days: 30
