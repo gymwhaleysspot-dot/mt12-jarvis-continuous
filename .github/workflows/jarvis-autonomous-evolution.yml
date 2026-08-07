@@ -1,0 +1,67 @@
+name: Jarvis Autonomous Evolution Scheduler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 * * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: jarvis-autonomous-evolution-scheduler
+  cancel-in-progress: false
+
+jobs:
+  launch-next-generation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Decide whether Jarvis may evolve
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          FACTORY: jarvis-complete-rewrite-factory.yml
+        run: |
+          set -Eeuo pipefail
+          runs="$(gh api -H 'Accept: application/vnd.github+json' "/repos/${REPO}/actions/workflows/${FACTORY}/runs?per_page=20")"
+
+          active="$(jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress")] | length' <<<"$runs")"
+          if [ "$active" -gt 0 ]; then
+            echo "Jarvis rewrite already active; no duplicate generation will be launched."
+            echo "launch=false" >> "$GITHUB_OUTPUT"
+            echo "reason=active-run" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          latest="$(jq -r '[.workflow_runs[] | select(.status=="completed")][0] // empty | [.run_number,.conclusion,.html_url] | @tsv' <<<"$runs")"
+          if [ -n "$latest" ]; then
+            IFS=$'\t' read -r number conclusion url <<<"$latest"
+            echo "Latest completed generation: #${number} conclusion=${conclusion} ${url}"
+            if [ "$conclusion" != "success" ]; then
+              echo "Autonomous evolution paused because the last generation did not succeed."
+              echo "launch=false" >> "$GITHUB_OUTPUT"
+              echo "reason=previous-failure" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "launch=true" >> "$GITHUB_OUTPUT"
+          echo "reason=ready" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch next Complete Rewrite generation
+        if: steps.gate.outputs.launch == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          FACTORY: jarvis-complete-rewrite-factory.yml
+        run: |
+          set -Eeuo pipefail
+          gh workflow run "$FACTORY" --repo "$REPO" --ref main
+          echo "Next Jarvis architectural generation dispatched from the current evolution parent."
+
+      - name: Report scheduler hold
+        if: steps.gate.outputs.launch != 'true'
+        run: echo "Jarvis scheduler held this cycle: ${{ steps.gate.outputs.reason }}"
