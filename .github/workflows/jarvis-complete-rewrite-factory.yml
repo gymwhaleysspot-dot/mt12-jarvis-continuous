@@ -50,5 +50,101 @@ jobs:
         run: |
           python3 - <<'PY'
           import json
-          from pathlib import import Path
+          from pathlib import Path
+          result=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
+          compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
+          assert compiled
+          src=[c['sourceSha256'] for c in compiled]; bc=[c['luacSha256'] for c in compiled]
+          assert len(src)==len(set(src)); assert len(bc)==len(set(bc))
+          known_src=set(); known_bc=set()
+          for p in Path('public/builds').rglob('*.json'):
+            try: stack=[json.loads(p.read_text())]
+            except Exception: continue
+            while stack:
+              x=stack.pop()
+              if isinstance(x,dict):
+                if isinstance(x.get('sourceSha256'),str): known_src.add(x['sourceSha256'])
+                if isinstance(x.get('luacSha256'),str): known_bc.add(x['luacSha256'])
+                if isinstance(x.get('source'),dict) and isinstance(x['source'].get('sha256'),str): known_src.add(x['source']['sha256'])
+                if isinstance(x.get('luac'),dict) and isinstance(x['luac'].get('sha256'),str): known_bc.add(x['luac']['sha256'])
+                stack.extend(x.values())
+              elif isinstance(x,list): stack.extend(x)
+          assert not (set(src)&known_src), 'source already published'
+          assert not (set(bc)&known_bc), 'LUAC already published'
+          for c in compiled:
+            rc=c['rewriteContract']
+            assert rc['sourceNovel'] is True and rc['bytecodeNovel'] is True
+          print({'compiled':len(compiled),'historicalSources':len(known_src),'historicalLuacs':len(known_bc)})
           PY
+      - name: Publish rewrite candidates into immutable mission directory
+        run: |
+          python3 - <<'PY'
+          import json,os,shutil
+          from pathlib import Path
+          src=Path('dist-controller-tournament'); result=json.loads((src/'TOURNAMENT.json').read_text())
+          mission=f"rewrite-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"; base=Path('public/builds')/mission; base.mkdir(parents=True,exist_ok=True)
+          published=[]
+          for c in result['candidates']:
+            if c.get('status')!='COMPILED': continue
+            cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
+            published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-5','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
+          PY
+      - name: Apply evolution and champion authorities
+        run: |
+          python3 tools/jarvis_evolution_gate.py
+          python3 tools/jarvis_champion_guard.py
+          python3 tools/jarvis_graph_intelligence.py
+      - name: Persist immutable rewrite directory atomically
+        run: |
+          set -Eeuo pipefail
+          mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          stage="$(mktemp -d)"
+          cp -a "public/builds/${mission}" "$stage/${mission}"
+          git config user.name 'Jarvis Complete Rewrite Factory'
+          git config user.email 'actions@users.noreply.github.com'
+
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            rm -rf -- "public/builds/${mission}"
+
+            if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
+              git checkout origin/main -- "public/builds/${mission}"
+              if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then
+                echo "Rewrite generation ${mission} is tracked identically on origin/main."
+                exit 0
+              fi
+              echo "ERROR: immutable mission collision for ${mission}; remote contents differ"
+              exit 1
+            fi
+
+            cp -a "$stage/${mission}" "public/builds/${mission}"
+            git add -- "public/builds/${mission}"
+            git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
+
+            if git push origin HEAD:main; then
+              git fetch origin main
+              git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"
+              git reset --hard origin/main
+              git checkout origin/main -- "public/builds/${mission}"
+              diff -qr "$stage/${mission}" "public/builds/${mission}"
+              echo "Verified rewrite generation ${mission} is tracked and byte-identical on origin/main."
+              exit 0
+            fi
+
+            echo "Publish race on attempt ${n}; retrying from current main."
+            sleep $((n*5))
+          done
+          echo "ERROR: unable to persist ${mission} after 5 attempts"
+          exit 1
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: jarvis-complete-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist-controller-tournament/
+            public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: ignore
+          retention-days: 30
