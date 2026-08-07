@@ -44,12 +44,14 @@ def advance(mission:str,run_number:int|None=None)->dict:
  winner=tournament.get('winner')
  if winner!='jrw6':raise RuntimeError(f'evolution advance requires synthesis winner; got {winner}')
  manifest=json.loads((base/winner/'MANIFEST.json').read_text())
- contract=manifest.get('rewriteContract',{})
+ candidate=next((c for c in tournament.get('candidates',[]) if c.get('candidate')==winner),{})
+ contract=manifest.get('rewriteContract') or candidate.get('rewriteContract') or {}
  if manifest.get('status')!='COMPILED' or manifest.get('errors'):raise RuntimeError('synthesis winner is not cleanly compiled')
  if manifest.get('profile')!='synthesis':raise RuntimeError('winner is not synthesis profile')
  if int(manifest.get('normalizedBytes',10**9))>MAX_BYTES:raise RuntimeError('synthesis winner exceeds MT12 size ceiling')
  if not contract.get('sourceNovel') or not contract.get('bytecodeNovel'):raise RuntimeError('synthesis winner failed novelty contract')
  source=base/winner/f'{winner}.lua';deploy=base/winner/f'{winner}.luac'
+ if digest(source)!=manifest.get('sourceSha256') or digest(deploy)!=manifest.get('luacSha256'):raise RuntimeError('synthesis winner hash does not match manifest')
  text=source.read_text();missing=[x for x in REQUIRED if x not in text];bad=[x for x in FORBIDDEN if x in text]
  if missing or bad:raise RuntimeError(f'synthesis winner violated canonical floor missing={missing} forbidden={bad}')
  run_number=int(run_number or 0)
