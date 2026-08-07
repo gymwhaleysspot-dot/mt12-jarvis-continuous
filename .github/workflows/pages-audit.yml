@@ -42,109 +42,135 @@ jobs:
           node-version: '22'
           package-manager-cache: false
 
-      - name: Validate core JavaScript Python JSON Pages and workflow topology
+      - name: Validate rewritten HTML JavaScript Python JSON and compatibility routes
         run: |
           set -euo pipefail
           node --check classic-token.js
-          for f in jarvis/*.js scripts/*.mjs; do
-            [ -f "$f" ] && node --check "$f"
-          done
+          for f in jarvis/*.js scripts/*.mjs; do [ -f "$f" ] && node --check "$f"; done
           python3 -m compileall -q tools
           python3 tools/audit_workflow_wiring.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
-          python3 -m json.tool public/evidence-data/sync.json >/dev/null
           node scripts/prepare-pages.mjs
-          grep -q 'Jarvis MT12 Engineering Intelligence' index.html
+          grep -q 'Jarvis MT12 Engineering OS' index.html
+          grep -q 'workspaceBody' index.html
           grep -q 'iphone-sync-boot.js' index.html
+          grep -q 'latestGeneration' jarvis/app.js
+          grep -q 'JRW6D DEFENDED FLOOR' jarvis/app.js
+          grep -q 'IMMUTABLE GENERATIONS' jarvis/app.js
+          grep -q 'DOWNLOAD LUAC' jarvis/app.js
+          grep -q 'rewrite-<run-id>-<attempt>' jarvis/capabilities.json
+          grep -q 'workflowRuns' jarvis/api.js
+          grep -q 'discoverGenerations' jarvis/state.js
+          grep -q 'public/builds/releases/jrw6d/MANIFEST.json' jarvis/state.js
           grep -q 'webkitdirectory' jarvis/iphone-sync.js
-          grep -q 'iPhone 17 Safari Files picker' jarvis/iphone-sync.js
-          grep -q 'putBytes' jarvis/api.js
-          grep -q 'LUAC Downloads' jarvis/app.js
-          grep -q 'BACKUP & FLASH' jarvis/app.js
-          grep -q 'active-mission.json' jarvis/state.js
-          grep -q 'evidence-data/sync.json' jarvis/state.js
-          grep -q 'recommended.json' jarvis/state.js
-          for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do
-            grep -q 'Opening Jarvis' "$f"
-          done
+          for f in chief.html builds.html mission.html completion.html device.html control.html research.html discovery.html v3.html updates.html builder.html web/index.html; do grep -q 'Opening Jarvis' "$f"; done
+
+      - name: Validate UI contract and workflow topology
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const c=require('./jarvis/capabilities.json');const state=fs.readFileSync('jarvis/state.js','utf8');
+          if(c.schema<6)throw Error('Jarvis UI contract must be v6+');
+          if(c.workspaces.length!==10)throw Error('Expected ten Jarvis workspaces');
+          if(c.orchestration.policy!=='ONE_SCHEDULER_ONE_PRODUCER')throw Error('Wrong producer topology');
+          if(c.orchestration.controllerProducer!=='jarvis-complete-rewrite-factory.yml')throw Error('Wrong controller producer');
+          if(c.controllerLineage.canonicalParent!=='jrw6d')throw Error('Canonical parent is not JRW6D');
+          const ids=new Set,paths=new Set;
+          for(const m of c.missions){
+            if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
+            if(!c.workspaces.some(w=>w.id===m.workspace))throw Error('Unknown workspace '+m.workspace);
+            const p='.github/workflows/'+m.workflow;if(!fs.existsSync(p))throw Error('Missing workflow '+p);paths.add(p);
+            const y=fs.readFileSync(p,'utf8');if(!/workflow_dispatch\s*:/.test(y))throw Error('Not dispatchable '+p);
+          }
+          for(const d of c.dataSources)if(!state.includes(`'${d.path}'`))throw Error('State loader missing '+d.path);
+          if(!c.dynamicDataSources.some(x=>x.id==='rewrite-runs'))throw Error('Missing dynamic rewrite-run source');
+          console.log({schema:c.schema,workspaces:c.workspaces.length,missions:ids.size,workflows:paths.size,dataSources:c.dataSources.length});
+          NODE
+
+      - name: Validate canonical JRW6D defended release
+        run: |
+          set -euo pipefail
+          test -f public/builds/releases/jrw6d/jrw6d.lua
+          test -f public/builds/releases/jrw6d/jrw6d.luac
+          test -f public/builds/releases/jrw6d/MANIFEST.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('public/builds/releases/jrw6d/MANIFEST.json').read_text())
+          assert m['release']=='jrw6d'
+          assert m['normalizedBytes']<=87000
+          assert Path('public/builds/releases/jrw6d/jrw6d.luac').stat().st_size==m['normalizedBytes']
+          s=Path('public/builds/releases/jrw6d/jrw6d.lua').read_text()
+          for token in ('local pc=pcall','/LOGS/m0','/LOGS/m1','local function memOpt','local function watch','V[179]*.0045','92+4*dc','bb_line(151,rg4,0)'):
+              assert token in s, token
+          print({'release':m['release'],'bytes':m['normalizedBytes'],'authority':m['authority']})
+          PY
+
+      - name: Validate persisted rewrite generation model
+        run: |
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          roots=[]
+          for p in Path('public/builds').iterdir():
+              m=re.fullmatch(r'rewrite-(\d+)-(\d+)',p.name)
+              if m and (p/'TOURNAMENT.json').exists(): roots.append((int(m.group(1)),int(m.group(2)),p))
+          assert roots,'No persisted rewrite generations found'
+          _,_,p=max(roots)
+          t=json.loads((p/'TOURNAMENT.json').read_text())
+          assert t['parent']=='jrw6d',t['parent']
+          assert t['winner']
+          compiled=[c for c in t['candidates'] if c.get('status')=='COMPILED']
+          assert compiled
+          assert len({c['sourceSha256'] for c in compiled})==len(compiled)
+          assert len({c['luacSha256'] for c in compiled})==len(compiled)
+          for c in compiled:
+              cid=c['candidate']; base=p/cid
+              assert (base/f'{cid}.lua').exists()
+              assert (base/f'{cid}.luac').exists()
+              assert (base/'MANIFEST.json').exists()
+              assert c['normalizedBytes']<=87000
+          print({'generation':p.name,'winner':t['winner'],'compiled':len(compiled)})
+          PY
+
+      - name: Validate public-read request budget and UI generation identity
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const s=fs.readFileSync('jarvis/state.js','utf8');const a=fs.readFileSync('jarvis/app.js','utf8');
+          const fixed=(s.match(/'[^']+\.json'/g)||[]).length;
+          if(!s.includes('.slice(0,6)'))throw Error('Generation history is not API-budget bounded');
+          if(!a.includes('${w.candidate?.toUpperCase()}-${g.runNumber}'))throw Error('Winner identity is not run-qualified');
+          if(!a.includes('runtimeIdentity?.token'))throw Error('Runtime identity missing from UI');
+          if(!a.includes('TOURNAMENT'))throw Error('Tournament download missing');
+          console.log({fixedJsonReferences:fixed,generationHistory:6,publicBudget:'bounded'});
+          NODE
 
       - name: Validate repository JSON syntax
         run: |
-          set -euo pipefail
           python3 - <<'PY'
           import json
           from pathlib import Path
           roots=[Path('jarvis'),Path('factory'),Path('research'),Path('public')]
-          skip=('public/builds/', 'research/history/', 'engineering-missions/history/')
-          bad=[]; checked=0
+          skip=('public/builds/','research/history/','engineering-missions/history/')
+          bad=[];checked=0
           for root in roots:
               if not root.exists(): continue
               for p in root.rglob('*.json'):
                   s=p.as_posix()
                   if any(s.startswith(x) for x in skip): continue
-                  try:
-                      json.loads(p.read_text())
-                      checked+=1
-                  except Exception as e:
-                      bad.append(f'{s}: {e}')
-          if bad:
-              raise SystemExit('JSON errors:\n'+'\n'.join(bad))
+                  try: json.loads(p.read_text());checked+=1
+                  except Exception as e: bad.append(f'{s}: {e}')
+          if bad: raise SystemExit('JSON errors:\n'+'\n'.join(bad))
           print({'jsonFilesChecked':checked})
           PY
 
-      - name: Validate every UI mission points to a dispatchable workflow file
-        run: |
-          node - <<'NODE'
-          const fs=require('fs');const c=require('./jarvis/capabilities.json');
-          if(c.workspaces.length!==10)throw Error('Expected ten workspaces');
-          const ids=new Set,paths=new Set;
-          for(const m of c.missions){
-            if(ids.has(m.id))throw Error('Duplicate mission id '+m.id);ids.add(m.id);
-            if(!c.workspaces.some(w=>w.id===m.workspace))throw Error('Unknown workspace '+m.workspace);
-            const p='.github/workflows/'+m.workflow;
-            if(!fs.existsSync(p))throw Error('Missing workflow '+p);paths.add(p);
-            const y=fs.readFileSync(p,'utf8');
-            if(!/workflow_dispatch\s*:/.test(y))throw Error('Not dispatchable '+p);
-          }
-          const sources=new Set(c.dataSources.map(x=>x.path));
-          const state=fs.readFileSync('jarvis/state.js','utf8');
-          for(const p of sources)if(!state.includes(`'${p}'`))throw Error('Data source not loaded by state.js: '+p);
-          console.log({missions:ids.size,workflows:paths.size,dataSources:sources.size});
-          NODE
-
-      - name: Exercise evolution persistence and publication contract twice
-        run: |
-          set -euo pipefail
-          python3 tools/jarvis_evolution_gate.py > /tmp/gate1.json
-          cp public/builds/index.json /tmp/index1.json
-          python3 tools/jarvis_evolution_gate.py > /tmp/gate2.json
-          node - <<'NODE'
-          const fs=require('fs'),a=require('/tmp/index1.json'),b=require('./public/builds/index.json');
-          if(a.uniqueBuilds!==b.uniqueBuilds)throw Error(`Unique builds vanished across rerun: ${a.uniqueBuilds} -> ${b.uniqueBuilds}`);
-          if(a.builds.length!==b.builds.length)throw Error('Build list is not persistent');
-          const names=new Set,hashes=new Set;
-          for(const x of b.builds){
-            if(!/^[a-z][a-z0-9]{0,5}$/.test(x.name))throw Error('Bad deploy identity '+x.name);
-            if(names.has(x.name)||hashes.has(x.luacSha256))throw Error('Duplicate accepted controller');
-            names.add(x.name);hashes.add(x.luacSha256);
-            const base=x.base;
-            if(!fs.existsSync(base+x.deploy)||!fs.existsSync(base+x.bundle)||!fs.existsSync(base+x.audit))throw Error('Broken download wiring '+x.name);
-          }
-          if(b.recommended&&!b.builds.some(x=>x.name===b.recommended&&x.promotionEligible))throw Error('Invalid recommendation');
-          console.log({unique:b.uniqueBuilds,rejected:b.duplicatesRejected,recommended:b.recommended});
-          NODE
-
-      - name: Validate firmware sync and optional-helper wiring
+      - name: Validate firmware and MT12 helper wiring
         run: |
           set -euo pipefail
           test -f .github/workflows/firmware-build-flash.yml
           grep -q 'mt12-flasher' .github/workflows/firmware-build-flash.yml
           grep -q 'a17y-mt12-backup' .github/workflows/firmware-build-flash.yml
           grep -q 'a17y-mt12-flash' .github/workflows/firmware-build-flash.yml
-          grep -q 'public/device-data/releases.json' jarvis/state.js
           test -f .github/workflows/mt12-sync.yml
           grep -q 'mt12-sync' .github/workflows/mt12-sync.yml
           grep -q 'a17y-mt12-detect' .github/workflows/mt12-sync.yml
           grep -q 'a17y-mt12-sync-logs' .github/workflows/mt12-sync.yml
-          grep -q 'historical-log-reingest.yml' jarvis/iphone-sync.js
-          grep -q 'jarvis-knowledge-graph.yml' jarvis/iphone-sync.js
