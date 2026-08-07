@@ -43,7 +43,7 @@ jobs:
           node --check research/run.mjs
           node -e "JSON.parse(require('fs').readFileSync('research/config.json'))"
           node -e "JSON.parse(require('fs').readFileSync('research/questions.json'))"
-          python3 -m py_compile tools/engineering_knowledge_graph.py
+          python3 -m py_compile tools/engineering_knowledge_graph.py tools/jarvis_external_research_bridge.py tools/jarvis_intelligence_planner.py
       - name: Publish visible Jarvis mission state
         shell: bash
         run: |
@@ -77,17 +77,24 @@ jobs:
           node - <<'NODE'
           const fs=require('fs'),r=JSON.parse(fs.readFileSync('research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('Accepted finding has invalid citations');}console.log(`validated ${r.acceptedFindings.length} accepted findings against ${ids.size} sources`);
           NODE
+      - name: Bridge verified outside research into Jarvis engineering memory
+        run: |
+          python3 tools/jarvis_external_research_bridge.py
+          python3 tools/jarvis_intelligence_planner.py
       - name: Preserve mission output
         shell: bash
         run: |
           set -Eeuo pipefail
           rm -rf /tmp/jarvis-research-output
-          mkdir -p /tmp/jarvis-research-output/research/history
+          mkdir -p /tmp/jarvis-research-output/research/history /tmp/jarvis-research-output/factory/memory /tmp/jarvis-research-output/public/jarvis-data
           cp research/state.json /tmp/jarvis-research-output/research/state.json
           cp research/current.json /tmp/jarvis-research-output/research/current.json
           cp research/questions.json /tmp/jarvis-research-output/research/questions.json
           cp research/research-run.log /tmp/jarvis-research-output/research/research-run.log
-          find research/history -maxdepth 1 -type f -newer research/research-run.log -print0 2>/dev/null | xargs -0 -r -I{} cp '{}' /tmp/jarvis-research-output/research/history/
+          cp factory/memory/external-research.json /tmp/jarvis-research-output/factory/memory/external-research.json
+          cp factory/next-experiment.json /tmp/jarvis-research-output/factory/next-experiment.json
+          cp public/jarvis-data/external-research.json /tmp/jarvis-research-output/public/jarvis-data/external-research.json
+          cp public/jarvis-data/experiment-plan.json /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json
           cp -a research/history/. /tmp/jarvis-research-output/research/history/
       - name: Persist mission memory on latest main
         shell: bash
@@ -102,15 +109,19 @@ jobs:
             cp /tmp/jarvis-research-output/research/current.json research/current.json
             cp /tmp/jarvis-research-output/research/questions.json research/questions.json
             cp /tmp/jarvis-research-output/research/research-run.log research/research-run.log
-            mkdir -p research/history
+            mkdir -p research/history factory/memory public/jarvis-data
             cp -a /tmp/jarvis-research-output/research/history/. research/history/
+            cp /tmp/jarvis-research-output/factory/memory/external-research.json factory/memory/external-research.json
+            cp /tmp/jarvis-research-output/factory/next-experiment.json factory/next-experiment.json
+            cp /tmp/jarvis-research-output/public/jarvis-data/external-research.json public/jarvis-data/external-research.json
+            cp /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json public/jarvis-data/experiment-plan.json
             python3 tools/engineering_knowledge_graph.py
-            git add research/state.json research/current.json research/questions.json research/history research/research-run.log factory/knowledge-graph.json
+            git add research/state.json research/current.json research/questions.json research/history research/research-run.log factory/knowledge-graph.json factory/memory/external-research.json factory/next-experiment.json public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json
             if git diff --cached --quiet; then
               echo 'No mission-memory change to persist'
               exit 0
             fi
-            git commit -m 'Record Jarvis engineering mission and knowledge graph [skip ci]'
+            git commit -m 'Record Jarvis research-backed engineering memory [skip ci]'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((n*5))
           done
@@ -127,5 +138,9 @@ jobs:
             research/questions.json
             research/research-run.log
             factory/knowledge-graph.json
+            factory/memory/external-research.json
+            factory/next-experiment.json
+            public/jarvis-data/external-research.json
+            public/jarvis-data/experiment-plan.json
           if-no-files-found: error
           retention-days: 90
