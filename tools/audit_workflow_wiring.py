@@ -32,17 +32,21 @@ for wf in (
     'controller-tournament.yml',
     'engineering-mission.yml',
     'jarvis-mission-scheduler.yml',
+    'jarvis-continuous-handoff.yml',
 ):
     require_manual_only(wf)
 
+handoff=text('jarvis-continuous-handoff.yml')
+assert 'gh workflow run' not in handoff, 'continuous handoff dispatch loop restored'
+
 a=text('jarvis-always-on.yml')
 assert "primary='jarvis-complete-rewrite-factory.yml'" in a
-for forbidden in ('jarvis-complete-factory.yml','guaranteed-luac.yml','workbench.yml','controller-tournament.yml','engineering-mission.yml'):
+for forbidden in ('jarvis-complete-factory.yml','guaranteed-luac.yml','workbench.yml','controller-tournament.yml','engineering-mission.yml','force-candidate.yml','repair-root-build-aegis.yml'):
     assert forbidden not in a, f'Always-On dispatches forbidden producer: {forbidden}'
 
 pm=Path('tools/jarvis_persistent_mission.py').read_text()
 pm_code='\n'.join(line.split('#',1)[0] for line in pm.splitlines())
-for forbidden in ('jarvis-complete-factory.yml','jarvis-complete-rewrite-factory.yml','guaranteed-luac.yml','workbench.yml','controller-tournament.yml','jarvis-evolution-gate.yml'):
+for forbidden in ('jarvis-complete-factory.yml','jarvis-complete-rewrite-factory.yml','guaranteed-luac.yml','workbench.yml','controller-tournament.yml','jarvis-evolution-gate.yml','force-candidate.yml','repair-root-build-aegis.yml'):
     assert forbidden not in pm_code, f'persistent mission dispatches controller path: {forbidden}'
 
 g=text('jarvis-mandatory-intelligence-gate.yml')
@@ -54,4 +58,4 @@ ps=text('jarvis-persistent-mission.yml')
 assert 'Jarvis Mandatory Controller Intelligence Gate' in ps
 assert not re.search(r'^\s+schedule:',trigger_block(ps),re.M)
 
-print('Jarvis workflow wiring: PASS — one autonomous producer, no self-requeue, secondary publishers explicit-only.')
+print('Jarvis workflow wiring: PASS — one scheduler, one controller producer, no self/handoff requeue, secondary publishers explicit-only.')
