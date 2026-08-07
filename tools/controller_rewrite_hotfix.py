@@ -22,6 +22,22 @@ SLOT_AREA={
 }
 LABEL={"conservative":"JRW1","balanced":"JRW2","learning":"JRW3","observability":"JRW4","combined":"JRW5","synthesis":"JRW6"}
 
+# Stage-1 is what JRW6-523 already inherited. Stage-2 must be genuinely new.
+S1={
+ "dropoutGain":"if V[119]>.45 and X[46]<120 then ac=m_min(ac,94)end;",
+ "tractionGain":"md<(.40+.02*V[114]) and V[119]<.45",
+ "jumpGain":"V[760+km]>(2+(V[543]>0 and 1 or 0))",
+ "truthGain":"clamp(V[179]/(242+8*V[119]+6*(1-V[114])),0,.35)",
+ "absGain":"if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,93+(X[46]>150 and 1 or 0))end",
+}
+S2={
+ "dropoutGain":"if V[119]>.45 and X[46]<120 then ac=m_min(ac,93+(V[114]>.65 and 1 or 0))end;",
+ "tractionGain":"md<(.39+.025*V[114]+.01*(1-V[119])) and V[119]<.45",
+ "jumpGain":"V[760+km]>(2+(V[543]>0 and 1 or 0)+(V[119]>.5 and 1 or 0))",
+ "truthGain":"clamp(V[179]/(240+7*V[119]+5*(1-V[114])+4*(X[46]<100 and 1 or 0)),0,.35)",
+ "absGain":"if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,92+(X[46]>150 and 1 or 0)+(V[114]>.7 and 1 or 0))end",
+}
+
 
 def protected_checks(text:str)->list[str]:
  errors=[e for e in _original_checks(text) if e!="missing:A17Z"]
@@ -65,31 +81,46 @@ def _replace_one(text:str,old:str,new:str,name:str)->str:
  return text.replace(old,new,1)
 
 
+def _stage(text:str,key:str,base_old:str,base_new:str)->str:
+ """Advance one stage. S2 is idempotent; inherited S1 is replaced, otherwise install S1."""
+ if S2[key] in text:return text
+ if S1[key] in text:return text.replace(S1[key],S2[key],1)
+ if base_new in text:return text.replace(base_new,S2[key],1)
+ return _replace_one(text,base_old,base_new,key+"-stage1")
+
+
 def _dropout(text:str)->str:
- marker="V[720]=ac;setgv(3,m_min(V[35],ac));";sig="V[119]>.45 and X[46]<120"
- return text if sig in text else _replace_one(text,marker,"if "+sig+" then ac=m_min(ac,94)end;"+marker,"dropout-recovery")
+ marker="V[720]=ac;setgv(3,m_min(V[35],ac));"
+ if S2["dropoutGain"] in text:return text
+ if S1["dropoutGain"] in text:return text.replace(S1["dropoutGain"],S2["dropoutGain"],1)
+ return _replace_one(text,marker,S1["dropoutGain"]+marker,"dropout-recovery-stage1")
 
 
 def _traction(text:str)->str:
- old="md<.42 and V[119]<.45";new="md<(.40+.02*V[114]) and V[119]<.45"
- return text if new in text else _replace_one(text,old,new,"traction-context")
+ if S2["tractionGain"] in text:return text
+ if S1["tractionGain"] in text:return text.replace(S1["tractionGain"],S2["tractionGain"],1)
+ return _replace_one(text,"md<.42 and V[119]<.45",S1["tractionGain"],"traction-context-stage1")
 
 
 def _jump(text:str)->str:
- old="V[760+km]>2";new="V[760+km]>(2+(V[543]>0 and 1 or 0))"
- return text if new in text else _replace_one(text,old,new,"jump-landing")
+ if S2["jumpGain"] in text:return text
+ if S1["jumpGain"] in text:return text.replace(S1["jumpGain"],S2["jumpGain"],1)
+ return _replace_one(text,"V[760+km]>2",S1["jumpGain"],"jump-landing-stage1")
 
 
 def _truth(text:str)->str:
- old="clamp(V[179]/(245+10*V[119]),0,.35)";new="clamp(V[179]/(242+8*V[119]+6*(1-V[114])),0,.35)"
- if new in text:return text
- if old in text:return text.replace(old,new,1)
- return _replace_one(text,"clamp(V[179]/250,0,.35)",new,"truth-speed-fusion")
+ if S2["truthGain"] in text:return text
+ if S1["truthGain"] in text:return text.replace(S1["truthGain"],S2["truthGain"],1)
+ old="clamp(V[179]/(245+10*V[119]),0,.35)"
+ if old in text:return text.replace(old,S1["truthGain"],1)
+ return _replace_one(text,"clamp(V[179]/250,0,.35)",S1["truthGain"],"truth-speed-stage1")
 
 
 def _abs(text:str)->str:
- old="if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end";new="if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,93+(X[46]>150 and 1 or 0))end"
- return text if new in text else _replace_one(text,old,new,"abs-control")
+ if S2["absGain"] in text:return text
+ if S1["absGain"] in text:return text.replace(S1["absGain"],S2["absGain"],1)
+ old="if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end"
+ return _replace_one(text,old,S1["absGain"],"abs-control-stage1")
 
 
 def _apply_area(text:str,area:str)->str:
@@ -121,11 +152,10 @@ def _parent_text()->str:
 
 
 def candidate_bonus(profile:str,text:str)->dict[str,float]:
- parent=_parent_text();markers={"dropoutGain":"V[119]>.45 and X[46]<120","tractionGain":"md<(.40+.02*V[114]) and V[119]<.45","jumpGain":"V[760+km]>(2+(V[543]>0 and 1 or 0))","truthGain":"242+8*V[119]+6*(1-V[114])","absGain":"m_min(ac,93+(X[46]>150 and 1 or 0))"}
- wanted={"sensor-dropout-recovery":("dropoutGain",),"traction-control":("tractionGain",),"jump-landing-classification":("jumpGain",),"truth-speed-fusion":("truthGain",),"abs-control":("absGain",),"synthesis-all-five":tuple(markers)}[SLOT_AREA[profile]]
- out={k:0.0 for k in markers};new_count=0
+ parent=_parent_text();wanted={"sensor-dropout-recovery":("dropoutGain",),"traction-control":("tractionGain",),"jump-landing-classification":("jumpGain",),"truth-speed-fusion":("truthGain",),"abs-control":("absGain",),"synthesis-all-five":tuple(S2)}[SLOT_AREA[profile]]
+ out={k:0.0 for k in S2};new_count=0
  for key in wanted:
-  marker=markers[key]
+  marker=S2[key]
   if marker in text and marker not in parent:out[key]=3.0;new_count+=1
  out["compositionGain"]=3.0 if profile=="synthesis" and new_count==5 else 0.0
  return out
@@ -133,7 +163,7 @@ def candidate_bonus(profile:str,text:str)->dict[str,float]:
 
 def main()->None:
  tournament.latest_release=jarvis_evolution_parent.resolve;tournament.protected_checks=protected_checks;tournament.candidate_bonus=candidate_bonus;tournament.imprint_runtime_identity=imprint_runtime_identity;rewrite_factory.experiment_rewrite=experiment_rewrite
- evolution,source=jarvis_evolution_parent.resolve();canonical,_=jarvis_canonical_parent.resolve();print({"evolutionParent":evolution,"canonicalFloor":canonical,"source":str(source),"strategy":"FIVE_HYPOTHESES_PLUS_SYNTHESIS","slots":SLOT_AREA});rewrite_factory.main()
+ evolution,source=jarvis_evolution_parent.resolve();canonical,_=jarvis_canonical_parent.resolve();print({"evolutionParent":evolution,"canonicalFloor":canonical,"source":str(source),"strategy":"STAGED_FIVE_HYPOTHESES_PLUS_SYNTHESIS","stage":2,"slots":SLOT_AREA});rewrite_factory.main()
 
 
 if __name__=="__main__":main()
