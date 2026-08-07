@@ -1,6 +1,6 @@
-// MJX 7303 V11 game bridge - custom AI3D renderer + V4 physics
-import {AI3DEngine,Node,V3,Mesh,boxMeshData,util} from './ai3d-engine-v11.js';
-import {AI7303Modeler,buildGarageEnvironment} from './mjx7303-ai-model-v11.js';
+// MJX 7303 V15 game bridge - direct custom AI3D renderer + V4 physics
+import {AI3DEngine,Node,V3,Mesh,boxMeshData,util} from './ai3d-engine-v15.js?v=20260807renderer15direct';
+import {AI7303Modeler,buildGarageEnvironment} from './mjx7303-asset-v13.js?v=20260807asset13direct';
 const $=s=>document.querySelector(s),clamp=util.clamp;
 const garageCanvas=$('#garage3d'),driveCanvas=$('#drive3d'),garageView=$('#garageView'),driveView=$('#driveView');
 const SAVE='jarvis-mjx7303-v11-garage',defaults={cash:25000,engine:0,turbo:0,tires:0,brakes:0,weight:0,nitrous:0,gyr:260,tc:25,pressure:32,diff:55,suspension:50};
