@@ -11,7 +11,9 @@ on:
       - racing-mjx7303-v19.html
       - racing-mjx7303-v20.html
       - racing-mjx7303-v24.html
+      - racing-mjx7303-v25.html
       - jarvis/**
+      - tools/**
       - classic-token.js
       - scripts/prepare-pages.mjs
       - factory/**
@@ -39,6 +41,27 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
+      - name: Install Blender CAD toolchain
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y blender
+          blender --version | head -2
+      - name: Build MJX 7303 V25 CAD asset
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/build_mjx7303_v25_blender.py
+          mkdir -p assets/mjx7303
+          MJX_V25_OUT=assets/mjx7303/mjx7303-v25.glb blender --background --factory-startup --python tools/build_mjx7303_v25_blender.py
+          test -s assets/mjx7303/mjx7303-v25.glb
+          node - <<'NODE'
+          const fs=require('fs');const b=fs.readFileSync('assets/mjx7303/mjx7303-v25.glb');
+          if(b.length<10000)throw Error('V25 Blender GLB unexpectedly small: '+b.length);
+          if(b.subarray(0,4).toString('ascii')!=='glTF')throw Error('V25 GLB magic invalid');
+          if(b.readUInt32LE(4)!==2)throw Error('V25 GLB is not glTF 2.0');
+          if(b.readUInt32LE(8)!==b.length)throw Error('V25 GLB length mismatch');
+          console.log({asset:'MJX7303_V25_BLENDER_CAD',bytes:b.length,glb:'VALID_GLB2'});
+          NODE
       - name: Validate current Jarvis workstation
         run: |
           set -euo pipefail
@@ -49,17 +72,19 @@ jobs:
           if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];
           const ids=new Set(c.workspaces.map(x=>x.id));for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
-          for(const p of ['racing-mjx7303-v24.html','racing-mjx7303-v20.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-playcanvas-v24.js'])if(!fs.existsSync(p))throw Error('Racing V24 asset missing: '+p);
+          for(const p of ['racing-mjx7303-v25.html','racing-mjx7303-v24.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-playcanvas-v25.js','tools/build_mjx7303_v25_blender.py','assets/mjx7303/mjx7303-v25.glb'])if(!fs.existsSync(p))throw Error('Racing V25 CAD asset missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','jarvis/app.js');check('index.html','classic-token.js');check('jarvis/state.js','public/device-data/releases.json');
-          check('racing-mjx7303-v24.html','V24 GTA5 Floor');check('racing-mjx7303-v24.html','mjx7303-physics-v4.js');check('racing-mjx7303-v24.html','mjx7303-playcanvas-v24.js');
-          check('jarvis/racing-tab.js','racing-mjx7303-v24.html');check('jarvis/racing-tab.js','V24 GTA5-FLOOR');
-          check('jarvis/mjx7303-playcanvas-v24.js','playcanvas@2.21.3');check('jarvis/mjx7303-playcanvas-v24.js','continuous-body-shell');check('jarvis/mjx7303-playcanvas-v24.js','glasshouse-shell');check('jarvis/mjx7303-playcanvas-v24.js','clearCoat');check('jarvis/mjx7303-playcanvas-v24.js','shadowResolution:2048');check('jarvis/mjx7303-playcanvas-v24.js','Back Wall');check('jarvis/mjx7303-playcanvas-v24.js','brake-disc');check('jarvis/mjx7303-playcanvas-v24.js','__V24_READY');
+          check('racing-mjx7303-v25.html','V25 CAD');check('racing-mjx7303-v25.html','mjx7303-physics-v4.js');check('racing-mjx7303-v25.html','mjx7303-playcanvas-v25.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v25.html');check('jarvis/racing-tab.js','V25 BLENDER CAD');
+          check('jarvis/mjx7303-playcanvas-v25.js','playcanvas@2.21.3');check('jarvis/mjx7303-playcanvas-v25.js','mjx7303-v25.glb');check('jarvis/mjx7303-playcanvas-v25.js','instantiateRenderEntity');check('jarvis/mjx7303-playcanvas-v25.js','__V25_READY');
+          check('tools/build_mjx7303_v25_blender.py','BODY_CLOSED_SUBDIV');check('tools/build_mjx7303_v25_blender.py','Automotive subdivision');check('tools/build_mjx7303_v25_blender.py','export_scene.gltf');
+          const b=fs.readFileSync('assets/mjx7303/mjx7303-v25.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('Generated V25 GLB failed final validation');
           for(const f of ['chief.html','builds.html','mission.html','completion.html','device.html','control.html','research.html','discovery.html','v3.html','updates.html','builder.html','web/index.html']){if(!fs.existsSync(f))throw Error('Compatibility route missing '+f);check(f,'Opening Jarvis')}
-          console.log({pages:'PASS',racing:'V24 GTA5 floor',renderer:'PlayCanvas 2.21.3',physics:'V4',paint:'CLEARCOAT_PBR',shadows:2048,environment:'GARAGE'});
+          console.log({pages:'PASS',racing:'V25 Blender CAD',renderer:'PlayCanvas 2.21.3',physics:'V4',model:'GENERATED_GLB',cad:'BLENDER'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
