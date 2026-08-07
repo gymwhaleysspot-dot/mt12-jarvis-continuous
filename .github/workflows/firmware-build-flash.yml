@@ -1,134 +1,180 @@
 name: Jarvis Named Firmware Build and Flash
+
 on:
   workflow_dispatch:
     inputs:
       platform:
+        description: Firmware platform
         required: true
         type: choice
-        options: [EDGETX, EXPRESSLRS]
+        options:
+          - EDGETX
+          - EXPRESSLRS
       operation:
+        description: Prepare package or flash connected radio
         required: true
         type: choice
-        options: [PREPARE, FLASH]
+        options:
+          - PREPARE
+          - FLASH
       channel:
+        description: Release channel
         required: true
         type: choice
-        options: [stable, prerelease]
+        options:
+          - stable
+          - prerelease
         default: stable
       version:
+        description: Exact release version
         required: true
+        type: string
       release_name:
+        description: Human-readable release name
         required: true
+        type: string
       asset_url:
+        description: Official EdgeTX firmware ZIP URL
         required: false
+        type: string
         default: ''
       asset_sha256:
+        description: Expected SHA-256 for downloaded EdgeTX asset
         required: false
+        type: string
         default: ''
       target:
+        description: Exact hardware target
         required: true
+        type: string
         default: RadioMaster MT12
       regulatory_domain:
+        description: ExpressLRS regulatory domain
         required: false
         type: choice
-        options: [ISM_2400, FCC_915, EU_CE_2400]
+        options:
+          - ISM_2400
+          - FCC_915
+          - EU_CE_2400
         default: ISM_2400
+
 permissions:
   contents: read
   actions: read
+
 concurrency:
-  group: jarvis-firmware-${{ inputs.platform }}-${{ inputs.target }}
+  group: jarvis-named-firmware-build-flash
   cancel-in-progress: false
+
 jobs:
   prepare-edgetx:
-    if: ${{ inputs.platform == 'EDGETX' }}
+    if: ${{ github.event.inputs.platform == 'EDGETX' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Validate named EdgeTX request
+        env:
+          TARGET: ${{ github.event.inputs.target }}
+          VERSION: ${{ github.event.inputs.version }}
+          RELEASE_NAME: ${{ github.event.inputs.release_name }}
+          ASSET_URL: ${{ github.event.inputs.asset_url }}
         run: |
           set -euo pipefail
-          test '${{ inputs.target }}' = 'RadioMaster MT12'
-          test -n '${{ inputs.version }}'
-          test -n '${{ inputs.release_name }}'
-          test -n '${{ inputs.asset_url }}'
-      - name: Download, verify and extract MT12 firmware
+          test "$TARGET" = 'RadioMaster MT12'
+          test -n "$VERSION"
+          test -n "$RELEASE_NAME"
+          test -n "$ASSET_URL"
+      - name: Download verify and extract MT12 firmware
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          NAME: ${{ github.event.inputs.release_name }}
+          CHANNEL: ${{ github.event.inputs.channel }}
+          ASSET_URL: ${{ github.event.inputs.asset_url }}
+          EXPECTED_SHA256: ${{ github.event.inputs.asset_sha256 }}
         run: |
           set -euo pipefail
-          mkdir -p firmware-output/raw firmware-output/mt12
-          curl --fail --location --retry 3 '${{ inputs.asset_url }}' -o firmware-output/raw/official.zip
-          ACTUAL=$(sha256sum firmware-output/raw/official.zip|cut -d' ' -f1)
-          EXPECTED='${{ inputs.asset_sha256 }}'
-          if [ -n "$EXPECTED" ] && [ "$ACTUAL" != "$EXPECTED" ]; then exit 1; fi
+          mkdir -p firmware-output/raw firmware-output/mt12 firmware-output/unpacked
+          curl --fail --location --retry 3 "$ASSET_URL" -o firmware-output/raw/official.zip
+          ACTUAL="$(sha256sum firmware-output/raw/official.zip | cut -d' ' -f1)"
+          if [ -n "$EXPECTED_SHA256" ] && [ "$ACTUAL" != "$EXPECTED_SHA256" ]; then
+            echo "SHA-256 mismatch: expected $EXPECTED_SHA256 got $ACTUAL" >&2
+            exit 1
+          fi
           unzip -q firmware-output/raw/official.zip -d firmware-output/unpacked
           find firmware-output/unpacked -type f \( -iname '*mt12*.bin' -o -iname '*mt12*.dfu' -o -iname '*mt12*.uf2' \) -exec cp {} firmware-output/mt12/ \;
-          test "$(find firmware-output/mt12 -type f|wc -l)" -gt 0
+          test "$(find firmware-output/mt12 -type f | wc -l)" -gt 0
           sha256sum firmware-output/mt12/* > firmware-output/SHA256SUMS
           python3 - <<'PY'
-          import json,glob,hashlib,os
+          import glob, hashlib, json, os
           files=[]
           for p in glob.glob('firmware-output/mt12/*'):
-            b=open(p,'rb').read();files.append({'name':os.path.basename(p),'sha256':hashlib.sha256(b).hexdigest(),'size':len(b)})
-          m={'schema':1,'platform':'EdgeTX','version':os.environ['VERSION'],'releaseName':os.environ['NAME'],'channel':os.environ['CHANNEL'],'target':'RadioMaster MT12','files':files,'authority':'PACKAGE_BUILT','backupRequired':True,'postFlashCertificationRequired':True}
-          open('firmware-output/BUILD-MANIFEST.json','w').write(json.dumps(m,indent=2)+'\n')
+              with open(p,'rb') as f: b=f.read()
+              files.append({'name':os.path.basename(p),'sha256':hashlib.sha256(b).hexdigest(),'size':len(b)})
+          manifest={'schema':1,'platform':'EdgeTX','version':os.environ['VERSION'],'releaseName':os.environ['NAME'],'channel':os.environ['CHANNEL'],'target':'RadioMaster MT12','files':files,'authority':'PACKAGE_BUILT','backupRequired':True,'postFlashCertificationRequired':True}
+          with open('firmware-output/BUILD-MANIFEST.json','w') as f: json.dump(manifest,f,indent=2); f.write('\n')
           PY
-        env:
-          VERSION: ${{ inputs.version }}
-          NAME: ${{ inputs.release_name }}
-          CHANNEL: ${{ inputs.channel }}
       - uses: actions/upload-artifact@v6
         with:
-          name: edgetx-${{ inputs.version }}-mt12
+          name: edgetx-${{ github.event.inputs.version }}-mt12
           path: firmware-output
           if-no-files-found: error
           retention-days: 90
+
   prepare-elrs:
-    if: ${{ inputs.platform == 'EXPRESSLRS' }}
-    runs-on: [self-hosted, elrs-builder]
+    if: ${{ github.event.inputs.platform == 'EXPRESSLRS' }}
+    runs-on:
+      - self-hosted
+      - elrs-builder
     steps:
       - uses: actions/checkout@v5
       - name: Build named ExpressLRS firmware
         env:
+          VERSION: ${{ github.event.inputs.version }}
+          NAME: ${{ github.event.inputs.release_name }}
+          CHANNEL: ${{ github.event.inputs.channel }}
+          TARGET: ${{ github.event.inputs.target }}
+          DOMAIN: ${{ github.event.inputs.regulatory_domain }}
           ELRS_BINDING_PHRASE: ${{ secrets.ELRS_BINDING_PHRASE }}
           ELRS_WIFI_SSID: ${{ secrets.ELRS_WIFI_SSID }}
           ELRS_WIFI_PASSWORD: ${{ secrets.ELRS_WIFI_PASSWORD }}
         run: |
           set -euo pipefail
-          test '${{ inputs.target }}' = 'RadioMaster MT12 Internal 2.4GHz TX'
+          test "$TARGET" = 'RadioMaster MT12 Internal 2.4GHz TX'
           command -v a17y-elrs-official-build
           test -n "$ELRS_BINDING_PHRASE"
           mkdir -p firmware-output
-          a17y-elrs-official-build --version '${{ inputs.version }}' --target '${{ inputs.target }}' --domain '${{ inputs.regulatory_domain }}' --output firmware-output
+          a17y-elrs-official-build --version "$VERSION" --target "$TARGET" --domain "$DOMAIN" --output firmware-output
           test -f firmware-output/firmware.bin
           sha256sum firmware-output/firmware.bin > firmware-output/SHA256SUMS
           python3 - <<'PY'
-          import json,hashlib,os
-          p='firmware-output/firmware.bin';b=open(p,'rb').read()
-          m={'schema':1,'platform':'ExpressLRS','version':os.environ['VERSION'],'releaseName':os.environ['NAME'],'channel':os.environ['CHANNEL'],'target':'RadioMaster MT12 Internal 2.4GHz TX','regulatoryDomain':os.environ['DOMAIN'],'files':[{'name':'firmware.bin','sha256':hashlib.sha256(b).hexdigest(),'size':len(b)}],'authority':'PACKAGE_BUILT','backupRequired':True,'postFlashCertificationRequired':True}
-          open('firmware-output/BUILD-MANIFEST.json','w').write(json.dumps(m,indent=2)+'\n')
+          import hashlib, json, os
+          p='firmware-output/firmware.bin'
+          with open(p,'rb') as f: b=f.read()
+          manifest={'schema':1,'platform':'ExpressLRS','version':os.environ['VERSION'],'releaseName':os.environ['NAME'],'channel':os.environ['CHANNEL'],'target':os.environ['TARGET'],'regulatoryDomain':os.environ['DOMAIN'],'files':[{'name':'firmware.bin','sha256':hashlib.sha256(b).hexdigest(),'size':len(b)}],'authority':'PACKAGE_BUILT','backupRequired':True,'postFlashCertificationRequired':True}
+          with open('firmware-output/BUILD-MANIFEST.json','w') as f: json.dump(manifest,f,indent=2); f.write('\n')
           PY
-        env:
-          VERSION: ${{ inputs.version }}
-          NAME: ${{ inputs.release_name }}
-          CHANNEL: ${{ inputs.channel }}
-          DOMAIN: ${{ inputs.regulatory_domain }}
       - uses: actions/upload-artifact@v6
         with:
-          name: elrs-${{ inputs.version }}-mt12
+          name: elrs-${{ github.event.inputs.version }}-mt12
           path: firmware-output
           if-no-files-found: error
           retention-days: 90
+
   flash-edgetx:
-    if: ${{ inputs.platform == 'EDGETX' && inputs.operation == 'FLASH' }}
+    if: ${{ github.event.inputs.platform == 'EDGETX' && github.event.inputs.operation == 'FLASH' }}
     needs: prepare-edgetx
-    runs-on: [self-hosted, mt12-flasher]
+    runs-on:
+      - self-hosted
+      - mt12-flasher
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v6
         with:
-          name: edgetx-${{ inputs.version }}-mt12
+          name: edgetx-${{ github.event.inputs.version }}-mt12
           path: firmware-package
-      - name: Backup, flash and verify MT12
+      - name: Backup flash and verify MT12
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
           command -v a17y-mt12-detect
@@ -139,23 +185,28 @@ jobs:
           a17y-mt12-backup --output flash-evidence/backup
           a17y-mt12-flash --manifest firmware-package/BUILD-MANIFEST.json --require-backup flash-evidence/backup/BACKUP-MANIFEST.json --noninteractive
           a17y-mt12-detect --require-target 'RadioMaster MT12' --wait 120
-          a17y-mt12-flash --verify --expected-version '${{ inputs.version }}' --output flash-evidence/POST-FLASH.json
+          a17y-mt12-flash --verify --expected-version "$VERSION" --output flash-evidence/POST-FLASH.json
       - uses: actions/upload-artifact@v6
         with:
-          name: edgetx-flash-evidence-${{ inputs.version }}
+          name: edgetx-flash-evidence-${{ github.event.inputs.version }}
           path: flash-evidence
           retention-days: 365
+
   flash-elrs:
-    if: ${{ inputs.platform == 'EXPRESSLRS' && inputs.operation == 'FLASH' }}
+    if: ${{ github.event.inputs.platform == 'EXPRESSLRS' && github.event.inputs.operation == 'FLASH' }}
     needs: prepare-elrs
-    runs-on: [self-hosted, mt12-flasher]
+    runs-on:
+      - self-hosted
+      - mt12-flasher
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v6
         with:
-          name: elrs-${{ inputs.version }}-mt12
+          name: elrs-${{ github.event.inputs.version }}-mt12
           path: firmware-package
-      - name: Backup, flash and verify internal ELRS module
+      - name: Backup flash and verify internal ELRS module
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
           command -v a17y-mt12-detect
@@ -165,9 +216,9 @@ jobs:
           mkdir -p flash-evidence/backup
           a17y-mt12-backup --output flash-evidence/backup
           a17y-mt12-flash --manifest firmware-package/BUILD-MANIFEST.json --require-backup flash-evidence/backup/BACKUP-MANIFEST.json --noninteractive
-          a17y-mt12-flash --verify --expected-version '${{ inputs.version }}' --component expresslrs --output flash-evidence/POST-FLASH.json
+          a17y-mt12-flash --verify --expected-version "$VERSION" --component expresslrs --output flash-evidence/POST-FLASH.json
       - uses: actions/upload-artifact@v6
         with:
-          name: elrs-flash-evidence-${{ inputs.version }}
+          name: elrs-flash-evidence-${{ github.event.inputs.version }}
           path: flash-evidence
           retention-days: 365
