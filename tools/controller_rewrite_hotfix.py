@@ -6,6 +6,7 @@ from pathlib import Path
 import controller_rewrite_factory as rewrite_factory
 import controller_tournament as tournament
 import jarvis_canonical_parent
+import jarvis_evolution_parent
 
 ROOT=Path(__file__).resolve().parents[1]
 _original_checks=tournament.protected_checks
@@ -116,7 +117,7 @@ def experiment_rewrite(text:str,profile:str,experiment:dict,generation:str)->str
 
 
 def _parent_text()->str:
- _,p=jarvis_canonical_parent.resolve();return p.read_text()
+ _,p=jarvis_evolution_parent.resolve();return p.read_text()
 
 
 def candidate_bonus(profile:str,text:str)->dict[str,float]:
@@ -131,8 +132,8 @@ def candidate_bonus(profile:str,text:str)->dict[str,float]:
 
 
 def main()->None:
- tournament.latest_release=jarvis_canonical_parent.resolve;tournament.protected_checks=protected_checks;tournament.candidate_bonus=candidate_bonus;tournament.imprint_runtime_identity=imprint_runtime_identity;rewrite_factory.experiment_rewrite=experiment_rewrite
- parent,source=jarvis_canonical_parent.resolve();print({"canonicalParent":parent,"source":str(source),"strategy":"FIVE_HYPOTHESES_PLUS_SYNTHESIS","slots":SLOT_AREA});rewrite_factory.main()
+ tournament.latest_release=jarvis_evolution_parent.resolve;tournament.protected_checks=protected_checks;tournament.candidate_bonus=candidate_bonus;tournament.imprint_runtime_identity=imprint_runtime_identity;rewrite_factory.experiment_rewrite=experiment_rewrite
+ evolution,source=jarvis_evolution_parent.resolve();canonical,_=jarvis_canonical_parent.resolve();print({"evolutionParent":evolution,"canonicalFloor":canonical,"source":str(source),"strategy":"FIVE_HYPOTHESES_PLUS_SYNTHESIS","slots":SLOT_AREA});rewrite_factory.main()
 
 
 if __name__=="__main__":main()
