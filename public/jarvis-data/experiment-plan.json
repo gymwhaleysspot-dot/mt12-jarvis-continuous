@@ -1,10 +1,10 @@
 {
   "buildState": {
-    "duplicatesRejected": 56,
+    "duplicatesRejected": 57,
     "unique": 2
   },
   "champion": "j00002",
-  "generatedAt": "2026-08-06T14:34:08.883109+00:00",
+  "generatedAt": "2026-08-07T00:30:34.658856+00:00",
   "graphState": {
     "nodes": 8,
     "relationships": 3
@@ -18,20 +18,20 @@
       "mustCompareAgainstChampion": true,
       "noRegression": true
     },
-    "area": "abs-control",
-    "createdAt": "2026-08-06T14:34:08.883102+00:00",
-    "expectedInformationGain": 0.7996,
-    "hypothesis": "A controller derived from j00002 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-    "id": "EXP-20260806143408",
-    "measurement": "reduce lock duration without increasing stopping distance proxy",
+    "area": "jump-landing-classification",
+    "createdAt": "2026-08-07T00:30:34.658849+00:00",
+    "expectedInformationGain": 0.7988,
+    "hypothesis": "A controller derived from j00002 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
+    "id": "EXP-20260807003034",
+    "measurement": "reduce jump false positives while preserving true jump recall",
     "mutations": [
-      "adaptive lock target confidence",
-      "linear release/reapply timing"
+      "separate airborne and landing evidence",
+      "adaptive post-landing confirmation window"
     ],
-    "name": "Improve abs control",
+    "name": "Improve jump landing classification",
     "parent": "j00002",
-    "priority": 0.7996,
-    "reason": "Highest expected information gain; uncertainty=0.57, evidence coverage=0, prior experiments=0.",
+    "priority": 0.7988,
+    "reason": "Highest expected information gain; uncertainty=0.6, evidence coverage=0, prior experiments=0.",
     "requiredTests": [
       "Lua 5.3 compile",
       "MT12 normalization",
@@ -41,24 +41,9 @@
       "adversarial regression suite",
       "runtime memory check"
     ],
-    "uncertainty": 0.57
+    "uncertainty": 0.6
   },
   "rankedUnknowns": [
-    {
-      "area": "abs-control",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.7996,
-      "impact": 0.91,
-      "measure": "reduce lock duration without increasing stopping distance proxy",
-      "mutation": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.7996,
-      "recentSelections": 0,
-      "uncertainty": 0.57
-    },
     {
       "area": "jump-landing-classification",
       "evidenceCoverage": 0,
@@ -118,6 +103,21 @@
       "priority": 0.791,
       "recentSelections": 1,
       "uncertainty": 0.55
+    },
+    {
+      "area": "abs-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.7796,
+      "impact": 0.91,
+      "measure": "reduce lock duration without increasing stopping distance proxy",
+      "mutation": [
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.7796,
+      "recentSelections": 1,
+      "uncertainty": 0.57
     },
     {
       "area": "digital-twin-transfer",
