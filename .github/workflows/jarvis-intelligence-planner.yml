@@ -35,11 +35,16 @@ jobs:
           from pathlib import Path
           p=json.loads(Path('public/jarvis-data/experiment-plan.json').read_text())
           e=p['nextExperiment']
-          assert p['schema']=='JARVIS-EXPERIMENT-PLAN-1'
+          assert p['schema']=='JARVIS-EXPERIMENT-PLAN-4'
+          assert len(e['portfolio'])==5
+          assert e['synthesis']['area']=='synthesis-all-five'
           assert e['hypothesis'] and e['mutations'] and e['measurement']
           assert e['acceptanceCriteria']['mustCompareAgainstChampion'] is True
+          assert e['acceptanceCriteria']['mustPreserveCanonicalFloor'] is True
+          assert e['acceptanceCriteria']['fiveIndependentHypotheses'] is True
+          assert e['acceptanceCriteria']['sixthSynthesisRequired'] is True
           assert 0 <= e['expectedInformationGain'] <= 1
-          print(e['id'], e['area'], e['expectedInformationGain'])
+          print(e['id'],e['area'],e['expectedInformationGain'],p['schema'])
           PY
       - name: Persist planner decision
         run: |
