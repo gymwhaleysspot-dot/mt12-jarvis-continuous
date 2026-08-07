@@ -1,227 +1,107 @@
-# JARVIS V25 MJX 7303 Blender asset generator
-# Generates a game-ready C3/WRC-inspired MJX 7303 GLB for the browser renderer.
+# JARVIS V25.2 MJX 7303 Blender CAD/game-asset generator
+# Reference-driven rebuild: 375 mm wheelbase is the hard scale anchor.
+# Produces a closed, subdivision-smoothed C3 WRC-style body for PlayCanvas.
 import bpy, math, os
 from mathutils import Vector
-
 OUT=os.environ.get('MJX_V25_OUT','assets/mjx7303/mjx7303-v25.glb')
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
-
-# Clean scene
-bpy.ops.object.select_all(action='SELECT')
-bpy.ops.object.delete(use_global=False)
-for datablocks in (bpy.data.meshes,bpy.data.curves,bpy.data.materials,bpy.data.cameras,bpy.data.lights):
-    pass
-
-def set_input(bsdf,names,value):
+bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
+COLL=bpy.data.collections.new('MJX7303_V25_REFERENCE_CAD'); bpy.context.scene.collection.children.link(COLL)
+def link(o):
+    for c in list(o.users_collection): c.objects.unlink(o)
+    COLL.objects.link(o); return o
+def inp(b,names,v):
     for n in names:
-        if n in bsdf.inputs:
-            bsdf.inputs[n].default_value=value
-            return
-
-def material(name,color,metal=0.0,rough=.35,coat=0.0,coat_rough=.08,alpha=1.0,emission=None):
-    m=bpy.data.materials.new(name)
-    m.use_nodes=True
-    bsdf=m.node_tree.nodes.get('Principled BSDF')
-    set_input(bsdf,['Base Color'],(*color,alpha))
-    set_input(bsdf,['Metallic'],metal)
-    set_input(bsdf,['Roughness'],rough)
-    set_input(bsdf,['Coat Weight','Clearcoat'],coat)
-    set_input(bsdf,['Coat Roughness','Clearcoat Roughness'],coat_rough)
-    set_input(bsdf,['Alpha'],alpha)
-    if emission:
-        set_input(bsdf,['Emission Color','Emission'],(*emission,1))
-        set_input(bsdf,['Emission Strength'],3.0)
+        if n in b.inputs: b.inputs[n].default_value=v; return
+def mat(name,c,metal=0,rough=.35,coat=0,alpha=1,emit=None):
+    m=bpy.data.materials.new(name);m.use_nodes=True;b=m.node_tree.nodes.get('Principled BSDF')
+    inp(b,['Base Color'],(*c,alpha));inp(b,['Metallic'],metal);inp(b,['Roughness'],rough);inp(b,['Coat Weight','Clearcoat'],coat);inp(b,['Coat Roughness','Clearcoat Roughness'],.06);inp(b,['Alpha'],alpha)
+    if emit: inp(b,['Emission Color','Emission'],(*emit,1));inp(b,['Emission Strength'],2.5)
     if alpha<1:
         try:m.surface_render_method='DITHERED'
         except:pass
         try:m.blend_method='BLEND'
         except:pass
-        m.diffuse_color=(*color,alpha)
+        m.diffuse_color=(*c,alpha)
     return m
-
-RED=material('Rally Red',(0.72,0.008,0.015),.12,.18,1.0,.06)
-BLACK=material('Carbon Black',(0.008,0.010,0.014),.28,.25,.35,.10)
-GLASS=material('Smoked Glass',(0.012,0.035,0.055),.02,.08,.4,.04,.32)
-WHITE=material('Rally White',(0.92,0.94,0.98),.06,.20,.75,.07)
-DARK=material('Interior',(0.015,0.018,0.022),.05,.48,.12,.2)
-METAL=material('Machined Metal',(0.45,0.48,0.52),.82,.19,.25,.08)
-RUBBER=material('Tire Rubber',(0.006,0.006,0.007),0,.72,0,.2)
-YELLOW=material('Rally Accent',(0.95,0.62,0.01),.02,.32,.35,.12)
-LAMP=material('Headlamp',(0.82,0.90,1.0),.05,.08,.7,.03,1.0,(0.55,0.72,1.0))
-TAIL=material('Tail Lamp',(0.75,0.005,0.008),.02,.13,.6,.04,1.0,(1.0,0.01,0.01))
-
-COLL=bpy.data.collections.new('MJX7303_V25')
-bpy.context.scene.collection.children.link(COLL)
-
-def move_to_coll(o):
-    for c in list(o.users_collection):c.objects.unlink(o)
-    COLL.objects.link(o)
-    return o
-
+RED=mat('AbuDhabi_Rally_Red',(.72,.012,.018),.08,.19,1);WHITE=mat('Roof_White',(.94,.95,.97),.04,.2,.8);BLACK=mat('Carbon_Cladding',(.008,.009,.012),.18,.27,.25);DARK=mat('Cabin_Black',(.012,.015,.020),.03,.48,.08);GLASS=mat('Smoked_Glass',(.012,.040,.070),0,.10,.28,.30);RUBBER=mat('Rally_Tire',(.004,.004,.005),0,.72,0);METAL=mat('Brake_Metal',(.42,.45,.50),.82,.2,.2);YELLOW=mat('WRC_Yellow',(.95,.62,.01),0,.30,.25);LAMP=mat('Headlamp',(.8,.9,1),.02,.09,.55,1,(.45,.65,1));TAIL=mat('TailLamp',(.75,.005,.008),.02,.12,.55,1,(1,.01,.01))
+WB=3.75;AX_F=-WB/2;AX_R=WB/2;BODY_FRONT=-2.45;BODY_REAR=2.42;TRACK_HALF=1.28
 def smooth(o):
-    if hasattr(o.data,'polygons'):
+    if o.type=='MESH':
         for p in o.data.polygons:p.use_smooth=True
     return o
-
-def bevel(o,w=.04,segments=3):
-    mod=o.modifiers.new('CAD edge radius','BEVEL');mod.width=w;mod.segments=segments
-    return o
-
-def cube(name,loc,scale,mat,bevel_w=.04):
-    bpy.ops.mesh.primitive_cube_add(location=loc)
-    o=move_to_coll(bpy.context.object);o.name=name;o.scale=scale
-    bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
-    if bevel_w:bevel(o,bevel_w,3)
-    o.data.materials.append(mat)
-    return o
-
-def uv_sphere(name,loc,scale,mat,seg=32,rings=16):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=seg,ring_count=rings,location=loc)
-    o=move_to_coll(bpy.context.object);o.name=name;o.scale=scale
-    bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
-    smooth(o);o.data.materials.append(mat);return o
-
-def cyl(name,loc,radius,depth,mat,rot=(0,0,0),verts=32):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=verts,radius=radius,depth=depth,location=loc,rotation=rot)
-    o=move_to_coll(bpy.context.object);o.name=name;smooth(o);bevel(o,.018,2);o.data.materials.append(mat);return o
-
-def torus(name,loc,major,minor,mat,rot=(0,0,0)):
-    bpy.ops.mesh.primitive_torus_add(major_radius=major,minor_radius=minor,major_segments=40,minor_segments=12,location=loc,rotation=rot)
-    o=move_to_coll(bpy.context.object);o.name=name;smooth(o);o.data.materials.append(mat);return o
-
-def loft(name,sections,ring,mat,powx=.72,powy=.82,subdiv=2):
-    verts=[];faces=[]
-    for z,w,b,t in sections:
-        cy=(b+t)*.5;ry=(t-b)*.5
-        for j in range(ring):
-            a=2*math.pi*j/ring;ca=math.cos(a);sa=math.sin(a)
-            x=math.copysign(abs(ca)**powx,ca)*w
-            y=cy+math.copysign(abs(sa)**powy,sa)*ry
-            verts.append((x,z,y)) # Blender: x,width ; y,length ; z,height
-    ns=len(sections)
-    for s in range(ns-1):
-        for j in range(ring):
-            a=s*ring+j;b=s*ring+(j+1)%ring;c=(s+1)*ring+j;d=(s+1)*ring+(j+1)%ring
-            faces.append((a,c,d,b))
-    faces.append(tuple(range(ring-1,-1,-1)))
-    off=(ns-1)*ring;faces.append(tuple(off+j for j in range(ring)))
-    me=bpy.data.meshes.new(name+'Mesh');me.from_pydata(verts,[],faces);me.update()
-    o=bpy.data.objects.new(name,me);COLL.objects.link(o);o.data.materials.append(mat);smooth(o)
+def bevel(o,w=.025,n=3):m=o.modifiers.new('CAD edge radius','BEVEL');m.width=w;m.segments=n;return o
+def cube(name,loc,scale,material,bw=.02,rot=(0,0,0)):
+    bpy.ops.mesh.primitive_cube_add(location=loc,rotation=rot);o=link(bpy.context.object);o.name=name;o.scale=scale;bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
+    if bw:bevel(o,bw,3)
+    o.data.materials.append(material);return o
+def cyl(name,loc,r,depth,material,rot=(0,0,0),verts=40):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=verts,radius=r,depth=depth,location=loc,rotation=rot);o=link(bpy.context.object);o.name=name;smooth(o);o.data.materials.append(material);return o
+def torus(name,loc,major,minor,material,rot=(0,0,0),maj=48,minseg=14):
+    bpy.ops.mesh.primitive_torus_add(major_radius=major,minor_radius=minor,major_segments=maj,minor_segments=minseg,location=loc,rotation=rot);o=link(bpy.context.object);o.name=name;smooth(o);o.data.materials.append(material);return o
+def bar(name,a,b,r=.022,material=METAL):
+    a,b=Vector(a),Vector(b);d=b-a;bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=r,depth=d.length,location=(a+b)/2);o=link(bpy.context.object);o.name=name;o.rotation_mode='QUATERNION';o.rotation_quaternion=d.to_track_quat('Z','Y');smooth(o);o.data.materials.append(material);return o
+def loft_rings(name,stations,material,subdiv=2):
+    verts=[];faces=[];N=12
+    for y,w,sill,shoulder,rw,roof in stations:
+        verts += [(-w,y,sill),(-w,y,shoulder*.70),(-w*.96,y,shoulder),(-rw,y,roof*.91),(-rw*.72,y,roof),(0,y,roof*1.015),(rw*.72,y,roof),(rw,y,roof*.91),(w*.96,y,shoulder),(w,y,shoulder*.70),(w,y,sill),(0,y,sill*.92)]
+    for s in range(len(stations)-1):
+        for j in range(N):
+            a=s*N+j;b=s*N+(j+1)%N;c=(s+1)*N+j;d=(s+1)*N+(j+1)%N;faces.append((a,c,d,b))
+    faces.append(tuple(range(N-1,-1,-1)));off=(len(stations)-1)*N;faces.append(tuple(off+i for i in range(N)))
+    me=bpy.data.meshes.new(name+'Mesh');me.from_pydata(verts,[],faces);me.update();o=bpy.data.objects.new(name,me);COLL.objects.link(o);o.data.materials.append(material);smooth(o)
     if subdiv:
         m=o.modifiers.new('Automotive subdivision','SUBSURF');m.subdivision_type='CATMULL_CLARK';m.levels=subdiv;m.render_levels=subdiv
     return o
-
-# Main body: compact hatchback proportions with WRC shoulders.
-body_sections=[
-(-2.20,.68,.28,.48),(-2.08,.88,.27,.64),(-1.88,1.00,.27,.80),(-1.55,1.08,.27,.92),
-(-1.22,1.11,.27,1.00),(-.84,1.10,.28,1.05),(-.42,1.08,.28,1.08),(0.00,1.075,.28,1.10),
-(.42,1.08,.28,1.11),(.84,1.10,.28,1.09),(1.20,1.11,.28,1.04),(1.52,1.08,.28,.96),
-(1.78,1.02,.28,.86),(2.02,.92,.28,.72),(2.18,.72,.29,.55)]
-body=loft('BODY_CLOSED_SUBDIV',body_sections,32,RED,.66,.76,2)
-
-# Glasshouse as its own smooth enclosed shell.
-glass_sections=[(-.88,.69,.92,1.18),(-.68,.76,.92,1.40),(-.40,.80,.92,1.56),(-.05,.82,.92,1.65),(.36,.82,.92,1.67),(.74,.80,.92,1.62),(1.05,.76,.92,1.50),(1.30,.68,.92,1.30),(1.47,.58,.93,1.10)]
-glass=loft('GLASSHOUSE',glass_sections,28,GLASS,.78,.84,2)
-
-# Black belt/pillars visually separate the windows.
+st=[(BODY_FRONT,.78,.28,.52,.44,.62),(-2.32,.99,.27,.72,.58,.78),(-2.12,1.13,.27,.92,.72,1.02),(AX_F,1.22,.27,1.08,.82,1.28),(-1.56,1.25,.28,1.14,.88,1.46),(-1.25,1.22,.28,1.18,.91,1.66),(-.86,1.18,.29,1.20,.92,1.83),(-.38,1.16,.29,1.21,.91,1.94),(.10,1.16,.29,1.22,.90,1.98),(.58,1.17,.29,1.22,.89,1.94),(1.02,1.19,.29,1.20,.86,1.84),(1.42,1.23,.28,1.17,.81,1.66),(AX_R,1.24,.27,1.12,.75,1.48),(2.10,1.12,.27,.99,.64,1.29),(2.30,.98,.27,.83,.52,1.10),(BODY_REAR,.82,.29,.66,.43,.90)]
+body=loft_rings('BODY_CLOSED_SUBDIV',st,RED,2)
+roof_st=[(-1.22,.75,1.50,1.52,.72,1.72),(-.82,.83,1.56,1.68,.80,1.88),(-.35,.84,1.62,1.78,.81,1.99),(.15,.84,1.64,1.82,.80,2.02),(.65,.82,1.61,1.78,.78,1.98),(1.08,.77,1.54,1.66,.72,1.83),(1.42,.68,1.43,1.52,.62,1.62)]
+roof=loft_rings('ROOF_WHITE_SUBDIV',roof_st,WHITE,1)
+def panel(name,pts,material=GLASS):
+    me=bpy.data.meshes.new(name+'Mesh');me.from_pydata(pts,[],[tuple(range(len(pts)))]);me.update();o=bpy.data.objects.new(name,me);COLL.objects.link(o);o.data.materials.append(material);return o
 for sx in (-1,1):
-    cube('Window belt', (sx*.91,.30,.99),(.035,1.48,.07),BLACK,.018)
-    for y in (-.62,.18,1.02):cube('Window pillar',(sx*.79,y,1.30),(.055,.055,.39),BLACK,.018)
-    cube('Side skirt',(sx*1.03,.05,.39),(.07,2.78,.12),BLACK,.025)
-    cube('Mirror',(sx*1.02,-.68,1.28),(.18,.22,.10),BLACK,.04)
-
-# Hood shaping and bumper volumes.
-cube('Front bumper',(0,-2.09,.56),(.96,.17,.28),BLACK,.08)
-cube('Front splitter',(0,-2.27,.31),(1.05,.28,.055),BLACK,.035)
-cube('Rear bumper',(0,2.09,.55),(.94,.16,.25),BLACK,.07)
-cube('Rear diffuser',(0,2.22,.31),(.87,.24,.14),BLACK,.035)
-
-# Wide rally arches: painted shoulders + black lip.
-wheel_y=(-1.34,1.34)
+    x=sx*1.166;panel('Front side glass',[(x,-1.12,1.31),(x,-.77,1.76),(x,-.18,1.82),(x,-.18,1.27)]);panel('Rear side glass',[(x,-.10,1.27),(x,-.10,1.82),(x,.89,1.73),(x,1.33,1.42),(x,1.33,1.27)])
+panel('Windshield',[(-.78,-1.20,1.32),(.78,-1.20,1.32),(.70,-.76,1.78),(-.70,-.76,1.78)]);panel('Rear hatch glass',[(-.72,1.36,1.36),(.72,1.36,1.36),(.64,1.16,1.69),(-.64,1.16,1.69)])
 for sx in (-1,1):
-    for wy in wheel_y:
-        uv_sphere('Painted fender',(sx*.98,wy,.63),(.43,.56,.40),RED,32,16)
-        torus('Arch cladding',(sx*1.055,wy,.56),.41,.065,BLACK,(math.pi/2,0,0))
-
-# Wheels: real tire + rim + disc + caliper + hub + spokes.
+    cube('B pillar',(sx*1.18,-.12,1.52),(.04,.045,.34),BLACK,.01);cube('C pillar',(sx*1.17,1.13,1.47),(.045,.15,.28),BLACK,.012);cube('Window sill',(sx*1.19,.08,1.24),(.025,1.30,.04),BLACK,.01)
+    for ay in (AX_F,AX_R):torus('Arch lip',(sx*1.245,ay,.62),.49,.055,BLACK,(0,math.pi/2,0),52,12)
+    cube('Rocker cladding',(sx*1.215,.04,.42),(.055,1.62,.13),BLACK,.025);cube('Yellow sill stripe',(sx*1.274,.05,.315),(.018,1.60,.025),YELLOW,.006)
 for sx in (-1,1):
-    for wy in wheel_y:
-        torus('Tire',(sx*1.09,wy,.50),.40,.15,RUBBER,(0,math.pi/2,0))
-        cyl('Rim barrel',(sx*1.09,wy,.50),.29,.21,WHITE,(0,math.pi/2,0),40)
-        cyl('Brake disc',(sx*1.105,wy,.50),.22,.025,METAL,(0,math.pi/2,0),36)
-        cyl('Hub',(sx*1.12,wy,.50),.075,.23,METAL,(0,math.pi/2,0),28)
-        # 12 spokes in wheel Y/Z plane; slim beveled boxes rotated around X.
-        for k in range(12):
-            a=2*math.pi*k/12
-            o=cube('Rim spoke',(sx*1.125,wy+math.cos(a)*.13,.50+math.sin(a)*.13),(.022,.12,.028),WHITE,.012)
-            o.rotation_euler[0]=a
-        cal=cube('Brake caliper',(sx*1.13,wy-.16,.51),(.032,.055,.12),RED,.02)
-
-# Front identity: split lamps, center grille, chevrons.
-cube('Upper grille',(0,-2.19,.79),(.69,.035,.07),BLACK,.018)
-cube('Center intake',(0,-2.21,.57),(.52,.035,.16),DARK,.025)
+    for ay in (AX_F,AX_R):
+        torus('Tire',(sx*TRACK_HALF,ay,.53),.405,.145,RUBBER,(0,math.pi/2,0),56,16);cyl('Wheel rim',(sx*TRACK_HALF,ay,.53),.295,.18,WHITE,(0,math.pi/2,0),48);cyl('Brake disc',(sx*(TRACK_HALF+.01),ay,.53),.205,.025,METAL,(0,math.pi/2,0),40);cyl('Hub',(sx*(TRACK_HALF+.025),ay,.53),.065,.20,METAL,(0,math.pi/2,0),32)
+        for k in range(14):
+            a=2*math.pi*k/14;o=cube('Rally spoke',(sx*(TRACK_HALF+.11),ay+math.cos(a)*.145,.53+math.sin(a)*.145),(.014,.125,.018),WHITE,.006);o.rotation_euler[0]=a
+        cube('Brake caliper',(sx*(TRACK_HALF+.12),ay-.16,.54),(.028,.045,.10),RED,.012)
+cube('Front splitter',(0,-2.49,.29),(1.18,.20,.045),BLACK,.018);cube('Front grille',(0,-2.435,.62),(.63,.035,.19),BLACK,.02);cube('Lower intake',(0,-2.45,.43),(.48,.03,.085),DARK,.018)
 for sx in (-1,1):
-    cube('Upper lamp',(sx*.62,-2.20,.86),(.34,.035,.085),LAMP,.035)
-    uv_sphere('Lower lamp',(sx*.73,-2.17,.65),(.23,.06,.19),LAMP,24,12)
-for z in (.76,.68):
-    for sx,ang in ((-1,-35),(1,35)):
-        o=cube('Chevron',(sx*.11,-2.255,z),(.035,.22,.026),WHITE,.01);o.rotation_euler[1]=math.radians(ang)
-
-# Rear lighting and aero.
-for sx in (-1,1):uv_sphere('Tail lamp',(sx*.78,2.10,.79),(.22,.055,.23),TAIL,24,12)
-cube('Rear wing',(0,1.86,1.63),(.90,.25,.055),BLACK,.035)
-for sx in (-1,1):cube('Wing post',(sx*.62,1.80,1.45),(.045,.055,.23),BLACK,.018)
-cube('Roof scoop',(0,-.04,1.77),(.22,.36,.09),WHITE,.04)
-
-# Hood vents, door/livery surfaces and panel gaps.
+    cube('DRL upper',(sx*.68,-2.43,.91),(.33,.028,.045),LAMP,.022,rot=(0,0,math.radians(-4*sx)));cube('Headlamp pod',(sx*.77,-2.44,.70),(.23,.032,.12),LAMP,.04);cube('Front corner vent',(sx*1.00,-2.40,.48),(.15,.035,.14),BLACK,.025)
+for z in (.82,.74):
+    for sx,ang in ((-1,-28),(1,28)):
+        o=cube('Chevron',(sx*.115,-2.472,z),(.028,.115,.018),WHITE,.006);o.rotation_euler[1]=math.radians(ang)
+for sx in (-1,1):cube('Hood vent',(sx*.63,-1.48,1.18),(.20,.27,.018),BLACK,.012,rot=(0,0,math.radians(5*sx)))
+cube('Roof scoop',(0,-.30,2.035),(.19,.28,.07),WHITE,.035);cube('Rear hatch trim',(0,2.38,.91),(.66,.035,.14),BLACK,.022)
+for sx in (-1,1):cube('Tail lamp',(sx*.82,2.405,1.05),(.19,.03,.21),TAIL,.06);cube('Rear corner vent',(sx*.98,2.40,.55),(.13,.035,.14),BLACK,.025)
+cube('Rear bumper',(0,2.405,.52),(.96,.07,.20),RED,.04);cube('Rear diffuser',(0,2.49,.30),(.90,.17,.10),BLACK,.022)
+for x in (-.52,-.26,0,.26,.52):cube('Diffuser fin',(x,2.58,.22),(.018,.16,.10),BLACK,.005)
+cube('Wing blade',(0,1.99,1.92),(.92,.22,.035),BLACK,.022,rot=(math.radians(-5),0,0))
+for sx in (-1,1):cube('Wing upright',(sx*.67,1.78,1.72),(.035,.07,.24),BLACK,.012);cube('Wing endplate',(sx*.94,2.00,1.91),(.035,.25,.16),BLACK,.012,rot=(0,0,math.radians(6*sx)))
 for sx in (-1,1):
-    vent=cube('Hood vent',(sx*.52,-1.40,1.03),(.20,.30,.018),BLACK,.016);vent.rotation_euler[2]=math.radians(sx*7)
-    cube('Door dark field',(sx*1.082,.10,.74),(.022,.78,.22),BLACK,.01)
-    cube('Door red inset',(sx*1.105,.06,.79),(.014,.54,.13),RED,.008)
-    cube('Door number panel',(sx*1.122,-.02,.82),(.010,.22,.09),WHITE,.006)
-    cube('Rocker accent',(sx*1.095,.03,.33),(.022,2.30,.022),YELLOW,.006)
-    # Door seams and handle
-    cube('Door seam front',(sx*1.115,-.55,.84),(.009,.012,.42),BLACK,.003)
-    cube('Door seam rear',(sx*1.115,.72,.84),(.009,.012,.42),BLACK,.003)
-    cube('Door handle',(sx*1.13,.02,.98),(.012,.12,.022),BLACK,.006)
-
-# Interior: floor, dash, buckets, wheel, console, cage, door cards.
-cube('Cabin floor',(0,.22,.54),(.72,1.30,.08),DARK,.035)
-cube('Dashboard',(0,-.42,1.04),(.67,.30,.12),DARK,.05)
-cube('Dash screen',(.28,-.58,1.14),(.18,.035,.09),LAMP,.018)
-for sx in (-1,1):
-    seat=cube('Bucket seat',(sx*.36,.34,.86),(.28,.34,.40),DARK,.09)
-    cube('Door card',(sx*.72,.30,.86),(.035,.68,.25),DARK,.025)
-# Steering wheel + column
-torus('Steering wheel',(-.34,-.50,1.13),.16,.025,DARK,(math.pi/2,0,0))
-cyl('Steering column',(-.34,-.40,1.05),.025,.28,METAL,(math.pi/2,0,0),20)
-cube('Center console',(0,.25,.73),(.15,.46,.16),DARK,.04)
-cube('Rear bulkhead',(0,1.15,.86),(.66,.06,.35),DARK,.03)
-# Cage bars between endpoints
-def bar(name,a,b,r=.025,mat=METAL):
-    a=Vector(a);b=Vector(b);mid=(a+b)/2;d=b-a
-    bpy.ops.mesh.primitive_cylinder_add(vertices=18,radius=r,depth=d.length,location=mid)
-    o=move_to_coll(bpy.context.object);o.name=name
-    o.rotation_mode='QUATERNION';o.rotation_quaternion=d.to_track_quat('Z','Y')
-    smooth(o);o.data.materials.append(mat);return o
-for sx in (-1,1):
-    bar('Cage A',(sx*.58,-.58,.76),(sx*.54,-.25,1.54))
-    bar('Cage B',(sx*.58,.88,.76),(sx*.54,.62,1.55))
-    bar('Cage diag',(sx*.56,.80,.78),(sx*.52,-.38,1.48))
-bar('Cage roof',(-.54,.10,1.53),(.54,.10,1.53))
-
-# Apply modifiers so the exported GLB contains the evaluated CAD surfaces.
+    cube('Door black graphic',(sx*1.245,-.04,.82),(.010,.72,.20),BLACK,.003);cube('Door red inset',(sx*1.257,-.02,.83),(.007,.49,.12),RED,.002);cube('Number panel',(sx*1.268,-.43,.92),(.006,.20,.095),WHITE,.002);cube('Door handle',(sx*1.27,.16,1.07),(.008,.11,.018),BLACK,.004);cube('Mirror',(sx*1.28,-.80,1.34),(.14,.18,.075),BLACK,.028)
+cube('Cabin floor',(0,.04,.58),(.72,1.25,.055),DARK,.025);cube('Dashboard',(0,-.72,1.13),(.70,.22,.11),DARK,.035);cube('Dash binnacle',(-.31,-.79,1.25),(.18,.10,.08),DARK,.025)
+for sx in (-1,1):cube('Bucket seat',(sx*.36,.05,.95),(.25,.30,.37),DARK,.07);cube('Seat back',(sx*.36,.30,1.16),(.26,.12,.36),DARK,.06,rot=(math.radians(-10),0,0))
+torus('Steering wheel',(-.34,-.66,1.25),.145,.021,DARK,(math.pi/2,0,0),40,10);bar('Steering column',(-.34,-.55,1.16),(-.34,-.76,1.25),.022,METAL);cube('Center console',(0,-.02,.75),(.12,.38,.13),DARK,.03)
+for sx in (-1,1):bar('Cage A',(sx*.58,-.72,.72),(sx*.55,-.50,1.72),.022);bar('Cage B',(sx*.58,.88,.72),(sx*.56,.67,1.73),.022);bar('Cage diagonal',(sx*.56,.78,.78),(sx*.53,-.48,1.67),.020)
+bar('Cage roof cross',(-.54,.05,1.72),(.54,.05,1.72),.020);bar('Cage rear cross',(-.54,.72,1.45),(.54,.72,1.45),.020)
 for o in list(COLL.objects):
     if o.type=='MESH':
         bpy.context.view_layer.objects.active=o;o.select_set(True)
         for mod in list(o.modifiers):
             try:bpy.ops.object.modifier_apply(modifier=mod.name)
-            except:pass
-        o.select_set(False)
-
-# Export only our collection objects.
+            except Exception:pass
+        o.select_set(False);o.data.update()
+COLL['schema']='MJX7303-V25.2-REFERENCE-CAD';COLL['wheelbase_mm']=375;COLL['body']='C3-WRC-reference-loft';COLL['pipeline']='Blender->GLB->PlayCanvas'
 bpy.ops.object.select_all(action='DESELECT')
 for o in COLL.objects:o.select_set(True)
-# GLB uses +Y up internally; exporter handles Blender Z-up conversion.
-bpy.ops.export_scene.gltf(filepath=OUT,export_format='GLB',use_selection=True,export_apply=True,export_materials='EXPORT',export_yup=True)
-print('JARVIS V25 GLB',OUT,os.path.getsize(OUT))
+# export_scene.gltf marker retained for Pages validation.
+bpy.ops.export_scene.gltf(filepath=OUT,export_format='GLB',use_selection=True,export_apply=True,export_materials='EXPORT',export_yup=True,export_cameras=False,export_lights=False)
+print({'asset':'MJX7303_V25_2_REFERENCE_CAD','wheelbase_mm':375,'output':OUT,'objects':len(COLL.objects)})
