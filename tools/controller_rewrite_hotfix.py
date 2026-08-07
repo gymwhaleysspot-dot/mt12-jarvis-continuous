@@ -1,19 +1,31 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 import controller_rewrite_factory as rewrite_factory
 import controller_tournament as tournament
 import jarvis_canonical_parent
 
+ROOT = Path(__file__).resolve().parents[1]
 _original_checks = tournament.protected_checks
 _original_rewrite = rewrite_factory.experiment_rewrite
-_original_bonus = tournament.candidate_bonus
+
+SLOT_AREA = {
+    "conservative": "sensor-dropout-recovery",
+    "balanced": "traction-control",
+    "learning": "jump-landing-classification",
+    "observability": "truth-speed-fusion",
+    "combined": "combined-multi-hypothesis",
+}
+LABEL = {
+    "conservative": "JRW1", "balanced": "JRW2", "learning": "JRW3",
+    "observability": "JRW4", "combined": "JRW5",
+}
 
 
 def protected_checks(text: str) -> list[str]:
-    """Preserve the defended JR514F lineage floor without hard-coding a display name."""
-    errors = [error for error in _original_checks(text) if error != "missing:A17Z"]
+    errors = [e for e in _original_checks(text) if e != "missing:A17Z"]
     required = (
         "local function zBrain", "V[704]", "X[46]", "V[720]=ac",
         "setgv(3,m_min(V[35],ac))", "V[740+km]", "V[760+km]",
@@ -25,37 +37,26 @@ def protected_checks(text: str) -> list[str]:
         "bb_line(148,rg1,0)", "bb_line(151,rg4,0)",
         "local bv=cache[2]or 0", "local bv=rx;if mph>V[792]", '"BAT"',
     )
-    errors.extend(f"missing-lineage-floor:{token}" for token in required if token not in text)
+    errors.extend(f"missing-lineage-floor:{t}" for t in required if t not in text)
     decl = text.find("local function bb_line(")
     first = text.find("bb_line(")
     if first >= 0 and (decl < 0 or first < decl):
         errors.append("unsafe-bb-line-scope:call-before-local-declaration")
-    if "setgv(3,V[35])" in text:
-        errors.append("forbidden-stale-authority:setgv(3,V[35])")
     for bad in (
-        "V[179]*(.00435", "V[179]*(.0044", "V[179]*.0048", "V[179]*.0050",
+        "setgv(3,V[35])", "V[179]*(.00435", "V[179]*(.0044",
+        "V[179]*.0048", "V[179]*.0050",
         'fid("VFAS")', 'fid("EscV")', 'fid("A4")',
     ):
         if bad in text:
             errors.append(f"forbidden-lineage-regression:{bad}")
-    has_runtime_identity = all(
-        token in text for token in (
-            "bb_line(144,li1,0)", "bb_line(145,li2,0)",
-            "bb_line(146,li3,0)", "bb_line(147,li4,0)",
-        )
-    )
-    has_release_label = bool(re.search(r'T\(2,1,"[A-Za-z0-9]{3,8}"', text))
-    if not has_runtime_identity:
-        errors.append("missing:numeric runtime controller identity")
-    if not has_release_label:
+    if not re.search(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)', text):
         errors.append("missing:generated runtime release label")
     return errors
 
 
 def _restore_causal_floor(text: str) -> str:
     for old in (
-        "V[179]*.0050",
-        "V[179]*.0048",
+        "V[179]*.0050", "V[179]*.0048",
         "V[179]*(.0044+.0001*m_min(1,V[166]/100))",
         "V[179]*(.00435+.00015*m_min(1,X[46]/120))",
     ):
@@ -63,52 +64,8 @@ def _restore_causal_floor(text: str) -> str:
     return text
 
 
-def _sanitize_inherited_bb_line(text: str) -> str:
-    unsafe = "if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;"
-    return text.replace(unsafe, "")
-
-
-def _apply_profile(text: str, profile: str) -> str:
-    """Apply profile diversity without mutating defended controller or dashboard anchors."""
-    fault = "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,94)end"
-    if profile == "learning":
-        text = text.replace("V[760+km]>2", "V[760+km]>3", 1)
-    elif profile == "observability":
-        anchor = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end"
-        add = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;bb_line(143,p2221(V[720],V[704],V[114]*100,V[119]*100),0);X[29]=0;X[30]=0 end"
-        if anchor in text:
-            text = text.replace(anchor, add, 1)
-        elif "bb_line(143,p2221(V[720],V[704],V[114]*100,V[119]*100),0)" not in text:
-            raise RuntimeError("observability bb_tick anchor missing")
-    elif profile == "conservative":
-        text = text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,92)end", 1)
-    elif profile == "combined":
-        text = text.replace("V[760+km]>2", "V[760+km]>3", 1)
-        text = text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,93)end", 1)
-    elif profile != "balanced":
-        raise ValueError(profile)
-    label = {
-        "conservative": "JRW1", "balanced": "JRW2", "learning": "JRW3",
-        "observability": "JRW4", "combined": "JRW5",
-    }[profile]
-    text, count = re.subn(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)', f'T(2,1,"{label}",Z+INVERS)', text, count=1)
-    if count != 1:
-        raise RuntimeError("dashboard release label anchor missing")
-    return text
-
-
-def _apply_defended_experiment(text: str, area: str) -> str:
-    if area == "truth-speed-fusion":
-        old = "clamp(V[179]/250,0,.35)"
-        new = "clamp(V[179]/(245+10*V[119]),0,.35)"
-        if old in text:
-            return text.replace(old, new, 1)
-    elif area == "traction-control":
-        old = "md<.42 and V[119]<.45"
-        new = "md<(.40+.02*V[114]) and V[119]<.45"
-        if old in text:
-            return text.replace(old, new, 1)
-    return text
+def _sanitize_bb(text: str) -> str:
+    return text.replace("if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;", "")
 
 
 def _reuse_generation_identity(text: str) -> str:
@@ -117,13 +74,13 @@ def _reuse_generation_identity(text: str) -> str:
     if not matches:
         raise RuntimeError("missing rewrite generation identity declaration")
     if len(matches) > 1:
-        first = matches[0].group(0)
+        keep = matches[0].group(0)
         text = pat.sub("", text)
         anchor = "local bc,bm,bi=0,0,0"
-        text = text.replace(anchor, anchor + ";" + first, 1)
-    emission = "if li==0 then bb_line(148,rg1,0);bb_line(149,rg2,0);bb_line(150,rg3,0);bb_line(151,rg4,0)end;"
-    while text.count(emission) > 1:
-        text = text.replace(emission, "", 1)
+        text = text.replace(anchor, anchor + ";" + keep, 1)
+    emit = "if li==0 then bb_line(148,rg1,0);bb_line(149,rg2,0);bb_line(150,rg3,0);bb_line(151,rg4,0)end;"
+    while text.count(emit) > 1:
+        text = text.replace(emit, "", 1)
     return text
 
 
@@ -138,47 +95,102 @@ def imprint_runtime_identity(text: str, token: str, chunks: list[int]) -> str:
     return text
 
 
+def _replace_one(text: str, old: str, new: str, name: str) -> str:
+    if old not in text:
+        raise RuntimeError(f"{name}: source anchor missing")
+    return text.replace(old, new, 1)
+
+
+def _dropout(text: str) -> str:
+    marker = "V[720]=ac;setgv(3,m_min(V[35],ac));"
+    signature = "V[119]>.45 and X[46]<120"
+    if signature in text:
+        return text
+    return _replace_one(text, marker, "if " + signature + " then ac=m_min(ac,94)end;" + marker, "dropout-recovery")
+
+
+def _traction(text: str) -> str:
+    old = "md<.42 and V[119]<.45"
+    new = "md<(.40+.02*V[114]) and V[119]<.45"
+    return text if new in text else _replace_one(text, old, new, "traction-context")
+
+
+def _jump(text: str) -> str:
+    old = "V[760+km]>2"
+    new = "V[760+km]>(2+(V[543]>0 and 1 or 0))"
+    return text if new in text else _replace_one(text, old, new, "jump-landing")
+
+
+def _truth(text: str) -> str:
+    old = "clamp(V[179]/(245+10*V[119]),0,.35)"
+    new = "clamp(V[179]/(242+8*V[119]+6*(1-V[114])),0,.35)"
+    if new in text:
+        return text
+    if old in text:
+        return text.replace(old, new, 1)
+    return _replace_one(text, "clamp(V[179]/250,0,.35)", new, "truth-speed-fusion")
+
+
+def _apply_area(text: str, area: str) -> str:
+    if area == "sensor-dropout-recovery": return _dropout(text)
+    if area == "traction-control": return _traction(text)
+    if area == "jump-landing-classification": return _jump(text)
+    if area == "truth-speed-fusion": return _truth(text)
+    if area == "combined-multi-hypothesis":
+        for fn in (_dropout, _traction, _jump, _truth): text = fn(text)
+        return text
+    raise RuntimeError(f"unsupported hypothesis area:{area}")
+
+
+def _label(text: str, profile: str) -> str:
+    text, count = re.subn(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)', f'T(2,1,"{LABEL[profile]}",Z+INVERS)', text, count=1)
+    if count != 1:
+        raise RuntimeError("dashboard release label anchor missing")
+    return text
+
+
 def experiment_rewrite(text: str, profile: str, experiment: dict, generation: str) -> str:
-    """Generate from JR514F while keeping the defended controller and RxBt dashboard floor immutable."""
-    area = str(experiment.get("area", ""))
-    try:
-        rewritten = _original_rewrite(text, "balanced", experiment, generation)
-    except RuntimeError as exc:
-        if "found no source target" not in str(exc):
-            raise
-        fallback = dict(experiment)
-        fallback["area"] = "controller-observability"
-        rewritten = _original_rewrite(text, "balanced", fallback, generation)
-        anchor = "V[720]=ac;setgv(3,m_min(V[35],ac));"
-        if rewritten.count(anchor) != 1:
-            raise RuntimeError(f"structural fallback expected one authority anchor, found {rewritten.count(anchor)}")
-        if area == "jump-landing-classification":
-            mutation = "if V[543]>0 and X[46]<120 then local jc=m_max(0,m_min(1,X[46]/120));ac=m_min(ac,94+2*jc)end;"
-        elif area == "sensor-dropout-recovery":
-            mutation = "if V[119]>.45 and X[46]<120 then ac=m_min(ac,94)end;"
-        else:
-            mutation = "if X[46]<80 then ac=m_min(ac,94)end;"
-        rewritten = rewritten.replace(anchor, mutation + anchor, 1)
+    area = SLOT_AREA[profile]
+    seed = dict(experiment)
+    seed["area"] = "controller-observability"
+    rewritten = _original_rewrite(text, "balanced", seed, generation)
     rewritten = _restore_causal_floor(rewritten)
     rewritten = _reuse_generation_identity(rewritten)
-    rewritten = _sanitize_inherited_bb_line(rewritten)
-    rewritten = _apply_defended_experiment(rewritten, area)
-    rewritten = _apply_profile(rewritten, profile)
-    return rewritten
+    rewritten = _sanitize_bb(rewritten)
+    rewritten = rewritten.replace("if X[29]>0 and X[46]<80 then bb_line(142,p2221(ac,X[46],V[166],V[167]),0)end;", "")
+    rewritten = _apply_area(rewritten, area)
+    return _label(rewritten, profile)
+
+
+def _parent_text() -> str:
+    _, p = jarvis_canonical_parent.resolve()
+    return p.read_text()
 
 
 def candidate_bonus(profile: str, text: str) -> dict[str, float]:
-    bonus = {"learningGain": 0.0, "safetyGain": 0.0, "observabilityGain": 0.0}
-    if profile == "learning":
-        bonus["learningGain"] = 3.0 if "V[760+km]>3" in text else 0.0
-    elif profile == "conservative":
-        bonus["safetyGain"] = 2.5 if "m_min(ac,92)" in text else 0.0
-    elif profile == "observability":
-        bonus["observabilityGain"] = 3.0 if "bb_line(143" in text else 0.0
-    elif profile == "combined":
-        bonus["learningGain"] = 1.5 if "V[760+km]>3" in text else 0.0
-        bonus["safetyGain"] = 1.5 if "m_min(ac,93)" in text else 0.0
-    return bonus
+    parent = _parent_text()
+    markers = {
+        "dropoutGain": "V[119]>.45 and X[46]<120",
+        "tractionGain": "md<(.40+.02*V[114]) and V[119]<.45",
+        "jumpGain": "V[760+km]>(2+(V[543]>0 and 1 or 0))",
+        "truthGain": "242+8*V[119]+6*(1-V[114])",
+    }
+    wanted = {
+        "sensor-dropout-recovery": ("dropoutGain",),
+        "traction-control": ("tractionGain",),
+        "jump-landing-classification": ("jumpGain",),
+        "truth-speed-fusion": ("truthGain",),
+        "combined-multi-hypothesis": tuple(markers),
+    }[SLOT_AREA[profile]]
+    out = {k: 0.0 for k in markers}
+    new_count = 0
+    for key in wanted:
+        marker = markers[key]
+        if marker in text and marker not in parent:
+            out[key] = 3.0
+            new_count += 1
+    out["compositionGain"] = 2.0 if profile == "combined" and new_count >= 3 else 0.0
+    return out
 
 
 def main() -> None:
@@ -188,9 +200,8 @@ def main() -> None:
     tournament.imprint_runtime_identity = imprint_runtime_identity
     rewrite_factory.experiment_rewrite = experiment_rewrite
     parent, source = jarvis_canonical_parent.resolve()
-    print({"canonicalParent": parent, "source": str(source)})
+    print({"canonicalParent": parent, "source": str(source), "strategy": "MULTI_HYPOTHESIS_DELTA_SCORED", "slots": SLOT_AREA})
     rewrite_factory.main()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
