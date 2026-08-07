@@ -25,6 +25,10 @@ def protected_checks(text: str) -> list[str]:
         "bb_line(148,rg1,0)", "bb_line(151,rg4,0)",
     )
     errors.extend(f"missing-lineage-floor:{token}" for token in required if token not in text)
+    decl = text.find("local function bb_line(")
+    first = text.find("bb_line(")
+    if first >= 0 and (decl < 0 or first < decl):
+        errors.append("unsafe-bb-line-scope:call-before-local-declaration")
     if "setgv(3,V[35])" in text:
         errors.append("forbidden-stale-authority:setgv(3,V[35])")
     for bad in ("V[179]*(.00435", "V[179]*(.0044", "V[179]*.0048", "V[179]*.0050"):
@@ -61,9 +65,11 @@ def _apply_profile(text: str, profile: str) -> str:
     if profile == "learning":
         text = text.replace("V[760+km]>2", "V[760+km]>3", 1)
     elif profile == "observability":
-        anchor = "V[720]=ac;setgv(3,m_min(V[35],ac));"
-        add = "if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;"
-        text = text.replace(anchor, anchor + add, 1)
+        anchor = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;X[29]=0;X[30]=0 end"
+        add = "if X[29]>0 then bb_line(135,X[29],0);if X[30]>0 then bb_line(136,X[30],0)end;bb_line(143,p2221(V[720],V[704],V[114]*100,V[119]*100),0);X[29]=0;X[30]=0 end"
+        if text.count(anchor) != 1:
+            raise RuntimeError(f"observability bb_tick anchor expected one match, found {text.count(anchor)}")
+        text = text.replace(anchor, add, 1)
     elif profile == "conservative":
         text = text.replace(fault, "if V[543]>0 or V[161]>0 or V[164]>0 then ac=m_min(ac,92)end", 1)
     elif profile == "combined":
@@ -101,8 +107,6 @@ def _reuse_generation_identity(text: str) -> str:
     if not matches:
         raise RuntimeError("missing rewrite generation identity declaration")
     if len(matches) > 1:
-        # _original_rewrite inserts the new generation declaration first. Remove all
-        # inherited declarations so the new values drive the existing 148-151 logger.
         first = matches[0].group(0)
         text = pat.sub("", text)
         anchor = "local bc,bm,bi=0,0,0"
@@ -128,8 +132,6 @@ def imprint_runtime_identity(text: str, token: str, chunks: list[int]) -> str:
 def experiment_rewrite(text: str, profile: str, experiment: dict, generation: str) -> str:
     """Generate from the defended parent while keeping JRW6D protections immutable."""
     area = str(experiment.get("area", ""))
-    # Use the structurally neutral profile inside the legacy rewrite engine. Profile
-    # diversity is reapplied below using defended-source anchors.
     try:
         rewritten = _original_rewrite(text, "balanced", experiment, generation)
     except RuntimeError as exc:
@@ -144,7 +146,6 @@ def experiment_rewrite(text: str, profile: str, experiment: dict, generation: st
         if area == "jump-landing-classification":
             mutation = "if V[543]>0 and X[46]<120 then local jc=m_max(0,m_min(1,X[46]/120));ac=m_min(ac,94+2*jc)end;"
         elif area == "sensor-dropout-recovery":
-            # Preserve the canonical 92→96 floor; add only an event-conditioned cap.
             mutation = "if V[119]>.45 and X[46]<120 then ac=m_min(ac,94)end;"
         else:
             mutation = "if X[46]<80 then ac=m_min(ac,94)end;"
