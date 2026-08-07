@@ -45,8 +45,12 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
           blender --version | head -2
+          python3 - <<'PY'
+          import numpy
+          print('numpy',numpy.__version__)
+          PY
       - name: Build MJX 7303 V25 CAD asset
         run: |
           set -euo pipefail
