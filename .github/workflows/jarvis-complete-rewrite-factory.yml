@@ -86,7 +86,7 @@ jobs:
             if c.get('status')!='COMPILED': continue
             cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
             published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract']})
-          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-3','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True}
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-4','mission':mission,'canonicalParent':result['parent'],'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'IDEMPOTENT_VERIFIED'}
           (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text())
           PY
       - name: Apply evolution and champion authorities
@@ -94,20 +94,43 @@ jobs:
           python3 tools/jarvis_evolution_gate.py
           python3 tools/jarvis_champion_guard.py
           python3 tools/jarvis_graph_intelligence.py
-      - name: Persist immutable rewrite directory
+      - name: Persist immutable rewrite directory atomically
         run: |
           set -Eeuo pipefail
           mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          stage="$(mktemp -d)"; cp -a "public/builds/${mission}" "$stage/${mission}"
-          git fetch origin main; git reset --hard origin/main
-          test ! -e "public/builds/${mission}"
-          cp -a "$stage/${mission}" "public/builds/${mission}"
-          git config user.name 'Jarvis Complete Rewrite Factory'; git config user.email 'actions@users.noreply.github.com'
-          git add -- "public/builds/${mission}"; git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
+          stage="$(mktemp -d)"
+          cp -a "public/builds/${mission}" "$stage/${mission}"
+          git config user.name 'Jarvis Complete Rewrite Factory'
+          git config user.email 'actions@users.noreply.github.com'
+
           for n in 1 2 3 4 5; do
-            git push origin HEAD:main && exit 0
-            git fetch origin main; git rebase origin/main || { git rebase --abort || true; }; sleep $((n*5))
+            git fetch origin main
+            git reset --hard origin/main
+
+            if [ -e "public/builds/${mission}" ]; then
+              if diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then
+                echo "Rewrite generation ${mission} is already persisted identically on main."
+                exit 0
+              fi
+              echo "ERROR: immutable mission collision for ${mission}; remote contents differ"
+              exit 1
+            fi
+
+            cp -a "$stage/${mission}" "public/builds/${mission}"
+            git add -- "public/builds/${mission}"
+            git commit -m "Publish canonical-parent novel MT12 LUAC generation ${mission} [skip ci]"
+
+            if git push origin HEAD:main; then
+              git fetch origin main
+              git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"
+              echo "Verified rewrite generation ${mission} persisted on main."
+              exit 0
+            fi
+
+            echo "Publish race on attempt ${n}; retrying from current main."
+            sleep $((n*5))
           done
+          echo "ERROR: unable to persist ${mission} after 5 attempts"
           exit 1
       - uses: actions/upload-artifact@v6
         if: always()
@@ -117,4 +140,4 @@ jobs:
             dist-controller-tournament/
             public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: ignore
-          retention-days: 90
+          retention-days: 30
