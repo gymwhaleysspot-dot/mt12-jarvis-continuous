@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - index.html
-      - racing-mjx7303-v27.html
+      - racing-mjx7303-v28.html
       - jarvis/**
       - tools/**
       - classic-token.js
@@ -40,42 +40,49 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
           blender --version | head -2
-      - name: Build MJX 7303 V27 reference CAD asset
+      - name: Build MJX 7303 V28 solid body asset
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/build_mjx7303_v27_blender.py
+          python3 -m py_compile tools/build_mjx7303_v28_blender.py
           mkdir -p assets/mjx7303
-          MJX_V27_OUT=assets/mjx7303/mjx7303-v27.glb blender --background --factory-startup --python tools/build_mjx7303_v27_blender.py
-          test -s assets/mjx7303/mjx7303-v27.glb
+          MJX_V28_OUT=assets/mjx7303/mjx7303-v28.glb blender --background --factory-startup --python tools/build_mjx7303_v28_blender.py
+          test -s assets/mjx7303/mjx7303-v28.glb
           node - <<'NODE'
-          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v27.glb');
-          if(b.length<1000)throw Error('V27 GLB too small: '+b.length);
-          if(b.subarray(0,4).toString('ascii')!=='glTF')throw Error('V27 GLB magic invalid');
-          if(b.readUInt32LE(4)!==2)throw Error('V27 GLB is not glTF 2.0');
-          if(b.readUInt32LE(8)!==b.length)throw Error('V27 GLB length mismatch');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V27 JSON chunk invalid');JSON.parse(b.subarray(20,20+jl).toString('utf8').trim());
-          console.log({asset:'MJX7303_V27_REFERENCE_CAD',bytes:b.length,glb:'VALID_GLB2'});
+          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v28.glb');
+          if(b.length<10000)throw Error('V28 GLB too small: '+b.length);
+          if(b.subarray(0,4).toString('ascii')!=='glTF')throw Error('V28 GLB magic invalid');
+          if(b.readUInt32LE(4)!==2)throw Error('V28 GLB is not glTF 2.0');
+          if(b.readUInt32LE(8)!==b.length)throw Error('V28 GLB length mismatch');
+          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V28 JSON chunk invalid');
+          const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim());
+          const names=(g.nodes||[]).map(n=>n.name||'');
+          if(!names.some(n=>n.includes('BODY_SHELL_CONTINUOUS_V28')))throw Error('V28 continuous body shell missing');
+          if(!names.some(n=>n.includes('WhiteRoof')))throw Error('V28 roof missing');
+          if(!names.some(n=>n.includes('Windshield')))throw Error('V28 windshield missing');
+          if(names.some(n=>n.includes('GREENHOUSE_REFERENCE_V27')))throw Error('Old floating greenhouse leaked into V28');
+          console.log({asset:'MJX7303_V28_SOLID_BODY',bytes:b.length,nodes:names.length,glb:'VALID_GLB2'});
           NODE
-      - name: Validate Jarvis V27 workstation
+      - name: Validate Jarvis V28 workstation
         run: |
           set -euo pipefail
           node --check classic-token.js
           for f in jarvis/*.js scripts/*.mjs device/*.mjs; do [ -f "$f" ] && node --check "$f"; done
-          python3 -m py_compile tools/build_mjx7303_v27_blender.py
+          python3 -m py_compile tools/build_mjx7303_v28_blender.py
           node - <<'NODE'
           const fs=require('fs'),c=require('./jarvis/capabilities.json');if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];const ids=new Set(c.workspaces.map(x=>x.id));for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
-          for(const p of ['racing-mjx7303-v27.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-racing-v27.js','tools/build_mjx7303_v27_blender.py','assets/mjx7303/mjx7303-v27.glb'])if(!fs.existsSync(p))throw Error('Racing V27 asset missing: '+p);
+          for(const p of ['racing-mjx7303-v28.html','jarvis/mjx7303-physics-v4.js','jarvis/mjx7303-racing-v28.js','tools/build_mjx7303_v28_blender.py','assets/mjx7303/mjx7303-v28.glb'])if(!fs.existsSync(p))throw Error('Racing V28 asset missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
-          check('index.html','Jarvis MT12 Engineering Workstation');check('racing-mjx7303-v27.html','V27 REFERENCE CAD');check('racing-mjx7303-v27.html','mjx7303-physics-v4.js');check('racing-mjx7303-v27.html','mjx7303-racing-v27.js');
-          check('jarvis/racing-tab.js','racing-mjx7303-v27.html');check('jarvis/racing-tab.js','RACING V27 REFERENCE CAD');
-          check('jarvis/mjx7303-racing-v27.js','playcanvas@2.21.3');check('jarvis/mjx7303-racing-v27.js','mjx7303-v27.glb');check('jarvis/mjx7303-racing-v27.js','__V27_READY');check('jarvis/mjx7303-racing-v27.js','SHADOW_PCF5');
-          check('tools/build_mjx7303_v27_blender.py','375 mm wheelbase');check('tools/build_mjx7303_v27_blender.py','WB=3.75');check('tools/build_mjx7303_v27_blender.py','True wheel opening');check('tools/build_mjx7303_v27_blender.py','GREENHOUSE_REFERENCE_V27');check('tools/build_mjx7303_v27_blender.py','export_scene.gltf');
-          const b=fs.readFileSync('assets/mjx7303/mjx7303-v27.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('Generated V27 GLB failed final validation');
-          console.log({pages:'PASS',racing:'V27 reference CAD',renderer:'PlayCanvas HQ',physics:'V4',wheelbaseMM:375,trueWheelOpenings:true});
+          check('index.html','Jarvis MT12 Engineering Workstation');
+          check('racing-mjx7303-v28.html','V28 SOLID C3 BODY');check('racing-mjx7303-v28.html','mjx7303-physics-v4.js');check('racing-mjx7303-v28.html','mjx7303-racing-v28.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v28.html');check('jarvis/racing-tab.js','RACING V28 SOLID C3 BODY');
+          check('jarvis/mjx7303-racing-v28.js','playcanvas@2.21.3');check('jarvis/mjx7303-racing-v28.js','mjx7303-v28.glb');check('jarvis/mjx7303-racing-v28.js','__V28_READY');check('jarvis/mjx7303-racing-v28.js','SHADOW_PCF5');
+          check('tools/build_mjx7303_v28_blender.py','375 mm wheelbase');check('tools/build_mjx7303_v28_blender.py','WB=3.75');check('tools/build_mjx7303_v28_blender.py','True wheel opening');check('tools/build_mjx7303_v28_blender.py','BODY_SHELL_CONTINUOUS_V28');check('tools/build_mjx7303_v28_blender.py','export_scene.gltf');
+          const b=fs.readFileSync('assets/mjx7303/mjx7303-v28.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('Generated V28 GLB failed final validation');
+          console.log({pages:'PASS',racing:'V28 solid C3 body',renderer:'PlayCanvas HQ',physics:'V4',wheelbaseMM:375,continuousBody:true});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
