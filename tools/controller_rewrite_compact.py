@@ -1,11 +1,11 @@
 from __future__ import annotations
 import re
 import controller_rewrite_hotfix as base
+import jarvis_authority_selfheal as selfheal
 
-# Preserve the unpatched scorer before main() temporarily replaces base.candidate_bonus.
-# compact_candidate_bonus must call this saved function for JRW1-JRW5 or it recurses
-# through the monkey-patched base.candidate_bonus until Python exhausts the stack.
+# Preserve the unpatched scorer and rewrite before main() temporarily replaces them.
 _BASE_CANDIDATE_BONUS=base.candidate_bonus
+_BASE_EXPERIMENT_REWRITE=base.experiment_rewrite
 
 
 def _jas(text:str)->str:
@@ -45,6 +45,26 @@ def compact_outcome_synth(text:str)->tuple[str,str]:
  return text,f"compact-feedback:{winner}>{runner}"
 
 
+def selfhealing_experiment_rewrite(text:str,profile:str,experiment:dict,generation:str)->str:
+ # Never mutate inherited authority state directly. A broken evolution parent is
+ # reduced to the stable lineage floor first; the selected architecture is then
+ # regenerated from scratch.
+ clean,meta=selfheal.sanitize_parent(text)
+ out=_BASE_EXPERIMENT_REWRITE(clean,profile,experiment,generation)
+ errors=selfheal.validate(out,profile)
+ if errors:
+  # One deterministic recovery pass is allowed. This is repair, not mutation:
+  # canonicalize the authority graph from the generated architecture contracts.
+  out=base._authority_finalize(out,profile)
+  errors=selfheal.validate(out,profile)
+ if errors:
+  raise RuntimeError("Jarvis self-repair exhausted: "+" | ".join(errors))
+ # Attach diagnostics to stdout without changing the deploy Lua.
+ if any(meta["defs"].values()) or any(meta["calls"].values()):
+  print({"jarvisSelfHeal":"authority-parent-sanitized","profile":profile,"inheritedLabel":meta["label"],"inheritedStage":meta["stage"],"inheritedDefs":meta["defs"],"inheritedCalls":meta["calls"]})
+ return out
+
+
 def compact_candidate_bonus(profile:str,text:str)->dict[str,float]:
  if profile!="synthesis":return _BASE_CANDIDATE_BONUS(profile,text)
  parent=base._parent_text();new=bool(_jas(text)) and _jas(text)!=_jas(parent)
@@ -56,10 +76,10 @@ def compact_candidate_bonus(profile:str,text:str)->dict[str,float]:
 
 
 def main()->None:
- old_synth=base._outcome_synth;old_bonus=base.candidate_bonus
- base._outcome_synth=compact_outcome_synth;base.candidate_bonus=compact_candidate_bonus
+ old_synth=base._outcome_synth;old_bonus=base.candidate_bonus;old_rewrite=base.experiment_rewrite
+ base._outcome_synth=compact_outcome_synth;base.candidate_bonus=compact_candidate_bonus;base.experiment_rewrite=selfhealing_experiment_rewrite
  try:base.main()
- finally:base._outcome_synth=old_synth;base.candidate_bonus=old_bonus
+ finally:base._outcome_synth=old_synth;base.candidate_bonus=old_bonus;base.experiment_rewrite=old_rewrite
 
 
 if __name__=="__main__":main()
