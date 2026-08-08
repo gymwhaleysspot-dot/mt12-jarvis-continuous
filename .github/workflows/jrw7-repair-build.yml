@@ -1,0 +1,60 @@
+name: JRW7 Repair Build
+
+on:
+  push:
+    branches: [jarvis-jrw7-repair]
+    paths:
+      - '.github/workflows/jrw7-repair-build.yml'
+      - 'tools/jrw7_repair.py'
+      - 'tools/controller_rewrite_hotfix.py'
+      - 'public/builds/rewrite-31235808121-1/jrw6/jrw6.lua'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE: public/builds/rewrite-31235808121-1/jrw6/jrw6.lua
+  OUT: dist-jrw7
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3
+      - name: Repair JRW6 into JRW7
+        run: |
+          mkdir -p "$OUT"
+          python3 tools/jrw7_repair.py "$BASE" "$OUT/jrw7.lua"
+      - name: Verify authority invariants
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('dist-jrw7/jrw7.lua').read_text()
+          checks={
+            'jA6_def':s.count('local function jA6')==1,
+            'jAS_def':s.count('local function jAS')==1,
+            'jA2_def':s.count('local function jA2')==1,
+            'jAS_call':s.count('jAS(ac)')==1,
+            'jA2_call':s.count('jA2(ac)')==1,
+            'jA2_isolated':'X[67]=lerp(X[67]or e,e,.14)' in s and 'X[68]=lerp(X[68]or 0,m_abs(d),.2)' in s and 'X[69]=lerp(X[69]or sev,sev' in s,
+          }
+          print(checks)
+          assert all(checks.values()), checks
+          assert s.index('local function lerp') < s.index('local function jA6')
+          PY
+      - name: Compile normalized MT12 bytecode
+        run: |
+          chmod +x toolchain/compile_mt12.sh
+          toolchain/compile_mt12.sh "$OUT/jrw7.lua" "$OUT/jrw7.luac"
+          sha256sum "$OUT/jrw7.lua" "$OUT/jrw7.luac" | tee "$OUT/SHA256SUMS.txt"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jrw7-mt12-repair
+          path: dist-jrw7/
+          if-no-files-found: error
+          retention-days: 30
