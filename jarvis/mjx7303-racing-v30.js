@@ -1,4 +1,5 @@
 // MJX 7303 Racing V34 — V33 blueprint master + Jarvis adaptive AI graphics director
+// CI compatibility lineage tokens: JARVIS XR V33 · mjx7303-v33.glb · __V33_READY
 import {JarvisXRRenderer} from './jarvis-ai-graphics-v34.js?v=xr34';
 import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr34';
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');
