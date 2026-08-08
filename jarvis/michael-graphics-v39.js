@@ -1,6 +1,6 @@
-// MICHAEL V45 — mobile WRC world engine: licensed authority mesh, procedural livery,
+// MICHAEL V46 — mobile WRC world engine: licensed authority mesh, procedural livery,
 // sorted transparent glass, fitted light lenses, batched garage/forest worlds and adaptive quality.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael58-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael59-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.ema=16.7;this.jitter=0;this.q=1.78;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL LICENSED';this.exposure=1.24}
@@ -67,10 +67,11 @@ function addMichaelWorld(r){
 }
 
 export class JarvisXRRenderer extends Physical38{
-  constructor(canvas){super(canvas);this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V45';this.visualProfile='WRC_PRESENTATION_ENGINE';this.quality=1.78;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
+  constructor(canvas){super(canvas);this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V46';this.visualProfile='WRC_PRESENTATION_ENGINE';this.quality=1.78;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
   addGround(){const first=this.drawables.length;super.addGround();for(const d of this.drawables.slice(first))d.world=true;addMichaelWorld(this);this.setMode(this.michael.mode)}
   setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage')}this.fogDensity=road?.017:.004;this.fogColor=new Float32Array(road?[.026,.074,.060]:[.006,.009,.014]);this.gl.clearColor(...(road?[.018,.048,.043,1]:[.003,.005,.008,1]))}
   async loadGLB(url){const first=this.drawables.length,licensed=url.startsWith('blob:')||/michael-v40\.bin(?:\?|$)/.test(url),info=await super.loadGLB(url),printerToMichael=new Float32Array([1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1]);if(licensed){for(const d of this.drawables.slice(first)){d.model=printerToMichael;d.mat.base=new Float32Array([.72,.012,.026]);d.mat.metal=.18;d.mat.rough=.10}addCompletedTwin(this)}for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114,spread=Math.max(r,g,b)-Math.min(r,g,b);if(r>g*1.32&&r>b*1.25&&r>.11){m.rough=clamp(m.rough,.075,.115);m.metal=clamp(Math.max(m.metal,.16),0,.24)}else if(lum<.025){m.rough=Math.max(m.rough,.72);m.metal=0}else if(spread<.09&&lum>.48){m.rough=Math.min(m.rough,.105);m.metal=Math.max(m.metal,.90)}else if(b>r*1.15&&lum<.22){m.rough=Math.min(m.rough,.05);m.metal=0}}return{...info,drawables:this.drawables.length,ai:this.aiVersion,profile:this.visualProfile,scanAware:true,completeTwin:this._michaelSystems||null,roadDressing:true,world:this._michaelWorld||null,capabilities:this.capabilities}}
-  render(){this.michael.tick();super.render()}
+  beginOwnedFrame(){this.michael.tick();return super.beginOwnedFrame()}
+  render(){const c=this.beginOwnedFrame();this.renderShadowPass(c);this.beginColorPass(c);this.renderOpaquePass(c);this.renderTransmissionPass(c);this.endOwnedFrame(c)}
   getAIStats(){return{...super.getAIStats(),version:this.aiVersion,profile:this.visualProfile,qualityTier:this.michael.tier,michaelFrameMs:this.michael.ema,michaelJitter:this.michael.jitter,stillFrames:this.michael.still,stationaryConvergence:this.michael.still>90,qualityCeiling:2.25,meshSource:'LICENSED_C3_WRC_AUTHORITY_MESH',completeTwin:this._michaelSystems||null,world:this._michaelWorld||null,capabilities:this.capabilities}}
 }

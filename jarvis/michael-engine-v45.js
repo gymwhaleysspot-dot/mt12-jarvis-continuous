@@ -1,4 +1,4 @@
-// MICHAEL ENGINE V45 — custom heavyweight browser game-engine kernel.
+// MICHAEL ENGINE V46 — custom heavyweight browser game-engine kernel.
 // Backend-neutral frame graph, ECS world, resource lifecycle, GPU timing and adaptive feature policy.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export class MichaelFrameGraph{
@@ -34,14 +34,13 @@ class MichaelFeaturePolicy{
   update(cpuMs,gpuMs,mode){const sample=gpuMs>0?Math.max(cpuMs,gpuMs):cpuMs;this.ema+=clamp(sample-this.ema,-8,8)*.055;const budget=mode==='garage'?31:17;if(this.ema>budget*1.22)this.tier='BALANCED';else if(this.ema<budget*.82)this.tier='ULTRA';const high=this.tier==='ULTRA';this.features.softShadows=high;this.features.reflections=high;this.features.particles=mode==='garage'&&high;return this.features}
 }
 export class MichaelEngine{
-  constructor({renderer,dynamics,canvas}){this.version='MICHAEL_ENGINE_V45';this.backend='WEBGL2_FORWARD_PLUS_FOUNDATION';this.renderer=renderer;this.dynamics=dynamics;this.canvas=canvas;this.world=new MichaelWorld;this.resources=new MichaelResources;this.graph=new MichaelFrameGraph;this.profiler=new MichaelGPUProfiler(renderer.gl);this.policy=new MichaelFeaturePolicy;this.mode='garage';this.frame=0;this.started=performance.now();this.last=this.started;this.cpuMs=0;this.vehicle=-1;this.camera=-1;this.scene=-1;this._buildGraph()}
-  _buildGraph(){this.graph.add('input').add('simulation',{after:['input']}).add('visibility',{after:['simulation']}).add('shadow-atlas',{after:['visibility'],enabled:c=>c.features.softShadows}).add('opaque-pbr',{after:['shadow-atlas']}).add('transmission',{after:['opaque-pbr'],enabled:c=>c.features.transmission}).add('atmosphere',{after:['transmission']}).add('telemetry',{after:['atmosphere']}).compile()}
+  constructor({renderer,dynamics,canvas}){this.version='MICHAEL_ENGINE_V46';this.backend='WEBGL2_FORWARD_PLUS_FOUNDATION';this.renderer=renderer;this.dynamics=dynamics;this.canvas=canvas;this.world=new MichaelWorld;this.resources=new MichaelResources;this.graph=new MichaelFrameGraph;this.profiler=new MichaelGPUProfiler(renderer.gl);this.policy=new MichaelFeaturePolicy;this.mode='garage';this.frame=0;this.started=performance.now();this.last=this.started;this.cpuMs=0;this.vehicle=-1;this.camera=-1;this.scene=-1;this._buildGraph()}
+  _buildGraph(){const r=this.renderer;this.graph.add('visibility').add('shadow-atlas',{after:['visibility'],enabled:c=>c.features.softShadows,run:c=>r.renderShadowPass(c.frameState)}).add('opaque-pbr',{after:['shadow-atlas'],run:c=>{r.beginColorPass(c.frameState);r.renderOpaquePass(c.frameState)}}).add('transmission',{after:['opaque-pbr'],enabled:c=>c.features.transmission,run:c=>r.renderTransmissionPass(c.frameState)}).add('atmosphere',{after:['transmission'],run:c=>r.endOwnedFrame(c.frameState)}).add('telemetry',{after:['atmosphere']}).compile()}
   bootstrap(){this.scene=this.world.create('rally-world',4);this.vehicle=this.world.create('mjx-7303',1|2);this.camera=this.world.create('chase-camera',8);this.resources.keep('licensed-c3-wrc',{authority:true},{bytes:0});return this}
   setMode(mode){this.mode=mode}
   setVehiclePose(x,y,z,yaw){this.world.pose(this.vehicle,x,y,z,yaw)}
-  beginFrame(now=performance.now()){this._cpuStart=performance.now();this.frame++;this.last=now;this.profiler.poll();const ctx={engine:this,mode:this.mode,features:this.policy.features,frame:this.frame};this.graph.execute(ctx)}
-  beginGPU(){this.profiler.begin()}
-  endGPU(){this.profiler.end()}
+  beginFrame(now=performance.now()){this._cpuStart=performance.now();this.frame++;this.last=now;this.profiler.poll();this.frameContext={engine:this,mode:this.mode,features:this.policy.features,frame:this.frame,frameState:null}}
+  render(){this.profiler.begin();this.frameContext.frameState=this.renderer.beginOwnedFrame();this.graph.execute(this.frameContext);this.profiler.end()}
   endFrame(){this.cpuMs=performance.now()-this._cpuStart;this.policy.update(this.cpuMs,this.profiler.gpuMs,this.mode);if((this.frame&31)===0)globalThis.__MICHAEL_ENGINE=this.report()}
-  report(){return{version:this.version,backend:this.backend,webgpuAvailable:!!navigator.gpu,frame:this.frame,cpuMs:+this.cpuMs.toFixed(2),gpuMs:+this.profiler.gpuMs.toFixed(2),gpuTiming:this.profiler.supported,tier:this.policy.tier,features:{...this.policy.features},renderGraph:this.graph.describe(),world:this.world.snapshot(),resources:this.resources.report(),uptimeMs:Math.round(performance.now()-this.started)}}
+  report(){return{version:this.version,backend:this.backend,webgpuAvailable:!!navigator.gpu,frame:this.frame,cpuMs:+this.cpuMs.toFixed(2),gpuMs:+this.profiler.gpuMs.toFixed(2),gpuTiming:this.profiler.supported,ownedRenderPasses:true,tier:this.policy.tier,features:{...this.policy.features},renderGraph:this.graph.describe(),world:this.world.snapshot(),resources:this.resources.report(),uptimeMs:Math.round(performance.now()-this.started)}}
 }
