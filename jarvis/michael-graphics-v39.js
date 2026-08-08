@@ -1,6 +1,6 @@
 // MICHAEL V42 — mobile WRC world engine: licensed authority mesh, procedural livery,
 // sorted transparent glass, fitted light lenses, batched garage/forest worlds and adaptive quality.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael54-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael55-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.ema=16.7;this.jitter=0;this.q=1.78;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL LICENSED';this.exposure=1.30}
@@ -51,14 +51,13 @@ function addMichaelWorld(r){
   const road=new TwinBatch(),shoulder=new TwinBatch(),trunk=new TwinBatch(),trees=new TwinBatch(),garage=new TwinBatch(),garageLight=new TwinBatch();
   road.box(0,-.08,0,7.4,.14,128);shoulder.box(-5.2,-.12,0,3.0,.12,128);shoulder.box(5.2,-.12,0,3.0,.12,128);
   for(let k=0;k<40;k++){const z=-58+k*3.1+(k%3)*.37;for(const side of [-1,1]){const x=side*(5.3+(k%5)*.58+Math.sin(k*1.7)*.35),h=3.8+(k%7)*.32;trunk.cylY(x,h*.22,z,h*.44,.14+(k%3)*.025,7);trees.coneY(x,h*.70,z,h*1.08,1.05+(k%4)*.15,9)}}
-  garage.box(0,-.10,0,10.8,.16,13.5);garage.box(-5.05,2.15,-5.55,.18,4.3,.18);garage.box(5.05,2.15,-5.55,.18,4.3,.18);garage.box(0,4.28,-5.55,10.2,.18,.18);
-  for(const x of [-3.7,3.7])garageLight.box(x,.03,0,.075,.028,9.4);
+  garage.box(0,-.11,0,7.4,.12,7.4);
   const created=[
     pushBatch(r,road,M([.035,.042,.046],0,.92),'road'),
     pushBatch(r,shoulder,M([.12,.075,.036],0,.98),'road'),
     pushBatch(r,trunk,M([.12,.055,.022],0,.92),'road'),
     pushBatch(r,trees,M([.025,.19,.065],0,.90),'road'),
-    pushBatch(r,garage,M([.075,.09,.105],.08,.63),'garage'),
+    pushBatch(r,garage,M([.010,.013,.017],.02,.82),'garage'),
     pushBatch(r,garageLight,M([.72,.89,1],.04,.16,[2.2,2.8,3.5]),'garage')
   ].filter(Boolean);
   r._michaelWorld={worldTrees:80,roadEnvironment:true,garageEnvironment:true,garageSmoke:true,batchedDraws:created.length,fog:true};
