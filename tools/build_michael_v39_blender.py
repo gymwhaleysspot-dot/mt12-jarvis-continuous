@@ -65,7 +65,8 @@ lights=[area('MichaelKey',(-5.0,-4.6,6.8),1750,5.8,(1.0,.91,.82)),area('MichaelF
 for o in lights:point(o)
 S.world.color=(.011,.014,.020)
 try:S.render.engine='BLENDER_EEVEE_NEXT'
-except TypeError:S.render.engine='BLENDER_EEVEE'S.render.resolution_x=1400;S.render.resolution_y=1050;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG';S.render.film_transparent=False
+except TypeError:S.render.engine='BLENDER_EEVEE'
+S.render.resolution_x=1400;S.render.resolution_y=1050;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG';S.render.film_transparent=False
 camd=bpy.data.cameras.new('MICHAEL_PhysicalCamera');cam=bpy.data.objects.new('MICHAEL_PhysicalCamera',camd);S.collection.objects.link(cam);S.camera=cam;camd.lens=92
 views={'front':((0,-12.0,1.55),(0,-.18,1.00)),'three':((7.3,-9.6,3.0),(0,0,1.02)),'side':((12.2,0,1.55),(0,0,1.02)),'rear':((0,12.0,1.55),(0,.20,1.00)),'top':((4.8,-3.9,13.0),(0,0,.75))}
 for name,(loc,target) in views.items():cam.location=loc;point(cam,target);S.render.filepath=os.path.join(PRE,name+'.png');bpy.ops.render.render(write_still=True)
