@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import json
+import json,re
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -10,9 +10,18 @@ REPAIRABLE_PREFIXES=(
     'forbidden-lineage-regression:',
     'missing:generated runtime release label',
 )
+PROFILE_BY_LABEL={
+    '1':'conservative','2':'balanced','3':'learning',
+    '4':'observability','5':'combined','6':'synthesis',
+}
 
 
-def repair_text(base,text:str,profile:str,journal:list|None=None)->str:
+def _profile_from_text(text:str,fallback:str)->str:
+    m=re.search(r'T\(2,1,"JRW([1-6])",Z\+INVERS\)',text)
+    return PROFILE_BY_LABEL.get(m.group(1),fallback) if m else fallback
+
+
+def repair_text(base,text:str,profile:str,journal:list|None=None,phase:str='candidate')->str:
     journal=journal if journal is not None else []
     detected=base.protected_checks(text)
     y=text
@@ -28,26 +37,37 @@ def repair_text(base,text:str,profile:str,journal:list|None=None)->str:
         fatal=[e for e in errors if not e.startswith(REPAIRABLE_PREFIXES)]
         if not errors:
             if detected or y!=text:
-                journal.append({'profile':profile,'attempt':attempt,'detected':detected,'status':'REPAIRED_AND_VERIFIED'})
+                journal.append({'phase':phase,'profile':profile,'attempt':attempt,'detected':detected,'status':'REPAIRED_AND_VERIFIED'})
             return y
         if fatal:
-            journal.append({'profile':profile,'attempt':attempt,'detected':errors,'status':'HARD_STOP_UNKNOWN_OR_PROTECTED_DEFECT'})
+            journal.append({'phase':phase,'profile':profile,'attempt':attempt,'detected':errors,'status':'HARD_STOP_UNKNOWN_OR_PROTECTED_DEFECT'})
             raise RuntimeError('jarvis-self-repair-fatal:'+';'.join(fatal))
         if y==before:
             break
     errors=base.protected_checks(y)
-    journal.append({'profile':profile,'attempt':3,'detected':errors,'status':'REPAIR_EXHAUSTED'})
+    journal.append({'phase':phase,'profile':profile,'attempt':3,'detected':errors,'status':'REPAIR_EXHAUSTED'})
     raise RuntimeError('jarvis-self-repair-exhausted:'+';'.join(errors))
 
 
 def install(base):
-    """Wrap Jarvis's rewrite function with bounded, auditable self-repair."""
+    """Wrap Jarvis rewrite with bounded pre-generation and post-generation self-repair.
+
+    Generator-owned structural defects are canonicalized before the inherited
+    controller is handed to the rewrite engine and again after candidate
+    generation. Unknown or protected-controller defects remain fatal.
+    """
     original=base.experiment_rewrite
     journal=[]
 
     def wrapped(text:str,profile:str,experiment:dict,generation:str)->str:
-        candidate=original(text,profile,experiment,generation)
-        return repair_text(base,candidate,profile,journal)
+        parent=text
+        if text and 'local function zBrain' in text:
+            parent_profile=_profile_from_text(text,profile)
+            parent_errors=base.protected_checks(text)
+            if parent_errors:
+                parent=repair_text(base,text,parent_profile,journal,'parent')
+        candidate=original(parent,profile,experiment,generation)
+        return repair_text(base,candidate,profile,journal,'candidate')
 
     base.experiment_rewrite=wrapped
 
@@ -57,9 +77,9 @@ def install(base):
     def write_state():
         STATE.parent.mkdir(parents=True,exist_ok=True)
         STATE.write_text(json.dumps({
-            'schema':'JARVIS-SELF-REPAIR-1',
-            'policy':'BOUNDED_KNOWN_REPAIR_ONLY; UNKNOWN_OR_PROTECTED_DEFECTS_HARD_STOP',
-            'maxAttemptsPerCandidate':3,
+            'schema':'JARVIS-SELF-REPAIR-2',
+            'policy':'PRE_AND_POST_GENERATION_BOUNDED_KNOWN_REPAIR_ONLY; UNKNOWN_OR_PROTECTED_DEFECTS_HARD_STOP',
+            'maxAttemptsPerPhase':3,
             'repairs':journal,
         },indent=2)+'\n')
 
