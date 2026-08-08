@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - racing-mjx7303-v30.html
       - racing-mjx7303-v29.html
       - assets/mjx7303/**
       - jarvis/**
@@ -17,6 +18,7 @@ on:
   pull_request:
     paths:
       - index.html
+      - racing-mjx7303-v30.html
       - racing-mjx7303-v29.html
       - assets/mjx7303/**
       - jarvis/**
@@ -49,20 +51,20 @@ jobs:
           python3 tools/audit_workflow_wiring.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
-      - name: Validate Jarvis XR V29 contract
+      - name: Validate Jarvis XR V30 contract
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,label=t)=>{if(!fs.existsSync(f))throw Error('Missing file '+f);const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${label} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','workspaceBody');check('jarvis/app.js','latestGeneration');check('jarvis/state.js','factory/canonical-controller.json');
-          check('racing-mjx7303-v29.html','JARVIS XR ENGINE V29','V29 simulator shell');check('racing-mjx7303-v29.html','mjx7303-physics-v4.js');check('racing-mjx7303-v29.html','mjx7303-racing-v29.js');
-          check('jarvis/racing-tab.js','racing-mjx7303-v29.html');check('jarvis/racing-tab.js','RACING V29 CUSTOM XR ENGINE');
+          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V30','V30 simulator shell');check('racing-mjx7303-v30.html','mjx7303-physics-v4.js');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
+          check('jarvis/racing-tab.js','racing-mjx7303-v30.html');check('jarvis/racing-tab.js','RACING V30 CLEAN BODY');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');check('jarvis/jarvis-xr-engine-v29.js','shadowFbo');
-          check('jarvis/jarvis-dynamics-v29.js','fixed=1/120');check('jarvis/jarvis-dynamics-v29.js','impact(');check('jarvis/jarvis-dynamics-v29.js','snapshot()');
-          check('jarvis/mjx7303-racing-v29.js','JarvisXRRenderer');check('jarvis/mjx7303-racing-v29.js','JarvisDynamics');check('jarvis/mjx7303-racing-v29.js','__V29_READY');
-          const runtime=fs.readFileSync('jarvis/mjx7303-racing-v29.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into V29: '+banned);
-          check('tools/build_mjx7303_v28_blender.py','375 mm wheelbase');check('tools/build_mjx7303_v28_blender.py','WB=3.75');check('tools/build_mjx7303_v28_blender.py','BODY_SHELL_CONTINUOUS_V28');check('tools/build_mjx7303_v28_blender.py','export_scene.gltf');
-          console.log({racing:'V29',renderer:'Jarvis XR raw WebGL2',pbr:'GGX',tone:'ACES',physics:'Jarvis Dynamics 120Hz + MT12 V4',wheelbaseMM:375,externalRenderer:false});
+          check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
+          check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v30.js','JarvisXRRenderer');check('jarvis/mjx7303-racing-v30.js','JarvisDynamics');check('jarvis/mjx7303-racing-v30.js','__V30_READY');
+          const runtime=fs.readFileSync('jarvis/mjx7303-racing-v30.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into V30: '+banned);
+          check('tools/build_mjx7303_v30_blender.py','375 mm wheelbase');check('tools/build_mjx7303_v30_blender.py','WB=3.75');check('tools/build_mjx7303_v30_blender.py','BODY_SHELL_CONTINUOUS_V30');check('tools/build_mjx7303_v30_blender.py','export_scene.gltf');
+          console.log({racing:'V30',renderer:'Jarvis XR raw WebGL2',pbr:'GGX',tone:'ACES',physics:'Jarvis Dynamics V30 spawn-safe 120Hz + MT12 V4',wheelbaseMM:375,externalRenderer:false});
           NODE
       - name: Validate planner schema contract
         run: |
