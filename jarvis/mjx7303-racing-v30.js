@@ -1,11 +1,11 @@
-// MJX 7303 Racing V32 — Blender-master body, spawn-safe dynamics, mobile-first framing
-import {JarvisXRRenderer} from './jarvis-xr-engine-v29.js?v=xr32';
-import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr32';
+// MJX 7303 Racing V33 — blueprint-grade Blender master, spawn-safe dynamics, mobile-first framing
+import {JarvisXRRenderer} from './jarvis-xr-engine-v29.js?v=xr33';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr33';
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');
 let xr,dyn,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.11,dist=10.8,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
-const asset=new URL('../assets/mjx7303/mjx7303-v32.glb?v=xr32',import.meta.url).href;
-try{xr=new JarvisXRRenderer(canvas);xr.addGround();dyn=new JarvisDynamics();status.textContent='JARVIS XR V32 · LOADING BLENDER MASTER…';const info=await xr.loadGLB(asset);status.textContent=`JARVIS XR V32 · ${info.drawables} GPU DRAWS · CUSTOM PBR`;status.className='asset-state ok';window.__V32_MODEL=true}catch(e){console.error(e);status.textContent='JARVIS XR V32 FAILED · '+e.message;status.className='asset-state warn'}
+const asset=new URL('../assets/mjx7303/mjx7303-v33.glb?v=xr33',import.meta.url).href;
+try{xr=new JarvisXRRenderer(canvas);xr.addGround();dyn=new JarvisDynamics();status.textContent='JARVIS XR V33 · LOADING BLUEPRINT MASTER…';const info=await xr.loadGLB(asset);status.textContent=`JARVIS XR V33 · ${info.drawables} GPU DRAWS · CUSTOM PBR`;status.className='asset-state ok';window.__V33_MODEL=true}catch(e){console.error(e);status.textContent='JARVIS XR V33 FAILED · '+e.message;status.className='asset-state warn'}
 function orbit(){xr?.orbit(yaw,pitch,dist,1.02)}orbit();
 const views={front:[Math.PI,.05,10.8],three:[-.72,.11,10.8],side:[-Math.PI/2,.06,11.0],rear:[0,.07,10.8],top:[-.42,1.02,12.7]};
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));[yaw,pitch,dist]=views[b.dataset.view];orbit()}));
@@ -17,4 +17,4 @@ function setMode(m){mode=m;document.body.dataset.mode=m;$('#garageBtn')?.classLi
 $('#garageBtn')?.addEventListener('click',()=>setMode('garage'));$('#driveBtn')?.addEventListener('click',()=>setMode('drive'));
 document.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.upgrade;tune[k]=Math.min(1.30,(tune[k]||1)+.05);b.textContent=Math.round(tune[k]*100)+'%';dyn?.setTune(tune)}));
 function frame(now){const dt=Math.min(.04,(now-last)/1000||.016);last=now;if(xr){xr.resize();if(mode==='drive'&&dyn){const steerKey=(keys.has('ArrowLeft')||keys.has('KeyA'))?-1:(keys.has('ArrowRight')||keys.has('KeyD'))?1:null,thKey=keys.has('ArrowUp')||keys.has('KeyW'),brKey=keys.has('ArrowDown')||keys.has('KeyS')||keys.has('Space');dyn.setInput({steer:steerKey??input.steer,throttle:thKey?1:input.throttle,brake:brKey?1:input.brake,surface:input.surface});dyn.setTune(tune);const s=dyn.step(dt),p=s.position;xr.setRoot(p.x*3,p.y*.5,p.z*3,s.rotation.yaw);xr.chase(p.x*3,p.y*.5,p.z*3,s.rotation.yaw);$('#mph').textContent=Math.round(s.truthMph);$('#rpm').textContent=Math.round(s.truthRpm);$('#battery').textContent=s.batteryV.toFixed(1)+'V';$('#tc').textContent=s.tc?'TC':'—';$('#abs').textContent=s.abs?'ABS':'—';$('#damage').textContent=Math.round(s.damage*100)+'%';$('#reason').textContent=s.reason}xr.render();$('#frame').textContent=(xr.avgMs||0).toFixed(1)+' ms';$('#scale').textContent=Math.round((xr.quality||1)*100)+'%'}requestAnimationFrame(frame)}
-requestAnimationFrame(frame);window.__V30_READY=true;window.__V31_READY=true;window.__V32_READY=true;addEventListener('resize',()=>xr?.resize());
+requestAnimationFrame(frame);window.__V30_READY=true;window.__V31_READY=true;window.__V32_READY=true;window.__V33_READY=true;addEventListener('resize',()=>xr?.resize());
