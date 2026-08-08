@@ -1,0 +1,53 @@
+name: Commit Verified Jarvis Authority Fix
+
+on:
+  push:
+    branches: [jarvis-jrw7-repair]
+    paths:
+      - '.github/workflows/jarvis-authority-commit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply verified generator repair
+        run: python3 tools/fix_jarvis_authority.py
+      - name: Verify repaired generator
+        run: |
+          python3 -m py_compile tools/controller_rewrite_hotfix.py
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import controller_rewrite_hotfix as h
+          s=Path('public/builds/rewrite-31235808121-1/jrw6/jrw6.lua').read_text()
+          x=h._authority_finalize(s,'synthesis')
+          assert x.count('local function jA6(a)')==1
+          assert x.count('local function jAS(a)')==1
+          assert x.count('local function jA2(a)')==1
+          assert x.count('jAS(ac)')==1 and x.count('jA2(ac)')==1
+          assert 'ac=jAS(ac);ac=jA2(ac);V[720]=ac;' in x
+          assert x.index('local function lerp') < x.index('local function jA6')
+          j2=next(z for z in x.splitlines() if z.strip().startswith('local function jA2(a)'))
+          assert all(f'X[{i}]' not in j2 for i in range(55,67))
+          assert all(f'X[{i}]' in j2 for i in (67,68,69))
+          assert not [e for e in h.protected_checks(x) if e.startswith('authority-')]
+          PY
+      - name: Persist repaired Jarvis generator on repair branch
+        run: |
+          if git diff --quiet -- tools/controller_rewrite_hotfix.py; then
+            echo 'Generator already contains the verified fix.'
+            exit 0
+          fi
+          git config user.name 'Jarvis Authority Repair'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- tools/controller_rewrite_hotfix.py
+          git commit -m 'Fix Jarvis authority synthesis finalization'
+          git push origin HEAD:jarvis-jrw7-repair
