@@ -111,10 +111,12 @@ jobs:
           assert compiled, t
           for c in compiled:
             assert not [e for e in c.get('errors',[]) if 'authority-' in e], c
+          synth=next(c for c in t['candidates'] if c.get('profile')=='synthesis')
+          assert synth.get('status')=='COMPILED', synth
           s=json.loads(Path('factory/memory/jarvis-self-repair.json').read_text())
-          assert s['schema']=='JARVIS-SELF-REPAIR-1'
-          assert s['policy'].startswith('BOUNDED_KNOWN_REPAIR_ONLY')
-          print({'compiled':len(compiled),'winner':t.get('winner'),'repairs':s['repairs']})
+          assert s['schema']=='JARVIS-SELF-REPAIR-2'
+          assert s['policy'].startswith('PRE_AND_POST_GENERATION_BOUNDED_KNOWN_REPAIR_ONLY')
+          print({'compiled':len(compiled),'winner':t.get('winner'),'synthesis':synth.get('status'),'repairs':s['repairs']})
           PY
       - uses: actions/upload-artifact@v6
         with:
