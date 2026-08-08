@@ -1,17 +1,17 @@
 // MICHAEL V42 Racing — licensed C3 WRC personal MJX 7303 + MICHAEL graphics engine + proven Jarvis Dynamics.
-import {JarvisXRRenderer} from './michael-graphics-v39.js?v=michael54';
-import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael54';
-import p0 from './michael-v40-payload-00.js?v=michael54';
-import p1 from './michael-v40-payload-01.js?v=michael54';
-import p2 from './michael-v40-payload-02.js?v=michael54';
-import p3 from './michael-v40-payload-03.js?v=michael54';
-import p4 from './michael-v40-payload-04.js?v=michael54';
-import p5 from './michael-v40-payload-05.js?v=michael54';
-import p6 from './michael-v40-payload-06.js?v=michael54'; 
+import {JarvisXRRenderer} from './michael-graphics-v39.js?v=michael55';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael55';
+import p0 from './michael-v40-payload-00.js?v=michael55';
+import p1 from './michael-v40-payload-01.js?v=michael55';
+import p2 from './michael-v40-payload-02.js?v=michael55';
+import p3 from './michael-v40-payload-03.js?v=michael55';
+import p4 from './michael-v40-payload-04.js?v=michael55';
+import p5 from './michael-v40-payload-05.js?v=michael55';
+import p6 from './michael-v40-payload-06.js?v=michael55'; 
 const michaelPayload=p0+p1+p2+p3+p4+p5+p6;
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');let xr,dyn,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.105,dist=10.6,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
-const payloadURL=()=>{const raw=atob(michaelPayload),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}))},scan=payloadURL();const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael54-fallback';
+const payloadURL=()=>{const raw=atob(michaelPayload),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}))},scan=payloadURL();const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael55-fallback';
 async function loadVehicle(){xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();status.textContent='MICHAEL V42 · LICENSED C3 WRC MJX 7303 · LOADING…';try{const info=await xr.loadGLB(scan);status.textContent=`MICHAEL V42 COMPLETE · ${info.drawables} GPU DRAWS · WRC LIVERY + GLASS + LIGHTS + ROAD + TREES`;window.__MICHAEL_SYSTEMS=info.completeTwin;status.className='asset-state ok';window.__MICHAEL_MODEL=true;return info}catch(e){const primary=String(e?.message||e);console.error('MICHAEL V42 PRIMARY MODEL ERROR',scan,primary);window.__MICHAEL_ERROR={primary,url:scan};status.textContent=`MICHAEL V42 PRIMARY ${primary} · V33 CONTINUITY ACTIVE`;status.className='asset-state warn';const info=await xr.loadGLB(fallback);window.__MICHAEL_MODEL=false;return{...info,primaryError:primary}}}
 try{await loadVehicle()}catch(e){console.error(e);status.textContent='MICHAEL V42 MODEL LOAD FAILED · '+e.message;status.className='asset-state warn'}
 function orbit(){xr?.orbit(yaw,pitch,dist,1.02)}orbit();const views={front:[0,.055,10.65],three:[-.72,.115,10.35],side:[-Math.PI/2,.065,10.75],rear:[Math.PI,.065,10.70],top:[-.42,.94,11.75]};
