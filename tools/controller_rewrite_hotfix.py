@@ -33,25 +33,53 @@ def _function_line(text:str,name:str)->str:
 def _slots(line:str)->set[int]:
  return {int(x) for x in re.findall(r"X\[(\d+)\]",line)}
 
+def _write_slots(line:str)->set[int]:
+ return {int(x) for x in re.findall(r"X\[(\d+)\]\s*=",line)}
+
+def _authority_orphan_bodies()->set[str]:
+ out=set()
+ for fn in ARCH.values():
+  m=re.match(r"local function jA[1-6]\(a\)(.*)$",fn)
+  if m:out.add(m.group(1))
+ return out
+
 def _strip_authority(text:str)->str:
- text=re.sub(r"(?m)^local function jA[1-6]\(a\).*?\n?","",text)
- text=re.sub(r"(?m)^local function jAS\(a\).*?\n?","",text)
- text=re.sub(r"ac=jA[1-6]\(ac\);","",text)
- text=re.sub(r"ac=jAS\(ac\);","",text)
- return text
+ # Authority code is generator-owned. Remove complete one-line definitions and calls,
+ # plus exact orphan bodies created by older declaration-only stripping. Never half-strip
+ # an unknown multiline function because that can corrupt Lua structure silently.
+ orphan=_authority_orphan_bodies();out=[]
+ decl=re.compile(r"^\s*local function (jA[1-6]|jAS)\(a\)(.*)$")
+ call=re.compile(r"ac=(jA[1-6]|jAS)\(ac\);")
+ for line in text.splitlines(keepends=True):
+  raw=line.rstrip("\r\n");s=raw.strip()
+  if s in orphan:continue
+  m=decl.match(raw)
+  if m:
+   body=m.group(2).strip()
+   if body and body.endswith("end"):continue
+   raise RuntimeError("noncanonical multiline authority definition; refusing partial strip: "+m.group(1))
+  line=call.sub("",line);out.append(line)
+ clean="".join(out)
+ if re.search(r"(?m)^\s*local function (jA[1-6]|jAS)\(a\)",clean):raise RuntimeError("authority strip left a definition")
+ if call.search(clean):raise RuntimeError("authority strip left a generated call")
+ return clean
 
 def _assert_authority(text:str,profile:str)->list[str]:
  e=[]
  required=["jA2"] + ([] if profile=="balanced" else (["jA6","jAS"] if profile=="synthesis" else ["jA"+str(list(LABEL).index(profile)+1)]))
+ writes={}
  for name in required:
   if len(re.findall(rf"(?m)^local function {name}\(a\)",text))!=1:e.append(f"authority-definition-count:{name}")
-  line=_function_line(text,name)
-  if line and not _slots(line)<=OWNERS[name]:e.append(f"authority-slot-ownership:{name}:{sorted(_slots(line)-OWNERS[name])}")
+  line=_function_line(text,name);writes[name]=_write_slots(line)
+  if line and not writes[name]<=OWNERS[name]:e.append(f"authority-slot-ownership:{name}:{sorted(writes[name]-OWNERS[name])}")
+ for i,name in enumerate(required):
+  for other in required[i+1:]:
+   overlap=writes.get(name,set())&writes.get(other,set())
+   if overlap:e.append(f"authority-slot-collision:{name}:{other}:{sorted(overlap)}")
  if text.count("ac=jA2(ac);")!=1:e.append(f"authority-call-count:jA2:{text.count('ac=jA2(ac);')}")
  if profile=="synthesis":
   if text.count("ac=jAS(ac);")!=1:e.append(f"authority-call-count:jAS:{text.count('ac=jAS(ac);')}")
   if "ac=jA6(ac);" in text:e.append("authority-double-call:jA6")
-  if _slots(_function_line(text,"jA6")) & _slots(_function_line(text,"jA2")):e.append("authority-slot-collision:jA6:jA2")
  else:
   name="jA"+str(list(LABEL).index(profile)+1)
   if profile!="balanced" and text.count(f"ac={name}(ac);")!=1:e.append(f"authority-call-count:{name}:{text.count(f'ac={name}(ac);')}")
