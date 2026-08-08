@@ -1,0 +1,56 @@
+name: Verify Jarvis Authority Fix
+
+on:
+  push:
+    branches: [jarvis-jrw7-repair]
+    paths:
+      - 'tools/fix_jarvis_authority.py'
+      - '.github/workflows/jarvis-authority-fix-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Apply generator source repair
+        run: python3 tools/fix_jarvis_authority.py
+      - name: Syntax check repaired Jarvis
+        run: python3 -m py_compile tools/controller_rewrite_hotfix.py
+      - name: Prove finalizer against broken JRW6
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import controller_rewrite_hotfix as h
+          p=Path('public/builds/rewrite-31235808121-1/jrw6/jrw6.lua')
+          s=p.read_text()
+          x=h._authority_finalize(s,'synthesis')
+          assert x.count('local function jA6(a)')==1
+          assert x.count('local function jAS(a)')==1
+          assert x.count('local function jA2(a)')==1
+          assert x.count('jAS(ac)')==1
+          assert x.count('jA2(ac)')==1
+          assert 'ac=jAS(ac);ac=jA2(ac);V[720]=ac;' in x
+          j2=next(z for z in x.splitlines() if z.strip().startswith('local function jA2(a)'))
+          assert all(f'X[{i}]' not in j2 for i in range(55,67))
+          assert all(f'X[{i}]' in j2 for i in (67,68,69))
+          assert x.index('local function lerp') < x.index('local function jA6')
+          ae=[e for e in h.protected_checks(x) if e.startswith('authority-')]
+          assert not ae, ae
+          Path('controller_rewrite_hotfix.fixed.py').write_text(Path('tools/controller_rewrite_hotfix.py').read_text())
+          Path('jrw6-authority-finalized.lua').write_text(x)
+          print({'sourceBytes':len(x.encode()),'authorityErrors':ae})
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-authority-generator-fix
+          path: |
+            controller_rewrite_hotfix.fixed.py
+            jrw6-authority-finalized.lua
+          if-no-files-found: error
+          retention-days: 30
