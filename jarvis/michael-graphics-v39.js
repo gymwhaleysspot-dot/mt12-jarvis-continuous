@@ -22,16 +22,16 @@ function addCompletedTwin(r){
   const B={rubber:new TwinBatch(),alloy:new TwinBatch(),brake:new TwinBatch(),chassis:new TwinBatch(),glass:new TwinBatch(),lamp:new TwinBatch(),tail:new TwinBatch(),cabin:new TwinBatch(),susp:new TwinBatch()};
   const axles=[-1.875,1.875],sides=[-1.37,1.37];
   B.chassis.box(0,.28,0,2.28,.20,4.72);B.chassis.box(0,.43,-.10,1.92,.16,3.92);B.chassis.box(0,.30,-2.42,2.42,.18,.28);B.chassis.box(0,.30,2.42,2.42,.18,.28);
-  B.cabin.box(0,.82,.18,1.70,.28,2.35);B.cabin.box(-.47,1.06,.25,.48,.58,.70);B.cabin.box(.47,1.06,.25,.48,.58,.70);B.cabin.box(0,1.12,-.72,1.48,.22,.38);
-  B.glass.box(0,1.47,-.73,1.82,.70,.055);B.glass.box(0,1.48,1.05,1.72,.62,.055);B.glass.box(-1.055,1.43,.12,.045,.67,1.83);B.glass.box(1.055,1.43,.12,.045,.67,1.83);
+  B.cabin.box(0,.72,.12,1.62,.20,2.16);B.cabin.box(-.45,1.03,.18,.44,.52,.62);B.cabin.box(.45,1.03,.18,.44,.52,.62);B.cabin.box(0,1.05,.62,1.30,.12,.24);
+  B.glass.box(0,1.48,.78,1.54,.48,.030);B.glass.box(0,1.49,-.94,1.48,.44,.030);for(const x of[-1.015,1.015]){B.glass.box(x,1.47,.36,.024,.48,.62);B.glass.box(x,1.47,-.42,.024,.48,.62)}
   for(const z of axles){B.susp.box(0,.51,z,2.45,.085,.12);B.susp.box(0,.73,z,2.22,.065,.10);for(const x of sides){B.rubber.cylX(x,.56,z,.42,.51,22);B.alloy.cylX(x,.56,z,.432,.315,18);B.brake.cylX(x,.56,z,.445,.205,16);B.chassis.cylX(x,.56,z,.46,.075,14);B.susp.cylY(x*.83,.72,z,.62,.055,12)}} 
   B.susp.box(-.88,.48,-1.875,.62,.055,.55);B.susp.box(.88,.48,-1.875,.62,.055,.55);B.susp.box(-.88,.48,1.875,.62,.055,.55);B.susp.box(.88,.48,1.875,.62,.055,.55);
-  B.lamp.box(-.90,.78,-3.02,.48,.23,.075);B.lamp.box(.90,.78,-3.02,.48,.23,.075);B.lamp.box(-1.17,.54,-2.94,.18,.28,.08);B.lamp.box(1.17,.54,-2.94,.18,.28,.08);
-  B.tail.box(-1.08,.82,3.00,.39,.22,.075);B.tail.box(1.08,.82,3.00,.39,.22,.075);B.tail.box(0,1.83,2.53,.58,.065,.08);
+  B.lamp.box(-.94,.91,3.035,.38,.115,.038);B.lamp.box(.94,.91,3.035,.38,.115,.038);B.lamp.box(-1.15,.66,3.00,.13,.11,.035);B.lamp.box(1.15,.66,3.00,.13,.11,.035);
+  B.tail.box(-1.04,.93,-3.035,.31,.105,.038);B.tail.box(1.04,.93,-3.035,.31,.105,.038);B.tail.box(0,1.72,-2.72,.42,.045,.035);
   B.alloy.box(0,.27,-2.58,1.50,.055,.80);B.alloy.box(0,.25,2.57,1.64,.055,.70);
-  const mats={rubber:M([.009,.011,.014],0,.88),alloy:M([.62,.68,.76],.94,.12),brake:M([.27,.30,.34],.88,.19),chassis:M([.028,.034,.041],.22,.58),glass:M([.012,.055,.095],0,.035),lamp:M([.78,.86,1],.05,.055,[2.4,2.65,3.1]),tail:M([.55,.006,.012],.05,.08,[2.3,.02,.01]),cabin:M([.018,.020,.024],0,.76),susp:M([.42,.47,.54],.83,.20)};
+  const mats={rubber:M([.009,.011,.014],0,.88),alloy:M([.62,.68,.76],.94,.12),brake:M([.27,.30,.34],.88,.19),chassis:M([.028,.034,.041],.22,.58),glass:M([.012,.055,.095],0,.035),lamp:M([.44,.52,.66],.05,.10,[.42,.50,.62]),tail:M([.38,.004,.008],.05,.12,[.48,.004,.002]),cabin:M([.018,.020,.024],0,.76),susp:M([.42,.47,.54],.83,.20)};
   for(const k of Object.keys(B)){const b=B[k];if(b.p.length)r._mesh(new Float32Array(b.p),new Float32Array(b.n),new Uint32Array(b.i),mats[k],I4())}
-  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,lighting:true,cockpit:true,batches:Object.keys(B).length}
+  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,lighting:true,fittedLighting:true,cockpit:true,batches:Object.keys(B).length}
 }
 
 export class JarvisXRRenderer extends Physical38{
