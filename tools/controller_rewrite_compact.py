@@ -2,14 +2,12 @@ from __future__ import annotations
 import re
 import controller_rewrite_hotfix as base
 
-# Preserve the unpatched scorer before main() temporarily replaces base.candidate_bonus.
-# compact_candidate_bonus must call this saved function for JRW1-JRW5 or it recurses
-# through the monkey-patched base.candidate_bonus until Python exhausts the stack.
+# Preserve the canonical scorer before main() temporarily installs the compact scorer.
 _BASE_CANDIDATE_BONUS=base.candidate_bonus
 
 
 def _jas(text:str)->str:
- m=re.search(r"local function jAS\(a\).*?(?=local function bad\(x\))",text,re.S)
+ m=re.search(r"local function jAS\(a\).*?(?=\nlocal function (?:bad|jA[1-6])\(|$)",text,re.S)
  return m.group(0).strip() if m else ""
 
 
@@ -26,27 +24,21 @@ def _compact_template(runner:str)->str:
  return "local function jAS(a)local b=jA6(a);local e=X[57]or 0;X[63]=lerp(X[63]or e,e,.16);X[64]=lerp(X[64]or 0,m_abs(e-X[63]),.22);local v=c1(e*.52+(X[64]or 0)*1.9+(X[56]or 0)*.28);X[66]=lerp(X[66]or v,v,v>.48 and .27 or .075);return m_min(b,94.5-4.8*X[66]+2.4*c1((X[61]or 0)*(1-(X[56]or 0)*.3)))end"
 
 
-def compact_outcome_synth(text:str)->tuple[str,str]:
+def compact_synth_fn(stage_source:str)->tuple[str,str]:
+ """Provide compact synthesis through the current canonical _synth_fn contract.
+
+ The authority installer owns placement, call count and scratch validation. Compact mode only
+ chooses the jAS body; it must never wrap or edit the authority gate itself.
+ """
  winner,runner=base._latest_feedback()
  fn=_compact_template(runner)
- pat=re.compile(r"local function jAS\(a\).*?(?=local function bad\(x\))",re.S)
- if pat.search(text):
-  text=pat.sub(fn+"\n",text,count=1)
- else:
-  anchor="local function bad(x)"
-  if anchor not in text:raise RuntimeError("compact synthesis anchor missing")
-  text=text.replace(anchor,fn+"\n"+anchor,1)
-  gate="ac=jA6(ac);V[720]=ac;setgv(3,m_min(V[35],ac));"
-  if gate in text:text=text.replace(gate,"ac=jAS(ac);V[720]=ac;setgv(3,m_min(V[35],ac));",1)
-  else:
-   gate="V[720]=ac;setgv(3,m_min(V[35],ac));"
-   if gate not in text:raise RuntimeError("compact synthesis authority gate missing")
-   text=text.replace(gate,"ac=jAS(ac);"+gate,1)
- return text,f"compact-feedback:{winner}>{runner}"
+ return fn,f"compact-feedback:{winner}>{runner}"
 
 
 def compact_candidate_bonus(profile:str,text:str)->dict[str,float]:
  if profile!="synthesis":return _BASE_CANDIDATE_BONUS(profile,text)
+ if base.protected_checks(text):
+  return {k:0.0 for k in("dropoutGain","tractionGain","jumpGain","truthGain","absGain","compositionGain")}
  parent=base._parent_text();new=bool(_jas(text)) and _jas(text)!=_jas(parent)
  out={k:0.0 for k in("dropoutGain","tractionGain","jumpGain","truthGain","absGain")}
  if new:
@@ -56,10 +48,10 @@ def compact_candidate_bonus(profile:str,text:str)->dict[str,float]:
 
 
 def main()->None:
- old_synth=base._outcome_synth;old_bonus=base.candidate_bonus
- base._outcome_synth=compact_outcome_synth;base.candidate_bonus=compact_candidate_bonus
+ old_synth=base._synth_fn;old_bonus=base.candidate_bonus
+ base._synth_fn=compact_synth_fn;base.candidate_bonus=compact_candidate_bonus
  try:base.main()
- finally:base._outcome_synth=old_synth;base.candidate_bonus=old_bonus
+ finally:base._synth_fn=old_synth;base.candidate_bonus=old_bonus
 
 
 if __name__=="__main__":main()
