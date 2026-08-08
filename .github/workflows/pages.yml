@@ -44,7 +44,7 @@ jobs:
           echo 'f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a  assets/mjx7303/michael-v39.glb' | sha256sum -c -
           test "$(stat -c '%s' assets/mjx7303/michael-v39.glb)" -eq 3154380
           cp assets/mjx7303/michael-v39.glb assets/mjx7303/michael-v40.bin
-          for part in 00 01 02 03 04 05 06; do { printf "export default '"; tr -d '\\r\\n' < "tools/michael-v40-private/body.glb.b64.$part"; printf "';\\n"; } > "jarvis/michael-v40-payload-$part.js"; done
+          for part in 00 01 02 03 04 05 06; do { printf "export default '"; tr -d '\r\n' < "tools/michael-v40-private/body.glb.b64.$part"; printf "';\\n"; } > "jarvis/michael-v40-payload-$part.js"; done
           node - <<'NODE'
           const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/michael-v39.glb');
           if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V40 GLB invalid');
