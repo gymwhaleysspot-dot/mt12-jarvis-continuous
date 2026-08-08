@@ -1,7 +1,7 @@
 // JARVIS PHYSICAL TWIN GRAPHICS V38 — physically layered automotive WebGL2 presentation
 // Replaces the V29/V37 single-lobe presentation shader with a multi-lobe automotive shader while
 // retaining the proven GLB loader, dynamics hooks and mobile adaptive quality director.
-import {JarvisXRRenderer as Twin37} from './jarvis-ai-graphics-v37.js?v=michael64-core';
+import {JarvisXRRenderer as Twin37} from './jarvis-ai-graphics-v37.js?v=michael65-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function sh(gl,type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s)||'V38 shader compile');return s}
 function prog(gl,vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl,gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p)||'V38 program link');return p}
