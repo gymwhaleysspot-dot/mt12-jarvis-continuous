@@ -12,7 +12,7 @@ SLOT_AREA={"conservative":"dropout-state-machine","balanced":"traction-state-est
 LABEL={"conservative":"JRW1","balanced":"JRW2","learning":"JRW3","observability":"JRW4","combined":"JRW5","synthesis":"JRW6"}
 ARCH={
 "conservative":"local function jA1(a)local u=c1(V[119]);local c=c1(V[114]);X[55]=lerp(X[55]or c,c,.08);if u>.45 then X[56]=m_min(60,(X[56]or 0)+1)else X[56]=m_max(0,(X[56]or 0)-2)end;local r=c1((X[55]or 0)*(1-u));local cap=91+5*r;if(X[56]or 0)>8 then cap=cap-2 end;X[57]=lerp(X[57]or cap,cap,.18);return m_min(a,X[57])end",
-"balanced":"local function jA2(a)local q=c1(V[114]);local u=c1(V[119]);local e=c1((V[161]+V[164])/2);X[55]=lerp(X[55]or e,e,.14);local d=e-(X[55]or e);X[56]=lerp(X[56]or 0,m_abs(d),.2);local sev=c1(e*.55+(X[56]or 0)*1.8+u*.3);local rel=c1(q*(1-u));X[57]=lerp(X[57]or sev,sev,sev>.5 and .25 or .08);return m_min(a,96-5*(X[57]or 0)+2*rel)end",
+"balanced":"local function jA2(a)local q=c1(V[114]);local u=c1(V[119]);local e=c1((V[161]+V[164])/2);X[67]=lerp(X[67]or e,e,.14);local d=e-(X[67]or e);X[68]=lerp(X[68]or 0,m_abs(d),.2);local sev=c1(e*.55+(X[68]or 0)*1.8+u*.3);local rel=c1(q*(1-u));X[69]=lerp(X[69]or sev,sev,sev>.5 and .25 or .08);return m_min(a,96-5*(X[69]or 0)+2*rel)end",
 "learning":"local function jA3(a)local u=c1(V[119]);local air=V[543]>0 and 1 or 0;X[55]=clamp((X[55]or 0)+(air and(1-u)*.18 or -.12),0,1);local land=(not air and(X[55]or 0)>.35)and 1 or 0;X[56]=clamp((X[56]or 0)+(land*.22-.08),0,1);if land>0 then X[57]=(X[57]or 0)+1 else X[57]=m_max(0,(X[57]or 0)-1)end;local conf=c1((X[55]or 0)*(1-u));local cap=96-3*conf-((X[57]or 0)>3 and 2 or 0);return m_min(a,cap)end",
 "observability":"local function jA4(a)local q=c1(V[114]);local u=c1(V[119]);local ca=c1((X[46]or 0)/200);local obs=c1(q*.45+(1-u)*.35+ca*.2);X[55]=lerp(X[55]or obs,obs,obs<(X[55]or obs)and .22 or .07);X[56]=lerp(X[56]or u,u,.12);local trust=c1((X[55]or 0)*(1-(X[56]or 0)*.35));local cap=92+5*trust;return m_min(a,cap)end",
 "combined":"local function jA5(a)local b=(V[161]>0 or V[164]>0 or V[543]>0)and 1 or 0;local q=c1(V[114]);local u=c1(V[119]);X[55]=clamp((X[55]or 0)+(b and .16 or -.09),0,1);local lock=c1((X[55]or 0)*(.7+.3*u));X[56]=lerp(X[56]or lock,lock,lock>.45 and .28 or .1);local rec=c1(q*(1-u));local cap=96-5*(X[56]or 0)+rec;return m_min(a,cap)end",
@@ -25,6 +25,23 @@ def protected_checks(text:str)->list[str]:
  e.extend(f"missing-lineage-floor:{x}" for x in req if x not in text)
  for bad in("setgv(3,V[35])","V[179]*(.00435","V[179]*(.0044","V[179]*.0048","V[179]*.0050",'fid("VFAS")','fid("EscV")','fid("A4")'):
   if bad in text:e.append("forbidden-lineage-regression:"+bad)
+
+ # Authority architecture must be closed, singular, and lexically safe.
+ lm=text.find("local function lerp(a,b,t)t=c1(t);return a+(b-a)*t end")
+ for n in ("jA1","jA2","jA3","jA4","jA5","jA6","jAS"):
+  dc=text.count("local function "+n+"(a)");cc=text.count(n+"(ac)")
+  if dc>1:e.append("authority-duplicate-definition:"+n)
+  if cc>1:e.append("authority-duplicate-call:"+n)
+  if cc and not dc:e.append("authority-call-without-definition:"+n)
+  p=text.find("local function "+n+"(a)")
+  if p>=0 and (lm<0 or p<lm):e.append("authority-helper-before-local-lerp:"+n)
+ m=re.search(r'T\(2,1,"JRW([1-6])",Z\+INVERS\)',text)
+ if m and m.group(1)=="6":
+  for x in ("local function jA6(a)","local function jAS(a)","local function jA2(a)","ac=jAS(ac);ac=jA2(ac);","X[67]=lerp","X[68]=lerp","X[69]=lerp"):
+   if x not in text:e.append("authority-synthesis-missing:"+x)
+  j2=next((z for z in text.splitlines() if z.strip().startswith("local function jA2(a)")),"")
+  if any(("X[%d]"%i) in j2 for i in range(55,67)):e.append("authority-scratch-collision:jA2")
+
  if not re.search(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)',text):e.append("missing:generated runtime release label")
  return e
 
@@ -102,6 +119,44 @@ def _inject(text:str,profile:str)->str:
  text=text.replace(gate,"ac="+name+"(ac);"+gate,1)
  return text
 
+
+def _authority_finalize(text:str,profile:str)->str:
+ # Strip inherited architecture helper lines. Evolution parents may contain one or
+ # many old jA*/jAS helpers; carrying them forward caused JRW6 call stacking.
+ lines=text.splitlines();keep=[];found={}
+ for line in lines:
+  st=line.strip()
+  if re.match(r"local function jA[1-6]\(a\)",st) or st.startswith("local function jAS(a)"):
+   m=re.match(r"local function (jA[1-6]|jAS)\(a\)",st)
+   if m:found.setdefault(m.group(1),[]).append(st)
+   continue
+  keep.append(line)
+ text="\n".join(keep)
+ lerp_line="local function lerp(a,b,t)t=c1(t);return a+(b-a)*t end"
+ if lerp_line not in text:raise RuntimeError("authority lexical anchor missing")
+ if profile=="synthesis":
+  # Preserve the newly synthesized staged jAS, install exactly one jA6 and one
+  # isolated jA2. Ownership: jA6=55..62, jAS=63..66, jA2=67..69.
+  js=found.get("jAS")or[]
+  if not js:raise RuntimeError("synthesis helper jAS missing")
+  helpers=ARCH["synthesis"]+"\n"+js[-1]+"\n"+ARCH["balanced"]
+  calls="ac=jAS(ac);ac=jA2(ac);"
+ else:
+  name="jA"+str(list(LABEL).index(profile)+1)
+  helpers=ARCH[profile];calls="ac="+name+"(ac);"
+ text=text.replace(lerp_line,lerp_line+"\n"+helpers,1)
+ tail="V[720]=ac;setgv(3,m_min(V[35],ac));"
+ pos=text.find(tail)
+ if pos<0:raise RuntimeError("authority gate missing")
+ start=pos;pat=re.compile(r"ac=(?:jA[1-6]|jAS)\(ac\);")
+ while True:
+  last=None
+  for m in pat.finditer(text,max(0,start-1024),start):last=m
+  if last and last.end()==start:start=last.start()
+  else:break
+ text=text[:start]+calls+text[pos:]
+ return text
+
 def _label(text:str,p:str)->str:
  text,n=re.subn(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)',f'T(2,1,"{LABEL[p]}",Z+INVERS)',text,count=1)
  if n!=1:raise RuntimeError("dashboard label anchor missing")
@@ -112,7 +167,7 @@ def experiment_rewrite(text:str,profile:str,experiment:dict,generation:str)->str
  x=_original_rewrite(text,"balanced",seed,generation);x=_restore(x);x=_reuse(x)
  x=x.replace("if X[29]>0 then bb_line(143,p2221(ac,V[704],V[114]*100,V[119]*100),0)end;","")
  x=x.replace("if X[29]>0 and X[46]<80 then bb_line(142,p2221(ac,X[46],V[166],V[167]),0)end;","")
- return _label(_inject(x,profile),profile)
+ return _label(_authority_finalize(_inject(x,profile),profile),profile)
 
 def _parent_text():
  _,p=jarvis_evolution_parent.resolve();return p.read_text()
