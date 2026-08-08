@@ -71,7 +71,7 @@ jobs:
             git commit -m "Persist generated MJX 7303 V31 reference CAD asset"
             git push origin HEAD:main
           fi
-      - name: Validate Jarvis XR reference body runtime
+      - name: Validate Jarvis XR V31 runtime
         run: |
           set -euo pipefail
           node --check classic-token.js
@@ -86,13 +86,13 @@ jobs:
           node - <<'NODE'
           const fs=require('fs'),check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');
-          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V30');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
-          check('jarvis/mjx7303-racing-v30.js','mjx7303-v31.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS XR V31');check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');
-          check('jarvis/racing-tab.js','racing-mjx7303-v30.html');
+          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V31');check('racing-mjx7303-v30.html','BOOTING JARVIS XR V31');check('racing-mjx7303-v30.html','xr31b');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
+          check('jarvis/mjx7303-racing-v30.js','mjx7303-v31.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS XR V31');check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v30.js','__V31_READY');
+          check('jarvis/racing-tab.js','xr31b');check('jarvis/racing-tab.js','Simulator V31');check('jarvis/racing-tab.js','RACING V31 REFERENCE BODY');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
           const b=fs.readFileSync('assets/mjx7303/mjx7303-v31.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('V31 XR asset failed final validation');
-          console.log({pages:'PASS',racing:'V31_REFERENCE_BODY',renderer:'JARVIS_XR_WEBGL2',physics:'SPAWN_SAFE_120HZ',externalRenderer:false});
+          console.log({pages:'PASS',racing:'V31_REFERENCE_BODY',shell:'V31',cache:'xr31b',renderer:'JARVIS_XR_WEBGL2',physics:'SPAWN_SAFE_120HZ',externalRenderer:false});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
