@@ -22,7 +22,11 @@ def pinput(bsdf,names,val):
 def material(name,color,metal=0,rough=.3,coat=.4,alpha=1):
     m=bpy.data.materials.get(name) or bpy.data.materials.new(name);m.use_nodes=True;m.diffuse_color=(*color,alpha)
     b=m.node_tree.nodes.get('Principled BSDF');pinput(b,['Base Color'],(*color,1));pinput(b,['Metallic'],metal);pinput(b,['Roughness'],rough);pinput(b,['Coat Weight','Clearcoat'],coat)
-    if alpha<1:\n        pinput(b,['Alpha'],alpha)\n        if hasattr(m,'surface_render_method'):m.surface_render_method='DITHERED'\n        elif hasattr(m,'blend_method'):m.blend_method='BLEND'\n        if hasattr(m,'use_screen_refraction'):m.use_screen_refraction=True
+    if alpha<1:
+        pinput(b,['Alpha'],alpha)
+        if hasattr(m,'surface_render_method'):m.surface_render_method='DITHERED'
+        elif hasattr(m,'blend_method'):m.blend_method='BLEND'
+        if hasattr(m,'use_screen_refraction'):m.use_screen_refraction=True
     return m
 BLACK=material('V37_Satin_Black',(.003,.004,.005),0,.42,.08);RUB=material('V37_Tire_Rubber',(.006,.006,.007),0,.66,.03)
 AL=material('V37_Machined_Aluminum',(.58,.62,.67),.92,.15,.30);DARKAL=material('V37_Dark_Metal',(.045,.052,.060),.78,.24,.18)
@@ -109,7 +113,8 @@ def area(n,loc,energy,size,color):
 def pointat(o,target=(0,0,1.05)):
     o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
 for o in [area('KeySoftbox_V37',(-4.5,-4.2,6.5),1200,5.0,(1.0,.92,.82)),area('FillSoftbox_V37',(4.8,-1.0,4.2),900,4.0,(.76,.86,1.0)),area('RimSoftbox_V37',(0,4.0,5.3),1100,3.2,(1.0,.70,.58))]:pointat(o)
-S.world.color=(.018,.022,.028);try:S.render.engine='BLENDER_EEVEE_NEXT'\nexcept TypeError:S.render.engine='BLENDER_EEVEE'S.render.resolution_x=1200;S.render.resolution_y=900;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG'
+S.world.color=(.018,.022,.028);try:S.render.engine='BLENDER_EEVEE_NEXT'
+except TypeError:S.render.engine='BLENDER_EEVEE'S.render.resolution_x=1200;S.render.resolution_y=900;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG'
 camd=bpy.data.cameras.new('V37_PhysicalCamera');cam=bpy.data.objects.new('V37_PhysicalCamera',camd);S.collection.objects.link(cam);S.camera=cam;camd.lens=72
 views={'front':((0,-10.5,1.65),(0,-.2,1.05)),'three':((6.5,-8.3,3.2),(0,0,1.00)),'side':((10.7,0,1.65),(0,0,1.00)),'rear':((0,10.6,1.65),(0,.2,1.00)),'top':((5.1,-4.0,11.4),(0,0,.75))}
 for name,(loc,target) in views.items():
