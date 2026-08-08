@@ -1,6 +1,6 @@
 // MICHAEL V42 — mobile WRC world engine: licensed authority mesh, procedural livery,
 // sorted transparent glass, fitted light lenses, batched garage/forest worlds and adaptive quality.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael53-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael54-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.ema=16.7;this.jitter=0;this.q=1.78;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL LICENSED';this.exposure=1.30}
@@ -51,8 +51,8 @@ function addMichaelWorld(r){
   const road=new TwinBatch(),shoulder=new TwinBatch(),trunk=new TwinBatch(),trees=new TwinBatch(),garage=new TwinBatch(),garageLight=new TwinBatch();
   road.box(0,-.08,0,7.4,.14,128);shoulder.box(-5.2,-.12,0,3.0,.12,128);shoulder.box(5.2,-.12,0,3.0,.12,128);
   for(let k=0;k<40;k++){const z=-58+k*3.1+(k%3)*.37;for(const side of [-1,1]){const x=side*(5.3+(k%5)*.58+Math.sin(k*1.7)*.35),h=3.8+(k%7)*.32;trunk.cylY(x,h*.22,z,h*.44,.14+(k%3)*.025,7);trees.coneY(x,h*.70,z,h*1.08,1.05+(k%4)*.15,9)}}
-  garage.box(-5.3,2.25,0,.24,4.5,12);garage.box(5.3,2.25,0,.24,4.5,12);garage.box(0,4.55,-2.7,10.8,.22,6.4);garage.box(0,.02,-5.7,10.8,.18,.24);
-  for(const x of [-3.3,0,3.3])garageLight.box(x,4.28,-.2,1.8,.045,.16);
+  garage.box(0,-.10,0,10.8,.16,13.5);garage.box(-5.05,2.15,-5.55,.18,4.3,.18);garage.box(5.05,2.15,-5.55,.18,4.3,.18);garage.box(0,4.28,-5.55,10.2,.18,.18);
+  for(const x of [-3.7,3.7])garageLight.box(x,.03,0,.075,.028,9.4);
   const created=[
     pushBatch(r,road,M([.035,.042,.046],0,.92),'road'),
     pushBatch(r,shoulder,M([.12,.075,.036],0,.98),'road'),
@@ -67,7 +67,7 @@ function addMichaelWorld(r){
 export class JarvisXRRenderer extends Physical38{
   constructor(canvas){super(canvas);this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V42';this.visualProfile='WRC_WORLD_ENGINE';this.quality=1.78;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
   addGround(){const first=this.drawables.length;super.addGround();for(const d of this.drawables.slice(first))d.world=true;addMichaelWorld(this);this.setMode(this.michael.mode)}
-  setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage')}this.fogDensity=road?.021:.010;this.fogColor=new Float32Array(road?[.045,.105,.075]:[.055,.072,.092])}
+  setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage')}this.fogDensity=road?.021:.006;this.fogColor=new Float32Array(road?[.045,.105,.075]:[.012,.018,.026])}
   async loadGLB(url){const first=this.drawables.length,licensed=url.startsWith('blob:')||/michael-v40\.bin(?:\?|$)/.test(url),info=await super.loadGLB(url),printerToMichael=new Float32Array([1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1]);if(licensed){for(const d of this.drawables.slice(first)){d.model=printerToMichael;d.mat.base=new Float32Array([.72,.012,.026]);d.mat.metal=.18;d.mat.rough=.10}addCompletedTwin(this)}for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114,spread=Math.max(r,g,b)-Math.min(r,g,b);if(r>g*1.32&&r>b*1.25&&r>.11){m.rough=clamp(m.rough,.075,.115);m.metal=clamp(Math.max(m.metal,.16),0,.24)}else if(lum<.025){m.rough=Math.max(m.rough,.72);m.metal=0}else if(spread<.09&&lum>.48){m.rough=Math.min(m.rough,.105);m.metal=Math.max(m.metal,.90)}else if(b>r*1.15&&lum<.22){m.rough=Math.min(m.rough,.05);m.metal=0}}return{...info,drawables:this.drawables.length,ai:this.aiVersion,profile:this.visualProfile,scanAware:true,completeTwin:this._michaelSystems||null,world:this._michaelWorld||null,capabilities:this.capabilities}}
   render(){this.michael.tick();super.render()}
   getAIStats(){return{...super.getAIStats(),version:this.aiVersion,profile:this.visualProfile,qualityTier:this.michael.tier,michaelFrameMs:this.michael.ema,michaelJitter:this.michael.jitter,stillFrames:this.michael.still,stationaryConvergence:this.michael.still>90,qualityCeiling:2.25,meshSource:'LICENSED_C3_WRC_AUTHORITY_MESH',completeTwin:this._michaelSystems||null,world:this._michaelWorld||null,capabilities:this.capabilities}}
