@@ -1,6 +1,6 @@
-// MICHAEL V55 — coordinated adaptive renderer: licensed authority mesh, energy-aware paint,
+// MICHAEL V56 — visual-foundation renderer: fitted optics, panel-following livery and safe staging.
 // stable mobile frame pacing, scene-aware lighting and calibrated camera composition.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael68-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael69-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.mobile=Math.min(innerWidth||720,innerHeight||1280)<900;this.ema=16.7;this.jitter=0;this.pressure=0;this.badFrames=0;this.goodFrames=0;this.cooldown=0;this.q=this.mobile?.96:1.18;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL BALANCED';this.exposure=.98;this.maxQuality=this.mobile?1.10:1.38}
@@ -50,10 +50,9 @@ function addCompletedTwin(r){
   B.glass.quad([-.91,1.18,.93],[.91,1.18,.93],[.76,1.76,.52],[-.76,1.76,.52],[0,.55,.84]);
   B.glass.quad([.86,1.18,-.97],[-.86,1.18,-.97],[-.72,1.70,-.62],[.72,1.70,-.62],[0,.55,-.84]);
   for(const x of [-1.015,1.015]){const n=[Math.sign(x),0,0];B.glass.quad([x,1.18,.78],[x,1.18,.02],[x,1.70,.08],[x,1.70,.47],n);B.glass.quad([x,1.18,-.08],[x,1.18,-.78],[x,1.68,-.46],[x,1.68,-.07],n)}
-  // Crisp, geometry-backed works livery. Separate paint batches prevent the soft grey decal look.
-  for(const x of [-1.226,1.226]){const n=[Math.sign(x),0,0],q=x+Math.sign(x)*.004;B.liveryWhite.quad([q,.58,-1.22],[q,.58,1.26],[q,1.18,1.12],[q,1.18,-1.08],n);B.liveryBlue.quad([q+Math.sign(x)*.003,.58,-.12],[q+Math.sign(x)*.003,.58,.04],[q+Math.sign(x)*.003,1.18,.12],[q+Math.sign(x)*.003,1.18,-.02],n);B.liveryGold.quad([q+Math.sign(x)*.006,.58,.08],[q+Math.sign(x)*.006,.58,.24],[q+Math.sign(x)*.006,1.18,.32],[q+Math.sign(x)*.006,1.18,.18],n)}
-  // Layered optics: recessed black buckets, projector lenses and flush clear covers follow the fascia.
-  for(const x of [-.73,.73]){B.lampHousing.cylZ(x,.91,2.932,.035,.205,22);B.projector.cylZ(x,.91,2.958,.045,.102,24)}
+  // The works panel follows the door envelope instead of hovering as a full-height rectangle.
+  for(const x of [-1.226,1.226]){const s=Math.sign(x),n=[s,0,0],q=x+s*.004;B.liveryWhite.quad([q,.62,-1.08],[q,.62,.92],[q,1.11,.98],[q,1.14,-.96],n);B.liveryBlue.quad([q+s*.003,.62,-.14],[q+s*.003,.62,.015],[q+s*.003,1.12,.13],[q+s*.003,1.12,-.025],n);B.liveryGold.quad([q+s*.006,.62,.035],[q+s*.006,.62,.17],[q+s*.006,1.12,.29],[q+s*.006,1.12,.155],n)}
+  // Fascia-matched lens and ribbon geometry replaces the former floating circular projectors.
   B.frontLens.quad([-.98,.82,2.936],[-.39,.84,3.034],[-.43,1.02,3.026],[-.96,1.00,2.930],[0,0,1]);
   B.frontLens.quad([.39,.84,3.034],[.98,.82,2.936],[.96,1.00,2.930],[.43,1.02,3.026],[0,0,1]);
   B.rearLens.quad([.45,.82,-3.022],[.99,.82,-2.920],[.96,1.02,-2.916],[.48,1.03,-3.018],[0,0,-1]);
@@ -70,7 +69,7 @@ function addCompletedTwin(r){
   B.beams.quad([-.92,.035,2.86],[-.36,.035,2.86],[-.72,.035,9.4],[-2.40,.035,9.4],[0,1,0]);B.beams.quad([.36,.035,2.86],[.92,.035,2.86],[2.40,.035,9.4],[.72,.035,9.4],[0,1,0]);
   const mats={contact:M([.002,.003,.004],0,1),rubber:M([.006,.007,.009],0,.88),tread:M([.018,.020,.024],0,.74),alloy:M([.43,.50,.59],.82,.18),rimAccent:M([.10,.13,.17],.72,.25),brake:M([.24,.26,.29],.76,.28),chassis:M([.014,.017,.021],.10,.72),cabin:M([.010,.013,.017],0,.84),cockpit:M([.018,.022,.028],0,.68),carbon:M([.012,.014,.017],.18,.42),harness:M([.62,.018,.022],0,.62),susp:M([.23,.27,.32],.60,.34),mud:M([.006,.007,.009],0,.94),glass:{...M([.012,.030,.052],0,.065),alpha:.27},liveryWhite:M([.76,.79,.82],.02,.28),liveryBlue:M([.045,.18,.52],.03,.24),liveryGold:M([.94,.58,.045],.04,.23),lampHousing:M([.003,.004,.006],.10,.22),projector:{...M([.20,.27,.35],.18,.06,[.16,.22,.30]),alpha:.82},frontLens:{...M([.20,.28,.36],0,.045),alpha:.16},frontDrl:{...M([.78,.87,.96],.01,.10,[1.00,1.18,1.40]),alpha:.98},rearLens:{...M([.42,.006,.010],0,.07),alpha:.20},rearLamp:{...M([.72,.004,.008],.01,.12,[1.05,.008,.012]),alpha:.96},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.020}};
   for(const k of Object.keys(B)){const d=pushBatch(r,B[k],mats[k]);if(d&&k==='beams'){d.driveOnly=true;d.hidden=true}}
-  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,layeredOptics:true,modeledLampHousings:true,projectorLenses:true,lighting:true,fittedLights:true,wrcLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,batches:Object.keys(B).length}
+  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,layeredOptics:true,flushLensGeometry:true,projectorLenses:false,lighting:true,fittedLights:true,wrcLivery:true,panelFollowingLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,batches:Object.keys(B).length}
 }
 function addMichaelWorld(r){
   const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),garageMark=new TwinBatch(),servicePad=new TwinBatch(),turntable=new TwinBatch(),garageCurb=new TwinBatch(),garageEquipment=new TwinBatch();
@@ -79,9 +78,9 @@ function addMichaelWorld(r){
   for(const side of [-1,1]){guardrail.box(side*4.42,.46,0,.10,.12,128);for(let z=-60;z<=60;z+=4)guardrail.box(side*4.42,.24,z,.12,.52,.12)}
   // A broad floor and image-based key avoid camera-crossing physical light bars at every orbit angle.
   garage.box(0,-.11,0,24,.12,24);servicePad.box(0,-.035,0,7.7,.035,9.4);turntable.cylY(0,-.012,0,.052,3.25,48);
-  for(const x of [-4.2,4.2])garageMark.box(x,.005,0,.055,.018,15.5);for(const z of [-5.0,5.0])garageMark.box(0,.006,z,8.5,.020,.055);
-  for(const x of [-4.35,4.35]){garageCurb.box(x,.09,0,.13,.09,9.8);garageEquipment.box(x,.48,-3.75,.42,.48,.42);garageEquipment.box(x,.48,3.75,.42,.48,.42)}
-  for(const z of [-5.2,5.2])garageCurb.box(0,.09,z,8.95,.09,.13);
+  for(const x of [-5.4,5.4])garageMark.box(x,.005,0,.055,.018,18.5);for(const z of [-6.2,6.2])garageMark.box(0,.006,z,10.8,.020,.055);
+  for(const x of [-5.65,5.65]){garageCurb.box(x,.09,0,.13,.09,12.4);garageEquipment.box(x,.48,-6.1,.42,.48,.42);garageEquipment.box(x,.48,6.1,.42,.48,.42)}
+  for(const z of [-6.65,6.65])garageCurb.box(0,.09,z,11.5,.09,.13);
   const created=[
     pushBatch(r,road,M([.050,.058,.062],0,.90),'road'),
     pushBatch(r,shoulder,M([.105,.073,.042],0,.97),'road'),
@@ -102,7 +101,7 @@ function addMichaelWorld(r){
 }
 
 export class JarvisXRRenderer extends Physical38{
-  constructor(canvas){super(canvas);this.externalQuality=true;this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V55';this.visualProfile='SELF_MONITORING_MOBILE_WRC_ENGINE';this.quality=this.michael.q;this.postBloom=.045;this.postExposure=1.12;this.postLift=.018;this.postVignette=.985;this.performancePressure=0;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
+  constructor(canvas){super(canvas);this.externalQuality=true;this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V56';this.visualProfile='FITTED_MOBILE_VISUAL_FOUNDATION';this.quality=this.michael.q;this.postBloom=.035;this.postExposure=1.10;this.postLift=.020;this.postVignette=.99;this.performancePressure=0;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
   addGround(){const first=this.drawables.length;super.addGround();for(const d of this.drawables.slice(first))d.world=true;addMichaelWorld(this);this.setMode(this.michael.mode)}
   setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage');if(d.driveOnly)d.hidden=!road}this.fogDensity=road?.0022:.00045;this.fogColor=new Float32Array(road?[.042,.055,.062]:[.038,.047,.060]);this.postExposure=road?1.10:1.14;this.gl.clearColor(...(road?[.019,.029,.035,1]:[.026,.034,.045,1]))}
   chase(x,y,z,yaw){const fx=Math.sin(yaw),fz=Math.cos(yaw);this.at[0]=x;this.at[1]=y+.82;this.at[2]=z;this.eye[0]=x-fx*10.85;this.eye[1]=y+2.28;this.eye[2]=z-fz*10.85}
