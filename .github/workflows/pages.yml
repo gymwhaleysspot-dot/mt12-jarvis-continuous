@@ -109,12 +109,7 @@ jobs:
             code_asset=$(curl -L -sS -o /tmp/v37.glb -w '%{http_code}' "$asset" || true)
             code_shell=$(curl -L -sS -o /tmp/v37.html -w '%{http_code}' "$shell" || true)
             if [ "$code_asset" = 200 ] && [ "$code_shell" = 200 ] && [ -s /tmp/v37.glb ] && grep -q 'JARVIS DIGITAL TWIN V37' /tmp/v37.html; then
-              python3 - <<'PY'
-from pathlib import Path
-b=Path('/tmp/v37.glb').read_bytes()
-assert b[:4]==b'glTF' and int.from_bytes(b[4:8],'little')==2 and int.from_bytes(b[8:12],'little')==len(b)
-print({'liveV37':'PASS','bytes':len(b)})
-PY
+              python3 -c "from pathlib import Path;b=Path('/tmp/v37.glb').read_bytes();assert b[:4]==b'glTF' and int.from_bytes(b[4:8],'little')==2 and int.from_bytes(b[8:12],'little')==len(b);print({'liveV37':'PASS','bytes':len(b)})"
               ok=1
               break
             fi
