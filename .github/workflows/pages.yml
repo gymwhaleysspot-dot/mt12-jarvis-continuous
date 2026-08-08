@@ -18,7 +18,7 @@ on:
       - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -58,6 +58,18 @@ jobs:
           for(const token of ['BODY_SHELL_CONTINUOUS_V30','Windshield','WhiteRoof','WingBlade','FrontSplitter'])if(!names.some(n=>n.includes(token)))throw Error('V30 CAD component missing '+token);
           console.log({asset:'MJX7303_V30_CLEAN_CAD',bytes:b.length,nodes:names.length,glb:'VALID_GLB2'});
           NODE
+      - name: Persist generated V30 CAD asset to main
+        run: |
+          set -euo pipefail
+          git config user.name "jarvis-pages-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add assets/mjx7303/mjx7303-v30.glb
+          if git diff --cached --quiet; then
+            echo "V30 CAD asset already current on main."
+          else
+            git commit -m "Persist generated MJX 7303 V30 CAD asset"
+            git push origin HEAD:main
+          fi
       - name: Validate Jarvis XR V30 engine
         run: |
           set -euo pipefail
