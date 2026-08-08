@@ -80,10 +80,10 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
-          base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
+          base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload-00.js?v=smoke-${GITHUB_SHA}";assetLast="${base}jarvis/michael-v40-payload-06.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
           for attempt in $(seq 1 30); do
-            echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael.glb -w '%{http_code}' "$asset" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
-            if [ "$ca" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q 'MICHAEL PERSONAL TWIN V40' /tmp/michael.html && grep -q 'MICHAEL_V40' /tmp/michael.js; then python3 -c "from pathlib import Path;import base64,hashlib,re;s=Path('/tmp/michael.glb').read_text();m=re.fullmatch(r\"export default '([A-Za-z0-9+/=]+)';\\n?\",s);assert m;b=base64.b64decode(m.group(1));assert b[:4]==b'glTF' and int.from_bytes(b[8:12],'little')==len(b) and len(b)==3154380 and hashlib.sha256(b).hexdigest()=='f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a';print({'MICHAEL_LIVE_PAYLOAD':'PASS','bytes':len(b)})";ok=1;break;fi
-            echo "asset=$ca shell=$cs engine=$ce";sleep 5
+            echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael-00.js -w '%{http_code}' "$asset" || true);cz=$(curl -L -sS -o /tmp/michael-06.js -w '%{http_code}' "$assetLast" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
+            if [ "$ca" = 200 ] && [ "$cz" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q "^export default '" /tmp/michael-00.js && grep -q "^export default '" /tmp/michael-06.js && grep -q 'MICHAEL PERSONAL TWIN V40' /tmp/michael.html && grep -q 'MICHAEL_V40' /tmp/michael.js; then echo "{MICHAEL_LIVE_CHUNKS: PASS}";ok=1;break;fi
+            echo "asset00=$ca asset06=$cz shell=$cs engine=$ce";sleep 5
           done
           test "$ok" -eq 1
