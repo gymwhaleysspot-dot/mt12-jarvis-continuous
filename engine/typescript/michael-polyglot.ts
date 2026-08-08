@@ -4,7 +4,7 @@ const instantiate = async (url:string, imports:WebAssembly.Imports={}) => {
   const response=await fetch(url,{cache:'force-cache'}); if(!response.ok) throw new Error(`${response.status} ${url}`);
   const bytes=await response.arrayBuffer(); return WebAssembly.instantiate(bytes,imports);
 };
-export async function bootMichaelPolyglot(base='./generated/',cache='michael68'):Promise<MichaelPolyglot>{
+export async function bootMichaelPolyglot(base='./generated/',cache='michael69'):Promise<MichaelPolyglot>{
   const states:MichaelModuleState[]=[]; let cpp:any=null,rust:any=null,assembly:any=null,zig:any=null; let fallbackExposure=1.18;
   try{const factory=(await import(`${base}michael-core.js?v=${cache}`)).default;cpp=await factory({locateFile:(n:string)=>`${base}${n}?v=${cache}`});cpp._michael_boot(0x7303);states.push({name:'C/C++ Wasm',ready:cpp._michael_abi()===1});}catch(error){states.push({name:'C/C++ Wasm',ready:false,reason:String(error)});}
   for(const [name,file,set] of [['Rust Wasm','michael-rust.wasm',(v:any)=>rust=v],['AssemblyScript Wasm','michael-assembly.wasm',(v:any)=>assembly=v],['Zig Wasm','michael-zig.wasm',(v:any)=>zig=v]] as const){try{const v=(await instantiate(`${base}${file}?v=${cache}`)).instance.exports;set(v);states.push({name,ready:true});}catch(error){states.push({name,ready:false,reason:String(error)});}}
