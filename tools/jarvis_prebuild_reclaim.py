@@ -28,8 +28,6 @@ def _profile(text:str)->str:
     hotfix=_hotfix()
     m=re.search(r'T\(2,1,"JRW([1-6])",Z\+INVERS\)',text)
     if m:return list(hotfix.LABEL)[int(m.group(1))-1]
-    # Historical parents can have cosmetic label churn. Infer synthesis from jA6/jAS,
-    # otherwise use the evolution pointer candidate when it maps to a known JRW profile.
     if 'local function jAS(a)' in text or 'local function jA6(a)' in text:return 'synthesis'
     try:
         p=json.loads((ROOT/'factory/evolution-controller.json').read_text()).get('candidate','').upper()
@@ -38,15 +36,46 @@ def _profile(text:str)->str:
     return 'balanced'
 
 
+def _legacy_authority_scrub(text:str)->tuple[str,list[str]]:
+    """Remove historical generated authority declarations/calls before canonical rebuild.
+
+    Authority helpers are generator-owned and historically emitted as standalone one-line
+    declarations. We remove every such legacy declaration regardless of indentation, strip
+    every generated authority call, and refuse ambiguous mixed-content lines instead of
+    guessing. This is the migration boundary from pre-canonical JRW parents to the current
+    owned-scratch authority graph.
+    """
+    out=[];removed=[]
+    decl=re.compile(r'^\s*local function (jA[1-6]|jAS)\(a\).*?\r?\n?$')
+    any_decl=re.compile(r'local function (jA[1-6]|jAS)\(a\)')
+    call=re.compile(r'ac=(jA[1-6]|jAS)\(ac\);')
+    for line in text.splitlines(keepends=True):
+        m=decl.match(line)
+        if m:
+            removed.append('definition:'+m.group(1));continue
+        if any_decl.search(line):
+            raise RuntimeError('unsafe mixed-line legacy authority declaration; refusing destructive repair')
+        names=call.findall(line)
+        if names:removed.extend('call:'+n for n in names);line=call.sub('',line)
+        out.append(line)
+    cleaned=''.join(out)
+    leftovers=any_decl.findall(cleaned)
+    stale_calls=call.findall(cleaned)
+    if leftovers or stale_calls:
+        raise RuntimeError(f'legacy authority scrub incomplete definitions={leftovers} calls={stale_calls}')
+    return cleaned,removed
+
+
 def _self_heal_parent(text:str)->tuple[str,dict|None]:
     hotfix=_hotfix();profile=_profile(text);before=hotfix.protected_checks(text)
     authority_errors=[e for e in before if e.startswith('authority-')]
     if not authority_errors:return text,None
-    healed=hotfix._install_authority(text,profile,text)
+    scrubbed,removed=_legacy_authority_scrub(text)
+    healed=hotfix._install_authority(scrubbed,profile,text)
     healed=hotfix._label(healed,profile)
     after=hotfix.protected_checks(healed)
     if after:raise RuntimeError('Jarvis parent self-heal failed: '+repr(after))
-    return healed,{'kind':'parent-self-heal','profile':profile,'detected':authority_errors,'verified':'AUTHORITY_CANONICALIZE+PROTECTED_CONTRACT'}
+    return healed,{'kind':'parent-self-heal','profile':profile,'detected':authority_errors,'legacyRemoved':removed,'verified':'LEGACY_AUTHORITY_MIGRATION+AUTHORITY_CANONICALIZE+PROTECTED_CONTRACT'}
 
 
 def _norm_size(text:str)->int:
@@ -128,7 +157,6 @@ def reclaim()->dict:
         healing['beforeNormalizedBytes']=before_size;healing['afterNormalizedBytes']=current_size
         healing['bytesDelta']=current_size-before_size;changes.append(healing)
 
-    # Reclamation starts only after inherited state has been canonicalized and validated.
     while rounds<8:
         rounds+=1;accepted=False
         proposal_groups=[]
@@ -149,11 +177,9 @@ def reclaim()->dict:
     if errors:raise RuntimeError('reclaimed seed violated protected contract after self-heal: '+repr(errors))
     _compile(SEED,LUAC);final_size=LUAC.stat().st_size
     if final_size!=current_size:current_size=final_size
-    # Never roll back a required structural self-heal merely because canonical state costs bytes.
-    # Size rollback remains valid only when no structural healing was required.
     if not healing and current_size>before_size:
         SEED.write_text(before_text);_compile(SEED,LUAC);current_size=LUAC.stat().st_size;changes=[]
-    doc={'schema':'JARVIS-PREBUILD-RECLAIM-3','release':release,'source':str(src.relative_to(ROOT)),'seed':str(SEED.relative_to(ROOT)),'parentNormalizedBytes':before_size,'reclaimedNormalizedBytes':current_size,'bytesReclaimed':max(0,before_size-current_size),'selfHealed':bool(healing),'discoveryRounds':rounds,'acceptedChanges':len(changes),'changes':changes,'protectedContractErrors':errors,'policy':'SELF_HEAL_PARENT+DISCOVER+TRIAL_COMPILE; REPAIR_STRUCTURAL_CORRUPTION_BEFORE_RECLAMATION; NEVER_REMOVE_LIVE_FEATURES','acceptanceRule':'SELF_HEAL_MUST_PASS_PROTECTED_CONTRACT; EACH_RECLAIM_CHANGE_MUST_LOAD_LUA53+PASS_PROTECTED_CONTRACT+NORMALIZE_MT12+STRICTLY_REDUCE_BYTES'}
+    doc={'schema':'JARVIS-PREBUILD-RECLAIM-4','release':release,'source':str(src.relative_to(ROOT)),'seed':str(SEED.relative_to(ROOT)),'parentNormalizedBytes':before_size,'reclaimedNormalizedBytes':current_size,'bytesReclaimed':max(0,before_size-current_size),'selfHealed':bool(healing),'discoveryRounds':rounds,'acceptedChanges':len(changes),'changes':changes,'protectedContractErrors':errors,'policy':'LEGACY_AUTHORITY_MIGRATION+SELF_HEAL_PARENT+DISCOVER+TRIAL_COMPILE; REPAIR_STRUCTURAL_CORRUPTION_BEFORE_RECLAMATION; NEVER_REMOVE_LIVE_FEATURES','acceptanceRule':'LEGACY_MIGRATION_MUST_BE_UNAMBIGUOUS; SELF_HEAL_MUST_PASS_PROTECTED_CONTRACT; EACH_RECLAIM_CHANGE_MUST_LOAD_LUA53+PASS_PROTECTED_CONTRACT+NORMALIZE_MT12+STRICTLY_REDUCE_BYTES'}
     STATE.write_text(json.dumps(doc,indent=2)+'\n');return doc
 
 
