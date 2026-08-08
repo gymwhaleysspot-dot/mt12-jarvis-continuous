@@ -47,9 +47,9 @@ for(const file of ['michael-core.wasm','michael-rust.wasm','michael-assembly.was
   new WebAssembly.Module(fs.readFileSync(path));
 }
 const manifest=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
-if(manifest.engine!=='MICHAEL_V49'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
-for(const token of ['#version 300 es','MICHAEL_V49','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
-for(const token of ['@vertex','@fragment','MICHAEL_V49'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
+if(manifest.engine!=='MICHAEL_V50'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
+for(const token of ['#version 300 es','MICHAEL_V50','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
+for(const token of ['@vertex','@fragment','MICHAEL_V50'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
 console.log({polyglot:'PASS',languages:manifest.languages,artifacts:manifest.artifacts.length});
 NODE
 
