@@ -37,41 +37,42 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Install Blender CAD toolchain
+      - name: Install Blender reconstruction toolchain
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
           blender --version | head -2
-      - name: Build MJX 7303 V31 reference-driven CAD asset
+      - name: Build and render MJX 7303 V32 Blender master
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/build_mjx7303_v31_blender.py
-          mkdir -p assets/mjx7303
-          MJX_V31_OUT=assets/mjx7303/mjx7303-v31.glb blender --background --factory-startup --python tools/build_mjx7303_v31_blender.py
-          test -s assets/mjx7303/mjx7303-v31.glb
+          python3 -m py_compile tools/build_mjx7303_v32_blender.py
+          mkdir -p assets/mjx7303/v32-previews
+          MJX_V32_OUT=assets/mjx7303/mjx7303-v32.glb MJX_V32_PREVIEW_DIR=assets/mjx7303/v32-previews blender --background --factory-startup --python tools/build_mjx7303_v32_blender.py
+          test -s assets/mjx7303/mjx7303-v32.glb
+          for view in front three side rear top; do test -s "assets/mjx7303/v32-previews/$view.png"; done
           node - <<'NODE'
-          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v31.glb');
-          if(b.length<10000)throw Error('V31 CAD GLB too small: '+b.length);
-          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('V31 CAD GLB invalid');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V31 GLB JSON chunk invalid');
+          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v32.glb');
+          if(b.length<25000)throw Error('V32 Blender master GLB too small: '+b.length);
+          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('V32 Blender master GLB invalid');
+          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V32 GLB JSON chunk invalid');
           const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
-          for(const token of ['BODY_SHELL_REFERENCE_V31','Windshield','IntegratedWhiteRoof','RearWing','FrontSplitter'])if(!names.some(n=>n.includes(token)))throw Error('V31 CAD component missing '+token);
-          console.log({asset:'MJX7303_V31_REFERENCE_CAD',bytes:b.length,nodes:names.length,glb:'VALID_GLB2'});
+          for(const token of ['BODY_SHELL_V32','Windshield','RoofPanel','RearWingMain','FrontSplitter','FenderLip','Tire'])if(!names.some(n=>n.includes(token)))throw Error('V32 Blender component missing '+token);
+          const stats={asset:'MJX7303_V32_BLENDER_MASTER',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2'};console.log(stats);
           NODE
-      - name: Persist generated V31 CAD asset to main
+      - name: Persist V32 GLB and visual QA renders
         run: |
           set -euo pipefail
           git config user.name "jarvis-pages-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add assets/mjx7303/mjx7303-v31.glb
+          git add assets/mjx7303/mjx7303-v32.glb assets/mjx7303/v32-previews/*.png
           if git diff --cached --quiet; then
-            echo "V31 CAD asset already current on main."
+            echo "V32 Blender master and previews already current on main."
           else
-            git commit -m "Persist generated MJX 7303 V31 reference CAD asset"
+            git commit -m "Persist MJX 7303 V32 Blender master and previews"
             git push origin HEAD:main
           fi
-      - name: Validate Jarvis XR V31 runtime
+      - name: Validate Jarvis XR V32 Blender runtime
         run: |
           set -euo pipefail
           node --check classic-token.js
@@ -80,19 +81,21 @@ jobs:
           const fs=require('fs'),c=require('./jarvis/capabilities.json');
           if(c.schema<7)throw Error('Jarvis capability contract must be schema 7+');
           const required=['command','factory','evidence','intelligence','vehicle','releases','radio','firmware','system','tools','racing'];const ids=new Set(c.workspaces.map(x=>x.id));for(const id of required)if(!ids.has(id))throw Error('Required workspace missing '+id);
-          for(const p of ['racing-mjx7303-v30.html','jarvis/jarvis-xr-engine-v29.js','jarvis/jarvis-dynamics-v30.js','jarvis/mjx7303-racing-v30.js','jarvis/mjx7303-physics-v4.js','assets/mjx7303/mjx7303-v31.glb'])if(!fs.existsSync(p))throw Error('Reference runtime component missing: '+p);
+          for(const p of ['racing-mjx7303-v30.html','jarvis/jarvis-xr-engine-v29.js','jarvis/jarvis-dynamics-v30.js','jarvis/mjx7303-racing-v30.js','jarvis/mjx7303-physics-v4.js','assets/mjx7303/mjx7303-v32.glb'])if(!fs.existsSync(p))throw Error('V32 runtime component missing: '+p);
           NODE
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs'),check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');
-          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V31');check('racing-mjx7303-v30.html','BOOTING JARVIS XR V31');check('racing-mjx7303-v30.html','xr31b');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
-          check('jarvis/mjx7303-racing-v30.js','mjx7303-v31.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS XR V31');check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v30.js','__V31_READY');
-          check('jarvis/racing-tab.js','xr31b');check('jarvis/racing-tab.js','Simulator V31');check('jarvis/racing-tab.js','RACING V31 REFERENCE BODY');
+          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V32');check('racing-mjx7303-v30.html','BOOTING JARVIS XR V32');check('racing-mjx7303-v30.html','xr32');check('racing-mjx7303-v30.html','V32 BLENDER MASTER');
+          check('jarvis/mjx7303-racing-v30.js','mjx7303-v32.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS XR V32');check('jarvis/mjx7303-racing-v30.js','__V32_READY');
+          check('jarvis/racing-tab.js','xr32');check('jarvis/racing-tab.js','Simulator V32');check('jarvis/racing-tab.js','RACING V32 BLENDER MASTER');
+          check('tools/build_mjx7303_v32_blender.py','WheelArch');check('tools/build_mjx7303_v32_blender.py','v32-previews');check('tools/build_mjx7303_v32_blender.py','BODY_SHELL_V32');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
-          const b=fs.readFileSync('assets/mjx7303/mjx7303-v31.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('V31 XR asset failed final validation');
-          console.log({pages:'PASS',racing:'V31_REFERENCE_BODY',shell:'V31',cache:'xr31b',renderer:'JARVIS_XR_WEBGL2',physics:'SPAWN_SAFE_120HZ',externalRenderer:false});
+          const b=fs.readFileSync('assets/mjx7303/mjx7303-v32.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('V32 XR asset failed final validation');
+          for(const v of ['front','three','side','rear','top'])if(fs.statSync(`assets/mjx7303/v32-previews/${v}.png`).size<5000)throw Error('V32 preview too small '+v);
+          console.log({pages:'PASS',racing:'V32_BLENDER_MASTER',shell:'V32',cache:'xr32',previews:5,renderer:'JARVIS_XR_WEBGL2',physics:'SPAWN_SAFE_120HZ',externalRenderer:false});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
