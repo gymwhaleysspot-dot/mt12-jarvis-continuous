@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import controller_rewrite_compact as hotfix
 import jarvis_prebuild_reclaim as prebuild
+import jarvis_self_repair as selfrepair
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'dist-controller-tournament'
@@ -64,10 +65,15 @@ def _postprocess()->None:
 
 
 def main()->None:
-    print({'jarvisResourceCycle':'RECLAIM_RETHINK_BUILD_COMPETE_SYNTHESIZE_COMPRESS_VERIFY_INHERIT','alwaysOn':True,'hardCeilingBytes':MAX_BYTES,'compactSynthesis':True})
+    print({'jarvisResourceCycle':'RECLAIM_RETHINK_BUILD_COMPETE_SYNTHESIZE_COMPRESS_VERIFY_INHERIT','alwaysOn':True,'hardCeilingBytes':MAX_BYTES,'compactSynthesis':True,'selfRepair':'BOUNDED_KNOWN_REPAIR_ONLY'})
     seed=prebuild.install_seed();print(json.dumps({'prebuildReclamation':seed['doc']},indent=2))
-    try:hotfix.main()
-    finally:seed['restore']()
+    repair=selfrepair.install(hotfix.base)
+    try:
+        hotfix.main()
+    finally:
+        repair['write_state']()
+        repair['restore']()
+        seed['restore']()
     _postprocess()
 
 
