@@ -1,6 +1,6 @@
-# Michael V48 polyglot engine
+# Michael V49 polyglot engine
 
-Michael uses one browser ABI and several focused languages. C/C++ owns the deterministic core; Rust, Zig, and AssemblyScript provide optional WebAssembly accelerators; TypeScript owns orchestration; GLSL and WGSL own GPU programs; Python, Lua, Go, and C# generate validated build-time data. Optional modules always fail open to the TypeScript fallback so a compiler or browser feature can never make the car disappear.
+Michael uses one browser ABI and several focused languages. C/C++ owns deterministic state and the calibrated exposure governor; Rust, Zig, and AssemblyScript provide optional WebAssembly accelerators; TypeScript owns orchestration; GLSL and WGSL own energy-aware GPU programs; Python, Lua, Go, and C# generate validated build-time data. Optional modules always fail open to the TypeScript fallback so a compiler or browser feature can never make the car disappear.
 
 | Language | Responsibility | Browser artifact |
 |---|---|---|
