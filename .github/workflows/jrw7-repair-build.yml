@@ -7,7 +7,10 @@ on:
       - '.github/workflows/jrw7-repair-build.yml'
       - 'tools/jrw7_repair.py'
       - 'tools/controller_rewrite_hotfix.py'
+      - 'tools/controller_rewrite_compact.py'
       - 'tools/jarvis_self_repair.py'
+      - 'tools/jarvis_authority_selfheal.py'
+      - 'tools/test_jarvis_authority_selfheal.py'
       - 'tools/jarvis_efficiency_cycle.py'
       - 'public/builds/rewrite-31235808121-1/jrw6/jrw6.lua'
   workflow_dispatch:
@@ -30,6 +33,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.3 zip
           chmod +x toolchain/compile_mt12.sh
+      - name: Prove pre-generation self-heal contracts
+        run: |
+          python3 -m py_compile tools/jarvis_authority_selfheal.py tools/test_jarvis_authority_selfheal.py tools/controller_rewrite_hotfix.py tools/controller_rewrite_compact.py tools/jarvis_self_repair.py tools/jarvis_efficiency_cycle.py
+          PYTHONPATH=tools python3 tools/test_jarvis_authority_selfheal.py
       - name: Repair JRW6 into JRW7
         run: |
           mkdir -p "$OUT"
