@@ -73,7 +73,8 @@ jobs:
           node - <<'NODE'
           const fs=require('fs'),check=(f,t,l=t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');
-          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V30');check('racing-mjx7303-v30.html','jarvis-dynamics-v30');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
+          check('racing-mjx7303-v30.html','JARVIS XR ENGINE V30');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');
+          check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');
           check('jarvis/racing-tab.js','racing-mjx7303-v30.html');check('jarvis/racing-tab.js','RACING V30 CLEAN BODY');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
