@@ -62,8 +62,11 @@ jobs:
           if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('V36 GLB invalid');
           const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V36 GLB JSON invalid');
           const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
-          for(const t of ['BODY_SHELL_V36_REFERENCE','GreenhouseShell_V36','Windshield_V36','RearWingMain_V36','FrontSplitter_V36','Tire_V36','RimOuter_V36','Dashboard_V36','RoofLiveryWhite_V36'])if(!names.some(n=>n.includes(t)))throw Error('V36 component missing '+t);
-          console.log({asset:'MJX7303_V36_REFERENCE_MASTER',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2'});
+          const required=['BODY_SHELL_V36_REFERENCE','GreenhouseShell_V36','Windshield_V36','RearWingMain_V36','FrontSplitter_V36','Tire_V36','WheelSpoke_V36','Dashboard_V36','RoofLiveryWhite_V36'];
+          for(const t of required)if(!names.some(n=>n.includes(t))){console.error('Exported V36 node names:',names);throw Error('V36 component missing '+t)}
+          const src=fs.readFileSync('tools/build_mjx7303_v36_blender.py','utf8');
+          for(const t of ['RimOuter_V36','RimInnerDark_V36','BrakeDisc_V36'])if(!src.includes(t))throw Error('V36 wheel source component missing '+t);
+          console.log({asset:'MJX7303_V36_REFERENCE_MASTER',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2',wheelSource:'VALID'});
           NODE
       - name: Validate Jarvis V36 realism runtime
         run: |
