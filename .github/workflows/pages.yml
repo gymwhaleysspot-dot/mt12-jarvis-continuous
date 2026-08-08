@@ -74,7 +74,21 @@ jobs:
             echo "V33 blueprint master and previews already current on main."
           else
             git commit -m "Persist MJX 7303 V33 blueprint master and previews"
-            git push origin HEAD:main
+            pushed=0
+            for attempt in 1 2 3; do
+              echo "Synchronizing generated V33 asset commit with origin/main (attempt $attempt/3)..."
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                pushed=1
+                break
+              fi
+              sleep 2
+            done
+            if [ "$pushed" -ne 1 ]; then
+              echo "Unable to persist V33 generated assets after 3 synchronized push attempts." >&2
+              exit 1
+            fi
           fi
       - name: Validate Jarvis XR V33 runtime
         run: |
