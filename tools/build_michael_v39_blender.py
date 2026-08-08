@@ -6,6 +6,8 @@ OUT=os.environ.get('MICHAEL_V39_OUT','assets/mjx7303/michael-v39.glb')
 PRE=os.environ.get('MICHAEL_V39_PREVIEW_DIR','assets/mjx7303/michael-v39-previews')
 SCAN=os.environ.get('MICHAEL_V39_SCAN_OBJ','/tmp/michael-v39-scan.obj')
 META=os.environ.get('MICHAEL_V39_SCAN_META','/tmp/michael-v39-scan.json')
+SCAN_META=json.loads(open(META).read()) if os.path.exists(META) else {}
+REFERENCE_FALLBACK=bool(SCAN_META.get('fallbackViews'))
 os.makedirs(os.path.dirname(OUT),exist_ok=True);os.makedirs(PRE,exist_ok=True)
 # Reuse V37's proven glass/interior/wheels/lamp hardware; replace its guessed body with the photo-carved scan.
 os.environ['MJX_V37_OUT']='/tmp/michael-v39-v37-base.glb';os.environ['MJX_V37_PREVIEW_DIR']='/tmp/michael-v39-v37-previews'
@@ -13,7 +15,7 @@ runpy.run_path('tools/build_mjx7303_v37_blender.py',run_name='__michael_v39_base
 S=bpy.context.scene
 for o in list(bpy.data.objects):
     if o.type in {'CAMERA','LIGHT'} or o.name.startswith('Studio'):bpy.data.objects.remove(o,do_unlink=True)
-    elif 'BODY_SHELL_V36_REFERENCE' in o.name:bpy.data.objects.remove(o,do_unlink=True)
+    elif not REFERENCE_FALLBACK and 'BODY_SHELL_V36_REFERENCE' in o.name:bpy.data.objects.remove(o,do_unlink=True)
 
 def pin(bsdf,names,val):
     for n in names:
@@ -26,18 +28,23 @@ def material(name,color,metal=0,rough=.2,coat=.8):
 PAINT=material('MICHAEL_V39_Scanned_Multicoat_Red',(.61,.012,.018),.18,.095,1.0)
 BLACK=material('MICHAEL_V39_Deep_Black',(.003,.004,.006),0,.58,.06)
 METAL=material('MICHAEL_V39_Machined_Metal',(.64,.68,.74),.92,.12,.28)
-# Import the actual photo-carved watertight mesh.
-if not os.path.exists(SCAN):raise RuntimeError('MICHAEL V39 scan OBJ missing: '+SCAN)
-before=set(bpy.data.objects)
-if hasattr(bpy.ops.wm,'obj_import'):bpy.ops.wm.obj_import(filepath=SCAN,forward_axis='NEGATIVE_Z',up_axis='Y')
-else:bpy.ops.import_scene.obj(filepath=SCAN,axis_forward='-Z',axis_up='Y')
-new=[o for o in bpy.data.objects if o not in before and o.type=='MESH']
-if not new:raise RuntimeError('MICHAEL V39 scan import produced no mesh')
-body=new[0];body.name='MICHAEL_SCAN_BODY_V39';body.data.materials.clear();body.data.materials.append(PAINT)
-for p in body.data.polygons:p.use_smooth=True
-# Scanner-like cleanup: preserve silhouette truth while smoothing voxel stair-stepping and keeping a printable watertight shell.
-sm=body.modifiers.new('MICHAEL_SCAN_SMOOTH','SMOOTH');sm.factor=.42;sm.iterations=5
-bev=body.modifiers.new('MICHAEL_MICRO_BEVEL','BEVEL');bev.width=.006;bev.segments=2;bev.limit_method='ANGLE';bev.angle_limit=math.radians(38)
+# Never substitute synthetic silhouettes for a photographed scan: they create a solid, axis-ambiguous slab.
+# When real reference views are unavailable, ship the proven V37 reference body and preserve all aligned hardware.
+if REFERENCE_FALLBACK:
+    body=next((o for o in S.objects if 'BODY_SHELL_V36_REFERENCE' in o.name),None)
+    if body is None:raise RuntimeError('MICHAEL reference body missing')
+    body.name='MICHAEL_SCAN_BODY_V39_REFERENCE_FALLBACK'
+else:
+    if not os.path.exists(SCAN):raise RuntimeError('MICHAEL V39 scan OBJ missing: '+SCAN)
+    before=set(bpy.data.objects)
+    if hasattr(bpy.ops.wm,'obj_import'):bpy.ops.wm.obj_import(filepath=SCAN,forward_axis='NEGATIVE_Y',up_axis='Z')
+    else:bpy.ops.import_scene.obj(filepath=SCAN,axis_forward='-Y',axis_up='Z')
+    new=[o for o in bpy.data.objects if o not in before and o.type=='MESH']
+    if not new:raise RuntimeError('MICHAEL V39 scan import produced no mesh')
+    body=new[0];body.name='MICHAEL_SCAN_BODY_V39';body.data.materials.clear();body.data.materials.append(PAINT)
+    for p in body.data.polygons:p.use_smooth=True
+    sm=body.modifiers.new('MICHAEL_SCAN_SMOOTH','SMOOTH');sm.factor=.42;sm.iterations=5
+    bev=body.modifiers.new('MICHAEL_MICRO_BEVEL','BEVEL');bev.width=.006;bev.segments=2;bev.limit_method='ANGLE';bev.angle_limit=math.radians(38)
 # Paint microstructure. This is subtle surface breakup, not fake body geometry.
 b=PAINT.node_tree.nodes.get('Principled BSDF');noise=PAINT.node_tree.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=185;noise.inputs['Detail'].default_value=3.2;noise.inputs['Roughness'].default_value=.58
 bump=PAINT.node_tree.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.032;bump.inputs['Distance'].default_value=.008;PAINT.node_tree.links.new(noise.outputs['Fac'],bump.inputs['Height']);PAINT.node_tree.links.new(bump.outputs['Normal'],b.inputs['Normal'])
@@ -70,5 +77,5 @@ S.render.resolution_x=1400;S.render.resolution_y=1050;S.render.resolution_percen
 camd=bpy.data.cameras.new('MICHAEL_PhysicalCamera');cam=bpy.data.objects.new('MICHAEL_PhysicalCamera',camd);S.collection.objects.link(cam);S.camera=cam;camd.lens=92
 views={'front':((0,-12.0,1.55),(0,-.18,1.00)),'three':((7.3,-9.6,3.0),(0,0,1.02)),'side':((12.2,0,1.55),(0,0,1.02)),'rear':((0,12.0,1.55),(0,.20,1.00)),'top':((4.8,-3.9,13.0),(0,0,.75))}
 for name,(loc,target) in views.items():cam.location=loc;point(cam,target);S.render.filepath=os.path.join(PRE,name+'.png');bpy.ops.render.render(write_still=True)
-meta=json.loads(open(META).read()) if os.path.exists(META) else {}
-print({'asset':'MICHAEL_V39_SCANNED_MJX7303','mesh':'MULTIVIEW_VISUAL_HULL','scanVertices':meta.get('vertices'),'scanFaces':meta.get('faces'),'out':OUT,'camera':'92MM_PHOTOGRAPHIC'})
+meta=SCAN_META
+print({'asset':'MICHAEL_V39_SCANNED_MJX7303','mesh':'V37_REFERENCE_FALLBACK' if REFERENCE_FALLBACK else 'MULTIVIEW_VISUAL_HULL','scanVertices':meta.get('vertices'),'scanFaces':meta.get('faces'),'out':OUT,'camera':'92MM_PHOTOGRAPHIC'})
