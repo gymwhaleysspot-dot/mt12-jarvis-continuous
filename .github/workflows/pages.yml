@@ -26,14 +26,23 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: write
   pages: write
   id-token: write
 concurrency:
   group: jarvis-pages
   cancel-in-progress: true
 jobs:
+  dispatch-after-merge:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch protected main-branch Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
   deploy:
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
