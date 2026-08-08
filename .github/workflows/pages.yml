@@ -36,7 +36,7 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Assemble MICHAEL V46 licensed C3 WRC asset
+      - name: Assemble MICHAEL V47 licensed C3 WRC asset
         run: |
           set -euo pipefail
           mkdir -p assets/mjx7303
@@ -47,8 +47,8 @@ jobs:
           for part in 00 01 02 03 04 05 06; do { printf "export default '"; tr -d '\r\n' < "tools/michael-v40-private/body.glb.b64.$part"; printf "';\\n"; } > "jarvis/michael-v40-payload-$part.js"; done
           node - <<'NODE'
           const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/michael-v39.glb');
-          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V46 GLB invalid');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('MICHAEL V46 GLB JSON invalid');
+          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V47 GLB invalid');
+          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('MICHAEL V47 GLB JSON invalid');
           const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
           if(!names.some(n=>n.includes('MICHAEL_LICENSED_C3_WRC_BODY_V40')))throw Error('Licensed C3 WRC authority mesh missing');
           if(names.some(n=>/VISUAL_HULL|SCAN_BODY_V39/.test(n)))throw Error('Legacy visual-hull mesh survived V40 replacement');
@@ -65,10 +65,10 @@ jobs:
           node - <<'NODE'
           const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
           for(const p of ['racing-mjx7303-michael-v39.html','jarvis/michael-graphics-v39.js','jarvis/michael-engine-v45.js','jarvis/mjx7303-racing-michael-v39.js','assets/mjx7303/michael-v39.glb','assets/mjx7303/michael-v40.bin','jarvis/michael-v40-payload-00.js','jarvis/michael-v40-payload-01.js','jarvis/michael-v40-payload-02.js','jarvis/michael-v40-payload-03.js','jarvis/michael-v40-payload-04.js','jarvis/michael-v40-payload-05.js','jarvis/michael-v40-payload-06.js'])if(!fs.existsSync(p))throw Error('MICHAEL runtime component missing '+p);
-          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V46');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','garage-atmosphere');check('racing-mjx7303-michael-v39.html','michael59');check('jarvis/racing-tab.js','michael59');check('index.html','racing-tab.js?v=20260808michael59');
-          check('jarvis/michael-graphics-v39.js','MICHAEL_V46');check('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V46');check('jarvis/michael-engine-v45.js','MichaelFrameGraph');check('jarvis/jarvis-xr-engine-v29.js','renderShadowPass');check('jarvis/jarvis-xr-engine-v29.js','renderOpaquePass');check('jarvis/jarvis-xr-engine-v29.js','renderTransmissionPass');check('jarvis/michael-engine-v45.js','MichaelWorld');check('jarvis/michael-graphics-v39.js','WRC_PRESENTATION_ENGINE');check('jarvis/michael-graphics-v39.js','printerToMichael');check('jarvis/michael-graphics-v39.js','addCompletedTwin');check('jarvis/michael-graphics-v39.js','wheelbase:3.75');check('jarvis/michael-graphics-v39.js','wheels:4');check('jarvis/michael-graphics-v39.js','wrcLivery:true');check('jarvis/michael-graphics-v39.js','addMichaelWorld');check('jarvis/michael-graphics-v39.js','worldTrees:80');check('jarvis/michael-graphics-v39.js','roadEnvironment:true');check('jarvis/michael-graphics-v39.js','transparentGlass:true');check('jarvis/michael-graphics-v39.js','fittedLights:true');check('jarvis/michael-graphics-v39.js','[.72,.012,.026]');check('jarvis/michael-graphics-v39.js','2.25');
-          check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-00.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-06.js');check('jarvis/mjx7303-racing-michael-v39.js','createObjectURL');check('jarvis/mjx7303-racing-michael-v39.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V46');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
-          check('jarvis/racing-tab.js','MICHAEL V46');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
+          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V47');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','garage-atmosphere');check('racing-mjx7303-michael-v39.html','michael60');check('jarvis/racing-tab.js','michael60');check('index.html','racing-tab.js?v=20260808michael60');
+          check('jarvis/michael-graphics-v39.js','MICHAEL_V47');check('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V47');check('jarvis/michael-engine-v45.js','MichaelFrameGraph');check('jarvis/jarvis-xr-engine-v29.js','renderShadowPass');check('jarvis/jarvis-xr-engine-v29.js','renderOpaquePass');check('jarvis/jarvis-xr-engine-v29.js','renderTransmissionPass');check('jarvis/jarvis-xr-engine-v29.js','RGBA16F');check('jarvis/jarvis-xr-engine-v29.js','POSTFS');check('jarvis/michael-engine-v45.js','post-process');check('jarvis/michael-engine-v45.js','MichaelWorld');check('jarvis/michael-graphics-v39.js','WRC_PRESENTATION_ENGINE');check('jarvis/michael-graphics-v39.js','printerToMichael');check('jarvis/michael-graphics-v39.js','addCompletedTwin');check('jarvis/michael-graphics-v39.js','wheelbase:3.75');check('jarvis/michael-graphics-v39.js','wheels:4');check('jarvis/michael-graphics-v39.js','wrcLivery:true');check('jarvis/michael-graphics-v39.js','addMichaelWorld');check('jarvis/michael-graphics-v39.js','worldTrees:80');check('jarvis/michael-graphics-v39.js','roadEnvironment:true');check('jarvis/michael-graphics-v39.js','transparentGlass:true');check('jarvis/michael-graphics-v39.js','fittedLights:true');check('jarvis/michael-graphics-v39.js','[.72,.012,.026]');check('jarvis/michael-graphics-v39.js','2.25');
+          check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-00.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-06.js');check('jarvis/mjx7303-racing-michael-v39.js','createObjectURL');check('jarvis/mjx7303-racing-michael-v39.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V47');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
+          check('jarvis/racing-tab.js','MICHAEL V47');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
@@ -83,7 +83,7 @@ jobs:
           base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload-00.js?v=smoke-${GITHUB_SHA}";assetLast="${base}jarvis/michael-v40-payload-06.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
           for attempt in $(seq 1 30); do
             echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael-00.js -w '%{http_code}' "$asset" || true);cz=$(curl -L -sS -o /tmp/michael-06.js -w '%{http_code}' "$assetLast" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
-            if [ "$ca" = 200 ] && [ "$cz" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q "^export default '" /tmp/michael-00.js && grep -q "^export default '" /tmp/michael-06.js && grep -q 'MICHAEL PERSONAL TWIN V46' /tmp/michael.html && grep -q 'MICHAEL_V46' /tmp/michael.js; then echo "{MICHAEL_LIVE_CHUNKS: PASS}";ok=1;break;fi
+            if [ "$ca" = 200 ] && [ "$cz" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q "^export default '" /tmp/michael-00.js && grep -q "^export default '" /tmp/michael-06.js && grep -q 'MICHAEL PERSONAL TWIN V47' /tmp/michael.html && grep -q 'MICHAEL_V47' /tmp/michael.js; then echo "{MICHAEL_LIVE_CHUNKS: PASS}";ok=1;break;fi
             echo "asset00=$ca asset06=$cz shell=$cs engine=$ce";sleep 5
           done
           test "$ok" -eq 1
