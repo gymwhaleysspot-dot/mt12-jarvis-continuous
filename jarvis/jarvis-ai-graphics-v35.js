@@ -2,7 +2,7 @@
 // Uses the full practical mobile GPU budget in Garage, while retaining a 60 Hz Drive target.
 // Layered on Jarvis XR WebGL2 core: adaptive supersampling, 4K shadows, camera-aware studio lighting,
 // automotive material remapping, aggressive temporal GPU budget learning, and cinematic exposure.
-import {JarvisXRRenderer as BaseXR} from './jarvis-xr-engine-v29.js?v=core35';
+import {JarvisXRRenderer as BaseXR} from './jarvis-xr-engine-v29.js?v=michael61-core';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a+(b-a)*t;
