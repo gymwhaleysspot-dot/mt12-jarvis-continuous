@@ -76,7 +76,7 @@ jobs:
           const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
           for(const p of ['racing-mjx7303-v30.html','jarvis/jarvis-ai-graphics-v37.js','jarvis/jarvis-dynamics-v30.js','jarvis/mjx7303-racing-v30.js','assets/mjx7303/mjx7303-v37.glb'])if(!fs.existsSync(p))throw Error('V37 runtime component missing '+p);
           check('racing-mjx7303-v30.html','JARVIS DIGITAL TWIN V37');check('racing-mjx7303-v30.html','V37 DIGITAL TWIN RECONSTRUCTION');check('racing-mjx7303-v30.html','xr37');
-          check('jarvis/mjx7303-racing-v30.js','mjx7303-v37.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS V37');check('jarvis/mjx7303-racing-v30.js','__V37_READY');
+          check('jarvis/mjx7303-racing-v30.js','mjx7303-v37.glb');check('jarvis/mjx7303-racing-v30.js','asset36');check('jarvis/mjx7303-racing-v30.js','JARVIS V37');check('jarvis/mjx7303-racing-v30.js','__V37_READY');
           check('jarvis/racing-tab.js','xr37');check('jarvis/racing-tab.js','Simulator V37');check('jarvis/racing-tab.js','RACING V37 DIGITAL TWIN');
           check('jarvis/jarvis-ai-graphics-v37.js','JARVIS_DIGITAL_TWIN_V37');check('jarvis/jarvis-ai-graphics-v37.js','1.82');check('jarvis/jarvis-ai-graphics-v35.js','4096');
           check('tools/build_mjx7303_v37_blender.py','TireTread_V37');check('tools/build_mjx7303_v37_blender.py','HeadlampProjector_V37');check('tools/build_mjx7303_v37_blender.py','72MM_PHOTOGRAPHIC');
@@ -95,3 +95,30 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify live V37 asset and simulator
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          base="${PAGE_URL%/}/"
+          asset="${base}assets/mjx7303/mjx7303-v37.glb?v=smoke-${GITHUB_SHA}"
+          shell="${base}racing-mjx7303-v30.html?v=smoke-${GITHUB_SHA}"
+          ok=0
+          for attempt in $(seq 1 24); do
+            echo "Live Pages smoke attempt $attempt/24: $asset"
+            code_asset=$(curl -L -sS -o /tmp/v37.glb -w '%{http_code}' "$asset" || true)
+            code_shell=$(curl -L -sS -o /tmp/v37.html -w '%{http_code}' "$shell" || true)
+            if [ "$code_asset" = 200 ] && [ "$code_shell" = 200 ] && [ -s /tmp/v37.glb ] && grep -q 'JARVIS DIGITAL TWIN V37' /tmp/v37.html; then
+              python3 - <<'PY'
+from pathlib import Path
+b=Path('/tmp/v37.glb').read_bytes()
+assert b[:4]==b'glTF' and int.from_bytes(b[4:8],'little')==2 and int.from_bytes(b[8:12],'little')==len(b)
+print({'liveV37':'PASS','bytes':len(b)})
+PY
+              ok=1
+              break
+            fi
+            echo "asset=$code_asset shell=$code_shell; waiting for Pages propagation..."
+            sleep 5
+          done
+          test "$ok" -eq 1
