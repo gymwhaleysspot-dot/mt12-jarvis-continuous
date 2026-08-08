@@ -4,8 +4,16 @@ set -euo pipefail
 generated="jarvis/generated"
 mkdir -p "$generated"
 
-sudo apt-get update -qq
-sudo apt-get install -y -qq emscripten lua5.4
+required=(em++ rustup cargo npm go dotnet lua5.4 curl python3 node)
+missing=()
+for tool in "${required[@]}"; do
+  command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
+done
+if ((${#missing[@]})); then
+  printf 'MICHAEL build prerequisites missing: %s\n' "${missing[*]}" >&2
+  printf 'Install the pinned CI toolchain before building; this script never mutates its host.\n' >&2
+  exit 2
+fi
 
 em++ -O3 -std=c++20 engine/cpp/michael_core.cpp engine/c/michael_math.c \
   -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web \
@@ -47,9 +55,9 @@ for(const file of ['michael-core.wasm','michael-rust.wasm','michael-assembly.was
   new WebAssembly.Module(fs.readFileSync(path));
 }
 const manifest=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
-if(manifest.engine!=='MICHAEL_V52'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
-for(const token of ['#version 300 es','MICHAEL_V52','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
-for(const token of ['@vertex','@fragment','MICHAEL_V52'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
+if(manifest.engine!=='MICHAEL_V55'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
+for(const token of ['#version 300 es','MICHAEL_V55','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
+for(const token of ['@vertex','@fragment','MICHAEL_V55'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
 console.log({polyglot:'PASS',languages:manifest.languages,artifacts:manifest.artifacts.length});
 NODE
 
