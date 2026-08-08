@@ -51,21 +51,21 @@ jobs:
           python3 tools/audit_workflow_wiring.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
-      - name: Validate Jarvis AI Graphics V34 contract
+      - name: Validate Jarvis AI Graphics V35 contract
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,label=t)=>{if(!fs.existsSync(f))throw Error('Missing file '+f);const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${label} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','workspaceBody');check('jarvis/app.js','latestGeneration');check('jarvis/state.js','factory/canonical-controller.json');
-          check('racing-mjx7303-v30.html','JARVIS AI GRAPHICS ENGINE V34','V34 simulator shell');check('racing-mjx7303-v30.html','mjx7303-physics-v4.js');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');check('racing-mjx7303-v30.html','V34 AI VISUAL DIRECTOR');check('racing-mjx7303-v30.html','xr34');
-          check('jarvis/racing-tab.js','racing-mjx7303-v30.html');check('jarvis/racing-tab.js','RACING V34 AI GRAPHICS');check('jarvis/racing-tab.js','xr34');
+          check('racing-mjx7303-v30.html','JARVIS AI GRAPHICS ENGINE V35','V35 simulator shell');check('racing-mjx7303-v30.html','mjx7303-physics-v4.js');check('racing-mjx7303-v30.html','mjx7303-racing-v30.js');check('racing-mjx7303-v30.html','V35 CINEMATIC ULTRA');check('racing-mjx7303-v30.html','xr35');
+          check('jarvis/racing-tab.js','racing-mjx7303-v30.html');check('jarvis/racing-tab.js','RACING V35 CINEMATIC ULTRA');check('jarvis/racing-tab.js','xr35');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');check('jarvis/jarvis-xr-engine-v29.js','shadowFbo');
-          check('jarvis/jarvis-ai-graphics-v34.js','JARVIS AI GRAPHICS ENGINE V34');check('jarvis/jarvis-ai-graphics-v34.js','NeuralVisualDirector');check('jarvis/jarvis-ai-graphics-v34.js','AUTOMOTIVE_STUDIO');check('jarvis/jarvis-ai-graphics-v34.js','getAIStats');
+          check('jarvis/jarvis-ai-graphics-v35.js','JARVIS AI GRAPHICS ENGINE V35');check('jarvis/jarvis-ai-graphics-v35.js','UltraVisualDirector');check('jarvis/jarvis-ai-graphics-v35.js','AUTOMOTIVE_CINEMATIC_ULTRA');check('jarvis/jarvis-ai-graphics-v35.js','shadowSize=4096');check('jarvis/jarvis-ai-graphics-v35.js','getAIStats');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
-          check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v30.js','./jarvis-ai-graphics-v34.js');check('jarvis/mjx7303-racing-v30.js','JarvisXRRenderer');check('jarvis/mjx7303-racing-v30.js','JarvisDynamics');check('jarvis/mjx7303-racing-v30.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS AI V34');check('jarvis/mjx7303-racing-v30.js','__V34_READY');
-          const runtime=fs.readFileSync('jarvis/mjx7303-racing-v30.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v34.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into V34: '+banned);
+          check('jarvis/mjx7303-racing-v30.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v30.js','./jarvis-ai-graphics-v35.js');check('jarvis/mjx7303-racing-v30.js','JarvisXRRenderer');check('jarvis/mjx7303-racing-v30.js','JarvisDynamics');check('jarvis/mjx7303-racing-v30.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-v30.js','JARVIS XR V35');check('jarvis/mjx7303-racing-v30.js','__V35_READY');
+          const runtime=fs.readFileSync('jarvis/mjx7303-racing-v30.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v35.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into V35: '+banned);
           check('tools/build_mjx7303_v33_blender.py','375 mm');check('tools/build_mjx7303_v33_blender.py','mjx7303-v33.glb');check('tools/build_mjx7303_v33_blender.py','BODY_SHELL_V33_BLUEPRINT');check('tools/build_mjx7303_v33_blender.py','Dashboard_V33');check('tools/build_mjx7303_v33_blender.py','export_scene.gltf');
-          console.log({racing:'V34',asset:'V33 blueprint-grade Blender master',renderer:'Jarvis AI Graphics V34 + raw WebGL2',director:'NeuralVisualDirector',profile:'AUTOMOTIVE_STUDIO',pbr:'GGX',tone:'ACES',physics:'Jarvis Dynamics V30 spawn-safe 120Hz + MT12 V4',wheelbaseMM:375,externalRenderer:false});
+          console.log({racing:'V35',asset:'V33 blueprint-grade Blender master',renderer:'Jarvis AI Graphics V35 + raw WebGL2',director:'UltraVisualDirector',profile:'AUTOMOTIVE_CINEMATIC_ULTRA',supersampling:'105-165%',shadows:4096,pbr:'GGX',tone:'ACES',physics:'Jarvis Dynamics V30 spawn-safe 120Hz + MT12 V4',wheelbaseMM:375,externalRenderer:false});
           NODE
       - name: Validate planner schema contract
         run: |
