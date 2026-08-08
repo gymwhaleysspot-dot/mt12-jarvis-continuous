@@ -5,7 +5,7 @@ const instantiate = async (url, imports = {}) => {
     const bytes = await response.arrayBuffer();
     return WebAssembly.instantiate(bytes, imports);
 };
-export async function bootMichaelPolyglot(base = './generated/', cache = 'michael68') {
+export async function bootMichaelPolyglot(base = './generated/', cache = 'michael69') {
     const states = [];
     let cpp = null, rust = null, assembly = null, zig = null;
     let fallbackExposure = 1.18;
