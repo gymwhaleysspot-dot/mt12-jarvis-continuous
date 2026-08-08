@@ -68,8 +68,11 @@ def validate(text:str,profile:str)->list[str]:
             blocks[n]=m.group(0) if m else ""
         owned={"jA6":set(range(55,63)),"jAS":set(range(63,67)),"jA2":set(range(67,70))}
         for n,b in blocks.items():
-            used={int(x) for x in re.findall(r"X\[(\d+)\]",b)}
-            foreign=used-owned[n]
+            # Ownership applies to state a helper WRITES. Cross-helper/system reads
+            # are intentional inputs (for example jA6 reads X[46], jAS reads
+            # jA6's X[56]/X[61]) and must not be mistaken for slot collisions.
+            written={int(x) for x in re.findall(r"X\[(\d+)\]\s*=",b)}
+            foreign=written-owned[n]
             if foreign:e.append("authority-scratch-ownership:"+n+":"+",".join(map(str,sorted(foreign))))
         if text.count("ac=jAS(ac);ac=jA2(ac);" )!=1:e.append("authority-synthesis-chain-not-canonical")
     return e
