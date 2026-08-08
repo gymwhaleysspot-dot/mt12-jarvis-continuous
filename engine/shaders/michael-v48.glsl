@@ -1,4 +1,4 @@
-// MICHAEL_V49 GLSL_REFERENCE — WebGL2 linear HDR, energy-aware clearcoat contract
+// MICHAEL_V50 GLSL_REFERENCE — WebGL2 linear HDR, energy-aware clearcoat contract
 #version 300 es
 precision highp float;
 in vec3 vWorldNormal;
