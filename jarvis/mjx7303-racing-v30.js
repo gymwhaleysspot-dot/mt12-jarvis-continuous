@@ -1,11 +1,23 @@
 // MJX 7303 Racing V37 — digital twin asset + Jarvis V37 adaptive cinematic graphics director
-import {JarvisXRRenderer} from './jarvis-ai-graphics-v37.js?v=xr37';
-import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr37';
+import {JarvisXRRenderer} from './jarvis-ai-graphics-v37.js?v=xr37b';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr37b';
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');
 let xr,dyn,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.11,dist=10.8,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
-const asset=new URL('../assets/mjx7303/mjx7303-v37.glb?v=xr37',import.meta.url).href;
-try{xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();status.textContent='JARVIS V37 · DIGITAL TWIN · LOADING…';const info=await xr.loadGLB(asset);status.textContent=`JARVIS V37 · ${info.drawables} GPU DRAWS · DIGITAL TWIN · ${info.shadowSize||4096}px SHADOW`;status.className='asset-state ok';window.__V37_MODEL=true;window.__JARVIS_AI_GRAPHICS=xr.getAIStats?.()}catch(e){console.error(e);status.textContent='JARVIS V37 FAILED · '+e.message;status.className='asset-state warn'}
+const asset37=new URL('../assets/mjx7303/mjx7303-v37.glb?v=xr37b',import.meta.url).href;
+const asset36=new URL('../assets/mjx7303/mjx7303-v33.glb?v=xr37b-fallback',import.meta.url).href;
+async function loadVehicle(){
+  xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();
+  status.textContent='JARVIS V37 · DIGITAL TWIN · LOADING…';
+  try{
+    const info=await xr.loadGLB(asset37);status.textContent=`JARVIS V37 · ${info.drawables} GPU DRAWS · DIGITAL TWIN · ${info.shadowSize||4096}px SHADOW`;status.className='asset-state ok';window.__V37_MODEL=true;window.__V37_FALLBACK=false;window.__JARVIS_AI_GRAPHICS=xr.getAIStats?.();return info;
+  }catch(primary){
+    console.warn('V37 asset unavailable; using continuity fallback until Pages asset is live',primary);
+    status.textContent='JARVIS V37 ASSET DEPLOYING · CONTINUITY MODEL';status.className='asset-state warn';
+    const info=await xr.loadGLB(asset36);status.textContent=`JARVIS V37 · CONTINUITY MODEL · ${info.drawables} GPU DRAWS`;window.__V37_MODEL=false;window.__V37_FALLBACK=true;window.__JARVIS_AI_GRAPHICS=xr.getAIStats?.();return info;
+  }
+}
+try{await loadVehicle()}catch(e){console.error(e);status.textContent='JARVIS MODEL LOAD FAILED · '+e.message;status.className='asset-state warn'}
 function orbit(){xr?.orbit(yaw,pitch,dist,1.02)}orbit();
 const views={front:[Math.PI,.045,10.8],three:[-.72,.105,10.6],side:[-Math.PI/2,.055,10.9],rear:[0,.06,10.8],top:[-.42,1.08,12.4]};
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));[yaw,pitch,dist]=views[b.dataset.view];orbit()}));
