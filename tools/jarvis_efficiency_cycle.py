@@ -5,11 +5,13 @@ from pathlib import Path
 import controller_rewrite_compact as hotfix
 import jarvis_prebuild_reclaim as prebuild
 import jarvis_self_repair as selfrepair
+import jarvis_evolution_parent as evolution_parent
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'dist-controller-tournament'
 POINTER=ROOT/'factory/evolution-controller.json'
 RECLAIM_STATE=ROOT/'factory/memory/prebuild-reclaim.json'
+REPAIRED_PARENT=ROOT/'factory/memory/self-repaired-evolution-parent.lua'
 MAX_BYTES=87000
 MIN_INTEL_PER_100_GROWTH_BYTES=0.50
 SYNTH_RECLAIM_SPEND_FRACTION=0.45
@@ -55,25 +57,40 @@ def _postprocess()->None:
         if c['promotionEfficiencyEligible']:eligible.append(c)
     result['candidates'].sort(key=lambda x:x.get('score',-1e9),reverse=True);eligible.sort(key=lambda x:x.get('score',-1e9),reverse=True)
     result['winner']=eligible[0]['candidate'] if eligible else None;result['runnerUp']=eligible[1]['candidate'] if len(eligible)>1 else None
-    result['resourcePolicy']={'schema':'JARVIS-RESOURCE-EVOLUTION-3','cycle':['reclaim','rethink','build','compete','synthesize','compress','verify','inherit'],
+    result['resourcePolicy']={'schema':'JARVIS-RESOURCE-EVOLUTION-3','cycle':['self-repair-parent','reclaim','rethink','build','self-repair-candidate','compete','synthesize','compress','verify','inherit'],
         'parentNormalizedBytes':parent_bytes,'prebuildSeedNormalizedBytes':seed_bytes,'prebuildBytesReclaimed':pre_reclaimed,'prebuildChanges':reclaim.get('changes',[]),
         'hardCeilingBytes':MAX_BYTES,'minimumIntelligencePer100GrowthBytes':MIN_INTEL_PER_100_GROWTH_BYTES,'synthesisSpendFractionOfReclaim':SYNTH_RECLAIM_SPEND_FRACTION,
         'synthesisByteBudget':synth_budget,'synthesisBudgetBounds':[SYNTH_MIN_BUDGET,SYNTH_MAX_BUDGET],
-        'rule':'PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON','growthWithoutEnoughIntelligence':'NOT_PROMOTION_ELIGIBLE','synthesisOverByteBudget':'NOT_PROMOTION_ELIGIBLE'}
+        'rule':'SELF_REPAIR+PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON','growthWithoutEnoughIntelligence':'NOT_PROMOTION_ELIGIBLE','synthesisOverByteBudget':'NOT_PROMOTION_ELIGIBLE'}
     result['verdict']='IMPROVEMENT_FOUND' if eligible else 'NO_RESOURCE_JUSTIFIED_IMPROVEMENT';(OUT/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps({'resourcePolicy':result['resourcePolicy'],'winner':result['winner'],'runnerUp':result['runnerUp'],'ranking':[{'candidate':c.get('candidate'),'score':c.get('score'),'normalizedBytes':c.get('normalizedBytes'),'intelligenceDelta':c.get('intelligenceDelta'),'efficiency':c.get('resourceEfficiency'),'eligible':c.get('promotionEfficiencyEligible')} for c in result.get('candidates',[])]},indent=2))
 
 
 def main()->None:
-    print({'jarvisResourceCycle':'RECLAIM_RETHINK_BUILD_COMPETE_SYNTHESIZE_COMPRESS_VERIFY_INHERIT','alwaysOn':True,'hardCeilingBytes':MAX_BYTES,'compactSynthesis':True,'selfRepair':'BOUNDED_KNOWN_REPAIR_ONLY'})
-    seed=prebuild.install_seed();print(json.dumps({'prebuildReclamation':seed['doc']},indent=2))
+    print({'jarvisResourceCycle':'SELF_REPAIR_RECLAIM_RETHINK_BUILD_COMPETE_SYNTHESIZE_COMPRESS_VERIFY_INHERIT','alwaysOn':True,'hardCeilingBytes':MAX_BYTES,'compactSynthesis':True,'selfRepair':'BOUNDED_KNOWN_REPAIR_ONLY'})
+    original_parent_resolve=evolution_parent.resolve
+    release,parent_path=original_parent_resolve()
+    pointer=json.loads(POINTER.read_text())
+    candidate=str(pointer.get('candidate') or '').lower()
+    profile={'jrw1':'conservative','jrw2':'balanced','jrw3':'learning','jrw4':'observability','jrw5':'combined','jrw6':'synthesis'}.get(candidate,'synthesis')
+    parent_journal=[]
+    parent_text=parent_path.read_text()
+    if hotfix.base.protected_checks(parent_text):
+        repaired=selfrepair.repair_text(hotfix.base,parent_text,profile,parent_journal)
+        REPAIRED_PARENT.parent.mkdir(parents=True,exist_ok=True);REPAIRED_PARENT.write_text(repaired)
+        evolution_parent.resolve=lambda:(release,REPAIRED_PARENT)
+        print(json.dumps({'selfRepairedEvolutionParent':release,'profile':profile,'repairs':parent_journal},indent=2))
     repair=selfrepair.install(hotfix.base)
+    repair['journal'].extend(parent_journal)
+    seed=None
     try:
+        seed=prebuild.install_seed();print(json.dumps({'prebuildReclamation':seed['doc']},indent=2))
         hotfix.main()
     finally:
         repair['write_state']()
         repair['restore']()
-        seed['restore']()
+        if seed:seed['restore']()
+        evolution_parent.resolve=original_parent_resolve
     _postprocess()
 
 
