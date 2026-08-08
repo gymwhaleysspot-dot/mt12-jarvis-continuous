@@ -1,5 +1,4 @@
 from __future__ import annotations
-import re
 from pathlib import Path
 
 P=Path(__file__).with_name('controller_rewrite_hotfix.py')
@@ -7,36 +6,34 @@ OLD='"balanced":"local function jA2(a)local q=c1(V[114]);local u=c1(V[119]);loca
 NEW='"balanced":"local function jA2(a)local q=c1(V[114]);local u=c1(V[119]);local e=c1((V[161]+V[164])/2);X[67]=lerp(X[67]or e,e,.14);local d=e-(X[67]or e);X[68]=lerp(X[68]or 0,m_abs(d),.2);local sev=c1(e*.55+(X[68]or 0)*1.8+u*.3);local rel=c1(q*(1-u));X[69]=lerp(X[69]or sev,sev,sev>.5 and .25 or .08);return m_min(a,96-5*(X[69]or 0)+2*rel)end",'
 FINALIZE=r'''
 def _authority_finalize(text:str,profile:str)->str:
- # Strip inherited architecture helper *lines*. Evolution parents may already contain
- # one or many old jA*/jAS helpers; carrying them forward caused JRW6 call stacking.
- lines=text.splitlines()
- keep=[]; found={}
+ # Strip inherited architecture helper lines. Evolution parents may contain one or
+ # many old jA*/jAS helpers; carrying them forward caused JRW6 call stacking.
+ lines=text.splitlines();keep=[];found={}
  for line in lines:
   st=line.strip()
-  if re.match(r"local function jA[1-6]\\(a\\)",st) or st.startswith("local function jAS(a)"):
-   m=re.match(r"local function (jA[1-6]|jAS)\\(a\\)",st)
+  if re.match(r"local function jA[1-6]\(a\)",st) or st.startswith("local function jAS(a)"):
+   m=re.match(r"local function (jA[1-6]|jAS)\(a\)",st)
    if m:found.setdefault(m.group(1),[]).append(st)
    continue
   keep.append(line)
- text="\\n".join(keep)
+ text="\n".join(keep)
  lerp_line="local function lerp(a,b,t)t=c1(t);return a+(b-a)*t end"
  if lerp_line not in text:raise RuntimeError("authority lexical anchor missing")
  if profile=="synthesis":
-  # Preserve the newly synthesized staged jAS, but install exactly one jA6 and one
-  # isolated jA2. jAS internally evaluates jA6; jA2 remains the independent
-  # traction ceiling. Scratch ownership: jA6=55..62, jAS=63..66, jA2=67..69.
-  js=(found.get("jAS")or[])
+  # Preserve the newly synthesized staged jAS, install exactly one jA6 and one
+  # isolated jA2. Ownership: jA6=55..62, jAS=63..66, jA2=67..69.
+  js=found.get("jAS")or[]
   if not js:raise RuntimeError("synthesis helper jAS missing")
-  ja=ARCH["synthesis"]+"\\n"+js[-1]+"\\n"+ARCH["balanced"]
+  helpers=ARCH["synthesis"]+"\n"+js[-1]+"\n"+ARCH["balanced"]
   calls="ac=jAS(ac);ac=jA2(ac);"
  else:
   name="jA"+str(list(LABEL).index(profile)+1)
-  ja=ARCH[profile];calls="ac="+name+"(ac);"
- text=text.replace(lerp_line,lerp_line+"\\n"+ja,1)
+  helpers=ARCH[profile];calls="ac="+name+"(ac);"
+ text=text.replace(lerp_line,lerp_line+"\n"+helpers,1)
  tail="V[720]=ac;setgv(3,m_min(V[35],ac));"
  pos=text.find(tail)
  if pos<0:raise RuntimeError("authority gate missing")
- start=pos;pat=re.compile(r"ac=(?:jA[1-6]|jAS)\\(ac\\);")
+ start=pos;pat=re.compile(r"ac=(?:jA[1-6]|jAS)\(ac\);")
  while True:
   last=None
   for m in pat.finditer(text,max(0,start-1024),start):last=m
@@ -55,7 +52,7 @@ CHECKS=r'''
   if cc and not dc:e.append("authority-call-without-definition:"+n)
   p=text.find("local function "+n+"(a)")
   if p>=0 and (lm<0 or p<lm):e.append("authority-helper-before-local-lerp:"+n)
- m=re.search(r'T\\(2,1,"JRW([1-6])",Z\\+INVERS\\)',text)
+ m=re.search(r'T\(2,1,"JRW([1-6])",Z\+INVERS\)',text)
  if m and m.group(1)=="6":
   for x in ("local function jA6(a)","local function jAS(a)","local function jA2(a)","ac=jAS(ac);ac=jA2(ac);","X[67]=lerp","X[68]=lerp","X[69]=lerp"):
    if x not in text:e.append("authority-synthesis-missing:"+x)
