@@ -7,7 +7,10 @@ OUT=os.environ.get('MJX_V36_OUT','assets/mjx7303/mjx7303-v36.glb')
 PRE=os.environ.get('MJX_V36_PREVIEW_DIR','assets/mjx7303/v36-previews')
 os.makedirs(os.path.dirname(OUT),exist_ok=True);os.makedirs(PRE,exist_ok=True)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
-S=bpy.context.scene;S.render.engine='BLENDER_EEVEE';S.render.resolution_x=1100;S.render.resolution_y=825;S.render.resolution_percentage=100
+S=bpy.context.scene
+try:S.render.engine='BLENDER_EEVEE_NEXT'
+except TypeError:S.render.engine='BLENDER_EEVEE'
+S.render.resolution_x=1100;S.render.resolution_y=825;S.render.resolution_percentage=100
 S.render.image_settings.file_format='PNG';S.world.color=(.025,.028,.032)
 C=bpy.data.collections.new('MJX7303_V36_REFERENCE_MASTER');S.collection.children.link(C)
 def own(o):
