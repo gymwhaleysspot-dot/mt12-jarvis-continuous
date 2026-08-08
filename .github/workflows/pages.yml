@@ -44,7 +44,7 @@ jobs:
           echo 'f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a  assets/mjx7303/michael-v39.glb' | sha256sum -c -
           test "$(stat -c '%s' assets/mjx7303/michael-v39.glb)" -eq 3154380
           cp assets/mjx7303/michael-v39.glb assets/mjx7303/michael-v40.bin
-          { printf "export default '"; cat tools/michael-v40-private/body.glb.b64.* | tr -d '\\r\\n'; printf "';\\n"; } > jarvis/michael-v40-payload.js
+          for part in 00 01 02 03 04 05 06; do { printf "export default '"; tr -d '\r\n' < "tools/michael-v40-private/body.glb.b64.$part"; printf "';\\n"; } > "jarvis/michael-v40-payload-$part.js"; done
           node - <<'NODE'
           const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/michael-v39.glb');
           if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V40 GLB invalid');
@@ -64,10 +64,10 @@ jobs:
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
-          for(const p of ['racing-mjx7303-michael-v39.html','jarvis/michael-graphics-v39.js','jarvis/mjx7303-racing-michael-v39.js','assets/mjx7303/michael-v39.glb','assets/mjx7303/michael-v40.bin','jarvis/michael-v40-payload.js'])if(!fs.existsSync(p))throw Error('MICHAEL runtime component missing '+p);
-          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V40');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','michael46');check('jarvis/racing-tab.js','michael46');check('index.html','racing-tab.js?v=20260808michael46');
+          for(const p of ['racing-mjx7303-michael-v39.html','jarvis/michael-graphics-v39.js','jarvis/mjx7303-racing-michael-v39.js','assets/mjx7303/michael-v39.glb','assets/mjx7303/michael-v40.bin','jarvis/michael-v40-payload-00.js','jarvis/michael-v40-payload-01.js','jarvis/michael-v40-payload-02.js','jarvis/michael-v40-payload-03.js','jarvis/michael-v40-payload-04.js','jarvis/michael-v40-payload-05.js','jarvis/michael-v40-payload-06.js'])if(!fs.existsSync(p))throw Error('MICHAEL runtime component missing '+p);
+          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V40');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','michael47');check('jarvis/racing-tab.js','michael47');check('index.html','racing-tab.js?v=20260808michael47');
           check('jarvis/michael-graphics-v39.js','MICHAEL_V40');check('jarvis/michael-graphics-v39.js','LICENSED_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','printerToMichael');check('jarvis/michael-graphics-v39.js','[.72,.012,.026]');check('jarvis/michael-graphics-v39.js','2.25');
-          check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload.js');check('jarvis/mjx7303-racing-michael-v39.js','createObjectURL');check('jarvis/mjx7303-racing-michael-v39.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V40');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
+          check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-00.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-06.js');check('jarvis/mjx7303-racing-michael-v39.js','createObjectURL');check('jarvis/mjx7303-racing-michael-v39.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V40');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
           check('jarvis/racing-tab.js','MICHAEL V40');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
           NODE
       - uses: actions/upload-pages-artifact@v4
@@ -80,10 +80,10 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
-          base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
+          base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload-00.js?v=smoke-${GITHUB_SHA}";assetLast="${base}jarvis/michael-v40-payload-06.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
           for attempt in $(seq 1 30); do
-            echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael.glb -w '%{http_code}' "$asset" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
-            if [ "$ca" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q 'MICHAEL PERSONAL TWIN V40' /tmp/michael.html && grep -q 'MICHAEL_V40' /tmp/michael.js; then python3 -c "from pathlib import Path;import base64,hashlib,re;s=Path('/tmp/michael.glb').read_text();m=re.fullmatch(r\"export default '([A-Za-z0-9+/=]+)';\\n?\",s);assert m;b=base64.b64decode(m.group(1));assert b[:4]==b'glTF' and int.from_bytes(b[8:12],'little')==len(b) and len(b)==3154380 and hashlib.sha256(b).hexdigest()=='f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a';print({'MICHAEL_LIVE_PAYLOAD':'PASS','bytes':len(b)})";ok=1;break;fi
-            echo "asset=$ca shell=$cs engine=$ce";sleep 5
+            echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael-00.js -w '%{http_code}' "$asset" || true);cz=$(curl -L -sS -o /tmp/michael-06.js -w '%{http_code}' "$assetLast" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
+            if [ "$ca" = 200 ] && [ "$cz" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q "^export default '" /tmp/michael-00.js && grep -q "^export default '" /tmp/michael-06.js && grep -q 'MICHAEL PERSONAL TWIN V40' /tmp/michael.html && grep -q 'MICHAEL_V40' /tmp/michael.js; then echo "{MICHAEL_LIVE_CHUNKS: PASS}";ok=1;break;fi
+            echo "asset00=$ca asset06=$cz shell=$cs engine=$ce";sleep 5
           done
           test "$ok" -eq 1
