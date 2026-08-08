@@ -54,15 +54,15 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,l=t)=>{if(!fs.existsSync(f))throw Error('Missing file '+f);const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','workspaceBody');check('jarvis/app.js','latestGeneration');check('jarvis/state.js','factory/canonical-controller.json');
-          check('racing-mjx7303-michael-v39.html','MICHAEL SCANNED TWIN V39');check('racing-mjx7303-michael-v39.html','PHOTO-SCANNED VISUAL HULL');check('racing-mjx7303-michael-v39.html','michael39');
-          check('jarvis/racing-tab.js','MICHAEL // V39 PHOTO-SCANNED TWIN');check('jarvis/racing-tab.js','Simulator — MICHAEL V39');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
+          check('racing-mjx7303-michael-v39.html','MICHAEL REFERENCE TWIN V39');check('racing-mjx7303-michael-v39.html','PRECISION REFERENCE DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','michael39');
+          check('jarvis/racing-tab.js','MICHAEL // V39 REFERENCE TWIN');check('jarvis/racing-tab.js','Simulator — MICHAEL V39');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');check('jarvis/jarvis-xr-engine-v29.js','shadowFbo');
-          check('jarvis/jarvis-ai-graphics-v38.js','MULTILOBE_CLEARCOAT_ENVIRONMENT');check('jarvis/michael-graphics-v39.js','MICHAEL_V39');check('jarvis/michael-graphics-v39.js','PHOTO_SCAN_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','2.25');
+          check('jarvis/jarvis-ai-graphics-v38.js','MULTILOBE_CLEARCOAT_ENVIRONMENT');check('jarvis/michael-graphics-v39.js','MICHAEL_V39');check('jarvis/michael-graphics-v39.js','REFERENCE_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','2.25');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
           check('jarvis/mjx7303-racing-michael-v39.js','./michael-graphics-v39.js');check('jarvis/mjx7303-racing-michael-v39.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v39.glb');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
           check('tools/build_michael_v39_scan.py','MULTIVIEW_SILHOUETTE_VISUAL_HULL_MARCHING_CUBES');check('tools/build_michael_v39_scan.py','375.0');check('tools/build_michael_v39_blender.py','MICHAEL_SCAN_BODY_V39');check('tools/build_michael_v39_blender.py','92MM_PHOTOGRAPHIC');
           const runtime=fs.readFileSync('jarvis/mjx7303-racing-michael-v39.js','utf8')+fs.readFileSync('jarvis/michael-graphics-v39.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v38.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into MICHAEL: '+banned);
-          console.log({racing:'MICHAEL_V39',asset:'Photo-scanned visual hull',renderer:'MICHAEL multi-lobe clearcoat',supersampling:'135-225%',cameraQA:'92mm',wheelbaseMM:375,externalRenderer:false});
+          console.log({racing:'MICHAEL_V39',asset:'Precision reference digital twin',renderer:'MICHAEL multi-lobe clearcoat',supersampling:'135-225%',cameraQA:'92mm',wheelbaseMM:375,externalRenderer:false});
           NODE
       - name: Validate planner schema contract
         run: |
