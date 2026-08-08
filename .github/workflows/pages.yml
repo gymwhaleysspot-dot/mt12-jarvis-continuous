@@ -47,6 +47,27 @@ jobs:
           print({'numpy':numpy.__version__,'scipy':scipy.__version__,'skimage':skimage.__version__,'pillow':PIL.__version__})
           PY
           blender --version | head -2
+      - name: Fetch verified MJX 7303 multiview references
+        run: |
+          set -euo pipefail
+          refs=assets/mjx7303/michael-v39-refs
+          mkdir -p "$refs"
+          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-rc-rally-car-front.png?v=1747793775&width=1946' -o "$refs/front.png"
+          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-rc-rally-car-back.png?v=1747793775&width=1946' -o "$refs/rear.png"
+          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-citroen-c3-body-side.png?v=1745285676&width=1946' -o "$refs/side.png"
+          curl -fL --retry 3 --retry-delay 2 'https://shop.robitronic.com/media/image/33/a8/bd/hyper-go-7303-1-7-citroen-c3-wrc-4wd-mx-7303-pic2_0028.jpg' -o "$refs/top.jpg"
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          root=Path('assets/mjx7303/michael-v39-refs')
+          for name in ('front.png','rear.png','side.png','top.jpg'):
+              p=root/name
+              assert p.stat().st_size>20000,(name,p.stat().st_size)
+              with Image.open(p) as im:
+                  im.verify()
+                  assert min(im.size)>=500,(name,im.size)
+                  print({'reference':name,'bytes':p.stat().st_size,'size':im.size})
+          PY
       - name: Reconstruct MJX 7303 from product photographs
         run: |
           set -euo pipefail
@@ -61,6 +82,8 @@ jobs:
           assert m['dimensionsMM']['wheelbase']==375.0
           assert m['vertices']>10000 and m['faces']>20000
           assert m['occupiedVoxels']>25000
+          assert m['fallbackViews']==[],m['fallbackViews']
+          for view in ('front','rear','side','top'): assert '_generated_' not in m['sources'][view],m['sources']
           print(m)
           PY
       - name: Build MICHAEL V39 scanned GLB and photographic QA
