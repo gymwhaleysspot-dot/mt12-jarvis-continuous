@@ -113,7 +113,8 @@ def area(n,loc,energy,size,color):
 def pointat(o,target=(0,0,1.05)):
     o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
 for o in [area('KeySoftbox_V37',(-4.5,-4.2,6.5),1200,5.0,(1.0,.92,.82)),area('FillSoftbox_V37',(4.8,-1.0,4.2),900,4.0,(.76,.86,1.0)),area('RimSoftbox_V37',(0,4.0,5.3),1100,3.2,(1.0,.70,.58))]:pointat(o)
-S.world.color=(.018,.022,.028);try:S.render.engine='BLENDER_EEVEE_NEXT'
+S.world.color=(.018,.022,.028)
+try:S.render.engine='BLENDER_EEVEE_NEXT'
 except TypeError:S.render.engine='BLENDER_EEVEE'S.render.resolution_x=1200;S.render.resolution_y=900;S.render.resolution_percentage=100;S.render.image_settings.file_format='PNG'
 camd=bpy.data.cameras.new('V37_PhysicalCamera');cam=bpy.data.objects.new('V37_PhysicalCamera',camd);S.collection.objects.link(cam);S.camera=cam;camd.lens=72
 views={'front':((0,-10.5,1.65),(0,-.2,1.05)),'three':((6.5,-8.3,3.2),(0,0,1.00)),'side':((10.7,0,1.65),(0,0,1.00)),'rear':((0,10.6,1.65),(0,.2,1.00)),'top':((5.1,-4.0,11.4),(0,0,.75))}
