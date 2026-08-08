@@ -1,0 +1,90 @@
+name: Verify Jarvis Self Repair
+
+on:
+  push:
+    branches: [jarvis-jrw7-repair]
+    paths:
+      - 'tools/jarvis_self_repair.py'
+      - 'tools/jarvis_efficiency_cycle.py'
+      - 'tools/controller_rewrite_hotfix.py'
+      - '.github/workflows/jarvis-self-repair-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install MT12 test toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Syntax check self repair stack
+        run: python3 -m py_compile tools/jarvis_self_repair.py tools/jarvis_efficiency_cycle.py tools/controller_rewrite_hotfix.py tools/controller_rewrite_compact.py
+      - name: Deliberately repair the broken JRW6 authority structure
+        run: |
+          python3 - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import controller_rewrite_hotfix as base
+          import jarvis_self_repair as sr
+          broken=Path('public/builds/rewrite-31235808121-1/jrw6/jrw6.lua').read_text()
+          real=base.experiment_rewrite
+          base.experiment_rewrite=lambda text,profile,experiment,generation: broken
+          guard=sr.install(base)
+          try:
+            fixed=base.experiment_rewrite('', 'synthesis', {}, 'SELFTEST')
+            assert fixed.count('local function jA6(a)')==1
+            assert fixed.count('local function jAS(a)')==1
+            assert fixed.count('local function jA2(a)')==1
+            assert fixed.count('jAS(ac)')==1
+            assert fixed.count('jA2(ac)')==1
+            assert 'ac=jAS(ac);ac=jA2(ac);V[720]=ac;' in fixed
+            j2=next(z for z in fixed.splitlines() if z.strip().startswith('local function jA2(a)'))
+            assert all(f'X[{i}]' not in j2 for i in range(55,67))
+            assert all(f'X[{i}]' in j2 for i in (67,68,69))
+            assert fixed.index('local function lerp') < fixed.index('local function jA6')
+            assert not base.protected_checks(fixed), base.protected_checks(fixed)
+            assert guard['journal'] and guard['journal'][-1]['status']=='REPAIRED_AND_VERIFIED'
+            guard['write_state']()
+            Path('self-repaired-jrw6.lua').write_text(fixed)
+            print(json.dumps(guard['journal'],indent=2))
+          finally:
+            guard['restore']()
+            base.experiment_rewrite=real
+          PY
+      - name: Run full Jarvis self-repair evolution cycle
+        env:
+          RELEASE_TYPE: R
+          SERIES: jrw
+        run: python3 tools/jarvis_efficiency_cycle.py
+      - name: Verify cycle and repair journal
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          t=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
+          compiled=[c for c in t['candidates'] if c.get('status')=='COMPILED']
+          assert compiled, t
+          for c in compiled:
+            assert not [e for e in c.get('errors',[]) if 'authority-' in e], c
+          s=json.loads(Path('factory/memory/jarvis-self-repair.json').read_text())
+          assert s['schema']=='JARVIS-SELF-REPAIR-1'
+          assert s['policy'].startswith('BOUNDED_KNOWN_REPAIR_ONLY')
+          print({'compiled':len(compiled),'winner':t.get('winner'),'repairs':s['repairs']})
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-self-repair-verification
+          path: |
+            self-repaired-jrw6.lua
+            factory/memory/jarvis-self-repair.json
+            dist-controller-tournament/TOURNAMENT.json
+          if-no-files-found: error
+          retention-days: 30
