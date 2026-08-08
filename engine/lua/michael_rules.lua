@@ -2,7 +2,7 @@ local M={}
 function M.profile(mode,frame_ms)
   local drive=mode=='drive'
   local pressure=math.max(0,math.min(1,(frame_ms-16.7)/24))
-  return {exposure=(drive and 2.18 or 1.94)-pressure*0.10, smoke=drive and 0.10 or 0.42, trees=drive and 80 or 0, fail_open=true}
+  return {exposure=(drive and 1.10 or 1.22)-pressure*0.06, smoke=drive and 0.02 or 0.16, trees=drive and 80 or 0, fail_open=true}
 end
 local function encode(v)
   if type(v)=='boolean' then return tostring(v) end
