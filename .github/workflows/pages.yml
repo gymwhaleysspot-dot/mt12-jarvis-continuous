@@ -37,36 +37,36 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Install Blender digital-twin toolchain
+      - name: Install Blender physical-twin toolchain
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy xvfb libegl1 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-utils
           blender --version | head -2
-      - name: Build MJX 7303 V37 digital twin and photographic QA
+      - name: Build MJX 7303 V38 physical twin and product QA
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/build_mjx7303_v36_blender.py tools/build_mjx7303_v37_blender.py
-          rm -rf assets/mjx7303/v37-previews
-          mkdir -p assets/mjx7303/v37-previews
-          rm -f assets/mjx7303/mjx7303-v37.glb
-          xvfb-run -a -s '-screen 0 1920x1080x24' env MJX_V37_OUT=assets/mjx7303/mjx7303-v37.glb MJX_V37_PREVIEW_DIR=assets/mjx7303/v37-previews blender --background --factory-startup --python tools/build_mjx7303_v37_blender.py
-          test -s assets/mjx7303/mjx7303-v37.glb
-          for view in front three side rear top; do test -s "assets/mjx7303/v37-previews/$view.png"; done
+          python3 -m py_compile tools/build_mjx7303_v36_blender.py tools/build_mjx7303_v37_blender.py tools/build_mjx7303_v38_blender.py
+          rm -rf assets/mjx7303/v38-previews
+          mkdir -p assets/mjx7303/v38-previews
+          rm -f assets/mjx7303/mjx7303-v38.glb
+          xvfb-run -a -s '-screen 0 1920x1080x24' env MJX_V38_OUT=assets/mjx7303/mjx7303-v38.glb MJX_V38_PREVIEW_DIR=assets/mjx7303/v38-previews blender --background --factory-startup --python tools/build_mjx7303_v38_blender.py
+          test -s assets/mjx7303/mjx7303-v38.glb
+          for view in front three side rear top; do test -s "assets/mjx7303/v38-previews/$view.png"; done
           node - <<'NODE'
-          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v37.glb');
-          if(b.length<90000)throw Error('V37 digital-twin GLB too small: '+b.length);
-          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('V37 GLB invalid');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V37 GLB JSON invalid');
+          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/mjx7303-v38.glb');
+          if(b.length<130000)throw Error('V38 physical-twin GLB too small: '+b.length);
+          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('V38 GLB invalid');
+          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('V38 GLB JSON invalid');
           const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
-          const required=['BODY_SHELL_V36_REFERENCE','GreenhouseShell_V36','Windshield_V36','Tire_V36','WheelSpoke_V36','TireTread_V37','CenterCap_V37','FrontGrilleSlat_V37','WiperBlade_V37','HeadlampProjector_V37','DIGITAL_TWIN_V37_ID'];
-          for(const t of required)if(!names.some(n=>n.includes(t))){console.error('Exported V37 node names:',names);throw Error('V37 component missing '+t)}
-          console.log({asset:'MJX7303_V37_DIGITAL_TWIN',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2'});
+          const required=['BODY_SKIN_V38_SUBD_HOOD','BODY_SKIN_V38_SUBD_REAR','BODY_SKIN_V38_SIDE_R','FrontFascia_V38_PHYSICAL','WheelArchLip_V38','TireShoulder_V38','WheelBarrel_V38','BrakeCaliper_V38','HeadlampHousing_V38','Undertray_V38','PHYSICAL_TWIN_V38_ID'];
+          for(const t of required)if(!names.some(n=>n.includes(t))){console.error('Exported V38 node names:',names);throw Error('V38 component missing '+t)}
+          console.log({asset:'MJX7303_V38_PHYSICAL_TWIN',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2'});
           NODE
-      - name: Validate Jarvis V37 digital-twin runtime
+      - name: Validate Jarvis V38 physical renderer and runtime
         run: |
           set -euo pipefail
           node --check classic-token.js
@@ -74,46 +74,48 @@ jobs:
           node scripts/prepare-pages.mjs
           node - <<'NODE'
           const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
-          for(const p of ['racing-mjx7303-v30.html','jarvis/jarvis-ai-graphics-v37.js','jarvis/jarvis-dynamics-v30.js','jarvis/mjx7303-racing-v30.js','assets/mjx7303/mjx7303-v37.glb'])if(!fs.existsSync(p))throw Error('V37 runtime component missing '+p);
-          check('racing-mjx7303-v30.html','JARVIS DIGITAL TWIN V37');check('racing-mjx7303-v30.html','V37 DIGITAL TWIN RECONSTRUCTION');check('racing-mjx7303-v30.html','xr37');
-          check('jarvis/mjx7303-racing-v30.js','mjx7303-v37.glb');check('jarvis/mjx7303-racing-v30.js','asset36');check('jarvis/mjx7303-racing-v30.js','JARVIS V37');check('jarvis/mjx7303-racing-v30.js','__V37_READY');
-          check('jarvis/racing-tab.js','xr37');check('jarvis/racing-tab.js','Simulator V37');check('jarvis/racing-tab.js','RACING V37 DIGITAL TWIN');
-          check('jarvis/jarvis-ai-graphics-v37.js','JARVIS_DIGITAL_TWIN_V37');check('jarvis/jarvis-ai-graphics-v37.js','1.82');check('jarvis/jarvis-ai-graphics-v35.js','4096');
-          check('tools/build_mjx7303_v37_blender.py','TireTread_V37');check('tools/build_mjx7303_v37_blender.py','HeadlampProjector_V37');check('tools/build_mjx7303_v37_blender.py','72MM_PHOTOGRAPHIC');
-          const b=fs.readFileSync('assets/mjx7303/mjx7303-v37.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('V37 asset invalid');
-          for(const v of ['front','three','side','rear','top'])if(fs.statSync(`assets/mjx7303/v37-previews/${v}.png`).size<9000)throw Error('V37 preview too small '+v);
-          console.log({pages:'PASS',racing:'V37_DIGITAL_TWIN',renderer:'V37_REFERENCE_CONVERGENCE',previews:5,delivery:'DIRECT_PAGES_ARTIFACT'});
+          for(const p of ['racing-mjx7303-v30.html','jarvis/jarvis-ai-graphics-v38.js','jarvis/jarvis-dynamics-v30.js','jarvis/mjx7303-racing-v38.js','assets/mjx7303/mjx7303-v38.glb'])if(!fs.existsSync(p))throw Error('V38 runtime component missing '+p);
+          check('racing-mjx7303-v30.html','JARVIS PHYSICAL TWIN V38');check('racing-mjx7303-v30.html','MULTI-LOBE GGX');check('racing-mjx7303-v30.html','xr38');
+          check('jarvis/mjx7303-racing-v38.js','mjx7303-v38.glb');check('jarvis/mjx7303-racing-v38.js','__V38_READY');check('jarvis/mjx7303-racing-v38.js','CONTINUITY MODEL');
+          check('jarvis/racing-tab.js','xr38');check('jarvis/racing-tab.js','Simulator V38');check('jarvis/racing-tab.js','RACING V38 PHYSICAL TWIN');
+          check('jarvis/jarvis-ai-graphics-v38.js','JARVIS_PHYSICAL_TWIN_V38');check('jarvis/jarvis-ai-graphics-v38.js','MULTILOBE_CLEARCOAT_ENVIRONMENT');check('jarvis/jarvis-ai-graphics-v38.js','for(int x=-2;x<=2;x++)');check('jarvis/jarvis-ai-graphics-v38.js','1.98');
+          check('tools/build_mjx7303_v38_blender.py','BODY_SKIN_V38_SUBD_HOOD');check('tools/build_mjx7303_v38_blender.py','WheelArchLip_V38');check('tools/build_mjx7303_v38_blender.py','85MM_PRODUCT');
+          const b=fs.readFileSync('assets/mjx7303/mjx7303-v38.glb');if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(8)!==b.length)throw Error('V38 asset invalid');
+          for(const v of ['front','three','side','rear','top'])if(fs.statSync(`assets/mjx7303/v38-previews/${v}.png`).size<10000)throw Error('V38 preview too small '+v);
+          console.log({pages:'PASS',racing:'V38_PHYSICAL_TWIN',renderer:'MULTI_LOBE_CLEARCOAT_ENVIRONMENT',body:'SUBDIVISION_COMPOUND_SURFACES',previews:5,delivery:'DIRECT_PAGES_ARTIFACT'});
           NODE
-      - name: Stage immutable Pages payload
+      - name: Stage immutable V38 Pages payload
         run: |
           set -euo pipefail
-          test -s assets/mjx7303/mjx7303-v37.glb
-          du -h assets/mjx7303/mjx7303-v37.glb
-          echo 'V37 generated digital twin and photographic QA will be deployed from this exact workspace.'
+          test -s assets/mjx7303/mjx7303-v38.glb
+          du -h assets/mjx7303/mjx7303-v38.glb
+          echo 'V38 generated physical twin and QA renders will be deployed from this exact workspace.'
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live V37 asset and simulator
+      - name: Verify live V38 asset and simulator
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
           base="${PAGE_URL%/}/"
-          asset="${base}assets/mjx7303/mjx7303-v37.glb?v=smoke-${GITHUB_SHA}"
+          asset="${base}assets/mjx7303/mjx7303-v38.glb?v=smoke-${GITHUB_SHA}"
           shell="${base}racing-mjx7303-v30.html?v=smoke-${GITHUB_SHA}"
+          engine="${base}jarvis/jarvis-ai-graphics-v38.js?v=smoke-${GITHUB_SHA}"
           ok=0
-          for attempt in $(seq 1 24); do
-            echo "Live Pages smoke attempt $attempt/24: $asset"
-            code_asset=$(curl -L -sS -o /tmp/v37.glb -w '%{http_code}' "$asset" || true)
-            code_shell=$(curl -L -sS -o /tmp/v37.html -w '%{http_code}' "$shell" || true)
-            if [ "$code_asset" = 200 ] && [ "$code_shell" = 200 ] && [ -s /tmp/v37.glb ] && grep -q 'JARVIS DIGITAL TWIN V37' /tmp/v37.html; then
-              python3 -c "from pathlib import Path;b=Path('/tmp/v37.glb').read_bytes();assert b[:4]==b'glTF' and int.from_bytes(b[4:8],'little')==2 and int.from_bytes(b[8:12],'little')==len(b);print({'liveV37':'PASS','bytes':len(b)})"
+          for attempt in $(seq 1 30); do
+            echo "Live Pages V38 smoke attempt $attempt/30"
+            code_asset=$(curl -L -sS -o /tmp/v38.glb -w '%{http_code}' "$asset" || true)
+            code_shell=$(curl -L -sS -o /tmp/v38.html -w '%{http_code}' "$shell" || true)
+            code_engine=$(curl -L -sS -o /tmp/v38.js -w '%{http_code}' "$engine" || true)
+            if [ "$code_asset" = 200 ] && [ "$code_shell" = 200 ] && [ "$code_engine" = 200 ] && [ -s /tmp/v38.glb ] && grep -q 'JARVIS PHYSICAL TWIN V38' /tmp/v38.html && grep -q 'JARVIS_PHYSICAL_TWIN_V38' /tmp/v38.js; then
+              python3 -c "from pathlib import Path;b=Path('/tmp/v38.glb').read_bytes();assert b[:4]==b'glTF' and int.from_bytes(b[4:8],'little')==2 and int.from_bytes(b[8:12],'little')==len(b);print({'liveV38':'PASS','bytes':len(b)})"
               ok=1
               break
             fi
-            echo "asset=$code_asset shell=$code_shell; waiting for Pages propagation..."
+            echo "asset=$code_asset shell=$code_shell engine=$code_engine; waiting for Pages propagation..."
             sleep 5
           done
           test "$ok" -eq 1
