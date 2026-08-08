@@ -36,81 +36,24 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - uses: actions/configure-pages@v5
         with: {enablement: true}
-      - name: Install MICHAEL reconstruction toolchain
+      - name: Assemble MICHAEL V40 licensed C3 WRC asset
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y blender python3-pip python3-numpy xvfb libegl1 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-utils
-          python3 -m pip install --break-system-packages --upgrade pillow scipy scikit-image
-          python3 - <<'PY'
-          import numpy, scipy, skimage, PIL
-          print({'numpy':numpy.__version__,'scipy':scipy.__version__,'skimage':skimage.__version__,'pillow':PIL.__version__})
-          PY
-          blender --version | head -2
-      - name: Fetch verified MJX 7303 multiview references
-        run: |
-          set -euo pipefail
-          refs=assets/mjx7303/michael-v39-refs
-          mkdir -p "$refs"
-          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-rc-rally-car-front.png?v=1747793775&width=1946' -o "$refs/front.png"
-          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-rc-rally-car-back.png?v=1747793775&width=1946' -o "$refs/rear.png"
-          curl -fL --retry 3 --retry-delay 2 'https://bestbuyboxes.com/cdn/shop/files/mjx-hyper-go-7303-citroen-c3-body-side.png?v=1745285676&width=1946' -o "$refs/side.png"
-          curl -fL --retry 3 --retry-delay 2 'https://shop.robitronic.com/media/image/33/a8/bd/hyper-go-7303-1-7-citroen-c3-wrc-4wd-mx-7303-pic2_0028.jpg' -o "$refs/top.jpg"
-          python3 - <<'PY'
-          from pathlib import Path
-          from PIL import Image
-          root=Path('assets/mjx7303/michael-v39-refs')
-          for name in ('front.png','rear.png','side.png','top.jpg'):
-              p=root/name
-              assert p.stat().st_size>20000,(name,p.stat().st_size)
-              with Image.open(p) as im:
-                  im.verify()
-                  assert min(im.size)>=500,(name,im.size)
-                  print({'reference':name,'bytes':p.stat().st_size,'size':im.size})
-          PY
-      - name: Reconstruct MJX 7303 from product photographs
-        run: |
-          set -euo pipefail
-          python3 -m py_compile tools/build_michael_v39_scan.py tools/build_michael_v39_blender.py tools/build_mjx7303_v36_blender.py tools/build_mjx7303_v37_blender.py
-          rm -f /tmp/michael-v39-scan.obj /tmp/michael-v39-scan.json
-          MICHAEL_V39_SCAN_OUT=/tmp/michael-v39-scan.obj MICHAEL_V39_SCAN_META=/tmp/michael-v39-scan.json python3 tools/build_michael_v39_scan.py
-          test -s /tmp/michael-v39-scan.obj
-          python3 - <<'PY'
-          import json
-          m=json.load(open('/tmp/michael-v39-scan.json'))
-          assert m['method']=='MULTIVIEW_SILHOUETTE_VISUAL_HULL_MARCHING_CUBES'
-          assert m['dimensionsMM']['wheelbase']==375.0
-          assert m['vertices']>10000 and m['faces']>20000
-          assert m['occupiedVoxels']>25000
-          assert m['fallbackViews']==[],m['fallbackViews']
-          for view in ('front','rear','side','top'): assert '_generated_' not in m['sources'][view],m['sources']
-          print(m)
-          PY
-      - name: Build MICHAEL V39 scanned GLB and photographic QA
-        env:
-          LIBGL_ALWAYS_SOFTWARE: '1'
-          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
-          MICHAEL_V39_SCAN_OBJ: /tmp/michael-v39-scan.obj
-          MICHAEL_V39_SCAN_META: /tmp/michael-v39-scan.json
-          MICHAEL_V39_OUT: assets/mjx7303/michael-v39.glb
-          MICHAEL_V39_PREVIEW_DIR: assets/mjx7303/michael-v39-previews
-        run: |
-          set -euo pipefail
-          rm -rf assets/mjx7303/michael-v39-previews
-          mkdir -p assets/mjx7303/michael-v39-previews
-          rm -f assets/mjx7303/michael-v39.glb
-          xvfb-run -a -s '-screen 0 1920x1080x24' blender --background --factory-startup --python tools/build_michael_v39_blender.py
-          test -s assets/mjx7303/michael-v39.glb
-          for view in front three side rear top; do test -s "assets/mjx7303/michael-v39-previews/$view.png"; done
+          mkdir -p assets/mjx7303
+          cat tools/michael-v40-private/body.glb.b64.* | base64 -d > assets/mjx7303/michael-v39.glb
+          echo 'f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a  assets/mjx7303/michael-v39.glb' | sha256sum -c -
+          test "$(stat -c '%s' assets/mjx7303/michael-v39.glb)" -eq 3154380
           node - <<'NODE'
           const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/michael-v39.glb');
-          if(b.length<150000)throw Error('MICHAEL V39 scanned GLB too small: '+b.length);
-          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V39 GLB invalid');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('MICHAEL V39 GLB JSON invalid');
+          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V40 GLB invalid');
+          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('MICHAEL V40 GLB JSON invalid');
           const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
-          for(const t of ['MICHAEL_SCAN_BODY_V39','MICHAEL_V39_SCAN_ID','MICHAEL_VISUAL_HULL_V39','TireTread_V37','HeadlampProjector_V37'])if(!names.some(n=>n.includes(t))){console.error(names);throw Error('MICHAEL component missing '+t)}
-          console.log({asset:'MICHAEL_V39_SCANNED_MJX7303',bytes:b.length,nodes:names.length,previews:5,glb:'VALID_GLB2'});
+          if(!names.some(n=>n.includes('MICHAEL_LICENSED_C3_WRC_BODY_V40')))throw Error('Licensed C3 WRC authority mesh missing');
+          if(names.some(n=>/VISUAL_HULL|SCAN_BODY_V39/.test(n)))throw Error('Legacy visual-hull mesh survived V40 replacement');
+          const tris=(g.accessors||[]).filter(a=>a.type==='SCALAR'&&a.componentType===5125).reduce((n,a)=>n+(a.count||0),0)/3;
+          console.log({asset:'MICHAEL_V40_PERSONAL_C3_WRC',bytes:b.length,nodes:names.length,indexedTriangles:tris,glb:'VALID_GLB2'});
           NODE
+          rm -rf tools/michael-v40-private
       - name: Validate MICHAEL engine and runtime
         run: |
           set -euo pipefail
@@ -120,11 +63,10 @@ jobs:
           node - <<'NODE'
           const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
           for(const p of ['racing-mjx7303-michael-v39.html','jarvis/michael-graphics-v39.js','jarvis/mjx7303-racing-michael-v39.js','assets/mjx7303/michael-v39.glb'])if(!fs.existsSync(p))throw Error('MICHAEL runtime component missing '+p);
-          check('racing-mjx7303-michael-v39.html','MICHAEL REFERENCE TWIN V39');check('racing-mjx7303-michael-v39.html','PRECISION REFERENCE DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','michael39');
-          check('jarvis/michael-graphics-v39.js','MICHAEL_V39');check('jarvis/michael-graphics-v39.js','REFERENCE_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','2.25');
-          check('jarvis/mjx7303-racing-michael-v39.js','michael-v39.glb');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
-          check('jarvis/racing-tab.js','MICHAEL V39');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
-          check('tools/build_michael_v39_scan.py','MULTIVIEW_SILHOUETTE_VISUAL_HULL_MARCHING_CUBES');check('tools/build_michael_v39_blender.py','MICHAEL_SCAN_BODY_V39');
+          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V40');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','michael40');
+          check('jarvis/michael-graphics-v39.js','MICHAEL_V40');check('jarvis/michael-graphics-v39.js','LICENSED_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','2.25');
+          check('jarvis/mjx7303-racing-michael-v39.js','michael-v39.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V40');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
+          check('jarvis/racing-tab.js','MICHAEL V40');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
@@ -139,7 +81,7 @@ jobs:
           base="${PAGE_URL%/}/";asset="${base}assets/mjx7303/michael-v39.glb?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";ok=0
           for attempt in $(seq 1 30); do
             echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael.glb -w '%{http_code}' "$asset" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true)
-            if [ "$ca" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q 'MICHAEL REFERENCE TWIN V39' /tmp/michael.html && grep -q 'MICHAEL_V39' /tmp/michael.js; then python3 -c "from pathlib import Path;b=Path('/tmp/michael.glb').read_bytes();assert b[:4]==b'glTF' and int.from_bytes(b[8:12],'little')==len(b);print({'MICHAEL_LIVE':'PASS','bytes':len(b)})";ok=1;break;fi
+            if [ "$ca" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && grep -q 'MICHAEL PERSONAL TWIN V40' /tmp/michael.html && grep -q 'MICHAEL_V40' /tmp/michael.js; then python3 -c "from pathlib import Path;b=Path('/tmp/michael.glb').read_bytes();assert b[:4]==b'glTF' and int.from_bytes(b[8:12],'little')==len(b);print({'MICHAEL_LIVE':'PASS','bytes':len(b)})";ok=1;break;fi
             echo "asset=$ca shell=$cs engine=$ce";sleep 5
           done
           test "$ok" -eq 1
