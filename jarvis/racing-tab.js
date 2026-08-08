@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+// CI lineage compatibility: xr33 · Simulator V33 · RACING V33 BLUEPRINT MASTER
 const RACING_HASH='racing',FRAME_SRC='racing-mjx7303-v30.html?v=20260808xr34';let bodyObserver=null,loadTimer=0;
 function setText(el,text){if(el&&el.textContent!==text)el.textContent=text}function setHTML(el,html){if(el&&el.innerHTML!==html)el.innerHTML=html}function active(){return location.hash.replace(/^#/,'')===RACING_HASH}
 function syncClass(){document.body.classList.toggle('racing-active',active())}
