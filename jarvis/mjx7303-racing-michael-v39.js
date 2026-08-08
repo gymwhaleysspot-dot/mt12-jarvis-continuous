@@ -1,9 +1,9 @@
 // MICHAEL V40 Racing — licensed C3 WRC personal MJX 7303 + MICHAEL graphics engine + proven Jarvis Dynamics.
-import {JarvisXRRenderer} from './michael-graphics-v39.js?v=michael40';
-import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael40';
+import {JarvisXRRenderer} from './michael-graphics-v39.js?v=michael41';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael41';
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');let xr,dyn,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.105,dist=10.6,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
-const scan=new URL('../assets/mjx7303/michael-v39.glb?v=michael40',import.meta.url).href;const fallback=new URL('../assets/mjx7303/mjx7303-v38.glb?v=michael40-fallback',import.meta.url).href;
+const siteBase=new URL('.',location.href).pathname.includes('/mt12-jarvis-continuous/')?'/mt12-jarvis-continuous/':'/';const scan=new URL(siteBase+'assets/mjx7303/michael-v39.glb?v=michael41',location.origin).href;const fallback=new URL(siteBase+'assets/mjx7303/mjx7303-v38.glb?v=michael41-fallback',location.origin).href;
 async function loadVehicle(){xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();status.textContent='MICHAEL V40 · LICENSED C3 WRC MJX 7303 · LOADING…';try{const info=await xr.loadGLB(scan);status.textContent=`MICHAEL V40 · ${info.drawables} GPU DRAWS · LICENSED PERSONAL DIGITAL TWIN`;status.className='asset-state ok';window.__MICHAEL_MODEL=true;return info}catch(e){console.warn('MICHAEL licensed asset unavailable; loading V38 continuity body',e);status.textContent='MICHAEL V40 BODY DEPLOYING · V38 CONTINUITY BODY';status.className='asset-state warn';const info=await xr.loadGLB(fallback);window.__MICHAEL_MODEL=false;return info}}
 try{await loadVehicle()}catch(e){console.error(e);status.textContent='MICHAEL V40 MODEL LOAD FAILED · '+e.message;status.className='asset-state warn'}
 function orbit(){xr?.orbit(yaw,pitch,dist,1.02)}orbit();const views={front:[Math.PI,.055,10.65],three:[-.72,.115,10.35],side:[-Math.PI/2,.065,10.75],rear:[0,.065,10.70],top:[-.42,.94,11.75]};
