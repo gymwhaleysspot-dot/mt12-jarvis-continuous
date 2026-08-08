@@ -1,11 +1,12 @@
-// MICHAEL V49 — calibrated mobile WRC presentation: licensed authority mesh, energy-aware paint,
-// dark fitted glass, rounded rally tires, camera-safe studio lighting and a neutral forest world.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael62-core';
+// MICHAEL V50 — camera-safe mobile WRC presentation: licensed authority mesh, energy-aware paint,
+// fitted optical lenses, bounded mobile GPU budgets and a readable neutral forest world.
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael63-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
-  constructor(r){this.r=r;this.mode='garage';this.ema=16.7;this.jitter=0;this.q=1.48;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL LICENSED';this.exposure=.92}
-  setMode(m){this.mode=m;this.q=clamp(this.q,m==='garage'?1.18:.74,m==='garage'?1.75:1.16);this.r.quality=this.q}
-  tick(){const r=this.r,ms=r.avgMs||16.7,e=ms-this.ema;this.ema+=e*.045;this.jitter=this.jitter*.945+Math.abs(e)*.055;const motion=Math.abs((r.yaw||0)-this.lastYaw)+Math.abs((r.pitch||0)-this.lastPitch);this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.still=motion<.00035?Math.min(900,this.still+1):0;const g=this.mode==='garage',target=g?24.0:16.8,lo=g?1.18:.74,hi=g?1.75:1.16;if(this.ema>target*1.08||this.jitter>target*.26)this.q-=g?.030:.022;else if(this.ema<target*.77&&this.jitter<target*.14)this.q+=g?.020:.010;if(g&&this.still>90)this.q+=.0035;if(g&&this.still>300)this.q+=.0025;this.q=clamp(this.q,lo,hi);r.quality=r.quality*.84+this.q*.16;this.tier=r.quality>1.66?'MICHAEL MAX':r.quality>1.48?'MICHAEL LICENSED':r.quality>1.26?'MICHAEL ULTRA':'MICHAEL HIGH';const y=r.yaw||0;r.lightDir[0]=Math.sin(y+.54)*.53;r.lightDir[1]=-.805;r.lightDir[2]=Math.cos(y+.54)*.53;r.lightColor[0]=g?2.72:2.34;r.lightColor[1]=g?2.58:2.25;r.lightColor[2]=g?2.46:2.18;r.ambient[0]=g?.17:.13;r.ambient[1]=g?.20:.16;r.ambient[2]=g?.25:.21;this.exposure=g?.94:.88;r.exposure=this.exposure;r.postLift=g?.003:.002}
+  constructor(r){this.r=r;this.mode='garage';this.mobile=Math.min(innerWidth||720,innerHeight||1280)<900;this.ema=16.7;this.jitter=0;this.q=this.mobile?.96:1.18;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL BALANCED';this.exposure=.98;this.maxQuality=this.mobile?1.10:1.38}
+  limits(m){const g=m==='garage';return this.mobile?(g?[.78,1.10,18.4]:[.66,1.00,16.8]):(g?[.92,1.38,21.5]:[.74,1.12,16.8])}
+  setMode(m){this.mode=m;const [lo,hi]=this.limits(m);this.maxQuality=hi;this.q=clamp(this.q,lo,hi);this.r.quality=this.q}
+  tick(){const r=this.r,ms=r.avgMs||16.7,e=ms-this.ema;this.ema+=e*.055;this.jitter=this.jitter*.94+Math.abs(e)*.06;const motion=Math.abs((r.yaw||0)-this.lastYaw)+Math.abs((r.pitch||0)-this.lastPitch);this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.still=motion<.00035?Math.min(900,this.still+1):0;const g=this.mode==='garage',[lo,hi,target]=this.limits(this.mode);if(this.ema>target*1.06||this.jitter>target*.23)this.q-=g?.032:.024;else if(this.ema<target*.78&&this.jitter<target*.13)this.q+=g?.016:.010;if(g&&this.still>140)this.q+=.0015;this.q=clamp(this.q,lo,hi);r.quality=r.quality*.82+this.q*.18;this.tier=r.quality>1.24?'MICHAEL MAX':r.quality>1.06?'MICHAEL LICENSED':r.quality>.86?'MICHAEL ULTRA':'MICHAEL HIGH';const y=r.yaw||0;r.lightDir[0]=Math.sin(y+.54)*.53;r.lightDir[1]=-.805;r.lightDir[2]=Math.cos(y+.54)*.53;r.lightColor[0]=g?2.48:2.22;r.lightColor[1]=g?2.38:2.14;r.lightColor[2]=g?2.30:2.08;r.ambient[0]=g?.28:.20;r.ambient[1]=g?.32:.24;r.ambient[2]=g?.39:.30;this.exposure=g?.98:.94;r.exposure=this.exposure;r.postLift=g?.011:.008}
 }
 
 const I4=()=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
@@ -31,7 +32,7 @@ function pushBatch(r,b,mat,env=null){
   return d
 }
 function addCompletedTwin(r){
-  const B={contact:new TwinBatch(),rubber:new TwinBatch(),alloy:new TwinBatch(),brake:new TwinBatch(),chassis:new TwinBatch(),cabin:new TwinBatch(),susp:new TwinBatch(),mud:new TwinBatch(),glass:new TwinBatch(),lights:new TwinBatch(),beams:new TwinBatch()};
+  const B={contact:new TwinBatch(),rubber:new TwinBatch(),alloy:new TwinBatch(),brake:new TwinBatch(),chassis:new TwinBatch(),cabin:new TwinBatch(),susp:new TwinBatch(),mud:new TwinBatch(),glass:new TwinBatch(),frontLens:new TwinBatch(),frontDrl:new TwinBatch(),rearLens:new TwinBatch(),rearLamp:new TwinBatch(),beams:new TwinBatch()};
   const axles=[-1.875,1.875],sides=[-1.37,1.37];
   B.contact.ellipseY(0,.014,0,.026,1.24,2.72,48);
   B.chassis.box(0,.28,0,2.28,.20,4.72);B.chassis.box(0,.43,-.10,1.92,.16,3.92);B.chassis.box(0,.30,-2.42,2.42,.18,.28);B.chassis.box(0,.30,2.42,2.42,.18,.28);
@@ -42,42 +43,48 @@ function addCompletedTwin(r){
   B.glass.quad([-.91,1.18,.93],[.91,1.18,.93],[.76,1.76,.52],[-.76,1.76,.52],[0,.55,.84]);
   B.glass.quad([.86,1.18,-.97],[-.86,1.18,-.97],[-.72,1.70,-.62],[.72,1.70,-.62],[0,.55,-.84]);
   for(const x of [-1.015,1.015]){const n=[Math.sign(x),0,0];B.glass.quad([x,1.18,.78],[x,1.18,.02],[x,1.70,.08],[x,1.70,.47],n);B.glass.quad([x,1.18,-.08],[x,1.18,-.78],[x,1.68,-.46],[x,1.68,-.07],n)}
-  // Compact lens quads sit inside the scanned lamp recesses instead of floating boxes.
-  B.lights.quad([-.99,.78,2.91],[-.40,.79,3.02],[-.43,.98,3.00],[-.96,.99,2.90],[0,0,1]);
-  B.lights.quad([.40,.79,3.02],[.99,.78,2.91],[.96,.99,2.90],[.43,.98,3.00],[0,0,1]);
-  B.lights.quad([.42,.82,-3.00],[.99,.82,-2.91],[.96,1.00,-2.90],[.44,1.00,-3.00],[0,0,-1]);
-  B.lights.quad([-.99,.82,-2.91],[-.42,.82,-3.00],[-.44,1.00,-3.00],[-.96,1.00,-2.90],[0,0,-1]);B.beams.quad([-.96,.035,2.86],[-.25,.035,2.86],[-.55,.035,12.0],[-3.45,.035,12.0],[0,1,0]);B.beams.quad([.25,.035,2.86],[.96,.035,2.86],[3.45,.035,12.0],[.55,.035,12.0],[0,1,0]);
-  const mats={contact:M([.002,.003,.004],0,1),rubber:M([.007,.008,.010],0,.80),alloy:M([.31,.36,.43],.78,.24),brake:M([.19,.21,.24],.72,.31),chassis:M([.014,.017,.021],.10,.72),cabin:M([.008,.010,.013],0,.88),susp:M([.21,.24,.28],.62,.36),mud:M([.006,.007,.009],0,.94),glass:{...M([.008,.025,.060],0,.075),alpha:.52},lights:{...M([.58,.68,.80],.02,.21,[.58,.72,.94]),alpha:.90},beams:{...M([.15,.24,.38],0,.55,[.08,.14,.24]),alpha:.045}};
-  for(const k of Object.keys(B))pushBatch(r,B[k],mats[k]);
+  // Optical housings carry shape; thin DRL/stop-light elements supply restrained emission.
+  B.frontLens.quad([-.99,.78,2.91],[-.40,.79,3.02],[-.43,.98,3.00],[-.96,.99,2.90],[0,0,1]);
+  B.frontLens.quad([.40,.79,3.02],[.99,.78,2.91],[.96,.99,2.90],[.43,.98,3.00],[0,0,1]);
+  B.frontDrl.quad([-.91,.88,2.925],[-.48,.89,3.015],[-.49,.945,3.01],[-.90,.94,2.92],[0,0,1]);
+  B.frontDrl.quad([.48,.89,3.015],[.91,.88,2.925],[.90,.94,2.92],[.49,.945,3.01],[0,0,1]);
+  B.rearLens.quad([.42,.82,-3.00],[.99,.82,-2.91],[.96,1.00,-2.90],[.44,1.00,-3.00],[0,0,-1]);
+  B.rearLens.quad([-.99,.82,-2.91],[-.42,.82,-3.00],[-.44,1.00,-3.00],[-.96,1.00,-2.90],[0,0,-1]);
+  B.rearLamp.quad([.50,.87,-3.01],[.91,.87,-2.925],[.90,.94,-2.92],[.51,.94,-3.01],[0,0,-1]);
+  B.rearLamp.quad([-.91,.87,-2.925],[-.50,.87,-3.01],[-.51,.94,-3.01],[-.90,.94,-2.92],[0,0,-1]);
+  B.beams.quad([-.92,.035,2.86],[-.36,.035,2.86],[-.72,.035,9.4],[-2.40,.035,9.4],[0,1,0]);B.beams.quad([.36,.035,2.86],[.92,.035,2.86],[2.40,.035,9.4],[.72,.035,9.4],[0,1,0]);
+  const mats={contact:M([.002,.003,.004],0,1),rubber:M([.007,.008,.010],0,.80),alloy:M([.31,.36,.43],.78,.24),brake:M([.19,.21,.24],.72,.31),chassis:M([.014,.017,.021],.10,.72),cabin:M([.008,.010,.013],0,.88),susp:M([.21,.24,.28],.62,.36),mud:M([.006,.007,.009],0,.94),glass:{...M([.010,.030,.068],0,.11),alpha:.47},frontLens:{...M([.025,.045,.072],.02,.29),alpha:.82},frontDrl:{...M([.18,.23,.29],.02,.27,[.16,.21,.28]),alpha:.78},rearLens:{...M([.10,.004,.006],.01,.34),alpha:.86},rearLamp:{...M([.26,.008,.010],.01,.30,[.17,.004,.006]),alpha:.82},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.024}};
+  for(const k of Object.keys(B)){const d=pushBatch(r,B[k],mats[k]);if(d&&k==='beams'){d.driveOnly=true;d.hidden=true}}
   r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,lighting:true,fittedLights:true,wrcLivery:true,cockpit:true,batches:Object.keys(B).length}
 }
 function addMichaelWorld(r){
-  const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),turntable=new TwinBatch(),garageLights=new TwinBatch();
+  const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),turntable=new TwinBatch();
   road.box(0,-.08,0,7.4,.14,128);shoulder.box(-5.2,-.12,0,3.0,.12,128);shoulder.box(5.2,-.12,0,3.0,.12,128);for(let z=-60;z<64;z+=5){roadMark.box(-3.25,.018,z,.10,.025,2.8);roadMark.box(3.25,.018,z,.10,.025,2.8);reflector.box(-3.62,.18,z,.09,.36,.12);reflector.box(3.62,.18,z,.09,.36,.12)}
   for(let k=0;k<40;k++){const z=-58+k*3.1+(k%3)*.37;for(const side of [-1,1]){const x=side*(5.3+(k%5)*.58+Math.sin(k*1.7)*.35),h=3.8+(k%7)*.32;trunk.cylY(x,h*.22,z,h*.44,.14+(k%3)*.025,7);const crown=k%2?treesNear:treesFar;crown.coneY(x,h*.55,z,h*.72,1.18+(k%4)*.14,9);crown.coneY(x,h*.78,z,h*.66,.92+(k%3)*.12,9);crown.coneY(x,h*.99,z,h*.54,.66+(k%2)*.10,9)}}
   for(const side of [-1,1]){guardrail.box(side*4.42,.46,0,.10,.12,128);for(let z=-60;z<=60;z+=4)guardrail.box(side*4.42,.24,z,.12,.52,.12)}
-  garage.box(0,-.11,0,9.4,.12,9.4);turntable.cylY(0,-.035,0,.075,3.25,48);for(const [x,z] of [[-4.30,-4.30],[4.30,-4.30],[-4.30,4.30],[4.30,4.30]])garageLights.box(x,2.05,z,.075,3.35,.075);
+  // A broad floor and image-based key avoid camera-crossing physical light bars at every orbit angle.
+  garage.box(0,-.11,0,24,.12,24);turntable.cylY(0,-.035,0,.075,3.25,48);
   const created=[
-    pushBatch(r,road,M([.035,.042,.046],0,.92),'road'),
-    pushBatch(r,shoulder,M([.085,.060,.036],0,.98),'road'),
-    pushBatch(r,roadMark,M([.56,.60,.62],0,.68),'road'),
-    pushBatch(r,reflector,M([.60,.68,.72],.05,.24,[.12,.16,.20]),'road'),
-    pushBatch(r,guardrail,M([.27,.31,.34],.72,.32),'road'),
-    pushBatch(r,trunk,M([.085,.040,.020],0,.94),'road'),
-    pushBatch(r,treesNear,M([.015,.090,.040],0,.96),'road'),
-    pushBatch(r,treesFar,M([.008,.045,.028],0,.98),'road'),
-    pushBatch(r,garage,M([.006,.008,.012],.02,.86),'garage'),
-    pushBatch(r,turntable,M([.038,.045,.056],.26,.40),'garage'),pushBatch(r,garageLights,M([.34,.42,.50],0,.30,[.36,.48,.64]),'garage')
+    pushBatch(r,road,M([.050,.058,.062],0,.90),'road'),
+    pushBatch(r,shoulder,M([.105,.073,.042],0,.97),'road'),
+    pushBatch(r,roadMark,M([.68,.72,.74],0,.62),'road'),
+    pushBatch(r,reflector,M([.66,.73,.78],.05,.26,[.075,.10,.13]),'road'),
+    pushBatch(r,guardrail,M([.34,.39,.44],.66,.35),'road'),
+    pushBatch(r,trunk,M([.11,.055,.028],0,.92),'road'),
+    pushBatch(r,treesNear,M([.022,.115,.052],0,.95),'road'),
+    pushBatch(r,treesFar,M([.012,.066,.036],0,.97),'road'),
+    pushBatch(r,garage,M([.018,.023,.032],.02,.82),'garage'),
+    pushBatch(r,turntable,M([.052,.062,.078],.20,.46),'garage')
   ].filter(Boolean);
-  r._michaelWorld={worldTrees:80,roadEnvironment:true,roadEdgeMarkers:true,reflectorPosts:50,garageEnvironment:true,garageTurntable:true,garageSmoke:true,batchedDraws:created.length,fog:true};
+  r._michaelWorld={worldTrees:80,roadEnvironment:true,roadEdgeMarkers:true,reflectorPosts:50,garageEnvironment:true,garageTurntable:true,garageSmoke:true,cameraSafeLighting:true,physicalLightBars:false,batchedDraws:created.length,fog:true};
 }
 
 export class JarvisXRRenderer extends Physical38{
-  constructor(canvas){super(canvas);this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V49';this.visualProfile='CALIBRATED_MOBILE_WRC_PRESENTATION_ENGINE';this.quality=1.48;this.postBloom=.10;this.postExposure=1.22;this.postVignette=.93;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
+  constructor(canvas){super(canvas);this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V50';this.visualProfile='CAMERA_SAFE_MOBILE_WRC_PRESENTATION_ENGINE';this.quality=this.michael.q;this.postBloom=.055;this.postExposure=1.08;this.postLift=.011;this.postVignette=.985;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
   addGround(){const first=this.drawables.length;super.addGround();for(const d of this.drawables.slice(first))d.world=true;addMichaelWorld(this);this.setMode(this.michael.mode)}
-  setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage')}this.fogDensity=road?.0042:.0012;this.fogColor=new Float32Array(road?[.022,.031,.034]:[.014,.018,.024]);this.postExposure=road?1.10:1.22;this.gl.clearColor(...(road?[.008,.014,.017,1]:[.006,.009,.014,1]))}
-  async loadGLB(url){const first=this.drawables.length,licensed=url.startsWith('blob:')||/michael-v40\.bin(?:\?|$)/.test(url),info=await super.loadGLB(url),printerToMichael=new Float32Array([1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1]);if(licensed){for(const d of this.drawables.slice(first)){d.model=printerToMichael;d.mat.base=new Float32Array([.34,.008,.014]);d.mat.metal=.08;d.mat.rough=.21}addCompletedTwin(this)}for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114,spread=Math.max(r,g,b)-Math.min(r,g,b);if(r>g*1.32&&r>b*1.25&&r>.11){m.rough=clamp(m.rough,.18,.25);m.metal=clamp(m.metal,0,.12)}else if(lum<.025){m.rough=Math.max(m.rough,.72);m.metal=0}else if(spread<.09&&lum>.48){m.rough=Math.min(m.rough,.18);m.metal=Math.max(m.metal,.76)}else if(b>r*1.15&&lum<.22){m.rough=Math.min(m.rough,.09);m.metal=0}}return{...info,drawables:this.drawables.length,ai:this.aiVersion,profile:this.visualProfile,scanAware:true,completeTwin:this._michaelSystems||null,roadDressing:true,world:this._michaelWorld||null,capabilities:this.capabilities}}
+  setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage');if(d.driveOnly)d.hidden=!road}this.fogDensity=road?.0032:.0007;this.fogColor=new Float32Array(road?[.033,.045,.050]:[.026,.033,.044]);this.postExposure=road?1.04:1.08;this.gl.clearColor(...(road?[.015,.023,.027,1]:[.018,.024,.034,1]))}
+  async loadGLB(url){const first=this.drawables.length,licensed=url.startsWith('blob:')||/michael-v40\.bin(?:\?|$)/.test(url),info=await super.loadGLB(url),printerToMichael=new Float32Array([1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1]);if(licensed){for(const d of this.drawables.slice(first)){d.model=printerToMichael;d.mat.base=new Float32Array([.46,.010,.016]);d.mat.metal=.06;d.mat.rough=.24}addCompletedTwin(this)}for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114,spread=Math.max(r,g,b)-Math.min(r,g,b);if(r>g*1.32&&r>b*1.25&&r>.11){m.rough=clamp(m.rough,.21,.29);m.metal=clamp(m.metal,0,.10)}else if(lum<.025){m.rough=Math.max(m.rough,.72);m.metal=0}else if(spread<.09&&lum>.48){m.rough=Math.min(m.rough,.20);m.metal=Math.max(m.metal,.72)}else if(b>r*1.15&&lum<.22){m.rough=Math.min(m.rough,.12);m.metal=0}}this.setMode(this.michael.mode);return{...info,drawables:this.drawables.length,ai:this.aiVersion,profile:this.visualProfile,scanAware:true,completeTwin:this._michaelSystems||null,roadDressing:true,world:this._michaelWorld||null,capabilities:this.capabilities}}
   beginOwnedFrame(){this.michael.tick();return super.beginOwnedFrame()}
   render(){const c=this.beginOwnedFrame();this.renderShadowPass(c);this.beginColorPass(c);this.renderOpaquePass(c);this.renderTransmissionPass(c);this.endOwnedFrame(c)}
-  getAIStats(){return{...super.getAIStats(),version:this.aiVersion,profile:this.visualProfile,qualityTier:this.michael.tier,michaelFrameMs:this.michael.ema,michaelJitter:this.michael.jitter,stillFrames:this.michael.still,stationaryConvergence:this.michael.still>90,qualityCeiling:1.75,meshSource:'LICENSED_C3_WRC_AUTHORITY_MESH',completeTwin:this._michaelSystems||null,world:this._michaelWorld||null,capabilities:this.capabilities}}
+  getAIStats(){return{...super.getAIStats(),version:this.aiVersion,profile:this.visualProfile,qualityTier:this.michael.tier,michaelFrameMs:this.michael.ema,michaelJitter:this.michael.jitter,stillFrames:this.michael.still,stationaryConvergence:this.michael.still>140,qualityCeiling:this.michael.maxQuality,mobileBudget:this.michael.mobile,meshSource:'LICENSED_C3_WRC_AUTHORITY_MESH',completeTwin:this._michaelSystems||null,world:this._michaelWorld||null,capabilities:this.capabilities}}
 }

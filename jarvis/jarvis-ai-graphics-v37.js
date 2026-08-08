@@ -1,7 +1,7 @@
 // JARVIS DIGITAL TWIN GRAPHICS V37 — beyond-CAD automotive presentation
 // Extends V35 Cinematic Ultra with a quality ladder, camera-aware optical exposure,
 // material micro-response and an idle convergence mode that spends spare GPU in Garage.
-import {JarvisXRRenderer as UltraXR} from './jarvis-ai-graphics-v35.js?v=michael62-core';
+import {JarvisXRRenderer as UltraXR} from './jarvis-ai-graphics-v35.js?v=michael63-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export class JarvisXRRenderer extends UltraXR{
   constructor(canvas){

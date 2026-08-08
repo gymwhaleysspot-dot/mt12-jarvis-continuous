@@ -1,8 +1,8 @@
 // JARVIS AI GRAPHICS ENGINE V35 — CINEMATIC ULTRA
 // Uses the full practical mobile GPU budget in Garage, while retaining a 60 Hz Drive target.
-// Layered on Jarvis XR WebGL2 core: adaptive supersampling, 4K shadows, camera-aware studio lighting,
+// Layered on Jarvis XR WebGL2 core: adaptive supersampling, bounded shadows, camera-aware studio lighting,
 // automotive material remapping, aggressive temporal GPU budget learning, and cinematic exposure.
-import {JarvisXRRenderer as BaseXR} from './jarvis-xr-engine-v29.js?v=michael62-core';
+import {JarvisXRRenderer as BaseXR} from './jarvis-xr-engine-v29.js?v=michael63-core';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a+(b-a)*t;
@@ -54,12 +54,13 @@ export class JarvisXRRenderer extends BaseXR{
     this.quality=1.45;
     this._lastRender=performance.now();
     this._materialStats={paint:0,metal:0,rubber:0,glass:0,light:0,other:0};
-    // Spend more GPU on shadow definition. 4096 is intentionally aggressive for Garage-quality rendering.
+    // Bound shadow memory on phones; a stable 1K map beats a thrashing 4K allocation.
     try{
       const gl=this.gl;
       if(this.shadowTex)gl.deleteTexture(this.shadowTex);if(this.shadowFbo)gl.deleteFramebuffer(this.shadowFbo);
-      this.shadowSize=4096;this._shadow();
-    }catch(e){console.warn('V35 4K shadow fallback',e);this.shadowSize=2048}
+      const mobile=Math.min(innerWidth||720,innerHeight||1280)<900;
+      this.shadowSize=mobile?1024:2048;this._shadow();
+    }catch(e){console.warn('V35 bounded shadow fallback',e);this.shadowSize=1024}
   }
   setMode(mode){this.ai.setMode(mode)}
   addGround(){
