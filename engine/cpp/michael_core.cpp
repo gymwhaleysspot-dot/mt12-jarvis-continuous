@@ -8,13 +8,13 @@
 #define MICHAEL_EXPORT
 #endif
 namespace {
-struct State { float exposure=1.9f, speed=0.0f, rpm=900.0f, heading=0.0f; std::uint32_t seed=0x7303u; } state;
+struct State { float exposure=1.18f, speed=0.0f, rpm=900.0f, heading=0.0f; std::uint32_t seed=0x7303u; } state;
 }
 extern "C" {
-MICHAEL_EXPORT void michael_boot(std::uint32_t seed) { state = {}; state.exposure=1.9f; state.rpm=900.0f; state.seed=seed?seed:0x7303u; }
+MICHAEL_EXPORT void michael_boot(std::uint32_t seed) { state = {}; state.exposure=1.18f; state.rpm=900.0f; state.seed=seed?seed:0x7303u; }
 MICHAEL_EXPORT float michael_visual_tick(int drive, float frame_ms, float dt) {
   const float pressure=michael_clampf((frame_ms-16.7f)/24.0f,0.0f,1.0f);
-  const float target=(drive?2.18f:1.94f)-pressure*0.10f;
+  const float target=(drive?1.10f:1.22f)-pressure*0.06f;
   state.exposure=michael_smoothf(state.exposure,target,4.5f,dt);
   return state.exposure;
 }
