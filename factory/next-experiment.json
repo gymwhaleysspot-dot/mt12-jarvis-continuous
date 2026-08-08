@@ -1,7 +1,7 @@
 {
   "buildState": {
     "duplicatesRejected": 152,
-    "unique": 2
+    "unique": 3
   },
   "canonicalFloor": "jr514f",
   "champion": "jrw2-571",
@@ -13,10 +13,10 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1786155918030",
+    "runId": "research-1786163516826",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-08-08T03:57:50.968447+00:00",
+  "generatedAt": "2026-08-08T04:33:35.392621+00:00",
   "graphState": {
     "nodes": 183,
     "relationships": 177
@@ -34,10 +34,10 @@
       "noRegression": true,
       "sixthSynthesisRequired": true
     },
-    "area": "abs-control",
+    "area": "sensor-dropout-recovery",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-08-08T03:57:50.968440+00:00",
-    "expectedInformationGain": 0.6743,
+    "createdAt": "2026-08-08T04:33:35.392616+00:00",
+    "expectedInformationGain": 0.6727,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -45,15 +45,13 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1786155918030",
+      "runId": "research-1786163516826",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20260808035750",
+    "id": "EXP-20260808043335",
     "measurement": "maximize information gained per generation while preserving defended behavior",
     "mutations": [
-      "adaptive lock target confidence",
-      "linear release/reapply timing",
       "graded fail-open sensor confidence",
       "state-preserving dropout recovery",
       "separate airborne and landing evidence",
@@ -61,39 +59,20 @@
       "contextual slip severity blend",
       "surface-conditioned intervention release",
       "adaptive GPS/RPM lag estimator",
-      "confidence-weighted truth-speed handoff"
+      "confidence-weighted truth-speed handoff",
+      "adaptive lock target confidence",
+      "linear release/reapply timing"
     ],
     "name": "Research-aware evolutionary five-hypothesis generation plus synthesis",
     "parent": "jrw2-571",
     "portfolio": [
-      {
-        "area": "abs-control",
-        "baselineHypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-        "expectedInformationGain": 0.6648,
-        "externalResearch": {
-          "findings": 0,
-          "runId": "research-1786155918030",
-          "sourceIds": [],
-          "weight": 0
-        },
-        "hypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-        "measurement": "reduce lock duration without increasing stopping distance proxy",
-        "mutations": [
-          "adaptive lock target confidence",
-          "linear release/reapply timing"
-        ],
-        "name": "Improve abs control",
-        "priority": 0.5248,
-        "researchCanDirectlyMutateController": false,
-        "slot": 1
-      },
       {
         "area": "sensor-dropout-recovery",
         "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw2-571 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
         "expectedInformationGain": 0.6904,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786155918030",
+          "runId": "research-1786163516826",
           "sourceIds": [],
           "weight": 0
         },
@@ -106,7 +85,7 @@
         "name": "Improve sensor dropout recovery",
         "priority": 0.5104,
         "researchCanDirectlyMutateController": false,
-        "slot": 2
+        "slot": 1
       },
       {
         "area": "jump-landing-classification",
@@ -114,7 +93,7 @@
         "expectedInformationGain": 0.6742,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786155918030",
+          "runId": "research-1786163516826",
           "sourceIds": [],
           "weight": 0
         },
@@ -125,9 +104,9 @@
           "adaptive post-landing confirmation window"
         ],
         "name": "Improve jump landing classification",
-        "priority": 0.4992,
+        "priority": 0.4942,
         "researchCanDirectlyMutateController": false,
-        "slot": 3
+        "slot": 2
       },
       {
         "area": "traction-control",
@@ -135,7 +114,7 @@
         "expectedInformationGain": 0.6718,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786155918030",
+          "runId": "research-1786163516826",
           "sourceIds": [],
           "weight": 0
         },
@@ -146,9 +125,9 @@
           "surface-conditioned intervention release"
         ],
         "name": "Improve traction control",
-        "priority": 0.4968,
+        "priority": 0.4918,
         "researchCanDirectlyMutateController": false,
-        "slot": 4
+        "slot": 3
       },
       {
         "area": "truth-speed-fusion",
@@ -156,7 +135,7 @@
         "expectedInformationGain": 0.6705,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1786155918030",
+          "runId": "research-1786163516826",
           "sourceIds": [],
           "weight": 0
         },
@@ -167,7 +146,28 @@
           "confidence-weighted truth-speed handoff"
         ],
         "name": "Improve truth speed fusion",
-        "priority": 0.4955,
+        "priority": 0.4905,
+        "researchCanDirectlyMutateController": false,
+        "slot": 4
+      },
+      {
+        "area": "abs-control",
+        "baselineHypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+        "expectedInformationGain": 0.6568,
+        "externalResearch": {
+          "findings": 0,
+          "runId": "research-1786163516826",
+          "sourceIds": [],
+          "weight": 0
+        },
+        "hypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+        "measurement": "reduce lock duration without increasing stopping distance proxy",
+        "mutations": [
+          "adaptive lock target confidence",
+          "linear release/reapply timing"
+        ],
+        "name": "Improve abs control",
+        "priority": 0.4818,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
@@ -185,11 +185,11 @@
     "synthesis": {
       "area": "synthesis-all-five",
       "inputs": [
-        "abs-control",
         "sensor-dropout-recovery",
         "jump-landing-classification",
         "traction-control",
-        "truth-speed-fusion"
+        "truth-speed-fusion",
+        "abs-control"
       ],
       "measurement": "beat each constituent on aggregate benefit without new regressions",
       "name": "Synthesize all five hypotheses",
@@ -199,33 +199,12 @@
   },
   "portfolio": [
     {
-      "area": "abs-control",
-      "baselineHypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-      "expectedInformationGain": 0.6648,
-      "externalResearch": {
-        "findings": 0,
-        "runId": "research-1786155918030",
-        "sourceIds": [],
-        "weight": 0
-      },
-      "hypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-      "measurement": "reduce lock duration without increasing stopping distance proxy",
-      "mutations": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
-      ],
-      "name": "Improve abs control",
-      "priority": 0.5248,
-      "researchCanDirectlyMutateController": false,
-      "slot": 1
-    },
-    {
       "area": "sensor-dropout-recovery",
       "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw2-571 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
       "expectedInformationGain": 0.6904,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786155918030",
+        "runId": "research-1786163516826",
         "sourceIds": [],
         "weight": 0
       },
@@ -238,7 +217,7 @@
       "name": "Improve sensor dropout recovery",
       "priority": 0.5104,
       "researchCanDirectlyMutateController": false,
-      "slot": 2
+      "slot": 1
     },
     {
       "area": "jump-landing-classification",
@@ -246,7 +225,7 @@
       "expectedInformationGain": 0.6742,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786155918030",
+        "runId": "research-1786163516826",
         "sourceIds": [],
         "weight": 0
       },
@@ -257,9 +236,9 @@
         "adaptive post-landing confirmation window"
       ],
       "name": "Improve jump landing classification",
-      "priority": 0.4992,
+      "priority": 0.4942,
       "researchCanDirectlyMutateController": false,
-      "slot": 3
+      "slot": 2
     },
     {
       "area": "traction-control",
@@ -267,7 +246,7 @@
       "expectedInformationGain": 0.6718,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786155918030",
+        "runId": "research-1786163516826",
         "sourceIds": [],
         "weight": 0
       },
@@ -278,9 +257,9 @@
         "surface-conditioned intervention release"
       ],
       "name": "Improve traction control",
-      "priority": 0.4968,
+      "priority": 0.4918,
       "researchCanDirectlyMutateController": false,
-      "slot": 4
+      "slot": 3
     },
     {
       "area": "truth-speed-fusion",
@@ -288,7 +267,7 @@
       "expectedInformationGain": 0.6705,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1786155918030",
+        "runId": "research-1786163516826",
         "sourceIds": [],
         "weight": 0
       },
@@ -299,7 +278,28 @@
         "confidence-weighted truth-speed handoff"
       ],
       "name": "Improve truth speed fusion",
-      "priority": 0.4955,
+      "priority": 0.4905,
+      "researchCanDirectlyMutateController": false,
+      "slot": 4
+    },
+    {
+      "area": "abs-control",
+      "baselineHypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+      "expectedInformationGain": 0.6568,
+      "externalResearch": {
+        "findings": 0,
+        "runId": "research-1786163516826",
+        "sourceIds": [],
+        "weight": 0
+      },
+      "hypothesis": "A abs-control candidate derived from jrw2-571 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
+      "measurement": "reduce lock duration without increasing stopping distance proxy",
+      "mutations": [
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
+      ],
+      "name": "Improve abs control",
+      "priority": 0.4818,
       "researchCanDirectlyMutateController": false,
       "slot": 5
     }
@@ -360,24 +360,6 @@
       "uncertainty": 0.5
     },
     {
-      "area": "abs-control",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6648,
-      "externalResearchFindings": 0,
-      "externalResearchHypotheses": [],
-      "externalResearchWeight": 0,
-      "impact": 0.91,
-      "measure": "reduce lock duration without increasing stopping distance proxy",
-      "mutation": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.5248,
-      "recentSelections": 4,
-      "uncertainty": 0.57
-    },
-    {
       "area": "sensor-dropout-recovery",
       "evidenceCoverage": 0,
       "expectedInformationGain": 0.6904,
@@ -392,7 +374,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.5104,
-      "recentSelections": 6,
+      "recentSelections": 7,
       "uncertainty": 0.62
     },
     {
@@ -409,8 +391,8 @@
         "adaptive post-landing confirmation window"
       ],
       "priorExperiments": 0,
-      "priority": 0.4992,
-      "recentSelections": 5,
+      "priority": 0.4942,
+      "recentSelections": 6,
       "uncertainty": 0.6
     },
     {
@@ -427,8 +409,8 @@
         "surface-conditioned intervention release"
       ],
       "priorExperiments": 0,
-      "priority": 0.4968,
-      "recentSelections": 5,
+      "priority": 0.4918,
+      "recentSelections": 6,
       "uncertainty": 0.58
     },
     {
@@ -445,20 +427,38 @@
         "confidence-weighted truth-speed handoff"
       ],
       "priorExperiments": 0,
-      "priority": 0.4955,
-      "recentSelections": 5,
+      "priority": 0.4905,
+      "recentSelections": 6,
       "uncertainty": 0.55
+    },
+    {
+      "area": "abs-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.6568,
+      "externalResearchFindings": 0,
+      "externalResearchHypotheses": [],
+      "externalResearchWeight": 0,
+      "impact": 0.91,
+      "measure": "reduce lock duration without increasing stopping distance proxy",
+      "mutation": [
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.4818,
+      "recentSelections": 5,
+      "uncertainty": 0.57
     }
   ],
   "schema": "JARVIS-EXPERIMENT-PLAN-4",
   "synthesis": {
     "area": "synthesis-all-five",
     "inputs": [
-      "abs-control",
       "sensor-dropout-recovery",
       "jump-landing-classification",
       "traction-control",
-      "truth-speed-fusion"
+      "truth-speed-fusion",
+      "abs-control"
     ],
     "measurement": "beat each constituent on aggregate benefit without new regressions",
     "name": "Synthesize all five hypotheses",
