@@ -4,8 +4,7 @@ on:
     branches: [main]
     paths:
       - index.html
-      - racing-mjx7303-v30.html
-      - racing-mjx7303-v29.html
+      - racing-mjx7303-*.html
       - assets/mjx7303/**
       - jarvis/**
       - classic-token.js
@@ -17,8 +16,7 @@ on:
   pull_request:
     paths:
       - index.html
-      - racing-mjx7303-v30.html
-      - racing-mjx7303-v29.html
+      - racing-mjx7303-*.html
       - assets/mjx7303/**
       - jarvis/**
       - classic-token.js
@@ -50,21 +48,21 @@ jobs:
           python3 tools/audit_workflow_wiring.py
           python3 -m json.tool jarvis/capabilities.json >/dev/null
           node scripts/prepare-pages.mjs
-      - name: Validate Jarvis V38 physical twin contract
+      - name: Validate MICHAEL V39 scanned-twin contract
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');const check=(f,t,l=t)=>{if(!fs.existsSync(f))throw Error('Missing file '+f);const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Missing ${l} in ${f}`)};
           check('index.html','Jarvis MT12 Engineering Workstation');check('index.html','workspaceBody');check('jarvis/app.js','latestGeneration');check('jarvis/state.js','factory/canonical-controller.json');
-          check('racing-mjx7303-v30.html','JARVIS PHYSICAL TWIN V38');check('racing-mjx7303-v30.html','V38 PHYSICAL TWIN');check('racing-mjx7303-v30.html','xr38');
-          check('jarvis/racing-tab.js','RACING V38 PHYSICAL TWIN');check('jarvis/racing-tab.js','Simulator V38');check('jarvis/racing-tab.js','xr38');
+          check('racing-mjx7303-michael-v39.html','MICHAEL SCANNED TWIN V39');check('racing-mjx7303-michael-v39.html','PHOTO-SCANNED VISUAL HULL');check('racing-mjx7303-michael-v39.html','michael39');
+          check('jarvis/racing-tab.js','MICHAEL // V39 PHOTO-SCANNED TWIN');check('jarvis/racing-tab.js','Simulator — MICHAEL V39');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');
           check('jarvis/jarvis-xr-engine-v29.js',"getContext('webgl2'");check('jarvis/jarvis-xr-engine-v29.js','Dggx');check('jarvis/jarvis-xr-engine-v29.js','aces');check('jarvis/jarvis-xr-engine-v29.js','loadGLB');check('jarvis/jarvis-xr-engine-v29.js','shadowFbo');
-          check('jarvis/jarvis-ai-graphics-v38.js','JARVIS_PHYSICAL_TWIN_V38');check('jarvis/jarvis-ai-graphics-v38.js','MULTILOBE_CLEARCOAT_ENVIRONMENT');check('jarvis/jarvis-ai-graphics-v38.js','1.98');check('jarvis/jarvis-ai-graphics-v38.js','for(int x=-2;x<=2;x++)');
+          check('jarvis/jarvis-ai-graphics-v38.js','MULTILOBE_CLEARCOAT_ENVIRONMENT');check('jarvis/michael-graphics-v39.js','MICHAEL_V39');check('jarvis/michael-graphics-v39.js','PHOTO_SCAN_MULTI_LOBE_CLEARCOAT');check('jarvis/michael-graphics-v39.js','2.25');
           check('jarvis/jarvis-dynamics-v30.js','fixed=1/120');check('jarvis/jarvis-dynamics-v30.js','impactDamage');check('jarvis/jarvis-dynamics-v30.js','_healthySpawn');
-          check('jarvis/mjx7303-racing-v38.js','./jarvis-ai-graphics-v38.js');check('jarvis/mjx7303-racing-v38.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-v38.js','mjx7303-v38.glb');check('jarvis/mjx7303-racing-v38.js','JARVIS V38');check('jarvis/mjx7303-racing-v38.js','__V38_READY');
-          check('tools/build_mjx7303_v38_blender.py','PHYSICAL_TWIN_V38_ID');check('tools/build_mjx7303_v38_blender.py','85MM_PRODUCT');check('tools/build_mjx7303_v38_blender.py','WheelArchLip_V38');check('tools/build_mjx7303_v38_blender.py','BrakeCaliper_V38');
-          const runtime=fs.readFileSync('jarvis/mjx7303-racing-v38.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v38.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v37.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into V38: '+banned);
-          console.log({racing:'V38',asset:'Subdivision physical twin',renderer:'V38 multi-lobe clearcoat environment',supersampling:'130-198%',shadows:'4096 + 5x5 PCF',cameraQA:'85mm',wheelbaseMM:375,externalRenderer:false});
+          check('jarvis/mjx7303-racing-michael-v39.js','./michael-graphics-v39.js');check('jarvis/mjx7303-racing-michael-v39.js','./jarvis-dynamics-v30.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v39.glb');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');
+          check('tools/build_michael_v39_scan.py','MULTIVIEW_SILHOUETTE_VISUAL_HULL_MARCHING_CUBES');check('tools/build_michael_v39_scan.py','375.0');check('tools/build_michael_v39_blender.py','MICHAEL_SCAN_BODY_V39');check('tools/build_michael_v39_blender.py','92MM_PHOTOGRAPHIC');
+          const runtime=fs.readFileSync('jarvis/mjx7303-racing-michael-v39.js','utf8')+fs.readFileSync('jarvis/michael-graphics-v39.js','utf8')+fs.readFileSync('jarvis/jarvis-ai-graphics-v38.js','utf8')+fs.readFileSync('jarvis/jarvis-xr-engine-v29.js','utf8');for(const banned of ['playcanvas@','three.module','babylon.js','BABYLON'])if(runtime.includes(banned))throw Error('External renderer leaked into MICHAEL: '+banned);
+          console.log({racing:'MICHAEL_V39',asset:'Photo-scanned visual hull',renderer:'MICHAEL multi-lobe clearcoat',supersampling:'135-225%',cameraQA:'92mm',wheelbaseMM:375,externalRenderer:false});
           NODE
       - name: Validate planner schema contract
         run: |
