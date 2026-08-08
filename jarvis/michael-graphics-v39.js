@@ -1,6 +1,6 @@
-// MICHAEL V56 — visual-foundation renderer: fitted optics, panel-following livery and safe staging.
+// MICHAEL V57 — camera-safe studio renderer: recessed optics, layered grounding and clean staging.
 // stable mobile frame pacing, scene-aware lighting and calibrated camera composition.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael69-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael70-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.mobile=Math.min(innerWidth||720,innerHeight||1280)<900;this.ema=16.7;this.jitter=0;this.pressure=0;this.badFrames=0;this.goodFrames=0;this.cooldown=0;this.q=this.mobile?.96:1.18;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL BALANCED';this.exposure=.98;this.maxQuality=this.mobile?1.10:1.38}
@@ -34,9 +34,10 @@ function pushBatch(r,b,mat,env=null){
   return d
 }
 function addCompletedTwin(r){
-  const B={contact:new TwinBatch(),rubber:new TwinBatch(),tread:new TwinBatch(),alloy:new TwinBatch(),rimAccent:new TwinBatch(),brake:new TwinBatch(),chassis:new TwinBatch(),cabin:new TwinBatch(),cockpit:new TwinBatch(),carbon:new TwinBatch(),harness:new TwinBatch(),susp:new TwinBatch(),mud:new TwinBatch(),glass:new TwinBatch(),liveryWhite:new TwinBatch(),liveryBlue:new TwinBatch(),liveryGold:new TwinBatch(),lampHousing:new TwinBatch(),projector:new TwinBatch(),frontLens:new TwinBatch(),frontDrl:new TwinBatch(),rearLens:new TwinBatch(),rearLamp:new TwinBatch(),beams:new TwinBatch()};
+  const B={contact:new TwinBatch(),contactCore:new TwinBatch(),wheelShadow:new TwinBatch(),rubber:new TwinBatch(),tread:new TwinBatch(),alloy:new TwinBatch(),rimAccent:new TwinBatch(),brake:new TwinBatch(),chassis:new TwinBatch(),cabin:new TwinBatch(),cockpit:new TwinBatch(),carbon:new TwinBatch(),harness:new TwinBatch(),susp:new TwinBatch(),mud:new TwinBatch(),glass:new TwinBatch(),liveryWhite:new TwinBatch(),liveryBlue:new TwinBatch(),liveryGold:new TwinBatch(),lampHousing:new TwinBatch(),projector:new TwinBatch(),frontLens:new TwinBatch(),frontDrl:new TwinBatch(),rearLens:new TwinBatch(),rearLamp:new TwinBatch(),beams:new TwinBatch()};
   const axles=[-1.875,1.875],sides=[-1.37,1.37];
-  B.contact.ellipseY(0,.014,0,.026,1.24,2.72,48);
+  B.contact.ellipseY(0,.012,0,.024,1.38,2.88,56);B.contactCore.ellipseY(0,.015,.08,.020,1.02,2.38,48);
+  for(const z of axles)for(const x of sides)B.wheelShadow.ellipseY(x,.018,z,.018,.48,.60,28);
   B.chassis.box(0,.28,0,2.28,.20,4.72);B.chassis.box(0,.43,-.10,1.92,.16,3.92);B.chassis.box(0,.30,-2.42,2.42,.18,.28);B.chassis.box(0,.30,2.42,2.42,.18,.28);
   B.cabin.box(0,.66,.12,1.54,.16,2.04);B.cabin.box(-.45,.98,.10,.40,.44,.56);B.cabin.box(.45,.98,.10,.40,.44,.56);
   // Cockpit depth: dashboard, wheel, console, roll cage and harnesses remain visible through real glass.
@@ -53,6 +54,10 @@ function addCompletedTwin(r){
   // The works panel follows the door envelope instead of hovering as a full-height rectangle.
   for(const x of [-1.226,1.226]){const s=Math.sign(x),n=[s,0,0],q=x+s*.004;B.liveryWhite.quad([q,.62,-1.08],[q,.62,.92],[q,1.11,.98],[q,1.14,-.96],n);B.liveryBlue.quad([q+s*.003,.62,-.14],[q+s*.003,.62,.015],[q+s*.003,1.12,.13],[q+s*.003,1.12,-.025],n);B.liveryGold.quad([q+s*.006,.62,.035],[q+s*.006,.62,.17],[q+s*.006,1.12,.29],[q+s*.006,1.12,.155],n)}
   // Fascia-matched lens and ribbon geometry replaces the former floating circular projectors.
+  B.lampHousing.quad([-.995,.805,2.919],[-.37,.825,3.040],[-.40,1.045,3.034],[-.985,1.025,2.914],[0,0,1]);
+  B.lampHousing.quad([.37,.825,3.040],[.995,.805,2.919],[.985,1.025,2.914],[.40,1.045,3.034],[0,0,1]);
+  B.projector.quad([-.80,.858,2.936],[-.62,.875,2.976],[-.63,.970,2.972],[-.81,.957,2.932],[0,0,1]);
+  B.projector.quad([.62,.875,2.976],[.80,.858,2.936],[.81,.957,2.932],[.63,.970,2.972],[0,0,1]);
   B.frontLens.quad([-.98,.82,2.936],[-.39,.84,3.034],[-.43,1.02,3.026],[-.96,1.00,2.930],[0,0,1]);
   B.frontLens.quad([.39,.84,3.034],[.98,.82,2.936],[.96,1.00,2.930],[.43,1.02,3.026],[0,0,1]);
   B.rearLens.quad([.45,.82,-3.022],[.99,.82,-2.920],[.96,1.02,-2.916],[.48,1.03,-3.018],[0,0,-1]);
@@ -67,20 +72,19 @@ function addCompletedTwin(r){
   B.rearLamp.quad([-.91,.875,-2.928],[-.53,.875,-3.012],[-.54,.930,-3.010],[-.90,.925,-2.925],[0,0,-1]);
   B.rearLamp.quad([-.90,.925,-2.925],[-.54,.930,-3.010],[-.56,.970,-3.006],[-.88,.970,-2.922],[0,0,-1]);
   B.beams.quad([-.92,.035,2.86],[-.36,.035,2.86],[-.72,.035,9.4],[-2.40,.035,9.4],[0,1,0]);B.beams.quad([.36,.035,2.86],[.92,.035,2.86],[2.40,.035,9.4],[.72,.035,9.4],[0,1,0]);
-  const mats={contact:M([.002,.003,.004],0,1),rubber:M([.006,.007,.009],0,.88),tread:M([.018,.020,.024],0,.74),alloy:M([.43,.50,.59],.82,.18),rimAccent:M([.10,.13,.17],.72,.25),brake:M([.24,.26,.29],.76,.28),chassis:M([.014,.017,.021],.10,.72),cabin:M([.010,.013,.017],0,.84),cockpit:M([.018,.022,.028],0,.68),carbon:M([.012,.014,.017],.18,.42),harness:M([.62,.018,.022],0,.62),susp:M([.23,.27,.32],.60,.34),mud:M([.006,.007,.009],0,.94),glass:{...M([.012,.030,.052],0,.065),alpha:.27},liveryWhite:M([.76,.79,.82],.02,.28),liveryBlue:M([.045,.18,.52],.03,.24),liveryGold:M([.94,.58,.045],.04,.23),lampHousing:M([.003,.004,.006],.10,.22),projector:{...M([.20,.27,.35],.18,.06,[.16,.22,.30]),alpha:.82},frontLens:{...M([.20,.28,.36],0,.045),alpha:.16},frontDrl:{...M([.78,.87,.96],.01,.10,[1.00,1.18,1.40]),alpha:.98},rearLens:{...M([.42,.006,.010],0,.07),alpha:.20},rearLamp:{...M([.72,.004,.008],.01,.12,[1.05,.008,.012]),alpha:.96},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.020}};
+  const mats={contact:{...M([.004,.006,.009],0,1),alpha:.38},contactCore:{...M([.001,.002,.003],0,1),alpha:.62},wheelShadow:{...M([.001,.001,.002],0,1),alpha:.72},rubber:M([.006,.007,.009],0,.88),tread:M([.018,.020,.024],0,.74),alloy:M([.43,.50,.59],.82,.18),rimAccent:M([.10,.13,.17],.72,.25),brake:M([.24,.26,.29],.76,.28),chassis:M([.014,.017,.021],.10,.72),cabin:M([.010,.013,.017],0,.84),cockpit:M([.018,.022,.028],0,.68),carbon:M([.012,.014,.017],.18,.42),harness:M([.62,.018,.022],0,.62),susp:M([.23,.27,.32],.60,.34),mud:M([.006,.007,.009],0,.94),glass:{...M([.010,.027,.048],0,.055),alpha:.25},liveryWhite:M([.76,.79,.82],.02,.28),liveryBlue:M([.045,.18,.52],.03,.24),liveryGold:M([.94,.58,.045],.04,.23),lampHousing:M([.002,.003,.005],.06,.18),projector:{...M([.10,.16,.23],.28,.045,[.11,.17,.24]),alpha:.88},frontLens:{...M([.16,.25,.34],0,.040),alpha:.14},frontDrl:{...M([.78,.87,.96],.01,.10,[1.00,1.18,1.40]),alpha:.98},rearLens:{...M([.42,.006,.010],0,.07),alpha:.20},rearLamp:{...M([.72,.004,.008],.01,.12,[1.05,.008,.012]),alpha:.96},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.020}};
   for(const k of Object.keys(B)){const d=pushBatch(r,B[k],mats[k]);if(d&&k==='beams'){d.driveOnly=true;d.hidden=true}}
-  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,layeredOptics:true,flushLensGeometry:true,projectorLenses:false,lighting:true,fittedLights:true,wrcLivery:true,panelFollowingLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,batches:Object.keys(B).length}
+  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,layeredOptics:true,flushLensGeometry:true,recessedProjectorChambers:true,lighting:true,fittedLights:true,wrcLivery:true,panelFollowingLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,layeredContactShadows:true,batches:Object.keys(B).length}
 }
 function addMichaelWorld(r){
-  const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),garageMark=new TwinBatch(),servicePad=new TwinBatch(),turntable=new TwinBatch(),garageCurb=new TwinBatch(),garageEquipment=new TwinBatch();
+  const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),garageMark=new TwinBatch(),servicePad=new TwinBatch(),turntable=new TwinBatch(),reflectionPad=new TwinBatch();
   road.box(0,-.08,0,7.4,.14,128);shoulder.box(-5.2,-.12,0,3.0,.12,128);shoulder.box(5.2,-.12,0,3.0,.12,128);for(let z=-60;z<64;z+=5){roadMark.box(-3.25,.018,z,.10,.025,2.8);roadMark.box(3.25,.018,z,.10,.025,2.8);reflector.box(-3.62,.18,z,.09,.36,.12);reflector.box(3.62,.18,z,.09,.36,.12)}
   for(let k=0;k<40;k++){const z=-58+k*3.1+(k%3)*.37;for(const side of [-1,1]){const x=side*(5.3+(k%5)*.58+Math.sin(k*1.7)*.35),h=3.8+(k%7)*.32;trunk.cylY(x,h*.22,z,h*.44,.14+(k%3)*.025,7);const crown=k%2?treesNear:treesFar;crown.coneY(x,h*.55,z,h*.72,1.18+(k%4)*.14,9);crown.coneY(x,h*.78,z,h*.66,.92+(k%3)*.12,9);crown.coneY(x,h*.99,z,h*.54,.66+(k%2)*.10,9)}}
   for(const side of [-1,1]){guardrail.box(side*4.42,.46,0,.10,.12,128);for(let z=-60;z<=60;z+=4)guardrail.box(side*4.42,.24,z,.12,.52,.12)}
   // A broad floor and image-based key avoid camera-crossing physical light bars at every orbit angle.
   garage.box(0,-.11,0,24,.12,24);servicePad.box(0,-.035,0,7.7,.035,9.4);turntable.cylY(0,-.012,0,.052,3.25,48);
   for(const x of [-5.4,5.4])garageMark.box(x,.005,0,.055,.018,18.5);for(const z of [-6.2,6.2])garageMark.box(0,.006,z,10.8,.020,.055);
-  for(const x of [-5.65,5.65]){garageCurb.box(x,.09,0,.13,.09,12.4);garageEquipment.box(x,.48,-6.1,.42,.48,.42);garageEquipment.box(x,.48,6.1,.42,.48,.42)}
-  for(const z of [-6.65,6.65])garageCurb.box(0,.09,z,11.5,.09,.13);
+  reflectionPad.ellipseY(0,.001,0,.018,3.42,4.82,64);
   const created=[
     pushBatch(r,road,M([.050,.058,.062],0,.90),'road'),
     pushBatch(r,shoulder,M([.105,.073,.042],0,.97),'road'),
@@ -94,14 +98,13 @@ function addMichaelWorld(r){
     pushBatch(r,garageMark,M([.36,.46,.56],.22,.40,[.025,.038,.052]),'garage'),
     pushBatch(r,servicePad,M([.030,.036,.046],.14,.48),'garage'),
     pushBatch(r,turntable,M([.052,.062,.078],.20,.46),'garage'),
-    pushBatch(r,garageCurb,M([.10,.14,.18],.28,.38,[.015,.045,.070]),'garage'),
-    pushBatch(r,garageEquipment,M([.035,.055,.072],.38,.30,[.025,.085,.12]),'garage')
+    pushBatch(r,reflectionPad,{...M([.070,.095,.125],.22,.19,[.008,.016,.026]),alpha:.28},'garage')
   ].filter(Boolean);
-  r._michaelWorld={worldTrees:80,roadEnvironment:true,roadEdgeMarkers:true,reflectorPosts:50,garageEnvironment:true,garageTurntable:true,garageServiceBay:true,garageGuideLighting:true,garagePitCurbs:true,garageEquipment:true,garageSmoke:true,cameraSafeLighting:true,physicalLightBars:false,batchedDraws:created.length,fog:true};
+  r._michaelWorld={worldTrees:80,roadEnvironment:true,roadEdgeMarkers:true,reflectorPosts:50,garageEnvironment:true,garageTurntable:true,garageServiceBay:true,flushGarageGuides:true,raisedCameraObstructions:false,reflectionPad:true,garageSmoke:true,cameraSafeLighting:true,physicalLightBars:false,batchedDraws:created.length,fog:true};
 }
 
 export class JarvisXRRenderer extends Physical38{
-  constructor(canvas){super(canvas);this.externalQuality=true;this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V56';this.visualProfile='FITTED_MOBILE_VISUAL_FOUNDATION';this.quality=this.michael.q;this.postBloom=.035;this.postExposure=1.10;this.postLift=.020;this.postVignette=.99;this.performancePressure=0;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
+  constructor(canvas){super(canvas);this.externalQuality=true;this.michael=new MichaelDirector(this);this.aiVersion='MICHAEL_V57';this.visualProfile='CAMERA_SAFE_STUDIO_FOUNDATION';this.quality=this.michael.q;this.postBloom=.035;this.postExposure=1.10;this.postLift=.020;this.postVignette=.99;this.performancePressure=0;this.michael.setMode('garage');const gl=this.gl;this.capabilities={...this.capabilities,maxTexture:gl.getParameter(gl.MAX_TEXTURE_SIZE),maxRenderbuffer:gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),samples:gl.getParameter(gl.SAMPLES),renderer:gl.getParameter(gl.RENDERER)};gl.enable(gl.DITHER);gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)}
   addGround(){const first=this.drawables.length;super.addGround();for(const d of this.drawables.slice(first))d.world=true;addMichaelWorld(this);this.setMode(this.michael.mode)}
   setMode(m){super.setMode(m);this.michael.setMode(m);const road=m==='drive';for(const d of this.drawables){if(d.env)d.hidden=d.env!==(road?'road':'garage');if(d.driveOnly)d.hidden=!road}this.fogDensity=road?.0022:.00045;this.fogColor=new Float32Array(road?[.042,.055,.062]:[.038,.047,.060]);this.postExposure=road?1.10:1.14;this.gl.clearColor(...(road?[.019,.029,.035,1]:[.026,.034,.045,1]))}
   chase(x,y,z,yaw){const fx=Math.sin(yaw),fz=Math.cos(yaw);this.at[0]=x;this.at[1]=y+.82;this.at[2]=z;this.eye[0]=x-fx*10.85;this.eye[1]=y+2.28;this.eye[2]=z-fz*10.85}

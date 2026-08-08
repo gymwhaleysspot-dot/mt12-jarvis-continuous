@@ -1,16 +1,105 @@
-// JARVIS DYNAMICS V30 — V29 fixed-step dynamics with spawn-safe damage authority
+// Michael V57 vehicle dynamics contract.
+// Browser-native, deterministic and deliberately fail-safe for mobile tab interruptions.
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+const finite=(value,fallback=0)=>Number.isFinite(value)?value:fallback;
+
 export class JarvisDynamics{
- constructor(backend=window.MJX7303PHYSICS){if(!backend?.make||!backend?.step)throw Error('MT12 V4 physics backend unavailable');this.backend=backend;this.car=backend.make();this.fixed=1/120;this.acc=0;this.time=0;this.maxCatchup=8;this.contacts=[];this.events=[];this.impactDamage=0;this.input={steer:0,throttle:0,brake:0,surface:'asphalt'};this.tune={gyr:260,tcSlip:.25,pressure:32,motor:1,grip:1,brake:1,aero:1};this._healthySpawn()}
- _healthySpawn(){const h=this.car.health;if(!h)return;h.structure=1;h.motor=1;h.esc=1;h.steering=1;h.diff=1;h.suspension=1;h.battery=Math.max(h.battery??1,.99)}
- setInput(p={}){Object.assign(this.input,p)}
- setTune(p={}){Object.assign(this.tune,p)}
- impact(side='front',energy=.1,point=null){energy=Math.max(0,Math.min(1,Number(energy)||0));this.impactDamage=Math.min(1,this.impactDamage+energy*.55);if(this.backend.impact)this.backend.impact(this.car,side,energy);this.contacts.push({side,energy,point,time:this.time});this.events.push({type:'impact',side,energy,time:this.time})}
- _substep(){const i=this.input,t=this.tune;this.backend.step(this.car,this.fixed,{steer:i.steer||0,throttle:Math.min(1,(i.throttle||0)*t.motor),brake:Math.min(1,(i.brake||0)*t.brake),surface:i.surface||'asphalt'},{gyr:t.gyr,tcSlip:t.tcSlip/Math.max(.4,t.grip),pressure:t.pressure,aero:t.aero});
-   // The deformable backend can accumulate solver strain while merely settling at spawn.
-   // V30 separates visual/driver damage from passive constraint settling: only real impacts authorize damage.
-   if(this.impactDamage===0){const h=this.car.health;if(h){h.structure=Math.max(h.structure??1,.98);h.motor=Math.max(h.motor??1,.99);h.esc=Math.max(h.esc??1,.99);h.steering=Math.max(h.steering??1,.99);h.diff=Math.max(h.diff??1,.99);h.suspension=Math.max(h.suspension??1,.98)}}
-   this.time+=this.fixed}
- step(dt){this.acc+=Math.min(.05,Math.max(0,dt));let n=0;while(this.acc>=this.fixed&&n<this.maxCatchup){this._substep();this.acc-=this.fixed;n++}if(n===this.maxCatchup)this.acc=0;return this.snapshot()}
- snapshot(){const c=this.car,d=c.dyn,t=c.telemetry,h=c.health,ch=c.channels;const structural=Math.max(0,1-(h.structure??1)),damage=Math.max(this.impactDamage,structural*(this.impactDamage>0?1:.08));return{time:this.time,position:{x:d.x,y:d.z||.04,z:d.y},rotation:{yaw:-d.yaw,pitch:d.pitch||0,roll:d.roll||0},velocity:{x:d.vx,y:d.vz||0,z:d.vy},truthMph:t.truthMph||0,truthRpm:t.truthRpm||0,batteryV:d.batteryV||16.8,tc:!!ch.TC,abs:!!ch.ABS,gyro:ch.GYR||0,tct:ch.TCT||1024,slip:t.slip||0,state:t.state||'GROUND',reason:damage>.22?'DAMAGE':(t.reason||'READY'),damage:Math.min(1,damage),health:{...h},wheels:c.wheels.map(w=>({name:w.name,loadN:w.loadN,slipRatio:w.slipRatio,slipAngle:w.slipAngle,tempC:w.tempC,wear:w.wear,punctured:w.punctured})),contacts:this.contacts.splice(0),events:this.events.splice(0)}}
- reset(){this.car=this.backend.make();this.acc=0;this.time=0;this.impactDamage=0;this.contacts.length=0;this.events.length=0;this._healthySpawn()}
+  constructor(){
+    this.tune={motor:1,grip:1,brake:1,aero:1};
+    this.input={steer:0,throttle:0,brake:0,surface:'asphalt'};
+    this.reset();
+  }
+
+  reset(){
+    this.position={x:0,y:0,z:0};
+    this.rotation={yaw:0};
+    this.speed=0;
+    this.steerAngle=0;
+    this.engineRpm=900;
+    this.batteryV=16.7;
+    this.damage=0;
+    this.elapsed=0;
+    this.lastReason='—';
+    return this.snapshot(false,false);
+  }
+
+  setInput(next={}){
+    this.input={
+      steer:clamp(finite(next.steer),-1,1),
+      throttle:clamp(finite(next.throttle),0,1),
+      brake:clamp(finite(next.brake),0,1),
+      surface:typeof next.surface==='string'?next.surface:'asphalt'
+    };
+  }
+
+  setTune(next={}){
+    for(const key of Object.keys(this.tune)){
+      if(Number.isFinite(next[key]))this.tune[key]=clamp(next[key],.75,1.3);
+    }
+  }
+
+  surfaceGrip(){
+    return ({asphalt:1,gravel:.72,mud:.48,snow:.38,ice:.22})[this.input.surface]??.82;
+  }
+
+  step(deltaSeconds){
+    const dt=clamp(finite(deltaSeconds,.016),.001,.04);
+    this.elapsed+=dt;
+    const grip=this.surfaceGrip()*this.tune.grip;
+    const throttle=this.input.throttle;
+    const brake=this.input.brake;
+    const direction=this.speed<-.05?-1:1;
+    const speedAbs=Math.abs(this.speed);
+
+    // A compact longitudinal model: electric launch torque, rolling resistance,
+    // quadratic aero drag and a brake curve that remains stable at zero speed.
+    const motorForce=11.8*this.tune.motor*throttle;
+    const rolling=(speedAbs>.01?.34:.08)*direction;
+    const aero=.014*this.tune.aero*this.speed*speedAbs;
+    const brakeForce=brake*(16.5*this.tune.brake)*direction;
+    const requested=motorForce-rolling-aero-brakeForce;
+    const tractionLimit=9.81*grip;
+    const acceleration=clamp(requested,-tractionLimit,tractionLimit);
+    const tc=motorForce>tractionLimit+.15;
+    const abs=brake>0&&Math.abs(brakeForce)>tractionLimit+.15&&speedAbs>1.2;
+    const previousSpeed=this.speed;
+    this.speed=clamp(this.speed+acceleration*dt,-3.5,35.75);
+    if(brake>0&&previousSpeed*this.speed<0)this.speed=0;
+    if(throttle===0&&brake===0&&Math.abs(this.speed)<.035)this.speed=0;
+
+    const targetSteer=this.input.steer*(.56-clamp(speedAbs/110,0,.22));
+    const steeringResponse=1-Math.exp(-dt*(8.5+grip*3));
+    this.steerAngle+=(targetSteer-this.steerAngle)*steeringResponse;
+    const wheelbase=2.56;
+    const yawRate=(this.speed/wheelbase)*Math.tan(this.steerAngle)*clamp(grip,.2,1.25);
+    this.rotation.yaw+=yawRate*dt;
+    this.position.x+=Math.sin(this.rotation.yaw)*this.speed*dt;
+    this.position.z+=Math.cos(this.rotation.yaw)*this.speed*dt;
+
+    const wheelRpm=speedAbs*60/(2*Math.PI*.335);
+    this.engineRpm=clamp(900+wheelRpm*7.8+throttle*5200,900,37000);
+    const electricalLoad=throttle*.78+brake*.08+clamp(speedAbs/36,0,1)*.14;
+    const targetVoltage=16.72-electricalLoad*1.12;
+    this.batteryV+=(targetVoltage-this.batteryV)*(1-Math.exp(-dt*3.2));
+    this.batteryV=clamp(this.batteryV,13.8,16.8);
+
+    if(![this.speed,this.rotation.yaw,this.position.x,this.position.z,this.engineRpm,this.batteryV].every(Number.isFinite)){
+      this.reset();
+      this.lastReason='INTEGRITY RESET';
+    }
+    return this.snapshot(tc,abs);
+  }
+
+  snapshot(tc=false,abs=false){
+    return {
+      position:{...this.position},rotation:{...this.rotation},
+      velocity:this.speed,steerAngle:this.steerAngle,
+      truthMph:Math.abs(this.speed)*2.236936,
+      truthRpm:this.engineRpm,batteryV:this.batteryV,
+      tc:Boolean(tc),abs:Boolean(abs),damage:clamp(this.damage,0,1),
+      reason:this.lastReason
+    };
+  }
 }
+
+export default JarvisDynamics;

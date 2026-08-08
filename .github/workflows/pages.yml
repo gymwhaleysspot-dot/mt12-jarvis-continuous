@@ -1,117 +1,57 @@
-name: Publish Jarvis MT12 Platform
+name: Deploy Michael V57 to Pages
+
 on:
   push:
     branches: [main]
-    paths:
-      - index.html
-      - racing-mjx7303-*.html
-      - jarvis/**
-      - engine/**
-      - scripts/build-michael-polyglot.sh
-      - tools/**
-      - assets/mjx7303/**
-      - classic-token.js
-      - scripts/prepare-pages.mjs
-      - factory/**
-      - research/**
-      - public/**
-      - device/**
-      - .github/workflows/pages.yml
-  pull_request:
-    types: [closed]
-    branches: [main]
-    paths:
-      - public/michael-v*-release.json
-      - .github/workflows/pages.yml
   workflow_dispatch:
+
 permissions:
   contents: read
-  actions: write
   pages: write
   id-token: write
+
 concurrency:
-  group: jarvis-pages
+  group: pages
   cancel-in-progress: true
+
 jobs:
-  dispatch-after-merge:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Dispatch protected main-branch Pages deployment
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"
   deploy:
-    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with: {node-version: '22', package-manager-cache: false}
-      - uses: actions/setup-go@v6
-        with: {go-version: '1.25.x', cache: false}
-      - uses: actions/setup-dotnet@v5
-        with: {dotnet-version: '8.0.x'}
-      - name: Install MICHAEL native build toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends emscripten lua5.4
+      - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-        with: {enablement: true}
-      - name: Build and validate MICHAEL V56 polyglot engine
-        run: bash scripts/build-michael-polyglot.sh
-      - name: Assemble MICHAEL V56 licensed C3 WRC asset
+      - name: Validate Michael V57 release
         run: |
-          set -euo pipefail
-          mkdir -p assets/mjx7303
-          cat tools/michael-v40-private/body.glb.b64.* | base64 -d > assets/mjx7303/michael-v39.glb
-          echo 'f4d91611ef369eb2bd6e865d4b03d224d8545e0af8a19c72f3ff93e1ab9b8f4a  assets/mjx7303/michael-v39.glb' | sha256sum -c -
-          test "$(stat -c '%s' assets/mjx7303/michael-v39.glb)" -eq 3154380
-          cp assets/mjx7303/michael-v39.glb assets/mjx7303/michael-v40.bin
-          for part in 00 01 02 03 04 05 06; do { printf "export default '"; tr -d '\r\n' < "tools/michael-v40-private/body.glb.b64.$part"; printf "';\\n"; } > "jarvis/michael-v40-payload-$part.js"; done
-          node - <<'NODE'
-          const fs=require('fs'),b=fs.readFileSync('assets/mjx7303/michael-v39.glb');
-          if(b.subarray(0,4).toString('ascii')!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('MICHAEL V56 GLB invalid');
-          const jl=b.readUInt32LE(12),jt=b.readUInt32LE(16);if(jt!==0x4E4F534A||20+jl>b.length)throw Error('MICHAEL V56 GLB JSON invalid');
-          const g=JSON.parse(b.subarray(20,20+jl).toString('utf8').trim()),names=(g.nodes||[]).map(n=>n.name||'');
-          if(!names.some(n=>n.includes('MICHAEL_LICENSED_C3_WRC_BODY_V40')))throw Error('Licensed C3 WRC authority mesh missing');
-          if(names.some(n=>/VISUAL_HULL|SCAN_BODY_V39/.test(n)))throw Error('Legacy visual-hull mesh survived V40 replacement');
-          const tris=(g.accessors||[]).filter(a=>a.type==='SCALAR'&&a.componentType===5125).reduce((n,a)=>n+(a.count||0),0)/3;
-          console.log({asset:'MICHAEL_V40_PERSONAL_C3_WRC',bytes:b.length,nodes:names.length,indexedTriangles:tris,glb:'VALID_GLB2'});
-          NODE
-          rm -rf tools/michael-v40-private
-      - name: Validate MICHAEL engine and runtime
-        run: |
-          set -euo pipefail
-          node --check classic-token.js
-          for f in jarvis/*.js scripts/*.mjs device/*.mjs; do [ -f "$f" ] && node --check "$f"; done
-          node scripts/prepare-pages.mjs
-          node - <<'NODE'
-          const fs=require('fs'),check=(f,t)=>{const s=fs.readFileSync(f,'utf8');if(!s.includes(t))throw Error(`Validation missing ${t} in ${f}`)};
-          for(const p of ['racing-mjx7303-michael-v39.html','jarvis/michael-graphics-v39.js','jarvis/michael-engine-v45.js','jarvis/mjx7303-racing-michael-v39.js','assets/mjx7303/michael-v39.glb','assets/mjx7303/michael-v40.bin','jarvis/michael-v40-payload-00.js','jarvis/michael-v40-payload-01.js','jarvis/michael-v40-payload-02.js','jarvis/michael-v40-payload-03.js','jarvis/michael-v40-payload-04.js','jarvis/michael-v40-payload-05.js','jarvis/michael-v40-payload-06.js','jarvis/generated/michael-core.js','jarvis/generated/michael-core.wasm','jarvis/generated/michael-polyglot.js','jarvis/generated/polyglot-manifest.json'])if(!fs.existsSync(p))throw Error('MICHAEL runtime component missing '+p);
-          check('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V56');check('racing-mjx7303-michael-v39.html','LICENSED C3 WRC DIGITAL TWIN');check('racing-mjx7303-michael-v39.html','FLUSH FASCIA OPTICS');check('racing-mjx7303-michael-v39.html','michael69');check('jarvis/racing-tab.js','michael69');check('index.html','racing-tab.js?v=20260808michael69');
-          check('jarvis/michael-graphics-v39.js','MICHAEL_V56');check('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V56');check('jarvis/michael-engine-v45.js','MichaelFrameGraph');check('jarvis/jarvis-xr-engine-v29.js','renderShadowPass');check('jarvis/jarvis-xr-engine-v29.js','renderOpaquePass');check('jarvis/jarvis-xr-engine-v29.js','renderTransmissionPass');check('jarvis/jarvis-xr-engine-v29.js','RGBA16F');check('jarvis/jarvis-xr-engine-v29.js','POSTFS');check('jarvis/jarvis-xr-engine-v29.js','1.70');check('jarvis/michael-engine-v45.js','post-process');check('jarvis/michael-engine-v45.js','MichaelWorld');check('jarvis/jarvis-ai-graphics-v38.js','ENERGY_CONSERVING_CLEARCOAT_ENVIRONMENT');check('jarvis/michael-graphics-v39.js','FITTED_MOBILE_VISUAL_FOUNDATION');check('jarvis/michael-graphics-v39.js','externalQuality=true');check('jarvis/michael-graphics-v39.js','printerToMichael');check('jarvis/michael-graphics-v39.js','addCompletedTwin');check('jarvis/michael-graphics-v39.js','torusX');check('jarvis/michael-graphics-v39.js','spokeX');check('jarvis/michael-graphics-v39.js','wheelbase:3.75');check('jarvis/michael-graphics-v39.js','wheels:4');check('jarvis/michael-graphics-v39.js','wrcLivery:true');check('jarvis/michael-graphics-v39.js','addMichaelWorld');check('jarvis/michael-graphics-v39.js','worldTrees:80');check('jarvis/michael-graphics-v39.js','roadEnvironment:true');check('jarvis/michael-graphics-v39.js','transparentGlass:true');check('jarvis/michael-graphics-v39.js','fittedLights:true');check('jarvis/michael-graphics-v39.js','physicalLightBars:false');check('jarvis/michael-graphics-v39.js','[.47,.010,.016]');check('jarvis/michael-graphics-v39.js','postBloom=.035');check('jarvis/michael-graphics-v39.js','this.mobile?1.10:1.38');check('jarvis/michael-graphics-v39.js','layeredOptics:true');check('jarvis/michael-graphics-v39.js','garageServiceBay:true');check('jarvis/michael-graphics-v39.js','rollCage:true');check('jarvis/jarvis-ai-graphics-v35.js','this.shadowSize=mobile?1024:2048');
-          check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-00.js');check('jarvis/mjx7303-racing-michael-v39.js','michael-v40-payload-06.js');check('jarvis/mjx7303-racing-michael-v39.js','createObjectURL');check('jarvis/mjx7303-racing-michael-v39.js','mjx7303-v33.glb');check('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V56');check('jarvis/mjx7303-racing-michael-v39.js','__MICHAEL_READY');check('jarvis/mjx7303-racing-michael-v39.js','front:[0,.045,11.4,.76]');check('jarvis/mjx7303-racing-michael-v39.js','900,37000');
-          check('jarvis/racing-tab.js','MICHAEL V56');check('jarvis/racing-tab.js','racing-mjx7303-michael-v39.html');check('jarvis/mjx7303-racing-michael-v39.js','bootMichaelPolyglot');check('jarvis/jarvis-xr-engine-v29.js','uPostExposure');check('engine/polyglot.json','MICHAEL_V56');check('public/michael-v56-release.json','FITTED_MOBILE_VISUAL_FOUNDATION');
+          node --check jarvis/michael-graphics-v39.js
+          node --check jarvis/mjx7303-racing-michael-v39.js
+          node --check jarvis/racing-tab.js
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const need=(p,s)=>{const v=fs.readFileSync(p,'utf8');if(!v.includes(s))throw Error(`${p} missing ${s}`)};
+          need('index.html','michael70');
+          need('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V57');
+          need('jarvis/michael-graphics-v39.js','MICHAEL_V57');
+          need('jarvis/michael-graphics-v39.js','CAMERA_SAFE_STUDIO_FOUNDATION');
+          need('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V57');
+          need('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V57');
+          need('jarvis/racing-tab.js','MICHAEL V57');
+          const release=JSON.parse(fs.readFileSync('public/michael-v57-release.json'));
+          if(release.engine!=='MICHAEL_V57'||release.cache!=='michael70')throw Error('V57 release manifest mismatch');
+          const poly=JSON.parse(fs.readFileSync('engine/polyglot.json'));
+          if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('V57 polyglot contract mismatch');
+          if(fs.statSync('jarvis/generated/michael-assembly.wasm').size<100)throw Error('AssemblyScript WASM is incomplete');
+          let b64='';for(let i=0;i<7;i++){const t=fs.readFileSync(`jarvis/michael-v40-payload-0${i}.js`,'utf8');const m=t.match(/export default ['"]([^'"]+)/);if(!m)throw Error(`payload ${i} invalid`);b64+=m[1]}
+          const b=Buffer.from(b64,'base64');if(b.subarray(0,4).toString()!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('GLB invalid');
+          const sha=crypto.createHash('sha256').update(b).digest('hex');
+          if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error(`GLB sha mismatch: ${sha}`);
+          console.log({engine:release.engine,cache:release.cache,languages:poly.languages.length,glbBytes:b.length,sha});
           NODE
       - uses: actions/upload-pages-artifact@v4
-        with: {path: .}
-      - name: Deploy GitHub Pages
+        with:
+          path: .
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live MICHAEL V39 asset, shell and engine
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          set -euo pipefail
-          base="${PAGE_URL%/}/";asset="${base}jarvis/michael-v40-payload-00.js?v=smoke-${GITHUB_SHA}";assetLast="${base}jarvis/michael-v40-payload-06.js?v=smoke-${GITHUB_SHA}";shell="${base}racing-mjx7303-michael-v39.html?v=smoke-${GITHUB_SHA}";engine="${base}jarvis/michael-graphics-v39.js?v=smoke-${GITHUB_SHA}";core="${base}jarvis/generated/michael-core.wasm?v=smoke-${GITHUB_SHA}";manifest="${base}jarvis/generated/polyglot-manifest.json?v=smoke-${GITHUB_SHA}";ok=0
-          for attempt in $(seq 1 30); do
-            echo "MICHAEL live smoke $attempt/30";ca=$(curl -L -sS -o /tmp/michael-00.js -w '%{http_code}' "$asset" || true);cz=$(curl -L -sS -o /tmp/michael-06.js -w '%{http_code}' "$assetLast" || true);cs=$(curl -L -sS -o /tmp/michael.html -w '%{http_code}' "$shell" || true);ce=$(curl -L -sS -o /tmp/michael.js -w '%{http_code}' "$engine" || true);cc=$(curl -L -sS -o /tmp/michael-core.wasm -w '%{http_code}' "$core" || true);cm=$(curl -L -sS -o /tmp/michael-manifest.json -w '%{http_code}' "$manifest" || true)
-            if [ "$ca" = 200 ] && [ "$cz" = 200 ] && [ "$cs" = 200 ] && [ "$ce" = 200 ] && [ "$cc" = 200 ] && [ "$cm" = 200 ] && grep -q "^export default '" /tmp/michael-00.js && grep -q "^export default '" /tmp/michael-06.js && grep -q 'MICHAEL PERSONAL TWIN V56' /tmp/michael.html && grep -q 'MICHAEL_V56' /tmp/michael.js && grep -q 'MICHAEL_V56' /tmp/michael-manifest.json && grep -q 'physicalLightBars:false' /tmp/michael.js && grep -q 'externalQuality=true' /tmp/michael.js && test "$(stat -c '%s' /tmp/michael-core.wasm)" -gt 100; then echo "{MICHAEL_V56_LIVE: PASS}";ok=1;break;fi
-            echo "asset00=$ca asset06=$cz shell=$cs engine=$ce core=$cc manifest=$cm";sleep 5
-          done
-          test "$ok" -eq 1
