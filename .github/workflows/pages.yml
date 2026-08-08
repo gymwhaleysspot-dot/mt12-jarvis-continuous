@@ -41,14 +41,18 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y blender python3-numpy
+          sudo apt-get install -y blender python3-numpy xvfb libegl1 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-utils
           blender --version | head -2
+          glxinfo -B || true
       - name: Build and render MJX 7303 V32 Blender master
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
         run: |
           set -euo pipefail
           python3 -m py_compile tools/build_mjx7303_v32_blender.py
           mkdir -p assets/mjx7303/v32-previews
-          MJX_V32_OUT=assets/mjx7303/mjx7303-v32.glb MJX_V32_PREVIEW_DIR=assets/mjx7303/v32-previews blender --background --factory-startup --python tools/build_mjx7303_v32_blender.py
+          xvfb-run -a -s '-screen 0 1920x1080x24' env MJX_V32_OUT=assets/mjx7303/mjx7303-v32.glb MJX_V32_PREVIEW_DIR=assets/mjx7303/v32-previews blender --background --factory-startup --python tools/build_mjx7303_v32_blender.py
           test -s assets/mjx7303/mjx7303-v32.glb
           for view in front three side rear top; do test -s "assets/mjx7303/v32-previews/$view.png"; done
           node - <<'NODE'
