@@ -1,4 +1,6 @@
-// MICHAEL V42 — mobile WRC world engine: licensed authority mesh, procedural livery,\n// sorted transparent glass, fitted light lenses, batched garage/forest worlds and adaptive quality.\nimport {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael40-core';
+// MICHAEL V42 — mobile WRC world engine: licensed authority mesh, procedural livery,
+// sorted transparent glass, fitted light lenses, batched garage/forest worlds and adaptive quality.
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael53-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.ema=16.7;this.jitter=0;this.q=1.78;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL LICENSED';this.exposure=1.30}
