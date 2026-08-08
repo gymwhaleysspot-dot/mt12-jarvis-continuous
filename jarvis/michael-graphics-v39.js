@@ -1,6 +1,6 @@
 // MICHAEL V57 — camera-safe studio renderer: recessed optics, layered grounding and clean staging.
 // stable mobile frame pacing, scene-aware lighting and calibrated camera composition.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael70-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael71-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.mobile=Math.min(innerWidth||720,innerHeight||1280)<900;this.ema=16.7;this.jitter=0;this.pressure=0;this.badFrames=0;this.goodFrames=0;this.cooldown=0;this.q=this.mobile?.96:1.18;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL BALANCED';this.exposure=.98;this.maxQuality=this.mobile?1.10:1.38}
@@ -47,19 +47,22 @@ function addCompletedTwin(r){
   for(const x of [-.46,.46]){B.harness.box(x-.09,1.26,.02,.045,.68,.038);B.harness.box(x+.09,1.26,.02,.045,.68,.038);B.harness.box(x,1.03,.16,.26,.055,.038)}
   for(const z of axles){B.susp.box(0,.51,z,2.45,.085,.12);B.susp.box(0,.73,z,2.22,.065,.10);for(const x of sides){B.rubber.torusX(x,.56,z,.375,.137,.43,32,11);for(const rr of [.318,.357,.397,.438])B.tread.torusX(x,.56,z,rr,.011,.438,28,6);B.alloy.torusX(x,.56,z,.238,.048,.438,28,8);B.rimAccent.torusX(x,.56,z,.182,.018,.442,24,6);for(let s=0;s<10;s++)B.alloy.spokeX(x,.56,z,.442,.070,.254,s*Math.PI/5,.025);B.rimAccent.cylX(x,.56,z,.452,.070,20);B.brake.cylX(x,.56,z,.423,.192,28);B.chassis.cylX(x,.56,z,.46,.052,14);B.susp.cylY(x*.83,.72,z,.62,.055,12)}}
   B.susp.box(-.88,.48,-1.875,.62,.055,.55);B.susp.box(.88,.48,-1.875,.62,.055,.55);B.susp.box(-.88,.48,1.875,.62,.055,.55);B.susp.box(.88,.48,1.875,.62,.055,.55);for(const x of [-1.24,1.24]){B.mud.box(x,.39,-2.26,.36,.62,.055);B.mud.box(x,.39,2.26,.36,.62,.055)}
-  // Glass is fitted as sloped transparent quads; pillars and openings remain visible.
+  // Neutral laminated glass: fitted to the apertures, bright enough to read as glass,
+  // and transparent enough to preserve the cockpit and roll-cage silhouette.
   B.glass.quad([-.91,1.18,.93],[.91,1.18,.93],[.76,1.76,.52],[-.76,1.76,.52],[0,.55,.84]);
   B.glass.quad([.86,1.18,-.97],[-.86,1.18,-.97],[-.72,1.70,-.62],[.72,1.70,-.62],[0,.55,-.84]);
   for(const x of [-1.015,1.015]){const n=[Math.sign(x),0,0];B.glass.quad([x,1.18,.78],[x,1.18,.02],[x,1.70,.08],[x,1.70,.47],n);B.glass.quad([x,1.18,-.08],[x,1.18,-.78],[x,1.68,-.46],[x,1.68,-.07],n)}
-  // The works panel follows the door envelope instead of hovering as a full-height rectangle.
-  for(const x of [-1.226,1.226]){const s=Math.sign(x),n=[s,0,0],q=x+s*.004;B.liveryWhite.quad([q,.62,-1.08],[q,.62,.92],[q,1.11,.98],[q,1.14,-.96],n);B.liveryBlue.quad([q+s*.003,.62,-.14],[q+s*.003,.62,.015],[q+s*.003,1.12,.13],[q+s*.003,1.12,-.025],n);B.liveryGold.quad([q+s*.006,.62,.035],[q+s*.006,.62,.17],[q+s*.006,1.12,.29],[q+s*.006,1.12,.155],n)}
-  // Fascia-matched lens and ribbon geometry replaces the former floating circular projectors.
-  B.lampHousing.quad([-.995,.805,2.919],[-.37,.825,3.040],[-.40,1.045,3.034],[-.985,1.025,2.914],[0,0,1]);
-  B.lampHousing.quad([.37,.825,3.040],[.995,.805,2.919],[.985,1.025,2.914],[.40,1.045,3.034],[0,0,1]);
+  // Satin works graphics are inset from every panel edge and taper with the door.
+  // This removes the former glowing, full-height rectangle while retaining the identity stripe.
+  for(const x of [-1.226,1.226]){const s=Math.sign(x),n=[s,0,0],q=x+s*.004;B.liveryWhite.quad([q,.70,-.88],[q,.70,.70],[q,1.03,.74],[q,1.06,-.80],n);B.liveryBlue.quad([q+s*.003,.70,-.08],[q+s*.003,.70,.055],[q+s*.003,1.04,.13],[q+s*.003,1.04,.005],n);B.liveryGold.quad([q+s*.006,.70,.075],[q+s*.006,.70,.19],[q+s*.006,1.04,.27],[q+s*.006,1.04,.16],n)}
+  // Only a narrow recessed chamber sits behind the ribbons. The licensed fascia remains
+  // visible around it instead of being covered by opaque black rectangles.
+  B.lampHousing.quad([-.91,.852,2.936],[-.43,.866,3.026],[-.45,.985,3.021],[-.90,.970,2.932],[0,0,1]);
+  B.lampHousing.quad([.43,.866,3.026],[.91,.852,2.936],[.90,.970,2.932],[.45,.985,3.021],[0,0,1]);
   B.projector.quad([-.80,.858,2.936],[-.62,.875,2.976],[-.63,.970,2.972],[-.81,.957,2.932],[0,0,1]);
   B.projector.quad([.62,.875,2.976],[.80,.858,2.936],[.81,.957,2.932],[.63,.970,2.972],[0,0,1]);
-  B.frontLens.quad([-.98,.82,2.936],[-.39,.84,3.034],[-.43,1.02,3.026],[-.96,1.00,2.930],[0,0,1]);
-  B.frontLens.quad([.39,.84,3.034],[.98,.82,2.936],[.96,1.00,2.930],[.43,1.02,3.026],[0,0,1]);
+  B.frontLens.quad([-.93,.84,2.941],[-.41,.855,3.031],[-.44,1.00,3.024],[-.92,.985,2.936],[0,0,1]);
+  B.frontLens.quad([.41,.855,3.031],[.93,.84,2.941],[.92,.985,2.936],[.44,1.00,3.024],[0,0,1]);
   B.rearLens.quad([.45,.82,-3.022],[.99,.82,-2.920],[.96,1.02,-2.916],[.48,1.03,-3.018],[0,0,-1]);
   B.rearLens.quad([-.99,.82,-2.920],[-.45,.82,-3.022],[-.48,1.03,-3.018],[-.96,1.02,-2.916],[0,0,-1]);
   // Flush segmented ribbons sit inside those housings instead of floating as white boxes.
@@ -72,9 +75,9 @@ function addCompletedTwin(r){
   B.rearLamp.quad([-.91,.875,-2.928],[-.53,.875,-3.012],[-.54,.930,-3.010],[-.90,.925,-2.925],[0,0,-1]);
   B.rearLamp.quad([-.90,.925,-2.925],[-.54,.930,-3.010],[-.56,.970,-3.006],[-.88,.970,-2.922],[0,0,-1]);
   B.beams.quad([-.92,.035,2.86],[-.36,.035,2.86],[-.72,.035,9.4],[-2.40,.035,9.4],[0,1,0]);B.beams.quad([.36,.035,2.86],[.92,.035,2.86],[2.40,.035,9.4],[.72,.035,9.4],[0,1,0]);
-  const mats={contact:{...M([.004,.006,.009],0,1),alpha:.38},contactCore:{...M([.001,.002,.003],0,1),alpha:.62},wheelShadow:{...M([.001,.001,.002],0,1),alpha:.72},rubber:M([.006,.007,.009],0,.88),tread:M([.018,.020,.024],0,.74),alloy:M([.43,.50,.59],.82,.18),rimAccent:M([.10,.13,.17],.72,.25),brake:M([.24,.26,.29],.76,.28),chassis:M([.014,.017,.021],.10,.72),cabin:M([.010,.013,.017],0,.84),cockpit:M([.018,.022,.028],0,.68),carbon:M([.012,.014,.017],.18,.42),harness:M([.62,.018,.022],0,.62),susp:M([.23,.27,.32],.60,.34),mud:M([.006,.007,.009],0,.94),glass:{...M([.010,.027,.048],0,.055),alpha:.25},liveryWhite:M([.76,.79,.82],.02,.28),liveryBlue:M([.045,.18,.52],.03,.24),liveryGold:M([.94,.58,.045],.04,.23),lampHousing:M([.002,.003,.005],.06,.18),projector:{...M([.10,.16,.23],.28,.045,[.11,.17,.24]),alpha:.88},frontLens:{...M([.16,.25,.34],0,.040),alpha:.14},frontDrl:{...M([.78,.87,.96],.01,.10,[1.00,1.18,1.40]),alpha:.98},rearLens:{...M([.42,.006,.010],0,.07),alpha:.20},rearLamp:{...M([.72,.004,.008],.01,.12,[1.05,.008,.012]),alpha:.96},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.020}};
+  const mats={contact:{...M([.004,.006,.009],0,1),alpha:.34},contactCore:{...M([.001,.002,.003],0,1),alpha:.52},wheelShadow:{...M([.001,.001,.002],0,1),alpha:.64},rubber:M([.006,.007,.009],0,.88),tread:M([.018,.020,.024],0,.74),alloy:M([.43,.50,.59],.82,.18),rimAccent:M([.10,.13,.17],.72,.25),brake:M([.24,.26,.29],.76,.28),chassis:M([.014,.017,.021],.10,.72),cabin:M([.010,.013,.017],0,.84),cockpit:M([.018,.022,.028],0,.68),carbon:M([.012,.014,.017],.18,.42),harness:M([.62,.018,.022],0,.62),susp:M([.23,.27,.32],.60,.34),mud:M([.006,.007,.009],0,.94),glass:{...M([.075,.105,.135],0,.16),alpha:.16},liveryWhite:M([.56,.58,.61],.01,.58),liveryBlue:M([.040,.13,.40],.01,.47),liveryGold:M([.72,.39,.035],.01,.45),lampHousing:{...M([.018,.025,.034],.08,.34),alpha:.72},projector:{...M([.14,.20,.27],.20,.12,[.055,.085,.12]),alpha:.74},frontLens:{...M([.18,.27,.35],0,.16),alpha:.10},frontDrl:{...M([.72,.82,.92],.01,.16,[.62,.76,.92]),alpha:.91},rearLens:{...M([.32,.008,.012],0,.18),alpha:.16},rearLamp:{...M([.64,.006,.010],.01,.18,[.72,.006,.010]),alpha:.91},beams:{...M([.10,.16,.25],0,.64,[.035,.060,.10]),alpha:.016}};
   for(const k of Object.keys(B)){const d=pushBatch(r,B[k],mats[k]);if(d&&k==='beams'){d.driveOnly=true;d.hidden=true}}
-  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,transparentGlass:true,layeredOptics:true,flushLensGeometry:true,recessedProjectorChambers:true,lighting:true,fittedLights:true,wrcLivery:true,panelFollowingLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,layeredContactShadows:true,batches:Object.keys(B).length}
+  r._michaelSystems={wheelbase:3.75,wheels:4,chassis:true,suspension:true,glass:true,neutralLaminatedGlass:true,transparentGlass:true,layeredOptics:true,flushLensGeometry:true,recessedProjectorChambers:true,lighting:true,fittedLights:true,wrcLivery:true,insetSatinLivery:true,panelFollowingLivery:true,geometryLivery:true,tireTread:true,twoToneRims:true,cockpit:true,rollCage:true,harnesses:true,materialSeparation:true,layeredContactShadows:true,batches:Object.keys(B).length}
 }
 function addMichaelWorld(r){
   const road=new TwinBatch(),shoulder=new TwinBatch(),roadMark=new TwinBatch(),reflector=new TwinBatch(),guardrail=new TwinBatch(),trunk=new TwinBatch(),treesNear=new TwinBatch(),treesFar=new TwinBatch(),garage=new TwinBatch(),garageMark=new TwinBatch(),servicePad=new TwinBatch(),turntable=new TwinBatch(),reflectionPad=new TwinBatch();
