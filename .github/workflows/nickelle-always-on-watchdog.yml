@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nickelle-always-on-watchdog.yml'
+      - '.github/workflows/jarvis-integrated-intelligence.yml'
   schedule:
     - cron: '*/5 * * * *'
 
@@ -22,22 +23,19 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Keep Nickelle evolution lanes continuously active
+      - name: Keep all continuous intelligence lanes active
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
-
           active_count() {
             local workflow="$1"
             gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=30" \
               --jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting" or .status=="requested")] | length'
           }
-
           ensure_running() {
-            local workflow="$1" label="$2"
-            local active
+            local workflow="$1" label="$2" active
             active="$(active_count "$workflow")"
             echo "$label active/queued runs: $active"
             if [ "$active" -eq 0 ]; then
@@ -47,17 +45,16 @@ jobs:
               echo "$label already active; no duplicate dispatched"
             fi
           }
-
           ensure_running michael-visual-evolution.yml 'Nickelle Visual Laboratory'
           ensure_running nickelle-heavy-vision.yml 'Nickelle Heavyweight Neural Vision'
-
-      - name: Report continuous evolution health
+          ensure_running jarvis-integrated-intelligence.yml 'Jarvis Integrated Proving Ground'
+      - name: Report continuous intelligence health
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
-          for workflow in michael-visual-evolution.yml nickelle-heavy-vision.yml; do
+          for workflow in michael-visual-evolution.yml nickelle-heavy-vision.yml jarvis-integrated-intelligence.yml; do
             echo "--- $workflow ---"
             gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" \
               --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
