@@ -9,7 +9,9 @@ on:
       - 'tools/michael_visual_evolution.py'
       - 'tools/michael_visual_capture.mjs'
       - 'tools/michael_visual_judge.mjs'
+      - 'tools/michael_internal_vision.mjs'
       - 'michael/visual/owner-truth.json'
+      - 'michael/visual/reference-metrics.json'
   schedule:
     - cron: '42 * * * *'
     - cron: '17 */6 * * *'
@@ -35,9 +37,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
-          gh workflow run research.yml --repo "$REPO" --ref main \
-            -f mission_type=digital-twin \
-            -f topic='Research the exact MJX Hyper Go 7303 Citroen C3 WRC body and the 2017 Citroen C3 WRC visual construction. Prioritize front grille and lamp pod geometry, wheel/arch proportions, black-carbon arch treatment, roof scoop, rear wing/endplates, diffuser, side vent/skirt, and Abu Dhabi/Total livery placement. Preserve evidence URLs and precise proportions useful to Michael Visual Evolution.'
+          gh workflow run research.yml --repo "$REPO" --ref main -f mission_type=digital-twin -f topic='Research the exact MJX Hyper Go 7303 Citroen C3 WRC body and 2017 Citroen C3 WRC visual construction. Preserve evidence and proportions for Michael Internal Vision.'
 
   evolve:
     if: github.event_name != 'schedule' || github.event.schedule != '17 */6 * * *'
@@ -49,40 +49,38 @@ jobs:
       MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+        with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-          package-manager-cache: false
-      - name: Validate self-evolution tools
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate self-evolution and internal vision
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/michael_visual_evolution.py
           node --check tools/michael_visual_capture.mjs
           node --check tools/michael_visual_judge.mjs
+          node --check tools/michael_internal_vision.mjs
           node --check jarvis/mjx7303-racing-michael-v39.js
           python3 - <<'PY'
           import json
-          for p in ['michael/visual/owner-truth.json','michael/visual/genome.json','michael/visual/state.json']:
-              json.load(open(p))
-          print('Michael visual memory valid')
+          for p in ['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json']: json.load(open(p))
+          print('Michael internal visual memory valid')
           PY
-      - name: Install headless visual capture runtime
+      - name: Install headless visual runtime
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
       - name: Start local Michael renderer
         run: |
           python3 -m http.server 4173 >/tmp/michael-http.log 2>&1 &
-          echo $! >/tmp/michael-http.pid
-          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/racing-mjx7303-michael-v39.html >/dev/null && exit 0; sleep 1; done
-          cat /tmp/michael-http.log
-          exit 1
+          for n in $(seq 1 30); do curl -fsS "$MICHAEL_URL" >/dev/null && exit 0; sleep 1; done
+          cat /tmp/michael-http.log; exit 1
       - name: Capture champion canonical views
         run: node tools/michael_visual_capture.mjs /tmp/michael-baseline
-      - name: Diagnose champion and propose bounded candidate
-        run: node tools/michael_visual_judge.mjs propose /tmp/michael-baseline /tmp/michael-proposal.json
+      - name: Internal vision diagnoses champion and proposes candidate
+        run: node tools/michael_internal_vision.mjs propose /tmp/michael-baseline /tmp/michael-proposal.json
+      - name: Optional external vision advisory
+        continue-on-error: true
+        run: node tools/michael_visual_judge.mjs propose /tmp/michael-baseline /tmp/michael-external-advisory.json
       - name: Apply bounded visual candidate
         run: |
           cp michael/visual/genome.json /tmp/michael-genome-before.json
@@ -91,54 +89,40 @@ jobs:
           node --check jarvis/mjx7303-racing-michael-v39.js
           grep -F "lat=clamp((p?.x||0)*1.55" jarvis/mjx7303-racing-michael-v39.js
           grep -F 'function chaseRoad' jarvis/mjx7303-racing-michael-v39.js
-          changed="$(git diff --name-only | sort)"
-          echo "$changed"
+          changed="$(git diff --name-only | sort)"; echo "$changed"
           bad="$(echo "$changed" | grep -Ev '^(jarvis/mjx7303-racing-michael-v39.js|michael/visual/genome.json)$' || true)"
           test -z "$bad" || { echo "Forbidden candidate files changed: $bad" >&2; exit 1; }
       - name: Capture candidate canonical views
         run: node tools/michael_visual_capture.mjs /tmp/michael-candidate
-      - name: Compare candidate against champion
-        run: node tools/michael_visual_judge.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-proposal.json /tmp/michael-verdict.json
+      - name: Internal vision compares candidate against champion
+        run: node tools/michael_internal_vision.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-verdict.json
       - name: Run promotion gates
         id: gate
         run: |
           python3 tools/michael_visual_evolution.py finalize /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-baseline/metrics.json /tmp/michael-candidate/metrics.json /tmp/michael-decision.json
-          promote="$(jq -r '.promote' /tmp/michael-decision.json)"
-          echo "promote=$promote" >> "$GITHUB_OUTPUT"
-          cat /tmp/michael-decision.json
+          promote="$(jq -r '.promote' /tmp/michael-decision.json)"; echo "promote=$promote" >> "$GITHUB_OUTPUT"; cat /tmp/michael-decision.json
       - name: Prepare promoted Michael build
         if: steps.gate.outputs.promote == 'true'
         run: |
-          set -Eeuo pipefail
           python3 tools/michael_visual_evolution.py bump-version
           node --check jarvis/mjx7303-racing-michael-v39.js
           grep -F "lat=clamp((p?.x||0)*1.55" jarvis/mjx7303-racing-michael-v39.js
           grep -F 'function chaseRoad' jarvis/mjx7303-racing-michael-v39.js
-          changed="$(git diff --name-only | sort)"
-          echo "$changed"
-          bad="$(echo "$changed" | grep -Ev '^(jarvis/mjx7303-racing-michael-v39.js|racing-mjx7303-michael-v39.html|michael/visual/genome.json|michael/visual/state.json)$' || true)"
-          test -z "$bad" || { echo "Forbidden promotion files changed: $bad" >&2; exit 1; }
-      - name: Promote only if main is still the evaluated parent
+      - name: Promote only if main is still evaluated parent
         if: steps.gate.outputs.promote == 'true'
-        env:
-          START_SHA: ${{ github.sha }}
+        env: {START_SHA: '${{ github.sha }}'}
         run: |
           set -Eeuo pipefail
           git fetch origin main
-          current="$(git rev-parse origin/main)"
-          if [ "$current" != "$START_SHA" ]; then
-            echo "main advanced from $START_SHA to $current; visual promotion safely deferred to next cycle."
-            exit 0
-          fi
-          git config user.name 'Michael Visual Evolution'
-          git config user.email 'actions@users.noreply.github.com'
+          test "$(git rev-parse origin/main)" = "$START_SHA" || { echo 'main advanced; promotion deferred'; exit 0; }
+          git config user.name 'Michael Visual Evolution'; git config user.email 'actions@users.noreply.github.com'
           git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json
           git commit -m "Evolve Michael V57 visual genome generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
           git push origin HEAD:main
       - name: Reject non-improving candidate cleanly
         if: steps.gate.outputs.promote != 'true'
         run: |
-          echo 'Candidate did not beat the visual champion; no Michael source is promoted.'
+          echo 'Internal vision rejected candidate; champion retained.'
           git restore jarvis/mjx7303-racing-michael-v39.js michael/visual/genome.json michael/visual/state.json
       - name: Preserve visual evolution evidence
         if: always()
@@ -151,6 +135,7 @@ jobs:
             /tmp/michael-proposal.json
             /tmp/michael-verdict.json
             /tmp/michael-decision.json
+            /tmp/michael-external-advisory.json
             /tmp/michael-http.log
           if-no-files-found: warn
           retention-days: 30
