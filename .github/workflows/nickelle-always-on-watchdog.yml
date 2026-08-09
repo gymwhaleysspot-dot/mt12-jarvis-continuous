@@ -2,6 +2,10 @@ name: Nickelle Always-On Evolution Watchdog
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nickelle-always-on-watchdog.yml'
   schedule:
     - cron: '*/5 * * * *'
 
