@@ -1,4 +1,4 @@
-name: Michael Continuous Visual Evolution
+name: Nickelle Continuous Visual Evolution
 
 on:
   workflow_dispatch:
@@ -10,8 +10,10 @@ on:
       - 'tools/michael_visual_capture.mjs'
       - 'tools/michael_visual_judge.mjs'
       - 'tools/michael_internal_vision.mjs'
+      - 'tools/nickelle_visual_ai.mjs'
       - 'michael/visual/owner-truth.json'
       - 'michael/visual/reference-metrics.json'
+      - 'nickelle/identity.json'
   schedule:
     - cron: '42 * * * *'
     - cron: '17 */6 * * *'
@@ -22,7 +24,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: michael-continuous-visual-evolution
+  group: nickelle-continuous-visual-evolution
   cancel-in-progress: false
 
 jobs:
@@ -31,13 +33,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Dispatch Michael-specific external research
+      - name: Dispatch Nickelle visual research
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
-          gh workflow run research.yml --repo "$REPO" --ref main -f mission_type=digital-twin -f topic='Research the exact MJX Hyper Go 7303 Citroen C3 WRC body and 2017 Citroen C3 WRC visual construction. Preserve evidence and proportions for Michael Internal Vision.'
+          gh workflow run research.yml --repo "$REPO" --ref main -f mission_type=digital-twin -f topic='Nickelle visual research: exact MJX Hyper Go 7303 Citroen C3 WRC body and 2017 Citroen C3 WRC construction. Prioritize owner-car grille/lamp pod geometry, wheel-to-arch fill, body silhouette, black-carbon arch treatment, roof scoop, rear wing/endplates, diffuser, side vent/skirt and livery placement. Preserve evidence and measurable proportions for Nickelle.'
 
   evolve:
     if: github.event_name != 'schedule' || github.event.schedule != '17 */6 * * *'
@@ -52,18 +54,19 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Validate self-evolution and internal vision
+      - name: Validate Nickelle and visual evolution
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/michael_visual_evolution.py
           node --check tools/michael_visual_capture.mjs
           node --check tools/michael_visual_judge.mjs
           node --check tools/michael_internal_vision.mjs
+          node --check tools/nickelle_visual_ai.mjs
           node --check jarvis/mjx7303-racing-michael-v39.js
           python3 - <<'PY'
           import json
-          for p in ['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json']: json.load(open(p))
-          print('Michael internal visual memory valid')
+          for p in ['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json','nickelle/identity.json','nickelle/memory.json']: json.load(open(p))
+          print('Nickelle visual AI memory and Michael visual truth valid')
           PY
       - name: Install headless visual runtime
         run: |
@@ -76,12 +79,12 @@ jobs:
           cat /tmp/michael-http.log; exit 1
       - name: Capture champion canonical views
         run: node tools/michael_visual_capture.mjs /tmp/michael-baseline
-      - name: Internal vision diagnoses champion and proposes candidate
-        run: node tools/michael_internal_vision.mjs propose /tmp/michael-baseline /tmp/michael-proposal.json
-      - name: Optional external vision advisory
+      - name: Nickelle diagnoses champion and proposes candidate
+        run: node tools/nickelle_visual_ai.mjs propose /tmp/michael-baseline /tmp/michael-proposal.json
+      - name: Optional external vision advisory for Nickelle
         continue-on-error: true
         run: node tools/michael_visual_judge.mjs propose /tmp/michael-baseline /tmp/michael-external-advisory.json
-      - name: Apply bounded visual candidate
+      - name: Apply Nickelle bounded visual candidate
         run: |
           cp michael/visual/genome.json /tmp/michael-genome-before.json
           cp michael/visual/state.json /tmp/michael-state-before.json
@@ -94,41 +97,57 @@ jobs:
           test -z "$bad" || { echo "Forbidden candidate files changed: $bad" >&2; exit 1; }
       - name: Capture candidate canonical views
         run: node tools/michael_visual_capture.mjs /tmp/michael-candidate
-      - name: Internal vision compares candidate against champion
-        run: node tools/michael_internal_vision.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-verdict.json
-      - name: Run promotion gates
+      - name: Nickelle compares candidate against champion
+        run: node tools/nickelle_visual_ai.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-proposal.json /tmp/michael-verdict.json
+      - name: Run protected promotion gates
         id: gate
         run: |
           python3 tools/michael_visual_evolution.py finalize /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-baseline/metrics.json /tmp/michael-candidate/metrics.json /tmp/michael-decision.json
           promote="$(jq -r '.promote' /tmp/michael-decision.json)"; echo "promote=$promote" >> "$GITHUB_OUTPUT"; cat /tmp/michael-decision.json
-      - name: Prepare promoted Michael build
+      - name: Nickelle learns from the result
+        run: |
+          node tools/nickelle_visual_ai.mjs learn /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-decision.json nickelle/memory.json
+          cat nickelle/memory.json
+      - name: Prepare Nickelle-approved Michael build
         if: steps.gate.outputs.promote == 'true'
         run: |
           python3 tools/michael_visual_evolution.py bump-version
           node --check jarvis/mjx7303-racing-michael-v39.js
           grep -F "lat=clamp((p?.x||0)*1.55" jarvis/mjx7303-racing-michael-v39.js
           grep -F 'function chaseRoad' jarvis/mjx7303-racing-michael-v39.js
-      - name: Promote only if main is still evaluated parent
+      - name: Nickelle promotes only if main is still evaluated parent
         if: steps.gate.outputs.promote == 'true'
         env: {START_SHA: '${{ github.sha }}'}
         run: |
           set -Eeuo pipefail
           git fetch origin main
-          test "$(git rev-parse origin/main)" = "$START_SHA" || { echo 'main advanced; promotion deferred'; exit 0; }
-          git config user.name 'Michael Visual Evolution'; git config user.email 'actions@users.noreply.github.com'
-          git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json
-          git commit -m "Evolve Michael V57 visual genome generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
+          test "$(git rev-parse origin/main)" = "$START_SHA" || { echo 'main advanced; Nickelle promotion deferred'; exit 0; }
+          git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
+          git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json nickelle/memory.json
+          git commit -m "Nickelle evolves Michael visual generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
           git push origin HEAD:main
       - name: Reject non-improving candidate cleanly
         if: steps.gate.outputs.promote != 'true'
         run: |
-          echo 'Internal vision rejected candidate; champion retained.'
+          echo 'Nickelle rejected candidate; Michael champion retained.'
           git restore jarvis/mjx7303-racing-michael-v39.js michael/visual/genome.json michael/visual/state.json
-      - name: Preserve visual evolution evidence
+      - name: Persist Nickelle learning from rejected candidate
+        if: steps.gate.outputs.promote != 'true'
+        env: {START_SHA: '${{ github.sha }}'}
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; rejected-candidate learning preserved in artifact only'; exit 0; fi
+          git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
+          git add nickelle/memory.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Nickelle learns from rejected Michael visual candidate [skip ci]'
+          git push origin HEAD:main
+      - name: Preserve Nickelle visual evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: michael-visual-evolution-${{ github.run_number }}
+          name: nickelle-visual-evolution-${{ github.run_number }}
           path: |
             /tmp/michael-baseline
             /tmp/michael-candidate
@@ -137,5 +156,6 @@ jobs:
             /tmp/michael-decision.json
             /tmp/michael-external-advisory.json
             /tmp/michael-http.log
+            nickelle/memory.json
           if-no-files-found: warn
           retention-days: 30
