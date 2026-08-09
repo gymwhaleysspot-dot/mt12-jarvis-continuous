@@ -1,0 +1,100 @@
+name: Nickelle Heavyweight Neural Vision
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nickelle-heavy-vision.yml'
+      - 'tools/nickelle_heavy_vision.mjs'
+      - 'tools/nickelle_heavy_memory.mjs'
+      - 'nickelle/heavy-vision.json'
+      - 'jarvis/michael-graphics-v40.js'
+      - 'jarvis/mjx7303-racing-michael-v39.js'
+  schedule:
+    - cron: '7 */6 * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nickelle-heavyweight-vision
+  cancel-in-progress: true
+
+jobs:
+  heavy-vision:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
+      HF_HOME: /home/runner/.cache/huggingface
+      NICKELLE_SEG_MODEL: Xenova/segformer-b5-finetuned-ade-640-640
+      NICKELLE_DEPTH_MODEL: onnx-community/depth-anything-v2-base
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate heavyweight vision stack
+        run: |
+          set -Eeuo pipefail
+          node --check tools/nickelle_heavy_vision.mjs
+          node --check tools/nickelle_heavy_memory.mjs
+          node --check tools/michael_visual_capture.mjs
+          node --check jarvis/michael-graphics-v40.js
+          python3 - <<'PY'
+          import json
+          cfg=json.load(open('nickelle/heavy-vision.json'))
+          assert cfg['enabled'] and cfg['segmentation']['architecture']=='SegFormer-B5'
+          assert 'Depth Anything V2 Base' in cfg['depth']['architecture']
+          print('Nickelle heavyweight configuration valid')
+          PY
+      - name: Restore heavyweight model cache
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/huggingface
+          key: nickelle-heavy-v1-${{ runner.os }}-segformer-b5-depth-anything-v2-base
+      - name: Install heavyweight neural runtime
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0 @huggingface/transformers
+          npx playwright install --with-deps chromium
+      - name: Start Michael renderer
+        run: |
+          python3 -m http.server 4173 >/tmp/nickelle-heavy-http.log 2>&1 &
+          for n in $(seq 1 30); do curl -fsS "$MICHAEL_URL" >/dev/null && exit 0; sleep 1; done
+          cat /tmp/nickelle-heavy-http.log; exit 1
+      - name: Capture heavyweight canonical set
+        run: MICHAEL_CAPTURE_SIZE=900 node tools/michael_visual_capture.mjs /tmp/nickelle-heavy-render
+      - name: Run SegFormer-B5 and Depth Anything V2 Base
+        run: node tools/nickelle_heavy_vision.mjs analyze /tmp/nickelle-heavy-render /tmp/nickelle-heavy-analysis.json
+      - name: Update Nickelle heavyweight memory
+        run: node tools/nickelle_heavy_memory.mjs /tmp/nickelle-heavy-analysis.json nickelle/heavy-memory.json
+      - name: Persist heavyweight perception memory
+        env:
+          START_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then
+            echo 'main advanced; heavyweight evidence kept in artifact only'
+            exit 0
+          fi
+          git config user.name 'Nickelle Heavy Vision'
+          git config user.email 'actions@users.noreply.github.com'
+          git add nickelle/heavy-memory.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Nickelle learns heavyweight segmentation and depth [skip ci]'
+          git push origin HEAD:main
+      - name: Preserve heavyweight vision evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nickelle-heavy-vision-${{ github.run_number }}
+          path: |
+            /tmp/nickelle-heavy-render
+            /tmp/nickelle-heavy-analysis.json
+            /tmp/nickelle-heavy-http.log
+            nickelle/heavy-memory.json
+          if-no-files-found: warn
+          retention-days: 30
