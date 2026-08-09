@@ -11,9 +11,11 @@ on:
       - 'tools/michael_visual_judge.mjs'
       - 'tools/michael_internal_vision.mjs'
       - 'tools/nickelle_visual_ai.mjs'
+      - 'tools/nickelle_neural_vision.mjs'
       - 'michael/visual/owner-truth.json'
       - 'michael/visual/reference-metrics.json'
       - 'nickelle/identity.json'
+      - 'nickelle/neural-model.json'
   schedule:
     - cron: '42 * * * *'
     - cron: '17 */6 * * *'
@@ -34,12 +36,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Dispatch Nickelle visual research
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
+        env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          gh workflow run research.yml --repo "$REPO" --ref main -f mission_type=digital-twin -f topic='Nickelle visual research: exact MJX Hyper Go 7303 Citroen C3 WRC body and 2017 Citroen C3 WRC construction. Prioritize owner-car grille/lamp pod geometry, wheel-to-arch fill, body silhouette, black-carbon arch treatment, roof scoop, rear wing/endplates, diffuser, side vent/skirt and livery placement. Preserve evidence and measurable proportions for Nickelle.'
+          gh workflow run research.yml --repo "$REPO" --ref main -f mission_type=digital-twin -f topic='Nickelle visual research: exact MJX Hyper Go 7303 Citroen C3 WRC body and 2017 Citroen C3 WRC construction. Preserve evidence and measurable proportions for deterministic and neural visual learning.'
 
   evolve:
     if: github.event_name != 'schedule' || github.event.schedule != '17 */6 * * *'
@@ -54,7 +54,7 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Validate Nickelle and visual evolution
+      - name: Validate Nickelle visual stack
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/michael_visual_evolution.py
@@ -62,11 +62,12 @@ jobs:
           node --check tools/michael_visual_judge.mjs
           node --check tools/michael_internal_vision.mjs
           node --check tools/nickelle_visual_ai.mjs
+          node --check tools/nickelle_neural_vision.mjs
           node --check jarvis/mjx7303-racing-michael-v39.js
           python3 - <<'PY'
           import json
-          for p in ['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json','nickelle/identity.json','nickelle/memory.json']: json.load(open(p))
-          print('Nickelle visual AI memory and Michael visual truth valid')
+          for p in ['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json','nickelle/identity.json','nickelle/memory.json','nickelle/neural-model.json']: json.load(open(p))
+          print('Nickelle deterministic + neural visual stack valid')
           PY
       - name: Install headless visual runtime
         run: |
@@ -97,17 +98,18 @@ jobs:
           test -z "$bad" || { echo "Forbidden candidate files changed: $bad" >&2; exit 1; }
       - name: Capture candidate canonical views
         run: node tools/michael_visual_capture.mjs /tmp/michael-candidate
-      - name: Nickelle compares candidate against champion
+      - name: Nickelle fuses internal and neural vision
         run: node tools/nickelle_visual_ai.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-proposal.json /tmp/michael-verdict.json
       - name: Run protected promotion gates
         id: gate
         run: |
           python3 tools/michael_visual_evolution.py finalize /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-baseline/metrics.json /tmp/michael-candidate/metrics.json /tmp/michael-decision.json
           promote="$(jq -r '.promote' /tmp/michael-decision.json)"; echo "promote=$promote" >> "$GITHUB_OUTPUT"; cat /tmp/michael-decision.json
-      - name: Nickelle learns from the result
+      - name: Nickelle learns memory and neural weights
         run: |
           node tools/nickelle_visual_ai.mjs learn /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-decision.json nickelle/memory.json
-          cat nickelle/memory.json
+          node tools/nickelle_neural_vision.mjs train /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-verdict.json /tmp/michael-decision.json nickelle/neural-model.json
+          node -e "const m=require('./nickelle/neural-model.json'); console.log(m.training)"
       - name: Prepare Nickelle-approved Michael build
         if: steps.gate.outputs.promote == 'true'
         run: |
@@ -123,8 +125,8 @@ jobs:
           git fetch origin main
           test "$(git rev-parse origin/main)" = "$START_SHA" || { echo 'main advanced; Nickelle promotion deferred'; exit 0; }
           git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
-          git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json nickelle/memory.json
-          git commit -m "Nickelle evolves Michael visual generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
+          git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json nickelle/memory.json nickelle/neural-model.json
+          git commit -m "Nickelle neural-visual evolution generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
           git push origin HEAD:main
       - name: Reject non-improving candidate cleanly
         if: steps.gate.outputs.promote != 'true'
@@ -137,11 +139,11 @@ jobs:
         run: |
           set -Eeuo pipefail
           git fetch origin main
-          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; rejected-candidate learning preserved in artifact only'; exit 0; fi
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; learning preserved in artifact only'; exit 0; fi
           git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
-          git add nickelle/memory.json
+          git add nickelle/memory.json nickelle/neural-model.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Nickelle learns from rejected Michael visual candidate [skip ci]'
+          git commit -m 'Nickelle learns visual and neural weights from rejected candidate [skip ci]'
           git push origin HEAD:main
       - name: Preserve Nickelle visual evidence
         if: always()
@@ -155,7 +157,10 @@ jobs:
             /tmp/michael-verdict.json
             /tmp/michael-decision.json
             /tmp/michael-external-advisory.json
+            /tmp/nickelle-neural-predict.json
+            /tmp/nickelle-neural-verdict.json
             /tmp/michael-http.log
             nickelle/memory.json
+            nickelle/neural-model.json
           if-no-files-found: warn
           retention-days: 30
