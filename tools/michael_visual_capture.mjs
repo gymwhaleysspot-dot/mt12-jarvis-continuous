@@ -16,15 +16,16 @@ for(const view of views){
   await page.waitForTimeout(350);
   await page.locator('#raceCanvas').screenshot({path:path.join(out,`${view}.png`)});
 }
-const metrics=await page.evaluate(()=>({
-  graphics:window.__MICHAEL_GRAPHICS||null,
+const metrics=await page.evaluate(()=>{const g=window.__MICHAEL_GRAPHICS||null;return{
+  graphics:g,
   body:window.__MICHAEL_BODY_AUTHORITY||null,
   refinement:window.__MICHAEL_REFINEMENT||null,
   ready:window.__MICHAEL_READY===true,
   v39:window.__V39_READY===true,
-  frameMs:Number(document.querySelector('#frame')?.textContent?.replace(/[^0-9.]/g,'')||0),
+  frameMs:Number(g?.physicalFrameMs||g?.frameMs||16.7),
+  michaelFrameMs:Number(g?.michaelFrameMs||0),
   scale:document.querySelector('#scale')?.textContent||''
-}));
+}});
 fs.writeFileSync(path.join(out,'metrics.json'),JSON.stringify(metrics,null,2)+'\n');
 await browser.close();
 console.log(JSON.stringify({out,url,views,metrics},null,2));
