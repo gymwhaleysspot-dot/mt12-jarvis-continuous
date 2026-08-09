@@ -1,6 +1,6 @@
 // MICHAEL V57 — camera-safe studio renderer: recessed optics, layered grounding and clean staging.
 // stable mobile frame pacing, scene-aware lighting and calibrated camera composition.
-import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael71-core';
+import {JarvisXRRenderer as Physical38} from './jarvis-ai-graphics-v38.js?v=michael72-core';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 class MichaelDirector{
   constructor(r){this.r=r;this.mode='garage';this.mobile=Math.min(innerWidth||720,innerHeight||1280)<900;this.ema=16.7;this.jitter=0;this.pressure=0;this.badFrames=0;this.goodFrames=0;this.cooldown=0;this.q=this.mobile?.96:1.18;this.still=0;this.lastYaw=r.yaw||0;this.lastPitch=r.pitch||0;this.tier='MICHAEL BALANCED';this.exposure=.98;this.maxQuality=this.mobile?1.10:1.38}

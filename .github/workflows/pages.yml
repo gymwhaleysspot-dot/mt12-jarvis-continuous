@@ -31,7 +31,7 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),crypto=require('crypto');
           const need=(p,s)=>{const v=fs.readFileSync(p,'utf8');if(!v.includes(s))throw Error(`${p} missing ${s}`)};
-          need('index.html','michael71');
+          need('index.html','michael72');
           need('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V57');
           need('jarvis/michael-graphics-v39.js','MICHAEL_V57');
           need('jarvis/michael-graphics-v39.js','CAMERA_SAFE_STUDIO_FOUNDATION');
@@ -39,7 +39,7 @@ jobs:
           need('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V57');
           need('jarvis/racing-tab.js','MICHAEL V57');
           const release=JSON.parse(fs.readFileSync('public/michael-v57-release.json'));
-          if(release.engine!=='MICHAEL_V57'||release.cache!=='michael71')throw Error('V57 release manifest mismatch');
+          if(release.engine!=='MICHAEL_V57'||release.cache!=='michael72')throw Error('V57 release manifest mismatch');
           const poly=JSON.parse(fs.readFileSync('engine/polyglot.json'));
           if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('V57 polyglot contract mismatch');
           if(fs.statSync('jarvis/generated/michael-assembly.wasm').size<100)throw Error('AssemblyScript WASM is incomplete');
