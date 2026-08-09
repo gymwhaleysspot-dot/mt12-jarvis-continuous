@@ -5,7 +5,7 @@ const instantiate = async (url, imports = {}) => {
     const bytes = await response.arrayBuffer();
     return WebAssembly.instantiate(bytes, imports);
 };
-export async function bootMichaelPolyglot(base = './generated/', cache = 'michael72') {
+export async function bootMichaelPolyglot(base = './generated/', cache = 'michael73') {
     const states = [];
     let cpp = null, rust = null, assembly = null, zig = null;
     let fallbackExposure = 1.18;
@@ -33,7 +33,7 @@ export async function bootMichaelPolyglot(base = './generated/', cache = 'michae
     const particleBudget = (frameMs, scale) => rust?.michael_particle_budget ? Number(rust.michael_particle_budget(frameMs, scale)) : Math.max(48, Math.min(640, 320 * (1 - Math.max(0, Math.min(1, (frameMs - 16.7) / 24)) * .72) * Math.max(.5, Math.min(2, scale))));
     const quality = (frameMs, scale) => assembly?.michaelQualityScore ? Number(assembly.michaelQualityScore(frameMs, scale)) : Math.max(0, 1 - Math.max(0, frameMs - 16.7) / 33.3) * .72 + Math.min(1, scale / 1.5) * .28;
     // Keep every named view composed to the same physical framing model on portrait phones.
-    const cameraPreset = (view, aspect) => { const portrait = Math.max(0, Math.min(1, (1 - Math.max(.45, Math.min(1.8, aspect))) / .55)), fit = 1 + portrait * .055, presets = { front: [0, .055, 11.78, .80], three: [-.72, .115, 12.02, .81], side: [-Math.PI / 2, .055, 12.92, .77], rear: [Math.PI, .055, 11.78, .80], top: [-.42, .895, 15.35, .73] }, p = presets[view] || presets.three; return { yaw: p[0], pitch: p[1], distance: p[2] * fit, targetY: p[3] }; };
+    const cameraPreset = (view, aspect) => { const portrait = Math.max(0, Math.min(1, (1 - Math.max(.45, Math.min(1.8, aspect))) / .55)), fit = 1 + portrait * .015, presets = { front: [0, .050, 9.80, .50], three: [-.72, .105, 11.10, .55], side: [-Math.PI / 2, .050, 12.30, .53], rear: [Math.PI, .050, 9.80, .50], top: [-.42, .895, 17.20, .40] }, p = presets[view] || presets.three; return { yaw: p[0], pitch: p[1], distance: p[2] * fit, targetY: p[3] }; };
     void zig;
     const api = { abi: 1, states, exposure, particleBudget, quality, cameraPreset };
     globalThis.__MICHAEL_POLYGLOT = api;
