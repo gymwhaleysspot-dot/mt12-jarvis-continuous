@@ -2,10 +2,44 @@
   "schema": 1,
   "supervisor": "Jarvis",
   "systems": {
-    "jarvis": {"role": "system correctness, causal diagnosis, repair, deployment, rollback", "authority": ["workflows", "builds", "health", "repair", "causal_memory"]},
-    "nickelle": {"role": "visual perception, reconstruction, graphics evolution", "authority": ["visual_research", "visual_genome", "materials", "geometry", "visual_models"]},
-    "michael": {"role": "semantic digital twin, simulation, rendering and interaction", "authority": ["runtime_state", "scene_graph", "rendering", "simulation"]},
-    "truth": {"role": "protected physical evidence", "authority": ["owner_truth", "measurements", "evidence", "contradictions"]}
+    "jarvis": {
+      "role": "system correctness, causal diagnosis, repair, deployment, rollback",
+      "authority": [
+        "workflows",
+        "builds",
+        "health",
+        "repair",
+        "causal_memory"
+      ]
+    },
+    "nickelle": {
+      "role": "visual perception, reconstruction, graphics evolution",
+      "authority": [
+        "visual_research",
+        "visual_genome",
+        "materials",
+        "geometry",
+        "visual_models"
+      ]
+    },
+    "michael": {
+      "role": "semantic digital twin, simulation, rendering and interaction",
+      "authority": [
+        "runtime_state",
+        "scene_graph",
+        "rendering",
+        "simulation"
+      ]
+    },
+    "truth": {
+      "role": "protected physical evidence",
+      "authority": [
+        "owner_truth",
+        "measurements",
+        "evidence",
+        "contradictions"
+      ]
+    }
   },
   "protectedInvariants": [
     "steering_sign",
@@ -15,6 +49,21 @@
     "mobile_frame_budget",
     "truth_owner_authority"
   ],
-  "health": {"status": "BOOTSTRAPPING", "lastAudit": null, "lastRepair": null},
-  "causalGraph": {"nodes": [], "edges": []}
+  "health": {
+    "status": "HEALTHY",
+    "lastAudit": "2026-08-09T22:39:54.727Z",
+    "lastRepair": null,
+    "failed": []
+  },
+  "causalGraph": {
+    "nodes": [
+      {
+        "id": "audit:2026-08-09T22:39:54.727Z",
+        "type": "system_audit",
+        "status": "HEALTHY",
+        "failed": []
+      }
+    ],
+    "edges": []
+  }
 }
