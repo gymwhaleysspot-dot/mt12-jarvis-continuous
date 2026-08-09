@@ -1,0 +1,60 @@
+name: Nickelle Always-On Evolution Watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: nickelle-always-on-watchdog
+  cancel-in-progress: true
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Keep Nickelle evolution lanes continuously active
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+
+          active_count() {
+            local workflow="$1"
+            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=30" \
+              --jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting" or .status=="requested")] | length'
+          }
+
+          ensure_running() {
+            local workflow="$1" label="$2"
+            local active
+            active="$(active_count "$workflow")"
+            echo "$label active/queued runs: $active"
+            if [ "$active" -eq 0 ]; then
+              echo "Starting $label"
+              gh workflow run "$workflow" --repo "$REPO" --ref main
+            else
+              echo "$label already active; no duplicate dispatched"
+            fi
+          }
+
+          ensure_running michael-visual-evolution.yml 'Nickelle Visual Laboratory'
+          ensure_running nickelle-heavy-vision.yml 'Nickelle Heavyweight Neural Vision'
+
+      - name: Report continuous evolution health
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          for workflow in michael-visual-evolution.yml nickelle-heavy-vision.yml; do
+            echo "--- $workflow ---"
+            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" \
+              --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
+          done
