@@ -1,0 +1,88 @@
+name: Jarvis Integrated Intelligence Proving Ground
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'truth/**'
+      - 'jarvis/system-registry.json'
+      - 'michael/digital-twin.json'
+      - 'nickelle/reconstruction.json'
+      - 'tools/jarvis_supervisor.mjs'
+      - 'tools/jarvis_proving_ground.mjs'
+      - 'tools/nickelle_reconstruction.mjs'
+      - '.github/workflows/jarvis-integrated-intelligence.yml'
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: jarvis-integrated-intelligence
+  cancel-in-progress: false
+
+jobs:
+  proving-ground:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate architecture
+        run: |
+          set -Eeuo pipefail
+          for f in tools/nickelle_reconstruction.mjs tools/jarvis_supervisor.mjs tools/jarvis_proving_ground.mjs jarvis/mjx7303-racing-michael-v39.js jarvis/michael-graphics-v40.js; do node --check "$f"; done
+          python3 - <<'PY'
+          import json
+          for p in ['truth/truth.json','jarvis/system-registry.json','michael/digital-twin.json']:
+              json.load(open(p))
+          print('Truth/Jarvis/Nickelle/Michael architecture valid')
+          PY
+      - name: Rebuild Nickelle truth-grounded 3D belief
+        run: node tools/nickelle_reconstruction.mjs
+      - name: Jarvis global causal health audit
+        run: node tools/jarvis_supervisor.mjs
+      - name: Disposable Michael proving ground
+        run: node tools/jarvis_proving_ground.mjs
+      - name: Synchronize Michael twin state
+        run: |
+          python3 - <<'PY'
+          import json,datetime
+          p='michael/digital-twin.json'; x=json.load(open(p)); r=json.load(open('nickelle/reconstruction.json'))
+          x['state']['reconstructionConfidence']=r.get('confidence',0)
+          x['state']['lastTruthSync']=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          json.dump(x,open(p,'w'),indent=2); open(p,'a').write('\n')
+          PY
+      - name: Persist architecture learning safely
+        env: {START_SHA: '${{ github.sha }}'}
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then
+            echo 'main advanced; architecture evidence preserved as artifact only'
+            exit 0
+          fi
+          git config user.name 'Jarvis Integrated Supervisor'
+          git config user.email 'actions@users.noreply.github.com'
+          git add jarvis/system-registry.json michael/digital-twin.json nickelle/reconstruction.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Jarvis synchronizes Truth Nickelle and Michael state [skip ci]'
+          git push origin HEAD:main
+      - name: Preserve proving-ground evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-integrated-proving-ground-${{ github.run_number }}
+          path: |
+            /tmp/jarvis-supervisor.json
+            /tmp/jarvis-proving-ground.json
+            nickelle/reconstruction.json
+            jarvis/system-registry.json
+            michael/digital-twin.json
+          if-no-files-found: warn
+          retention-days: 30
