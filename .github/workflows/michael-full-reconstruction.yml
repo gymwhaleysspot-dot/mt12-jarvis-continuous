@@ -1,0 +1,67 @@
+name: Michael Full Vehicle Reconstruction
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'michael/reconstruction/**'
+      - 'tools/michael_reconstruction_*.mjs'
+      - 'nickelle/research/**'
+      - 'keleb/reconstruction.json'
+      - 'michael/visual/reference-metrics.json'
+      - 'michael/visual/owner-truth.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: michael-full-vehicle-reconstruction
+  cancel-in-progress: false
+
+jobs:
+  reconstruct-direct:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate reconstruction stack
+        run: |
+          node --check tools/michael_reconstruction_director.mjs
+          node --check tools/michael_reconstruction_prove.mjs
+          node --check tools/nickelle_component_reconstruct.mjs
+          node -e "JSON.parse(require('fs').readFileSync('michael/reconstruction/system.json'));JSON.parse(require('fs').readFileSync('michael/reconstruction/landmarks.json'))"
+      - name: Solve complete vehicle reconstruction plan
+        run: node tools/michael_reconstruction_director.mjs run michael/reconstruction/current.json
+      - name: Prove all reconstruction gates exist
+        run: node tools/michael_reconstruction_prove.mjs michael/reconstruction/current.json /tmp/reconstruction-proof.json
+      - name: Generate component mesh challengers
+        run: |
+          rm -rf /tmp/full-reconstruction-candidates
+          node tools/nickelle_component_reconstruct.mjs generate /tmp/full-reconstruction-candidates
+      - name: Persist director belief without touching champion geometry
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Michael Reconstruction Director'
+          git config user.email 'actions@users.noreply.github.com'
+          git add michael/reconstruction/current.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Update full vehicle reconstruction belief [skip ci]'
+          git pull --rebase origin main || exit 0
+          git push origin HEAD:main || true
+      - name: Archive reconstruction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: michael-full-reconstruction-${{ github.run_number }}
+          path: |
+            michael/reconstruction
+            /tmp/reconstruction-proof.json
+            /tmp/full-reconstruction-candidates
+          if-no-files-found: warn
+          retention-days: 60
