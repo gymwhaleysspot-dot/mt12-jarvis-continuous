@@ -28,6 +28,7 @@ jobs:
       HF_HOME: /home/runner/.cache/huggingface
       NICKELLE_SEG_MODEL: Xenova/segformer-b5-finetuned-ade-640-640
       NICKELLE_DEPTH_MODEL: onnx-community/depth-anything-v2-base
+      KELEB_INTERIOR_BLEND: /tmp/keleb-interior.blend
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
@@ -54,14 +55,22 @@ jobs:
         run: node keleb/reconstruct.mjs | tee /tmp/keleb-reconstruction.log
       - name: Generate interior candidate population
         run: node keleb/evolve.mjs | tee /tmp/keleb-evolution.log
-      - name: Install Blender
+      - name: Install Blender and glTF dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y blender >/tmp/keleb-blender-install.log 2>&1
+          sudo apt-get install -y blender python3-numpy >/tmp/keleb-blender-install.log 2>&1
+          python3 -c 'import numpy; print(numpy.__version__)'
       - name: Build native Keleb interior champion
-        run: blender -b --python tools/build_keleb_interior.py
-      - name: Render canonical interior views
-        run: blender -b --python tools/render_keleb_interior.py
+        env:
+          PYTHONPATH: /usr/lib/python3/dist-packages
+        run: |
+          blender -b --python tools/build_keleb_interior.py
+          test -s "$KELEB_INTERIOR_BLEND"
+          test -s assets/mjx7303/keleb-interior.glb
+      - name: Render canonical interior views directly from native scene
+        run: |
+          blender -b --python tools/render_keleb_interior.py
+          for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
       - name: Restore heavyweight model cache
         uses: actions/cache@v4
         with:
@@ -82,6 +91,7 @@ jobs:
         run: |
           git diff --exit-code HEAD -- jarvis index.html '*.html' || { echo 'Keleb touched protected exterior/runtime files'; exit 1; }
           test -s assets/mjx7303/keleb-interior.glb
+          test -s "$KELEB_INTERIOR_BLEND"
           node -e "const p=require('./keleb/lab/proposal.json'); if(!p.requiresVisualValidation) process.exit(1)"
       - name: Persist Keleb learning and interior asset on newest main
         run: |
@@ -116,6 +126,7 @@ jobs:
             /tmp/keleb-research.log
             /tmp/keleb-reconstruction.log
             /tmp/keleb-evolution.log
+            /tmp/keleb-interior.blend
             keleb
             assets/mjx7303/keleb-interior.glb
           if-no-files-found: warn
