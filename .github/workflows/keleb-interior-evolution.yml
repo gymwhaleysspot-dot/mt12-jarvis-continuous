@@ -36,6 +36,8 @@ jobs:
       - name: Validate Keleb authority and code
         run: |
           node --check keleb/research-run.mjs
+          node --check keleb/direct-evidence-run.mjs
+          node --check keleb/reconstruct.mjs
           node --check keleb/evolve.mjs
           python3 -m py_compile tools/build_keleb_interior.py tools/render_keleb_interior.py
           node - <<'NODE'
@@ -44,8 +46,12 @@ jobs:
           for(const k of ['exterior','camera','steering','physics','telemetry','track','livery','headlights','wheels','body_shell'])if(!c.forbiddenMutationScopes.includes(k))throw Error(`missing forbidden scope ${k}`);
           console.log('Keleb interior-only authority validated');
           NODE
+      - name: Acquire direct C3 WRC cockpit evidence
+        run: node keleb/direct-evidence-run.mjs | tee /tmp/keleb-direct-evidence.log
       - name: Run Keleb dedicated interior research
         run: node keleb/research-run.mjs | tee /tmp/keleb-research.log
+      - name: Reconstruct Keleb interior belief
+        run: node keleb/reconstruct.mjs | tee /tmp/keleb-reconstruction.log
       - name: Generate interior candidate population
         run: node keleb/evolve.mjs | tee /tmp/keleb-evolution.log
       - name: Install Blender
@@ -71,6 +77,7 @@ jobs:
           const fs=require('fs'),p='keleb/heavy-memory.json';let m=JSON.parse(fs.readFileSync(p));const a=JSON.parse(fs.readFileSync('/tmp/keleb-heavy-analysis.json'));
           m.updatedAt=new Date().toISOString();m.runs=(m.runs||0)+1;m.lastAnalysis=a;fs.writeFileSync(p,JSON.stringify(m,null,2)+'\n');
           NODE
+          node keleb/reconstruct.mjs
       - name: Prove interior-only mutation boundary
         run: |
           git diff --exit-code HEAD -- jarvis index.html '*.html' || { echo 'Keleb touched protected exterior/runtime files'; exit 1; }
@@ -80,7 +87,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           mkdir -p /tmp/keleb-out/keleb /tmp/keleb-out/assets/mjx7303
-          cp -a keleb/memory.json keleb/heavy-memory.json keleb/research keleb/lab /tmp/keleb-out/keleb/
+          cp -a keleb/memory.json keleb/heavy-memory.json keleb/reconstruction.json keleb/research keleb/lab /tmp/keleb-out/keleb/
           cp assets/mjx7303/keleb-interior.glb /tmp/keleb-out/assets/mjx7303/
           git config user.name 'Keleb Interior AI'
           git config user.email 'actions@users.noreply.github.com'
@@ -105,7 +112,9 @@ jobs:
           path: |
             /tmp/keleb-render
             /tmp/keleb-heavy-analysis.json
+            /tmp/keleb-direct-evidence.log
             /tmp/keleb-research.log
+            /tmp/keleb-reconstruction.log
             /tmp/keleb-evolution.log
             keleb
             assets/mjx7303/keleb-interior.glb
