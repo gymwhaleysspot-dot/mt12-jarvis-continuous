@@ -1,11 +1,11 @@
 {
-  "schema": 3,
+  "schema": 4,
   "root": "michael_v57",
   "protected": ["licensed_shell_transform","camera_system","track_pose","steering","dynamics","telemetry"],
   "nodes": {
-    "front_grille": {"authority":"visual_genome","parameters":["grille_half_bottom","grille_half_top","grille_bottom_y","grille_top_y"],"views":["front","three"]},
-    "grille": {"authority":"visual_genome","parameters":["grille_half_bottom","grille_half_top","grille_bottom_y","grille_top_y"],"views":["front","three"]},
-    "grilleSpan": {"authority":"visual_genome","parameters":["grille_half_bottom","grille_half_top"],"views":["front","three"]},
+    "front_grille": {"authority":"native_topology_v42","parameters":["grille_half_bottom","grille_half_top","grille_bottom_y","grille_top_y","grille_corner_radius","grille_frame_thickness"],"construction":["rounded_rectangle_perimeter","recessed_dark_cavity","diagonal_mesh","low_wide_owner_profile"],"ownerTruthPrimary":true,"views":["front","three"]},
+    "grille": {"authority":"native_topology_v42","parameters":["grille_half_bottom","grille_half_top","grille_bottom_y","grille_top_y","grille_corner_radius","grille_frame_thickness"],"target":"owner-photo low wide recessed mesh opening","views":["front","three"]},
+    "grilleSpan": {"authority":"native_topology_v42","parameters":["grille_half_bottom","grille_half_top","grille_corner_radius"],"views":["front","three"]},
     "headlamp_pods": {"authority":"native_topology_v41","parameters":["headlamp_width","headlamp_height","headlamp_corner_radius","headlamp_lens_width","headlamp_lens_height","headlamp_lens_offset_x"],"construction":["rounded_rectangle_outer_pod","red_perimeter_surround","recessed_black_cavity","offset_internal_lens","thin_upper_drl"],"ownerTruthPrimary":true,"views":["front","three"]},
     "projector_pods": {"authority":"native_topology_v41","parameters":["headlamp_width","headlamp_height","headlamp_corner_radius","headlamp_lens_width","headlamp_lens_height","headlamp_lens_offset_x"],"legacyEllipseParametersDeprecated":true,"views":["front","three"]},
     "projectorShape": {"authority":"native_topology_v41","parameters":["headlamp_width","headlamp_height","headlamp_corner_radius","headlamp_lens_width","headlamp_lens_height","headlamp_lens_offset_x"],"target":"owner-photo horizontal rounded rectangle","views":["front","three"]},
