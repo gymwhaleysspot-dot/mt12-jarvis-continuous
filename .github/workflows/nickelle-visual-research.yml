@@ -22,6 +22,7 @@ on:
 permissions:
   contents: write
   models: read
+  actions: write
 
 concurrency:
   group: nickelle-dedicated-visual-research
@@ -63,7 +64,8 @@ jobs:
             if(!i.imageUrl||!i.sourcePage||!i.authority) throw Error('incomplete direct image evidence');
             if(i.truthEligible&&!['mjx_official','citroen_wrc_official','competition_official','manufacturer_media'].includes(i.authority)) throw Error('non-authoritative image marked truth-eligible');
           }
-          console.log(`Nickelle direct evidence: ${d.stats?.selectedImages||0} selected images, ${d.stats?.downloadedImages||0} downloaded, ${d.stats?.components||0} semantic components.`);
+          console.log(`Nickelle direct evidence: ${d.stats?.imagesSelected||0} selected images, ${d.stats?.downloaded||0} downloaded, ${d.stats?.components||0} semantic components.`);
+          console.log('Coverage:',JSON.stringify(d.stats?.componentCounts||d.componentEvidence?Object.fromEntries(Object.entries(d.componentEvidence||{}).map(([k,v])=>[k,v.length])):{}));
           NODE
       - name: Run dedicated automotive graphics and vision research
         run: node nickelle/research-run.mjs | tee /tmp/nickelle-research.log
@@ -77,10 +79,6 @@ jobs:
           for(const f of r.deterministicEvidence||[]) if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x))) throw Error('uncited deterministic visual lead');
           const truth=JSON.parse(fs.readFileSync('truth/truth.json'));
           if(truth.rules?.generatedEvidenceMayOverwriteOwnerTruth!==false) throw Error('Truth protection missing');
-          const useful=(r.acceptedFindings||[]).length+(r.deterministicEvidence||[]).length;
-          const gaps=(r.researchGaps||[]).length;
-          if(!useful&&!gaps) console.log('Academic lane produced no direct constraints; direct visual evidence lane remains available.');
-          else console.log(`Nickelle validated ${useful} cited findings/leads from ${ids.size} strictly qualified sources with ${gaps} explicit gaps.`);
           NODE
       - name: Convert research and images into actionable component evidence
         run: |
@@ -120,12 +118,15 @@ jobs:
             cp /tmp/nickelle-research-out/reconstruction.json nickelle/reconstruction.json
             cp -a /tmp/nickelle-research-out/history/. nickelle/research/history/
             git add nickelle/research nickelle/research-queue.json nickelle/reconstruction.json
-            if git diff --cached --quiet; then exit 0; fi
+            if git diff --cached --quiet; then break; fi
             git commit -m 'Nickelle records direct automotive visual evidence [skip ci]'
-            if git push origin HEAD:main; then exit 0; fi
+            if git push origin HEAD:main; then break; fi
             sleep $((n*4))
           done
-          exit 1
+      - name: Hand fresh evidence to full reconstruction director
+        run: |
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/workflows/michael-full-reconstruction.yml/dispatches" -f ref=main
+          echo 'Dispatched Michael Full Vehicle Reconstruction against fresh Nickelle evidence.'
       - name: Archive Nickelle visual evidence and downloaded references
         if: always()
         uses: actions/upload-artifact@v6
