@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "generatedAt": "2026-08-10T08:58:39.985Z",
+  "generatedAt": "2026-08-10T09:43:35.016Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -51,46 +51,6 @@
   "landmarkGraph": "michael/reconstruction/landmarks.json",
   "componentPlan": [
     {
-      "component": "headlights",
-      "evidence": {
-        "confidence": 0,
-        "references": 0,
-        "uniqueDirectReferences": 0
-      },
-      "uncertainty": 1,
-      "parameters": [
-        "projector_outer_rx",
-        "projector_outer_ry",
-        "projector_red_inner_rx",
-        "projector_red_inner_ry",
-        "projector_black_outer_rx",
-        "projector_black_outer_ry",
-        "projector_black_inner_rx",
-        "projector_black_inner_ry"
-      ],
-      "priority": 1.25,
-      "authority": "Nickelle",
-      "strategy": "research_then_reconstruct"
-    },
-    {
-      "component": "grille",
-      "evidence": {
-        "confidence": 0,
-        "references": 0,
-        "uniqueDirectReferences": 0
-      },
-      "uncertainty": 1,
-      "parameters": [
-        "grille_half_bottom",
-        "grille_half_top",
-        "grille_bottom_y",
-        "grille_top_y"
-      ],
-      "priority": 1.25,
-      "authority": "Nickelle",
-      "strategy": "research_then_reconstruct"
-    },
-    {
       "component": "roof_scoop",
       "evidence": {
         "confidence": 0,
@@ -108,20 +68,38 @@
       "strategy": "research_then_reconstruct"
     },
     {
+      "component": "grille",
+      "evidence": {
+        "confidence": 0.46,
+        "references": 28,
+        "uniqueDirectReferences": 28
+      },
+      "uncertainty": 0.54,
+      "parameters": [
+        "grille_half_bottom",
+        "grille_half_top",
+        "grille_bottom_y",
+        "grille_top_y"
+      ],
+      "priority": 1.178,
+      "authority": "Nickelle",
+      "strategy": "reference_constrained_reconstruction"
+    },
+    {
       "component": "arches",
       "evidence": {
-        "confidence": 0.44,
-        "references": 44,
-        "uniqueDirectReferences": 44
+        "confidence": 0.46,
+        "references": 36,
+        "uniqueDirectReferences": 18
       },
-      "uncertainty": 0.56,
+      "uncertainty": 0.54,
       "parameters": [
         "arch_x",
         "wheel_radius",
         "wheel_track_x",
         "wheel_y"
       ],
-      "priority": 1.192,
+      "priority": 1.178,
       "authority": "Nickelle",
       "strategy": "reference_constrained_reconstruction"
     },
@@ -129,8 +107,8 @@
       "component": "stance",
       "evidence": {
         "confidence": 0.46,
-        "references": 70,
-        "uniqueDirectReferences": 70
+        "references": 72,
+        "uniqueDirectReferences": 18
       },
       "uncertainty": 0.54,
       "parameters": [
@@ -147,8 +125,8 @@
       "component": "rear_aero",
       "evidence": {
         "confidence": 0.42,
-        "references": 2,
-        "uniqueDirectReferences": 2
+        "references": 9,
+        "uniqueDirectReferences": 9
       },
       "uncertainty": 0.58,
       "parameters": [
@@ -156,7 +134,29 @@
         "diffuser_half_bottom",
         "diffuser_half_top"
       ],
-      "priority": 0.976,
+      "priority": 1.046,
+      "authority": "Nickelle",
+      "strategy": "reference_constrained_reconstruction"
+    },
+    {
+      "component": "headlights",
+      "evidence": {
+        "confidence": 0.92,
+        "references": 316,
+        "uniqueDirectReferences": 62
+      },
+      "uncertainty": 0.08,
+      "parameters": [
+        "projector_outer_rx",
+        "projector_outer_ry",
+        "projector_red_inner_rx",
+        "projector_red_inner_ry",
+        "projector_black_outer_rx",
+        "projector_black_outer_ry",
+        "projector_black_inner_rx",
+        "projector_black_inner_ry"
+      ],
+      "priority": 0.856,
       "authority": "Nickelle",
       "strategy": "reference_constrained_reconstruction"
     }
@@ -307,7 +307,7 @@
     "focusFraction": 0.05
   },
   "componentLocks": {
-    "headlights": {
+    "roof_scoop": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -315,13 +315,6 @@
       "mutationScaleWhenStable": 0.25
     },
     "grille": {
-      "winsRequired": 4,
-      "minimumIndependentViews": 3,
-      "minimumReferenceClasses": 2,
-      "locked": false,
-      "mutationScaleWhenStable": 0.25
-    },
-    "roof_scoop": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -343,6 +336,13 @@
       "mutationScaleWhenStable": 0.25
     },
     "rear_aero": {
+      "winsRequired": 4,
+      "minimumIndependentViews": 3,
+      "minimumReferenceClasses": 2,
+      "locked": false,
+      "mutationScaleWhenStable": 0.25
+    },
+    "headlights": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -379,5 +379,5 @@
     "requireMobilePerformancePass": true,
     "componentFirst": true
   },
-  "nextComponent": "headlights"
+  "nextComponent": "roof_scoop"
 }
