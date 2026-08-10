@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "identity": "Keleb Interior AI",
+  "mission": "Research, reconstruct, evaluate and evolve Michael's interior only.",
+  "continuous": true,
+  "researchTopics": [
+    "Citroen C3 WRC cockpit interior roll cage dashboard steering wheel seats harness shifter handbrake",
+    "2017 Citroen C3 WRC interior driver co-driver cockpit photographs",
+    "WRC rally cockpit safety equipment fire extinguisher pedal box door cards",
+    "automotive interior photogrammetry multi-view reconstruction",
+    "semantic segmentation vehicle cockpit seats dashboard steering wheel roll cage",
+    "monocular depth and surface normals automotive interior",
+    "inverse rendering dark automotive interiors carbon fiber alcantara metal",
+    "mobile WebGL interior LOD occlusion and visibility optimization"
+  ],
+  "authorityOrder": ["owner_interior_photo","owner_measurement","citroen_wrc_official","competition_official","technical_reference","high_quality_photography","academic_graphics_cv","model_inference","generated_render"],
+  "candidatePopulation": 10,
+  "lowResolution": 480,
+  "finalResolution": 900,
+  "promotion": {"minimumGain":0.35,"maxFrameTimeMs":20,"maxRegressionMs":0.8},
+  "heavyVision": {"segmentation":"SegFormer-B5","depth":"Depth Anything V2 Base","fallback":"lightweight_proxy"},
+  "forbiddenMutationScopes": ["exterior","camera","steering","physics","telemetry","track","livery","headlights","wheels","body_shell"]
+}
