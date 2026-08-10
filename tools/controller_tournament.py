@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+import controller_behavior_replay as behavior_replay
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "dist-controller-tournament"
@@ -79,6 +80,8 @@ def feature_score(text: str) -> dict[str, float]:
 
 
 def candidate_bonus(profile: str, text: str) -> dict[str, float]:
+    # Kept only as diagnostic metadata for older manifests. It no longer contributes
+    # to tournament intelligenceDelta or winner selection.
     bonus={"learningGain":0.0,"safetyGain":0.0,"observabilityGain":0.0}
     if profile=="learning": bonus["learningGain"]=3.0 if ".0050" in text and "V[760+km]>3" in text else 0.0
     elif profile=="conservative": bonus["safetyGain"]=2.5 if "X[46]<140" in text and "m_min(ac,92)" in text else 0.0
@@ -93,6 +96,7 @@ def run() -> None:
     release_type=os.environ.get("RELEASE_TYPE","X").upper(); series=re.sub(r"[^a-z0-9]","",os.environ.get("SERIES",parent_name+"x"))[:8]; profiles=POLICY["candidateProfiles"]
     shutil.rmtree(OUT,ignore_errors=True); OUT.mkdir(parents=True); rows=[]
     risk_map={"conservative":2.0,"balanced":0.5,"learning":3.0,"observability":1.0,"combined":2.5,"synthesis":3.5}
+    replay=behavior_replay.tournament_scores()
     for index,profile in enumerate(profiles,1):
         cid=f"{series}{index}"; d=OUT/cid; d.mkdir(); lua=d/f"{cid}.lua"; luac=d/f"{cid}.luac"; status="REJECTED"; errors=[]; text=""; token,chunks=runtime_identity(parent_source_sha,cid,profile)
         try:
@@ -100,13 +104,13 @@ def run() -> None:
             if errors: raise RuntimeError("; ".join(errors))
             subprocess.run(["lua5.3","-e",f"assert(loadfile('{lua}'))"],check=True); subprocess.run([str(ROOT/"toolchain/compile_mt12.sh"),str(lua),str(luac)],check=True); status="COMPILED"
         except Exception as exc: errors.append(str(exc))
-        intelligence=feature_score(text) if text else {"total":0.0}; bonus=candidate_bonus(profile,text); risk=risk_map.get(profile,3.0); raw_delta=intelligence.get("total",0.0)-parent_intelligence["total"]+sum(bonus.values()); score=(100.0 if status=="COMPILED" else 0.0)+raw_delta-risk
-        manifest={"candidate":cid,"parent":parent_name,"releaseType":release_type,"profile":profile,"status":status,"authority":"EXPERIMENTAL_ROAD_REQUIRED","sourceBytes":lua.stat().st_size if lua.exists() else None,"normalizedBytes":luac.stat().st_size if luac.exists() else None,"sourceSha256":sha256(lua) if lua.exists() else None,"luacSha256":sha256(luac) if luac.exists() else None,"runtimeIdentity":{"schema":"MT12BBID1","token":token,"groups":[144,145,146,147],"chunks":chunks,"emitPolicy":"first logger cycle and every 600 logger cycles","floatExact":True,"mapsToFinalHashesInManifest":True},"parentIntelligence":parent_intelligence,"candidateIntelligence":intelligence,"intelligenceBonus":bonus,"intelligenceDelta":round(raw_delta,3),"riskPenalty":risk,"score":round(score,3),"errors":errors,"replayAuthority":"STATIC_SELF_EVALUATION_ONLY; ROAD_LOGS_STILL_REQUIRED"}
+        intelligence=feature_score(text) if text else {"total":0.0}; advisory=candidate_bonus(profile,text); behavior=replay.get(profile,{"score":0.0,"deltaVsBalanced":0.0}); risk=risk_map.get(profile,3.0); raw_delta=intelligence.get("total",0.0)-parent_intelligence["total"]+behavior.get("deltaVsBalanced",0.0); score=(100.0 if status=="COMPILED" else 0.0)+raw_delta-risk
+        manifest={"candidate":cid,"parent":parent_name,"releaseType":release_type,"profile":profile,"status":status,"authority":"EXPERIMENTAL_ROAD_REQUIRED","sourceBytes":lua.stat().st_size if lua.exists() else None,"normalizedBytes":luac.stat().st_size if luac.exists() else None,"sourceSha256":sha256(lua) if lua.exists() else None,"luacSha256":sha256(luac) if luac.exists() else None,"runtimeIdentity":{"schema":"MT12BBID1","token":token,"groups":[144,145,146,147],"chunks":chunks,"emitPolicy":"first logger cycle and every 600 logger cycles","floatExact":True,"mapsToFinalHashesInManifest":True},"parentIntelligence":parent_intelligence,"candidateIntelligence":intelligence,"sourcePresenceBonusAdvisory":advisory,"behaviorReplay":behavior,"intelligenceDelta":round(raw_delta,3),"riskPenalty":risk,"score":round(score,3),"errors":errors,"replayAuthority":"SYNTHETIC_BEHAVIOR_REPLAY; ROAD_LOGS_STILL_REQUIRED"}
         (d/"MANIFEST.json").write_text(json.dumps(manifest,indent=2)+"\n"); (d/"IDENTITY.json").write_text(json.dumps({"schema":"MT12BBID1","controller":cid,"parent":parent_name,"runtimeToken":token,"blackboxGroups":[144,145,146,147],"numericChunks":chunks,"sourceSha256":manifest["sourceSha256"],"luacSha256":manifest["luacSha256"]},indent=2)+"\n")
         if status=="COMPILED": subprocess.run(["zip","-9",f"{cid}.zip",lua.name,luac.name,"MANIFEST.json","IDENTITY.json"],cwd=d,check=True)
         rows.append(manifest)
     rows.sort(key=lambda x:x["score"],reverse=True); improved=[r for r in rows if r["status"]=="COMPILED" and r["intelligenceDelta"]>0]
-    result={"parent":parent_name,"releaseType":release_type,"parentIntelligence":parent_intelligence,"winner":improved[0]["candidate"] if improved else None,"runnerUp":improved[1]["candidate"] if len(improved)>1 else None,"candidates":rows,"runtimeIdentitySchema":"MT12BBID1","verdict":"IMPROVEMENT_FOUND" if improved else "NO_PROVEN_IMPROVEMENT","promotion":"NEVER_AUTOMATIC; self-evaluation plus bench and returned road logs required"}
+    result={"parent":parent_name,"releaseType":release_type,"parentIntelligence":parent_intelligence,"winner":improved[0]["candidate"] if improved else None,"runnerUp":improved[1]["candidate"] if len(improved)>1 else None,"candidates":rows,"behaviorReplaySchema":"JRW-BEHAVIOR-REPLAY-1","runtimeIdentitySchema":"MT12BBID1","verdict":"IMPROVEMENT_FOUND" if improved else "NO_PROVEN_IMPROVEMENT","promotion":"NEVER_AUTOMATIC; synthetic replay plus bench and returned road logs required"}
     (OUT/"TOURNAMENT.json").write_text(json.dumps(result,indent=2)+"\n"); print(json.dumps(result,indent=2))
     if not any(r["status"]=="COMPILED" for r in rows): raise SystemExit("no candidate compiled")
 
