@@ -1,0 +1,86 @@
+name: Nickelle Visual Learning Reconciler
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nickelle-learning-reconcile.yml'
+      - 'tools/nickelle_reconcile_learning.mjs'
+      - 'nickelle/learning-ledger.json'
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: nickelle-visual-learning-reconciler
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate reconciliation stack
+        run: |
+          set -Eeuo pipefail
+          node --check tools/nickelle_reconcile_learning.mjs
+          node --check tools/nickelle_visual_ai.mjs
+          node --check tools/nickelle_neural_vision.mjs
+          node --check tools/nickelle_graphics_lab.mjs
+          jq -e '.schema == 1 and (.processedRuns|type)=="array"' nickelle/learning-ledger.json >/dev/null
+      - name: Recover missed completed laboratory learning
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          mkdir -p /tmp/nickelle-reconcile
+          gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?status=completed&per_page=20" \
+            --jq '.workflow_runs | reverse | .[] | [.id,.run_number,.conclusion] | @tsv' > /tmp/nickelle-runs.tsv
+          while IFS=$'\t' read -r run_id run_number conclusion; do
+            [ "$conclusion" = "success" ] || continue
+            if jq -e --arg id "$run_id" '.processedRuns[]? | (if type=="object" then .runId else . end) | tostring == $id' nickelle/learning-ledger.json >/dev/null; then
+              echo "Run $run_id already reconciled"
+              continue
+            fi
+            dest="/tmp/nickelle-reconcile/run-$run_id"
+            mkdir -p "$dest"
+            echo "Recovering Nickelle laboratory run $run_number ($run_id)"
+            if ! gh run download "$run_id" --repo "$REPO" --dir "$dest"; then
+              echo "No downloadable evidence for run $run_id yet; will retry later"
+              continue
+            fi
+            if ! find "$dest" -name michael-decision.json -print -quit | grep -q .; then
+              echo "Run $run_id has no completed decision artifact; skipping"
+              continue
+            fi
+            node tools/nickelle_reconcile_learning.mjs "$run_id" "$dest"
+          done < /tmp/nickelle-runs.tsv
+      - name: Persist reconciled learning onto newest main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Nickelle Learning Reconciler'
+          git config user.email 'actions@users.noreply.github.com'
+          git add nickelle/memory.json nickelle/neural-model.json nickelle/embedding-prototype.json nickelle/visual-regression.json nickelle/critic-weights.json nickelle/research-queue.json nickelle/learning-ledger.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No missed Nickelle learning to persist'
+            exit 0
+          fi
+          git commit -m 'Reconcile Nickelle visual learning from completed laboratories [skip ci]'
+          git fetch origin main
+          if ! git rebase origin/main; then
+            echo 'Concurrent Nickelle/main write detected; aborting safely so next reconciliation replays from fresh main'
+            git rebase --abort || true
+            exit 0
+          fi
+          git push origin HEAD:main
