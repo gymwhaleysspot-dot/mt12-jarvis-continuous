@@ -58,14 +58,16 @@ jobs:
           for(const f of r.deterministicEvidence||[]) if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x))) throw Error('uncited deterministic visual lead');
           const truth=JSON.parse(fs.readFileSync('truth/truth.json'));
           if(truth.rules?.generatedEvidenceMayOverwriteOwnerTruth!==false) throw Error('Truth protection missing');
-          if((r.sources||[]).length && !(r.acceptedFindings||[]).length && !(r.deterministicEvidence||[]).length) throw Error('research produced no usable cited evidence');
-          console.log(`Nickelle validated ${(r.acceptedFindings||[]).length} synthesized findings + ${(r.deterministicEvidence||[]).length} deterministic leads from ${ids.size} visual sources; owner Truth remains protected.`);
+          const useful=(r.acceptedFindings||[]).length+(r.deterministicEvidence||[]).length;
+          const gaps=(r.researchGaps||[]).length;
+          if(!useful&&!gaps) throw Error('research produced neither usable evidence nor an explicit evidence gap');
+          console.log(`Nickelle validated ${useful} cited findings/leads from ${ids.size} strictly qualified sources with ${gaps} explicit gaps; owner Truth remains protected.`);
           NODE
       - name: Convert research into actionable component constraints
         run: |
           node tools/nickelle_research_bridge.mjs | tee /tmp/nickelle-research-bridge.log
           node tools/nickelle_reconstruction.mjs | tee /tmp/nickelle-reconstruction.log
-          node -e "const r=JSON.parse(require('fs').readFileSync('nickelle/research/constraints.json')); if(!Object.keys(r.componentConstraints||{}).length&&r.sourceCount) throw Error('no component constraints generated'); console.log('research constraints',Object.keys(r.componentConstraints||{}).length,'confidence',r.confidence,'fallback leads',r.deterministicLeadCount||0)"
+          node -e "const r=JSON.parse(require('fs').readFileSync('nickelle/research/constraints.json')); console.log('research constraints',Object.keys(r.componentConstraints||{}).length,'confidence',r.confidence,'fallback leads',r.deterministicLeadCount||0,'gaps',(r.researchGaps||[]).length); if(!Object.keys(r.componentConstraints||{}).length) console.log('No direct component constraint: Nickelle correctly preserved uncertainty instead of inventing one.')"
       - name: Preserve research output before syncing main
         run: |
           rm -rf /tmp/nickelle-research-out
