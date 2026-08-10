@@ -9,6 +9,7 @@ on:
       - 'keleb/**'
       - 'tools/build_keleb_interior.py'
       - 'tools/render_keleb_interior.py'
+      - 'tools/nickelle_heavy_vision.mjs'
   schedule:
     - cron: '12,32,52 * * * *'
 
@@ -28,6 +29,7 @@ jobs:
       HF_HOME: /home/runner/.cache/huggingface
       NICKELLE_SEG_MODEL: Xenova/segformer-b5-finetuned-ade-640-640
       NICKELLE_DEPTH_MODEL: onnx-community/depth-anything-v2-base
+      NICKELLE_HEAVY_VIEWS: front,driver,codriver,rear,top
       KELEB_INTERIOR_BLEND: /tmp/keleb-interior.blend
     steps:
       - uses: actions/checkout@v5
@@ -40,6 +42,7 @@ jobs:
           node --check keleb/direct-evidence-run.mjs
           node --check keleb/reconstruct.mjs
           node --check keleb/evolve.mjs
+          node --check tools/nickelle_heavy_vision.mjs
           python3 -m py_compile tools/build_keleb_interior.py tools/render_keleb_interior.py
           node - <<'NODE'
           const fs=require('fs');const t=JSON.parse(fs.readFileSync('keleb/interior-twin.json'));const c=JSON.parse(fs.readFileSync('keleb/config.json'));
@@ -48,7 +51,11 @@ jobs:
           console.log('Keleb interior-only authority validated');
           NODE
       - name: Acquire direct C3 WRC cockpit evidence
-        run: node keleb/direct-evidence-run.mjs | tee /tmp/keleb-direct-evidence.log
+        run: |
+          node keleb/direct-evidence-run.mjs | tee /tmp/keleb-direct-evidence.log
+          node - <<'NODE'
+          const r=require('./keleb/research/direct-evidence.json');if(!r.images?.length)throw Error('Keleb acquired no cockpit images');if(!Object.keys(r.componentEvidence||{}).length)throw Error('Keleb cockpit evidence mapped to zero components');console.log(`Keleb mapped ${r.images.length} images across ${Object.keys(r.componentEvidence).length} components`);
+          NODE
       - name: Run Keleb dedicated interior research
         run: node keleb/research-run.mjs | tee /tmp/keleb-research.log
       - name: Reconstruct Keleb interior belief
@@ -80,11 +87,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /home/runner/.cache/huggingface
-          key: keleb-heavy-v1-${{ runner.os }}-segformer-b5-depth-anything-v2-base
+          key: keleb-heavy-v2-${{ runner.os }}-segformer-b5-depth-anything-v2-base
       - name: Install heavyweight neural runtime
         run: npm install --no-save --package-lock=false pngjs@7.0.0 @huggingface/transformers
       - name: Run heavyweight segmentation and depth on Keleb cockpit
-        run: node tools/nickelle_heavy_vision.mjs analyze /tmp/keleb-render /tmp/keleb-heavy-analysis.json
+        run: |
+          node tools/nickelle_heavy_vision.mjs analyze /tmp/keleb-render /tmp/keleb-heavy-analysis.json
+          node - <<'NODE'
+          const a=require('/tmp/keleb-heavy-analysis.json');const expected=['front','driver','codriver','rear','top'];if(expected.some(v=>!a.views?.[v]))throw Error('Keleb heavyweight view manifest incomplete');if(a.viewOrder.join(',')!==expected.join(','))throw Error(`wrong heavyweight view order: ${a.viewOrder}`);console.log('Keleb heavyweight cockpit manifest validated');
+          NODE
       - name: Preserve Keleb heavyweight perception
         run: |
           node - <<'NODE'
@@ -98,6 +109,7 @@ jobs:
           test -s assets/mjx7303/keleb-interior.glb
           test -s "$KELEB_INTERIOR_BLEND"
           for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
+          test -s /tmp/keleb-heavy-analysis.json
           node -e "const p=require('./keleb/lab/proposal.json'); if(!p.requiresVisualValidation) process.exit(1)"
       - name: Persist Keleb learning and interior asset on newest main
         run: |
