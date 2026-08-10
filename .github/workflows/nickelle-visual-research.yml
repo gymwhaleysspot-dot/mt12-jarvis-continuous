@@ -13,6 +13,8 @@ on:
       - '.github/workflows/nickelle-visual-research.yml'
       - 'nickelle/research-run.mjs'
       - 'nickelle/research-config.json'
+      - 'nickelle/direct-evidence-run.mjs'
+      - 'nickelle/direct-evidence-config.json'
       - 'tools/nickelle_research_bridge.mjs'
   schedule:
     - cron: '7,27,47 * * * *'
@@ -28,7 +30,7 @@ concurrency:
 jobs:
   research:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       GITHUB_TOKEN: ${{ github.token }}
       NICKELLE_RESEARCH_TOPIC: ${{ inputs.topic || '' }}
@@ -40,12 +42,29 @@ jobs:
       - name: Validate Nickelle research engine
         run: |
           node --check nickelle/research-run.mjs
+          node --check nickelle/direct-evidence-run.mjs
           node --check tools/nickelle_research_bridge.mjs
           node --check tools/nickelle_reconstruction.mjs
           node -e "JSON.parse(require('fs').readFileSync('nickelle/research-config.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('nickelle/direct-evidence-config.json'))"
           node -e "JSON.parse(require('fs').readFileSync('nickelle/research-queue.json'))"
           node -e "JSON.parse(require('fs').readFileSync('truth/truth.json'))"
           node -e "JSON.parse(require('fs').readFileSync('michael/digital-twin.json'))"
+      - name: Acquire direct automotive pages and reference images
+        run: node nickelle/direct-evidence-run.mjs | tee /tmp/nickelle-direct-evidence.log
+      - name: Validate direct visual evidence boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('nickelle/research/direct-evidence.json'));
+          const truth=JSON.parse(fs.readFileSync('truth/truth.json'));
+          if(truth.rules?.generatedEvidenceMayOverwriteOwnerTruth!==false) throw Error('Truth protection missing');
+          for(const i of d.images||[]){
+            if(!i.imageUrl||!i.sourcePage||!i.authority) throw Error('incomplete direct image evidence');
+            if(i.truthEligible&&!['mjx_official','citroen_wrc_official','competition_official','manufacturer_media'].includes(i.authority)) throw Error('non-authoritative image marked truth-eligible');
+          }
+          console.log(`Nickelle direct evidence: ${d.stats?.selectedImages||0} selected images, ${d.stats?.downloadedImages||0} downloaded, ${d.stats?.components||0} semantic components.`);
+          NODE
       - name: Run dedicated automotive graphics and vision research
         run: node nickelle/research-run.mjs | tee /tmp/nickelle-research.log
       - name: Validate evidence and Truth boundary
@@ -60,20 +79,25 @@ jobs:
           if(truth.rules?.generatedEvidenceMayOverwriteOwnerTruth!==false) throw Error('Truth protection missing');
           const useful=(r.acceptedFindings||[]).length+(r.deterministicEvidence||[]).length;
           const gaps=(r.researchGaps||[]).length;
-          if(!useful&&!gaps) throw Error('research produced neither usable evidence nor an explicit evidence gap');
-          console.log(`Nickelle validated ${useful} cited findings/leads from ${ids.size} strictly qualified sources with ${gaps} explicit gaps; owner Truth remains protected.`);
+          if(!useful&&!gaps) console.log('Academic lane produced no direct constraints; direct visual evidence lane remains available.');
+          else console.log(`Nickelle validated ${useful} cited findings/leads from ${ids.size} strictly qualified sources with ${gaps} explicit gaps.`);
           NODE
-      - name: Convert research into actionable component constraints
+      - name: Convert research and images into actionable component evidence
         run: |
           node tools/nickelle_research_bridge.mjs | tee /tmp/nickelle-research-bridge.log
           node tools/nickelle_reconstruction.mjs | tee /tmp/nickelle-reconstruction.log
-          node -e "const r=JSON.parse(require('fs').readFileSync('nickelle/research/constraints.json')); console.log('research constraints',Object.keys(r.componentConstraints||{}).length,'confidence',r.confidence,'fallback leads',r.deterministicLeadCount||0,'gaps',(r.researchGaps||[]).length); if(!Object.keys(r.componentConstraints||{}).length) console.log('No direct component constraint: Nickelle correctly preserved uncertainty instead of inventing one.')"
+          node - <<'NODE'
+          const r=JSON.parse(require('fs').readFileSync('nickelle/research/constraints.json'));
+          console.log('research components',Object.keys(r.componentConstraints||{}).length,'confidence',r.confidence,'direct images',r.directImageCount||0,'direct components',r.directComponentCount||0,'gaps',(r.researchGaps||[]).length);
+          NODE
       - name: Preserve research output before syncing main
         run: |
           rm -rf /tmp/nickelle-research-out
           mkdir -p /tmp/nickelle-research-out/history
           cp nickelle/research/current.json /tmp/nickelle-research-out/current.json
           cp nickelle/research/state.json /tmp/nickelle-research-out/state.json
+          cp nickelle/research/direct-evidence.json /tmp/nickelle-research-out/direct-evidence.json
+          cp nickelle/research/direct-evidence-state.json /tmp/nickelle-research-out/direct-evidence-state.json
           cp nickelle/research/constraints.json /tmp/nickelle-research-out/constraints.json
           cp nickelle/research-queue.json /tmp/nickelle-research-out/research-queue.json
           cp nickelle/reconstruction.json /tmp/nickelle-research-out/reconstruction.json
@@ -89,18 +113,20 @@ jobs:
             mkdir -p nickelle/research/history
             cp /tmp/nickelle-research-out/current.json nickelle/research/current.json
             cp /tmp/nickelle-research-out/state.json nickelle/research/state.json
+            cp /tmp/nickelle-research-out/direct-evidence.json nickelle/research/direct-evidence.json
+            cp /tmp/nickelle-research-out/direct-evidence-state.json nickelle/research/direct-evidence-state.json
             cp /tmp/nickelle-research-out/constraints.json nickelle/research/constraints.json
             cp /tmp/nickelle-research-out/research-queue.json nickelle/research-queue.json
             cp /tmp/nickelle-research-out/reconstruction.json nickelle/reconstruction.json
             cp -a /tmp/nickelle-research-out/history/. nickelle/research/history/
             git add nickelle/research nickelle/research-queue.json nickelle/reconstruction.json
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Nickelle records visual research and updates reconstruction [skip ci]'
+            git commit -m 'Nickelle records direct automotive visual evidence [skip ci]'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((n*4))
           done
           exit 1
-      - name: Archive Nickelle visual research evidence
+      - name: Archive Nickelle visual evidence and downloaded references
         if: always()
         uses: actions/upload-artifact@v6
         with:
@@ -108,10 +134,14 @@ jobs:
           path: |
             nickelle/research/current.json
             nickelle/research/state.json
+            nickelle/research/direct-evidence.json
+            nickelle/research/direct-evidence-state.json
             nickelle/research/constraints.json
             nickelle/research/history
             nickelle/research-queue.json
             nickelle/reconstruction.json
+            /tmp/nickelle-direct-images
+            /tmp/nickelle-direct-evidence.log
             /tmp/nickelle-research.log
             /tmp/nickelle-research-bridge.log
             /tmp/nickelle-reconstruction.log
