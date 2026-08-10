@@ -1,6 +1,6 @@
 {
-  "schema": 1,
-  "generatedAt": "2026-08-10T07:46:24.044Z",
+  "schema": 2,
+  "generatedAt": "2026-08-10T08:58:39.985Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -54,7 +54,8 @@
       "component": "headlights",
       "evidence": {
         "confidence": 0,
-        "references": 0
+        "references": 0,
+        "uniqueDirectReferences": 0
       },
       "uncertainty": 1,
       "parameters": [
@@ -75,7 +76,8 @@
       "component": "grille",
       "evidence": {
         "confidence": 0,
-        "references": 0
+        "references": 0,
+        "uniqueDirectReferences": 0
       },
       "uncertainty": 1,
       "parameters": [
@@ -92,7 +94,8 @@
       "component": "roof_scoop",
       "evidence": {
         "confidence": 0,
-        "references": 0
+        "references": 0,
+        "uniqueDirectReferences": 0
       },
       "uncertainty": 1,
       "parameters": [
@@ -108,7 +111,8 @@
       "component": "arches",
       "evidence": {
         "confidence": 0.44,
-        "references": 30
+        "references": 44,
+        "uniqueDirectReferences": 44
       },
       "uncertainty": 0.56,
       "parameters": [
@@ -125,7 +129,8 @@
       "component": "stance",
       "evidence": {
         "confidence": 0.46,
-        "references": 56
+        "references": 70,
+        "uniqueDirectReferences": 70
       },
       "uncertainty": 0.54,
       "parameters": [
@@ -142,7 +147,8 @@
       "component": "rear_aero",
       "evidence": {
         "confidence": 0.42,
-        "references": 1
+        "references": 2,
+        "uniqueDirectReferences": 2
       },
       "uncertainty": 0.58,
       "parameters": [
@@ -150,7 +156,7 @@
         "diffuser_half_bottom",
         "diffuser_half_top"
       ],
-      "priority": 0.966,
+      "priority": 0.976,
       "authority": "Nickelle",
       "strategy": "reference_constrained_reconstruction"
     }
@@ -218,13 +224,11 @@
       "decal"
     ],
     "separateGeometryFromLighting": true,
-    "neutralStudioRequired": true,
-    "referenceMatchedLightingSecondary": true
+    "neutralStudioRequired": true
   },
   "liveryUV": {
     "enabled": true,
-    "separateFromBodyGeometry": true,
-    "projectFromValidatedReferences": true
+    "separateFromBodyGeometry": true
   },
   "lighting": {
     "neutralStudioGeometryJudge": true,
@@ -300,8 +304,7 @@
       "livery",
       "occlusion"
     ],
-    "focusFraction": 0.05,
-    "policy": "allocate next reconstruction cycle to highest weighted residual error"
+    "focusFraction": 0.05
   },
   "componentLocks": {
     "headlights": {
@@ -365,12 +368,6 @@
         "target": "mobile_far",
         "detail": 0.32
       }
-    ],
-    "preserve": [
-      "silhouette",
-      "lamp_identity",
-      "wheel_arch_fit",
-      "livery_readability"
     ],
     "mobileChampionUsesLOD": "LOD1"
   },
