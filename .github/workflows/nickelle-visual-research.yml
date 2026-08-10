@@ -13,6 +13,7 @@ on:
       - '.github/workflows/nickelle-visual-research.yml'
       - 'nickelle/research-run.mjs'
       - 'nickelle/research-config.json'
+      - 'tools/nickelle_research_bridge.mjs'
   schedule:
     - cron: '7,27,47 * * * *'
 
@@ -39,22 +40,33 @@ jobs:
       - name: Validate Nickelle research engine
         run: |
           node --check nickelle/research-run.mjs
+          node --check tools/nickelle_research_bridge.mjs
+          node --check tools/nickelle_reconstruction.mjs
           node -e "JSON.parse(require('fs').readFileSync('nickelle/research-config.json'))"
           node -e "JSON.parse(require('fs').readFileSync('nickelle/research-queue.json'))"
-          node -e "JSON.parse(require('fs').readFileSync('truth/michael-7303.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('truth/truth.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('michael/digital-twin.json'))"
       - name: Run dedicated automotive graphics and vision research
         run: node nickelle/research-run.mjs | tee /tmp/nickelle-research.log
       - name: Validate evidence and Truth boundary
         run: |
           node - <<'NODE'
-          const fs=require('fs'),r=JSON.parse(fs.readFileSync('nickelle/research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('uncited Nickelle finding');}const truth=JSON.parse(fs.readFileSync('truth/michael-7303.json'));if(!truth.policy?.generatedEvidenceCannotOverrideOwnerTruth)throw Error('Truth protection missing');console.log(`Nickelle validated ${r.acceptedFindings.length} findings from ${ids.size} visual sources`);
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync('nickelle/research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('uncited Nickelle finding');}const truth=JSON.parse(fs.readFileSync('truth/truth.json'));if(!truth.policy?.generatedEvidenceCannotOverrideOwnerTruth)throw Error('Truth protection missing');console.log(`Nickelle validated ${r.acceptedFindings.length} findings from ${ids.size} visual sources`);
           NODE
+      - name: Convert research into actionable component constraints
+        run: |
+          node tools/nickelle_research_bridge.mjs | tee /tmp/nickelle-research-bridge.log
+          node tools/nickelle_reconstruction.mjs | tee /tmp/nickelle-reconstruction.log
+          node -e "const r=JSON.parse(require('fs').readFileSync('nickelle/research/constraints.json')); console.log('research constraints',Object.keys(r.componentConstraints||{}).length,'confidence',r.confidence)"
       - name: Preserve research output before syncing main
         run: |
           rm -rf /tmp/nickelle-research-out
           mkdir -p /tmp/nickelle-research-out/history
           cp nickelle/research/current.json /tmp/nickelle-research-out/current.json
           cp nickelle/research/state.json /tmp/nickelle-research-out/state.json
+          cp nickelle/research/constraints.json /tmp/nickelle-research-out/constraints.json
+          cp nickelle/research-queue.json /tmp/nickelle-research-out/research-queue.json
+          cp nickelle/reconstruction.json /tmp/nickelle-research-out/reconstruction.json
           cp -a nickelle/research/history/. /tmp/nickelle-research-out/history/
       - name: Persist Nickelle research on newest main
         run: |
@@ -67,10 +79,13 @@ jobs:
             mkdir -p nickelle/research/history
             cp /tmp/nickelle-research-out/current.json nickelle/research/current.json
             cp /tmp/nickelle-research-out/state.json nickelle/research/state.json
+            cp /tmp/nickelle-research-out/constraints.json nickelle/research/constraints.json
+            cp /tmp/nickelle-research-out/research-queue.json nickelle/research-queue.json
+            cp /tmp/nickelle-research-out/reconstruction.json nickelle/reconstruction.json
             cp -a /tmp/nickelle-research-out/history/. nickelle/research/history/
-            git add nickelle/research
+            git add nickelle/research nickelle/research-queue.json nickelle/reconstruction.json
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Nickelle records dedicated visual research [skip ci]'
+            git commit -m 'Nickelle records visual research and updates reconstruction [skip ci]'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((n*4))
           done
@@ -83,7 +98,12 @@ jobs:
           path: |
             nickelle/research/current.json
             nickelle/research/state.json
+            nickelle/research/constraints.json
             nickelle/research/history
+            nickelle/research-queue.json
+            nickelle/reconstruction.json
             /tmp/nickelle-research.log
+            /tmp/nickelle-research-bridge.log
+            /tmp/nickelle-reconstruction.log
           if-no-files-found: warn
           retention-days: 90
