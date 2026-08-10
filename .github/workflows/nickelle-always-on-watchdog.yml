@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/nickelle-always-on-watchdog.yml'
       - '.github/workflows/jarvis-integrated-intelligence.yml'
+      - '.github/workflows/nickelle-visual-research.yml'
   schedule:
     - cron: '*/5 * * * *'
 
@@ -31,31 +32,24 @@ jobs:
           set -Eeuo pipefail
           active_count() {
             local workflow="$1"
-            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=30" \
-              --jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting" or .status=="requested")] | length'
+            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=30" --jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting" or .status=="requested")] | length'
           }
           ensure_running() {
             local workflow="$1" label="$2" active
             active="$(active_count "$workflow")"
             echo "$label active/queued runs: $active"
-            if [ "$active" -eq 0 ]; then
-              echo "Starting $label"
-              gh workflow run "$workflow" --repo "$REPO" --ref main
-            else
-              echo "$label already active; no duplicate dispatched"
-            fi
+            if [ "$active" -eq 0 ]; then gh workflow run "$workflow" --repo "$REPO" --ref main; else echo "$label already active"; fi
           }
           ensure_running michael-visual-evolution.yml 'Nickelle Visual Laboratory'
           ensure_running nickelle-heavy-vision.yml 'Nickelle Heavyweight Neural Vision'
+          ensure_running nickelle-visual-research.yml 'Nickelle Dedicated Visual Research'
           ensure_running jarvis-integrated-intelligence.yml 'Jarvis Integrated Proving Ground'
       - name: Report continuous intelligence health
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          set -Eeuo pipefail
-          for workflow in michael-visual-evolution.yml nickelle-heavy-vision.yml jarvis-integrated-intelligence.yml; do
+          for workflow in michael-visual-evolution.yml nickelle-heavy-vision.yml nickelle-visual-research.yml jarvis-integrated-intelligence.yml; do
             echo "--- $workflow ---"
-            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" \
-              --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
+            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
           done
