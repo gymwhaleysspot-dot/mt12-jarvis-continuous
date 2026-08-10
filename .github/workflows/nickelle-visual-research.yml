@@ -1,0 +1,89 @@
+name: Nickelle Dedicated Visual Research
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: Optional Nickelle visual research objective
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nickelle-visual-research.yml'
+      - 'nickelle/research-run.mjs'
+      - 'nickelle/research-config.json'
+  schedule:
+    - cron: '7,27,47 * * * *'
+
+permissions:
+  contents: write
+  models: read
+
+concurrency:
+  group: nickelle-dedicated-visual-research
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      NICKELLE_RESEARCH_TOPIC: ${{ inputs.topic || '' }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate Nickelle research engine
+        run: |
+          node --check nickelle/research-run.mjs
+          node -e "JSON.parse(require('fs').readFileSync('nickelle/research-config.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('nickelle/research-queue.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('truth/michael-7303.json'))"
+      - name: Run dedicated automotive graphics and vision research
+        run: node nickelle/research-run.mjs | tee /tmp/nickelle-research.log
+      - name: Validate evidence and Truth boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync('nickelle/research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('uncited Nickelle finding');}const truth=JSON.parse(fs.readFileSync('truth/michael-7303.json'));if(!truth.policy?.generatedEvidenceCannotOverrideOwnerTruth)throw Error('Truth protection missing');console.log(`Nickelle validated ${r.acceptedFindings.length} findings from ${ids.size} visual sources`);
+          NODE
+      - name: Preserve research output before syncing main
+        run: |
+          rm -rf /tmp/nickelle-research-out
+          mkdir -p /tmp/nickelle-research-out/history
+          cp nickelle/research/current.json /tmp/nickelle-research-out/current.json
+          cp nickelle/research/state.json /tmp/nickelle-research-out/state.json
+          cp -a nickelle/research/history/. /tmp/nickelle-research-out/history/
+      - name: Persist Nickelle research on newest main
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Nickelle Visual Research AI'
+          git config user.email 'actions@users.noreply.github.com'
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p nickelle/research/history
+            cp /tmp/nickelle-research-out/current.json nickelle/research/current.json
+            cp /tmp/nickelle-research-out/state.json nickelle/research/state.json
+            cp -a /tmp/nickelle-research-out/history/. nickelle/research/history/
+            git add nickelle/research
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Nickelle records dedicated visual research [skip ci]'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((n*4))
+          done
+          exit 1
+      - name: Archive Nickelle visual research evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nickelle-visual-research-${{ github.run_number }}
+          path: |
+            nickelle/research/current.json
+            nickelle/research/state.json
+            nickelle/research/history
+            /tmp/nickelle-research.log
+          if-no-files-found: warn
+          retention-days: 90
