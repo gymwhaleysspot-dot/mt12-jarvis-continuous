@@ -5,6 +5,7 @@ from mathutils import Vector
 STATE=json.load(open('keleb/state.json'))
 P=STATE['parameters']
 OUT=os.environ.get('KELEB_INTERIOR_OUT','assets/mjx7303/keleb-interior.glb')
+BLEND=os.environ.get('KELEB_INTERIOR_BLEND','/tmp/keleb-interior.blend')
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
 
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
@@ -50,41 +51,34 @@ def seat(name,x):
     for sx in (-1,1): box(name+'_Bolster',(x+sx*w*.92,.18,1.06),(.045,d*.82,.22),BLACK,.025)
     for sx in (-1,1): box(name+'_Harness',(x+sx*.075,.19,1.18),(P['harnessWidth'],.018,.34),RED,.006)
 
-# cockpit floor / tunnel
 box('Keleb_Floor',(0,.15,.60),(1.02,1.25,.035),BLACK,.02)
 box('Keleb_CenterTunnel',(0,.22,.78),(P['centerTunnelWidth'],.72,.18),CARBON,.025)
-# dashboard
 box('Keleb_Dashboard',(0,-1.02,1.31),(.86,P['dashboardDepth'],P['dashboardHeight']),CARBON,.05)
 box('Keleb_Cluster',(-.46,-1.20,1.46),(.22,.045,.095),BLACK,.025)
 box('Keleb_CenterPanel',(0,-1.20,1.34),(.20,.045,.16),BLACK,.02)
 for i in range(5): box(f'Keleb_Switch_{i}',(-.12+i*.06,-1.255,1.34),(.012,.012,.018),RED if i==2 else WHITE,.004)
-# seats
 seat('Keleb_DriverSeat',-P['seatSeparation']);seat('Keleb_CodriverSeat',P['seatSeparation'])
-# steering wheel and column
 bpy.ops.mesh.primitive_torus_add(major_radius=P['steeringRadius'],minor_radius=.018,major_segments=64,minor_segments=16,location=(-.46,-.91,P['steeringZ']),rotation=(math.pi/2,0,0))
 wheel=own(bpy.context.object);wheel.name='Keleb_SteeringWheel';wheel.data.materials.append(BLACK)
 cyl('Keleb_SteeringColumn',(-.46,-1.00,1.36),(-.46,-.91,P['steeringZ']),.018,METAL)
-# shifter + hydraulic handbrake
 box('Keleb_ShifterBase',(-.05,-.10,.96),(.05,.07,.05),CARBON,.02)
 cyl('Keleb_SequentialShifter',(-.05,-.10,.99),(-.05,-.10,.99+P['shifterHeight']),.018,METAL)
 box('Keleb_ShifterKnob',(-.05,-.10,1.24),(.035,.035,.045),BLACK,.025)
 cyl('Keleb_Handbrake',(0.09,.02,.98),(0.09,-P['handbrakeLength'],1.10),.016,METAL)
-# roll cage: A/B hoops, roof rails, door bars, cross brace
 r=P['cageTubeRadius'];rz=P['cageRoofZ']
-pts={
-'fl':(-.88,-.92,.68),'fr':(.88,-.92,.68),'fla':(-.80,-.82,rz),'fra':(.80,-.82,rz),
-'rl':(-.90,.94,.68),'rr':(.90,.94,.68),'rla':(-.82,.86,rz),'rra':(.82,.86,rz)}
+pts={'fl':(-.88,-.92,.68),'fr':(.88,-.92,.68),'fla':(-.80,-.82,rz),'fra':(.80,-.82,rz),'rl':(-.90,.94,.68),'rr':(.90,.94,.68),'rla':(-.82,.86,rz),'rra':(.82,.86,rz)}
 for a,b,n in [('fl','fla','A_L'),('fr','fra','A_R'),('rl','rla','B_L'),('rr','rra','B_R'),('fla','fra','RoofFront'),('rla','rra','RoofRear'),('fla','rla','RoofL'),('fra','rra','RoofR'),('fl','rl','SillL'),('fr','rr','SillR'),('fl','rla','DoorX1L'),('rl','fla','DoorX2L'),('fr','rra','DoorX1R'),('rr','fra','DoorX2R'),('rla','rr','RearX1'),('rra','rl','RearX2')]: cyl('Keleb_Cage_'+n,pts[a],pts[b],r,METAL)
-# door cards and extinguishing bottle
 box('Keleb_DoorCard_L',(-1.03,.05,1.08),(.025,.72,.32),CARBON,.015)
 box('Keleb_DoorCard_R',(1.03,.05,1.08),(.025,.72,.32),CARBON,.015)
 bpy.ops.mesh.primitive_cylinder_add(vertices=48,radius=.075,depth=.42,location=(.68,.78,.76),rotation=(0,math.pi/2,0));ext=own(bpy.context.object);ext.name='Keleb_FireExtinguisher';ext.data.materials.append(RED)
 
 scene.render.resolution_x=900;scene.render.resolution_y=700;scene.render.resolution_percentage=100
-scene.camera=None
-bpy.ops.object.camera_add(location=(0,-4.3,1.55),rotation=(math.radians(78),0,0));cam=own(bpy.context.object);cam.name='Keleb_AuditCamera';scene.camera=cam
-# aim camera
+bpy.ops.object.camera_add(location=(0,-4.3,1.55));cam=own(bpy.context.object);cam.name='Keleb_AuditCamera';scene.camera=cam
 def aim(o,pt): o.rotation_euler=(Vector(pt)-o.location).to_track_quat('-Z','Y').to_euler()
 aim(cam,(0,0,1.2));cam.data.lens=52
-bpy.ops.export_scene.gltf(filepath=OUT,export_format='GLB',use_selection=False)
-print(json.dumps({'generation':STATE['generation'],'out':OUT,'objects':len(C.objects),'authority':'interior_only'}))
+
+# Native .blend is the authoritative audit/render intermediate. Save it before any exporter addon runs.
+bpy.ops.wm.save_as_mainfile(filepath=BLEND)
+# GLB remains the deployable Michael interior asset. NumPy is installed by the workflow for Blender's glTF addon.
+bpy.ops.export_scene.gltf(filepath=OUT,export_format='GLB',use_selection=False,export_draco_mesh_compression_enable=False)
+print(json.dumps({'generation':STATE['generation'],'out':OUT,'blend':BLEND,'objects':len(C.objects),'authority':'interior_only'}))
