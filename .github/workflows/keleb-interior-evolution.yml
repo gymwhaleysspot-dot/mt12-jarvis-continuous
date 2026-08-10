@@ -55,11 +55,12 @@ jobs:
         run: node keleb/reconstruct.mjs | tee /tmp/keleb-reconstruction.log
       - name: Generate interior candidate population
         run: node keleb/evolve.mjs | tee /tmp/keleb-evolution.log
-      - name: Install Blender and glTF dependencies
+      - name: Install Blender, glTF and headless Mesa dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y blender python3-numpy >/tmp/keleb-blender-install.log 2>&1
+          sudo apt-get install -y blender python3-numpy xvfb libegl1 libegl-mesa0 libgl1-mesa-dri libglx-mesa0 mesa-utils >/tmp/keleb-blender-install.log 2>&1
           python3 -c 'import numpy; print(numpy.__version__)'
+          ldconfig -p | grep -E 'libEGL.so.1|libGLX_mesa.so.0' || true
       - name: Build native Keleb interior champion
         env:
           PYTHONPATH: /usr/lib/python3/dist-packages
@@ -68,8 +69,12 @@ jobs:
           test -s "$KELEB_INTERIOR_BLEND"
           test -s assets/mjx7303/keleb-interior.glb
       - name: Render canonical interior views directly from native scene
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+          GALLIUM_DRIVER: llvmpipe
         run: |
-          blender -b --python tools/render_keleb_interior.py
+          xvfb-run -a -s '-screen 0 1280x1024x24' blender -b --python tools/render_keleb_interior.py
           for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
       - name: Restore heavyweight model cache
         uses: actions/cache@v4
@@ -92,6 +97,7 @@ jobs:
           git diff --exit-code HEAD -- jarvis index.html '*.html' || { echo 'Keleb touched protected exterior/runtime files'; exit 1; }
           test -s assets/mjx7303/keleb-interior.glb
           test -s "$KELEB_INTERIOR_BLEND"
+          for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
           node -e "const p=require('./keleb/lab/proposal.json'); if(!p.requiresVisualValidation) process.exit(1)"
       - name: Persist Keleb learning and interior asset on newest main
         run: |
