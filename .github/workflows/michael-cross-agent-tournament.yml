@@ -21,12 +21,14 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Restore Keleb measured state from ai-state
+      - name: Restore Nickelle and Keleb measured state from ai-state
         run: |
           set -Eeuo pipefail
           git fetch origin ai-state
-          mkdir -p /tmp/ai-state/keleb
+          mkdir -p /tmp/ai-state/keleb michael/reconstruction
           git show origin/ai-state:keleb/measured-state.json >/tmp/ai-state/keleb/measured-state.json
+          git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
       - name: Run combined exterior interior tournament
         run: |
           node --check tools/michael_cross_agent_tournament.mjs
