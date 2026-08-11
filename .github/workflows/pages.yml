@@ -1,4 +1,4 @@
-name: Deploy Michael V57 to Pages
+name: Deploy Michael Current to Pages
 
 on:
   push:
@@ -11,6 +11,8 @@ on:
       - 'assets/**'
       - 'engine/**'
       - 'public/**'
+      - 'michael/visual/**'
+      - 'nickelle/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -32,31 +34,51 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Validate Michael V57 release
+      - name: Validate current Michael release
         run: |
+          set -Eeuo pipefail
           node --check jarvis/michael-graphics-v39.js
+          node --check jarvis/michael-graphics-v40-base.js
+          node --check jarvis/michael-graphics-v40.js
           node --check jarvis/mjx7303-racing-michael-v39.js
           node --check jarvis/racing-tab.js
+          node --check tools/michael_internal_vision.mjs
+          node --check tools/nickelle_visual_ai.mjs
           node <<'NODE'
           const fs=require('fs'),crypto=require('crypto');
-          const need=(p,s)=>{const v=fs.readFileSync(p,'utf8');if(!v.includes(s))throw Error(`${p} missing ${s}`)};
-          need('index.html','michael74');
-          need('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V57');
-          need('jarvis/michael-graphics-v39.js','MICHAEL_V57');
-          need('jarvis/michael-graphics-v39.js','CAMERA_SAFE_STUDIO_FOUNDATION');
+          const text=p=>fs.readFileSync(p,'utf8');
+          const need=(p,s)=>{const v=text(p);if(!v.includes(s))throw Error(`${p} missing ${s}`)};
+
+          // Workstation and live racing entrypoints: validate structure, not obsolete cache literals.
+          need('index.html','jarvis/racing-tab.js');
+          need('racing-mjx7303-michael-v39.html','MICHAEL PERSONAL TWIN V60');
+          need('racing-mjx7303-michael-v39.html','jarvis/mjx7303-racing-michael-v39.js?v=michael86');
+          need('jarvis/mjx7303-racing-michael-v39.js','michael-graphics-v40.js');
+          need('jarvis/michael-graphics-v40.js','MICHAEL GRAPHICS V60');
+          need('jarvis/michael-graphics-v40.js','v60NoBodyOverlay:true');
+          need('jarvis/michael-graphics-v40-base.js','licensed livery preservation');
           need('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V57');
-          need('jarvis/mjx7303-racing-michael-v39.js','MICHAEL V57');
-          need('jarvis/racing-tab.js','MICHAEL V57');
-          const release=JSON.parse(fs.readFileSync('public/michael-v57-release.json'));
-          if(release.engine!=='MICHAEL_V57'||release.cache!=='michael74')throw Error('V57 release manifest mismatch');
-          const poly=JSON.parse(fs.readFileSync('engine/polyglot.json'));
-          if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('V57 polyglot contract mismatch');
+
+          // Owner Truth and autonomous visual convergence are now part of the release contract.
+          const truth=JSON.parse(text('michael/visual/owner-truth.json'));
+          if(truth.authorityOrder?.[0]!=='owner_photos')throw Error('Owner Truth is not primary visual authority');
+          const refs=JSON.parse(text('michael/visual/owner-reference-observations.json'));
+          if(refs.authority!=='owner_photos'||(refs.repositoryFiles||[]).length<7)throw Error('Owner photo reference set incomplete');
+          const live=JSON.parse(text('michael/visual/live-status.json'));
+          if(!live.ownerTruthAuthority)throw Error('Nickelle live convergence status is not owner-truth bound');
+
+          // V57 remains the underlying engine/polyglot lineage; visual releases may advance independently.
+          const release=JSON.parse(text('public/michael-v57-release.json'));
+          if(release.engine!=='MICHAEL_V57')throw Error('Michael engine release manifest mismatch');
+          const poly=JSON.parse(text('engine/polyglot.json'));
+          if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('Michael polyglot contract mismatch');
           if(fs.statSync('jarvis/generated/michael-assembly.wasm').size<100)throw Error('AssemblyScript WASM is incomplete');
-          let b64='';for(let i=0;i<14;i++){const n=String(i).padStart(2,'0'),t=fs.readFileSync(`jarvis/michael-v40-payload-${n}.js`,'utf8'),m=t.match(/export default ['"]([^'"]+)/);if(!m)throw Error(`payload ${i} invalid`);b64+=m[1]}
+
+          let b64='';for(let i=0;i<14;i++){const n=String(i).padStart(2,'0'),t=text(`jarvis/michael-v40-payload-${n}.js`),m=t.match(/export default ['"]([^'"]+)/);if(!m)throw Error(`payload ${i} invalid`);b64+=m[1]}
           const b=Buffer.from(b64,'base64');if(b.subarray(0,4).toString()!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('GLB invalid');
           const sha=crypto.createHash('sha256').update(b).digest('hex');
           if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error(`GLB sha mismatch: ${sha}`);
-          console.log({engine:release.engine,cache:release.cache,languages:poly.languages.length,glbBytes:b.length,sha});
+          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,languages:poly.languages.length,glbBytes:b.length,sha});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with:
