@@ -24,12 +24,16 @@ jobs:
         with: {node-version: '22', package-manager-cache: false}
       - name: Validate unified system engine
         run: node --check tools/michael_system_orchestrator.mjs
-      - name: Restore prior ledger from isolated ai-state branch
+      - name: Restore isolated AI state and prior ledger
         run: |
           set -Eeuo pipefail
           git fetch origin ai-state:refs/remotes/origin/ai-state || true
-          mkdir -p /tmp/michael-system
+          mkdir -p /tmp/michael-system michael/reconstruction keleb
           git show origin/ai-state:michael/system/promotion-ledger.json >/tmp/prior-ledger.json 2>/dev/null || echo '{"schema":1,"events":[]}' >/tmp/prior-ledger.json
+          git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json 2>/dev/null || true
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
+          git show origin/ai-state:michael/reconstruction/current.json >michael/reconstruction/current.json 2>/dev/null || true
+          git show origin/ai-state:keleb/measured-state.json >keleb/measured-state.json 2>/dev/null || true
       - name: Build promotion ledger compatibility tournament and health dashboard data
         env: {SOURCE_SHA: '${{ github.sha }}'}
         run: node tools/michael_system_orchestrator.mjs run /tmp/michael-system /tmp/prior-ledger.json
