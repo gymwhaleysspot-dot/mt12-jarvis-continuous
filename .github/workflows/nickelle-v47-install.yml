@@ -42,14 +42,23 @@ jobs:
           grep -F 'V47 24-angle turntable and cross-resolution identity proof' .github/workflows/michael-visual-evolution.yml
           grep -F 'nickelle_visual_convergence.mjs gate' .github/workflows/michael-visual-evolution.yml
           grep -F 'nickelle_visual_convergence.mjs learn' .github/workflows/michael-visual-evolution.yml
-      - name: Commit installed V47 convergence
+      - name: Persist installed V47 convergence safely
         run: |
           set -Eeuo pipefail
           git config user.name 'Nickelle V47 Convergence Installer'
           git config user.email 'actions@users.noreply.github.com'
-          git add .github/workflows/michael-visual-evolution.yml michael/visual/scene-graph.json
-          git diff --cached --quiet && exit 0
-          git fetch origin main
-          git rebase origin/main
-          git commit -m 'Wire V47 convergence into Nickelle promotion gate [skip ci]'
-          git push origin HEAD:main
+          cp .github/workflows/michael-visual-evolution.yml /tmp/michael-visual-evolution.yml
+          cp michael/visual/scene-graph.json /tmp/scene-graph.json
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/michael-visual-evolution.yml .github/workflows/michael-visual-evolution.yml
+            cp /tmp/scene-graph.json michael/visual/scene-graph.json
+            git add .github/workflows/michael-visual-evolution.yml michael/visual/scene-graph.json
+            if git diff --cached --quiet; then echo 'V47 already installed'; exit 0; fi
+            git commit -m 'Wire V47 convergence into Nickelle promotion gate [skip ci]'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt*2))
+          done
+          echo 'V47 install could not persist after retries' >&2
+          exit 1
