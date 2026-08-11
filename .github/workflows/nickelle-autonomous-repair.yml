@@ -33,6 +33,11 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
+      - name: Restore isolated autonomous belief
+        run: |
+          git fetch origin ai-state:refs/remotes/origin/ai-state || true
+          mkdir -p michael/reconstruction
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
       - name: Validate autonomous graphics stack
         run: |
           set -Eeuo pipefail
@@ -64,23 +69,23 @@ jobs:
           if(!x.visualDebt?.regions?.length) throw Error('whole-car visual debt map missing');
           console.log('Nickelle autonomous repair: 20/20 upgrades live; focus=',x.focusRegion,'topology queue=',x.topologyQueue.length);
           NODE
-      - name: Persist autonomous belief safely
-        env: {START_SHA: '${{ github.sha }}'}
+      - name: Persist autonomous belief only to ai-state
         run: |
           set -Eeuo pipefail
-          git fetch origin main
-          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; state preserved as artifact and will refresh next cycle'; exit 0; fi
+          cp michael/reconstruction/autonomous-state.json /tmp/nickelle-autonomous-state.json
           git config user.name 'Nickelle Autonomous Repair AI'
           git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state
+          git checkout -B ai-state origin/ai-state
+          mkdir -p michael/reconstruction
+          cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
           git add michael/reconstruction/autonomous-state.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Nickelle updates autonomous whole-car visual debt [skip ci]'
-          git push origin HEAD:main
+          if ! git diff --cached --quiet; then git commit -m 'Nickelle updates isolated autonomous visual debt [skip ci]'; git push origin HEAD:ai-state; fi
       - name: Route topology debt into full reconstruction
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          q="$(jq '.topologyQueue | length' michael/reconstruction/autonomous-state.json)"
+          q="$(jq '.topologyQueue | length' /tmp/nickelle-autonomous-state.json)"
           if [ "$q" -gt 0 ]; then
             active="$(gh api "/repos/$REPO/actions/workflows/michael-full-reconstruction.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
             [ "$active" -gt 0 ] || gh workflow run michael-full-reconstruction.yml --repo "$REPO" --ref main
@@ -89,7 +94,7 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          debt="$(jq -r '.visualDebt.regions[0].debt // 0' michael/reconstruction/autonomous-state.json)"
+          debt="$(jq -r '.visualDebt.regions[0].debt // 0' /tmp/nickelle-autonomous-state.json)"
           awk "BEGIN{exit !($debt > 0.08)}" || exit 0
           active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
           [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main
@@ -99,7 +104,7 @@ jobs:
         with:
           name: nickelle-autonomous-repair-${{ github.run_number }}
           path: |
-            michael/reconstruction/autonomous-state.json
+            /tmp/nickelle-autonomous-state.json
             /tmp/michael-autonomy-baseline
           if-no-files-found: warn
           retention-days: 45
