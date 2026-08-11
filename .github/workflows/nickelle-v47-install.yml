@@ -1,0 +1,55 @@
+name: Install Nickelle V47 Visual Convergence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/install_nickelle_v47.mjs'
+      - 'tools/nickelle_visual_convergence.mjs'
+      - 'tools/michael_turntable_capture.mjs'
+      - 'michael/visual/convergence-policy.json'
+      - 'nickelle/visual-negatives.json'
+      - '.github/workflows/nickelle-v47-install.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: install-nickelle-v47-convergence
+  cancel-in-progress: false
+
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate V47 installer
+        run: |
+          node --check tools/install_nickelle_v47.mjs
+          node --check tools/nickelle_visual_convergence.mjs
+          node --check tools/michael_turntable_capture.mjs
+          node -e "for(const p of ['michael/visual/convergence-policy.json','michael/visual/convergence-state.json','nickelle/visual-negatives.json']) JSON.parse(require('fs').readFileSync(p))"
+      - name: Patch Nickelle promotion path and scene graph
+        run: node tools/install_nickelle_v47.mjs
+      - name: Validate installed workflow and scene graph
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('michael/visual/scene-graph.json'))"
+          grep -F 'V47 24-angle turntable and cross-resolution identity proof' .github/workflows/michael-visual-evolution.yml
+          grep -F 'nickelle_visual_convergence.mjs gate' .github/workflows/michael-visual-evolution.yml
+          grep -F 'nickelle_visual_convergence.mjs learn' .github/workflows/michael-visual-evolution.yml
+      - name: Commit installed V47 convergence
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Nickelle V47 Convergence Installer'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/michael-visual-evolution.yml michael/visual/scene-graph.json
+          git diff --cached --quiet && exit 0
+          git fetch origin main
+          git rebase origin/main
+          git commit -m 'Wire V47 convergence into Nickelle promotion gate [skip ci]'
+          git push origin HEAD:main
