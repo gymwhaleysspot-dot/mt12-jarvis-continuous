@@ -2,16 +2,17 @@ name: Keleb Continuous Interior Evolution
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '12,32,52 * * * *'
   push:
     branches: [main]
     paths:
       - '.github/workflows/keleb-interior-evolution.yml'
-      - 'keleb/**'
       - 'tools/build_keleb_interior.py'
       - 'tools/render_keleb_interior.py'
       - 'tools/nickelle_heavy_vision.mjs'
-  schedule:
-    - cron: '12,32,52 * * * *'
+      - 'keleb/config.json'
+      - 'keleb/interior-twin.json'
 
 permissions:
   contents: write
@@ -36,102 +37,68 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
+      - name: Restore isolated Keleb learning
+        run: |
+          git fetch origin ai-state:refs/remotes/origin/ai-state || true
+          for f in memory.json heavy-memory.json reconstruction.json; do git show "origin/ai-state:keleb/$f" >"keleb/$f" 2>/dev/null || true; done
       - name: Validate Keleb authority and code
         run: |
-          node --check keleb/research-run.mjs
-          node --check keleb/direct-evidence-run.mjs
-          node --check keleb/reconstruct.mjs
-          node --check keleb/evolve.mjs
-          node --check tools/nickelle_heavy_vision.mjs
+          node --check keleb/research-run.mjs; node --check keleb/direct-evidence-run.mjs; node --check keleb/reconstruct.mjs; node --check keleb/evolve.mjs; node --check tools/nickelle_heavy_vision.mjs
           python3 -m py_compile tools/build_keleb_interior.py tools/render_keleb_interior.py
           node - <<'NODE'
           const fs=require('fs');const t=JSON.parse(fs.readFileSync('keleb/interior-twin.json'));const c=JSON.parse(fs.readFileSync('keleb/config.json'));
           for(const k of ['exteriorGeometry','cameras','steering','vehicleDynamics','telemetry','track','nickelleExteriorState'])if(t.protectedBoundaries[k]!=='read_only')throw Error(`Keleb boundary ${k} not protected`);
           for(const k of ['exterior','camera','steering','physics','telemetry','track','livery','headlights','wheels','body_shell'])if(!c.forbiddenMutationScopes.includes(k))throw Error(`missing forbidden scope ${k}`);
-          console.log('Keleb interior-only authority validated');
           NODE
-      - name: Acquire direct C3 WRC cockpit evidence
+      - name: Acquire and learn direct cockpit evidence
         run: |
           node keleb/direct-evidence-run.mjs | tee /tmp/keleb-direct-evidence.log
-          node - <<'NODE'
-          const r=require('./keleb/research/direct-evidence.json');if(!r.images?.length)throw Error('Keleb acquired no cockpit images');if(!Object.keys(r.componentEvidence||{}).length)throw Error('Keleb cockpit evidence mapped to zero components');console.log(`Keleb mapped ${r.images.length} images across ${Object.keys(r.componentEvidence).length} components`);
-          NODE
-      - name: Run Keleb dedicated interior research
-        run: node keleb/research-run.mjs | tee /tmp/keleb-research.log
-      - name: Reconstruct Keleb interior belief
-        run: node keleb/reconstruct.mjs | tee /tmp/keleb-reconstruction.log
-      - name: Generate interior candidate population
-        run: node keleb/evolve.mjs | tee /tmp/keleb-evolution.log
-      - name: Install Blender, glTF and headless Mesa dependencies
+          node keleb/research-run.mjs | tee /tmp/keleb-research.log
+          node keleb/reconstruct.mjs | tee /tmp/keleb-reconstruction.log
+          node keleb/evolve.mjs | tee /tmp/keleb-evolution.log
+      - name: Install Blender runtime
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy xvfb libegl1 libegl-mesa0 libgl1-mesa-dri libglx-mesa0 mesa-utils >/tmp/keleb-blender-install.log 2>&1
-          python3 -c 'import numpy; print(numpy.__version__)'
-          ldconfig -p | grep -E 'libEGL.so.1|libGLX_mesa.so.0' || true
-      - name: Build native Keleb interior champion
-        env:
-          PYTHONPATH: /usr/lib/python3/dist-packages
+      - name: Build and render native interior
+        env: {PYTHONPATH: '/usr/lib/python3/dist-packages',LIBGL_ALWAYS_SOFTWARE: '1',MESA_LOADER_DRIVER_OVERRIDE: llvmpipe,GALLIUM_DRIVER: llvmpipe}
         run: |
           blender -b --python tools/build_keleb_interior.py
-          test -s "$KELEB_INTERIOR_BLEND"
-          test -s assets/mjx7303/keleb-interior.glb
-      - name: Render canonical interior views directly from native scene
-        env:
-          LIBGL_ALWAYS_SOFTWARE: '1'
-          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
-          GALLIUM_DRIVER: llvmpipe
-        run: |
+          test -s "$KELEB_INTERIOR_BLEND"; test -s assets/mjx7303/keleb-interior.glb
           xvfb-run -a -s '-screen 0 1280x1024x24' blender -b --python tools/render_keleb_interior.py
           for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
-      - name: Restore heavyweight model cache
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.cache/huggingface
-          key: keleb-heavy-v2-${{ runner.os }}-segformer-b5-depth-anything-v2-base
-      - name: Install heavyweight neural runtime
-        run: npm install --no-save --package-lock=false pngjs@7.0.0 @huggingface/transformers
-      - name: Run heavyweight segmentation and depth on Keleb cockpit
+      - uses: actions/cache@v4
+        with: {path: /home/runner/.cache/huggingface, key: 'keleb-heavy-v2-${{ runner.os }}-segformer-b5-depth-anything-v2-base'}
+      - name: Run heavyweight cockpit perception
         run: |
+          npm install --no-save --package-lock=false pngjs@7.0.0 @huggingface/transformers
           node tools/nickelle_heavy_vision.mjs analyze /tmp/keleb-render /tmp/keleb-heavy-analysis.json
           node - <<'NODE'
-          const a=require('/tmp/keleb-heavy-analysis.json');const expected=['front','driver','codriver','rear','top'];if(expected.some(v=>!a.views?.[v]))throw Error('Keleb heavyweight view manifest incomplete');if(a.viewOrder.join(',')!==expected.join(','))throw Error(`wrong heavyweight view order: ${a.viewOrder}`);console.log('Keleb heavyweight cockpit manifest validated');
-          NODE
-      - name: Preserve Keleb heavyweight perception
-        run: |
-          node - <<'NODE'
-          const fs=require('fs'),p='keleb/heavy-memory.json';let m=JSON.parse(fs.readFileSync(p));const a=JSON.parse(fs.readFileSync('/tmp/keleb-heavy-analysis.json'));
-          m.updatedAt=new Date().toISOString();m.runs=(m.runs||0)+1;m.lastAnalysis=a;fs.writeFileSync(p,JSON.stringify(m,null,2)+'\n');
+          const fs=require('fs'),p='keleb/heavy-memory.json';let m=JSON.parse(fs.readFileSync(p));const a=JSON.parse(fs.readFileSync('/tmp/keleb-heavy-analysis.json'));m.updatedAt=new Date().toISOString();m.runs=(m.runs||0)+1;m.lastAnalysis=a;fs.writeFileSync(p,JSON.stringify(m,null,2)+'\n');
           NODE
           node keleb/reconstruct.mjs
-      - name: Prove interior-only mutation boundary
+      - name: Prove interior-only boundary
         run: |
           git diff --exit-code HEAD -- jarvis index.html '*.html' || { echo 'Keleb touched protected exterior/runtime files'; exit 1; }
-          test -s assets/mjx7303/keleb-interior.glb
-          test -s "$KELEB_INTERIOR_BLEND"
-          for v in front driver codriver rear top; do test -s "/tmp/keleb-render/$v.png"; done
-          test -s /tmp/keleb-heavy-analysis.json
-          node -e "const p=require('./keleb/lab/proposal.json'); if(!p.requiresVisualValidation) process.exit(1)"
-      - name: Persist Keleb learning and interior asset on newest main
+          node -e "const p=require('./keleb/lab/proposal.json');if(!p.requiresVisualValidation)process.exit(1)"
+      - name: Save Keleb learning to ai-state only
         run: |
           set -Eeuo pipefail
-          mkdir -p /tmp/keleb-out/keleb /tmp/keleb-out/assets/mjx7303
-          cp -a keleb/memory.json keleb/heavy-memory.json keleb/reconstruction.json keleb/research keleb/lab /tmp/keleb-out/keleb/
-          cp assets/mjx7303/keleb-interior.glb /tmp/keleb-out/assets/mjx7303/
-          git config user.name 'Keleb Interior AI'
-          git config user.email 'actions@users.noreply.github.com'
-          for n in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p keleb assets/mjx7303
-            cp -a /tmp/keleb-out/keleb/. keleb/
-            cp /tmp/keleb-out/assets/mjx7303/keleb-interior.glb assets/mjx7303/keleb-interior.glb
-            git add keleb assets/mjx7303/keleb-interior.glb
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Keleb learns and rebuilds Michael interior [skip ci]'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((n*4))
-          done
-          exit 1
+          mkdir -p /tmp/keleb-memory/keleb
+          cp -a keleb/memory.json keleb/heavy-memory.json keleb/reconstruction.json keleb/research keleb/lab /tmp/keleb-memory/keleb/
+          git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state; git checkout -B ai-state origin/ai-state; mkdir -p keleb
+          cp -a /tmp/keleb-memory/keleb/. keleb/; git add keleb
+          if ! git diff --cached --quiet; then git commit -m 'Keleb updates isolated interior intelligence [skip ci]'; git push origin HEAD:ai-state; fi
+      - name: Promote only changed interior asset to main
+        run: |
+          set -Eeuo pipefail
+          cp assets/mjx7303/keleb-interior.glb /tmp/keleb-interior.glb
+          git fetch origin main; git checkout -B main origin/main; mkdir -p assets/mjx7303
+          cp /tmp/keleb-interior.glb assets/mjx7303/keleb-interior.glb; git add assets/mjx7303/keleb-interior.glb
+          if git diff --cached --quiet; then echo 'interior asset unchanged; no deploy-source commit'; exit 0; fi
+          git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'Keleb promotes improved interior asset'; git push origin HEAD:main
       - name: Archive Keleb evidence
         if: always()
         uses: actions/upload-artifact@v6
@@ -145,7 +112,4 @@ jobs:
             /tmp/keleb-reconstruction.log
             /tmp/keleb-evolution.log
             /tmp/keleb-interior.blend
-            keleb
-            assets/mjx7303/keleb-interior.glb
-          if-no-files-found: warn
           retention-days: 60
