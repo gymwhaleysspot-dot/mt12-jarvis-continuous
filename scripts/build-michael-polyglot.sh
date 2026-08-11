@@ -42,6 +42,37 @@ mkdir -p "$zig_root"
 tar -xf "$zig_archive" -C "$zig_root" --strip-components=1
 "$zig_root/zig" build-exe engine/zig/michael_spatial.zig -target wasm32-freestanding -O ReleaseSmall -fno-entry -rdynamic -femit-bin="$generated/michael-zig.wasm"
 
+# Derived provenance is required by the runtime manifest. Rebuild it every time so a
+# missing/stale generated file repairs itself instead of aborting the whole pipeline.
+python3 - <<'PY'
+import json, pathlib, subprocess, datetime
+out=pathlib.Path('jarvis/generated/compiler-provenance.json')
+def first(cmd):
+    try:
+        p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,check=False,timeout=20)
+        return (p.stdout or '').strip().splitlines()[0][:240] if p.stdout else 'unknown'
+    except Exception as e:
+        return f'unavailable: {e}'
+provenance={
+  'engine':'MICHAEL_V57',
+  'generatedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+  'compilers':{
+    'emscripten':first(['em++','--version']),
+    'rustc':first(['rustc','--version']),
+    'cargo':first(['cargo','--version']),
+    'node':first(['node','--version']),
+    'npm':first(['npm','--version']),
+    'go':first(['go','version']),
+    'dotnet':first(['dotnet','--version']),
+    'lua':first(['lua5.4','-v']),
+    'zig':first(['/tmp/michael-zig-0.16.0/zig','version']),
+    'python':first(['python3','--version'])
+  }
+}
+out.write_text(json.dumps(provenance,indent=2)+'\n')
+print('self-healed',out)
+PY
+
 python3 engine/python/build_manifest.py "$generated"
 
 python3 -m json.tool engine/polyglot.json >/dev/null
@@ -57,6 +88,8 @@ for(const file of ['michael-core.wasm','michael-rust.wasm','michael-assembly.was
 }
 const manifest=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
 if(manifest.engine!=='MICHAEL_V57'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
+const provenance=JSON.parse(fs.readFileSync('jarvis/generated/compiler-provenance.json','utf8'));
+if(provenance.engine!=='MICHAEL_V57'||!provenance.compilers?.emscripten)throw Error('Compiler provenance incomplete');
 for(const token of ['#version 300 es','MICHAEL_V56','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
 for(const token of ['@vertex','@fragment','MICHAEL_V56'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
 console.log({polyglot:'PASS',languages:manifest.languages,artifacts:manifest.artifacts.length});
