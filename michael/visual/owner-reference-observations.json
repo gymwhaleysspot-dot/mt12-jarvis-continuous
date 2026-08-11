@@ -1,26 +1,11 @@
 {
-  "schema": 2,
+  "schema": 3,
   "identity": "Michael V57 repository-backed owner exterior truth set",
   "authority": "owner_photos",
   "weight": 1.0,
   "capturedAt": "2026-08-10",
-  "repositoryFiles": [
-    "IMG_4328.jpeg",
-    "IMG_4329.jpeg",
-    "IMG_4330.jpeg",
-    "IMG_4331.jpeg",
-    "IMG_4332.jpeg",
-    "IMG_4333.jpeg",
-    "IMG_4334.jpeg",
-    "IMG_4335.jpeg"
-  ],
-  "repositoryBinding": {
-    "commit": "fa9bb8b69164538c720f221a5242bc45ee76c77a",
-    "mode": "binary_owner_truth",
-    "required": true,
-    "discovery": "IMG_43*.jpeg",
-    "note": "These are the actual owner-supplied JPEG binaries in the repository. View observations below remain semantic anchors; reconstruction and vision workflows must carry the repository images as primary evidence."
-  },
+  "repositoryFiles": ["IMG_4328.jpeg","IMG_4329.jpeg","IMG_4330.jpeg","IMG_4331.jpeg","IMG_4332.jpeg","IMG_4333.jpeg","IMG_4334.jpeg","IMG_4335.jpeg"],
+  "repositoryBinding": {"commit":"fa9bb8b69164538c720f221a5242bc45ee76c77a","mode":"binary_owner_truth","required":true,"discovery":"IMG_43*.jpeg","note":"Actual owner-supplied JPEG binaries. Semantic aliases below are authoritative bridges between scene-graph, judge, reconstruction and owner-photo names."},
   "photos": [
     {"id":"owner-front-three-left","view":"front_three_left","coverage":["front_grille","front_left_lamp_housing","front_right_lamp_housing","front_left_projector","front_right_projector","front_left_drl","front_right_drl","front_arch_left","front_arch_right","hood_vents","front_splitter","roof_scoop","wheel_fl","wheel_fr","side_skirt_left","rear_wing"],"observations":["Lower lamp assemblies are horizontal rounded-rectangle pods with red perimeter, dark internal housing, and offset rectangular lens areas.","Upper DRL/headlamp strip is very thin and visually integrated with the Citroen chevron/chrome line.","Central grille is wide, low, rounded-rectangular and mesh-filled with a thin contrasting perimeter.","Front fender extensions are multi-plane black aero pieces, not simple smooth arches.","Front splitter projects clearly ahead of the bumper face.","Hood-side vents are recessed black mesh openings.","Roof scoop is low, rectangular, forward-facing, white with red center treatment."]},
     {"id":"owner-rear-three-left","view":"rear_three_left","coverage":["rear_wing","rear_diffuser","rear_left_lamp","rear_right_lamp","rear_bumper","rear_arch_left","rear_arch_right","rear_quarter_aero","rear_window"],"observations":["Rear wing has a broad upper plane, large shaped vertical endplates and a secondary lower aero element/support plane.","Rear bumper has deep corner openings with contrasting perimeter trim.","Rear diffuser uses multiple pronounced vertical fins and a centered exhaust treatment.","Taillights are rounded-rectangular with internal lens segmentation rather than thin red bars."]},
@@ -31,12 +16,37 @@
     {"id":"owner-rear-straight","view":"rear","coverage":["rear_wing","rear_diffuser","rear_left_lamp","rear_right_lamp","rear_bumper","rear_arch_left","rear_arch_right","rear_window"],"observations":["Straight rear is the primary symmetry/proportion anchor for wing width, hatch width, taillight placement, bumper opening placement and diffuser width.","Diffuser has five pronounced fin regions beneath the bumper.","Central rear recess and exhaust treatment sit on the vehicle centerline.","Wing spans almost the full body width and endplates extend well above/below the upper plane."]}
   ],
   "componentAuthority": {
-    "headlights": {"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right"]},
-    "grille": {"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right"]},
-    "arches": {"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right","owner-side-right"]},
-    "roof_scoop": {"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-three-right","owner-side-right"]},
-    "rear_wing": {"confidence":1.0,"photoIds":["owner-rear-three-left","owner-side-right","owner-rear-three-right","owner-rear-straight"]},
-    "rear_diffuser": {"confidence":1.0,"photoIds":["owner-rear-three-left","owner-rear-three-right","owner-rear-straight"]},
-    "side_profile": {"confidence":1.0,"photoIds":["owner-side-right"]}
+    "headlights":{"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right"]},
+    "grille":{"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right"]},
+    "arches":{"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right","owner-side-right"]},
+    "roof_scoop":{"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-three-right","owner-side-right"]},
+    "rear_wing":{"confidence":1.0,"photoIds":["owner-rear-three-left","owner-side-right","owner-rear-three-right","owner-rear-straight"]},
+    "rear_diffuser":{"confidence":1.0,"photoIds":["owner-rear-three-left","owner-rear-three-right","owner-rear-straight"]},
+    "rear_lamps":{"confidence":1.0,"photoIds":["owner-rear-three-left","owner-rear-three-right","owner-rear-straight"]},
+    "side_profile":{"confidence":1.0,"photoIds":["owner-side-right"]},
+    "wheels":{"confidence":1.0,"photoIds":["owner-front-three-left","owner-front-three-right","owner-side-right"]},
+    "roof_greenhouse":{"confidence":1.0,"photoIds":["owner-side-right","owner-front-three-left","owner-front-three-right"]},
+    "livery_materials":{"confidence":0.95,"photoIds":["owner-front-three-left","owner-front-straight","owner-front-three-right","owner-side-right","owner-rear-three-left","owner-rear-three-right","owner-rear-straight"]}
+  },
+  "semanticAliases": {
+    "headlights":["headlights","headlamp_pods","projector_pods","projectorShape","front_drl","front_left_lamp_housing","front_right_lamp_housing","front_left_projector","front_right_projector","front_left_drl","front_right_drl"],
+    "grille":["grille","grilleSpan","front_grille"],
+    "arches":["front_arches","wheelFill","front_arch_left","front_arch_right","rear_arch_left","rear_arch_right"],
+    "roof_scoop":["roof_scoop"],
+    "rear_wing":["rear_wing"],
+    "rear_diffuser":["rear_diffuser","rearMass","rear_bumper","rear_quarter_aero"],
+    "rear_lamps":["rear_left_lamp","rear_right_lamp","rear_lamps"],
+    "side_profile":["sideSilhouette","threeSilhouette","sideDark","side_insert_right","side_skirt_right","side_skirt_left"],
+    "wheels":["wheels","wheel_fl","wheel_fr","wheel_rl","wheel_rr"],
+    "roof_greenhouse":["roof","roofWhite","roofline","windshield","greenhouse"],
+    "livery_materials":["materials","lighting","decals","edgeDetail","liveryYellow","lower_door_carbon","door_red_authority","yellow_skirt"]
+  },
+  "componentRegions": {
+    "headlights":"front_fascia","headlamp_pods":"front_fascia","projector_pods":"front_fascia","projectorShape":"front_fascia","front_drl":"front_fascia","grille":"front_fascia","grilleSpan":"front_fascia","front_grille":"front_fascia","frontSymmetry":"front_fascia",
+    "front_arches":"front_arches","wheelFill":"front_arches","wheels":"front_arches",
+    "sideSilhouette":"side_body","threeSilhouette":"side_body","sideDark":"side_body","lower_door_carbon":"side_body","door_red_authority":"side_body","yellow_skirt":"side_body",
+    "roof":"hood_roof","roofWhite":"hood_roof","roof_scoop":"hood_roof",
+    "rearMass":"rear_body","rear_wing":"rear_body","rear_diffuser":"rear_body","rear_lamps":"rear_body",
+    "materials":"materials_livery","lighting":"materials_livery","decals":"materials_livery","edgeDetail":"materials_livery","liveryYellow":"materials_livery"
   }
 }
