@@ -11,6 +11,9 @@ on:
       - 'tools/build_keleb_interior.py'
       - 'tools/render_keleb_interior.py'
       - 'tools/nickelle_heavy_vision.mjs'
+      - 'tools/michael_artist_council.mjs'
+      - 'michael/art/ultra-art-director.json'
+      - 'keleb/artist-brain.json'
       - 'keleb/config.json'
       - 'keleb/interior-twin.json'
 
@@ -40,15 +43,16 @@ jobs:
       - name: Restore isolated Keleb learning
         run: |
           git fetch origin ai-state:refs/remotes/origin/ai-state || true
-          for f in memory.json heavy-memory.json reconstruction.json; do git show "origin/ai-state:keleb/$f" >"keleb/$f" 2>/dev/null || true; done
-      - name: Validate Keleb authority and code
+          for f in memory.json heavy-memory.json reconstruction.json measured-state.json artist-council.json; do git show "origin/ai-state:keleb/$f" >"keleb/$f" 2>/dev/null || true; done
+      - name: Validate Keleb authority code and Artist Brain
         run: |
-          node --check keleb/research-run.mjs; node --check keleb/direct-evidence-run.mjs; node --check keleb/reconstruct.mjs; node --check keleb/evolve.mjs; node --check tools/nickelle_heavy_vision.mjs
+          node --check keleb/research-run.mjs; node --check keleb/direct-evidence-run.mjs; node --check keleb/reconstruct.mjs; node --check keleb/evolve.mjs; node --check tools/nickelle_heavy_vision.mjs; node --check tools/michael_artist_council.mjs
           python3 -m py_compile tools/build_keleb_interior.py tools/render_keleb_interior.py
           node - <<'NODE'
-          const fs=require('fs');const t=JSON.parse(fs.readFileSync('keleb/interior-twin.json'));const c=JSON.parse(fs.readFileSync('keleb/config.json'));
+          const fs=require('fs');const t=JSON.parse(fs.readFileSync('keleb/interior-twin.json'));const c=JSON.parse(fs.readFileSync('keleb/config.json'));const a=JSON.parse(fs.readFileSync('keleb/artist-brain.json'));const d=JSON.parse(fs.readFileSync('michael/art/ultra-art-director.json'));
           for(const k of ['exteriorGeometry','cameras','steering','vehicleDynamics','telemetry','track','nickelleExteriorState'])if(t.protectedBoundaries[k]!=='read_only')throw Error(`Keleb boundary ${k} not protected`);
           for(const k of ['exterior','camera','steering','physics','telemetry','track','livery','headlights','wheels','body_shell'])if(!c.forbiddenMutationScopes.includes(k))throw Error(`missing forbidden scope ${k}`);
+          if(!a.imagination?.enabled||!d.artistCouncil?.restraintCritic)throw Error('Ultra Artist Brain/Director not active');
           NODE
       - name: Acquire and learn direct cockpit evidence
         run: |
@@ -77,28 +81,39 @@ jobs:
           const fs=require('fs'),p='keleb/heavy-memory.json';let m=JSON.parse(fs.readFileSync(p));const a=JSON.parse(fs.readFileSync('/tmp/keleb-heavy-analysis.json'));m.updatedAt=new Date().toISOString();m.runs=(m.runs||0)+1;m.lastAnalysis=a;fs.writeFileSync(p,JSON.stringify(m,null,2)+'\n');
           NODE
           node keleb/reconstruct.mjs
+      - name: Run Keleb Ultra Artist Council
+        run: |
+          set +e
+          node tools/michael_artist_council.mjs interior keleb/measured-state.json /tmp/keleb-heavy-analysis.json keleb/reconstruction.json /tmp/keleb-artist-council.json
+          rc=$?
+          set -e
+          test "$rc" -eq 0 -o "$rc" -eq 3
+          cat /tmp/keleb-artist-council.json
       - name: Prove interior-only boundary
         run: |
           git diff --exit-code HEAD -- jarvis index.html '*.html' || { echo 'Keleb touched protected exterior/runtime files'; exit 1; }
           node -e "const p=require('./keleb/lab/proposal.json');if(!p.requiresVisualValidation)process.exit(1)"
-      - name: Save Keleb learning to ai-state only
+      - name: Save Keleb learning and artist verdict to ai-state only
         run: |
           set -Eeuo pipefail
           mkdir -p /tmp/keleb-memory/keleb
           cp -a keleb/memory.json keleb/heavy-memory.json keleb/reconstruction.json keleb/research keleb/lab /tmp/keleb-memory/keleb/
+          test -f keleb/measured-state.json && cp keleb/measured-state.json /tmp/keleb-memory/keleb/ || true
+          cp /tmp/keleb-artist-council.json /tmp/keleb-memory/keleb/artist-council.json
           git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
           git fetch origin ai-state; git checkout -B ai-state origin/ai-state; mkdir -p keleb
           cp -a /tmp/keleb-memory/keleb/. keleb/; git add keleb
-          if ! git diff --cached --quiet; then git commit -m 'Keleb updates isolated interior intelligence [skip ci]'; git push origin HEAD:ai-state; fi
-      - name: Promote only changed interior asset to main
+          if ! git diff --cached --quiet; then git commit -m 'Keleb updates isolated interior artist intelligence [skip ci]'; git push origin HEAD:ai-state; fi
+      - name: Promote only Artist-Council-approved changed interior asset to main
         run: |
           set -Eeuo pipefail
+          test "$(jq -r '.pass' /tmp/keleb-artist-council.json)" = 'true' || { echo 'Keleb Artist Council rejected this interior; learning retained, asset not promoted.'; exit 0; }
           cp assets/mjx7303/keleb-interior.glb /tmp/keleb-interior.glb
           git fetch origin main; git checkout -B main origin/main; mkdir -p assets/mjx7303
           cp /tmp/keleb-interior.glb assets/mjx7303/keleb-interior.glb; git add assets/mjx7303/keleb-interior.glb
           if git diff --cached --quiet; then echo 'interior asset unchanged; no deploy-source commit'; exit 0; fi
           git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
-          git commit -m 'Keleb promotes improved interior asset'; git push origin HEAD:main
+          git commit -m 'Keleb Artist Council promotes improved interior asset'; git push origin HEAD:main
       - name: Archive Keleb evidence
         if: always()
         uses: actions/upload-artifact@v6
@@ -107,6 +122,7 @@ jobs:
           path: |
             /tmp/keleb-render
             /tmp/keleb-heavy-analysis.json
+            /tmp/keleb-artist-council.json
             /tmp/keleb-direct-evidence.log
             /tmp/keleb-research.log
             /tmp/keleb-reconstruction.log
