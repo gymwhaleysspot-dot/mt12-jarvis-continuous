@@ -10,6 +10,7 @@ on:
       - 'tools/michael_visual_capture.mjs'
       - 'tools/michael_turntable_capture.mjs'
       - 'tools/nickelle_visual_convergence.mjs'
+      - 'tools/nickelle_artist_council.mjs'
       - 'tools/michael_visual_judge.mjs'
       - 'tools/michael_internal_vision.mjs'
       - 'tools/nickelle_visual_ai.mjs'
@@ -18,6 +19,7 @@ on:
       - 'tools/nickelle_temporal_vision.mjs'
       - 'jarvis/michael-graphics-v40.js'
       - 'michael/visual/**'
+      - 'michael/art/**'
       - 'nickelle/**'
   schedule:
     - cron: '42 * * * *'
@@ -48,7 +50,7 @@ jobs:
   evolve:
     if: github.event_name != 'schedule' || github.event.schedule != '17 */6 * * *'
     runs-on: ubuntu-24.04
-    timeout-minutes: 70
+    timeout-minutes: 120
     env:
       GITHUB_TOKEN: ${{ github.token }}
       MICHAEL_VISUAL_MODEL: openai/gpt-4.1
@@ -58,18 +60,20 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Validate all twenty Nickelle graphics systems plus V47 convergence
+      - name: Validate Nickelle thirty-system Ultra Artist stack plus convergence
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/michael_visual_evolution.py
-          for f in tools/michael_visual_capture.mjs tools/michael_turntable_capture.mjs tools/nickelle_visual_convergence.mjs tools/michael_visual_judge.mjs tools/michael_internal_vision.mjs tools/nickelle_visual_ai.mjs tools/nickelle_neural_vision.mjs tools/nickelle_graphics_lab.mjs tools/nickelle_temporal_vision.mjs jarvis/michael-graphics-v40.js jarvis/mjx7303-racing-michael-v39.js; do node --check "$f"; done
+          for f in tools/michael_visual_capture.mjs tools/michael_turntable_capture.mjs tools/nickelle_visual_convergence.mjs tools/nickelle_artist_council.mjs tools/michael_visual_judge.mjs tools/michael_internal_vision.mjs tools/nickelle_visual_ai.mjs tools/nickelle_neural_vision.mjs tools/nickelle_graphics_lab.mjs tools/nickelle_temporal_vision.mjs jarvis/michael-graphics-v40.js jarvis/mjx7303-racing-michael-v39.js; do node --check "$f"; done
           python3 - <<'PY'
           import json
-          files=['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json','michael/visual/scene-graph.json','michael/visual/convergence-policy.json','michael/visual/convergence-state.json','nickelle/visual-negatives.json','nickelle/identity.json','nickelle/memory.json','nickelle/neural-model.json','nickelle/embedding-prototype.json','nickelle/capabilities.json','nickelle/lab.json','nickelle/visual-regression.json','nickelle/research-queue.json','nickelle/critic-weights.json']
+          files=['michael/visual/owner-truth.json','michael/visual/reference-metrics.json','michael/visual/genome.json','michael/visual/state.json','michael/visual/scene-graph.json','michael/visual/convergence-policy.json','michael/visual/convergence-state.json','michael/art/ultra-art-director.json','nickelle/artist-brain.json','nickelle/visual-negatives.json','nickelle/identity.json','nickelle/memory.json','nickelle/neural-model.json','nickelle/embedding-prototype.json','nickelle/capabilities.json','nickelle/lab.json','nickelle/visual-regression.json','nickelle/research-queue.json','nickelle/critic-weights.json']
           for p in files: json.load(open(p))
           caps=json.load(open('nickelle/capabilities.json'))['capabilities']
-          assert len(caps)==20 and all(x.get('enabled') for x in caps.values())
-          print('Nickelle twenty-part graphics stack + V47 convergence valid')
+          assert len(caps)>=30 and all(x.get('enabled') for x in caps.values())
+          director=json.load(open('michael/art/ultra-art-director.json'))
+          assert len(director['artistCouncil'])==10
+          print('Nickelle thirty-system Ultra Artist stack + ten-critic council valid')
           PY
       - name: Enable native Nickelle Graphics V40 authority
         id: native
@@ -101,12 +105,12 @@ jobs:
           cat /tmp/michael-http.log; exit 1
       - name: Capture and analyze champion
         run: |
-          MICHAEL_CAPTURE_SIZE=900 node tools/michael_visual_capture.mjs /tmp/michael-baseline
+          MICHAEL_CAPTURE_SIZE=1080 node tools/michael_visual_capture.mjs /tmp/michael-baseline
           node tools/nickelle_graphics_lab.mjs analyze /tmp/michael-baseline /tmp/nickelle-baseline-analysis.json
           cp jarvis/mjx7303-racing-michael-v39.js /tmp/nickelle-champion-runtime.js
           cp michael/visual/genome.json /tmp/nickelle-champion-genome.json
           cp michael/visual/state.json /tmp/nickelle-champion-state.json
-      - name: Nickelle proposes seed and builds counterfactual population
+      - name: Nickelle proposes seed and builds Ultra Artist counterfactual population
         run: |
           node tools/nickelle_visual_ai.mjs propose /tmp/michael-baseline /tmp/michael-seed-proposal.json
           rm -rf /tmp/nickelle-lab /tmp/nickelle-tournament
@@ -115,7 +119,7 @@ jobs:
       - name: Optional external vision advisory
         continue-on-error: true
         run: node tools/michael_visual_judge.mjs propose /tmp/michael-baseline /tmp/michael-external-advisory.json
-      - name: Run Nickelle low-resolution visual tournament
+      - name: Run Nickelle 24-candidate visual tournament
         run: |
           set -Eeuo pipefail
           i=0
@@ -128,7 +132,7 @@ jobs:
             node --check jarvis/mjx7303-racing-michael-v39.js
             grep -F "lat=clamp((p?.x||0)*1.55" jarvis/mjx7303-racing-michael-v39.js
             grep -F 'function chaseRoad' jarvis/mjx7303-racing-michael-v39.js
-            MICHAEL_CAPTURE_SIZE=480 node tools/michael_visual_capture.mjs "/tmp/nickelle-tournament/candidate-$tag"
+            MICHAEL_CAPTURE_SIZE=540 node tools/michael_visual_capture.mjs "/tmp/nickelle-tournament/candidate-$tag"
             node tools/nickelle_visual_ai.mjs compare /tmp/michael-baseline "/tmp/nickelle-tournament/candidate-$tag" "$proposal" "/tmp/nickelle-tournament/candidate-$tag.verdict.json"
             node tools/nickelle_graphics_lab.mjs record "$proposal" "/tmp/nickelle-tournament/candidate-$tag.verdict.json" "/tmp/nickelle-tournament/candidate-$tag/metrics.json" "/tmp/nickelle-tournament/candidate-$tag.record.json"
           done
@@ -149,14 +153,22 @@ jobs:
           test -z "$bad" || { echo "Forbidden candidate files changed: $bad" >&2; exit 1; }
       - name: Full-resolution challenger vision
         run: |
-          MICHAEL_CAPTURE_SIZE=900 node tools/michael_visual_capture.mjs /tmp/michael-candidate
+          MICHAEL_CAPTURE_SIZE=1080 node tools/michael_visual_capture.mjs /tmp/michael-candidate
           node tools/nickelle_visual_ai.mjs compare /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-proposal.json /tmp/michael-verdict.json
           node tools/nickelle_graphics_lab.mjs analyze /tmp/michael-candidate /tmp/nickelle-candidate-analysis.json
           node tools/nickelle_neural_vision.mjs embed /tmp/michael-candidate /tmp/nickelle-candidate-embedding.json
-      - name: V47 24-angle turntable and cross-resolution identity proof
+      - name: Ultra Artist 48-angle turntable and mobile identity proof
         run: |
           rm -rf /tmp/michael-turntable
-          MICHAEL_TURNTABLE_SIZE=420 MICHAEL_TURNTABLE_FRAMES=24 node tools/michael_turntable_capture.mjs /tmp/michael-turntable
+          MICHAEL_TURNTABLE_SIZE=430 MICHAEL_TURNTABLE_FRAMES=48 node tools/michael_turntable_capture.mjs /tmp/michael-turntable
+      - name: Ten-critic Ultra Artist Council
+        run: |
+          set +e
+          node tools/nickelle_artist_council.mjs judge /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-artist-council.json
+          code=$?
+          set -e
+          test $code -eq 0 -o $code -eq 2
+          cat /tmp/michael-artist-council.json
       - name: Temporal vision and mobile graphics intelligence
         run: node tools/nickelle_temporal_vision.mjs /tmp/nickelle-temporal.json
       - name: Run protected promotion gates
@@ -167,6 +179,13 @@ jobs:
         run: |
           python3 tools/michael_visual_evolution.py finalize /tmp/michael-proposal.json /tmp/michael-verdict.json /tmp/michael-baseline/metrics.json /tmp/michael-candidate/metrics.json /tmp/michael-decision.json
           node tools/nickelle_visual_convergence.mjs gate /tmp/michael-baseline /tmp/michael-candidate /tmp/michael-verdict.json /tmp/michael-decision.json /tmp/michael-turntable /tmp/michael-convergence.json
+          if [ "$(jq -r '.promote' /tmp/michael-artist-council.json)" != "true" ]; then
+            jq --arg why "$(jq -r '.reason' /tmp/michael-artist-council.json)" '.promote=false | .artistCouncil=false | .reason=((.reason // "") + " | " + $why)' /tmp/michael-decision.json > /tmp/michael-decision.artist.json
+            mv /tmp/michael-decision.artist.json /tmp/michael-decision.json
+          else
+            jq '.artistCouncil=true' /tmp/michael-decision.json > /tmp/michael-decision.artist.json
+            mv /tmp/michael-decision.artist.json /tmp/michael-decision.json
+          fi
           promote="$(jq -r '.promote' /tmp/michael-decision.json)"; echo "promote=$promote" >> "$GITHUB_OUTPUT"; cat /tmp/michael-decision.json
       - name: Nickelle learns memory neural embeddings critic regressions and convergence
         run: |
@@ -199,12 +218,12 @@ jobs:
           test "$(git rev-parse origin/main)" = "$START_SHA" || { echo 'main advanced; Nickelle promotion safely deferred'; exit 0; }
           git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
           git add jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html michael/visual/genome.json michael/visual/state.json michael/visual/convergence-state.json nickelle/visual-negatives.json nickelle/memory.json nickelle/neural-model.json nickelle/embedding-prototype.json nickelle/visual-regression.json nickelle/critic-weights.json nickelle/research-queue.json
-          git commit -m "Nickelle laboratory evolves Michael generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
+          git commit -m "Nickelle Ultra Artist evolves Michael generation $(jq -r '.generation' michael/visual/genome.json) [skip ci]"
           git push origin HEAD:main
       - name: Reject non-improving challenger cleanly
         if: steps.gate.outputs.promote != 'true'
         run: |
-          echo 'Nickelle laboratory rejected challenger; Michael champion retained.'
+          echo 'Nickelle Ultra Artist Council rejected challenger; Michael champion retained.'
           cp /tmp/nickelle-champion-runtime.js jarvis/mjx7303-racing-michael-v39.js
           cp /tmp/nickelle-champion-genome.json michael/visual/genome.json
           cp /tmp/nickelle-champion-state.json michael/visual/state.json
@@ -218,17 +237,18 @@ jobs:
           git config user.name 'Nickelle Visual AI'; git config user.email 'actions@users.noreply.github.com'
           git add michael/visual/convergence-state.json nickelle/visual-negatives.json nickelle/memory.json nickelle/neural-model.json nickelle/embedding-prototype.json nickelle/visual-regression.json nickelle/critic-weights.json nickelle/research-queue.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Nickelle learns from visual laboratory generation [skip ci]'
+          git commit -m 'Nickelle Ultra Artist learns from rejected generation [skip ci]'
           git push origin HEAD:main
-      - name: Preserve complete Nickelle laboratory evidence
+      - name: Preserve complete Nickelle Ultra Artist evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: nickelle-visual-laboratory-${{ github.run_number }}
+          name: nickelle-ultra-artist-laboratory-${{ github.run_number }}
           path: |
             /tmp/michael-baseline
             /tmp/michael-candidate
             /tmp/michael-turntable
+            /tmp/michael-artist-council.json
             /tmp/michael-seed-proposal.json
             /tmp/michael-proposal.json
             /tmp/michael-verdict.json
@@ -244,6 +264,8 @@ jobs:
             /tmp/nickelle-tournament-report.json
             /tmp/michael-http.log
             michael/visual/convergence-state.json
+            michael/art/ultra-art-director.json
+            nickelle/artist-brain.json
             nickelle/visual-negatives.json
             nickelle/memory.json
             nickelle/neural-model.json
