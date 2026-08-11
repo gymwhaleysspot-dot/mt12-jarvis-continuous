@@ -1,0 +1,52 @@
+name: Michael Cross-Agent Whole-Car Tournament
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '13,43 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: michael-cross-agent-whole-car-tournament
+  cancel-in-progress: true
+
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Restore Keleb measured state from ai-state
+        run: |
+          set -Eeuo pipefail
+          git fetch origin ai-state
+          mkdir -p /tmp/ai-state/keleb
+          git show origin/ai-state:keleb/measured-state.json >/tmp/ai-state/keleb/measured-state.json
+      - name: Run combined exterior interior tournament
+        run: |
+          node --check tools/michael_cross_agent_tournament.mjs
+          node tools/michael_cross_agent_tournament.mjs /tmp/cross-agent-tournament.json
+      - name: Persist compatibility verdict to ai-state only
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Michael Cross-Agent Tournament'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state
+          git checkout -B ai-state origin/ai-state
+          mkdir -p michael/system
+          cp /tmp/cross-agent-tournament.json michael/system/cross-agent-tournament.json
+          git add michael/system/cross-agent-tournament.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Update isolated whole-car compatibility state [skip ci]'
+          git push origin HEAD:ai-state
+      - name: Archive compatibility evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: michael-cross-agent-${{ github.run_number }}
+          path: /tmp/cross-agent-tournament.json
+          retention-days: 90
