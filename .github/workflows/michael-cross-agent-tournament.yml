@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '13,43 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/michael_cross_agent_tournament.mjs'
+      - 'tools/michael_artist_council.mjs'
+      - 'michael/art/ultra-art-director.json'
+      - 'nickelle/artist-brain.json'
+      - 'keleb/artist-brain.json'
 
 permissions:
   contents: write
@@ -21,22 +29,25 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Restore Nickelle and Keleb measured state from ai-state
+      - name: Restore Nickelle and Keleb measured artist state from ai-state
         run: |
           set -Eeuo pipefail
           git fetch origin ai-state
           mkdir -p /tmp/ai-state/keleb michael/reconstruction
           git show origin/ai-state:keleb/measured-state.json >/tmp/ai-state/keleb/measured-state.json
+          git show origin/ai-state:keleb/artist-council.json >/tmp/ai-state/keleb/artist-council.json
           git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json
           git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
-      - name: Run combined exterior interior tournament
+      - name: Run Ultra Art Director combined exterior interior tournament
         run: |
+          node --check tools/michael_artist_council.mjs
           node --check tools/michael_cross_agent_tournament.mjs
           node tools/michael_cross_agent_tournament.mjs /tmp/cross-agent-tournament.json
-      - name: Persist compatibility verdict to ai-state only
+          cat /tmp/cross-agent-tournament.json
+      - name: Persist compatibility and art-director verdict to ai-state only
         run: |
           set -Eeuo pipefail
-          git config user.name 'Michael Cross-Agent Tournament'
+          git config user.name 'Michael Ultra Art Director'
           git config user.email 'actions@users.noreply.github.com'
           git fetch origin ai-state
           git checkout -B ai-state origin/ai-state
@@ -44,7 +55,7 @@ jobs:
           cp /tmp/cross-agent-tournament.json michael/system/cross-agent-tournament.json
           git add michael/system/cross-agent-tournament.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Update isolated whole-car compatibility state [skip ci]'
+          git commit -m 'Update isolated whole-car Ultra Art Director state [skip ci]'
           git push origin HEAD:ai-state
       - name: Archive compatibility evidence
         uses: actions/upload-artifact@v6
