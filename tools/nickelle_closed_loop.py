@@ -7,6 +7,7 @@ CAPTURE=ROOT/'tools/michael_visual_capture.mjs'; JUDGE=ROOT/'tools/nickelle_owne
 CAPTURE_TIMEOUT=int(os.getenv('CAPTURE_TIMEOUT_SECONDS','45'))
 JUDGE_TIMEOUT=int(os.getenv('JUDGE_TIMEOUT_SECONDS','20'))
 GROUPS={
+ 'owner_livery':['roof_white_width','roof_white_front_z','roof_white_rear_z','roof_white_inset','side_black_height','side_black_center_y','side_identity_front_z','side_identity_rear_z','yellow_accent_height','yellow_accent_y','yellow_accent_front_z','yellow_accent_rear_z','front_black_quarter_scale'],
  'front_fascia':['grille_half_bottom','grille_half_top','grille_bottom_y','grille_top_y','grille_corner_radius','grille_frame_thickness'],
  'headlights':['headlamp_width','headlamp_height','headlamp_corner_radius','headlamp_lens_width','headlamp_lens_height','headlamp_lens_offset_x'],
  'rear_lamps':['rear_lamp_width','rear_lamp_height','rear_lamp_corner_radius','rear_lamp_x','rear_lamp_y','rear_lamp_inner_scale','rear_lamp_z'],
@@ -16,6 +17,7 @@ GROUPS={
  'livery_materials':['paint_roughness_scale','dark_roughness_scale','exposure_scale','key_light_scale','ambient_scale'],
 }
 ALIASES={'grille':'front_fascia','three_quarter':'front_fascia'}
+IDENTITY_TOPOLOGY_FAILURES={'yellow_livery_missing','white_roof_livery_missing','side_identity_missing','black_quarter_missing'}
 
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}",flush=True)
@@ -52,6 +54,9 @@ def candidate(g,key,value):
     x=json.loads(json.dumps(g)); x['parameters'][key]=round(value,5); return x
 
 def choose_component(score,exhausted):
+    failures=set(score.get('identityFailures',[]))
+    if failures & IDENTITY_TOPOLOGY_FAILURES and 'owner_livery' not in exhausted:
+        return 'owner_livery',-1
     for k,v in sorted(score.get('parts',{}).items(),key=lambda kv:kv[1]):
         group=ALIASES.get(k,k)
         if group in GROUPS and group not in exhausted:return group,v
@@ -72,9 +77,9 @@ def main():
     log(f"Nickelle closed loop: rounds={rounds} captureTimeout={CAPTURE_TIMEOUT}s judgeTimeout={JUDGE_TIMEOUT}s")
     champion=json.loads(GENOME.read_text()); champion_score=capture(WORK/'champion',label='baseline')
     start=champion_score['score']; accepted=rejected=tested=failures=0; exhausted=set()
-    save_status(schema=3,status='RUNNING',round=0,maxRounds=rounds,score=start,startingScore=start,accepted=0,rejected=0,testedCandidates=0,captureFailures=0,
+    save_status(schema=4,status='RUNNING',round=0,maxRounds=rounds,score=start,startingScore=start,accepted=0,rejected=0,testedCandidates=0,captureFailures=0,
                 converged=False,viewScores=champion_score.get('viewScores',{}),parts=champion_score.get('parts',{}),ownerTruthFailures=champion_score.get('identityFailures',[]),
-                authority='DIRECT_OWNER_JPEG_PIXELS',runtimeBodyOverlay=False,diagnosis=['Direct owner-JPEG coordinate search started with fail-fast candidate deadlines.'],weakest=[])
+                authority='DIRECT_OWNER_JPEG_PIXELS',runtimeBodyOverlay=False,diagnosis=['Direct owner-JPEG coordinate search with native topology/livery reconstruction enabled.'],weakest=[])
     for r in range(1,rounds+1):
         comp,_=choose_component(champion_score,exhausted)
         if not comp:break
@@ -90,7 +95,7 @@ def main():
                 val=max(lo,min(hi,cur+direction*step))
                 if abs(val-cur)<1e-9:continue
                 cand=candidate(champion,key,val); set_genome(cand); out=WORK/f"r{r}-{key}-{'p' if direction>0 else 'm'}"
-                save_status(status='CAPTURING',round=r,activeComponent=comp,activeParameter=key,candidateDirection=direction,testedCandidates=tested,
+                save_status(status='CAPTURING_TOPOLOGY' if comp=='owner_livery' else 'CAPTURING',round=r,activeComponent=comp,activeParameter=key,candidateDirection=direction,testedCandidates=tested,
                             captureFailures=failures,score=champion_score['score'],accepted=accepted,rejected=rejected,
                             diagnosis=[f"Rendering {comp}: {key} {'+' if direction>0 else '-'} with a {CAPTURE_TIMEOUT}s hard deadline."])
                 try:sc=capture(out,label=f"r{r} {key} {'+' if direction>0 else '-'}")
@@ -107,7 +112,7 @@ def main():
                 tested+=1; gain=sc['score']-champion_score['score']
                 row={'score':sc['score'],'gain':gain,'key':key,'value':val,'genome':cand,'eval':sc,'dir':str(out)}
                 if no_regression(champion_score,sc) and (best is None or row['score']>best['score']):best=row
-                save_status(status='TESTING',round=r,activeComponent=comp,activeParameter=key,candidateDirection=direction,testedCandidates=tested,captureFailures=failures,
+                save_status(status='TESTING_TOPOLOGY' if comp=='owner_livery' else 'TESTING',round=r,activeComponent=comp,activeParameter=key,candidateDirection=direction,testedCandidates=tested,captureFailures=failures,
                             score=champion_score['score'],candidateScore=sc['score'],accepted=accepted,rejected=rejected,viewScores=champion_score.get('viewScores',{}),
                             parts=champion_score.get('parts',{}),ownerTruthFailures=champion_score.get('identityFailures',[]),
                             diagnosis=[f"Measured {comp}: {key} {'+' if direction>0 else '-'} = {sc['score']:.3f} ({gain:+.3f})."])
@@ -116,10 +121,10 @@ def main():
         if best and best['gain']>=0.20:
             champion=best['genome']; champion['generation']=int(champion.get('generation',0))+1; set_genome(champion); champion_score=best['eval']; accepted+=1; exhausted.clear()
             shutil.rmtree(WORK/'champion',ignore_errors=True); shutil.copytree(best['dir'],WORK/'champion')
-            state='IMPROVING'; diagnosis=[f"Accepted {best['key']}={best['value']:.5f}; direct owner-photo gain {best['gain']:+.3f}."]
+            state='IMPROVING_TOPOLOGY' if comp=='owner_livery' else 'IMPROVING'; diagnosis=[f"Accepted {best['key']}={best['value']:.5f}; direct owner-photo gain {best['gain']:+.3f}."]
             log(diagnosis[0])
         else:
-            exhausted.add(comp); rejected+=1; state='SEARCHING'; diagnosis=[f"{comp} exhausted bounded parameter search; escalate to topology/asset reconstruction."]
+            exhausted.add(comp); rejected+=1; state='SEARCHING'; diagnosis=[f"{comp} exhausted measured search; {'native topology remains active for the next component' if comp=='owner_livery' else 'escalate to topology/asset reconstruction'}."]
             log(diagnosis[0])
         ranked=sorted(champion_score.get('parts',{}).items(),key=lambda kv:kv[1])[:5]
         save_status(status=state,round=r,score=champion_score['score'],startingScore=start,accepted=accepted,rejected=rejected,testedCandidates=tested,captureFailures=failures,
