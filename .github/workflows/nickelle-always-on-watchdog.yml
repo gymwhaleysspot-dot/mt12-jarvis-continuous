@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nickelle-always-on-watchdog.yml'
+      - '.github/workflows/michael-global-intelligence-scheduler.yml'
       - '.github/workflows/jarvis-integrated-intelligence.yml'
       - '.github/workflows/nickelle-visual-research.yml'
       - '.github/workflows/keleb-interior-evolution.yml'
@@ -28,35 +29,17 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Keep all continuous intelligence lanes active
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
+      - name: Keep only the global scheduler alive
+        env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          active_count() {
-            local workflow="$1"
-            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=30" --jq '[.workflow_runs[] | select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting" or .status=="requested")] | length'
-          }
-          ensure_running() {
-            local workflow="$1" label="$2" active
-            active="$(active_count "$workflow")"
-            echo "$label active/queued runs: $active"
-            if [ "$active" -eq 0 ]; then gh workflow run "$workflow" --repo "$REPO" --ref main; else echo "$label already active"; fi
-          }
-          ensure_running michael-full-reconstruction.yml 'Michael Full Vehicle Reconstruction'
-          ensure_running michael-visual-evolution.yml 'Nickelle Visual Laboratory'
-          ensure_running nickelle-advanced-graphics.yml 'Nickelle Advanced Graphics Intelligence'
-          ensure_running nickelle-heavy-vision.yml 'Nickelle Heavyweight Neural Vision'
-          ensure_running nickelle-visual-research.yml 'Nickelle Dedicated Visual Research'
-          ensure_running keleb-interior-evolution.yml 'Keleb Interior AI Laboratory'
-          ensure_running jarvis-integrated-intelligence.yml 'Jarvis Integrated Proving Ground'
-      - name: Report continuous intelligence health
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
+          active="$(gh api "/repos/$REPO/actions/workflows/michael-global-intelligence-scheduler.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting")]|length')"
+          echo "Global scheduler active/queued: $active"
+          [ "$active" -gt 0 ] || gh workflow run michael-global-intelligence-scheduler.yml --repo "$REPO" --ref main
+      - name: Report intelligence health without duplicate dispatch
+        env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
-          for workflow in michael-full-reconstruction.yml michael-visual-evolution.yml nickelle-advanced-graphics.yml nickelle-heavy-vision.yml nickelle-visual-research.yml keleb-interior-evolution.yml jarvis-integrated-intelligence.yml; do
+          for workflow in michael-global-intelligence-scheduler.yml nickelle-autonomous-repair.yml michael-full-reconstruction.yml michael-visual-evolution.yml nickelle-advanced-graphics.yml nickelle-heavy-vision.yml nickelle-visual-research.yml keleb-interior-evolution.yml jarvis-integrated-intelligence.yml; do
             echo "--- $workflow ---"
-            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
+            gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=3" --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
           done
