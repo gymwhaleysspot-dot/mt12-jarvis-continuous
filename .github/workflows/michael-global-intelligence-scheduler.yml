@@ -1,0 +1,49 @@
+name: Michael Global Intelligence Scheduler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: michael-global-intelligence-scheduler
+  cancel-in-progress: true
+
+jobs:
+  schedule-intelligence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Dispatch only due nonduplicate intelligence lanes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          main_sha="$(gh api "/repos/$REPO/commits/main" --jq .sha)"
+          now="$(date +%s)"
+          due() {
+            local wf="$1" min_age="$2" label="$3"; local json active last_sha last_time age
+            json="$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=20")"
+            active="$(jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting")]|length' <<<"$json")"
+            if [ "$active" -gt 0 ]; then echo "$label already active"; return; fi
+            last_sha="$(jq -r '[.workflow_runs[]|select(.conclusion=="success")][0].head_sha // ""' <<<"$json")"
+            last_time="$(jq -r '[.workflow_runs[]|select(.conclusion=="success")][0].updated_at // "1970-01-01T00:00:00Z"' <<<"$json")"
+            age=$(( now - $(date -d "$last_time" +%s) ))
+            if [ "$last_sha" = "$main_sha" ] && [ "$age" -lt "$min_age" ]; then echo "$label unchanged generation; cooldown ${age}/${min_age}s"; return; fi
+            echo "dispatch $label: head_changed=$([ "$last_sha" != "$main_sha" ] && echo yes || echo no) age=$age"
+            gh workflow run "$wf" --repo "$REPO" --ref main
+          }
+          # Cheap diagnosis may run often. Heavy render/reconstruction lanes get longer cooldowns.
+          due nickelle-autonomous-repair.yml 600 'Autonomous Repair'
+          due nickelle-advanced-graphics.yml 1200 'Advanced Graphics'
+          due michael-full-reconstruction.yml 1200 'Full Reconstruction'
+          due michael-visual-evolution.yml 1800 'Visual Tournament'
+          due nickelle-heavy-vision.yml 1800 'Heavy Vision'
+          due nickelle-visual-research.yml 21600 'Visual Research'
+          due keleb-interior-evolution.yml 1800 'Keleb Interior'
+          due jarvis-integrated-intelligence.yml 900 'Jarvis Proving Ground'
