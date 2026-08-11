@@ -1,7 +1,7 @@
 {
-  "schema": 3,
-  "identity": "Michael V62 / owner's MJX 7303 Citroen C3 WRC personal twin",
-  "authorityOrder": ["owner_photos", "owner_measurements", "owner_requirements", "same_body_external_references", "full_size_c3_wrc_references"],
+  "schema": 4,
+  "identity": "Michael V63 / owner's MJX 7303 Citroen C3 WRC personal twin",
+  "authorityOrder": ["owner_photos", "owner_measurements", "owner_requirements", "topology_sanity", "same_body_external_references", "full_size_c3_wrc_references"],
   "primaryOwnerReferenceSet": "michael/visual/owner-reference-observations.json",
   "protectedFacts": {
     "body": [
@@ -10,16 +10,25 @@
       "Rear wheel arches remain predominantly red",
       "Dominant wide low black central front grille/intake with mesh and a thin contrasting perimeter",
       "Lower lamp assemblies are horizontal rounded-rectangle pods with red perimeter, dark internal housing and offset rectangular lens areas",
-      "Hood-side vents are recessed black mesh openings",
-      "Front fender extensions use layered multi-plane aero surfaces",
+      "Hood-side vents are recessed black mesh openings lying on the hood surface, never front-facing floating panels",
+      "Front fender extensions use layered multi-plane aero surfaces attached to the shell",
       "Front splitter projects clearly ahead of the bumper face",
       "Long black lower-door insert and black rearward side vent",
       "Deep lower side skirt with a thin yellow accent line",
-      "White roof area and white/gray hood graphic structure",
+      "White roof area is an exterior top surface and must read clearly in TOP view",
+      "White/gray hood graphic structure follows the hood surface",
       "Low rectangular forward-facing roof scoop with white/red coloring",
       "Broad high rear wing with large shaped endplates and a secondary lower aero plane/support element",
       "Rear bumper has deep corner openings with contrasting perimeter trim",
       "Black rear diffuser has multiple pronounced vertical fins and central exhaust treatment"
+    ],
+    "topology": [
+      "Every generated visual batch contains finite coordinates and valid triangle indices",
+      "Generated exterior topology remains inside the bounded vehicle envelope",
+      "Front-facing details are built in a front/rear plane, hood and roof details in a top-facing plane, and side identity in side-facing planes",
+      "No detached floating rectangles or impossible body intersections are permitted",
+      "Left/right paired exterior modules preserve intentional symmetry unless owner photos prove asymmetry",
+      "Malformed generated topology is rejected before pixel scoring or promotion"
     ],
     "wheels": [
       "White multi-spoke rally wheels",
@@ -40,7 +49,7 @@
       "Cabin contains two rally occupants: one driver and one navigator/co-driver",
       "Driver is seated at the steering position and is visibly helmeted through the greenhouse",
       "Navigator/co-driver is seated in the passenger position and is visibly helmeted through the greenhouse",
-      "Both occupants use rally bucket-seat, torso and harness silhouettes",
+      "Both occupants use rally bucket-seat, torso, visor and harness silhouettes",
       "Navigator has a compact pace-note board/detail",
       "Existing roll cage, glass and cabin visibility remain preserved"
     ],
@@ -56,11 +65,12 @@
   "referenceNotes": [
     "Eight owner photographs supplied 2026-08-10 define the primary exterior shape and identity.",
     "Owner requirement supplied 2026-08-11 defines the cockpit as an occupied rally cabin with a driver and navigator/co-driver.",
+    "Owner screenshots supplied 2026-08-11 exposed detached front topology in V62; V63 therefore makes geometry sanity a pre-score invariant.",
     "Web research may fill hidden details but must not outrank the owner set for visible geometry.",
     "The side photograph is the primary proportion anchor for wheelbase, wheel diameter, overhangs, roofline, windshield rake, greenhouse and rocker height.",
     "The straight front and rear photographs are the primary symmetry/placement anchors for fascia, lamps, grille, wing, taillights, bumper openings and diffuser."
   ],
   "mutableSubsystems": ["front_grille", "lamp_housings", "projectors", "drls", "front_arches", "hood_vents", "front_splitter", "side_insert", "skirt_accent", "roof_graphic", "roof_scoop", "wing_detail", "rear_lamps", "rear_bumper_openings", "rear_diffuser", "wheel_material", "cockpit_crew"],
-  "requiredRuntimeSystems": {"driverPresent": true, "navigatorPresent": true, "occupantCount": 2, "cockpitCrew": "RALLY_DRIVER_AND_NAVIGATOR_V62"},
+  "requiredRuntimeSystems": {"ownerTopology": "OWNER_V63", "topologySanity": true, "malformedTopologyCount": 0, "driverPresent": true, "navigatorPresent": true, "occupantCount": 2, "cockpitCrew": "RALLY_DRIVER_AND_NAVIGATOR_V63"},
   "forbiddenAutomaticSubsystems": ["dynamics", "steering", "track_centerline", "camera_presets", "controller", "telemetry", "payload", "licensed_mesh_transform"]
 }
