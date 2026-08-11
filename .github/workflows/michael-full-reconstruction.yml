@@ -7,12 +7,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'michael/reconstruction/**'
       - 'tools/michael_reconstruction_*.mjs'
       - 'nickelle/research/**'
       - 'keleb/reconstruction.json'
       - 'michael/visual/reference-metrics.json'
       - 'michael/visual/owner-truth.json'
+      - '.github/workflows/michael-full-reconstruction.yml'
 
 permissions:
   contents: write
@@ -30,6 +30,10 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
+      - name: Restore isolated reconstruction belief
+        run: |
+          git fetch origin ai-state:refs/remotes/origin/ai-state || true
+          git show origin/ai-state:michael/reconstruction/current.json >michael/reconstruction/current.json 2>/dev/null || true
       - name: Validate reconstruction stack
         run: |
           node --check tools/michael_reconstruction_director.mjs
@@ -44,23 +48,25 @@ jobs:
         run: |
           rm -rf /tmp/full-reconstruction-candidates
           node tools/nickelle_component_reconstruct.mjs generate /tmp/full-reconstruction-candidates
-      - name: Persist director belief without touching champion geometry
+      - name: Persist director belief only to ai-state
         run: |
           set -Eeuo pipefail
+          cp michael/reconstruction/current.json /tmp/reconstruction-current.json
           git config user.name 'Michael Reconstruction Director'
           git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state
+          git checkout -B ai-state origin/ai-state
+          mkdir -p michael/reconstruction
+          cp /tmp/reconstruction-current.json michael/reconstruction/current.json
           git add michael/reconstruction/current.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Update full vehicle reconstruction belief [skip ci]'
-          git pull --rebase origin main || exit 0
-          git push origin HEAD:main || true
+          if ! git diff --cached --quiet; then git commit -m 'Update isolated full vehicle reconstruction belief [skip ci]'; git push origin HEAD:ai-state; fi
       - name: Archive reconstruction evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: michael-full-reconstruction-${{ github.run_number }}
           path: |
-            michael/reconstruction
+            /tmp/reconstruction-current.json
             /tmp/reconstruction-proof.json
             /tmp/full-reconstruction-candidates
           if-no-files-found: warn
