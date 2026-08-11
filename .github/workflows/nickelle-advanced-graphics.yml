@@ -1,0 +1,108 @@
+name: Nickelle Advanced Graphics Intelligence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '11,31,51 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/nickelle_advanced_graphics_intelligence.mjs'
+      - 'michael/visual/advanced-autonomy.json'
+      - 'michael/reconstruction/autonomous-state.json'
+      - 'michael/reconstruction/topology-dsl.json'
+      - 'michael/visual/owner-reference-observations.json'
+      - 'michael/visual/scene-graph.json'
+      - '.github/workflows/nickelle-advanced-graphics.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nickelle-advanced-graphics-intelligence
+  cancel-in-progress: false
+
+jobs:
+  advanced-intelligence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate advanced graphics intelligence
+        run: |
+          set -Eeuo pipefail
+          node --check tools/nickelle_advanced_graphics_intelligence.mjs
+          node -e "for(const p of ['michael/visual/advanced-autonomy.json','michael/reconstruction/autonomous-state.json','michael/reconstruction/topology-dsl.json','michael/visual/scene-graph.json']) JSON.parse(require('fs').readFileSync(p))"
+      - name: Install visual analysis runtime
+        run: npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0 jpeg-js@0.4.4
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start Michael renderer
+        run: |
+          python3 -m http.server 4173 >/tmp/michael-advanced-http.log 2>&1 &
+          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/racing-mjx7303-michael-v39.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/michael-advanced-http.log; exit 1
+      - name: Capture canonical Michael views
+        env:
+          MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
+          MICHAEL_CAPTURE_SIZE: 720
+        run: node tools/michael_visual_capture.mjs /tmp/michael-advanced-baseline
+      - name: Run all twenty advanced graphics upgrades
+        run: node tools/nickelle_advanced_graphics_intelligence.mjs run /tmp/michael-advanced-baseline michael/reconstruction/advanced-state.json
+      - name: Verify advanced stack 20 of 20
+        run: |
+          node - <<'NODE'
+          const x=require('./michael/reconstruction/advanced-state.json');
+          const keys=Object.keys(x.upgrades||{}), live=keys.filter(k=>x.upgrades[k]);
+          if(keys.length!==20||live.length!==20) throw Error(`advanced upgrades ${live.length}/${keys.length}`);
+          if(!x.benchmark?.name||!Number.isFinite(x.benchmark.score)) throw Error('graphics benchmark missing');
+          if(!x.realityGap||!Number.isFinite(x.realityGap.gap)) throw Error('reality-gap score missing');
+          if(!Array.isArray(x.uncertainty)||!x.uncertainty.length) throw Error('uncertainty model missing');
+          if(!x.implicitSurface?.latent?.length) throw Error('implicit surface representation missing');
+          console.log(`Nickelle advanced graphics: 20/20 live; benchmark=${x.benchmark.score}; realityGap=${x.realityGap.gap}; mode=${x.resourceGovernor.mode}`);
+          NODE
+      - name: Persist advanced intelligence safely
+        env: {START_SHA: '${{ github.sha }}'}
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; advanced state retained in artifact and will refresh'; exit 0; fi
+          git config user.name 'Nickelle Advanced Graphics AI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add michael/reconstruction/advanced-state.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Nickelle updates advanced graphics intelligence [skip ci]'
+          git push origin HEAD:main
+      - name: Route heavy topology and mesh-surgery work
+        env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
+        run: |
+          set -Eeuo pipefail
+          mode="$(jq -r '.resourceGovernor.mode' michael/reconstruction/advanced-state.json)"
+          surgery="$(jq '.meshSurgery | length' michael/reconstruction/advanced-state.json)"
+          if [ "$mode" = 'heavy_topology' ] || [ "$surgery" -gt 0 ]; then
+            active="$(gh api "/repos/$REPO/actions/workflows/michael-full-reconstruction.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
+            [ "$active" -gt 0 ] || gh workflow run michael-full-reconstruction.yml --repo "$REPO" --ref main
+          fi
+      - name: Route unresolved benchmark debt back to visual evolution
+        env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
+        run: |
+          set -Eeuo pipefail
+          pass="$(jq -r '.benchmark.pass' michael/reconstruction/advanced-state.json)"
+          if [ "$pass" != 'true' ]; then
+            active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
+            [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main
+          fi
+      - name: Preserve advanced graphics evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nickelle-advanced-graphics-${{ github.run_number }}
+          path: |
+            michael/reconstruction/advanced-state.json
+            /tmp/michael-advanced-baseline
+          if-no-files-found: warn
+          retention-days: 60
