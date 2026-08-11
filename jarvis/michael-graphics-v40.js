@@ -1,6 +1,6 @@
 // MICHAEL GRAPHICS V40 — Nickelle native visual authority layer.
 // Intercepts generated twin meshes before GPU upload so stance changes are native geometry, not overlays.
-// V57/V44/V45 identity preservation: generated topology may add depth, but may not erase photographed livery/glass/lamp identity.
+// V57/V46 identity preservation: generated topology may add depth, but may not erase photographed livery/glass/lamp identity.
 import {JarvisXRRenderer as V39} from './michael-graphics-v39.js?v=nickelle-v40-core';
 const near=(m,v,t=.00045)=>!!m?.base&&Math.abs(m.base[0]-v[0])<t&&Math.abs(m.base[1]-v[1])<t&&Math.abs(m.base[2]-v[2])<t;
 const rough=(m,v,t=.025)=>Number.isFinite(m?.rough)&&Math.abs(m.rough-v)<t;
@@ -10,61 +10,12 @@ const shadowMat=m=>near(m,[.001,.001,.002])&&rough(m,1,.03);
 const authorityRed=m=>near(m,[.64,.018,.020],.003);
 const authorityDark=m=>near(m,[.006,.008,.010],.003)&&rough(m,.44,.035);
 const authorityYellow=m=>near(m,[.92,.63,.015],.004);
-const identityMaterial=m=>
-  (near(m,[.56,.58,.61],.002)&&rough(m,.58,.025))||
-  (near(m,[.040,.13,.40],.002)&&rough(m,.47,.025))||
-  (near(m,[.72,.39,.035],.002)&&rough(m,.45,.025))||
-  (near(m,[.010,.013,.017],.002)&&rough(m,.34,.025))||
-  (near(m,[.055,.065,.078],.002)&&rough(m,.24,.025));
+const identityMaterial=m=>(near(m,[.56,.58,.61],.002)&&rough(m,.58,.025))||(near(m,[.040,.13,.40],.002)&&rough(m,.47,.025))||(near(m,[.72,.39,.035],.002)&&rough(m,.45,.025))||(near(m,[.010,.013,.017],.002)&&rough(m,.34,.025))||(near(m,[.055,.065,.078],.002)&&rough(m,.24,.025));
 function transformWheel(pos,shadow=false){const c=cfg(),radius=Number(c.wheelRadius||.512),track=Number(c.wheelTrackX||1.37),width=Number(c.wheelWidth||.43),wy=Number(c.wheelY||.56),rs=radius/.512,ws=width/.43,out=new Float32Array(pos.length);for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2],sx=x<0?-1:1,sz=z<0?-1:1,cx=sx*1.37,cz=sz*1.875,cy=shadow?.018:.56;out[i]=sx*track+(x-cx)*ws;out[i+1]=(shadow?.018:wy)+(y-cy)*rs;out[i+2]=cz+(z-cz)*rs}return out}
-function preserveLicensedSkin(pos,idx,mat){
-  if(!idx?.length)return idx;
-  // V44: the generated yellow batch produced the visible hooks below the projector pods and a false grille outline.
-  // The photographed shell supplies its own yellow livery accents, so generated yellow authority is removed completely.
-  if(authorityYellow(mat))return new Uint32Array(0);
-  if(!(authorityRed(mat)||authorityDark(mat)))return idx;
-  const keep=[];
-  for(let i=0;i<idx.length;i+=3){
-    const a=idx[i]*3,b=idx[i+1]*3,c=idx[i+2]*3;
-    const x=(pos[a]+pos[b]+pos[c])/3,y=(pos[a+1]+pos[b+1]+pos[c+1])/3,z=(pos[a+2]+pos[b+2]+pos[c+2])/3;
-    const side=Math.abs(x)>1.20,door=side&&z>-1.14&&z<1.05&&y>.50&&y<1.22;
-    if(!door)keep.push(idx[i],idx[i+1],idx[i+2]);
-  }
-  return keep.length===idx.length?idx:new Uint32Array(keep);
-}
-class RearLampBatch{
-  constructor(){this.p=[];this.n=[];this.i=[]}
-  q(a,b,c,d){const o=this.p.length/3;this.p.push(...a,...b,...c,...d);for(let k=0;k<4;k++)this.n.push(0,0,-1);this.i.push(o,o+1,o+2,o,o+2,o+3)}
-  box(cx,cy,z,w,h){this.q([cx-w/2,cy-h/2,z],[cx-w/2,cy+h/2,z],[cx+w/2,cy+h/2,z],[cx+w/2,cy-h/2,z])}
-}
-const rearRR=(cx,cy,w,h,r,steps=6)=>{const hw=w/2,hh=h/2,rad=Math.max(.004,Math.min(r,hw-.002,hh-.002)),out=[];for(const [ox,oy,a0] of [[hw-rad,hh-rad,0],[-hw+rad,hh-rad,Math.PI/2],[-hw+rad,-hh+rad,Math.PI],[hw-rad,-hh+rad,Math.PI*1.5]])for(let j=0;j<=steps;j++){const a=a0+j/steps*Math.PI/2;out.push([cx+ox+Math.cos(a)*rad,cy+oy+Math.sin(a)*rad])}return out};
+function preserveLicensedSkin(pos,idx,mat){if(!idx?.length)return idx;if(authorityYellow(mat))return new Uint32Array(0);if(!(authorityRed(mat)||authorityDark(mat)))return idx;const keep=[];for(let i=0;i<idx.length;i+=3){const a=idx[i]*3,b=idx[i+1]*3,c=idx[i+2]*3,x=(pos[a]+pos[b]+pos[c])/3,y=(pos[a+1]+pos[b+1]+pos[c+1])/3,z=(pos[a+2]+pos[b+2]+pos[c+2])/3,side=Math.abs(x)>1.20,door=side&&z>-1.14&&z<1.05&&y>.50&&y<1.22;if(!door)keep.push(idx[i],idx[i+1],idx[i+2])}return keep.length===idx.length?idx:new Uint32Array(keep)}
+class RearLampBatch{constructor(){this.p=[];this.n=[];this.i=[]}q(a,b,c,d){const o=this.p.length/3;this.p.push(...a,...b,...c,...d);for(let k=0;k<4;k++)this.n.push(0,0,-1);this.i.push(o,o+1,o+2,o,o+2,o+3)}poly(points,z){if(points.length<3)return;const cx=points.reduce((s,p)=>s+p[0],0)/points.length,cy=points.reduce((s,p)=>s+p[1],0)/points.length,c=this.p.length/3;this.p.push(cx,cy,z);this.n.push(0,0,-1);for(const p of points){this.p.push(p[0],p[1],z);this.n.push(0,0,-1)}for(let i=0;i<points.length;i++)this.i.push(c,c+1+i,c+1+((i+1)%points.length))}box(cx,cy,z,w,h){this.q([cx-w/2,cy-h/2,z],[cx-w/2,cy+h/2,z],[cx+w/2,cy+h/2,z],[cx+w/2,cy-h/2,z])}}
+const rearRR=(cx,cy,w,h,r,steps=7)=>{const hw=w/2,hh=h/2,rad=Math.max(.004,Math.min(r,hw-.002,hh-.002)),out=[];for(const [ox,oy,a0] of [[hw-rad,hh-rad,0],[-hw+rad,hh-rad,Math.PI/2],[-hw+rad,-hh+rad,Math.PI],[hw-rad,-hh+rad,Math.PI*1.5]])for(let j=0;j<=steps;j++){const a=a0+j/steps*Math.PI/2;out.push([cx+ox+Math.cos(a)*rad,cy+oy+Math.sin(a)*rad])}return out};
 function rearRing(b,cx,cy,z,w,h,r,iw,ih,ir){const o=rearRR(cx,cy,w,h,r),n=rearRR(cx,cy,iw,ih,ir);for(let k=0;k<o.length;k++){const j=(k+1)%o.length;b.q([o[k][0],o[k][1],z],[o[j][0],o[j][1],z],[n[j][0],n[j][1],z-.002],[n[k][0],n[k][1],z-.002])}}
 function uploadRearLamp(r,b,base,metal,rough,em=[0,0,0]){if(!b.i.length)return;r._mesh(new Float32Array(b.p),new Float32Array(b.n),new Uint32Array(b.i),{base:new Float32Array(base),metal,rough,em:new Float32Array(em)},new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]))}
-function addRearLampTopology(r){
-  const c=cfg(),w=Number(c.rearLampWidth||.50),h=Number(c.rearLampHeight||.29),cr=Number(c.rearLampCornerRadius||.105),cx=Number(c.rearLampX||.91),cy=Number(c.rearLampY||.89),inner=Math.max(.54,Math.min(.72,Number(c.rearLampInnerScale||.64))),z=-3.11;
-  const smoke=new RearLampBatch(),cavity=new RearLampBatch(),red=new RearLampBatch(),clear=new RearLampBatch();
-  for(const s of [-1,1]){
-    const x=s*cx,iw=w*inner,ih=h*inner,ir=Math.max(.03,cr*.58);
-    rearRing(smoke,x,cy,z,w,h,cr,w-.050,h-.046,Math.max(.035,cr-.022));
-    cavity.box(x,cy,z-.006,w-.058,h-.052);
-    rearRing(red,x,cy,z-.011,iw,ih,ir,iw*.66,ih*.56,Math.max(.018,ir*.50));
-    clear.box(x-s*w*.105,cy+h*.055,z-.015,w*.15,h*.085);
-    red.box(x+s*w*.105,cy-h*.035,z-.017,w*.105,h*.068);
-  }
-  uploadRearLamp(r,cavity,[.007,.008,.010],.03,.30);
-  uploadRearLamp(r,smoke,[.105,.010,.016],.10,.20,[.010,.001,.001]);
-  uploadRearLamp(r,red,[.46,.010,.016],.05,.21,[.090,.002,.002]);
-  uploadRearLamp(r,clear,[.42,.31,.29],.10,.18,[.018,.012,.010]);
-  r._michaelSystems={...(r._michaelSystems||{}),rearLampTopology:'OWNER_V45_SMOKED_C3_INTERNALS',rearLampNative:true};
-}
-export class JarvisXRRenderer extends V39{
-  _mesh(pos,nor,idx,mat,model){
-    if(wheelMat(mat))pos=transformWheel(pos,false);else if(shadowMat(mat))pos=transformWheel(pos,true);
-    idx=preserveLicensedSkin(pos,idx,mat);
-    if(!idx.length)return null;
-    return super._mesh(pos,nor,idx,mat,model)
-  }
-  async loadGLB(url){const info=await super.loadGLB(url),c=cfg(),paint=Number(c.paintRoughnessScale||1),dark=Number(c.darkRoughnessScale||1);for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114;if(r>g*1.32&&r>b*1.25&&r>.11)m.rough=Math.max(.055,Math.min(.42,m.rough*paint));else if(lum<.055)m.rough=Math.max(.18,Math.min(1,m.rough*dark))}addRearLampTopology(this);this._michaelSystems={...(this._michaelSystems||{}),nickelleNativeAuthority:true,nativeWheelRadius:Number(c.wheelRadius||.512),nativeWheelTrackX:Number(c.wheelTrackX||1.37),nativeWheelWidth:Number(c.wheelWidth||.43),nativeWheelY:Number(c.wheelY||.56),mudflapsProtected:true,licensedIdentityProtected:true,v44StrayYellowRemoved:true,rearLampNative:true};return{...info,nickelleNative:true,rearLampNative:true}}
-  beginOwnedFrame(){let restored=0;for(const d of this.drawables||[]){if(d?.hidden&&identityMaterial(d.mat)){d.hidden=false;restored++}}const c=super.beginOwnedFrame(),n=cfg(),key=Number(n.keyLightScale||1),amb=Number(n.ambientScale||1),exp=Number(n.exposureScale||1);this.lightColor[0]*=key;this.lightColor[1]*=key;this.lightColor[2]*=key;this.ambient[0]*=amb;this.ambient[1]*=amb;this.ambient[2]*=amb;this.exposure*=exp;this._identityRestored=restored;return c}
-  getAIStats(){return{...super.getAIStats(),nickelleNativeVisual:cfg(),licensedIdentityProtected:true,v44StrayYellowRemoved:true,identityBatchesRestored:this._identityRestored||0,rearLampTopology:'OWNER_V45_SMOKED_C3_INTERNALS'}}
-}
+function addRearLampTopology(r){const c=cfg(),w=Number(c.rearLampWidth||.39),h=Number(c.rearLampHeight||.34),cr=Number(c.rearLampCornerRadius||.14),cx=Number(c.rearLampX||1.08),cy=Number(c.rearLampY||.94),inner=Math.max(.50,Math.min(.66,Number(c.rearLampInnerScale||.58))),z=Number(c.rearLampZ||-3.045),smoke=new RearLampBatch(),cavity=new RearLampBatch(),red=new RearLampBatch(),clear=new RearLampBatch();for(const s of [-1,1]){const x=s*cx,iw=w*inner,ih=h*inner,ir=Math.max(.035,cr*.54),outer=rearRR(x,cy,w,h,cr),cav=rearRR(x,cy,w*.72,h*.68,Math.max(.035,cr*.62));smoke.poly(outer,z);cavity.poly(cav,z-.004);rearRing(red,x,cy,z-.006,iw,ih,ir,iw*.69,ih*.58,Math.max(.018,ir*.52));clear.box(x-s*w*.10,cy+h*.055,z-.010,w*.14,h*.078);red.box(x+s*w*.10,cy-h*.045,z-.011,w*.105,h*.064)}uploadRearLamp(r,smoke,[.22,.014,.021],.08,.22,[.012,.001,.001]);uploadRearLamp(r,cavity,[.012,.010,.012],.02,.28);uploadRearLamp(r,red,[.54,.012,.018],.04,.19,[.075,.002,.002]);uploadRearLamp(r,clear,[.46,.34,.32],.08,.17,[.014,.010,.009]);r._michaelSystems={...(r._michaelSystems||{}),rearLampTopology:'OWNER_V46_INTEGRATED_SMOKED_QUARTER',rearLampNative:true}}
+export class JarvisXRRenderer extends V39{_mesh(pos,nor,idx,mat,model){if(wheelMat(mat))pos=transformWheel(pos,false);else if(shadowMat(mat))pos=transformWheel(pos,true);idx=preserveLicensedSkin(pos,idx,mat);if(!idx.length)return null;return super._mesh(pos,nor,idx,mat,model)}async loadGLB(url){const info=await super.loadGLB(url),c=cfg(),paint=Number(c.paintRoughnessScale||1),dark=Number(c.darkRoughnessScale||1);for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [rr,g,b]=m.base,lum=rr*.299+g*.587+b*.114;if(rr>g*1.32&&rr>b*1.25&&rr>.11)m.rough=Math.max(.055,Math.min(.42,m.rough*paint));else if(lum<.055)m.rough=Math.max(.18,Math.min(1,m.rough*dark))}addRearLampTopology(this);this._michaelSystems={...(this._michaelSystems||{}),nickelleNativeAuthority:true,nativeWheelRadius:Number(c.wheelRadius||.512),nativeWheelTrackX:Number(c.wheelTrackX||1.37),nativeWheelWidth:Number(c.wheelWidth||.43),nativeWheelY:Number(c.wheelY||.56),mudflapsProtected:true,licensedIdentityProtected:true,v44StrayYellowRemoved:true,rearLampNative:true};return{...info,nickelleNative:true,rearLampNative:true}}beginOwnedFrame(){let restored=0;for(const d of this.drawables||[]){if(d?.hidden&&identityMaterial(d.mat)){d.hidden=false;restored++}}const c=super.beginOwnedFrame(),n=cfg(),key=Number(n.keyLightScale||1),amb=Number(n.ambientScale||1),exp=Number(n.exposureScale||1);this.lightColor[0]*=key;this.lightColor[1]*=key;this.lightColor[2]*=key;this.ambient[0]*=amb;this.ambient[1]*=amb;this.ambient[2]*=amb;this.exposure*=exp;this._identityRestored=restored;return c}getAIStats(){return{...super.getAIStats(),nickelleNativeVisual:cfg(),licensedIdentityProtected:true,v44StrayYellowRemoved:true,identityBatchesRestored:this._identityRestored||0,rearLampTopology:'OWNER_V46_INTEGRATED_SMOKED_QUARTER'}}}
