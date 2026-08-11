@@ -37,6 +37,7 @@ zig_archive="/tmp/michael-zig-0.16.0.tar.xz"
 zig_root="/tmp/michael-zig-0.16.0"
 curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o "$zig_archive"
 echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/michael-zig-0.16.0.tar.xz' | sha256sum -c -
+rm -rf "$zig_root"
 mkdir -p "$zig_root"
 tar -xf "$zig_archive" -C "$zig_root" --strip-components=1
 "$zig_root/zig" build-exe engine/zig/michael_spatial.zig -target wasm32-freestanding -O ReleaseSmall -fno-entry -rdynamic -femit-bin="$generated/michael-zig.wasm"
@@ -55,7 +56,7 @@ for(const file of ['michael-core.wasm','michael-rust.wasm','michael-assembly.was
   new WebAssembly.Module(fs.readFileSync(path));
 }
 const manifest=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
-if(manifest.engine!=='MICHAEL_V56'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
+if(manifest.engine!=='MICHAEL_V57'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
 for(const token of ['#version 300 es','MICHAEL_V56','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
 for(const token of ['@vertex','@fragment','MICHAEL_V56'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
 console.log({polyglot:'PASS',languages:manifest.languages,artifacts:manifest.artifacts.length});
