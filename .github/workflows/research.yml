@@ -32,115 +32,75 @@ jobs:
       RESEARCH_MODEL: openai/gpt-4.1
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+        with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-          package-manager-cache: false
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Restore isolated Jarvis continuity
+        run: |
+          git fetch origin ai-state:refs/remotes/origin/ai-state || true
+          for f in research/state.json research/current.json research/questions.json factory/memory/external-research.json factory/next-experiment.json factory/knowledge-graph.json; do mkdir -p "$(dirname "$f")"; git show "origin/ai-state:$f" >"$f" 2>/dev/null || true; done
       - name: Load Jarvis continuity and validate mission systems
         run: |
           node --check research/run.mjs
           node -e "JSON.parse(require('fs').readFileSync('research/config.json'))"
           node -e "JSON.parse(require('fs').readFileSync('research/questions.json'))"
           python3 -m py_compile tools/engineering_knowledge_graph.py tools/jarvis_external_research_bridge.py tools/jarvis_intelligence_planner.py
-      - name: Publish visible Jarvis mission state
-        shell: bash
+      - name: Mark mission running in isolated state
         run: |
-          set -Eeuo pipefail
           node - <<'NODE'
           const fs=require('fs');const now=new Date().toISOString();const s=JSON.parse(fs.readFileSync('research/state.json'));s.status='RUNNING';s.phase='REMEMBERING';s.identity='Jarvis Engineering Intelligence';s.missionType=process.env.MISSION_TYPE||'autonomous';s.currentTopic=process.env.RESEARCH_TOPIC||'Highest-priority unresolved engineering objective';s.startedAt=now;s.updatedAt=now;s.message='Loading engineering memory, controller lineages, attributed logs, digital-twin state and unresolved uncertainty.';s.recentActivity=[{at:now,phase:'MISSION',message:'Jarvis engineering mission started.'},{at:now,phase:'REMEMBERING',message:'Reconstructing mission continuity from persistent evidence.'}];fs.writeFileSync('research/state.json',JSON.stringify(s,null,2)+'\n');
           NODE
-          cp research/state.json /tmp/jarvis-running-state.json
-          git config user.name 'Jarvis Engineering Intelligence'
-          git config user.email 'actions@users.noreply.github.com'
-          for n in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/jarvis-running-state.json research/state.json
-            git add research/state.json
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Jarvis mission started [skip ci]'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((n*4))
-          done
-          echo 'Unable to publish visible mission state after retries' >&2
-          exit 1
-      - name: Synchronize after visible-state publication
-        run: |
-          git fetch origin main
-          git reset --hard origin/main
-      - name: Research, challenge and synthesize the engineering objective
+      - name: Research challenge and synthesize objective
         run: node research/run.mjs | tee research/research-run.log
       - name: Validate cited findings
         run: |
           node - <<'NODE'
           const fs=require('fs'),r=JSON.parse(fs.readFileSync('research/current.json'));const ids=new Set(r.sources.map(x=>x.id));for(const f of r.acceptedFindings){if(!f.sourceIds?.length||!f.sourceIds.every(x=>ids.has(x)))throw Error('Accepted finding has invalid citations');}console.log(`validated ${r.acceptedFindings.length} accepted findings against ${ids.size} sources`);
           NODE
-      - name: Bridge verified outside research into Jarvis engineering memory
+      - name: Bridge verified research into engineering memory
         run: |
           python3 tools/jarvis_external_research_bridge.py
           python3 tools/jarvis_intelligence_planner.py
+          python3 tools/engineering_knowledge_graph.py
       - name: Preserve mission output
-        shell: bash
         run: |
-          set -Eeuo pipefail
-          rm -rf /tmp/jarvis-research-output
-          mkdir -p /tmp/jarvis-research-output/research/history /tmp/jarvis-research-output/factory/memory /tmp/jarvis-research-output/public/jarvis-data
-          cp research/state.json /tmp/jarvis-research-output/research/state.json
-          cp research/current.json /tmp/jarvis-research-output/research/current.json
-          cp research/questions.json /tmp/jarvis-research-output/research/questions.json
-          cp research/research-run.log /tmp/jarvis-research-output/research/research-run.log
-          cp factory/memory/external-research.json /tmp/jarvis-research-output/factory/memory/external-research.json
-          cp factory/next-experiment.json /tmp/jarvis-research-output/factory/next-experiment.json
-          cp public/jarvis-data/external-research.json /tmp/jarvis-research-output/public/jarvis-data/external-research.json
-          cp public/jarvis-data/experiment-plan.json /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json
+          rm -rf /tmp/jarvis-research-output; mkdir -p /tmp/jarvis-research-output/research/history /tmp/jarvis-research-output/factory/memory /tmp/jarvis-research-output/public/jarvis-data
+          cp research/state.json research/current.json research/questions.json research/research-run.log /tmp/jarvis-research-output/research/
           cp -a research/history/. /tmp/jarvis-research-output/research/history/
-      - name: Persist mission memory on latest main
-        shell: bash
+          cp factory/memory/external-research.json /tmp/jarvis-research-output/factory/memory/
+          cp factory/next-experiment.json factory/knowledge-graph.json /tmp/jarvis-research-output/factory/
+          cp public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json /tmp/jarvis-research-output/public/jarvis-data/
+      - name: Persist Jarvis mission memory only to ai-state
         run: |
           set -Eeuo pipefail
-          git config user.name 'Jarvis Engineering Intelligence'
-          git config user.email 'actions@users.noreply.github.com'
-          for n in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/jarvis-research-output/research/state.json research/state.json
-            cp /tmp/jarvis-research-output/research/current.json research/current.json
-            cp /tmp/jarvis-research-output/research/questions.json research/questions.json
-            cp /tmp/jarvis-research-output/research/research-run.log research/research-run.log
-            mkdir -p research/history factory/memory public/jarvis-data
-            cp -a /tmp/jarvis-research-output/research/history/. research/history/
-            cp /tmp/jarvis-research-output/factory/memory/external-research.json factory/memory/external-research.json
-            cp /tmp/jarvis-research-output/factory/next-experiment.json factory/next-experiment.json
-            cp /tmp/jarvis-research-output/public/jarvis-data/external-research.json public/jarvis-data/external-research.json
-            cp /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json public/jarvis-data/experiment-plan.json
-            python3 tools/engineering_knowledge_graph.py
-            git add research/state.json research/current.json research/questions.json research/history research/research-run.log factory/knowledge-graph.json factory/memory/external-research.json factory/next-experiment.json public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json
-            if git diff --cached --quiet; then
-              echo 'No mission-memory change to persist'
-              exit 0
-            fi
-            git commit -m 'Record Jarvis research-backed engineering memory [skip ci]'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((n*5))
-          done
-          echo 'Unable to persist mission memory after retries' >&2
-          exit 1
+          git config user.name 'Jarvis Engineering Intelligence'; git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state; git checkout -B ai-state origin/ai-state
+          mkdir -p research/history factory/memory
+          cp /tmp/jarvis-research-output/research/state.json research/state.json
+          cp /tmp/jarvis-research-output/research/current.json research/current.json
+          cp /tmp/jarvis-research-output/research/questions.json research/questions.json
+          cp /tmp/jarvis-research-output/research/research-run.log research/research-run.log
+          cp -a /tmp/jarvis-research-output/research/history/. research/history/
+          cp /tmp/jarvis-research-output/factory/memory/external-research.json factory/memory/external-research.json
+          cp /tmp/jarvis-research-output/factory/next-experiment.json factory/next-experiment.json
+          cp /tmp/jarvis-research-output/factory/knowledge-graph.json factory/knowledge-graph.json
+          git add research factory/memory/external-research.json factory/next-experiment.json factory/knowledge-graph.json
+          if ! git diff --cached --quiet; then git commit -m 'Update isolated Jarvis engineering memory [skip ci]'; git push origin HEAD:ai-state; fi
+      - name: Promote only changed public research data to main
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main; git checkout -B main origin/main; mkdir -p public/jarvis-data
+          cp /tmp/jarvis-research-output/public/jarvis-data/external-research.json public/jarvis-data/external-research.json
+          cp /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json public/jarvis-data/experiment-plan.json
+          git add public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json
+          if git diff --cached --quiet; then echo 'public research data unchanged; no deploy-source commit'; exit 0; fi
+          git config user.name 'Jarvis Engineering Intelligence'; git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'Publish changed Jarvis research data'; git push origin HEAD:main
       - name: Publish mission evidence artifact
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: jarvis-engineering-mission
-          path: |
-            research/state.json
-            research/current.json
-            research/questions.json
-            research/research-run.log
-            factory/knowledge-graph.json
-            factory/memory/external-research.json
-            factory/next-experiment.json
-            public/jarvis-data/external-research.json
-            public/jarvis-data/experiment-plan.json
+          path: /tmp/jarvis-research-output
           if-no-files-found: error
           retention-days: 90
