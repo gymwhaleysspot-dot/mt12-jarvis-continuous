@@ -3,6 +3,15 @@ name: Deploy Michael V57 to Pages
 on:
   push:
     branches: [main]
+    paths:
+      - 'index.html'
+      - 'racing-mjx7303-michael-v39.html'
+      - 'michael-health.html'
+      - 'jarvis/**'
+      - 'assets/**'
+      - 'engine/**'
+      - 'public/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -21,7 +30,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
       - name: Validate Michael V57 release
         run: |
