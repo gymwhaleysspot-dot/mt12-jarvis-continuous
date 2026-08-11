@@ -1,17 +1,17 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-10T11:38:36.304Z
+Generated: 2026-08-11T11:30:42.911Z
 
 ## System health
 
 - Status: **HEALTHY**
 - Active roadmap features: **85/100**
 - Planned features: **15**
-- Knowledge items indexed: **160**
+- Knowledge items indexed: **202**
 
 ## Research
 
-- Current topic: Which recorded signals best distinguish launch wheelspin from true airborne motion?
+- Current topic: Nickelle uncertainty-driven visual research: Find authoritative MJX Hyper Go 7303 / Citroen C3 WRC reference imagery or dimensions that clarify grille. Prefer owner-body-matching angles and measurable proportions.
 - Accepted findings: 0
 - Conflicts: 0
 - Sources: 40
@@ -24,10 +24,10 @@ Generated: 2026-08-10T11:38:36.304Z
 
 ## Engineering memory
 
-- Generations: 7
-- Lessons: 7
+- Generations: 8
+- Lessons: 8
 - Rejected hypotheses: 0
-- Last decision: {"at":"2026-08-10T10:44:10.774Z","status":"LOG EVIDENCE REVIEWED","missionType":"jump","score":78,"confidence":0.758}
+- Last decision: {"at":"2026-08-11T10:19:37.982Z","status":"LOG EVIDENCE REVIEWED","missionType":"general","score":100,"confidence":0.758}
 
 ## Authority
 
