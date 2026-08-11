@@ -42,28 +42,29 @@ jobs:
           [[ "$RELEASE_TYPE" =~ ^[RFXG]$ ]]
           [[ "$SERIES" =~ ^[a-z0-9]{1,5}$ ]]
           python3 -m json.tool controller-release-policy.json >/dev/null
-      - name: Generate, compile, normalize, and self-evaluate five candidates
+          python3 -m py_compile tools/controller_road_replay_gate.py
+      - name: Generate compile normalize and self-evaluate five candidates
         run: python3 tools/controller_tournament.py
+      - name: Apply persistent real-drive regression gate
+        run: python3 tools/controller_road_replay_gate.py dist-controller-tournament/ROAD_REPLAY.json
       - name: Verify tournament evidence
         run: |
           set -Eeuo pipefail
           test -s dist-controller-tournament/TOURNAMENT.json
+          test -s dist-controller-tournament/ROAD_REPLAY.json
           python3 - <<'PY'
           import json,os
-          r=json.load(open('dist-controller-tournament/TOURNAMENT.json'))
-          compiled=[x for x in r['candidates'] if x['status']=='COMPILED']
-          assert compiled
+          r=json.load(open('dist-controller-tournament/TOURNAMENT.json'));road=json.load(open('dist-controller-tournament/ROAD_REPLAY.json'))
+          compiled=[x for x in r['candidates'] if x['status']=='COMPILED'];assert compiled
           for x in compiled:
-            d=f"dist-controller-tournament/{x['candidate']}"
-            assert os.path.isfile(f"{d}/{x['candidate']}.lua")
-            assert os.path.isfile(f"{d}/{x['candidate']}.luac")
-            assert 'candidateIntelligence' in x
-            assert 'parentIntelligence' in x
-            assert 'intelligenceDelta' in x
+            d=f"dist-controller-tournament/{x['candidate']}";assert os.path.isfile(f"{d}/{x['candidate']}.lua");assert os.path.isfile(f"{d}/{x['candidate']}.luac")
+            for k in ['candidateIntelligence','parentIntelligence','intelligenceDelta']:assert k in x
+            if not road['promotionGate']:
+              assert x.get('promotionEligible') is False
+              assert x.get('roadReplayStatus')=='EXPERIMENTAL_ROAD_REQUIRED'
           if r['winner']:
-            w=next(x for x in compiled if x['candidate']==r['winner'])
-            assert w['intelligenceDelta']>0
-          print('verdict',r['verdict'],'winner',r['winner'],'runner-up',r['runnerUp'],'compiled',len(compiled))
+            w=next(x for x in compiled if x['candidate']==r['winner']);assert w['intelligenceDelta']>0
+          print('verdict',r['verdict'],'promotion',r.get('promotionVerdict'),'winner',r['winner'],'road datasets',road['availableDatasets'])
           PY
       - name: Upload manual tournament evidence
         uses: actions/upload-artifact@v6
