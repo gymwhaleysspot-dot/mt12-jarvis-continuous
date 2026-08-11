@@ -1,76 +1,46 @@
 {
-  "schema": 4,
-  "identity": "Michael V63 / owner's MJX 7303 Citroen C3 WRC personal twin",
-  "authorityOrder": ["owner_photos", "owner_measurements", "owner_requirements", "topology_sanity", "same_body_external_references", "full_size_c3_wrc_references"],
+  "schema": 5,
+  "identity": "Michael V64 / owner's MJX 7303 Citroen C3 WRC clean-sheet digital twin",
+  "authorityOrder": ["owner_photos", "owner_measurements", "owner_requirements", "asset_integrity", "topology_sanity", "same_body_external_references", "full_size_c3_wrc_references"],
   "primaryOwnerReferenceSet": "michael/visual/owner-reference-observations.json",
+  "assetAuthority": {"type":"CLEAN_SHEET_GLB","bytes":95528,"geometryCount":105,"faces":6232,"vertices":3326,"sha256":"1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5"},
   "protectedFacts": {
     "body": [
-      "Predominantly red body shell",
-      "Large black/carbon front wheel-arch extensions",
+      "Predominantly red body volumes are native GLB mesh geometry rather than JavaScript exterior patches",
+      "Large black/carbon front wheel-arch and quarter treatment",
       "Rear wheel arches remain predominantly red",
-      "Dominant wide low black central front grille/intake with mesh and a thin contrasting perimeter",
-      "Lower lamp assemblies are horizontal rounded-rectangle pods with red perimeter, dark internal housing and offset rectangular lens areas",
-      "Hood-side vents are recessed black mesh openings lying on the hood surface, never front-facing floating panels",
-      "Front fender extensions use layered multi-plane aero surfaces attached to the shell",
+      "Dominant wide low black central front grille/intake with mesh/slat depth",
+      "Lower lamp assemblies are recessed horizontal red/black pods with dedicated projector and rectangular lens geometry",
+      "Hood-side vents lie on the hood surface",
       "Front splitter projects clearly ahead of the bumper face",
-      "Long black lower-door insert and black rearward side vent",
+      "Long black lower-door identity region and rearward side vent",
       "Deep lower side skirt with a thin yellow accent line",
-      "White roof area is an exterior top surface and must read clearly in TOP view",
-      "White/gray hood graphic structure follows the hood surface",
-      "Low rectangular forward-facing roof scoop with white/red coloring",
-      "Broad high rear wing with large shaped endplates and a secondary lower aero plane/support element",
-      "Rear bumper has deep corner openings with contrasting perimeter trim",
-      "Black rear diffuser has multiple pronounced vertical fins and central exhaust treatment"
+      "White roof is native exterior mesh geometry and must read clearly in TOP view",
+      "White hood identity structure follows the hood surface",
+      "Low roof scoop is native geometry",
+      "Broad high rear wing has dedicated upper, main, support and endplate meshes",
+      "Rear bumper has dedicated dark corner openings with yellow identity markers",
+      "Black rear diffuser has five pronounced fin meshes and a center recess"
     ],
     "topology": [
-      "Every generated visual batch contains finite coordinates and valid triangle indices",
-      "Generated exterior topology remains inside the bounded vehicle envelope",
-      "Front-facing details are built in a front/rear plane, hood and roof details in a top-facing plane, and side identity in side-facing planes",
-      "No detached floating rectangles or impossible body intersections are permitted",
-      "Left/right paired exterior modules preserve intentional symmetry unless owner photos prove asymmetry",
-      "Malformed generated topology is rejected before pixel scoring or promotion"
+      "V64 clean-sheet asset is a valid GLB v2 with exactly 95,528 bytes",
+      "V64 asset contains 105 named watertight mesh objects, 6,232 faces and 3,326 vertices",
+      "All clean-sheet geometry remains inside the bounded vehicle envelope",
+      "No V63 exterior patch renderer is used to construct the car",
+      "Malformed, missing, substituted or hash-mismatched V64 assets are rejected before image scoring"
     ],
-    "wheels": [
-      "White multi-spoke rally wheels",
-      "Wheels visually fill the arches strongly",
-      "Tires have a rally/tarmac sidewall, not oversized balloon tires"
-    ],
-    "lighting": [
-      "Upper DRL/headlamp strip is extremely thin and follows the Citroen chevron/chrome line",
-      "Primary lower lamp assembly is horizontally elongated and recessed inside a rounded-rectangle red/black pod",
-      "Rear lamps are rounded-rectangular housings with visible internal segmentation"
-    ],
-    "rear": [
-      "Wing spans almost the full body width",
-      "Rear diffuser presents five pronounced fin regions",
-      "Central rear recess and exhaust treatment sit on the centerline"
-    ],
-    "interior": [
-      "Cabin contains two rally occupants: one driver and one navigator/co-driver",
-      "Driver is seated at the steering position and is visibly helmeted through the greenhouse",
-      "Navigator/co-driver is seated in the passenger position and is visibly helmeted through the greenhouse",
-      "Both occupants use rally bucket-seat, torso, visor and harness silhouettes",
-      "Navigator has a compact pace-note board/detail",
-      "Existing roll cage, glass and cabin visibility remain preserved"
-    ],
-    "preserve": [
-      "Cabin and roll cage visibility",
-      "Driver and navigator presence",
-      "Direct-X track-relative steering sign",
-      "Guardrail-aware chase camera",
-      "Licensed base shell and glass",
-      "Mobile frame pacing"
-    ]
+    "wheels": ["White multi-spoke rally wheels are native GLB meshes","Wheels visually fill the arches strongly","Tires have rally/tarmac proportions"],
+    "lighting": ["Upper DRL strips are dedicated thin meshes","Primary lower lamp pods contain dark housings plus projector and rectangular lens geometry","Rear lamps are dedicated red housings with clear segments"],
+    "interior": ["Cabin contains one driver and one navigator/co-driver","Both occupants have native seat, torso, helmet, visor and harness meshes","Navigator has a pace-note board","Roll-cage geometry is present inside the clean-sheet asset"],
+    "preserve": ["Driver and navigator presence","Direct-X track-relative steering sign","Guardrail-aware chase camera","Mobile frame pacing","V63 remains available only as rollback/reference, not as V64 exterior geometry"]
   },
   "referenceNotes": [
-    "Eight owner photographs supplied 2026-08-10 define the primary exterior shape and identity.",
-    "Owner requirement supplied 2026-08-11 defines the cockpit as an occupied rally cabin with a driver and navigator/co-driver.",
-    "Owner screenshots supplied 2026-08-11 exposed detached front topology in V62; V63 therefore makes geometry sanity a pre-score invariant.",
-    "Web research may fill hidden details but must not outrank the owner set for visible geometry.",
-    "The side photograph is the primary proportion anchor for wheelbase, wheel diameter, overhangs, roofline, windshield rake, greenhouse and rocker height.",
-    "The straight front and rear photographs are the primary symmetry/placement anchors for fascia, lamps, grille, wing, taillights, bumper openings and diffuser."
+    "Eight owner photographs define the primary visible shape and identity.",
+    "Owner screenshots demonstrated that procedural V62/V63 exterior patch geometry was not an acceptable final modeling architecture.",
+    "V64 therefore changes authority from patch-generated exterior surfaces to a clean-sheet exported GLB asset.",
+    "The side photograph remains the primary proportion anchor and straight front/rear photographs remain the primary placement anchors."
   ],
-  "mutableSubsystems": ["front_grille", "lamp_housings", "projectors", "drls", "front_arches", "hood_vents", "front_splitter", "side_insert", "skirt_accent", "roof_graphic", "roof_scoop", "wing_detail", "rear_lamps", "rear_bumper_openings", "rear_diffuser", "wheel_material", "cockpit_crew"],
-  "requiredRuntimeSystems": {"ownerTopology": "OWNER_V63", "topologySanity": true, "malformedTopologyCount": 0, "driverPresent": true, "navigatorPresent": true, "occupantCount": 2, "cockpitCrew": "RALLY_DRIVER_AND_NAVIGATOR_V63"},
-  "forbiddenAutomaticSubsystems": ["dynamics", "steering", "track_centerline", "camera_presets", "controller", "telemetry", "payload", "licensed_mesh_transform"]
+  "mutableSubsystems": ["clean_sheet_body", "front_grille", "lamp_housings", "projectors", "drls", "front_arches", "hood_vents", "front_splitter", "side_insert", "skirt_accent", "roof", "roof_scoop", "wing", "rear_lamps", "rear_bumper_openings", "rear_diffuser", "wheels", "cockpit_crew"],
+  "requiredRuntimeSystems": {"version":"MICHAEL_V64","assetAuthority":"CLEAN_SHEET_GLB","topologySanity":true,"driverPresent":true,"navigatorPresent":true,"occupantCount":2},
+  "forbiddenAutomaticSubsystems": ["dynamics", "steering", "track_centerline", "camera_presets", "controller", "telemetry"]
 }
