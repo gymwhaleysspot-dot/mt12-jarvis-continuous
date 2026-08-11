@@ -69,24 +69,34 @@ jobs:
           if(!x.implicitSurface?.latent?.length) throw Error('implicit surface representation missing');
           console.log(`Nickelle advanced graphics: 20/20 live; benchmark=${x.benchmark.score}; realityGap=${x.realityGap.gap}; mode=${x.resourceGovernor.mode}`);
           NODE
-      - name: Persist advanced intelligence safely
-        env: {START_SHA: '${{ github.sha }}'}
+      - name: Persist advanced intelligence with concurrent-agent rebase
         run: |
           set -Eeuo pipefail
-          git fetch origin main
-          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; advanced state retained in artifact and will refresh'; exit 0; fi
           git config user.name 'Nickelle Advanced Graphics AI'
           git config user.email 'actions@users.noreply.github.com'
-          git add michael/reconstruction/advanced-state.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Nickelle updates advanced graphics intelligence [skip ci]'
-          git push origin HEAD:main
+          cp michael/reconstruction/advanced-state.json /tmp/nickelle-advanced-state.json
+          cp michael/reconstruction/autonomous-state.json /tmp/nickelle-autonomous-state.json
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p michael/reconstruction
+            cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
+            cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
+            git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
+            if git diff --cached --quiet; then echo 'advanced state already persisted'; break; fi
+            git commit -m 'Nickelle updates advanced graphics intelligence [skip ci]'
+            if git push origin HEAD:main; then echo 'advanced state persisted'; break; fi
+            echo "main advanced during persistence attempt $attempt; rebasing generated state"
+            sleep $((attempt*2))
+          done
+          git fetch origin main
+          git show origin/main:michael/reconstruction/advanced-state.json >/dev/null || { echo 'advanced-state.json did not persist' >&2; exit 1; }
       - name: Route heavy topology and mesh-surgery work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          mode="$(jq -r '.resourceGovernor.mode' michael/reconstruction/advanced-state.json)"
-          surgery="$(jq '.meshSurgery | length' michael/reconstruction/advanced-state.json)"
+          mode="$(jq -r '.resourceGovernor.mode' /tmp/nickelle-advanced-state.json)"
+          surgery="$(jq '.meshSurgery | length' /tmp/nickelle-advanced-state.json)"
           if [ "$mode" = 'heavy_topology' ] || [ "$surgery" -gt 0 ]; then
             active="$(gh api "/repos/$REPO/actions/workflows/michael-full-reconstruction.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
             [ "$active" -gt 0 ] || gh workflow run michael-full-reconstruction.yml --repo "$REPO" --ref main
@@ -95,7 +105,7 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
           set -Eeuo pipefail
-          pass="$(jq -r '.benchmark.pass' michael/reconstruction/advanced-state.json)"
+          pass="$(jq -r '.benchmark.pass' /tmp/nickelle-advanced-state.json)"
           if [ "$pass" != 'true' ]; then
             active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
             [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main
@@ -106,8 +116,8 @@ jobs:
         with:
           name: nickelle-advanced-graphics-${{ github.run_number }}
           path: |
-            michael/reconstruction/autonomous-state.json
-            michael/reconstruction/advanced-state.json
+            /tmp/nickelle-autonomous-state.json
+            /tmp/nickelle-advanced-state.json
             /tmp/michael-advanced-baseline
           if-no-files-found: warn
           retention-days: 60
