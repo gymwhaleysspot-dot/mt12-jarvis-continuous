@@ -1,5 +1,5 @@
 // MICHAEL V59 Racing — owner-photo body authority, camera-safe studio, guarded simulation and Jarvis Dynamics.
-import {JarvisXRRenderer} from './michael-graphics-v40.js?v=michael85';
+import {JarvisXRRenderer} from './michael-graphics-v40.js?v=michael87';
 import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael84';
 import {MichaelEngine} from './michael-engine-v45.js?v=michael84';
 import {bootMichaelPolyglot} from './generated/michael-polyglot.js?v=michael84';
@@ -45,7 +45,7 @@ class TruthTelemetry{
 }
 const telemetry=new TruthTelemetry;
 const payloadURL=()=>{const raw=atob(michaelPayload),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}))},scan=payloadURL();
-const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael85-fallback';
+const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael87-fallback';
 async function loadVehicle(){xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();engine=new MichaelEngine({renderer:xr,dynamics:dyn,canvas}).bootstrap();globalThis.__MICHAEL_ENGINE=engine.report();status.textContent='MICHAEL V59 · OWNER 7303 PHOTO AUTHORITY · LOADING…';try{const info=await xr.loadGLB(scan);refineVehicle();status.textContent=`MICHAEL V59 · ${xr.drawables.length} GPU DRAWS · OWNER 7303 PHOTO AUTHORITY`;window.__MICHAEL_SYSTEMS=info.completeTwin;status.className='asset-state ok';clearTimeout(window.__MICHAEL_STATUS_TIMER);window.__MICHAEL_STATUS_TIMER=setTimeout(()=>status.classList.add('settled'),2200);window.__MICHAEL_MODEL=true;return info}catch(e){const primary=String(e?.message||e);console.error('MICHAEL V59 PRIMARY MODEL ERROR',scan,primary);window.__MICHAEL_ERROR={primary,url:scan};status.textContent=`MICHAEL V59 PRIMARY ${primary} · V33 CONTINUITY ACTIVE`;status.className='asset-state warn';status.classList.remove('settled');const info=await xr.loadGLB(fallback);window.__MICHAEL_MODEL=false;return{...info,primaryError:primary}}}
 try{await loadVehicle()}catch(e){console.error(e);status.textContent='MICHAEL V59 MODEL LOAD FAILED · '+e.message;status.className='asset-state warn';status.classList.remove('settled')}
 function orbit(){xr?.orbit(yaw,pitch,dist,targetY)}orbit();
