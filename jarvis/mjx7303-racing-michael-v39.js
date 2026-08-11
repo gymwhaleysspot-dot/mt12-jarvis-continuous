@@ -1,8 +1,8 @@
 // MICHAEL V57 Racing — owner-photo body authority, camera-safe studio, guarded simulation and Jarvis Dynamics.
-import {JarvisXRRenderer} from './michael-graphics-v40.js?v=michael82';
-import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael82';
-import {MichaelEngine} from './michael-engine-v45.js?v=michael82';
-import {bootMichaelPolyglot} from './generated/michael-polyglot.js?v=michael82';
+import {JarvisXRRenderer} from './michael-graphics-v40.js?v=michael83';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael83';
+import {MichaelEngine} from './michael-engine-v45.js?v=michael83';
+import {bootMichaelPolyglot} from './generated/michael-polyglot.js?v=michael83';
 import p0 from './michael-v40-payload-00.js?v=michael71';
 import p1 from './michael-v40-payload-01.js?v=michael71';
 import p2 from './michael-v40-payload-02.js?v=michael71';
@@ -18,7 +18,7 @@ import p11 from './michael-v40-payload-11.js?v=michael71';
 import p12 from './michael-v40-payload-12.js?v=michael71';
 import p13 from './michael-v40-payload-13.js?v=michael71';
 const michaelPayload=p0+p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13;
-let polyglot=null;bootMichaelPolyglot('./generated/','michael82').then(api=>{polyglot=api;globalThis.__MICHAEL_POLYGLOT=api}).catch(error=>console.warn('MICHAEL V57 optional module fallback',error));
+let polyglot=null;bootMichaelPolyglot('./generated/','michael83').then(api=>{polyglot=api;globalThis.__MICHAEL_POLYGLOT=api}).catch(error=>console.warn('MICHAEL V57 optional module fallback',error));
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');
 let xr,dyn,engine,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.11,dist=10.2,targetY=.82,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
@@ -44,13 +44,13 @@ class BodyBatch{
 function pushBody(b,base,metal=.02,rough=.48){if(!b.p.length)return 0;xr._mesh(new Float32Array(b.p),new Float32Array(b.n),new Uint32Array(b.i),{base:new Float32Array(base),metal,rough,em:new Float32Array([0,0,0])},new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]));return 1}
 function ring(b,x,cy,z,rx,ry,ix,iy,seg=20){for(let k=0;k<seg;k++){const a=k/seg*Math.PI*2,c=(k+1)/seg*Math.PI*2,oa=[x+Math.cos(a)*rx,cy+Math.sin(a)*ry,z],ob=[x+Math.cos(c)*rx,cy+Math.sin(c)*ry,z],ib=[x+Math.cos(c)*ix,cy+Math.sin(c)*iy,z+.003],ia=[x+Math.cos(a)*ix,cy+Math.sin(a)*iy,z+.003];b.q(oa,ob,ib,ia,[0,0,1])}}
 // MICHAEL_VISUAL_GENOME_BEGIN -- Nickelle generated; automatic edits stay inside this authority block.
-globalThis.__MICHAEL_NATIVE_VISUAL={wheelRadius:0.512,wheelTrackX:1.37,wheelWidth:0.43,wheelY:0.56,paintRoughnessScale:1,darkRoughnessScale:1,exposureScale:1,keyLightScale:1,ambientScale:1,headlampTopology:'OWNER_ROUNDED_RECT_V41',grilleTopology:'OWNER_RECESSED_ROUNDED_RECT_V42',generation:1};
+globalThis.__MICHAEL_NATIVE_VISUAL={wheelRadius:0.512,wheelTrackX:1.37,wheelWidth:0.43,wheelY:0.56,paintRoughnessScale:1,darkRoughnessScale:1,exposureScale:1,keyLightScale:1,ambientScale:1,headlampTopology:'OWNER_ROUNDED_RECT_V41',grilleTopology:'OWNER_RECESSED_ROUNDED_RECT_V42',generation:4};
 function addBodyAuthority(){
   if(!xr?._mesh)return;
   const dark=new BodyBatch(),red=new BodyBatch(),white=new BodyBatch(),yellow=new BodyBatch(),lens=new BodyBatch(),mesh=new BodyBatch();
   const rrPts=(cx,cy,w,h,r,steps=5)=>{const hw=w/2,hh=h/2,rad=Math.max(.004,Math.min(r,hw-.002,hh-.002)),out=[];for(const [ox,oy,a0] of [[hw-rad,hh-rad,0],[-hw+rad,hh-rad,Math.PI/2],[-hw+rad,-hh+rad,Math.PI],[hw-rad,-hh+rad,Math.PI*1.5]])for(let j=0;j<=steps;j++){const a=a0+j/steps*Math.PI/2;out.push([cx+ox+Math.cos(a)*rad,cy+oy+Math.sin(a)*rad])}return out};
   const rrRing=(b,cx,cy,z,w,h,r,iw,ih,ir)=>{const o=rrPts(cx,cy,w,h,r),n=rrPts(cx,cy,iw,ih,ir);for(let k=0;k<o.length;k++){const j=(k+1)%o.length;b.q([o[k][0],o[k][1],z],[o[j][0],o[j][1],z],[n[j][0],n[j][1],z+.003],[n[k][0],n[k][1],z+.003],[0,0,1])}};
-  const gw=(0.88+0.76),gy=(0.25+0.54)*.5,gh=0.54-0.25,gr=0.115,gf=0.028;
+  const gw=(0.8+0.69),gy=(0.27+0.49)*.5,gh=0.49-0.27,gr=0.105,gf=0.024;
   rrRing(yellow,0,gy,3.073,gw,gh,gr,Math.max(.30,gw-gf*2),Math.max(.16,gh-gf*2),Math.max(.035,gr-gf));
   dark.box(0,gy,3.058,Math.max(.26,gw-gf*2.15),Math.max(.14,gh-gf*2.15),.025);
   for(let x=-.62;x<=.62;x+=.155)mesh.q([x-.010,gy-gh*.32,3.074],[x+.010,gy-gh*.32,3.074],[x+.19,gy+gh*.32,3.074],[x+.17,gy+gh*.32,3.074],[0,0,1]);
@@ -63,7 +63,7 @@ function addBodyAuthority(){
   dark.q([-.98,1.59,-2.49],[.98,1.59,-2.49],[.91,1.64,-2.65],[-.91,1.64,-2.65],[0,1,0]);for(const s of [-1,1]){const x=s*1.16;dark.q([x,1.48,-2.47],[x,1.48,-2.72],[x,1.86,-2.82],[x,1.82,-2.50],[s,0,0]);dark.box(s*1.02,1.62,-2.56,.045,.34,.14)}
   dark.q([-0.98,.19,-3.040],[0.98,.19,-3.040],[0.87,.53,-3.040],[-0.87,.53,-3.040],[0,0,-1]);for(const x of [-.68,0,.68])dark.q([x-.032,.18,-3.043],[x+.032,.18,-3.043],[x+.024,.50,-2.86],[x-.024,.50,-2.86],[0,0,-1]);dark.box(0,.37,-3.085,.32,.12,.10);
   const draws=pushBody(dark,[.006,.008,.010],.12,.44)+pushBody(red,[.64,.018,.020],.02,.32)+pushBody(white,[.82,.82,.79],.02,.34)+pushBody(yellow,[.92,.63,.015],.01,.38)+pushBody(lens,[.72,.78,.82],.18,.20)+pushBody(mesh,[.12,.13,.14],.04,.52);
-  globalThis.__MICHAEL_BODY_AUTHORITY={source:'OWNER_7303_PHOTOS_VISUAL_GENOME',generation:1,frontGrille:true,grilleTopology:'OWNER_RECESSED_ROUNDED_RECT_V42',recessedGrilleCavity:true,grillePerimeter:true,grilleMesh:true,roundedRectangleHeadlamps:true,headlampTopology:'OWNER_ROUNDED_RECT_V41',redProjectorSurrounds:true,recessedBlackLampCavities:true,offsetRectangularInnerLenses:true,thinUpperDRL:true,legacyEllipseProjectors:false,blackFrontArches:true,redDoorAuthority:true,blackLowerDoorInsert:true,yellowSkirtAccent:true,whiteRoof:true,whiteHoodGraphic:true,rectangularRoofScoop:true,licensedMainWing:true,blackWingEndplates:true,rearDiffuser:true,centralExhaust:true,whiteRallyWheels:true,nickelleNativeVisual:true,batchedDraws:draws};
+  globalThis.__MICHAEL_BODY_AUTHORITY={source:'OWNER_7303_PHOTOS_VISUAL_GENOME',generation:4,frontGrille:true,grilleTopology:'OWNER_RECESSED_ROUNDED_RECT_V42',recessedGrilleCavity:true,grillePerimeter:true,grilleMesh:true,roundedRectangleHeadlamps:true,headlampTopology:'OWNER_ROUNDED_RECT_V41',redProjectorSurrounds:true,recessedBlackLampCavities:true,offsetRectangularInnerLenses:true,thinUpperDRL:true,legacyEllipseProjectors:false,blackFrontArches:true,redDoorAuthority:true,blackLowerDoorInsert:true,yellowSkirtAccent:true,whiteRoof:true,whiteHoodGraphic:true,rectangularRoofScoop:true,licensedMainWing:true,blackWingEndplates:true,rearDiffuser:true,centralExhaust:true,whiteRallyWheels:true,nickelleNativeVisual:true,batchedDraws:draws};
 }
 // MICHAEL_VISUAL_GENOME_END
 class TruthTelemetry{
@@ -73,7 +73,7 @@ class TruthTelemetry{
 }
 const telemetry=new TruthTelemetry;
 const payloadURL=()=>{const raw=atob(michaelPayload),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}))},scan=payloadURL();
-const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael82-fallback';
+const fallback='https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous/assets/mjx7303/mjx7303-v33.glb?v=michael83-fallback';
 async function loadVehicle(){xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();engine=new MichaelEngine({renderer:xr,dynamics:dyn,canvas}).bootstrap();globalThis.__MICHAEL_ENGINE=engine.report();status.textContent='MICHAEL V57 · OWNER 7303 PHOTO AUTHORITY · LOADING…';try{const info=await xr.loadGLB(scan);refineVehicle();addBodyAuthority();status.textContent=`MICHAEL V57 · ${info.drawables+4} GPU DRAWS · OWNER 7303 PHOTO BODY AUTHORITY`;window.__MICHAEL_SYSTEMS=info.completeTwin;status.className='asset-state ok';clearTimeout(window.__MICHAEL_STATUS_TIMER);window.__MICHAEL_STATUS_TIMER=setTimeout(()=>status.classList.add('settled'),2200);window.__MICHAEL_MODEL=true;return info}catch(e){const primary=String(e?.message||e);console.error('MICHAEL V57 PRIMARY MODEL ERROR',scan,primary);window.__MICHAEL_ERROR={primary,url:scan};status.textContent=`MICHAEL V57 PRIMARY ${primary} · V33 CONTINUITY ACTIVE`;status.className='asset-state warn';status.classList.remove('settled');const info=await xr.loadGLB(fallback);window.__MICHAEL_MODEL=false;return{...info,primaryError:primary}}}
 try{await loadVehicle()}catch(e){console.error(e);status.textContent='MICHAEL V57 MODEL LOAD FAILED · '+e.message;status.className='asset-state warn';status.classList.remove('settled')}
 function orbit(){xr?.orbit(yaw,pitch,dist,targetY)}orbit();
