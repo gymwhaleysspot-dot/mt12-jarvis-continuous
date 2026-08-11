@@ -1,7 +1,7 @@
 {
-  "schema": 2,
-  "identity": "Michael V57 / owner's MJX 7303 Citroen C3 WRC body",
-  "authorityOrder": ["owner_photos", "owner_measurements", "same_body_external_references", "full_size_c3_wrc_references"],
+  "schema": 3,
+  "identity": "Michael V62 / owner's MJX 7303 Citroen C3 WRC personal twin",
+  "authorityOrder": ["owner_photos", "owner_measurements", "owner_requirements", "same_body_external_references", "full_size_c3_wrc_references"],
   "primaryOwnerReferenceSet": "michael/visual/owner-reference-observations.json",
   "protectedFacts": {
     "body": [
@@ -36,8 +36,17 @@
       "Rear diffuser presents five pronounced fin regions",
       "Central rear recess and exhaust treatment sit on the centerline"
     ],
+    "interior": [
+      "Cabin contains two rally occupants: one driver and one navigator/co-driver",
+      "Driver is seated at the steering position and is visibly helmeted through the greenhouse",
+      "Navigator/co-driver is seated in the passenger position and is visibly helmeted through the greenhouse",
+      "Both occupants use rally bucket-seat, torso and harness silhouettes",
+      "Navigator has a compact pace-note board/detail",
+      "Existing roll cage, glass and cabin visibility remain preserved"
+    ],
     "preserve": [
       "Cabin and roll cage visibility",
+      "Driver and navigator presence",
       "Direct-X track-relative steering sign",
       "Guardrail-aware chase camera",
       "Licensed base shell and glass",
@@ -45,11 +54,13 @@
     ]
   },
   "referenceNotes": [
-    "Seven owner photographs supplied 2026-08-10 now define the primary exterior shape: front, left/right front three-quarter, side, left/right rear three-quarter, and straight rear.",
-    "Web research may fill hidden details but must not outrank the seven-photo owner set for visible exterior geometry.",
+    "Eight owner photographs supplied 2026-08-10 define the primary exterior shape and identity.",
+    "Owner requirement supplied 2026-08-11 defines the cockpit as an occupied rally cabin with a driver and navigator/co-driver.",
+    "Web research may fill hidden details but must not outrank the owner set for visible geometry.",
     "The side photograph is the primary proportion anchor for wheelbase, wheel diameter, overhangs, roofline, windshield rake, greenhouse and rocker height.",
     "The straight front and rear photographs are the primary symmetry/placement anchors for fascia, lamps, grille, wing, taillights, bumper openings and diffuser."
   ],
-  "mutableSubsystems": ["front_grille", "lamp_housings", "projectors", "drls", "front_arches", "hood_vents", "front_splitter", "side_insert", "skirt_accent", "roof_graphic", "roof_scoop", "wing_detail", "rear_lamps", "rear_bumper_openings", "rear_diffuser", "wheel_material"],
+  "mutableSubsystems": ["front_grille", "lamp_housings", "projectors", "drls", "front_arches", "hood_vents", "front_splitter", "side_insert", "skirt_accent", "roof_graphic", "roof_scoop", "wing_detail", "rear_lamps", "rear_bumper_openings", "rear_diffuser", "wheel_material", "cockpit_crew"],
+  "requiredRuntimeSystems": {"driverPresent": true, "navigatorPresent": true, "occupantCount": 2, "cockpitCrew": "RALLY_DRIVER_AND_NAVIGATOR_V62"},
   "forbiddenAutomaticSubsystems": ["dynamics", "steering", "track_centerline", "camera_presets", "controller", "telemetry", "payload", "licensed_mesh_transform"]
 }
