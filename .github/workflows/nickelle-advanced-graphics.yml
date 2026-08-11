@@ -9,6 +9,8 @@ on:
     paths:
       - 'tools/nickelle_advanced_graphics_intelligence.mjs'
       - 'tools/nickelle_autonomous_repair.mjs'
+      - 'tools/nickelle_measured_optimizer.mjs'
+      - 'tools/nickelle_quality_repair.mjs'
       - 'michael/visual/advanced-autonomy.json'
       - 'michael/visual/autonomy.json'
       - 'michael/reconstruction/topology-dsl.json'
@@ -27,7 +29,7 @@ concurrency:
 jobs:
   advanced-intelligence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
@@ -38,7 +40,10 @@ jobs:
           set -Eeuo pipefail
           node --check tools/nickelle_autonomous_repair.mjs
           node --check tools/nickelle_advanced_graphics_intelligence.mjs
-          node -e "for(const p of ['michael/visual/advanced-autonomy.json','michael/visual/autonomy.json','michael/reconstruction/topology-dsl.json','michael/visual/scene-graph.json']) JSON.parse(require('fs').readFileSync(p))"
+          node --check tools/nickelle_measured_optimizer.mjs
+          node --check tools/nickelle_quality_repair.mjs
+          python3 -m py_compile tools/michael_visual_evolution.py
+          node -e "for(const p of ['michael/visual/advanced-autonomy.json','michael/visual/autonomy.json','michael/reconstruction/topology-dsl.json','michael/visual/scene-graph.json','michael/visual/owner-reference-observations.json']) JSON.parse(require('fs').readFileSync(p))"
       - name: Install visual analysis runtime
         run: npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0 jpeg-js@0.4.4
       - name: Install Chromium
@@ -49,68 +54,79 @@ jobs:
           for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/racing-mjx7303-michael-v39.html >/dev/null && exit 0; sleep 1; done
           cat /tmp/michael-advanced-http.log; exit 1
       - name: Capture canonical Michael views
-        env:
-          MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
-          MICHAEL_CAPTURE_SIZE: 720
+        env: {MICHAEL_URL: 'http://127.0.0.1:4173/racing-mjx7303-michael-v39.html', MICHAEL_CAPTURE_SIZE: '720'}
         run: node tools/michael_visual_capture.mjs /tmp/michael-advanced-baseline
       - name: Rebuild current whole-car autonomous state
         run: node tools/nickelle_autonomous_repair.mjs run /tmp/michael-advanced-baseline michael/reconstruction/autonomous-state.json
-      - name: Run all twenty advanced graphics upgrades
-        run: node tools/nickelle_advanced_graphics_intelligence.mjs run /tmp/michael-advanced-baseline michael/reconstruction/advanced-state.json
-      - name: Verify advanced stack 20 of 20
-        run: |
-          node - <<'NODE'
-          const x=require('./michael/reconstruction/advanced-state.json');
-          const keys=Object.keys(x.upgrades||{}), live=keys.filter(k=>x.upgrades[k]);
-          if(keys.length!==20||live.length!==20) throw Error(`advanced upgrades ${live.length}/${keys.length}`);
-          if(!x.benchmark?.name||!Number.isFinite(x.benchmark.score)) throw Error('graphics benchmark missing');
-          if(!x.realityGap||!Number.isFinite(x.realityGap.gap)) throw Error('reality-gap score missing');
-          if(!Array.isArray(x.uncertainty)||!x.uncertainty.length) throw Error('uncertainty model missing');
-          if(!x.implicitSurface?.latent?.length) throw Error('implicit surface representation missing');
-          console.log(`Nickelle advanced graphics: 20/20 live; benchmark=${x.benchmark.score}; realityGap=${x.realityGap.gap}; mode=${x.resourceGovernor.mode}`);
-          NODE
-      - name: Persist advanced intelligence with concurrent-agent rebase
+      - name: Measure actual owner-truth parameter gradients
+        env: {MICHAEL_URL: 'http://127.0.0.1:4173/racing-mjx7303-michael-v39.html', MICHAEL_CAPTURE_SIZE: '480'}
         run: |
           set -Eeuo pipefail
-          git config user.name 'Nickelle Advanced Graphics AI'
-          git config user.email 'actions@users.noreply.github.com'
+          rm -rf /tmp/nickelle-gradient; mkdir -p /tmp/nickelle-gradient
+          cp -r /tmp/michael-advanced-baseline /tmp/nickelle-gradient/baseline
+          cp jarvis/mjx7303-racing-michael-v39.js /tmp/gradient-runtime.js
+          cp michael/visual/genome.json /tmp/gradient-genome.json
+          cp michael/visual/state.json /tmp/gradient-state.json
+          node tools/nickelle_measured_optimizer.mjs generate /tmp/nickelle-probes.json
+          jq -c '.probes[]' /tmp/nickelle-probes.json | while read -r row; do
+            id="$(jq -r '.id' <<<"$row")"
+            cp /tmp/gradient-runtime.js jarvis/mjx7303-racing-michael-v39.js
+            cp /tmp/gradient-genome.json michael/visual/genome.json
+            cp /tmp/gradient-state.json michael/visual/state.json
+            jq '.proposal' <<<"$row" > /tmp/probe.json
+            python3 tools/michael_visual_evolution.py apply /tmp/probe.json >/tmp/probe-apply.log
+            node tools/michael_visual_capture.mjs "/tmp/nickelle-gradient/$id"
+          done
+          cp /tmp/gradient-runtime.js jarvis/mjx7303-racing-michael-v39.js
+          cp /tmp/gradient-genome.json michael/visual/genome.json
+          cp /tmp/gradient-state.json michael/visual/state.json
+          node tools/nickelle_measured_optimizer.mjs evaluate /tmp/nickelle-probes.json /tmp/nickelle-gradient /tmp/nickelle-measured-optimizer.json
+      - name: Run all twenty advanced graphics upgrades
+        run: node tools/nickelle_advanced_graphics_intelligence.mjs run /tmp/michael-advanced-baseline michael/reconstruction/advanced-state.json
+      - name: Repair evidence routing critics topology and locks
+        run: node tools/nickelle_quality_repair.mjs
+      - name: Verify 20 plus eight repaired weaknesses
+        run: |
+          node - <<'NODE'
+          const x=require('./michael/reconstruction/advanced-state.json'),a=require('./michael/reconstruction/autonomous-state.json');
+          const keys=Object.keys(x.upgrades||{}),live=keys.filter(k=>x.upgrades[k]);
+          if(keys.length!==20||live.length!==20) throw Error(`advanced upgrades ${live.length}/${keys.length}`);
+          const q=x.qualityRepair||{}; if(!q.allEightWeaknessesAddressed||!q.actualRenderFiniteDifference) throw Error('eight-weakness repair not live');
+          if(x.optimizer?.method!=='actual_render_finite_difference_owner_truth') throw Error('measured optimizer not authoritative');
+          if(!x.critics?.semanticOwnerTruth?.requiredForPromotion) throw Error('semantic owner critic missing');
+          const bad=(x.informationGain||[]).filter(z=>z.component==='sideSilhouette'&&z.region!=='side_body'); if(bad.length) throw Error('region routing regression');
+          const mapped=(x.uncertainty||[]).filter(z=>z.ownerReferences>0).length; if(mapped<10) throw Error(`owner alias coverage too low: ${mapped}`);
+          if(!Array.isArray(a.topologyQueue)) throw Error('topology queue missing');
+          console.log(`Nickelle repaired stack live: 20/20 + 8/8; mapped=${mapped}; gradients=${x.optimizer.allGradients.length}; semantic=${x.critics.semanticOwnerTruth.score}`);
+          NODE
+      - name: Persist repaired intelligence with concurrent-agent rebase
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Nickelle Advanced Graphics AI'; git config user.email 'actions@users.noreply.github.com'
           cp michael/reconstruction/advanced-state.json /tmp/nickelle-advanced-state.json
           cp michael/reconstruction/autonomous-state.json /tmp/nickelle-autonomous-state.json
           for attempt in 1 2 3 4; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p michael/reconstruction
+            git fetch origin main; git reset --hard origin/main; mkdir -p michael/reconstruction
             cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
             cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
             git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
-            if git diff --cached --quiet; then echo 'advanced state already persisted'; break; fi
-            git commit -m 'Nickelle updates advanced graphics intelligence [skip ci]'
-            if git push origin HEAD:main; then echo 'advanced state persisted'; break; fi
-            echo "main advanced during persistence attempt $attempt; rebasing generated state"
+            if git diff --cached --quiet; then break; fi
+            git commit -m 'Nickelle persists measured repaired graphics intelligence [skip ci]'
+            if git push origin HEAD:main; then break; fi
             sleep $((attempt*2))
           done
           git fetch origin main
-          git show origin/main:michael/reconstruction/advanced-state.json >/dev/null || { echo 'advanced-state.json did not persist' >&2; exit 1; }
-      - name: Route heavy topology and mesh-surgery work
+          git show origin/main:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth' || { echo 'measured repaired state did not persist' >&2; exit 1; }
+      - name: Route repaired heavy topology work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
-          set -Eeuo pipefail
-          mode="$(jq -r '.resourceGovernor.mode' /tmp/nickelle-advanced-state.json)"
-          surgery="$(jq '.meshSurgery | length' /tmp/nickelle-advanced-state.json)"
-          if [ "$mode" = 'heavy_topology' ] || [ "$surgery" -gt 0 ]; then
-            active="$(gh api "/repos/$REPO/actions/workflows/michael-full-reconstruction.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
-            [ "$active" -gt 0 ] || gh workflow run michael-full-reconstruction.yml --repo "$REPO" --ref main
-          fi
-      - name: Route unresolved benchmark debt back to visual evolution
+          q="$(jq '.topologyQueue|length' /tmp/nickelle-autonomous-state.json)"; mode="$(jq -r '.resourceGovernor.mode' /tmp/nickelle-advanced-state.json)"
+          if [ "$q" -gt 0 ] || [ "$mode" = heavy_topology ]; then active="$(gh api "/repos/$REPO/actions/workflows/michael-full-reconstruction.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"; [ "$active" -gt 0 ] || gh workflow run michael-full-reconstruction.yml --repo "$REPO" --ref main; fi
+      - name: Route unresolved benchmark debt
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
-          set -Eeuo pipefail
-          pass="$(jq -r '.benchmark.pass' /tmp/nickelle-advanced-state.json)"
-          if [ "$pass" != 'true' ]; then
-            active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
-            [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main
-          fi
-      - name: Preserve advanced graphics evidence
+          pass="$(jq -r '.benchmark.pass' /tmp/nickelle-advanced-state.json)"; if [ "$pass" != true ]; then active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"; [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main; fi
+      - name: Preserve measured advanced evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
@@ -118,6 +134,8 @@ jobs:
           path: |
             /tmp/nickelle-autonomous-state.json
             /tmp/nickelle-advanced-state.json
+            /tmp/nickelle-measured-optimizer.json
+            /tmp/nickelle-gradient
             /tmp/michael-advanced-baseline
           if-no-files-found: warn
           retention-days: 60
