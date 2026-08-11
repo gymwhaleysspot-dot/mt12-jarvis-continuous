@@ -1,0 +1,162 @@
+name: Nickelle Live Owner-Truth Convergence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nickelle-live-convergence.yml'
+      - 'tools/michael_visual_evolution.py'
+      - 'tools/michael_internal_vision.mjs'
+      - 'tools/nickelle_visual_ai.mjs'
+      - 'tools/michael_visual_capture.mjs'
+      - 'jarvis/michael-graphics-v40.js'
+      - 'jarvis/michael-graphics-v40-base.js'
+      - 'michael/visual/genome.json'
+      - 'michael/visual/reference-metrics.json'
+      - 'michael/visual/owner-truth.json'
+      - 'michael/visual/owner-reference-observations.json'
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nickelle-continuous-visual-evolution
+  cancel-in-progress: false
+
+jobs:
+  converge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
+      MAX_ROUNDS: 10
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate closed-loop authority
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile tools/michael_visual_evolution.py
+          node --check tools/michael_internal_vision.mjs
+          node --check tools/nickelle_visual_ai.mjs
+          node --check jarvis/michael-graphics-v40.js
+          ! grep -F 'addBodyAuthority();' jarvis/mjx7303-racing-michael-v39.js
+          grep -F 'michael-graphics-v40.js' jarvis/mjx7303-racing-michael-v39.js
+      - name: Install headless renderer
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Start Michael renderer
+        run: |
+          python3 -m http.server 4173 >/tmp/michael-http.log 2>&1 &
+          for n in $(seq 1 30); do curl -fsS "$MICHAEL_URL" >/dev/null && exit 0; sleep 1; done
+          cat /tmp/michael-http.log; exit 1
+      - name: Run visible Owner-Truth convergence loop
+        id: loop
+        run: |
+          set -Eeuo pipefail
+          rm -rf /tmp/nickelle-live /tmp/michael-champion /tmp/michael-candidate
+          mkdir -p /tmp/nickelle-live
+          cp michael/visual/genome.json /tmp/champion-genome.json
+          cp michael/visual/state.json /tmp/champion-state.json
+          cp nickelle/memory.json /tmp/champion-memory.json
+          MICHAEL_CAPTURE_SIZE=900 node tools/michael_visual_capture.mjs /tmp/michael-champion
+          node tools/michael_internal_vision.mjs evaluate /tmp/michael-champion > /tmp/start-eval.json
+          start="$(jq -r '.score' /tmp/start-eval.json)"; current="$start"; accepted=0; rejected=0
+          python3 - "$start" "$MAX_ROUNDS" <<'PY'
+          import json,sys,datetime
+          score=float(sys.argv[1]); rounds=int(sys.argv[2])
+          json.dump({'schema':1,'updatedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'RUNNING','round':0,'maxRounds':rounds,'score':score,'startingScore':score,'accepted':0,'rejected':0,'converged':False,'weakest':[],'diagnosis':['Nickelle started closed-loop Owner Truth convergence.'],'ownerTruthFailures':[],'authority':'OWNER_PHOTOS','runtimeBodyOverlay':False},open('michael/visual/live-status.json','w'),indent=2)
+          open('michael/visual/live-status.json','a').write('\n')
+          PY
+          for round in $(seq 1 "$MAX_ROUNDS"); do
+            echo "=== NICKELLE OWNER-TRUTH ROUND $round/$MAX_ROUNDS ==="
+            cp /tmp/champion-genome.json michael/visual/genome.json
+            cp /tmp/champion-state.json michael/visual/state.json
+            cp /tmp/champion-memory.json nickelle/memory.json
+            node tools/nickelle_visual_ai.mjs propose /tmp/michael-champion "/tmp/nickelle-live/proposal-$round.json"
+            python3 tools/michael_visual_evolution.py apply "/tmp/nickelle-live/proposal-$round.json"
+            rm -rf /tmp/michael-candidate
+            MICHAEL_CAPTURE_SIZE=900 node tools/michael_visual_capture.mjs /tmp/michael-candidate
+            node tools/nickelle_visual_ai.mjs compare /tmp/michael-champion /tmp/michael-candidate "/tmp/nickelle-live/proposal-$round.json" "/tmp/nickelle-live/verdict-$round.json"
+            promote="$(jq -r '.promote' "/tmp/nickelle-live/verdict-$round.json")"
+            cand="$(jq -r '.candidateScore' "/tmp/nickelle-live/verdict-$round.json")"
+            cat > "/tmp/nickelle-live/decision-$round.json" <<JSON
+          {"promote":$promote,"round":$round,"baselineScore":$current,"candidateScore":$cand}
+          JSON
+            node tools/nickelle_visual_ai.mjs learn "/tmp/nickelle-live/proposal-$round.json" "/tmp/nickelle-live/verdict-$round.json" "/tmp/nickelle-live/decision-$round.json" nickelle/memory.json
+            if [ "$promote" = true ]; then
+              accepted=$((accepted+1)); current="$cand"
+              cp michael/visual/genome.json /tmp/champion-genome.json
+              cp michael/visual/state.json /tmp/champion-state.json
+              cp nickelle/memory.json /tmp/champion-memory.json
+              rm -rf /tmp/michael-champion; cp -a /tmp/michael-candidate /tmp/michael-champion
+              status='IMPROVING'
+            else
+              rejected=$((rejected+1)); status='SEARCHING'
+              cp /tmp/champion-genome.json michael/visual/genome.json
+              cp /tmp/champion-state.json michael/visual/state.json
+              cp /tmp/champion-memory.json nickelle/memory.json
+            fi
+            weakest="$(jq -c '.nickelle.weakest // []' "/tmp/nickelle-live/proposal-$round.json")"
+            diagnosis="$(jq -c '.diagnosis // []' "/tmp/nickelle-live/proposal-$round.json")"
+            failures="$(jq -c '.ownerTruthFailures // .candidate.ownerTruthFailures // []' "/tmp/nickelle-live/verdict-$round.json")"
+            python3 - "$round" "$MAX_ROUNDS" "$current" "$start" "$accepted" "$rejected" "$status" "$weakest" "$diagnosis" "$failures" <<'PY'
+          import json,sys,datetime
+          r,m,score,start,a,x,status=int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]),sys.argv[7]
+          weak=json.loads(sys.argv[8]);diag=json.loads(sys.argv[9]);fail=json.loads(sys.argv[10])
+          out={'schema':1,'updatedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':status,'round':r,'maxRounds':m,'score':score,'startingScore':start,'accepted':a,'rejected':x,'converged':False,'weakest':weak,'diagnosis':diag,'ownerTruthFailures':fail,'authority':'OWNER_PHOTOS','runtimeBodyOverlay':False}
+          json.dump(out,open('michael/visual/live-status.json','w'),indent=2);open('michael/visual/live-status.json','a').write('\n')
+          PY
+            # Stop only after a strong owner score and two consecutive rejected attempts.
+            if awk "BEGIN{exit !($current >= 92.0 && $rejected >= 2)}"; then break; fi
+          done
+          cp /tmp/champion-genome.json michael/visual/genome.json
+          cp /tmp/champion-state.json michael/visual/state.json
+          cp /tmp/champion-memory.json nickelle/memory.json
+          final_status='STABLE'; converged=false
+          if awk "BEGIN{exit !($current >= 92.0)}"; then final_status='CONVERGED'; converged=true; fi
+          python3 - "$current" "$start" "$accepted" "$rejected" "$final_status" "$converged" "$MAX_ROUNDS" <<'PY'
+          import json,sys,datetime
+          score,start,a,r,status,conv,maxr=float(sys.argv[1]),float(sys.argv[2]),int(sys.argv[3]),int(sys.argv[4]),sys.argv[5],sys.argv[6]=='true',int(sys.argv[7])
+          p='michael/visual/live-status.json'; old=json.load(open(p));old.update({'updatedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':status,'score':score,'startingScore':start,'accepted':a,'rejected':r,'converged':conv,'maxRounds':maxr});json.dump(old,open(p,'w'),indent=2);open(p,'a').write('\n')
+          PY
+          echo "accepted=$accepted" >> "$GITHUB_OUTPUT"
+          echo "start=$start" >> "$GITHUB_OUTPUT"
+          echo "final=$current" >> "$GITHUB_OUTPUT"
+          echo "Nickelle Owner Truth: $start -> $current, accepted $accepted, rejected $rejected"
+      - name: Force new live module graph when champion improved
+        if: steps.loop.outputs.accepted != '0'
+        run: python3 tools/michael_visual_evolution.py bump-version
+      - name: Verify final champion
+        run: |
+          set -Eeuo pipefail
+          node --check jarvis/mjx7303-racing-michael-v39.js
+          node --check jarvis/michael-graphics-v40.js
+          ! grep -F 'addBodyAuthority();' jarvis/mjx7303-racing-michael-v39.js
+          test "$(jq -r '.runtimeBodyOverlay' michael/visual/live-status.json)" = false
+      - name: Persist convergence result without overwriting newer main
+        env: {START_SHA: '${{ github.sha }}'}
+        run: |
+          set -Eeuo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then echo 'main advanced; convergence result deferred to next loop'; exit 0; fi
+          git config user.name 'Nickelle Closed Loop'; git config user.email 'actions@users.noreply.github.com'
+          git add michael/visual/genome.json michael/visual/state.json michael/visual/live-status.json nickelle/memory.json jarvis/mjx7303-racing-michael-v39.js racing-mjx7303-michael-v39.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Nickelle closed-loop Owner Truth ${START_SHA:0:7} [skip ci]"
+          git push origin HEAD:main
+      - name: Preserve every candidate and verdict
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nickelle-live-convergence-${{ github.run_number }}
+          path: |
+            /tmp/nickelle-live
+            /tmp/michael-champion
+            michael/visual/live-status.json
