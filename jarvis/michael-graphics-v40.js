@@ -1,6 +1,6 @@
 // MICHAEL GRAPHICS V40 — Nickelle native visual authority layer.
 // Intercepts generated twin meshes before GPU upload so stance changes are native geometry, not overlays.
-// V57/V44 identity preservation: generated topology may add depth, but may not erase photographed livery/glass/lamp identity.
+// V57/V44/V45 identity preservation: generated topology may add depth, but may not erase photographed livery/glass/lamp identity.
 import {JarvisXRRenderer as V39} from './michael-graphics-v39.js?v=nickelle-v40-core';
 const near=(m,v,t=.00045)=>!!m?.base&&Math.abs(m.base[0]-v[0])<t&&Math.abs(m.base[1]-v[1])<t&&Math.abs(m.base[2]-v[2])<t;
 const rough=(m,v,t=.025)=>Number.isFinite(m?.rough)&&Math.abs(m.rough-v)<t;
@@ -32,6 +32,31 @@ function preserveLicensedSkin(pos,idx,mat){
   }
   return keep.length===idx.length?idx:new Uint32Array(keep);
 }
+class RearLampBatch{
+  constructor(){this.p=[];this.n=[];this.i=[]}
+  q(a,b,c,d){const o=this.p.length/3;this.p.push(...a,...b,...c,...d);for(let k=0;k<4;k++)this.n.push(0,0,-1);this.i.push(o,o+1,o+2,o,o+2,o+3)}
+  box(cx,cy,z,w,h){this.q([cx-w/2,cy-h/2,z],[cx-w/2,cy+h/2,z],[cx+w/2,cy+h/2,z],[cx+w/2,cy-h/2,z])}
+}
+const rearRR=(cx,cy,w,h,r,steps=6)=>{const hw=w/2,hh=h/2,rad=Math.max(.004,Math.min(r,hw-.002,hh-.002)),out=[];for(const [ox,oy,a0] of [[hw-rad,hh-rad,0],[-hw+rad,hh-rad,Math.PI/2],[-hw+rad,-hh+rad,Math.PI],[hw-rad,-hh+rad,Math.PI*1.5]])for(let j=0;j<=steps;j++){const a=a0+j/steps*Math.PI/2;out.push([cx+ox+Math.cos(a)*rad,cy+oy+Math.sin(a)*rad])}return out};
+function rearRing(b,cx,cy,z,w,h,r,iw,ih,ir){const o=rearRR(cx,cy,w,h,r),n=rearRR(cx,cy,iw,ih,ir);for(let k=0;k<o.length;k++){const j=(k+1)%o.length;b.q([o[k][0],o[k][1],z],[o[j][0],o[j][1],z],[n[j][0],n[j][1],z-.002],[n[k][0],n[k][1],z-.002])}}
+function uploadRearLamp(r,b,base,metal,rough,em=[0,0,0]){if(!b.i.length)return;r._mesh(new Float32Array(b.p),new Float32Array(b.n),new Uint32Array(b.i),{base:new Float32Array(base),metal,rough,em:new Float32Array(em)},new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]))}
+function addRearLampTopology(r){
+  const c=cfg(),w=Number(c.rearLampWidth||.50),h=Number(c.rearLampHeight||.29),cr=Number(c.rearLampCornerRadius||.105),cx=Number(c.rearLampX||.91),cy=Number(c.rearLampY||.89),inner=Math.max(.54,Math.min(.72,Number(c.rearLampInnerScale||.64))),z=-3.11;
+  const smoke=new RearLampBatch(),cavity=new RearLampBatch(),red=new RearLampBatch(),clear=new RearLampBatch();
+  for(const s of [-1,1]){
+    const x=s*cx,iw=w*inner,ih=h*inner,ir=Math.max(.03,cr*.58);
+    rearRing(smoke,x,cy,z,w,h,cr,w-.050,h-.046,Math.max(.035,cr-.022));
+    cavity.box(x,cy,z-.006,w-.058,h-.052);
+    rearRing(red,x,cy,z-.011,iw,ih,ir,iw*.66,ih*.56,Math.max(.018,ir*.50));
+    clear.box(x-s*w*.105,cy+h*.055,z-.015,w*.15,h*.085);
+    red.box(x+s*w*.105,cy-h*.035,z-.017,w*.105,h*.068);
+  }
+  uploadRearLamp(r,cavity,[.007,.008,.010],.03,.30);
+  uploadRearLamp(r,smoke,[.105,.010,.016],.10,.20,[.010,.001,.001]);
+  uploadRearLamp(r,red,[.46,.010,.016],.05,.21,[.090,.002,.002]);
+  uploadRearLamp(r,clear,[.42,.31,.29],.10,.18,[.018,.012,.010]);
+  r._michaelSystems={...(r._michaelSystems||{}),rearLampTopology:'OWNER_V45_SMOKED_C3_INTERNALS',rearLampNative:true};
+}
 export class JarvisXRRenderer extends V39{
   _mesh(pos,nor,idx,mat,model){
     if(wheelMat(mat))pos=transformWheel(pos,false);else if(shadowMat(mat))pos=transformWheel(pos,true);
@@ -39,7 +64,7 @@ export class JarvisXRRenderer extends V39{
     if(!idx.length)return null;
     return super._mesh(pos,nor,idx,mat,model)
   }
-  async loadGLB(url){const info=await super.loadGLB(url),c=cfg(),paint=Number(c.paintRoughnessScale||1),dark=Number(c.darkRoughnessScale||1);for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114;if(r>g*1.32&&r>b*1.25&&r>.11)m.rough=Math.max(.055,Math.min(.42,m.rough*paint));else if(lum<.055)m.rough=Math.max(.18,Math.min(1,m.rough*dark))}this._michaelSystems={...(this._michaelSystems||{}),nickelleNativeAuthority:true,nativeWheelRadius:Number(c.wheelRadius||.512),nativeWheelTrackX:Number(c.wheelTrackX||1.37),nativeWheelWidth:Number(c.wheelWidth||.43),nativeWheelY:Number(c.wheelY||.56),mudflapsProtected:true,licensedIdentityProtected:true,v44StrayYellowRemoved:true};return{...info,nickelleNative:true}}
+  async loadGLB(url){const info=await super.loadGLB(url),c=cfg(),paint=Number(c.paintRoughnessScale||1),dark=Number(c.darkRoughnessScale||1);for(const d of this.drawables){const m=d.mat;if(!m?.base)continue;const [r,g,b]=m.base,lum=r*.299+g*.587+b*.114;if(r>g*1.32&&r>b*1.25&&r>.11)m.rough=Math.max(.055,Math.min(.42,m.rough*paint));else if(lum<.055)m.rough=Math.max(.18,Math.min(1,m.rough*dark))}addRearLampTopology(this);this._michaelSystems={...(this._michaelSystems||{}),nickelleNativeAuthority:true,nativeWheelRadius:Number(c.wheelRadius||.512),nativeWheelTrackX:Number(c.wheelTrackX||1.37),nativeWheelWidth:Number(c.wheelWidth||.43),nativeWheelY:Number(c.wheelY||.56),mudflapsProtected:true,licensedIdentityProtected:true,v44StrayYellowRemoved:true,rearLampNative:true};return{...info,nickelleNative:true,rearLampNative:true}}
   beginOwnedFrame(){let restored=0;for(const d of this.drawables||[]){if(d?.hidden&&identityMaterial(d.mat)){d.hidden=false;restored++}}const c=super.beginOwnedFrame(),n=cfg(),key=Number(n.keyLightScale||1),amb=Number(n.ambientScale||1),exp=Number(n.exposureScale||1);this.lightColor[0]*=key;this.lightColor[1]*=key;this.lightColor[2]*=key;this.ambient[0]*=amb;this.ambient[1]*=amb;this.ambient[2]*=amb;this.exposure*=exp;this._identityRestored=restored;return c}
-  getAIStats(){return{...super.getAIStats(),nickelleNativeVisual:cfg(),licensedIdentityProtected:true,v44StrayYellowRemoved:true,identityBatchesRestored:this._identityRestored||0}}
+  getAIStats(){return{...super.getAIStats(),nickelleNativeVisual:cfg(),licensedIdentityProtected:true,v44StrayYellowRemoved:true,identityBatchesRestored:this._identityRestored||0,rearLampTopology:'OWNER_V45_SMOKED_C3_INTERNALS'}}
 }
