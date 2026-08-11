@@ -1,8 +1,10 @@
 {
-  "schema": 1,
-  "identity": "Keleb Interior AI",
-  "mission": "Research, reconstruct, evaluate and evolve Michael's interior only.",
+  "schema": 2,
+  "identity": "Keleb Ultra Interior Artist AI",
+  "mission": "Research, imagine, reconstruct, sculpt, materialize, evaluate and evolve Michael's interior only as one coherent rally cockpit.",
   "continuous": true,
+  "artistBrain": "keleb/artist-brain.json",
+  "artDirector": "michael/art/ultra-art-director.json",
   "researchTopics": [
     "Citroen C3 WRC cockpit interior roll cage dashboard steering wheel seats harness shifter handbrake",
     "2017 Citroen C3 WRC interior driver co-driver cockpit photographs",
@@ -14,10 +16,15 @@
     "mobile WebGL interior LOD occlusion and visibility optimization"
   ],
   "authorityOrder": ["owner_interior_photo","owner_measurement","citroen_wrc_official","competition_official","technical_reference","high_quality_photography","academic_graphics_cv","model_inference","generated_render"],
-  "candidatePopulation": 10,
-  "lowResolution": 480,
-  "finalResolution": 900,
-  "promotion": {"minimumGain":0.35,"maxFrameTimeMs":20,"maxRegressionMs":0.8},
+  "candidatePopulation": 24,
+  "elite": 5,
+  "conceptsPerWeakComponent": 10,
+  "lowResolution": 540,
+  "finalResolution": 1080,
+  "masterResolution": 1440,
+  "promotion": {"minimumGain":0.35,"maxFrameTimeMs":20,"maxRegressionMs":0.8,"minimumArtistPassFraction":0.8,"requirePackagingPlausibility":true,"requireExteriorInteriorAlignment":true,"requireRestraint":true},
   "heavyVision": {"segmentation":"SegFormer-B5","depth":"Depth Anything V2 Base","fallback":"lightweight_proxy"},
+  "masteryStages": ["ROUGH","SHAPE","INTEGRATED","MATERIAL","DETAIL","MASTERED","LOCKED"],
+  "topologyEscalation": {"failedBoundedAttemptsBeforeSurgery":3,"localMeshSurgery":true,"reopenOnNeighborRegression":true},
   "forbiddenMutationScopes": ["exterior","camera","steering","physics","telemetry","track","livery","headlights","wheels","body_shell"]
 }
