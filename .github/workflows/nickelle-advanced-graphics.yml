@@ -58,7 +58,7 @@ jobs:
         run: node tools/michael_visual_capture.mjs /tmp/michael-advanced-baseline
       - name: Rebuild current whole-car autonomous state
         run: node tools/nickelle_autonomous_repair.mjs run /tmp/michael-advanced-baseline michael/reconstruction/autonomous-state.json
-      - name: Measure actual owner-truth parameter gradients
+      - name: Measure owner-truth single and pairwise parameter gradients
         env: {MICHAEL_URL: 'http://127.0.0.1:4173/racing-mjx7303-michael-v39.html', MICHAEL_CAPTURE_SIZE: '480'}
         run: |
           set -Eeuo pipefail
@@ -85,19 +85,20 @@ jobs:
         run: node tools/nickelle_advanced_graphics_intelligence.mjs run /tmp/michael-advanced-baseline michael/reconstruction/advanced-state.json
       - name: Repair evidence routing critics topology and locks
         run: node tools/nickelle_quality_repair.mjs
-      - name: Verify 20 plus eight repaired weaknesses
+      - name: Verify 20 plus repaired weaknesses and interactions
         run: |
           node - <<'NODE'
           const x=require('./michael/reconstruction/advanced-state.json'),a=require('./michael/reconstruction/autonomous-state.json');
           const keys=Object.keys(x.upgrades||{}),live=keys.filter(k=>x.upgrades[k]);
           if(keys.length!==20||live.length!==20) throw Error(`advanced upgrades ${live.length}/${keys.length}`);
-          const q=x.qualityRepair||{}; if(!q.allEightWeaknessesAddressed||!q.actualRenderFiniteDifference) throw Error('eight-weakness repair not live');
-          if(x.optimizer?.method!=='actual_render_finite_difference_owner_truth') throw Error('measured optimizer not authoritative');
+          const q=x.qualityRepair||{}; if(!q.allEightWeaknessesAddressed||!q.actualRenderFiniteDifference||!q.pairwiseInteractionGradients) throw Error('measured interaction repair not live');
+          if(x.optimizer?.method!=='actual_render_finite_difference_owner_truth_with_pairwise_interactions') throw Error('pairwise measured optimizer not authoritative');
+          if(!Array.isArray(x.optimizer?.interactions)||!x.optimizer.interactions.length) throw Error('pairwise interactions missing');
           if(!x.critics?.semanticOwnerTruth?.requiredForPromotion) throw Error('semantic owner critic missing');
           const bad=(x.informationGain||[]).filter(z=>z.component==='sideSilhouette'&&z.region!=='side_body'); if(bad.length) throw Error('region routing regression');
           const mapped=(x.uncertainty||[]).filter(z=>z.ownerReferences>0).length; if(mapped<10) throw Error(`owner alias coverage too low: ${mapped}`);
           if(!Array.isArray(a.topologyQueue)) throw Error('topology queue missing');
-          console.log(`Nickelle repaired stack live: 20/20 + 8/8; mapped=${mapped}; gradients=${x.optimizer.allGradients.length}; semantic=${x.critics.semanticOwnerTruth.score}`);
+          console.log(`Nickelle repaired stack live: 20/20; mapped=${mapped}; gradients=${x.optimizer.allGradients.length}; interactions=${x.optimizer.interactions.length}; semantic=${x.critics.semanticOwnerTruth.score}`);
           NODE
       - name: Persist repaired intelligence with concurrent-agent rebase
         run: |
@@ -116,7 +117,7 @@ jobs:
             sleep $((attempt*2))
           done
           git fetch origin main
-          git show origin/main:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth' || { echo 'measured repaired state did not persist' >&2; exit 1; }
+          git show origin/main:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions' || { echo 'measured interaction state did not persist' >&2; exit 1; }
       - name: Route repaired heavy topology work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
