@@ -35,29 +35,25 @@ def active_version(src):
     return int(m.group(1))
 
 def bump_version():
-    src=RUNTIME.read_text();old=active_version(src);new=old+1
-    RUNTIME.write_text(src.replace(f'michael{old}',f'michael{new}'))
-    HTML.write_text(HTML.read_text().replace(f'michael{old}',f'michael{new}'))
-    print(json.dumps({'old':old,'new':new}))
+    src=RUNTIME.read_text();html=HTML.read_text();old=active_version(src)
+    seen=[int(x) for x in re.findall(r'michael(\d+)',src+html)]
+    new=max([old,*seen])+1
+    src=re.sub(r"(michael-graphics-v40\.js\?v=michael)\d+",lambda m:m.group(1)+str(new),src)
+    src=re.sub(r"(mjx7303-v33\.glb\?v=michael)\d+",lambda m:m.group(1)+str(new),src)
+    html=re.sub(r"(mjx7303-racing-michael-v39\.js\?v=michael)\d+",lambda m:m.group(1)+str(new),html)
+    RUNTIME.write_text(src);HTML.write_text(html)
+    print(json.dumps({'old':old,'new':new,'outerAndInner':True}))
 
 def enable_v40():
     src=RUNTIME.read_text();changed=False
     if './michael-graphics-v40.js' not in src:
         src=src.replace('./michael-graphics-v39.js','./michael-graphics-v40.js');changed=True
-    # V60+ rule: never generate addBodyAuthority or any runtime body overlay.
-    # michael-graphics-v40-base.js loads michael/visual/genome.json directly and is the sole geometry authority.
     bad=re.search(r'// MICHAEL_VISUAL_GENOME_BEGIN[\s\S]*?// MICHAEL_VISUAL_GENOME_END\n?',src)
-    if bad:
-        block=bad.group(0)
-        if 'function addBodyAuthority' in block:
-            src=src[:bad.start()]+"// MICHAEL_VISUAL_GENOME_BEGIN -- native V40 genome authority; no runtime body overlay.\n// MICHAEL_VISUAL_GENOME_END\n"+src[bad.end():]
-            changed=True
-    # Also remove a legacy direct call if an old branch reintroduced it.
-    newer=src.replace('refineVehicle();addBodyAuthority();','refineVehicle();')
-    changed=changed or newer!=src;src=newer
+    if bad and 'function addBodyAuthority' in bad.group(0):
+        src=src[:bad.start()]+"// MICHAEL_VISUAL_GENOME_BEGIN -- native V40 genome authority; no runtime body overlay.\n// MICHAEL_VISUAL_GENOME_END\n"+src[bad.end():];changed=True
+    newer=src.replace('refineVehicle();addBodyAuthority();','refineVehicle();');changed=changed or newer!=src;src=newer
     if changed:
-        old=active_version(src);new=old+1;src=src.replace(f'michael{old}',f'michael{new}')
-        RUNTIME.write_text(src);HTML.write_text(HTML.read_text().replace(f'michael{old}',f'michael{new}'))
+        RUNTIME.write_text(src);bump_version()
     print(json.dumps({'changed':changed,'graphics':'v40','authority':'NATIVE_GENOME_ONLY','runtimeBodyOverlay':False},indent=2))
 
 def finalize(proposal_path,verdict_path,base_metrics,cand_metrics,out):
