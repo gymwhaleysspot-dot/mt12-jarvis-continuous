@@ -8,8 +8,9 @@ on:
     branches: [main]
     paths:
       - 'tools/nickelle_advanced_graphics_intelligence.mjs'
+      - 'tools/nickelle_autonomous_repair.mjs'
       - 'michael/visual/advanced-autonomy.json'
-      - 'michael/reconstruction/autonomous-state.json'
+      - 'michael/visual/autonomy.json'
       - 'michael/reconstruction/topology-dsl.json'
       - 'michael/visual/owner-reference-observations.json'
       - 'michael/visual/scene-graph.json'
@@ -35,8 +36,9 @@ jobs:
       - name: Validate advanced graphics intelligence
         run: |
           set -Eeuo pipefail
+          node --check tools/nickelle_autonomous_repair.mjs
           node --check tools/nickelle_advanced_graphics_intelligence.mjs
-          node -e "for(const p of ['michael/visual/advanced-autonomy.json','michael/reconstruction/autonomous-state.json','michael/reconstruction/topology-dsl.json','michael/visual/scene-graph.json']) JSON.parse(require('fs').readFileSync(p))"
+          node -e "for(const p of ['michael/visual/advanced-autonomy.json','michael/visual/autonomy.json','michael/reconstruction/topology-dsl.json','michael/visual/scene-graph.json']) JSON.parse(require('fs').readFileSync(p))"
       - name: Install visual analysis runtime
         run: npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0 jpeg-js@0.4.4
       - name: Install Chromium
@@ -51,6 +53,8 @@ jobs:
           MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
           MICHAEL_CAPTURE_SIZE: 720
         run: node tools/michael_visual_capture.mjs /tmp/michael-advanced-baseline
+      - name: Rebuild current whole-car autonomous state
+        run: node tools/nickelle_autonomous_repair.mjs run /tmp/michael-advanced-baseline michael/reconstruction/autonomous-state.json
       - name: Run all twenty advanced graphics upgrades
         run: node tools/nickelle_advanced_graphics_intelligence.mjs run /tmp/michael-advanced-baseline michael/reconstruction/advanced-state.json
       - name: Verify advanced stack 20 of 20
@@ -102,6 +106,7 @@ jobs:
         with:
           name: nickelle-advanced-graphics-${{ github.run_number }}
           path: |
+            michael/reconstruction/autonomous-state.json
             michael/reconstruction/advanced-state.json
             /tmp/michael-advanced-baseline
           if-no-files-found: warn
