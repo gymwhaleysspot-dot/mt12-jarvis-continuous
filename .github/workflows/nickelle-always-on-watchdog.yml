@@ -11,7 +11,7 @@ on:
       - '.github/workflows/keleb-interior-evolution.yml'
       - '.github/workflows/michael-full-reconstruction.yml'
       - '.github/workflows/michael-visual-evolution.yml'
-      - '.github/workflows/nickelle-autonomous-repair.yml'
+      - '.github/workflows/nickelle-advanced-graphics.yml'
   schedule:
     - cron: '*/5 * * * *'
 
@@ -44,9 +44,9 @@ jobs:
             echo "$label active/queued runs: $active"
             if [ "$active" -eq 0 ]; then gh workflow run "$workflow" --repo "$REPO" --ref main; else echo "$label already active"; fi
           }
-          ensure_running nickelle-autonomous-repair.yml 'Nickelle Autonomous Whole-Car Repair'
           ensure_running michael-full-reconstruction.yml 'Michael Full Vehicle Reconstruction'
           ensure_running michael-visual-evolution.yml 'Nickelle Visual Laboratory'
+          ensure_running nickelle-advanced-graphics.yml 'Nickelle Advanced Graphics Intelligence'
           ensure_running nickelle-heavy-vision.yml 'Nickelle Heavyweight Neural Vision'
           ensure_running nickelle-visual-research.yml 'Nickelle Dedicated Visual Research'
           ensure_running keleb-interior-evolution.yml 'Keleb Interior AI Laboratory'
@@ -56,7 +56,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          for workflow in nickelle-autonomous-repair.yml michael-full-reconstruction.yml michael-visual-evolution.yml nickelle-heavy-vision.yml nickelle-visual-research.yml keleb-interior-evolution.yml jarvis-integrated-intelligence.yml; do
+          for workflow in michael-full-reconstruction.yml michael-visual-evolution.yml nickelle-advanced-graphics.yml nickelle-heavy-vision.yml nickelle-visual-research.yml keleb-interior-evolution.yml jarvis-integrated-intelligence.yml; do
             echo "--- $workflow ---"
             gh api "/repos/$REPO/actions/workflows/$workflow/runs?per_page=5" --jq '.workflow_runs[] | [.run_number,.status,(.conclusion // ""),.event,.head_sha,.created_at] | @tsv' || true
           done
