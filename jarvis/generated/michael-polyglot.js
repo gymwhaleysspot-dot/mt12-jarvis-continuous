@@ -1,4 +1,5 @@
-const assetUrl = (file, cache) => { const u = new URL(file, import.meta.url); if (cache) u.searchParams.set('v', cache); return u.href; };
+const assetUrl = (file, cache) => { const u = new URL(file, import.meta.url); if (cache)
+    u.searchParams.set('v', cache); return u.href; };
 const instantiate = async (url, imports = {}) => {
     const response = await fetch(url, { cache: 'force-cache' });
     if (!response.ok)
