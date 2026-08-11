@@ -16,34 +16,45 @@ concurrency:
 jobs:
   schedule-intelligence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
-      - name: Dispatch only due nonduplicate intelligence lanes
+      - name: Dispatch due intelligence lanes by value per compute
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -Eeuo pipefail
           main_sha="$(gh api "/repos/$REPO/commits/main" --jq .sha)"
-          now="$(date +%s)"
+          now="$(date +%s)"; cutoff=$((now-86400))
+          ledger='{"events":[]}'
+          encoded="$(gh api "/repos/$REPO/contents/michael/system/promotion-ledger.json?ref=ai-state" --jq .content 2>/dev/null || true)"
+          if [ -n "$encoded" ]; then ledger="$(printf '%s' "$encoded" | base64 -d 2>/dev/null || echo '{"events":[]}')"; fi
           due() {
-            local wf="$1" min_age="$2" label="$3"; local json active last_sha last_time age
+            local wf="$1" base_age="$2" label="$3" kind="$4"; local json active last_sha last_time age completed avg_sec promos vpm factor min_age
             json="$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=20")"
             active="$(jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting")]|length' <<<"$json")"
             if [ "$active" -gt 0 ]; then echo "$label already active"; return; fi
             last_sha="$(jq -r '[.workflow_runs[]|select(.conclusion=="success")][0].head_sha // ""' <<<"$json")"
             last_time="$(jq -r '[.workflow_runs[]|select(.conclusion=="success")][0].updated_at // "1970-01-01T00:00:00Z"' <<<"$json")"
             age=$(( now - $(date -d "$last_time" +%s) ))
-            if [ "$last_sha" = "$main_sha" ] && [ "$age" -lt "$min_age" ]; then echo "$label unchanged generation; cooldown ${age}/${min_age}s"; return; fi
-            echo "dispatch $label: head_changed=$([ "$last_sha" != "$main_sha" ] && echo yes || echo no) age=$age"
+            completed="$(jq '[.workflow_runs[]|select(.conclusion!=null)][0:8]' <<<"$json")"
+            avg_sec="$(jq '[.[]|((.updated_at|fromdateiso8601)-(.run_started_at|fromdateiso8601))]|if length>0 then (add/length) else 600 end|floor' <<<"$completed" 2>/dev/null || echo 600)"
+            promos="$(jq --arg kind "$kind" --argjson c "$cutoff" '[.events[]?|select(.kind==$kind and (.status=="PROMOTED" or .status=="PROMOTION_ELIGIBLE"))|(.time|fromdateiso8601)|select(. >= $c)]|length' <<<"$ledger" 2>/dev/null || echo 0)"
+            vpm="$(awk -v p="$promos" -v s="$avg_sec" 'BEGIN{m=s/60;if(m<1)m=1;printf "%.5f",p/m}')"
+            factor="$(awk -v v="$vpm" 'BEGIN{if(v>=0.08)print 0.70;else if(v>=0.03)print 0.85;else if(v==0)print 1.35;else print 1.0}')"
+            min_age="$(awk -v b="$base_age" -v f="$factor" 'BEGIN{printf "%d",b*f}')"
+            if [ "$last_sha" = "$main_sha" ] && [ "$age" -lt "$min_age" ]; then echo "$label unchanged; value/min=$vpm cooldown ${age}/${min_age}s"; return; fi
+            echo "dispatch $label: kind=$kind value/min=$vpm avgSec=$avg_sec promotions24h=$promos adaptiveCooldown=$min_age"
             gh workflow run "$wf" --repo "$REPO" --ref main
           }
-          # Cheap diagnosis may run often. Heavy render/reconstruction lanes get longer cooldowns.
-          due nickelle-autonomous-repair.yml 600 'Autonomous Repair'
-          due nickelle-advanced-graphics.yml 1200 'Advanced Graphics'
-          due michael-full-reconstruction.yml 1200 'Full Reconstruction'
-          due michael-visual-evolution.yml 1800 'Visual Tournament'
-          due nickelle-heavy-vision.yml 1800 'Heavy Vision'
-          due nickelle-visual-research.yml 21600 'Visual Research'
-          due keleb-interior-evolution.yml 1800 'Keleb Interior'
-          due jarvis-integrated-intelligence.yml 900 'Jarvis Proving Ground'
+          due nickelle-autonomous-repair.yml 600 'Autonomous Repair' exterior
+          due nickelle-advanced-graphics.yml 1200 'Advanced Graphics' exterior
+          due michael-full-reconstruction.yml 1200 'Full Reconstruction' exterior
+          due michael-visual-evolution.yml 1800 'Visual Tournament' exterior
+          due nickelle-heavy-vision.yml 1800 'Heavy Vision' exterior
+          due nickelle-visual-research.yml 21600 'Visual Research' exterior
+          due keleb-interior-evolution.yml 1800 'Keleb Interior' interior
+          due keleb-measured-validation.yml 2400 'Keleb Measured Validation' interior
+          due jarvis-integrated-intelligence.yml 900 'Jarvis Proving Ground' controller
+          due michael-system-orchestrator.yml 900 'Unified System Orchestrator' system
+          due michael-cross-agent-tournament.yml 1800 'Cross-Agent Whole-Car Tournament' system
