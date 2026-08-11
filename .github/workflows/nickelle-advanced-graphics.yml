@@ -111,15 +111,43 @@ jobs:
           set -Eeuo pipefail
           cp michael/reconstruction/advanced-state.json /tmp/nickelle-advanced-state.json
           cp michael/reconstruction/autonomous-state.json /tmp/nickelle-autonomous-state.json
-          git config user.name 'Nickelle Advanced Graphics AI'; git config user.email 'actions@users.noreply.github.com'
-          git fetch origin ai-state
+          git config user.name 'Nickelle Advanced Graphics AI'
+          git config user.email 'actions@users.noreply.github.com'
+
+          # Generated state intentionally dirties the main checkout. Preserve it above,
+          # then return the checkout to a clean state before switching branches.
+          git reset --hard HEAD
+          git clean -fd
+          git fetch origin ai-state:refs/remotes/origin/ai-state
           git checkout -B ai-state origin/ai-state
-          mkdir -p michael/reconstruction
-          cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
-          cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
-          git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
-          if ! git diff --cached --quiet; then git commit -m 'Nickelle updates isolated advanced graphics intelligence [skip ci]'; git push origin HEAD:ai-state; fi
-          git show HEAD:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions'
+
+          persisted=0
+          for attempt in 1 2 3 4; do
+            git fetch origin ai-state:refs/remotes/origin/ai-state
+            git reset --hard origin/ai-state
+            mkdir -p michael/reconstruction
+            cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
+            cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
+            git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
+            if git diff --cached --quiet; then
+              echo 'Nickelle repaired intelligence already persisted on ai-state'
+              persisted=1
+              break
+            fi
+            git commit -m 'Nickelle updates isolated advanced graphics intelligence [skip ci]'
+            if git push origin HEAD:ai-state; then
+              echo "Nickelle ai-state persistence succeeded on attempt $attempt"
+              persisted=1
+              break
+            fi
+            echo "ai-state advanced during persistence attempt $attempt; rebasing generated state"
+            sleep $((attempt*2))
+          done
+          [ "$persisted" -eq 1 ] || { echo 'Nickelle ai-state persistence exhausted retries' >&2; exit 1; }
+          git fetch origin ai-state:refs/remotes/origin/ai-state
+          git show origin/ai-state:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions'
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json | grep -q 'topologyQueue'
+          echo 'Nickelle isolated advanced/autonomous state verified on remote ai-state'
       - name: Route repaired heavy topology work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
