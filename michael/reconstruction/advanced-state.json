@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-08-11T03:12:41.415Z",
+  "generatedAt": "2026-08-11T03:25:27.244Z",
   "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
   "upgrades": {
     "differentiableStyleOptimizer": true,
@@ -25,337 +25,663 @@
     "michaelGraphicsBenchmark": true
   },
   "optimizer": {
-    "method": "bounded_coordinate_gradient",
-    "targets": [
+    "method": "actual_render_finite_difference_owner_truth",
+    "baselineError": 0.255616,
+    "targets": [],
+    "allGradients": [
       {
         "parameter": "headlamp_width",
-        "current": 0.6,
-        "proposed": 0.589,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.261357,
+        "plusError": 0.261062,
+        "gradient": -0.021067,
+        "bestValue": 0.607,
+        "measuredGain": 0,
+        "direction": "increase"
       },
       {
         "parameter": "headlamp_height",
-        "current": 0.31,
-        "proposed": 0.3034,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.262876,
+        "plusError": 0.261048,
+        "gradient": -0.217672,
+        "bestValue": 0.3142,
+        "measuredGain": 0,
+        "direction": "increase"
       },
       {
         "parameter": "headlamp_corner_radius",
-        "current": 0.125,
-        "proposed": 0.1217,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.259919,
+        "plusError": 0.263211,
+        "gradient": 0.783992,
+        "bestValue": 0.1229,
+        "measuredGain": 0,
+        "direction": "decrease"
       },
       {
         "parameter": "headlamp_lens_width",
-        "current": 0.145,
-        "proposed": 0.1494,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.263305,
+        "plusError": 0.261105,
+        "gradient": -0.392908,
+        "bestValue": 0.1478,
+        "measuredGain": 0,
+        "direction": "increase"
       },
       {
         "parameter": "headlamp_lens_height",
-        "current": 0.082,
-        "proposed": 0.0848,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.263673,
+        "plusError": 0.261291,
+        "gradient": -0.680557,
+        "bestValue": 0.08375,
+        "measuredGain": 0,
+        "direction": "increase"
       },
       {
         "parameter": "headlamp_lens_offset_x",
-        "current": 0.045,
-        "proposed": 0.0486,
-        "expectedGain": 0.0216,
-        "method": "bounded_coordinate_gradient_proxy"
+        "baselineError": 0.255616,
+        "minusError": 0.262942,
+        "plusError": 0.26069,
+        "gradient": -0.495109,
+        "bestValue": 0.04727,
+        "measuredGain": 0,
+        "direction": "increase"
       }
     ]
   },
   "implicitSurface": {
     "representation": "multiview_feature_conditioned_sdf_proxy",
     "latent": [
-      -0.01961,
+      -0.01971,
       0.05468,
-      0.01537,
+      0.01534,
       -0.00701,
-      -0.02295,
-      0.02424,
-      0.0098,
-      -0.01372,
+      -0.02302,
+      0.02426,
+      0.00969,
+      -0.01373,
       -0.059,
-      0.01814,
+      0.01828,
       0.00716,
-      -0.01735,
-      0.07138,
-      0.00926,
-      -0.01469,
-      -0.01641,
-      0.02913,
-      0.00496,
-      -0.01949,
-      -0.02832,
-      0.0219,
-      -0.01528,
-      -0.02601,
-      0.03684,
-      0.01496,
-      -0.00754,
-      -0.03456,
-      0.01913,
-      0.00696,
-      -0.00985,
-      -0.08727,
-      0.01522
+      -0.01751,
+      0.07136,
+      0.00911,
+      -0.01477,
+      -0.01637,
+      0.02916,
+      0.00492,
+      -0.01928,
+      -0.02825,
+      0.02204,
+      -0.01527,
+      -0.02619,
+      0.03682,
+      0.01484,
+      -0.00751,
+      -0.03437,
+      0.01922,
+      0.00699,
+      -0.00972,
+      -0.08735,
+      0.01531
     ],
     "gridResolution": [
       24,
       12,
       40
     ],
-    "target": "bounded_topology_dsl"
+    "target": "bounded_topology_dsl",
+    "geometryInfluence": {
+      "enabled": true,
+      "method": "uncertainty_weighted_latent_to_bounded_geometry_field",
+      "note": "Latent state now produces bounded deformation priorities; renderer mutation remains protected by the topology DSL.",
+      "components": [
+        {
+          "component": "grille",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 0,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "grilleSpan",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 1,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "projectorShape",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 2,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "sideSilhouette",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 3,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "threeSilhouette",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 4,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "sideDark",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 5,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "liveryYellow",
+          "region": "materials_livery",
+          "weight": 1.26,
+          "latentIndex": 6,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "rearMass",
+          "region": "rear_body",
+          "weight": 1.26,
+          "latentIndex": 7,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "frontSymmetry",
+          "region": "front_fascia",
+          "weight": 0.48,
+          "latentIndex": 8,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "headlamp_pods",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 9,
+          "measuredGradientSupport": [
+            "headlamp_width",
+            "headlamp_height",
+            "headlamp_corner_radius",
+            "headlamp_lens_width"
+          ]
+        },
+        {
+          "component": "projector_pods",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 10,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "front_drl",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 11,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "lower_door_carbon",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 12,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "door_red_authority",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 13,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "yellow_skirt",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 14,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "suspension",
+          "region": "front_fascia",
+          "weight": 0.48,
+          "latentIndex": 15,
+          "measuredGradientSupport": []
+        }
+      ]
+    }
   },
   "uncertainty": [
     {
       "component": "grille",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
     },
     {
       "component": "grilleSpan",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
     },
     {
       "component": "projectorShape",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
     },
     {
       "component": "sideSilhouette",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
     },
     {
       "component": "threeSilhouette",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
       "views": [
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
     },
     {
       "component": "sideDark",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
     },
     {
       "component": "liveryYellow",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "rearMass",
-      "uncertainty": 0.69,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "rear",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_diffuser"
     },
     {
       "component": "frontSymmetry",
-      "uncertainty": 0.69,
+      "uncertainty": 0.68,
       "ownerReferences": 0,
       "views": [
         "front"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [],
+      "ownerAuthority": null
     },
     {
       "component": "headlamp_pods",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
     },
     {
       "component": "projector_pods",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
     },
     {
       "component": "front_drl",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
     },
     {
       "component": "lower_door_carbon",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "door_red_authority",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "yellow_skirt",
-      "uncertainty": 0.657,
-      "ownerReferences": 0,
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "suspension",
-      "uncertainty": 0.657,
+      "uncertainty": 0.68,
       "ownerReferences": 0,
       "views": [
         "side",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [],
+      "ownerAuthority": null
     },
     {
       "component": "roofWhite",
-      "uncertainty": 0.64,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
       "views": [
         "side",
         "three",
         "top"
       ],
-      "protected": false
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-side-right",
+        "owner-front-three-left",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "roof_greenhouse"
     },
     {
       "component": "wheelFill",
-      "uncertainty": 0.64,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "side",
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "arches"
     },
     {
       "component": "edgeDetail",
-      "uncertainty": 0.64,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "front",
         "three",
         "side",
         "rear"
       ],
-      "protected": false
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "front_arches",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "front",
         "three",
         "side"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "arches"
     },
     {
       "component": "roof",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
       "views": [
         "side",
         "three",
         "top"
       ],
-      "protected": false
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-side-right",
+        "owner-front-three-left",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "roof_greenhouse"
     },
     {
       "component": "wheels",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
       "views": [
         "side",
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-three-right",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "wheels"
     },
     {
       "component": "materials",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "front",
         "three",
         "side",
         "rear"
       ],
-      "protected": false
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "lighting",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "front",
         "three",
@@ -363,12 +689,23 @@
         "rear",
         "top"
       ],
-      "protected": false
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "decals",
-      "uncertainty": 0.607,
-      "ownerReferences": 0,
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
       "views": [
         "front",
         "three",
@@ -376,361 +713,431 @@
         "rear",
         "top"
       ],
-      "protected": false
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
     },
     {
       "component": "front_grille",
-      "uncertainty": 0.197,
+      "uncertainty": 0.16,
       "ownerReferences": 3,
       "views": [
         "front",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
     },
     {
       "component": "rear_diffuser",
-      "uncertainty": 0.197,
+      "uncertainty": 0.16,
       "ownerReferences": 3,
       "views": [
         "rear",
         "three"
       ],
-      "protected": false
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_diffuser"
     },
     {
       "component": "roof_scoop",
-      "uncertainty": 0.147,
+      "uncertainty": 0.125,
       "ownerReferences": 3,
       "views": [
         "three",
         "side",
         "top"
       ],
-      "protected": true
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-three-right",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "roof_scoop"
     },
     {
       "component": "rear_wing",
-      "uncertainty": 0.147,
+      "uncertainty": 0.125,
       "ownerReferences": 5,
       "views": [
         "rear",
         "side",
         "three"
       ],
-      "protected": true
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_wing"
     }
   ],
   "informationGain": [
     {
       "component": "edgeDetail",
-      "region": "side_body",
-      "informationGain": 0.738,
-      "uncertainty": 0.64,
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
       "views": [
         "front",
         "three",
         "side",
         "rear"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "materials",
-      "region": "side_body",
-      "informationGain": 0.7314,
-      "uncertainty": 0.607,
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
       "views": [
         "front",
         "three",
         "side",
         "rear"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "lighting",
-      "region": "side_body",
-      "informationGain": 0.7314,
-      "uncertainty": 0.607,
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
       "views": [
         "front",
         "three",
         "side",
         "rear",
         "top"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "decals",
       "region": "materials_livery",
-      "informationGain": 0.7314,
-      "uncertainty": 0.607,
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
       "views": [
         "front",
         "three",
         "side",
         "rear",
         "top"
-      ]
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "suspension",
+      "region": "front_fascia",
+      "informationGain": 0.536,
+      "uncertainty": 0.68,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 0
     },
     {
       "component": "roofWhite",
-      "region": "side_body",
-      "informationGain": 0.633,
-      "uncertainty": 0.64,
+      "region": "hood_roof",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "side",
         "three",
         "top"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "wheelFill",
-      "region": "side_body",
-      "informationGain": 0.633,
-      "uncertainty": 0.64,
+      "region": "front_arches",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "side",
         "front",
         "three"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "front_arches",
       "region": "front_arches",
-      "informationGain": 0.6264,
-      "uncertainty": 0.607,
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "front",
         "three",
         "side"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "roof",
-      "region": "side_body",
-      "informationGain": 0.6264,
-      "uncertainty": 0.607,
+      "region": "hood_roof",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "side",
         "three",
         "top"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "wheels",
-      "region": "side_body",
-      "informationGain": 0.6264,
-      "uncertainty": 0.607,
+      "region": "front_arches",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "side",
         "front",
         "three"
-      ]
-    },
-    {
-      "component": "grille",
-      "region": "front_fascia",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "front",
-        "three"
-      ]
-    },
-    {
-      "component": "grilleSpan",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "front",
-        "three"
-      ]
-    },
-    {
-      "component": "projectorShape",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "front",
-        "three"
-      ]
-    },
-    {
-      "component": "sideSilhouette",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "side",
-        "three"
-      ]
-    },
-    {
-      "component": "sideDark",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "side",
-        "three"
-      ]
-    },
-    {
-      "component": "liveryYellow",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "side",
-        "three"
-      ]
-    },
-    {
-      "component": "rearMass",
-      "region": "side_body",
-      "informationGain": 0.538,
-      "uncertainty": 0.69,
-      "views": [
-        "rear",
-        "three"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "roof_scoop",
       "region": "hood_roof",
-      "informationGain": 0.5344,
-      "uncertainty": 0.147,
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "three",
         "side",
         "top"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "rear_wing",
       "region": "rear_body",
-      "informationGain": 0.5344,
-      "uncertainty": 0.147,
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
       "views": [
         "rear",
         "side",
         "three"
-      ]
+      ],
+      "ownerReferences": 5
+    },
+    {
+      "component": "sideSilhouette",
+      "region": "side_body",
+      "informationGain": 0.446,
+      "uncertainty": 0.23,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 2
+    },
+    {
+      "component": "sideDark",
+      "region": "side_body",
+      "informationGain": 0.446,
+      "uncertainty": 0.23,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 2
+    },
+    {
+      "component": "grille",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "grilleSpan",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "projectorShape",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "liveryYellow",
+      "region": "materials_livery",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "rearMass",
+      "region": "rear_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "rear",
+        "three"
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "headlamp_pods",
-      "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "front",
         "three"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "projector_pods",
-      "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "front",
         "three"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "front_drl",
-      "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "front",
         "three"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "lower_door_carbon",
       "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "side",
         "three"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "door_red_authority",
       "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "side",
         "three"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "yellow_skirt",
       "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "side",
         "three"
-      ]
-    },
-    {
-      "component": "suspension",
-      "region": "side_body",
-      "informationGain": 0.5314,
-      "uncertainty": 0.657,
-      "views": [
-        "side",
-        "three"
-      ]
+      ],
+      "ownerReferences": 7
     },
     {
       "component": "front_grille",
-      "region": "side_body",
-      "informationGain": 0.4394,
-      "uncertainty": 0.197,
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "front",
         "three"
-      ]
+      ],
+      "ownerReferences": 3
     },
     {
       "component": "rear_diffuser",
-      "region": "side_body",
-      "informationGain": 0.4394,
-      "uncertainty": 0.197,
+      "region": "rear_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
       "views": [
         "rear",
         "three"
-      ]
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "frontSymmetry",
+      "region": "front_fascia",
+      "informationGain": 0.431,
+      "uncertainty": 0.68,
+      "views": [
+        "front"
+      ],
+      "ownerReferences": 0
     },
     {
       "component": "threeSilhouette",
       "region": "side_body",
-      "informationGain": 0.433,
-      "uncertainty": 0.69,
+      "informationGain": 0.341,
+      "uncertainty": 0.23,
       "views": [
         "three"
-      ]
-    },
-    {
-      "component": "frontSymmetry",
-      "region": "side_body",
-      "informationGain": 0.433,
-      "uncertainty": 0.69,
-      "views": [
-        "front"
-      ]
+      ],
+      "ownerReferences": 2
     }
   ],
   "critics": {
     "adversarial": {
-      "score": 0.7534,
+      "score": 0.7535,
       "pass": true,
       "attacks": [
         "toy_like_proportions",
@@ -740,11 +1147,21 @@
       ]
     },
     "photorealism": {
-      "score": 0.56,
+      "score": 0.5601,
       "pass": false,
       "geometryIndependent": true
     },
-    "combined": 0.6664
+    "combined": 0.5879,
+    "semanticOwnerTruth": {
+      "score": 0.4421,
+      "signals": {
+        "ownerSemanticCoverage": 0.931,
+        "cameraConfidence": 0,
+        "measuredGradientSupport": 0,
+        "photoCoverage": 31
+      },
+      "requiredForPromotion": true
+    }
   },
   "crossResolution": {
     "front": {
@@ -755,18 +1172,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9587
+          "identity": 0.9571
         },
         {
           "scale": 0.42,
-          "identity": 0.897
+          "identity": 0.8979
         },
         {
           "scale": 0.28,
-          "identity": 0.857
+          "identity": 0.8576
         }
       ],
-      "minimum": 0.857,
+      "minimum": 0.8576,
       "pass": false
     },
     "three": {
@@ -777,18 +1194,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9142
+          "identity": 0.9123
         },
         {
           "scale": 0.42,
-          "identity": 0.8576
+          "identity": 0.8614
         },
         {
           "scale": 0.28,
-          "identity": 0.8374
+          "identity": 0.8394
         }
       ],
-      "minimum": 0.8374,
+      "minimum": 0.8394,
       "pass": false
     },
     "side": {
@@ -799,18 +1216,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.8848
+          "identity": 0.8726
         },
         {
           "scale": 0.42,
-          "identity": 0.8618
+          "identity": 0.8666
         },
         {
           "scale": 0.28,
-          "identity": 0.8502
+          "identity": 0.847
         }
       ],
-      "minimum": 0.8502,
+      "minimum": 0.847,
       "pass": false
     },
     "rear": {
@@ -821,18 +1238,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9386
+          "identity": 0.9379
         },
         {
           "scale": 0.42,
-          "identity": 0.8928
+          "identity": 0.8931
         },
         {
           "scale": 0.28,
-          "identity": 0.8413
+          "identity": 0.832
         }
       ],
-      "minimum": 0.8413,
+      "minimum": 0.832,
       "pass": false
     },
     "top": {
@@ -843,18 +1260,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.929
+          "identity": 0.9283
         },
         {
           "scale": 0.42,
-          "identity": 0.895
+          "identity": 0.8947
         },
         {
           "scale": 0.28,
-          "identity": 0.8643
+          "identity": 0.8637
         }
       ],
-      "minimum": 0.8643,
+      "minimum": 0.8637,
       "pass": true
     }
   },
@@ -1096,7 +1513,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4329.jpeg": {
       "matchedView": "front",
@@ -1105,7 +1522,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4330.jpeg": {
       "matchedView": "front",
@@ -1114,7 +1531,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4331.jpeg": {
       "matchedView": "front",
@@ -1123,7 +1540,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4332.jpeg": {
       "matchedView": "front",
@@ -1132,7 +1549,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4333.jpeg": {
       "matchedView": "front",
@@ -1141,7 +1558,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4334.jpeg": {
       "matchedView": "front",
@@ -1150,7 +1567,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     },
     "IMG_4335.jpeg": {
       "matchedView": "front",
@@ -1159,7 +1576,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:12:41.417Z"
+      "updatedAt": "2026-08-11T03:25:27.246Z"
     }
   },
   "introspection": {
@@ -1681,12 +2098,12 @@
       "geometry": 0.5,
       "proportions": 0.5,
       "livery": 0.5,
-      "materials": 0.56,
+      "materials": 0.5601,
       "interiorFit": 0.7,
       "temporal": 0.82,
       "mobile": 0.84,
-      "photorealism": 0.56,
-      "lodIdentity": 0.85
+      "photorealism": 0.5601,
+      "lodIdentity": 0.8479
     }
   },
   "vocabularyExpansion": [
@@ -1738,84 +2155,84 @@
       "from": "front",
       "to": "three",
       "fraction": 0.25,
-      "consistency": 0.9929,
+      "consistency": 0.9913,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.5,
-      "consistency": 0.9929,
+      "consistency": 0.9913,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.75,
-      "consistency": 0.9929,
+      "consistency": 0.9913,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.25,
-      "consistency": 0.9827,
+      "consistency": 0.9826,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.5,
-      "consistency": 0.9827,
+      "consistency": 0.9826,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.75,
-      "consistency": 0.9827,
+      "consistency": 0.9826,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.25,
-      "consistency": 0.9877,
+      "consistency": 0.9858,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.5,
-      "consistency": 0.9877,
+      "consistency": 0.9858,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.75,
-      "consistency": 0.9877,
+      "consistency": 0.9858,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.25,
-      "consistency": 0.8857,
+      "consistency": 0.8849,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.5,
-      "consistency": 0.8857,
+      "consistency": 0.8849,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.75,
-      "consistency": 0.8857,
+      "consistency": 0.8849,
       "pass": true
     }
   ],
@@ -1834,23 +2251,35 @@
   },
   "benchmark": {
     "name": "Michael Graphics Intelligence Benchmark",
-    "score": 0.717,
+    "score": 0.7168,
     "minimumPromotionScore": 0.7,
     "pass": true,
     "dimensions": {
       "owner_similarity": 1,
       "topology_correctness": 0.04,
       "geometry": 0.5,
-      "materials": 0.56,
-      "photorealism": 0.56,
+      "materials": 0.5601,
+      "photorealism": 0.5601,
       "temporal": 0.82,
       "mobile": 0.84,
-      "lod_identity": 0.85,
+      "lod_identity": 0.8479,
       "causal_explainability": 1,
       "protected_invariants": 1,
       "certainty": 0.4118
     },
-    "hash": "9940181d2ab282e70eab4617f105eaccf2b735505f8a298426d6274c171fc111"
+    "hash": "35e6f44965d696a8e6741d59f643a80074fbe0f468cc0c9218a0af68b5f28e42"
   },
-  "parentAutonomyGeneratedAt": "2026-08-11T03:12:40.755Z"
+  "parentAutonomyGeneratedAt": "2026-08-11T03:14:28.385Z",
+  "qualityRepair": {
+    "schema": 1,
+    "allEightWeaknessesAddressed": true,
+    "ownerAliasNormalization": true,
+    "correctRegionRouting": true,
+    "actualRenderFiniteDifference": true,
+    "latentGeometryInfluence": true,
+    "semanticOwnerCritic": true,
+    "immediateEvidenceTopologyEscalation": true,
+    "safeMultiviewLocks": true,
+    "globalSchedulerExpected": true
+  }
 }
