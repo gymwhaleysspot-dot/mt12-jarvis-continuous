@@ -35,6 +35,12 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
+      - name: Restore isolated Nickelle memory if available
+        run: |
+          git fetch origin ai-state:refs/remotes/origin/ai-state || true
+          mkdir -p michael/reconstruction
+          git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json 2>/dev/null || true
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
       - name: Validate advanced graphics intelligence
         run: |
           set -Eeuo pipefail
@@ -100,24 +106,20 @@ jobs:
           if(!Array.isArray(a.topologyQueue)) throw Error('topology queue missing');
           console.log(`Nickelle repaired stack live: 20/20; mapped=${mapped}; gradients=${x.optimizer.allGradients.length}; interactions=${x.optimizer.interactions.length}; semantic=${x.critics.semanticOwnerTruth.score}`);
           NODE
-      - name: Persist repaired intelligence with concurrent-agent rebase
+      - name: Persist repaired intelligence to isolated ai-state branch
         run: |
           set -Eeuo pipefail
-          git config user.name 'Nickelle Advanced Graphics AI'; git config user.email 'actions@users.noreply.github.com'
           cp michael/reconstruction/advanced-state.json /tmp/nickelle-advanced-state.json
           cp michael/reconstruction/autonomous-state.json /tmp/nickelle-autonomous-state.json
-          for attempt in 1 2 3 4; do
-            git fetch origin main; git reset --hard origin/main; mkdir -p michael/reconstruction
-            cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
-            cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
-            git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
-            if git diff --cached --quiet; then break; fi
-            git commit -m 'Nickelle persists measured repaired graphics intelligence [skip ci]'
-            if git push origin HEAD:main; then break; fi
-            sleep $((attempt*2))
-          done
-          git fetch origin main
-          git show origin/main:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions' || { echo 'measured interaction state did not persist' >&2; exit 1; }
+          git config user.name 'Nickelle Advanced Graphics AI'; git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state
+          git checkout -B ai-state origin/ai-state
+          mkdir -p michael/reconstruction
+          cp /tmp/nickelle-advanced-state.json michael/reconstruction/advanced-state.json
+          cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
+          git add michael/reconstruction/advanced-state.json michael/reconstruction/autonomous-state.json
+          if ! git diff --cached --quiet; then git commit -m 'Nickelle updates isolated advanced graphics intelligence [skip ci]'; git push origin HEAD:ai-state; fi
+          git show HEAD:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions'
       - name: Route repaired heavy topology work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
