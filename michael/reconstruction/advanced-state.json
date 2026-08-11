@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-08-11T03:25:27.244Z",
+  "generatedAt": "2026-08-11T06:21:58.433Z",
   "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
   "upgrades": {
     "differentiableStyleOptimizer": true,
@@ -25,107 +25,154 @@
     "michaelGraphicsBenchmark": true
   },
   "optimizer": {
-    "method": "actual_render_finite_difference_owner_truth",
-    "baselineError": 0.255616,
+    "method": "actual_render_finite_difference_owner_truth_with_pairwise_interactions",
+    "baselineError": 0.256483,
     "targets": [],
     "allGradients": [
       {
         "parameter": "headlamp_width",
-        "baselineError": 0.255616,
-        "minusError": 0.261357,
-        "plusError": 0.261062,
-        "gradient": -0.021067,
+        "baselineError": 0.256483,
+        "minusError": 0.261058,
+        "plusError": 0.259874,
+        "gradient": -0.084537,
         "bestValue": 0.607,
         "measuredGain": 0,
         "direction": "increase"
       },
       {
         "parameter": "headlamp_height",
-        "baselineError": 0.255616,
-        "minusError": 0.262876,
-        "plusError": 0.261048,
-        "gradient": -0.217672,
+        "baselineError": 0.256483,
+        "minusError": 0.261131,
+        "plusError": 0.261103,
+        "gradient": -0.003342,
         "bestValue": 0.3142,
         "measuredGain": 0,
         "direction": "increase"
       },
       {
         "parameter": "headlamp_corner_radius",
-        "baselineError": 0.255616,
-        "minusError": 0.259919,
-        "plusError": 0.263211,
-        "gradient": 0.783992,
-        "bestValue": 0.1229,
+        "baselineError": 0.256483,
+        "minusError": 0.264181,
+        "plusError": 0.261071,
+        "gradient": -0.740593,
+        "bestValue": 0.1271,
         "measuredGain": 0,
-        "direction": "decrease"
+        "direction": "increase"
       },
       {
         "parameter": "headlamp_lens_width",
-        "baselineError": 0.255616,
-        "minusError": 0.263305,
-        "plusError": 0.261105,
-        "gradient": -0.392908,
+        "baselineError": 0.256483,
+        "minusError": 0.262686,
+        "plusError": 0.260461,
+        "gradient": -0.397437,
         "bestValue": 0.1478,
         "measuredGain": 0,
         "direction": "increase"
       },
       {
         "parameter": "headlamp_lens_height",
-        "baselineError": 0.255616,
-        "minusError": 0.263673,
-        "plusError": 0.261291,
-        "gradient": -0.680557,
+        "baselineError": 0.256483,
+        "minusError": 0.263622,
+        "plusError": 0.260922,
+        "gradient": -0.771605,
         "bestValue": 0.08375,
         "measuredGain": 0,
         "direction": "increase"
       },
       {
         "parameter": "headlamp_lens_offset_x",
-        "baselineError": 0.255616,
-        "minusError": 0.262942,
-        "plusError": 0.26069,
-        "gradient": -0.495109,
+        "baselineError": 0.256483,
+        "minusError": 0.262985,
+        "plusError": 0.260997,
+        "gradient": -0.436749,
         "bestValue": 0.04727,
         "measuredGain": 0,
         "direction": "increase"
       }
-    ]
+    ],
+    "interactions": [
+      {
+        "parameters": [
+          "headlamp_width",
+          "headlamp_height"
+        ],
+        "mixedPartial": 4.909175,
+        "baselineError": 0.256483,
+        "bestError": 0.261055,
+        "bestValues": {
+          "headlamp_width": 0.593,
+          "headlamp_height": 0.3058
+        },
+        "measuredGain": 0,
+        "synergy": 0
+      },
+      {
+        "parameters": [
+          "headlamp_lens_width",
+          "headlamp_lens_height"
+        ],
+        "mixedPartial": 13.089911,
+        "baselineError": 0.256483,
+        "bestError": 0.260017,
+        "bestValues": {
+          "headlamp_lens_width": 0.1478,
+          "headlamp_lens_height": 0.08025
+        },
+        "measuredGain": 0,
+        "synergy": 0
+      }
+    ],
+    "bestInteraction": {
+      "parameters": [
+        "headlamp_width",
+        "headlamp_height"
+      ],
+      "mixedPartial": 4.909175,
+      "baselineError": 0.256483,
+      "bestError": 0.261055,
+      "bestValues": {
+        "headlamp_width": 0.593,
+        "headlamp_height": 0.3058
+      },
+      "measuredGain": 0,
+      "synergy": 0
+    }
   },
   "implicitSurface": {
     "representation": "multiview_feature_conditioned_sdf_proxy",
     "latent": [
-      -0.01971,
-      0.05468,
-      0.01534,
-      -0.00701,
-      -0.02302,
-      0.02426,
-      0.00969,
-      -0.01373,
-      -0.059,
-      0.01828,
-      0.00716,
-      -0.01751,
-      0.07136,
-      0.00911,
-      -0.01477,
-      -0.01637,
-      0.02916,
-      0.00492,
-      -0.01928,
-      -0.02825,
-      0.02204,
-      -0.01527,
-      -0.02619,
-      0.03682,
-      0.01484,
+      -0.01967,
+      0.05458,
+      0.0155,
+      -0.00702,
+      -0.02286,
+      0.02407,
+      0.00972,
+      -0.01377,
+      -0.05889,
+      0.01826,
+      0.00726,
+      -0.01747,
+      0.07126,
+      0.00921,
+      -0.01485,
+      -0.01625,
+      0.02897,
+      0.00497,
+      -0.01933,
+      -0.02815,
+      0.02207,
+      -0.01526,
+      -0.02635,
+      0.03667,
+      0.01497,
       -0.00751,
-      -0.03437,
-      0.01922,
-      0.00699,
-      -0.00972,
-      -0.08735,
-      0.01531
+      -0.03417,
+      0.01904,
+      0.00701,
+      -0.00989,
+      -0.08738,
+      0.01532
     ],
     "gridResolution": [
       24,
@@ -136,7 +183,7 @@
     "geometryInfluence": {
       "enabled": true,
       "method": "uncertainty_weighted_latent_to_bounded_geometry_field",
-      "note": "Latent state now produces bounded deformation priorities; renderer mutation remains protected by the topology DSL.",
+      "note": "Latent state produces bounded deformation priorities; renderer mutation remains protected by topology DSL and measured owner-truth evidence.",
       "components": [
         {
           "component": "grille",
@@ -1137,7 +1184,7 @@
   ],
   "critics": {
     "adversarial": {
-      "score": 0.7535,
+      "score": 0.7545,
       "pass": true,
       "attacks": [
         "toy_like_proportions",
@@ -1147,17 +1194,18 @@
       ]
     },
     "photorealism": {
-      "score": 0.5601,
+      "score": 0.5611,
       "pass": false,
       "geometryIndependent": true
     },
-    "combined": 0.5879,
+    "combined": 0.5723,
     "semanticOwnerTruth": {
-      "score": 0.4421,
+      "score": 0.3956,
       "signals": {
         "ownerSemanticCoverage": 0.931,
         "cameraConfidence": 0,
         "measuredGradientSupport": 0,
+        "pairwiseInteractionSupport": 0,
         "photoCoverage": 31
       },
       "requiredForPromotion": true
@@ -1172,18 +1220,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9571
+          "identity": 0.9574
         },
         {
           "scale": 0.42,
-          "identity": 0.8979
+          "identity": 0.8976
         },
         {
           "scale": 0.28,
-          "identity": 0.8576
+          "identity": 0.8486
         }
       ],
-      "minimum": 0.8576,
+      "minimum": 0.8486,
       "pass": false
     },
     "three": {
@@ -1194,18 +1242,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9123
+          "identity": 0.9158
         },
         {
           "scale": 0.42,
-          "identity": 0.8614
+          "identity": 0.8595
         },
         {
           "scale": 0.28,
-          "identity": 0.8394
+          "identity": 0.8378
         }
       ],
-      "minimum": 0.8394,
+      "minimum": 0.8378,
       "pass": false
     },
     "side": {
@@ -1216,18 +1264,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.8726
+          "identity": 0.8675
         },
         {
           "scale": 0.42,
-          "identity": 0.8666
+          "identity": 0.8662
         },
         {
           "scale": 0.28,
-          "identity": 0.847
+          "identity": 0.8426
         }
       ],
-      "minimum": 0.847,
+      "minimum": 0.8426,
       "pass": false
     },
     "rear": {
@@ -1238,18 +1286,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9379
+          "identity": 0.9376
         },
         {
           "scale": 0.42,
-          "identity": 0.8931
+          "identity": 0.8938
         },
         {
           "scale": 0.28,
-          "identity": 0.832
+          "identity": 0.8358
         }
       ],
-      "minimum": 0.832,
+      "minimum": 0.8358,
       "pass": false
     },
     "top": {
@@ -1260,28 +1308,29 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9283
+          "identity": 0.9293
         },
         {
           "scale": 0.42,
-          "identity": 0.8947
+          "identity": 0.8954
         },
         {
           "scale": 0.28,
-          "identity": 0.8637
+          "identity": 0.864
         }
       ],
-      "minimum": 0.8637,
+      "minimum": 0.864,
       "pass": true
     }
   },
   "dependencies": {
-    "focusRegion": "side_body",
+    "focusRegion": "front_fascia",
     "assembly": [
+      "headlights",
+      "grille",
       "front_arches",
-      "rear_body",
-      "livery",
-      "roof"
+      "splitter",
+      "hood_vents"
     ],
     "mode": "constrained_assembly"
   },
@@ -1446,27 +1495,27 @@
   "diversity": {
     "lineages": {
       "owner_accuracy": {
-        "generation": 3,
+        "generation": 4,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "owner_accuracy"
       },
       "mobile_efficiency": {
-        "generation": 3,
+        "generation": 4,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "mobile_efficiency"
       },
       "photorealism": {
-        "generation": 3,
+        "generation": 4,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "photorealism"
       },
       "topology_exploration": {
-        "generation": 3,
+        "generation": 4,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "topology_exploration"
       }
     },
@@ -1476,31 +1525,31 @@
   "replayNegatives": [
     {
       "id": "grille_slab",
-      "hits": 329,
+      "hits": 357,
       "weight": 1.4,
       "rule": "Avoid recurrence of grille slab"
     },
     {
-      "id": "giant_rectangular_lamps",
-      "hits": 208,
-      "weight": 1.4,
-      "rule": "Avoid recurrence of giant rectangular lamps"
-    },
-    {
       "id": "oversimplified_arches",
-      "hits": 205,
+      "hits": 235,
       "weight": 1.4,
       "rule": "Avoid recurrence of oversimplified arches"
     },
     {
+      "id": "giant_rectangular_lamps",
+      "hits": 232,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of giant rectangular lamps"
+    },
+    {
       "id": "flat_rear_mass",
-      "hits": 114,
+      "hits": 126,
       "weight": 1.4,
       "rule": "Avoid recurrence of flat rear mass"
     },
     {
       "id": "toy_like_materials",
-      "hits": 114,
+      "hits": 126,
       "weight": 1.4,
       "rule": "Avoid recurrence of toy like materials"
     }
@@ -1513,7 +1562,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4329.jpeg": {
       "matchedView": "front",
@@ -1522,7 +1571,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4330.jpeg": {
       "matchedView": "front",
@@ -1531,7 +1580,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4331.jpeg": {
       "matchedView": "front",
@@ -1540,7 +1589,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4332.jpeg": {
       "matchedView": "front",
@@ -1549,7 +1598,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4333.jpeg": {
       "matchedView": "front",
@@ -1558,7 +1607,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4334.jpeg": {
       "matchedView": "front",
@@ -1567,7 +1616,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     },
     "IMG_4335.jpeg": {
       "matchedView": "front",
@@ -1576,7 +1625,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-08-11T03:25:27.246Z"
+      "updatedAt": "2026-08-11T06:21:58.436Z"
     }
   },
   "introspection": {
@@ -2084,6 +2133,8 @@
     "window": [
       0.5,
       0.5,
+      0.5,
+      0.5,
       0.5
     ],
     "improvement": 0,
@@ -2092,18 +2143,18 @@
     "action": "continue"
   },
   "realityGap": {
-    "score": 0.5744,
-    "gap": 0.4256,
+    "score": 0.5746,
+    "gap": 0.4254,
     "signals": {
       "geometry": 0.5,
       "proportions": 0.5,
       "livery": 0.5,
-      "materials": 0.5601,
+      "materials": 0.5611,
       "interiorFit": 0.7,
       "temporal": 0.82,
       "mobile": 0.84,
-      "photorealism": 0.5601,
-      "lodIdentity": 0.8479
+      "photorealism": 0.5611,
+      "lodIdentity": 0.8458
     }
   },
   "vocabularyExpansion": [
@@ -2155,84 +2206,84 @@
       "from": "front",
       "to": "three",
       "fraction": 0.25,
-      "consistency": 0.9913,
+      "consistency": 0.9931,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.5,
-      "consistency": 0.9913,
+      "consistency": 0.9931,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.75,
-      "consistency": 0.9913,
+      "consistency": 0.9931,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.25,
-      "consistency": 0.9826,
+      "consistency": 0.9834,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.5,
-      "consistency": 0.9826,
+      "consistency": 0.9834,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.75,
-      "consistency": 0.9826,
+      "consistency": 0.9834,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.25,
-      "consistency": 0.9858,
+      "consistency": 0.9845,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.5,
-      "consistency": 0.9858,
+      "consistency": 0.9845,
       "pass": true
     },
     {
       "from": "side",
       "to": "rear",
       "fraction": 0.75,
-      "consistency": 0.9858,
+      "consistency": 0.9845,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.25,
-      "consistency": 0.8849,
+      "consistency": 0.8844,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.5,
-      "consistency": 0.8849,
+      "consistency": 0.8844,
       "pass": true
     },
     {
       "from": "rear",
       "to": "top",
       "fraction": 0.75,
-      "consistency": 0.8849,
+      "consistency": 0.8844,
       "pass": true
     }
   ],
@@ -2258,24 +2309,25 @@
       "owner_similarity": 1,
       "topology_correctness": 0.04,
       "geometry": 0.5,
-      "materials": 0.5601,
-      "photorealism": 0.5601,
+      "materials": 0.5611,
+      "photorealism": 0.5611,
       "temporal": 0.82,
       "mobile": 0.84,
-      "lod_identity": 0.8479,
+      "lod_identity": 0.8458,
       "causal_explainability": 1,
       "protected_invariants": 1,
       "certainty": 0.4118
     },
-    "hash": "35e6f44965d696a8e6741d59f643a80074fbe0f468cc0c9218a0af68b5f28e42"
+    "hash": "acef60397977e50b5c2388f578311f5a7b2bfcb1fc2e8fcf50e270b7eff062a3"
   },
-  "parentAutonomyGeneratedAt": "2026-08-11T03:14:28.385Z",
+  "parentAutonomyGeneratedAt": "2026-08-11T06:04:06.327Z",
   "qualityRepair": {
-    "schema": 1,
+    "schema": 2,
     "allEightWeaknessesAddressed": true,
     "ownerAliasNormalization": true,
     "correctRegionRouting": true,
     "actualRenderFiniteDifference": true,
+    "pairwiseInteractionGradients": true,
     "latentGeometryInfluence": true,
     "semanticOwnerCritic": true,
     "immediateEvidenceTopologyEscalation": true,
