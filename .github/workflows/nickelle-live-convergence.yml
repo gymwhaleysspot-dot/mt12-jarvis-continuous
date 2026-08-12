@@ -68,8 +68,8 @@ jobs:
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
           node <<'NODE'
           const fs=require('fs'),r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
-          if(r.version!=='MICHAEL_V66'||r.identity!=='MJX7303_C3_WRC_V66')throw Error('release contract mismatch');
-          if(r.contracts.occupantCount!==2||r.identityRevision<2)throw Error('V66.2 contract mismatch');
+          if(r.version!=='MICHAEL_V67'||r.identity!=='MJX7303_C3_WRC_LICENSED_BODY')throw Error('release contract mismatch');
+          if(r.contracts.occupantCount!==2||r.identityRevision<7)throw Error('V67.0 contract mismatch');
           if(r.architecture.visualOptimizer!=='ADAPTIVE_REGION_AWARE_V2')throw Error('smart visual optimizer missing');
           for(const p of [r.live.page,r.live.runtime,r.live.renderer,r.live.rendererBridge,r.live.identityModule,r.live.coreRenderer,r.live.route])if(!fs.statSync(p).size)throw Error(`empty ${p}`);
           for(const retired of r.retiredLiveArchitectures)for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule,r.live.page,r.live.route])if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired ${retired} in ${p}`);
