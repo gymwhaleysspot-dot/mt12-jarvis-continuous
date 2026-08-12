@@ -35,7 +35,6 @@ on:
 
 permissions:
   contents: write
-
 concurrency:
   group: nickelle-v66-owner-photo
   cancel-in-progress: true
@@ -57,7 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
-
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
 
@@ -65,18 +63,17 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/nickelle_owner_truth.py tools/nickelle_closed_loop.py
-          for f in michael/release/current.json tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do
-            test -s "$f" || { echo "EMPTY OR MISSING: $f"; exit 1; }
-          done
+          for f in michael/release/current.json tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do test -s "$f"; done
           for f in tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do node --check "$f"; done
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
           node <<'NODE'
           const fs=require('fs'),r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
           if(r.version!=='MICHAEL_V66'||r.identity!=='MJX7303_C3_WRC_V66')throw Error('release contract mismatch');
-          if(r.contracts.occupantCount!==2)throw Error('crew contract mismatch');
+          if(r.contracts.occupantCount!==2||r.identityRevision<2)throw Error('V66.2 contract mismatch');
+          if(r.architecture.visualOptimizer!=='ADAPTIVE_REGION_AWARE_V2')throw Error('smart visual optimizer missing');
           for(const p of [r.live.page,r.live.runtime,r.live.renderer,r.live.rendererBridge,r.live.identityModule,r.live.coreRenderer,r.live.route])if(!fs.statSync(p).size)throw Error(`empty ${p}`);
           for(const retired of r.retiredLiveArchitectures)for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule,r.live.page,r.live.route])if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired ${retired} in ${p}`);
-          console.log({release:r.version,identity:r.identity,cache:r.live.cacheGeneration});
+          console.log({release:r.displayVersion,identityRevision:r.identityRevision,optimizer:r.architecture.visualOptimizer,cache:r.live.cacheGeneration});
           NODE
           test "$(jq -r '.authorityOrder[0]' michael/visual/owner-truth.json)" = owner_photos
           test "$(jq -r '.languages | length' engine/polyglot.json)" = 12
@@ -87,27 +84,34 @@ jobs:
           set -Eeuo pipefail
           sudo apt-get update -y
           sudo apt-get install -y emscripten lua5.4
-          build_ok=0
+          ok=0
           for attempt in 1 2 3; do
-            echo "MICHAEL V66 POLYGLOT BUILD $attempt/3"
-            if bash scripts/build-michael-polyglot.sh; then build_ok=1; break; fi
+            echo "MICHAEL POLYGLOT BUILD $attempt/3"
+            if bash scripts/build-michael-polyglot.sh; then ok=1; break; fi
             rm -rf engine/node_modules engine/rust/target engine/csharp/bin engine/csharp/obj
             rm -f jarvis/generated/polyglot-manifest.json jarvis/generated/compiler-provenance.json
             sleep 2
           done
-          test "$build_ok" = 1
+          test "$ok" = 1
           for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do test -s "jarvis/generated/$f"; done
           test "$(jq -r '.languages | length' jarvis/generated/polyglot-manifest.json)" = 12
 
-      - name: Persist deterministic compiler outputs
+      - name: Persist deterministic compiler outputs without blocking visual QA
         run: |
           set -Eeuo pipefail
           git config user.name 'Michael Polyglot Builder'
           git config user.email 'actions@users.noreply.github.com'
           git add jarvis/generated
-          if git diff --cached --quiet; then exit 0; fi
+          if git diff --cached --quiet; then echo 'compiler outputs already current'; exit 0; fi
           git commit -m 'Rebuild Michael V66 polyglot runtime [skip ci]'
-          git push origin HEAD:main
+          published=0
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then published=1; break; fi
+            echo "compiler publish race $attempt/3; rebasing on latest main"
+            git fetch origin main
+            if ! git rebase origin/main; then git rebase --abort || true; break; fi
+          done
+          if [ "$published" = 0 ]; then echo 'compiler outputs verified locally; remote publish deferred so visual QA can continue'; fi
 
       - name: Install visual judge
         run: |
@@ -115,15 +119,12 @@ jobs:
           npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Boot live V66 module graph
+      - name: Boot live V66.2 module graph
         run: |
           set -Eeuo pipefail
           python3 -m http.server 4173 >/tmp/michael-http.log 2>&1 &
           ready=0
-          for n in $(seq 1 30); do
-            if curl -fsS "$MICHAEL_URL" >/dev/null; then ready=1; break; fi
-            sleep 1
-          done
+          for n in $(seq 1 30); do if curl -fsS "$MICHAEL_URL" >/dev/null; then ready=1; break; fi; sleep 1; done
           test "$ready" = 1 || { cat /tmp/michael-http.log; exit 1; }
           release=$(cat michael/release/current.json)
           for p in $(jq -r '.live | [.runtime,.renderer,.rendererBridge,.identityModule,.coreRenderer] | .[]' <<<"$release"); do curl -fsS "http://127.0.0.1:4173/$p" >/dev/null; done
@@ -138,22 +139,18 @@ jobs:
           from PIL import Image
           from pathlib import Path
           import json
-          release=json.load(open('michael/release/current.json'))
-          root=Path('/tmp/michael-v66-five')
+          release=json.load(open('michael/release/current.json'));root=Path('/tmp/michael-v66-five')
           for v in release['contracts']['canonicalViews']:
-              p=root/(v+'.png')
-              assert p.stat().st_size>5000,p
-              im=Image.open(p).convert('RGB')
-              spread=max(hi-lo for lo,hi in im.getextrema())
+              p=root/(v+'.png');assert p.stat().st_size>5000,p
+              im=Image.open(p).convert('RGB');spread=max(hi-lo for lo,hi in im.getextrema())
               assert im.width>300 and im.height>300 and spread>8,(v,im.size,spread)
               print('VIEW PASS',v,im.size,p.stat().st_size)
-          m=json.load(open(root/'metrics.json'))
-          assert m['version']==release['version'],m
+          m=json.load(open(root/'metrics.json'));assert m['version']==release['version'],m
           assert m['topologySanity'] is True and m['malformedTopologyCount']==0,m
           assert m['driverPresent'] and m['navigatorPresent'] and m['occupantCount']==release['contracts']['occupantCount'],m
           PY
 
-      - name: Run owner-JPEG closed loop
+      - name: Run adaptive owner-JPEG closed loop
         id: loop
         run: |
           set -Eeuo pipefail
@@ -165,10 +162,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
-          node <<'NODE'
-          const fs=require('fs'),r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
-          for(const retired of r.retiredLiveArchitectures)for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule])if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired ${retired} returned to ${p}`);
-          NODE
+          grep -F 'revision:2' jarvis/michael-c3-v66.js
+          grep -F 'ADAPTIVE_REGION_AWARE_V2' tools/nickelle_closed_loop.py
 
       - name: Persist measured owner-truth state only
         run: |
@@ -178,16 +173,16 @@ jobs:
           mkdir -p /tmp/nickelle-promote/michael/visual
           cp michael/visual/genome.json /tmp/nickelle-promote/michael/visual/genome.json
           cp michael/visual/live-status.json /tmp/nickelle-promote/michael/visual/live-status.json
-          git fetch origin main
-          git reset --hard origin/main
+          git fetch origin main;git reset --hard origin/main
           cp /tmp/nickelle-promote/michael/visual/genome.json michael/visual/genome.json
           cp /tmp/nickelle-promote/michael/visual/live-status.json michael/visual/live-status.json
           git add michael/visual/genome.json michael/visual/live-status.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Nickelle V66 owner-photo evidence ${{ github.run_number }} [skip ci]"
-          git push origin HEAD:main
+          git commit -m "Nickelle V66.2 adaptive owner-photo evidence ${{ github.run_number }} [skip ci]"
+          for attempt in 1 2 3; do git push origin HEAD:main && exit 0; git fetch origin main; git rebase origin/main || { git rebase --abort || true; break; }; done
+          echo 'owner-truth publish raced newer main; measured evidence retained in artifact'
 
-      - name: Preserve V66 renders and diagnostics
+      - name: Preserve V66.2 renders and diagnostics
         if: always()
         uses: actions/upload-artifact@v6
         with:
