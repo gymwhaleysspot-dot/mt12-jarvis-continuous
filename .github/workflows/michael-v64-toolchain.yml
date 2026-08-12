@@ -37,34 +37,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: V64 browser-strict payload integrity gate
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          node --input-type=module <<'NODE'
-          import {gunzipSync} from 'node:zlib';
-          const mods=[];
-          for(let i=0;i<4;i++) mods.push((await import(`./jarvis/michael-v64-payload-0${i}.js`)).default);
-          for(let i=0;i<mods.length;i++){
-            const s=mods[i];
-            if(typeof s!=='string'||!s.length) throw Error(`payload ${i} empty`);
-            if(!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw Error(`payload ${i} contains non-base64 characters`);
-          }
-          let b64=mods.map((s,i)=>i<mods.length-1?s.replace(/=+$/,''):s.replace(/=+$/,'')).join('');
-          b64+='='.repeat((4-b64.length%4)%4);
-          let raw;
-          try { raw=atob(b64); } catch(e) { throw Error(`combined browser atob failed: ${e.message}`); }
-          const gz=Buffer.allocUnsafe(raw.length);
-          for(let i=0;i<raw.length;i++) gz[i]=raw.charCodeAt(i);
-          if(gz[0]!==0x1f||gz[1]!==0x8b) throw Error('V64 payload is not gzip');
-          const glb=gunzipSync(gz);
-          if(glb.length!==95528) throw Error(`V64 GLB wrong size ${glb.length}`);
-          if(glb.subarray(0,4).toString('ascii')!=='glTF') throw Error('V64 GLB magic missing');
-          console.log(`V64 PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
-          NODE
-          node --check jarvis/mjx7303-racing-michael-v39.js
-          node --check jarvis/michael-graphics-v39.js
-
       - name: Provision every native compiler required by Michael
         shell: bash
         run: |
@@ -90,7 +62,6 @@ jobs:
           echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/michael-zig-0.16.0.tar.xz' | sha256sum -c -
           rm -rf "$zig_root" && mkdir -p "$zig_root"
           tar -xf "$zig_archive" -C "$zig_root" --strip-components=1
-          ln -sf "$zig_root/zig" /tmp/zig
 
       - name: Verify complete compiler inventory
         shell: bash
@@ -122,14 +93,6 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           bash scripts/build-michael-polyglot.sh
 
-      - name: Compile GLSL shader contract
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          grep -F '#version 300 es' engine/shaders/michael-v48.glsl >/dev/null
-          glslangValidator --version >/dev/null
-          echo 'GLSL compiler available and shader contract present'
-
       - name: Verify generated WASM and manifest
         shell: bash
         run: |
@@ -146,3 +109,39 @@ jobs:
           for(const k of ['emscripten','rustc','cargo','node','npm','go','dotnet','lua','zig','python']) if(!p.compilers?.[k]) throw Error('missing provenance '+k);
           console.log('MICHAEL COMPLETE TOOLCHAIN PASS',m.languages.join(', '));
           NODE
+
+      - name: Verify shader compiler and contracts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          glslangValidator --version >/dev/null
+          grep -F '#version 300 es' engine/shaders/michael-v48.glsl >/dev/null
+          grep -F '@vertex' engine/shaders/michael-v48.wgsl >/dev/null
+          grep -F '@fragment' engine/shaders/michael-v48.wgsl >/dev/null
+          echo 'SHADER TOOLCHAIN PASS'
+
+      - name: V64 browser-strict payload integrity gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --input-type=module <<'NODE'
+          import {gunzipSync} from 'node:zlib';
+          const mods=[];
+          for(let i=0;i<4;i++) mods.push((await import(`./jarvis/michael-v64-payload-0${i}.js`)).default);
+          for(let i=0;i<mods.length;i++){
+            const s=mods[i];
+            if(typeof s!=='string'||!s.length) throw Error(`payload ${i} empty`);
+            if(!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw Error(`payload ${i} contains non-base64 characters`);
+          }
+          let b64=mods.map(s=>s.replace(/=+$/,'')).join('');
+          b64+='='.repeat((4-b64.length%4)%4);
+          const raw=atob(b64),gz=Buffer.allocUnsafe(raw.length);
+          for(let i=0;i<raw.length;i++) gz[i]=raw.charCodeAt(i);
+          if(gz[0]!==0x1f||gz[1]!==0x8b) throw Error('V64 payload is not gzip');
+          const glb=gunzipSync(gz);
+          if(glb.length!==95528) throw Error(`V64 GLB wrong size ${glb.length}`);
+          if(glb.subarray(0,4).toString('ascii')!=='glTF') throw Error('V64 GLB magic missing');
+          console.log(`V64 PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
+          NODE
+          node --check jarvis/mjx7303-racing-michael-v39.js
+          node --check jarvis/michael-graphics-v39.js
