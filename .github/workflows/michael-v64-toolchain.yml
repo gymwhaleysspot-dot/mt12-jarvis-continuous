@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: michael-v64-complete-toolchain
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-all-compilers:
@@ -46,7 +46,6 @@ jobs:
             build-essential clang lld cmake ninja-build \
             emscripten lua5.4 golang-go dotnet-sdk-8.0 \
             curl jq xz-utils ca-certificates glslang-tools
-
           if ! command -v rustup >/dev/null 2>&1; then
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
             echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
@@ -55,7 +54,6 @@ jobs:
           rustup toolchain install stable --profile minimal
           rustup default stable
           rustup target add wasm32-unknown-unknown
-
           zig_archive=/tmp/michael-zig-0.16.0.tar.xz
           zig_root=/tmp/michael-zig-0.16.0
           curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o "$zig_archive"
@@ -69,9 +67,7 @@ jobs:
           set -Eeuo pipefail
           export PATH="$HOME/.cargo/bin:$PATH"
           required=(em++ clang++ rustc cargo node npm go dotnet lua5.4 python3 curl glslangValidator)
-          for tool in "${required[@]}"; do
-            command -v "$tool" >/dev/null || { echo "MISSING COMPILER/TOOL: $tool"; exit 1; }
-          done
+          for tool in "${required[@]}"; do command -v "$tool" >/dev/null || { echo "MISSING COMPILER/TOOL: $tool"; exit 1; }; done
           test -x /tmp/michael-zig-0.16.0/zig
           printf '%-18s %s\n' emscripten "$(em++ --version | head -1)"
           printf '%-18s %s\n' clang "$(clang++ --version | head -1)"
@@ -97,9 +93,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do
-            test -s "jarvis/generated/$f" || { echo "missing generated runtime $f"; exit 1; }
-          done
+          for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do test -s "jarvis/generated/$f" || { echo "missing generated runtime $f"; exit 1; }; done
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           for(const f of ['michael-core.wasm','michael-rust.wasm','michael-assembly.wasm','michael-zig.wasm']) new WebAssembly.Module(fs.readFileSync('jarvis/generated/'+f));
@@ -120,7 +114,7 @@ jobs:
           grep -F '@fragment' engine/shaders/michael-v48.wgsl >/dev/null
           echo 'SHADER TOOLCHAIN PASS'
 
-      - name: V64 browser-strict payload integrity gate
+      - name: V64 Safari-exact payload integrity gate
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -128,20 +122,22 @@ jobs:
           import {gunzipSync} from 'node:zlib';
           const mods=[];
           for(let i=0;i<4;i++) mods.push((await import(`./jarvis/michael-v64-payload-0${i}.js`)).default);
-          for(let i=0;i<mods.length;i++){
-            const s=mods[i];
+          const parts=mods.map((s,i)=>{
             if(typeof s!=='string'||!s.length) throw Error(`payload ${i} empty`);
+            if(s.length%4!==0) throw Error(`payload ${i} length ${s.length} not divisible by 4`);
             if(!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw Error(`payload ${i} contains non-base64 characters`);
-          }
-          let b64=mods.map(s=>s.replace(/=+$/,'')).join('');
-          b64+='='.repeat((4-b64.length%4)%4);
-          const raw=atob(b64),gz=Buffer.allocUnsafe(raw.length);
-          for(let i=0;i<raw.length;i++) gz[i]=raw.charCodeAt(i);
+            let raw;
+            try{raw=atob(s)}catch(e){throw Error(`payload ${i} atob failed: ${e.message}`)}
+            const b=Buffer.allocUnsafe(raw.length);
+            for(let n=0;n<raw.length;n++) b[n]=raw.charCodeAt(n);
+            return b;
+          });
+          const gz=Buffer.concat(parts);
           if(gz[0]!==0x1f||gz[1]!==0x8b) throw Error('V64 payload is not gzip');
           const glb=gunzipSync(gz);
           if(glb.length!==95528) throw Error(`V64 GLB wrong size ${glb.length}`);
           if(glb.subarray(0,4).toString('ascii')!=='glTF') throw Error('V64 GLB magic missing');
-          console.log(`V64 PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
+          console.log(`V64 SAFARI PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
           NODE
           node --check jarvis/mjx7303-racing-michael-v39.js
           node --check jarvis/michael-graphics-v39.js
