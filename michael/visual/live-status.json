@@ -1,22 +1,54 @@
 {
-  "schema": 4,
-  "updatedAt": "2026-08-11T22:18:00Z",
-  "status": "V64_CLEAN_SHEET_AWAITING_MEASURE",
-  "round": 0,
+  "schema": 5,
+  "updatedAt": "2026-08-12T07:41:06.882769+00:00",
+  "status": "STABLE_NEEDS_GEOMETRY",
+  "round": 6,
   "maxRounds": 6,
-  "score": null,
-  "startingScore": null,
+  "score": 23.658,
+  "startingScore": 23.658,
   "accepted": 0,
-  "rejected": 0,
+  "rejected": 6,
   "converged": false,
-  "weakest": [],
-  "diagnosis": [
-    "V63 patch-based exterior authority retired for V64.",
-    "V64 is a new clean-sheet GLB asset: 95,528 bytes, 105 watertight geometry objects, 6,232 faces, 3,326 vertices.",
-    "Waiting for first five-view owner-photo measurement before any V64 optimization or promotion decision."
+  "weakest": [
+    {
+      "component": "headlights",
+      "need": 81.92093529411765,
+      "score": 16.282,
+      "viewScore": 21.416470588235295
+    },
+    {
+      "component": "front_fascia",
+      "need": 80.42431666666667,
+      "score": 18.649,
+      "viewScore": 21.296666666666667
+    },
+    {
+      "component": "rear_aero",
+      "need": 79.4685,
+      "score": 20.392,
+      "viewScore": 20.79057142857143
+    },
+    {
+      "component": "rear_lamps",
+      "need": 79.15629259259259,
+      "score": 20.392,
+      "viewScore": 21.68259259259259
+    },
+    {
+      "component": "roof_greenhouse",
+      "need": 79.076025,
+      "score": 14.815,
+      "viewScore": 32.269214285714284
+    }
   ],
-  "ownerTruthFailures": [],
-  "authority": "CLEAN_SHEET_GLB_PLUS_DIRECT_OWNER_JPEG_PIXELS",
+  "diagnosis": [
+    "Adaptive owner-photo optimization: 23.658 -> 23.658; tested 58, failures 0."
+  ],
+  "ownerTruthFailures": [
+    "yellow_livery_missing",
+    "white_roof_livery_missing"
+  ],
+  "authority": "DIRECT_OWNER_JPEG_PIXELS",
   "assetAuthority": "CLEAN_SHEET_GLB",
   "assetSha256": "1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5",
   "assetBytes": 95528,
@@ -27,9 +59,183 @@
   "navigatorPresent": true,
   "occupantCount": 2,
   "runtimeBodyOverlay": false,
-  "testedCandidates": 0,
+  "testedCandidates": 58,
   "captureFailures": 0,
-  "viewScores": {},
-  "parts": {},
-  "topologyEscalations": []
+  "viewScores": {
+    "top": 41.829,
+    "three": 25.37,
+    "side": 21.787,
+    "rear": 20.392,
+    "front": 18.649
+  },
+  "parts": {
+    "front_fascia": 18.649,
+    "headlights": 16.282,
+    "grille": 31.279,
+    "livery_materials": 77.719,
+    "side_profile": 21.787,
+    "roof_greenhouse": 14.815,
+    "rear_lamps": 20.392,
+    "rear_aero": 20.392,
+    "three_quarter": 25.37
+  },
+  "topologyEscalations": [
+    "front_fascia",
+    "headlights",
+    "owner_livery",
+    "rear_aero",
+    "rear_lamps",
+    "roof_greenhouse"
+  ],
+  "optimizer": "ADAPTIVE_REGION_AWARE_V2",
+  "activeComponent": "roof_greenhouse",
+  "activeParameter": "scoop_length",
+  "candidateDirection": 1,
+  "parameterIntelligence": {
+    "roof_white_width": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "roof_white_front_z": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "roof_white_rear_z": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "roof_white_inset": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "side_black_height": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "side_black_center_y": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "side_identity_front_z": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "side_identity_rear_z": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_half_bottom": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_half_top": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_bottom_y": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_top_y": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_corner_radius": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "grille_frame_thickness": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "wing_end_x": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "diffuser_half_bottom": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "diffuser_half_top": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_width": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_height": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_corner_radius": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_x": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_y": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_inner_scale": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "rear_lamp_z": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "roof_y_front": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "roof_y_rear": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "scoop_width": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "scoop_height": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    },
+    "scoop_length": {
+      "tests": 2,
+      "promise": 0,
+      "direction": 0
+    }
+  }
 }
