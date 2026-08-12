@@ -45,22 +45,22 @@ jobs:
           import {gunzipSync} from 'node:zlib';
           const mods=[];
           for(let i=0;i<4;i++) mods.push((await import(`./jarvis/michael-v64-payload-0${i}.js`)).default);
-          const chunks=mods.map((s,i)=>{
+          for(let i=0;i<mods.length;i++){
+            const s=mods[i];
             if(typeof s!=='string'||!s.length) throw Error(`payload ${i} empty`);
-            if(s.length%4!==0) throw Error(`payload ${i} base64 length ${s.length} is not divisible by 4`);
             if(!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw Error(`payload ${i} contains non-base64 characters`);
-            let raw;
-            try { raw=atob(s); } catch(e) { throw Error(`payload ${i} browser atob failed: ${e.message}`); }
-            const u=Buffer.allocUnsafe(raw.length);
-            for(let n=0;n<raw.length;n++) u[n]=raw.charCodeAt(n);
-            return u;
-          });
-          const gz=Buffer.concat(chunks);
+          }
+          let b64=mods.map((s,i)=>i<mods.length-1?s.replace(/=+$/,''):s.replace(/=+$/,'')).join('');
+          b64+='='.repeat((4-b64.length%4)%4);
+          let raw;
+          try { raw=atob(b64); } catch(e) { throw Error(`combined browser atob failed: ${e.message}`); }
+          const gz=Buffer.allocUnsafe(raw.length);
+          for(let i=0;i<raw.length;i++) gz[i]=raw.charCodeAt(i);
           if(gz[0]!==0x1f||gz[1]!==0x8b) throw Error('V64 payload is not gzip');
           const glb=gunzipSync(gz);
           if(glb.length!==95528) throw Error(`V64 GLB wrong size ${glb.length}`);
           if(glb.subarray(0,4).toString('ascii')!=='glTF') throw Error('V64 GLB magic missing');
-          console.log(`V64 PAYLOAD PASS chunks=${chunks.length} gzip=${gz.length} glb=${glb.length}`);
+          console.log(`V64 PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
           NODE
           node --check jarvis/mjx7303-racing-michael-v39.js
           node --check jarvis/michael-graphics-v39.js
@@ -126,8 +126,6 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          # The source is a WebGL ES shader bundle, so validate each stage only when
-          # stage markers are present; the runtime contract remains checked by the main build.
           grep -F '#version 300 es' engine/shaders/michael-v48.glsl >/dev/null
           glslangValidator --version >/dev/null
           echo 'GLSL compiler available and shader contract present'
@@ -141,9 +139,7 @@ jobs:
           done
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          for(const f of ['michael-core.wasm','michael-rust.wasm','michael-assembly.wasm','michael-zig.wasm']){
-            new WebAssembly.Module(fs.readFileSync('jarvis/generated/'+f));
-          }
+          for(const f of ['michael-core.wasm','michael-rust.wasm','michael-assembly.wasm','michael-zig.wasm']) new WebAssembly.Module(fs.readFileSync('jarvis/generated/'+f));
           const m=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
           if(m.engine!=='MICHAEL_V57'||m.languages?.length!==12) throw Error(`wrong manifest ${m.engine} languages=${m.languages?.length}`);
           const p=JSON.parse(fs.readFileSync('jarvis/generated/compiler-provenance.json','utf8'));
