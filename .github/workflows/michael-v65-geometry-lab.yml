@@ -1,0 +1,95 @@
+name: Michael V65 Geometry Lab
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/michael-v65-geometry-lab.yml'
+      - 'tools/build_michael_v65_blender.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: michael-v65-geometry-lab
+  cancel-in-progress: true
+
+jobs:
+  build-and-prove-v65:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install deterministic Blender compiler
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends blender python3-pil jq
+          blender --version | head -2
+
+      - name: Compile continuous-surface V65 GLB and five canonical renders
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p assets/v65-qc
+          MICHAEL_V65_OUT="$PWD/assets/michael-v65.glb" \
+          MICHAEL_V65_RENDERS="$PWD/assets/v65-qc" \
+          blender -b --python tools/build_michael_v65_blender.py | tee assets/v65-qc/build.log
+          test -s assets/michael-v65.glb
+          for v in front three side rear top; do test -s "assets/v65-qc/$v.png"; done
+
+      - name: Image-space geometry gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          import json, hashlib, struct
+          root=Path('assets/v65-qc')
+          report={}
+          # These are deliberately broad first-generation gates. They reject upside-down,
+          # off-screen, microscopic, giant, and grossly asymmetric renders before publish.
+          for name in ('front','three','side','rear','top'):
+              im=Image.open(root/f'{name}.png').convert('RGB')
+              px=im.load();w,h=im.size
+              bg=px[0,0]
+              pts=[]
+              for y in range(h):
+                  for x in range(w):
+                      r,g,b=px[x,y]
+                      if abs(r-bg[0])+abs(g-bg[1])+abs(b-bg[2])>28: pts.append((x,y))
+              assert pts, f'{name}: empty render'
+              xs=[p[0] for p in pts];ys=[p[1] for p in pts]
+              bw=max(xs)-min(xs)+1;bh=max(ys)-min(ys)+1;occ=len(pts)/(w*h)
+              assert .24 < bw/w < .96, (name,'width occupancy',bw/w)
+              assert .18 < bh/h < .92, (name,'height occupancy',bh/h)
+              assert .05 < occ < .72, (name,'foreground occupancy',occ)
+              report[name]={'bbox':[min(xs),min(ys),max(xs),max(ys)],'occupancy':round(occ,4),'bboxFraction':[round(bw/w,4),round(bh/h,4)]}
+          # Canonical shape constraints.
+          assert report['side']['bboxFraction'][0] > report['side']['bboxFraction'][1]*1.6, report['side']
+          assert report['front']['bboxFraction'][0] > report['front']['bboxFraction'][1]*1.15, report['front']
+          assert report['rear']['bboxFraction'][0] > report['rear']['bboxFraction'][1]*1.15, report['rear']
+          glb=Path('assets/michael-v65.glb').read_bytes()
+          assert glb[:4]==b'glTF' and struct.unpack_from('<I',glb,4)[0]==2 and struct.unpack_from('<I',glb,8)[0]==len(glb)
+          manifest={'asset':'MICHAEL_V65_PARAMETRIC_SURFACE','architecture':'continuous lofted body + semantic hardpoints + five-view visual gate','bytes':len(glb),'sha256':hashlib.sha256(glb).hexdigest(),'fiveViewGate':'PASS','views':report,'publishable':True}
+          Path('assets/michael-v65.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest,indent=2))
+          PY
+
+      - name: Publish V65 only after five-view proof
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/michael-v65.glb assets/michael-v65.json assets/v65-qc/front.png assets/v65-qc/three.png assets/v65-qc/side.png assets/v65-qc/rear.png assets/v65-qc/top.png
+          if git diff --cached --quiet; then echo 'V65 already current'; exit 0; fi
+          git commit -m 'Publish Michael V65 geometry-lab asset and five-view proof [skip ci]'
+          git push origin HEAD:main
