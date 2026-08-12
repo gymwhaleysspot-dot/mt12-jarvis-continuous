@@ -30,8 +30,9 @@ jobs:
         run: |
           set -Eeuo pipefail
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends blender python3-pil jq
+          sudo apt-get install -y --no-install-recommends blender python3-pil python3-numpy jq
           blender --version | head -2
+          blender -b --python-expr "import numpy, bpy; print('BLENDER PYTHON PASS', numpy.__version__, bpy.app.version_string)"
 
       - name: Compile continuous-surface V65 GLB and five canonical renders
         shell: bash
@@ -54,8 +55,6 @@ jobs:
           import json, hashlib, struct
           root=Path('assets/v65-qc')
           report={}
-          # These are deliberately broad first-generation gates. They reject upside-down,
-          # off-screen, microscopic, giant, and grossly asymmetric renders before publish.
           for name in ('front','three','side','rear','top'):
               im=Image.open(root/f'{name}.png').convert('RGB')
               px=im.load();w,h=im.size
@@ -72,7 +71,6 @@ jobs:
               assert .18 < bh/h < .92, (name,'height occupancy',bh/h)
               assert .05 < occ < .72, (name,'foreground occupancy',occ)
               report[name]={'bbox':[min(xs),min(ys),max(xs),max(ys)],'occupancy':round(occ,4),'bboxFraction':[round(bw/w,4),round(bh/h,4)]}
-          # Canonical shape constraints.
           assert report['side']['bboxFraction'][0] > report['side']['bboxFraction'][1]*1.6, report['side']
           assert report['front']['bboxFraction'][0] > report['front']['bboxFraction'][1]*1.15, report['front']
           assert report['rear']['bboxFraction'][0] > report['rear']['bboxFraction'][1]*1.15, report['rear']
