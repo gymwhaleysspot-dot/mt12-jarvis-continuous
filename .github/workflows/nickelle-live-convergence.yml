@@ -6,11 +6,12 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nickelle-live-convergence.yml'
+      - 'tools/michael_module_contract.mjs'
+      - 'tools/michael_visual_capture.mjs'
       - 'tools/nickelle_owner_truth.py'
       - 'tools/nickelle_closed_loop.py'
-      - 'tools/michael_visual_capture.mjs'
       - 'scripts/build-michael-polyglot.sh'
-      - 'engine/typescript/michael-polyglot.ts'
+      - 'engine/**'
       - 'jarvis/michael-c3-v66.js'
       - 'jarvis/michael-graphics-v40.js'
       - 'jarvis/michael-graphics-v40-base.js'
@@ -19,9 +20,7 @@ on:
       - 'racing-mjx7303-michael-v39.html'
       - 'jarvis/racing-tab.js'
       - 'index.html'
-      - 'michael/visual/genome.json'
-      - 'michael/visual/owner-truth.json'
-      - 'michael/visual/owner-reference-observations.json'
+      - 'michael/visual/**'
       - 'IMG_4328.jpeg'
       - 'IMG_4329.jpeg'
       - 'IMG_4330.jpeg'
@@ -35,6 +34,7 @@ on:
 
 permissions:
   contents: write
+
 concurrency:
   group: nickelle-v66-owner-photo
   cancel-in-progress: false
@@ -45,6 +45,8 @@ jobs:
     timeout-minutes: 60
     env:
       MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
+      MICHAEL_EXPECT_VERSION: MICHAEL_V66
+      MICHAEL_EXPECT_IDENTITY: MJX7303_C3_WRC_V66
       MAX_ROUNDS: 6
       STEP_FRACTION: 0.12
       CAPTURE_TIMEOUT_SECONDS: 60
@@ -56,26 +58,27 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
+
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
-      - name: Validate V66 source authority
+
+      - name: Fast source and ES-module contract gate
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/nickelle_owner_truth.py tools/nickelle_closed_loop.py
-          node --check tools/michael_visual_capture.mjs
-          node --check jarvis/michael-c3-v66.js
-          node --check jarvis/michael-graphics-v40.js
-          node --check jarvis/michael-graphics-v40-base.js
-          node --check jarvis/michael-graphics-v39.js
-          node --check jarvis/mjx7303-racing-michael-v66.js
+          for f in tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do
+            test -s "$f" || { echo "EMPTY OR MISSING: $f"; exit 1; }
+            node --check "$f"
+          done
+          node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
           grep -F 'MICHAEL V66' racing-mjx7303-michael-v39.html
-          grep -F 'michael-c3-v66.js?v=michael96' jarvis/michael-graphics-v40.js
-          grep -F 'mjx7303-racing-michael-v66.js?v=michael96' racing-mjx7303-michael-v39.html
+          grep -F 'MJX7303_C3_WRC_V66' jarvis/michael-c3-v66.js
           ! grep -F 'michael-v64-payload' jarvis/mjx7303-racing-michael-v66.js
           test "$(jq -r '.authorityOrder[0]' michael/visual/owner-truth.json)" = owner_photos
           test "$(jq -r '.languages | length' engine/polyglot.json)" = 12
           for n in 4328 4329 4330 4331 4332 4333 4334 4335; do test -s "IMG_${n}.jpeg"; done
-      - name: Rebuild complete Michael polyglot runtime
+
+      - name: Build complete 12-language Michael runtime
         run: |
           set -Eeuo pipefail
           sudo apt-get update -y
@@ -90,7 +93,9 @@ jobs:
           done
           test "$build_ok" = 1
           for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do test -s "jarvis/generated/$f"; done
-      - name: Persist rebuilt polyglot runtime
+          test "$(jq -r '.languages | length' jarvis/generated/polyglot-manifest.json)" = 12
+
+      - name: Persist deterministic compiler outputs
         run: |
           set -Eeuo pipefail
           git config user.name 'Michael Polyglot Builder'
@@ -99,36 +104,49 @@ jobs:
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Rebuild Michael V66 polyglot runtime [skip ci]'
           git push origin HEAD:main
-      - name: Install headless visual judge
+
+      - name: Install visual judge
         run: |
           python3 -m pip install --disable-pip-version-check --no-cache-dir pillow==11.3.0 numpy==2.3.2
           npm install --no-save --package-lock=false playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
-      - name: Start V66 renderer and verify HTTP graph
+
+      - name: Boot live V66 module graph
         run: |
           set -Eeuo pipefail
           python3 -m http.server 4173 >/tmp/michael-http.log 2>&1 &
-          for n in $(seq 1 30); do curl -fsS "$MICHAEL_URL" >/dev/null && break; sleep 1; done
-          curl -fsS http://127.0.0.1:4173/jarvis/michael-c3-v66.js >/dev/null
-          curl -fsS http://127.0.0.1:4173/jarvis/michael-graphics-v40.js >/dev/null
-          curl -fsS http://127.0.0.1:4173/jarvis/mjx7303-racing-michael-v66.js >/dev/null
+          ready=0
+          for n in $(seq 1 30); do
+            if curl -fsS "$MICHAEL_URL" >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1 || { cat /tmp/michael-http.log; exit 1; }
+          for f in jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do curl -fsS "http://127.0.0.1:4173/$f" >/dev/null; done
           for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js; do curl -fsS "http://127.0.0.1:4173/jarvis/generated/$f" >/dev/null; done
-      - name: Capture all five V66 canonical views
+
+      - name: Capture and validate all five canonical views
         run: |
           set -Eeuo pipefail
           rm -rf /tmp/michael-v66-five
-          MICHAEL_CAPTURE_VIEWS=front,three,side,rear,top MICHAEL_CAPTURE_SIZE=640 CAPTURE_TIMEOUT_SECONDS=60 node tools/michael_visual_capture.mjs /tmp/michael-v66-five
+          MICHAEL_CAPTURE_VIEWS=front,three,side,rear,top MICHAEL_CAPTURE_SIZE=640 node tools/michael_visual_capture.mjs /tmp/michael-v66-five
           python3 - <<'PY'
           from PIL import Image
           from pathlib import Path
+          import json
+          root=Path('/tmp/michael-v66-five')
           for v in ['front','three','side','rear','top']:
-              p=Path('/tmp/michael-v66-five')/(v+'.png')
+              p=root/(v+'.png')
               assert p.stat().st_size>5000,p
               im=Image.open(p).convert('RGB')
               spread=max(hi-lo for lo,hi in im.getextrema())
               assert im.width>300 and im.height>300 and spread>8,(v,im.size,spread)
               print('V66 VIEW PASS',v,im.size,p.stat().st_size)
+          m=json.load(open(root/'metrics.json'))
+          assert m['version']=='MICHAEL_V66',m
+          assert m['topologySanity'] is True and m['malformedTopologyCount']==0,m
+          assert m['driverPresent'] and m['navigatorPresent'] and m['occupantCount']==2,m
           PY
+
       - name: Run owner-JPEG closed loop
         id: loop
         run: |
@@ -136,17 +154,16 @@ jobs:
           python3 -u tools/nickelle_closed_loop.py | tee /tmp/nickelle-v66-loop.log
           cat /tmp/nickelle-owner-loop-result.json
           echo "accepted=$(jq -r '.accepted' /tmp/nickelle-owner-loop-result.json)" >> "$GITHUB_OUTPUT"
-      - name: Verify V66 remains live authority
+
+      - name: Verify V66 authority after optimization
         run: |
           set -Eeuo pipefail
-          node --check jarvis/michael-c3-v66.js
-          node --check jarvis/michael-graphics-v40.js
-          node --check jarvis/mjx7303-racing-michael-v66.js
+          node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
           grep -F 'MJX7303_C3_WRC_V66' jarvis/michael-c3-v66.js
           grep -F 'MICHAEL_V66' jarvis/michael-graphics-v40.js
-          grep -F 'mjx7303-racing-michael-v66.js?v=michael96' racing-mjx7303-michael-v39.html
+          ! grep -R -F 'CLEAN_SHEET_GLB' jarvis/mjx7303-racing-michael-v66.js jarvis/michael-graphics-v40.js jarvis/michael-c3-v66.js
+
       - name: Persist measured owner-truth state only
-        env: {START_SHA: '${{ github.sha }}'}
         run: |
           set -Eeuo pipefail
           git config user.name 'Nickelle V66 Owner Truth'
@@ -162,13 +179,15 @@ jobs:
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Nickelle V66 owner-photo evidence ${{ github.run_number }} [skip ci]"
           git push origin HEAD:main
-      - name: Preserve V66 renders and evidence
+
+      - name: Preserve V66 renders and diagnostics
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: nickelle-v66-owner-photo-${{ github.run_number }}
           path: |
             /tmp/michael-v66-five
+            /tmp/michael-http.log
             /tmp/nickelle-owner-loop
             /tmp/nickelle-v66-loop.log
             /tmp/nickelle-owner-loop-result.json
