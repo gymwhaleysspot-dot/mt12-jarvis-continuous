@@ -8,14 +8,14 @@ on:
       - '.github/workflows/michael-v64-toolchain.yml'
       - 'scripts/build-michael-polyglot.sh'
       - 'engine/**'
+      - 'tools/build_michael_v64.py'
       - 'jarvis/mjx7303-racing-michael-v39.js'
-      - 'jarvis/michael-v64-payload-*.js'
       - 'jarvis/michael-graphics-v39.js'
       - 'jarvis/racing-tab.js'
       - 'racing-mjx7303-michael-v39.html'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: michael-v64-complete-toolchain
@@ -23,10 +23,13 @@ concurrency:
 
 jobs:
   build-all-compilers:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:
@@ -69,18 +72,18 @@ jobs:
           required=(em++ clang++ rustc cargo node npm go dotnet lua5.4 python3 curl glslangValidator)
           for tool in "${required[@]}"; do command -v "$tool" >/dev/null || { echo "MISSING COMPILER/TOOL: $tool"; exit 1; }; done
           test -x /tmp/michael-zig-0.16.0/zig
-          printf '%-18s %s\n' emscripten "$(em++ --version | head -1)"
-          printf '%-18s %s\n' clang "$(clang++ --version | head -1)"
-          printf '%-18s %s\n' rust "$(rustc --version)"
-          printf '%-18s %s\n' cargo "$(cargo --version)"
-          printf '%-18s %s\n' node "$(node --version)"
-          printf '%-18s %s\n' npm "$(npm --version)"
-          printf '%-18s %s\n' go "$(go version)"
-          printf '%-18s %s\n' dotnet "$(dotnet --version)"
-          printf '%-18s %s\n' lua "$(lua5.4 -v 2>&1)"
-          printf '%-18s %s\n' python "$(python3 --version)"
-          printf '%-18s %s\n' zig "$(/tmp/michael-zig-0.16.0/zig version)"
-          printf '%-18s %s\n' glslang "$(glslangValidator --version | head -1)"
+          em++ --version | head -1
+          clang++ --version | head -1
+          rustc --version
+          cargo --version
+          node --version
+          npm --version
+          go version
+          dotnet --version
+          lua5.4 -v
+          python3 --version
+          /tmp/michael-zig-0.16.0/zig version
+          glslangValidator --version | head -1
 
       - name: Compile complete Michael polyglot runtime
         shell: bash
@@ -93,7 +96,9 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do test -s "jarvis/generated/$f" || { echo "missing generated runtime $f"; exit 1; }; done
+          for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js polyglot-manifest.json compiler-provenance.json; do
+            test -s "jarvis/generated/$f" || { echo "missing generated runtime $f"; exit 1; }
+          done
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           for(const f of ['michael-core.wasm','michael-rust.wasm','michael-assembly.wasm','michael-zig.wasm']) new WebAssembly.Module(fs.readFileSync('jarvis/generated/'+f));
@@ -114,30 +119,39 @@ jobs:
           grep -F '@fragment' engine/shaders/michael-v48.wgsl >/dev/null
           echo 'SHADER TOOLCHAIN PASS'
 
-      - name: V64 Safari-exact payload integrity gate
+      - name: Build V64 clean-sheet binary asset
         shell: bash
         run: |
           set -Eeuo pipefail
-          node --input-type=module <<'NODE'
-          import {gunzipSync} from 'node:zlib';
-          const mods=[];
-          for(let i=0;i<4;i++) mods.push((await import(`./jarvis/michael-v64-payload-0${i}.js`)).default);
-          const parts=mods.map((s,i)=>{
-            if(typeof s!=='string'||!s.length) throw Error(`payload ${i} empty`);
-            if(s.length%4!==0) throw Error(`payload ${i} length ${s.length} not divisible by 4`);
-            if(!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw Error(`payload ${i} contains non-base64 characters`);
-            let raw;
-            try{raw=atob(s)}catch(e){throw Error(`payload ${i} atob failed: ${e.message}`)}
-            const b=Buffer.allocUnsafe(raw.length);
-            for(let n=0;n<raw.length;n++) b[n]=raw.charCodeAt(n);
-            return b;
-          });
-          const gz=Buffer.concat(parts);
-          if(gz[0]!==0x1f||gz[1]!==0x8b) throw Error('V64 payload is not gzip');
-          const glb=gunzipSync(gz);
-          if(glb.length!==95528) throw Error(`V64 GLB wrong size ${glb.length}`);
-          if(glb.subarray(0,4).toString('ascii')!=='glTF') throw Error('V64 GLB magic missing');
-          console.log(`V64 SAFARI PAYLOAD PASS chunks=${mods.length} gzip=${gz.length} glb=${glb.length}`);
-          NODE
+          python -m pip install --disable-pip-version-check numpy trimesh
+          mkdir -p assets
+          MICHAEL_V64_OUT="$PWD/assets/michael-v64-clean.glb" python tools/build_michael_v64.py
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, struct
+          p=Path('assets/michael-v64-clean.glb')
+          b=p.read_bytes()
+          assert len(b)==95528, len(b)
+          assert b[:4]==b'glTF', b[:4]
+          assert struct.unpack_from('<I',b,4)[0]==2
+          assert struct.unpack_from('<I',b,8)[0]==len(b)
+          sha=hashlib.sha256(b).hexdigest()
+          assert sha=='1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5', sha
+          print('V64 DIRECT GLB PASS',len(b),sha)
+          PY
           node --check jarvis/mjx7303-racing-michael-v39.js
-          node --check jarvis/michael-graphics-v39.js
+          grep -F "./assets/michael-v64-clean.glb?v=michael93" jarvis/mjx7303-racing-michael-v39.js >/dev/null
+
+      - name: Publish verified V64 GLB
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if git diff --quiet -- assets/michael-v64-clean.glb && git ls-files --error-unmatch assets/michael-v64-clean.glb >/dev/null 2>&1; then
+            echo 'V64 GLB already current'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/michael-v64-clean.glb
+          git commit -m 'Publish verified Michael V64 clean-sheet GLB [skip ci]'
+          git push origin HEAD:main
