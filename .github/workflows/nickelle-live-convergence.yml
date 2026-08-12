@@ -9,10 +9,18 @@ on:
       - 'tools/nickelle_owner_truth.py'
       - 'tools/nickelle_closed_loop.py'
       - 'tools/michael_visual_capture.mjs'
+      - 'tools/michael_visual_evolution.py'
+      - 'tools/michael_v64_model_builder.py'
       - 'scripts/build-michael-polyglot.sh'
       - 'engine/typescript/michael-polyglot.ts'
       - 'jarvis/michael-graphics-v40.js'
       - 'jarvis/michael-graphics-v40-base.js'
+      - 'jarvis/michael-graphics-v39.js'
+      - 'jarvis/mjx7303-racing-michael-v39.js'
+      - 'jarvis/michael-v64-payload-*.js'
+      - 'racing-mjx7303-michael-v39.html'
+      - 'jarvis/racing-tab.js'
+      - 'index.html'
       - 'michael/visual/genome.json'
       - 'michael/visual/owner-truth.json'
       - 'michael/visual/owner-reference-observations.json'
@@ -60,12 +68,39 @@ jobs:
           node --check tools/michael_visual_capture.mjs
           node --check jarvis/michael-graphics-v40.js
           node --check jarvis/michael-graphics-v40-base.js
+          node --check jarvis/michael-graphics-v39.js
           node --check jarvis/mjx7303-racing-michael-v39.js
           ! grep -F 'addBodyAuthority();' jarvis/mjx7303-racing-michael-v39.js
           test "$(jq -r '.authorityOrder[0]' michael/visual/owner-truth.json)" = owner_photos
           test "$(jq -r '.engine' engine/polyglot.json)" = MICHAEL_V57
           test "$(jq -r '.languages | length' engine/polyglot.json)" = 12
           for n in 4328 4329 4330 4331 4332 4333 4334 4335; do test -s "IMG_${n}.jpeg"; done
+      - name: Reconstruct and verify V64 clean-sheet GLB
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs=require('fs'),zlib=require('zlib'),crypto=require('crypto');
+          const parts=[];
+          for(let i=0;i<4;i++){
+            const p=`jarvis/michael-v64-payload-${String(i).padStart(2,'0')}.js`;
+            const s=fs.readFileSync(p,'utf8');
+            const m=s.match(/export default ["']([^"']+)["']/);
+            if(!m) throw Error(`${p} missing payload`);
+            const b=Buffer.from(m[1],'base64');
+            if(!b.length) throw Error(`${p} decoded empty`);
+            parts.push(b);
+          }
+          const gz=Buffer.concat(parts),b=zlib.gunzipSync(gz);
+          if(b.subarray(0,4).toString()!=='glTF') throw Error('V64 GLB magic mismatch');
+          if(b.readUInt32LE(4)!==2) throw Error(`V64 GLB version ${b.readUInt32LE(4)}`);
+          if(b.readUInt32LE(8)!==b.length) throw Error(`V64 GLB declared length ${b.readUInt32LE(8)} != ${b.length}`);
+          if(b.length!==95528) throw Error(`V64 GLB byte mismatch ${b.length}`);
+          const sha=crypto.createHash('sha256').update(b).digest('hex');
+          const want='1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5';
+          if(sha!==want) throw Error(`V64 GLB sha mismatch ${sha}`);
+          fs.writeFileSync('/tmp/michael-v64-verified.glb',b);
+          console.log({chunks:parts.map(x=>x.length),gzipBytes:gz.length,glbBytes:b.length,sha});
+          NODE
       - name: Rebuild complete Michael polyglot runtime with self-heal
         run: |
           set -Eeuo pipefail
@@ -117,6 +152,9 @@ jobs:
             bad=0
             for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js; do
               curl -fsS "http://127.0.0.1:4173/jarvis/generated/$f" >/dev/null || { echo "HTTP missing jarvis/generated/$f"; bad=1; }
+            done
+            for f in michael-v64-payload-00.js michael-v64-payload-01.js michael-v64-payload-02.js michael-v64-payload-03.js; do
+              curl -fsS "http://127.0.0.1:4173/jarvis/$f" >/dev/null || { echo "HTTP missing jarvis/$f"; bad=1; }
             done
             test "$bad" = 0 && break
             echo "NICKELLE SELF-HEAL: restarting renderer after HTTP artifact failure"
@@ -211,6 +249,7 @@ jobs:
         with:
           name: nickelle-owner-photo-loop-${{ github.run_number }}
           path: |
+            /tmp/michael-v64-verified.glb
             /tmp/michael-smoke
             /tmp/nickelle-owner-loop
             /tmp/nickelle-owner-loop.log
