@@ -1,0 +1,72 @@
+name: Michael V66 Fast Contract CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/michael-v66-ci.yml'
+      - 'michael/release/current.json'
+      - 'tools/michael_module_contract.mjs'
+      - 'tools/michael_visual_capture.mjs'
+      - 'jarvis/michael-c3-v66.js'
+      - 'jarvis/michael-graphics-v40.js'
+      - 'jarvis/michael-graphics-v40-base.js'
+      - 'jarvis/michael-graphics-v39.js'
+      - 'jarvis/mjx7303-racing-michael-v66.js'
+      - 'racing-mjx7303-michael-v39.html'
+      - 'jarvis/racing-tab.js'
+      - 'index.html'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: michael-v66-fast-ci
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate release and live graph
+        run: |
+          set -Eeuo pipefail
+          files=(
+            michael/release/current.json
+            tools/michael_module_contract.mjs
+            tools/michael_visual_capture.mjs
+            jarvis/michael-c3-v66.js
+            jarvis/michael-graphics-v40.js
+            jarvis/michael-graphics-v40-base.js
+            jarvis/michael-graphics-v39.js
+            jarvis/mjx7303-racing-michael-v66.js
+            racing-mjx7303-michael-v39.html
+            jarvis/racing-tab.js
+            index.html
+          )
+          for f in "${files[@]}"; do test -s "$f" || { echo "EMPTY OR MISSING $f"; exit 1; }; done
+          for f in tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js jarvis/racing-tab.js; do node --check "$f"; done
+          node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
+          const need=(p,s)=>{const v=fs.readFileSync(p,'utf8');if(!v.includes(s))throw Error(`${p} missing ${s}`)};
+          if(r.version!=='MICHAEL_V66'||r.identity!=='MJX7303_C3_WRC_V66')throw Error('release identity mismatch');
+          if(r.architecture.rendererCore!=='V39'||r.architecture.worldLayer!=='V40'||r.architecture.vehicleIdentityLayer!=='V66')throw Error('release architecture mismatch');
+          if(r.contracts.occupantCount!==2||r.contracts.canonicalViews.join(',')!=='front,three,side,rear,top')throw Error('release contract mismatch');
+          need(r.live.runtime,r.version);need(r.live.renderer,r.version);need(r.live.identityModule,r.identity);
+          need(r.live.page,'mjx7303-racing-michael-v66.js?v='+r.live.cacheGeneration);
+          need(r.live.route,r.live.cacheGeneration);
+          need('index.html','id="drawer"');need('index.html','racing-tab.js?v=20260812'+r.live.cacheGeneration);
+          for(const retired of r.retiredLiveArchitectures){
+            for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule,r.live.page,r.live.route]){
+              if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired architecture ${retired} leaked into ${p}`);
+            }
+          }
+          console.log({release:r.version,identity:r.identity,cache:r.live.cacheGeneration,status:'PASS'});
+          NODE
