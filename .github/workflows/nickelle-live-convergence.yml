@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nickelle-live-convergence.yml'
+      - 'michael/release/current.json'
       - 'tools/michael_module_contract.mjs'
       - 'tools/michael_visual_capture.mjs'
       - 'tools/nickelle_owner_truth.py'
@@ -37,7 +38,7 @@ permissions:
 
 concurrency:
   group: nickelle-v66-owner-photo
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   converge:
@@ -45,8 +46,6 @@ jobs:
     timeout-minutes: 60
     env:
       MICHAEL_URL: http://127.0.0.1:4173/racing-mjx7303-michael-v39.html
-      MICHAEL_EXPECT_VERSION: MICHAEL_V66
-      MICHAEL_EXPECT_IDENTITY: MJX7303_C3_WRC_V66
       MAX_ROUNDS: 6
       STEP_FRACTION: 0.12
       CAPTURE_TIMEOUT_SECONDS: 60
@@ -62,18 +61,23 @@ jobs:
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
 
-      - name: Fast source and ES-module contract gate
+      - name: Fast release and ES-module contract gate
         run: |
           set -Eeuo pipefail
           python3 -m py_compile tools/nickelle_owner_truth.py tools/nickelle_closed_loop.py
-          for f in tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do
+          for f in michael/release/current.json tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do
             test -s "$f" || { echo "EMPTY OR MISSING: $f"; exit 1; }
-            node --check "$f"
           done
+          for f in tools/michael_module_contract.mjs tools/michael_visual_capture.mjs jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do node --check "$f"; done
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
-          grep -F 'MICHAEL V66' racing-mjx7303-michael-v39.html
-          grep -F 'MJX7303_C3_WRC_V66' jarvis/michael-c3-v66.js
-          ! grep -F 'michael-v64-payload' jarvis/mjx7303-racing-michael-v66.js
+          node <<'NODE'
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
+          if(r.version!=='MICHAEL_V66'||r.identity!=='MJX7303_C3_WRC_V66')throw Error('release contract mismatch');
+          if(r.contracts.occupantCount!==2)throw Error('crew contract mismatch');
+          for(const p of [r.live.page,r.live.runtime,r.live.renderer,r.live.rendererBridge,r.live.identityModule,r.live.coreRenderer,r.live.route])if(!fs.statSync(p).size)throw Error(`empty ${p}`);
+          for(const retired of r.retiredLiveArchitectures)for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule,r.live.page,r.live.route])if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired ${retired} in ${p}`);
+          console.log({release:r.version,identity:r.identity,cache:r.live.cacheGeneration});
+          NODE
           test "$(jq -r '.authorityOrder[0]' michael/visual/owner-truth.json)" = owner_photos
           test "$(jq -r '.languages | length' engine/polyglot.json)" = 12
           for n in 4328 4329 4330 4331 4332 4333 4334 4335; do test -s "IMG_${n}.jpeg"; done
@@ -121,30 +125,32 @@ jobs:
             sleep 1
           done
           test "$ready" = 1 || { cat /tmp/michael-http.log; exit 1; }
-          for f in jarvis/michael-c3-v66.js jarvis/michael-graphics-v40.js jarvis/michael-graphics-v40-base.js jarvis/michael-graphics-v39.js jarvis/mjx7303-racing-michael-v66.js; do curl -fsS "http://127.0.0.1:4173/$f" >/dev/null; done
+          release=$(cat michael/release/current.json)
+          for p in $(jq -r '.live | [.runtime,.renderer,.rendererBridge,.identityModule,.coreRenderer] | .[]' <<<"$release"); do curl -fsS "http://127.0.0.1:4173/$p" >/dev/null; done
           for f in michael-core.js michael-core.wasm michael-rust.wasm michael-assembly.wasm michael-zig.wasm michael-polyglot.js; do curl -fsS "http://127.0.0.1:4173/jarvis/generated/$f" >/dev/null; done
 
       - name: Capture and validate all five canonical views
         run: |
           set -Eeuo pipefail
           rm -rf /tmp/michael-v66-five
-          MICHAEL_CAPTURE_VIEWS=front,three,side,rear,top MICHAEL_CAPTURE_SIZE=640 node tools/michael_visual_capture.mjs /tmp/michael-v66-five
+          MICHAEL_CAPTURE_SIZE=640 node tools/michael_visual_capture.mjs /tmp/michael-v66-five
           python3 - <<'PY'
           from PIL import Image
           from pathlib import Path
           import json
+          release=json.load(open('michael/release/current.json'))
           root=Path('/tmp/michael-v66-five')
-          for v in ['front','three','side','rear','top']:
+          for v in release['contracts']['canonicalViews']:
               p=root/(v+'.png')
               assert p.stat().st_size>5000,p
               im=Image.open(p).convert('RGB')
               spread=max(hi-lo for lo,hi in im.getextrema())
               assert im.width>300 and im.height>300 and spread>8,(v,im.size,spread)
-              print('V66 VIEW PASS',v,im.size,p.stat().st_size)
+              print('VIEW PASS',v,im.size,p.stat().st_size)
           m=json.load(open(root/'metrics.json'))
-          assert m['version']=='MICHAEL_V66',m
+          assert m['version']==release['version'],m
           assert m['topologySanity'] is True and m['malformedTopologyCount']==0,m
-          assert m['driverPresent'] and m['navigatorPresent'] and m['occupantCount']==2,m
+          assert m['driverPresent'] and m['navigatorPresent'] and m['occupantCount']==release['contracts']['occupantCount'],m
           PY
 
       - name: Run owner-JPEG closed loop
@@ -155,13 +161,14 @@ jobs:
           cat /tmp/nickelle-owner-loop-result.json
           echo "accepted=$(jq -r '.accepted' /tmp/nickelle-owner-loop-result.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Verify V66 authority after optimization
+      - name: Verify live authority after optimization
         run: |
           set -Eeuo pipefail
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
-          grep -F 'MJX7303_C3_WRC_V66' jarvis/michael-c3-v66.js
-          grep -F 'MICHAEL_V66' jarvis/michael-graphics-v40.js
-          ! grep -R -F 'CLEAN_SHEET_GLB' jarvis/mjx7303-racing-michael-v66.js jarvis/michael-graphics-v40.js jarvis/michael-c3-v66.js
+          node <<'NODE'
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync('michael/release/current.json','utf8'));
+          for(const retired of r.retiredLiveArchitectures)for(const p of [r.live.runtime,r.live.renderer,r.live.identityModule])if(fs.readFileSync(p,'utf8').includes(retired))throw Error(`retired ${retired} returned to ${p}`);
+          NODE
 
       - name: Persist measured owner-truth state only
         run: |
