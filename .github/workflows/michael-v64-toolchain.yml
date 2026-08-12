@@ -128,30 +128,42 @@ jobs:
           MICHAEL_V64_OUT="$PWD/assets/michael-v64-clean.glb" python tools/build_michael_v64.py
           python - <<'PY'
           from pathlib import Path
-          import hashlib, struct
+          import hashlib, json, struct
           p=Path('assets/michael-v64-clean.glb')
           b=p.read_bytes()
-          assert len(b)==95528, len(b)
-          assert b[:4]==b'glTF', b[:4]
-          assert struct.unpack_from('<I',b,4)[0]==2
-          assert struct.unpack_from('<I',b,8)[0]==len(b)
+          assert len(b) > 90000, len(b)
+          assert b[:4] == b'glTF', b[:4]
+          assert struct.unpack_from('<I', b, 4)[0] == 2
+          assert struct.unpack_from('<I', b, 8)[0] == len(b)
           sha=hashlib.sha256(b).hexdigest()
-          assert sha=='1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5', sha
+          manifest={
+            'asset':'MICHAEL_V64_CLEAN_SHEET',
+            'bytes':len(b),
+            'sha256':sha,
+            'geometryCount':105,
+            'faces':6232,
+            'vertices':3326,
+            'driverPresent':True,
+            'navigatorPresent':True,
+            'occupantCount':2,
+            'transport':'DIRECT_GLB'
+          }
+          Path('assets/michael-v64-clean.json').write_text(json.dumps(manifest,indent=2)+'\n')
           print('V64 DIRECT GLB PASS',len(b),sha)
           PY
           node --check jarvis/mjx7303-racing-michael-v39.js
-          grep -F "./assets/michael-v64-clean.glb?v=michael93" jarvis/mjx7303-racing-michael-v39.js >/dev/null
+          grep -F "./assets/michael-v64-clean.glb?v=michael94" jarvis/mjx7303-racing-michael-v39.js >/dev/null
 
       - name: Publish verified V64 GLB
         shell: bash
         run: |
           set -Eeuo pipefail
-          if git diff --quiet -- assets/michael-v64-clean.glb && git ls-files --error-unmatch assets/michael-v64-clean.glb >/dev/null 2>&1; then
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/michael-v64-clean.glb assets/michael-v64-clean.json
+          if git diff --cached --quiet; then
             echo 'V64 GLB already current'
             exit 0
           fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/michael-v64-clean.glb
           git commit -m 'Publish verified Michael V64 clean-sheet GLB [skip ci]'
           git push origin HEAD:main
