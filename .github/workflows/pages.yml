@@ -66,7 +66,7 @@ jobs:
           const refs=JSON.parse(text('michael/visual/owner-reference-observations.json'));
           if(refs.authority!=='owner_photos'||(refs.repositoryFiles||[]).length<7)throw Error('Owner photo reference set incomplete');
           const live=JSON.parse(text('michael/visual/live-status.json'));
-          if(!live.ownerTruthAuthority)throw Error('Nickelle live convergence status is not owner-truth bound');
+          if(live.authority!=='DIRECT_OWNER_JPEG_PIXELS'||!Array.isArray(live.ownerTruthFailures))throw Error('Nickelle live convergence status schema mismatch');
 
           // V57 remains the underlying engine/polyglot lineage; visual releases may advance independently.
           const release=JSON.parse(text('public/michael-v57-release.json'));
