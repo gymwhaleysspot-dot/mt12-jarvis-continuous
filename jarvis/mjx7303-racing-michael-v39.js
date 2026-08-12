@@ -3,15 +3,16 @@ import {JarvisXRRenderer} from './michael-graphics-v39.js?v=michael-v64-clean';
 import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=michael84';
 import {MichaelEngine} from './michael-engine-v45.js?v=michael84';
 import {bootMichaelPolyglot} from './generated/michael-polyglot.js?v=michael84';
-import p0 from './michael-v64-payload-00.js?v=michael91';
-import p1 from './michael-v64-payload-01.js?v=michael91';
-import p2 from './michael-v64-payload-02.js?v=michael91';
-import p3 from './michael-v64-payload-03.js?v=michael91';
+import p0 from './michael-v64-payload-00.js?v=michael92';
+import p1 from './michael-v64-payload-01.js?v=michael92';
+import p2 from './michael-v64-payload-02.js?v=michael92';
+import p3 from './michael-v64-payload-03.js?v=michael92';
 const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState'),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let xr,dyn,engine,polyglot=null,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.11,dist=10.2,targetY=.82,last=performance.now();
 const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
 bootMichaelPolyglot('./generated/','michael84').then(a=>{polyglot=a;globalThis.__MICHAEL_POLYGLOT=a}).catch(e=>console.warn('MICHAEL V64 optional module fallback',e));
-async function cleanSheetURL(){const b64=p0+p1+p2+p3,raw=atob(b64),gz=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)gz[i]=raw.charCodeAt(i);if(typeof DecompressionStream!=='function')throw new Error('gzip decompression unsupported');const stream=new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip')),buf=await new Response(stream).arrayBuffer(),u=new Uint8Array(buf);if(u.length!==95528||String.fromCharCode(...u.slice(0,4))!=='glTF')throw new Error(`V64 GLB validation failed bytes=${u.length}`);globalThis.__MICHAEL_V64_ASSET={cleanSheet:true,bytes:u.length,sha256:'1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5',geometryCount:105,faces:6232,vertices:3326};return URL.createObjectURL(new Blob([u],{type:'model/gltf-binary'}))}
+function decode64(s){const raw=atob(s),u=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return u}
+async function cleanSheetURL(){const parts=[p0,p1,p2,p3].map(decode64),n=parts.reduce((a,b)=>a+b.length,0),gz=new Uint8Array(n);let o=0;for(const p of parts){gz.set(p,o);o+=p.length}if(typeof DecompressionStream!=='function')throw new Error('gzip decompression unsupported');const stream=new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip')),buf=await new Response(stream).arrayBuffer(),u=new Uint8Array(buf);if(u.length!==95528||String.fromCharCode(...u.slice(0,4))!=='glTF')throw new Error(`V64 GLB validation failed bytes=${u.length}`);globalThis.__MICHAEL_V64_ASSET={cleanSheet:true,bytes:u.length,sha256:'1131e49e2e76eca3f09cec8ffc3139e170c7de9cf3f59f236905f54d6b7a8dc5',geometryCount:105,faces:6232,vertices:3326};return URL.createObjectURL(new Blob([u],{type:'model/gltf-binary'}))}
 const trackCenter=z=>Math.sin(z*.0042)*6+Math.sin(z*.011)*2.2;
 function roadPose(p,r){const station=clamp((p?.z||0)*1.9,-1540,1540),e=2,c=trackCenter(station),s=(trackCenter(station+e)-trackCenter(station-e))/(e*2),ty=Math.atan(s),lat=clamp((p?.x||0)*1.55,-2.35,2.35),nx=Math.cos(ty),nz=-Math.sin(ty);return{x:c+nx*lat,y:(p?.y||0)*.5,z:station+nz*lat,yaw:ty+clamp(r?.yaw||0,-.52,.52),trackYaw:ty,lat}}
 function chaseRoad(p){xr.chase(p.x,p.y,p.z,p.yaw);const nx=Math.cos(p.trackYaw),nz=-Math.sin(p.trackYaw),q=-p.lat*.72,fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);xr.eye[0]+=nx*q+fx*1.35;xr.eye[2]+=nz*q+fz*1.35;xr.at[0]+=nx*q*.18;xr.at[2]+=nz*q*.18;xr.eye[1]+=.48}
