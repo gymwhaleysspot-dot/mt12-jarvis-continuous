@@ -162,7 +162,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           node --experimental-vm-modules tools/michael_module_contract.mjs jarvis/mjx7303-racing-michael-v66.js
-          grep -F 'revision:2' jarvis/michael-c3-v66.js
+          node -e "const s=require('fs').readFileSync('jarvis/michael-c3-v66.js','utf8');const m=s.match(/revision:(\d+)/);if(!m||Number(m[1])<7)throw Error('Michael C3 authority revision 7 missing')"
           grep -F 'ADAPTIVE_REGION_AWARE_V2' tools/nickelle_closed_loop.py
 
       - name: Persist measured owner-truth state only
