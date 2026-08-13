@@ -74,28 +74,39 @@ jobs:
         run: |
           set -Eeuo pipefail
           git config user.name 'Jarvis Engineering Intelligence'; git config user.email 'actions@users.noreply.github.com'
-          git fetch origin ai-state; git checkout -B ai-state origin/ai-state
-          mkdir -p research/history factory/memory
-          cp /tmp/jarvis-research-output/research/state.json research/state.json
-          cp /tmp/jarvis-research-output/research/current.json research/current.json
-          cp /tmp/jarvis-research-output/research/questions.json research/questions.json
-          cp /tmp/jarvis-research-output/research/research-run.log research/research-run.log
-          cp -a /tmp/jarvis-research-output/research/history/. research/history/
-          cp /tmp/jarvis-research-output/factory/memory/external-research.json factory/memory/external-research.json
-          cp /tmp/jarvis-research-output/factory/next-experiment.json factory/next-experiment.json
-          cp /tmp/jarvis-research-output/factory/knowledge-graph.json factory/knowledge-graph.json
-          git add research factory/memory/external-research.json factory/next-experiment.json factory/knowledge-graph.json
-          if ! git diff --cached --quiet; then git commit -m 'Update isolated Jarvis engineering memory [skip ci]'; git push origin HEAD:ai-state; fi
+          git fetch origin ai-state
+          state_tree="$(mktemp -d /tmp/jarvis-research-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p research/history factory/memory
+            cp /tmp/jarvis-research-output/research/state.json research/state.json
+            cp /tmp/jarvis-research-output/research/current.json research/current.json
+            cp /tmp/jarvis-research-output/research/questions.json research/questions.json
+            cp /tmp/jarvis-research-output/research/research-run.log research/research-run.log
+            cp -a /tmp/jarvis-research-output/research/history/. research/history/
+            cp /tmp/jarvis-research-output/factory/memory/external-research.json factory/memory/external-research.json
+            cp /tmp/jarvis-research-output/factory/next-experiment.json factory/next-experiment.json
+            cp /tmp/jarvis-research-output/factory/knowledge-graph.json factory/knowledge-graph.json
+            git add research factory/memory/external-research.json factory/next-experiment.json factory/knowledge-graph.json
+            if ! git diff --cached --quiet; then git commit -m 'Update isolated Jarvis engineering memory [skip ci]'; git push origin HEAD:ai-state; fi
+          )
       - name: Promote only changed public research data to main
         run: |
           set -Eeuo pipefail
-          git fetch origin main; git checkout -B main origin/main; mkdir -p public/jarvis-data
-          cp /tmp/jarvis-research-output/public/jarvis-data/external-research.json public/jarvis-data/external-research.json
-          cp /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json public/jarvis-data/experiment-plan.json
-          git add public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json
-          if git diff --cached --quiet; then echo 'public research data unchanged; no deploy-source commit'; exit 0; fi
           git config user.name 'Jarvis Engineering Intelligence'; git config user.email 'actions@users.noreply.github.com'
-          git commit -m 'Publish changed Jarvis research data'; git push origin HEAD:main
+          git fetch origin main
+          main_tree="$(mktemp -d /tmp/jarvis-research-main.XXXXXX)/tree"
+          git worktree add --detach "$main_tree" origin/main
+          (
+            cd "$main_tree"
+            mkdir -p public/jarvis-data
+            cp /tmp/jarvis-research-output/public/jarvis-data/external-research.json public/jarvis-data/external-research.json
+            cp /tmp/jarvis-research-output/public/jarvis-data/experiment-plan.json public/jarvis-data/experiment-plan.json
+            git add public/jarvis-data/external-research.json public/jarvis-data/experiment-plan.json
+            if git diff --cached --quiet; then echo 'public research data unchanged; no deploy-source commit'; exit 0; fi
+            git commit -m 'Publish changed Jarvis research data'; git push origin HEAD:main
+          )
       - name: Publish mission evidence artifact
         if: always()
         uses: actions/upload-artifact@v6
