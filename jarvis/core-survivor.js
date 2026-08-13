@@ -265,6 +265,62 @@ const tournamentWorld=iyla3DWorld;iyla3DWorld=function(){tournamentWorld();const
 const tournamentGrid=grid;grid=function(){tournamentGrid();x.save();x.translate(W/2,H/2);x.strokeStyle=tournament.round>4?'#ffcc5544':'#4fffe633';x.lineWidth=1.4;for(let n=0;n<5;n++){x.beginPath();x.ellipse(0,0,110+n*82,(110+n*82)*.48,0,0,TAU);x.stroke()}for(let n=0;n<12;n++){const a=n*TAU/12;x.beginPath();x.moveTo(Math.cos(a)*80,Math.sin(a)*38);x.lineTo(Math.cos(a)*Math.max(W,H),Math.sin(a)*Math.max(W,H)*.48);x.stroke()}x.restore()};
 const zStageSystems=omniSystems;omniSystems=function(dt){zStageSystems(dt);zStageUpdate(dt);tournamentUpdate()};
 const zStageVisualBase=omniVisuals;omniVisuals=function(){zStageVisualBase();zStageVisuals();superMoveVisuals()};
+
+// Matty Combat Authority 3.0: navigation commits to Owen's selected opponent.
+// This turns composed clips into real pursuit, contact, damage and completed routes.
+Object.assign(tournament,{started:false,phase:'OPENING',fighters:0,knockouts:0});
+Object.assign(zCinema,{lockedTarget:null,pursuit:0,engagements:0,completedRoutes:0});
+const mattyAutoVector=autoVector;
+autoVector=function(dt){
+ const planned=mattyAutoVector(dt),target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:zTarget();
+ if(!target||griffin.transformation?.active||griffin.superMove?.active)return planned;
+ const d=dist(player,target),a=Math.atan2(target.y-player.y,target.x-player.x),danger=hostile.some(h=>Math.hypot(h.x-player.x,h.y-player.y)<64);
+ if(danger&&zCinema.vanish<=0)return planned;
+ // Commit hard inside combat range; close deliberately outside it instead of orbiting forever.
+ const committed=zCinema.route.length||zCinema.combo||d<235||target.type===3;
+ if(committed){griffin.heading=a;zCinema.pursuit=Math.max(zCinema.pursuit,dt);griffin.mode=d>142?'MATTY COMBAT PURSUIT':griffin.mode;return{dx:Math.cos(a),dy:Math.sin(a)}}
+ return planned
+};
+const mattyCinemaUpdate=zCinemaUpdate;
+zCinemaUpdate=function(dt){
+ const before=zCinema.route.length,previous=zCinema.lockedTarget;
+ if(!previous||!enemies.includes(previous)){zCinema.lockedTarget=zTarget();if(zCinema.lockedTarget)zCinema.engagements++}
+ mattyCinemaUpdate(dt);
+ if(before&& !zCinema.route.length)zCinema.completedRoutes++;
+ if(zCinema.lockedTarget&&!enemies.includes(zCinema.lockedTarget))zCinema.lockedTarget=null;
+};
+
+// A dedicated Tournament of Power arena replaces the scrolling survival-world props.
+// The platform, void, grandstands and round boundaries now form one coherent scene.
+iyla3DWorld=function(){
+ const round=tournament.round||1,gold=round>4?[1,.57,.08]:[.05,.72,.78],edge=round>4?[.48,.08,.08]:[.04,.22,.26];
+ // Central elevated stone platform, assembled as bounded radial sectors.
+ for(let ring=0;ring<5;ring++)for(let n=0;n<20;n++){
+  const a=n*TAU/20+(ring&1?TAU/40:0),r=ring*1.72,w=ring?1.02:1.55;
+  iylaBox(Math.cos(a)*r,-.04-ring*.012,Math.sin(a)*r,w,.1,ring?1.05:1.55,(n+ring)%5===0?gold:[.12+.018*ring,.15+.018*ring,.17+.02*ring],-a,.96)
+ }
+ // Broken outer lip makes the arena boundary readable and removes the old infinite grid.
+ for(let n=0;n<32;n++){const a=n*TAU/32,r=8.65+(n%3)*.09;iylaBox(Math.cos(a)*r,-.12+(n%4)*.025,Math.sin(a)*r,.78,.2,.3,n%7===0?gold:edge,-a,.98)}
+ // Distant tiered spectator stands and energy pylons establish scale without world clutter.
+ for(let tier=0;tier<3;tier++)for(let n=0;n<18;n++){const a=n*TAU/18+tier*.055,r=11.8+tier*1.45;iylaBox(Math.cos(a)*r,1.05+tier*.72,Math.sin(a)*r,.72,.28,.5,n%6===0?gold:[.08,.09,.14],-a,.78)}
+ for(let n=0;n<8;n++){const a=n*TAU/8,r=10.1;iylaBox(Math.cos(a)*r,2.15,Math.sin(a)*r,.14,2.15,.14,gold,-a,.72)}
+};
+grid=function(){
+ const round=tournament.round||1;x.fillStyle=round>4?'#090409':'#02080d';x.fillRect(0,0,W,H);
+ const g=x.createRadialGradient(W/2,H*.52,30,W/2,H*.52,Math.max(W,H)*.68);g.addColorStop(0,round>4?'#391018':'#12353b');g.addColorStop(.48,'#07141a');g.addColorStop(1,'#010207');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.save();x.translate(W/2,H*.52);x.scale(1,.52);x.strokeStyle=round>4?'#ffbd5550':'#71fff052';x.lineWidth=2;
+ for(let n=1;n<=5;n++){x.beginPath();x.arc(0,0,n*78,0,TAU);x.stroke()}
+ for(let n=0;n<16;n++){const a=n*TAU/16;x.beginPath();x.moveTo(Math.cos(a)*35,Math.sin(a)*35);x.lineTo(Math.cos(a)*440,Math.sin(a)*440);x.stroke()}
+ x.restore()
+};
+const mattyTournamentUpdate=tournamentUpdate;
+tournamentUpdate=function(){
+ if(!running){tournament.started=false;return}
+ if(elapsed<.08)tournament.started=false;
+ if(!tournament.started){tournament.started=true;tournament.round=1;tournament.lastRound=1;tournament.phase='BATTLE';iylaScene('ZENITH POWER TOURNAMENT','ROUND 1 · SURVIVAL DRAW','#79fff0',2.8,30);combatEvent('TOURNAMENT_OPENING',{round:1,name:tournament.roundNames[0]})}
+ const previous=tournament.round;mattyTournamentUpdate();tournament.fighters=enemies.length;tournament.knockouts=kills;
+ if(tournament.round!==previous){tournament.phase='ROUND CHANGE';zCinema.route.length=0;zCinema.lockedTarget=null}else tournament.phase=zCinema.route.length?'COMBAT':'BATTLE'
+};
 $('#trainBrain').onclick=()=>trainGriffin(9000);$('#exportBrain').onclick=exportBrain;$('#importBrain').onclick=importBrain;
 setInterval(()=>{if(!running)griffin.defenseReady=false},250);
 setInterval(()=>{if(autoMode&&running)executive()},1000);

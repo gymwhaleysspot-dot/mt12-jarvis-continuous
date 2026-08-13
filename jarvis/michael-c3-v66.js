@@ -1,7 +1,0 @@
-// MICHAEL V66.7 — use the car that is already there.
-// The licensed C3 WRC authority body and its native V39 running gear/glass/finish stay intact.
-// V66 adds NO body, window, lamp, wheel, bumper, roof, wing or livery geometry.
-const authority=d=>{const m=d?.model;return !!(m&&Math.abs(Number(m[5]||0))<.001&&Math.abs(Number(m[6]||0)+1)<.001&&Math.abs(Number(m[9]||0)-1)<.001)};
-function restoreExistingCar(r){let authorityDrawables=0,nativeFinish=0,removedV66=0;for(const d of r.drawables||[]){if(d?.world)continue;if(d?._michaelV66){d.hidden=true;removedV66++;continue}d.hidden=false;if(authority(d))authorityDrawables++;else{nativeFinish++;if(d?._michaelLegacyCompletion)delete d._michaelLegacyCompletion}}return{authorityDrawables,nativeFinish,removedV66}}
-function correctAuthorityPaint(r){let painted=0;for(const d of r.drawables||[]){if(!authority(d)||!d?.mat)continue;d.mat.base=new Float32Array([.50,.010,.016]);d.mat.metal=.045;d.mat.rough=.235;painted++}return painted}
-export function installMichaelC3V66(r){r._v66Checks=[];const restored=restoreExistingCar(r),painted=correctAuthorityPaint(r);r._michaelV66={identity:'MJX7303_C3_WRC_LICENSED_BODY',revision:7,approach:'RESTORE_EXISTING_COMPLETE_CAR',authorityDrawables:restored.authorityDrawables,nativeFinishDrawables:restored.nativeFinish,priorV66Hidden:restored.removedV66,painted,bodyGeometryAdded:false,finishGeometryAdded:false,existingRunningGearPreserved:true,existingGlassPreserved:true,existingLightsPreserved:true,existingLiveryPreserved:true,malformed:0,checks:[]};return r._michaelV66}
