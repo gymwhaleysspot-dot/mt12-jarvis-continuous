@@ -55,11 +55,15 @@ jobs:
           git config user.name 'Michael Reconstruction Director'
           git config user.email 'actions@users.noreply.github.com'
           git fetch origin ai-state
-          git checkout -B ai-state origin/ai-state
-          mkdir -p michael/reconstruction
-          cp /tmp/reconstruction-current.json michael/reconstruction/current.json
-          git add michael/reconstruction/current.json
-          if ! git diff --cached --quiet; then git commit -m 'Update isolated full vehicle reconstruction belief [skip ci]'; git push origin HEAD:ai-state; fi
+          state_tree="$(mktemp -d /tmp/michael-reconstruction-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p michael/reconstruction
+            cp /tmp/reconstruction-current.json michael/reconstruction/current.json
+            git add michael/reconstruction/current.json
+            if ! git diff --cached --quiet; then git commit -m 'Update isolated full vehicle reconstruction belief [skip ci]'; git push origin HEAD:ai-state; fi
+          )
       - name: Archive reconstruction evidence
         if: always()
         uses: actions/upload-artifact@v6

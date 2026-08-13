@@ -76,11 +76,15 @@ jobs:
           git config user.name 'Nickelle Autonomous Repair AI'
           git config user.email 'actions@users.noreply.github.com'
           git fetch origin ai-state
-          git checkout -B ai-state origin/ai-state
-          mkdir -p michael/reconstruction
-          cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
-          git add michael/reconstruction/autonomous-state.json
-          if ! git diff --cached --quiet; then git commit -m 'Nickelle updates isolated autonomous visual debt [skip ci]'; git push origin HEAD:ai-state; fi
+          state_tree="$(mktemp -d /tmp/nickelle-autonomous-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p michael/reconstruction
+            cp /tmp/nickelle-autonomous-state.json michael/reconstruction/autonomous-state.json
+            git add michael/reconstruction/autonomous-state.json
+            if ! git diff --cached --quiet; then git commit -m 'Nickelle updates isolated autonomous visual debt [skip ci]'; git push origin HEAD:ai-state; fi
+          )
       - name: Route topology debt into full reconstruction
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |

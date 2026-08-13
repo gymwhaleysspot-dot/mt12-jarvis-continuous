@@ -50,13 +50,17 @@ jobs:
           git config user.name 'Michael Ultra Art Director'
           git config user.email 'actions@users.noreply.github.com'
           git fetch origin ai-state
-          git checkout -B ai-state origin/ai-state
-          mkdir -p michael/system
-          cp /tmp/cross-agent-tournament.json michael/system/cross-agent-tournament.json
-          git add michael/system/cross-agent-tournament.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Update isolated whole-car Ultra Art Director state [skip ci]'
-          git push origin HEAD:ai-state
+          state_tree="$(mktemp -d /tmp/michael-tournament-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p michael/system
+            cp /tmp/cross-agent-tournament.json michael/system/cross-agent-tournament.json
+            git add michael/system/cross-agent-tournament.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Update isolated whole-car Ultra Art Director state [skip ci]'
+            git push origin HEAD:ai-state
+          )
       - name: Archive compatibility evidence
         uses: actions/upload-artifact@v6
         with:
