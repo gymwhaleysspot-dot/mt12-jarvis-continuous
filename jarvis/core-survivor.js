@@ -270,6 +270,8 @@ const zStageVisualBase=omniVisuals;omniVisuals=function(){zStageVisualBase();zSt
 // This turns composed clips into real pursuit, contact, damage and completed routes.
 Object.assign(tournament,{started:false,phase:'OPENING',fighters:0,knockouts:0});
 Object.assign(zCinema,{lockedTarget:null,pursuit:0,engagements:0,completedRoutes:0});
+const mattyTarget=zTarget;
+zTarget=function(){return zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:mattyTarget()};
 const mattyAutoVector=autoVector;
 autoVector=function(dt){
  const planned=mattyAutoVector(dt),target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:zTarget();
@@ -277,7 +279,7 @@ autoVector=function(dt){
  const d=dist(player,target),a=Math.atan2(target.y-player.y,target.x-player.x),danger=hostile.some(h=>Math.hypot(h.x-player.x,h.y-player.y)<64);
  if(danger&&zCinema.vanish<=0)return planned;
  // Commit hard inside combat range; close deliberately outside it instead of orbiting forever.
- const committed=zCinema.route.length||zCinema.combo||d<235||target.type===3;
+ const committed=zCinema.route.length||zCinema.combo||d<520||target.type===3;
  if(committed){griffin.heading=a;zCinema.pursuit=Math.max(zCinema.pursuit,dt);griffin.mode=d>142?'MATTY COMBAT PURSUIT':griffin.mode;return{dx:Math.cos(a),dy:Math.sin(a)}}
  return planned
 };
@@ -286,29 +288,32 @@ zCinemaUpdate=function(dt){
  const before=zCinema.route.length,previous=zCinema.lockedTarget;
  if(!previous||!enemies.includes(previous)){zCinema.lockedTarget=zTarget();if(zCinema.lockedTarget)zCinema.engagements++}
  mattyCinemaUpdate(dt);
+ const target=zCinema.lockedTarget,d=target&&enemies.includes(target)?dist(player,target):Infinity;
+ // Never display a strike pose until its contact beat is actually in range.
+ if(target&&d>=146&&zCinema.attack<=0){zCinema.meleePose=d<300?'DASH':'FLIGHT';griffin.mode=d<300?'MATTY FLASH PURSUIT':'MATTY TARGET PURSUIT'}
  if(before&& !zCinema.route.length)zCinema.completedRoutes++;
  if(zCinema.lockedTarget&&!enemies.includes(zCinema.lockedTarget))zCinema.lockedTarget=null;
 };
 
-// A dedicated Tournament of Power arena replaces the scrolling survival-world props.
-// The platform, void, grandstands and round boundaries now form one coherent scene.
+// The Tournament architecture lives inside the original scrolling world.
 iyla3DWorld=function(){
+ tournamentWorld();
  const round=tournament.round||1,gold=round>4?[1,.57,.08]:[.05,.72,.78],edge=round>4?[.48,.08,.08]:[.04,.22,.26];
+ const sx=-(((worldX/45)%17.3+17.3)%17.3),sz=-(((worldY/45)%17.3+17.3)%17.3);
  // Central elevated stone platform, assembled as bounded radial sectors.
  for(let ring=0;ring<5;ring++)for(let n=0;n<20;n++){
   const a=n*TAU/20+(ring&1?TAU/40:0),r=ring*1.72,w=ring?1.02:1.55;
-  iylaBox(Math.cos(a)*r,-.04-ring*.012,Math.sin(a)*r,w,.1,ring?1.05:1.55,(n+ring)%5===0?gold:[.12+.018*ring,.15+.018*ring,.17+.02*ring],-a,.96)
+  iylaBox(sx+Math.cos(a)*r,-.04-ring*.012,sz+Math.sin(a)*r,w,.1,ring?1.05:1.55,(n+ring)%5===0?gold:[.12+.018*ring,.15+.018*ring,.17+.02*ring],-a,.96)
  }
  // Broken outer lip makes the arena boundary readable and removes the old infinite grid.
- for(let n=0;n<32;n++){const a=n*TAU/32,r=8.65+(n%3)*.09;iylaBox(Math.cos(a)*r,-.12+(n%4)*.025,Math.sin(a)*r,.78,.2,.3,n%7===0?gold:edge,-a,.98)}
+ for(let n=0;n<32;n++){const a=n*TAU/32,r=8.65+(n%3)*.09;iylaBox(sx+Math.cos(a)*r,-.12+(n%4)*.025,sz+Math.sin(a)*r,.78,.2,.3,n%7===0?gold:edge,-a,.98)}
  // Distant tiered spectator stands and energy pylons establish scale without world clutter.
- for(let tier=0;tier<3;tier++)for(let n=0;n<18;n++){const a=n*TAU/18+tier*.055,r=11.8+tier*1.45;iylaBox(Math.cos(a)*r,1.05+tier*.72,Math.sin(a)*r,.72,.28,.5,n%6===0?gold:[.08,.09,.14],-a,.78)}
- for(let n=0;n<8;n++){const a=n*TAU/8,r=10.1;iylaBox(Math.cos(a)*r,2.15,Math.sin(a)*r,.14,2.15,.14,gold,-a,.72)}
+ for(let tier=0;tier<3;tier++)for(let n=0;n<18;n++){const a=n*TAU/18+tier*.055,r=11.8+tier*1.45;iylaBox(sx+Math.cos(a)*r,1.05+tier*.72,sz+Math.sin(a)*r,.72,.28,.5,n%6===0?gold:[.08,.09,.14],-a,.78)}
+ for(let n=0;n<8;n++){const a=n*TAU/8,r=10.1;iylaBox(sx+Math.cos(a)*r,2.15,sz+Math.sin(a)*r,.14,2.15,.14,gold,-a,.72)}
 };
 grid=function(){
- const round=tournament.round||1;x.fillStyle=round>4?'#090409':'#02080d';x.fillRect(0,0,W,H);
- const g=x.createRadialGradient(W/2,H*.52,30,W/2,H*.52,Math.max(W,H)*.68);g.addColorStop(0,round>4?'#391018':'#12353b');g.addColorStop(.48,'#07141a');g.addColorStop(1,'#010207');x.fillStyle=g;x.fillRect(0,0,W,H);
- x.save();x.translate(W/2,H*.52);x.scale(1,.52);x.strokeStyle=round>4?'#ffbd5550':'#71fff052';x.lineWidth=2;
+ tournamentGrid();const round=tournament.round||1,ox=-((worldX*.18)%468),oy=-((worldY*.18)%244);
+ x.save();x.translate(W/2+ox,H*.52+oy);x.scale(1,.52);x.strokeStyle=round>4?'#ffbd5550':'#71fff052';x.lineWidth=2;
  for(let n=1;n<=5;n++){x.beginPath();x.arc(0,0,n*78,0,TAU);x.stroke()}
  for(let n=0;n<16;n++){const a=n*TAU/16;x.beginPath();x.moveTo(Math.cos(a)*35,Math.sin(a)*35);x.lineTo(Math.cos(a)*440,Math.sin(a)*440);x.stroke()}
  x.restore()
@@ -321,6 +326,70 @@ tournamentUpdate=function(){
  const previous=tournament.round;mattyTournamentUpdate();tournament.fighters=enemies.length;tournament.knockouts=kills;
  if(tournament.round!==previous){tournament.phase='ROUND CHANGE';zCinema.route.length=0;zCinema.lockedTarget=null}else tournament.phase=zCinema.route.length?'COMBAT':'BATTLE'
 };
+
+// Matty Campaign Director: clear a fighter wave, duel one unique boss, advance.
+const bossRoster=[
+ {name:'LIRA VANGUARD',style:'RUSH',color:'#ff315c',move:'METEOR RUSH',super:'CRIMSON COMET',hp:1,speed:1.22,damage:1},
+ {name:'LIRA TEMPEST',style:'STORM',color:'#bf62ff',move:'ARC VOLLEY',super:'THUNDER CAGE',hp:1.18,speed:1.08,damage:1.12},
+ {name:'LIRA TITAN',style:'TITAN',color:'#ff9d38',move:'GROUND BREAKER',super:'PLANET CRUSHER',hp:1.42,speed:.88,damage:1.3},
+ {name:'LIRA PHANTOM',style:'PHANTOM',color:'#ff4fa2',move:'AFTERIMAGE STRIKE',super:'VOID MIRROR',hp:1.28,speed:1.38,damage:1.18},
+ {name:'LIRA OMEGA',style:'OMEGA',color:'#fff0a0',move:'STAR BREAKER',super:'FINAL ERASURE',hp:1.7,speed:1.2,damage:1.48}
+];
+const campaign={stage:1,phase:'WAVE',quota:10,spawned:0,defeated:0,boss:null,transition:0,bossesDefeated:0};
+function campaignReset(){Object.assign(campaign,{stage:1,phase:'WAVE',quota:10,spawned:0,defeated:0,boss:null,transition:0,bossesDefeated:0});griffin.campaignGrowth=0}
+function campaignBoss(){return bossRoster[(campaign.stage-1)%bossRoster.length]}
+const campaignBaseReset=reset;
+reset=function(mode=autoMode){campaignReset();return campaignBaseReset(mode)};
+const campaignEnemy=enemy;
+enemy=function(forceBoss=false){
+ if(elapsed<.08&&campaign.phase!=='WAVE')campaignReset();
+ if(forceBoss){
+  if(campaign.phase!=='BOSS_READY'||enemies.some(e=>e.type===3))return;
+  campaignEnemy(true);const e=enemies[enemies.length-1],spec=campaignBoss(),scale=1+(campaign.stage-1)*.24;
+  Object.assign(e,{campaignBoss:true,bossName:spec.name,bossStyle:spec.style,bossMove:spec.move,bossSuper:spec.super,variant:{RUSH:'ANTI-CRYO',STORM:'PHASE',TITAN:'SPLITTER',PHANTOM:'DRAINER',OMEGA:'PHASE'}[spec.style],hp:e.hp*spec.hp*scale,max:e.max*spec.hp*scale,speed:e.speed*spec.speed*(1+(campaign.stage-1)*.045),damage:e.damage*spec.damage*(1+(campaign.stage-1)*.07),shield:e.shield*(1+campaign.stage*.16),shieldMax:e.shieldMax*(1+campaign.stage*.16),signatureClock:1.7,superClock:7.5});
+  campaign.boss=e;campaign.phase='BOSS';griffin.boss=e;zCinema.lockedTarget=e;hostile.length=0;
+  iylaScene(`LEVEL ${campaign.stage} BOSS · ${spec.name}`,`${spec.move} · SUPER: ${spec.super}`,spec.color,3,27);combatEvent('CAMPAIGN_BOSS_ENTERED',{level:campaign.stage,boss:spec.name,super:spec.super});return e
+ }
+ if(campaign.phase!=='WAVE'||campaign.spawned>=campaign.quota)return;
+ campaignEnemy(false);const e=enemies[enemies.length-1];if(e){e.campaignLevel=campaign.stage;e.hp*=1+(campaign.stage-1)*.1;e.max=e.hp;e.speed*=1+(campaign.stage-1)*.025;e.damage*=1+(campaign.stage-1)*.055;campaign.spawned++}return e
+};
+const campaignKill=kill;
+kill=function(e){
+ campaignKill(e);
+ if(e.campaignBoss){
+  campaign.bossesDefeated++;campaign.phase='LEVEL_CLEAR';campaign.transition=4;campaign.boss=null;griffin.boss=null;zCinema.lockedTarget=null;hostile.length=0;
+  griffin.campaignGrowth=(griffin.campaignGrowth||0)+1;player.damage*=1.07;player.speed=Math.min(440,player.speed+7);player.rate=Math.max(.075,player.rate*.975);player.maxHp+=8;player.hp=Math.min(player.maxHp,player.hp+player.maxHp*.35);memory.griffinEvolution.mastery+=25+campaign.stage*8;
+  iylaScene(`LEVEL ${campaign.stage} COMPLETE`,'GRIFFIN AND LIRA HAVE LEARNED · NEXT WORLD OPENING','#8dffe2',3.5,28);combatEvent('CAMPAIGN_LEVEL_CLEAR',{level:campaign.stage,boss:e.bossName,growth:griffin.campaignGrowth})
+ }else if(e.campaignLevel===campaign.stage)campaign.defeated++
+};
+function campaignBossAI(dt,b){
+ if(!b||!enemies.includes(b))return;const spec=campaignBoss(),a=Math.atan2(player.y-b.y,player.x-b.x),d=dist(player,b);b.signatureClock-=dt;b.superClock-=dt;
+ if(b.signatureClock<=0){b.signatureClock=Math.max(.55,2.2-campaign.stage*.09);lira.phase=`${spec.name} · ${spec.move}`;
+  if(spec.style==='RUSH'){b.x=player.x-Math.cos(a)*105;b.y=player.y-Math.sin(a)*105;b.role='RUSHER'}
+  else if(spec.style==='STORM')for(let q=0;q<7;q++){const z=q*TAU/7;hostile.push({x:player.x+Math.cos(z)*230,y:player.y+Math.sin(z)*230,vx:-Math.cos(z)*115,vy:-Math.sin(z)*115,r:8,damage:7+campaign.stage,life:3.2,homing:.12})}
+  else if(spec.style==='TITAN'){rings.push({x:b.x,y:b.y,r:18,max:250,life:.75});if(d<250)player.hp-=8+campaign.stage*2}
+  else if(spec.style==='PHANTOM'){const z=a+Math.PI+rnd(-.5,.5);b.x=player.x+Math.cos(z)*125;b.y=player.y+Math.sin(z)*125;for(let q=-1;q<=1;q++)hostile.push({x:b.x,y:b.y,vx:Math.cos(a+q*.2)*370,vy:Math.sin(a+q*.2)*370,r:7,damage:8+campaign.stage,life:2})}
+  else for(let q=-2;q<=2;q++)hostile.push({x:b.x,y:b.y,vx:Math.cos(a+q*.13)*420,vy:Math.sin(a+q*.13)*420,r:9,damage:10+campaign.stage*1.4,life:2.6,homing:.1});
+ }
+ if(b.superClock<=0){b.superClock=Math.max(5.2,9-campaign.stage*.25);lira.phase=`SUPER · ${spec.super}`;iylaScene(spec.super,`${spec.name} SIGNATURE SUPER` ,spec.color,1.8,24);rings.push({x:b.x,y:b.y,r:25,max:Math.max(W,H)*.55,life:1.1});
+  for(let q=0;q<10+campaign.stage;q++){const z=q*TAU/(10+campaign.stage);hostile.push({x:b.x,y:b.y,vx:Math.cos(z)*(180+campaign.stage*12),vy:Math.sin(z)*(180+campaign.stage*12),r:9,damage:7+campaign.stage*1.5,life:4,homing:spec.style==='PHANTOM'?.22:.04})}combatEvent('BOSS_SUPER_MOVE',{boss:spec.name,move:spec.super})
+ }
+}
+function campaignUpdate(dt){
+ if(!running)return;if(elapsed<.08){campaignReset();return}
+ if(campaign.phase==='WAVE'){
+  tournament.phase=`LEVEL ${campaign.stage} · FIGHTERS ${campaign.defeated}/${campaign.quota}`;
+  if(campaign.spawned>=campaign.quota&&!enemies.some(e=>!e.campaignBoss)){campaign.phase='BOSS_READY';hostile.length=0;iylaScene(`LEVEL ${campaign.stage} WAVE CLEAR`,'BOSS APPROACHING · PREPARE','#79fff0',2.2,24);combatEvent('CAMPAIGN_WAVE_CLEAR',{level:campaign.stage});enemy(true)}
+ }else if(campaign.phase==='BOSS'){tournament.phase=`LEVEL ${campaign.stage} · ${campaignBoss().name}`;campaignBossAI(dt,campaign.boss)}
+ else if(campaign.phase==='LEVEL_CLEAR'){
+  campaign.transition-=dt;if(campaign.transition<=0){campaign.stage++;campaign.phase='WAVE';campaign.quota=Math.min(28,9+campaign.stage*3);campaign.spawned=campaign.defeated=0;campaign.boss=null;hostile.length=0;zCinema.route.length=0;zCinema.lockedTarget=null;lira.power+=450+campaign.stage*180;griffin.difficulty=clamp(griffin.difficulty+.06,.9,1.8);iylaScene(`LEVEL ${campaign.stage}`,`${campaign.quota} FIGHTERS · THEN ${campaignBoss().name}`,'#8dffe2',2.7,27);combatEvent('CAMPAIGN_LEVEL_START',{level:campaign.stage,quota:campaign.quota,boss:campaignBoss().name})}
+ }
+ tournament.round=campaign.stage;tournament.fighters=enemies.length
+}
+const campaignTournamentUpdate=tournamentUpdate;
+tournamentUpdate=function(){campaignTournamentUpdate();campaignUpdate(Math.min(.033,(performance.now()-(campaign.lastTick||performance.now()))/1000||.016));campaign.lastTick=performance.now()};
+const campaignHud=hud;
+hud=function(force=false){campaignHud(force);const label=$('#levelLabel');if(label)label.textContent=`LEVEL ${campaign.stage} · ${campaign.phase==='BOSS'?campaignBoss().name:campaign.phase==='WAVE'?`FIGHTERS ${campaign.defeated}/${campaign.quota}`:campaign.phase.replace('_',' ')}`+(autoMode?' · GRIFFIN':'')};
 $('#trainBrain').onclick=()=>trainGriffin(9000);$('#exportBrain').onclick=exportBrain;$('#importBrain').onclick=importBrain;
 setInterval(()=>{if(!running)griffin.defenseReady=false},250);
 setInterval(()=>{if(autoMode&&running)executive()},1000);
