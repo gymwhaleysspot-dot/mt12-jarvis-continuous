@@ -101,19 +101,33 @@ jobs:
           test -f keleb/measured-state.json && cp keleb/measured-state.json /tmp/keleb-memory/keleb/ || true
           cp /tmp/keleb-artist-council.json /tmp/keleb-memory/keleb/artist-council.json
           git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
-          git fetch origin ai-state; git checkout -B ai-state origin/ai-state; mkdir -p keleb
-          cp -a /tmp/keleb-memory/keleb/. keleb/; git add keleb
-          if ! git diff --cached --quiet; then git commit -m 'Keleb updates isolated interior artist intelligence [skip ci]'; git push origin HEAD:ai-state; fi
+          git fetch origin ai-state
+          state_tree="$(mktemp -d /tmp/keleb-interior-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p keleb
+            cp -a /tmp/keleb-memory/keleb/. keleb/
+            git add keleb
+            if ! git diff --cached --quiet; then git commit -m 'Keleb updates isolated interior artist intelligence [skip ci]'; git push origin HEAD:ai-state; fi
+          )
       - name: Promote only Artist-Council-approved changed interior asset to main
         run: |
           set -Eeuo pipefail
           test "$(jq -r '.pass' /tmp/keleb-artist-council.json)" = 'true' || { echo 'Keleb Artist Council rejected this interior; learning retained, asset not promoted.'; exit 0; }
           cp assets/mjx7303/keleb-interior.glb /tmp/keleb-interior.glb
-          git fetch origin main; git checkout -B main origin/main; mkdir -p assets/mjx7303
-          cp /tmp/keleb-interior.glb assets/mjx7303/keleb-interior.glb; git add assets/mjx7303/keleb-interior.glb
-          if git diff --cached --quiet; then echo 'interior asset unchanged; no deploy-source commit'; exit 0; fi
           git config user.name 'Keleb Interior AI'; git config user.email 'actions@users.noreply.github.com'
-          git commit -m 'Keleb Artist Council promotes improved interior asset'; git push origin HEAD:main
+          git fetch origin main
+          main_tree="$(mktemp -d /tmp/keleb-interior-main.XXXXXX)/tree"
+          git worktree add --detach "$main_tree" origin/main
+          (
+            cd "$main_tree"
+            mkdir -p assets/mjx7303
+            cp /tmp/keleb-interior.glb assets/mjx7303/keleb-interior.glb
+            git add assets/mjx7303/keleb-interior.glb
+            if git diff --cached --quiet; then echo 'interior asset unchanged; no deploy-source commit'; exit 0; fi
+            git commit -m 'Keleb Artist Council promotes improved interior asset'; git push origin HEAD:main
+          )
       - name: Archive Keleb evidence
         if: always()
         uses: actions/upload-artifact@v6
