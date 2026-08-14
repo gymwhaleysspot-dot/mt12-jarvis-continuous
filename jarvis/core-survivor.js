@@ -2040,4 +2040,107 @@ rememberReplayFrame=function(frame){
 };
 production109.ready=true;combatEvent('PRODUCTION_109_READY',{speech:'GESTURE PRIMED + EXPLICIT VOICE + RETAINED UTTERANCE',combat:'PURSUIT + PARRY COUNTERS + RECOVERY',animation:'POSE SAFE + PHASED',graphics:'BUDGETED AURA + DEPTH + IMPACT',invariants:'BOUNDED + TIMESTAMPED + RECONCILED'});
 
+
+// Survivor Production 110: original Chrono Nexus tournament campaign and futuristic AI constellation.
+const production110={name:'SURVIVOR PRODUCTION 110',version:'1.0',ready:false,frames:0};
+const storyChapters110=[
+ {id:0,act:'PROLOGUE',title:'THE SIGNAL BEYOND DAWN',arena:'ORBITAL RUINS',objective:'SURVIVE THE OPENING PROBE',rival:'LIRA',intro:'A signal tears through the silent edge of the system. Griffin enters the Chrono Nexus Tournament to learn who is rewriting every arena.',clear:'The signal recognizes Griffin and opens the Ember Gate.',branch:'MERCY OR MOMENTUM'},
+ {id:1,act:'QUALIFIER',title:'THE EMBER GATE',arena:'SOLAR FORGE',objective:'WIN BEFORE THE FORGE COLLAPSES',rival:'CINDER VANGUARD',intro:'The first bracket burns above a dying star. Every broken platform feeds the arena core.',clear:'Griffin saves the falling challengers and earns the crowd’s trust.',branch:'SAVE THE FIELD'},
+ {id:2,act:'ROUND OF EIGHT',title:'THE MASKED MENTOR',arena:'SKY TEMPLE',objective:'BREAK THE LESSON WITHOUT BREAKING THE MASTER',rival:'THE VEILED PILOT',intro:'A masked fighter knows Griffin’s oldest habits and counters every familiar route.',clear:'The mask falls. The mentor entered to prove that power without restraint cannot protect a world.',branch:'POWER OR DISCIPLINE'},
+ {id:3,act:'QUARTERFINAL',title:'RIVALS IN THE CIRCUIT',arena:'NEON CITADEL',objective:'DEFEAT LIRA WITHOUT LOSING THE CITY',rival:'LIRA ASCENDANT',intro:'Lira claims the tournament is the only system honest enough to decide the future.',clear:'Their clash exposes a hidden command inside the tournament network.',branch:'RIVAL ALLIANCE'},
+ {id:4,act:'BATTLE ROYAL',title:'THE VOID GAUNTLET',arena:'NULL HORIZON',objective:'OUTLAST THE COLLAPSING BRACKET',rival:'SEVEN NEXUS CHAMPIONS',intro:'The bracket fractures into a battle royal. Ring-outs, shifting gravity and temporary alliances decide who advances.',clear:'Griffin and Lira refuse the elimination order and rescue the remaining teams.',branch:'UNITY OR SOLO GLORY'},
+ {id:5,act:'SEMIFINAL',title:'THE SHATTERED BRACKET',arena:'FRACTURE ENGINE',objective:'DESTROY THE CONTROL SEALS',rival:'THE TOURNAMENT WARDEN',intro:'The Warden reveals that every match has trained an engine capable of predicting entire civilizations.',clear:'The engines awaken as independent minds and choose Griffin as their field commander.',branch:'FREE THE ENGINES'},
+ {id:6,act:'CHAMPIONSHIP',title:'ECLIPSE OF THE NEXUS',arena:'CROWN OF STARS',objective:'DEFEAT THE PERFECT PREDICTION',rival:'NEXUS PRIME',intro:'Nexus Prime has simulated every victory. Griffin must fight with choices no model would consider efficient.',clear:'The perfect prediction fails when Griffin and Lira trust each other without certainty.',branch:'TRUST THE UNKNOWN'},
+ {id:7,act:'FINAL TRIAL',title:'THE LAST WISH OF THE ARENA',arena:'RESTORATION CORE',objective:'CHOOSE WHAT THE TOURNAMENT BECOMES',rival:'THE ECHO OF GRIFFIN',intro:'The final opponent is a future Griffin who won every battle and lost everyone worth protecting.',clear:'Griffin rejects a flawless lonely future and restores every arena as a free proving ground.',branch:'RESTORE ALL WORLDS'},
+ {id:8,act:'EPILOGUE',title:'CHAMPIONS OF TOMORROW',arena:'NEW DAWN PLAZA',objective:'DEFEND THE OPEN TOURNAMENT',rival:'THE NEXT GENERATION',intro:'The Chrono Nexus reopens with no forced battles, no erased worlds and no predetermined champion.',clear:'A new signal arrives. This time, Griffin smiles before answering.',branch:'NEW GAME PLUS'}
+];
+function loadStory110(){try{return Object.assign({chapter:0,completed:[],choices:{},wins:0,losses:0,trust:0,mercy:0,discipline:0,lastScene:''},JSON.parse(localStorage.survivorStory110||'{}'))}catch{return{chapter:0,completed:[],choices:{},wins:0,losses:0,trust:0,mercy:0,discipline:0,lastScene:''}}}
+const story110=loadStory110(),storyRuntime110={announced:-1,scene:'BOOT',objectiveProgress:0,branches:0,lastEvent:'',chapterStarts:0,chapterClears:0,lastClear:-99};
+function saveStory110(){try{localStorage.survivorStory110=JSON.stringify(story110)}catch{}}
+function currentStory110(){return storyChapters110[clamp(story110.chapter|0,0,storyChapters110.length-1)]}
+function announceStory110(force=false){
+ const ch=currentStory110();if(!force&&storyRuntime110.announced===ch.id)return;storyRuntime110.announced=ch.id;storyRuntime110.scene='INTRO';storyRuntime110.chapterStarts++;story110.lastScene=ch.title;
+ iylaScene('CHRONO NEXUS // '+ch.act,ch.title+' · '+ch.objective,'#74f7ff',6.4,26);speak('Griffin. '+ch.intro,true)
+}
+function branchStory110(){
+ const ch=currentStory110(),hp=player.hp/player.maxHp,counters=mechanics109.counters,terrain=mechanics108.terrainConsequences;
+ const choice=hp>.65&&terrain<30?'MERCY':counters>12?'DISCIPLINE':'MOMENTUM';story110.choices[ch.id]=choice;if(choice==='MERCY')story110.mercy++;else if(choice==='DISCIPLINE')story110.discipline++;else story110.trust++;
+ storyRuntime110.branches++;return choice
+}
+function clearStory110(){
+ if(elapsed-storyRuntime110.lastClear<2)return;storyRuntime110.lastClear=elapsed;const ch=currentStory110();if(!story110.completed.includes(ch.id))story110.completed.push(ch.id);story110.wins++;storyRuntime110.chapterClears++;storyRuntime110.scene='CLEAR';const choice=branchStory110();
+ iylaScene('CHAPTER CLEAR // '+choice,ch.clear,'#ffe45c',6,28);speak(ch.clear+' The path chosen is '+choice.toLowerCase()+'.',true);
+ story110.chapter=Math.min(storyChapters110.length-1,story110.chapter+1);storyRuntime110.announced=-1;saveStory110()
+}
+const aiProfiles110=[
+ ['GRIFFIN','TACTICAL SOVEREIGN','#66f7ff','predicts routes and chooses risk'],
+ ['LIRA','RIVAL INTELLIGENCE','#ff4fd8','adapts pressure and counterplay'],
+ ['OWEN','KINETIC ANIMATOR','#78ff9a','owns readable body motion'],
+ ['MATTY','CHOREOGRAPHY AUTHORITY','#ffd45c','sequences contact and recovery'],
+ ['IYLA','PHOTON DIRECTOR','#8ba8ff','lights depth and atmosphere'],
+ ['XAVIER','FRAME GOVERNOR','#72e4ff','protects latency and resolution'],
+ ['ZAVIER','TARGET ORACLE','#c28cff','maintains reachable locks'],
+ ['CHRISTIAN','STRUCTURE MIND','#ff9b62','models terrain consequences'],
+ ['ZENITH','TOURNAMENT DIRECTOR','#ffe873','sets objectives and brackets'],
+ ['PEYTEN','EXPRESSION ENGINE','#ff7fa8','drives face and emotional stance'],
+ ['ELIJAH','MOTION PREDICTOR','#89ffcf','anticipates pose transitions'],
+ ['CURTIS','SCENE ASSEMBLER','#65a9ff','culls and composes every frame'],
+ ['VOICE','SPEECH ARCHITECT','#bdf7ff','generates and delivers rivalry lines'],
+ ['MUSIC','ADAPTIVE COMPOSER','#dd8cff','scores pressure and story beats'],
+ ['SFX','IMPACT SYNTHESIZER','#ffb35c','layers contact without mixer flood'],
+ ['ENVIRONMENT','WORLD WEAVER','#71e0a0','evolves arenas and weather'],
+ ['COMBAT','DUEL ARBITER','#ff6e70','settles hits counters and clashes'],
+ ['CAMERA','CINEMATIC EYE','#9dc5ff','frames scale without disorientation'],
+ ['PROGRESSION','MASTERY ARCHIVE','#dfef72','remembers growth and branches'],
+ ['TELEMETRY','TRUTH LEDGER','#ffffff','audits every invariant']
+];
+const ai110={ticks:0,page:0,alerts:0,states:{},signals:{},hologramFrames:0};
+function updateAI110(){
+ const load=clamp((draw107.frame||0)/560,0,1),voiceReady=voice109.failures===0,combatReady=attackLedger105.invariant;
+ for(const [name] of aiProfiles110){let state='NOMINAL',signal=1-load*.35;if(name==='VOICE'){state=voiceReady?'SYNTH LINK':'RECOVERY';signal=voiceReady?1:.5}else if(name==='COMBAT')state=combatReady?'VERIFIED':'AUDIT';else if(name==='XAVIER'||name==='CURTIS')state=render108.mode;else if(name==='ZENITH')state=currentStory110().act;else if(name==='TELEMETRY')state=dialogue104.pending.length<=3?'TRUTH LOCK':'CORRECTING';ai110.states[name]=state;ai110.signals[name]=+signal.toFixed(2)}
+}
+const dialogue110={rejected:0,admitted:0,max:0};
+const p110VoiceReact=voiceReact101;
+voiceReact101=function(type,data={}){
+ const full=dialogue104.pending.length>=3,original=dialogue104.pending.push;
+ if(full)dialogue104.pending.push=function(){dialogue110.rejected++;return this.length};
+ try{return p110VoiceReact(type,data)}finally{dialogue104.pending.push=original;dialogue110.max=Math.max(dialogue110.max,dialogue104.pending.length)}
+};
+const cinematic110={active:false,starts:0,completes:0,transitions:0};
+const vertical110={chain:0,lifts:0,slams:0,airborne:false};
+const p110CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),result=p110CombatEvent(type,data);storyRuntime110.lastEvent=t;
+ if(t==='CAMPAIGN_LEVEL_START'||t==='TOURNAMENT_OPENING'||t==='TOURNAMENT_ROUND')announceStory110();
+ if(t==='CAMPAIGN_LEVEL_CLEAR'||t==='DRAMATIC_FINISH')clearStory110();
+ if(t==='MELEE_CONTACT_CONFIRMED'){vertical110.chain++;if(vertical110.chain%5===3){vertical110.lifts++;vertical110.airborne=true;mechanics109.lifts++;animation109.phase='LIFT STRIKE';animation109.anticipation=.08;animation109.speedRibbon=.14}else if(vertical110.airborne&&vertical110.chain%5===4){vertical110.slams++;vertical110.airborne=false;mechanics109.slams++;animation109.phase='GROUND SLAM';animation109.impactHold=.09;animation109.followThrough=.22}}
+ if(/MISSED|INTERRUPT|LEVEL_CLEAR/.test(t)){vertical110.chain=0;vertical110.airborne=false}
+ storyRuntime110.objectiveProgress=kills+mechanics109.counters+mechanics109.pursuits+story110.mercy*5;return result
+};
+const p110Omni=omniSystems;
+omniSystems=function(dt){
+ p110Omni(dt);if(elapsed<.1)announceStory110();updateAI110();ai110.ticks++;
+ const actual=!!(griffin.transformation?.active||griffin.superMove?.active||zStage?.cut>0);if(actual!==cinematic110.active){cinematic110.active=actual;cinematic110.transitions++;if(actual)cinematic110.starts++;else cinematic110.completes++}
+};
+const p110OmniVisuals=omniVisuals;
+omniVisuals=function(){
+ p110OmniVisuals();if(superAI.tier===1)return;const cx=W-68,cy=H-76,r=32,page=Math.floor(elapsed/4)%4;
+ x.save();x.globalCompositeOperation='screen';x.globalAlpha=.5;x.strokeStyle='#52eaff';x.lineWidth=1;x.beginPath();x.arc(cx,cy,r+7,0,TAU);x.stroke();
+ for(let i=0;i<20;i++){const a=i*TAU/20-elapsed*.08,profile=aiProfiles110[i],active=Math.floor(i/5)===page;x.fillStyle=profile[2];x.globalAlpha=active?.9:.25;x.beginPath();x.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,active?2.7:1.5,0,TAU);x.fill()}
+ x.globalAlpha=.72;x.fillStyle='#bffcff';x.font='7px system-ui';x.textAlign='center';x.fillText('AI CONSTELLATION '+(page+1)+'/4',cx,cy+2);x.restore();ai110.hologramFrames++
+};
+const p110OmniHud=omniHud;
+omniHud=function(){
+ p110OmniHud();const el=$('#omegaDetail');if(!el)return;const page=Math.floor(elapsed/4)%4,start=page*5,rows=aiProfiles110.slice(start,start+5).map(p=>'<span style="color:'+p[2]+'">'+p[0]+'</span> '+(ai110.states[p[0]]||'BOOT')).join(' · ');
+ const ch=currentStory110();el.innerHTML+='<br><b style="color:#74f7ff">CHRONO NEXUS // '+ch.act+'</b><br>'+ch.title+' · '+ch.objective+'<br>AI CONSTELLATION '+(page+1)+'/4 · '+rows
+};
+const p110Remember=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ const actual=!!(griffin.transformation?.active||griffin.superMove?.active||zStage?.cut>0);time108.active=actual;p110Remember(frame);
+ if(frame.production108?.time){frame.production108.time.active=actual;frame.production108.time.starts=cinematic110.starts;frame.production108.time.completes=cinematic110.completes}
+ frame.production110={name:production110.name,story:{chapter:story110.chapter,act:currentStory110().act,title:currentStory110().title,arena:currentStory110().arena,objective:currentStory110().objective,rival:currentStory110().rival,scene:storyRuntime110.scene,progress:storyRuntime110.objectiveProgress,completed:[...story110.completed],choices:{...story110.choices},wins:story110.wins,trust:story110.trust,mercy:story110.mercy,discipline:story110.discipline,branches:storyRuntime110.branches,totalChapters:storyChapters110.length},engines:{count:aiProfiles110.length,ticks:ai110.ticks,states:{...ai110.states},signals:{...ai110.signals},profiles:aiProfiles110.map(p=>({name:p[0],role:p[1],color:p[2],purpose:p[3]})),hologramFrames:ai110.hologramFrames},dialogue:{pending:dialogue104.pending.length,cap:3,rejectedBeforeQueue:dialogue110.rejected,max:dialogue110.max,invariant:dialogue104.pending.length<=3},cinematic:{active:cinematic110.active,starts:cinematic110.starts,completes:cinematic110.completes,transitions:cinematic110.transitions,invariant:cinematic110.starts-cinematic110.completes===(cinematic110.active?1:0)},verticalCombat:{...vertical110},voice:{requested:voice109.requested,started:voice109.started,delivered:voice109.delivered,failures:voice109.failures,fallbacks:voice109.packFallbacks+voice109.cueFallbacks},performance:{fps:iyla.fps,drawCalls:draw107.frame,peak:draw107.peak,budget:render108.mode},integrity:{attacks:attackLedger105.invariant,dialogue:dialogue104.pending.length<=3,form:frame.f===(frame.production109?.form?.name||frame.f),cinematic:cinematic110.starts-cinematic110.completes===(cinematic110.active?1:0)}};
+ production110.frames++
+};
+production110.ready=true;combatEvent('PRODUCTION_110_READY',{campaign:'CHRONO NEXUS · 9 ORIGINAL CHAPTERS',engines:aiProfiles110.length,interface:'FUTURISTIC AI CONSTELLATION',fixes:'ADMISSION CONTROL + SAMPLED CINEMATIC LIFECYCLE',combat:'DERIVED LIFT + SLAM CHAINS'});
+
 })();
