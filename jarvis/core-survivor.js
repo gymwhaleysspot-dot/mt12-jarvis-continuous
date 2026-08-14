@@ -2143,4 +2143,110 @@ rememberReplayFrame=function(frame){
 };
 production110.ready=true;combatEvent('PRODUCTION_110_READY',{campaign:'CHRONO NEXUS · 9 ORIGINAL CHAPTERS',engines:aiProfiles110.length,interface:'FUTURISTIC AI CONSTELLATION',fixes:'ADMISSION CONTROL + SAMPLED CINEMATIC LIFECYCLE',combat:'DERIVED LIFT + SLAM CHAINS'});
 
+
+// Survivor Production 111: distinct character direction, cinematic clarity and live-inspected visual repair.
+const production111={name:'SURVIVOR PRODUCTION 111',version:'1.0',ready:false,frames:0};
+Object.assign(combatVoices,{
+ narrator:{name:'ORACLE',pitch:.78,rate:.9,voiceGroup:'narrator'},
+ mentor:{name:'VEILED PILOT',pitch:.68,rate:.88,voiceGroup:'mentor'},
+ warden:{name:'WARDEN',pitch:.6,rate:.83,voiceGroup:'warden'},
+ nexus:{name:'NEXUS PRIME',pitch:1.3,rate:.87,voiceGroup:'nexus'}
+});
+Object.assign(combatVoices.jaxon,{name:'GRIFFIN',pitch:.82,rate:.97,voiceGroup:'hero'});
+Object.assign(combatVoices.conner,{name:'LIRA',pitch:1.18,rate:1.01,voiceGroup:'rival'});
+const voiceCast111={
+ jaxon:{patterns:/Daniel|Alex|Aaron|Arthur|Eddy|Reed/i,offset:0},
+ conner:{patterns:/Samantha|Ava|Karen|Moira|Serena|Tessa/i,offset:1},
+ narrator:{patterns:/Ralph|Fred|Albert|Grandpa|Narrator/i,offset:2},
+ mentor:{patterns:/Bruce|Lee|Rocko|Shelley/i,offset:3},
+ warden:{patterns:/Reed|Albert|Ralph|Daniel/i,offset:4},
+ nexus:{patterns:/Zarvox|Cellos|Trinoids|Whisper/i,offset:5}
+};
+const voiceDirection111={selected:{},requested:{},started:{},delivered:{},fallbacks:{},lastSpeaker:'',distinctVoices:0};
+function selectVoice111(agent){
+ const list=speechSynthesis.getVoices?.()||[],cast=voiceCast111[agent]||voiceCast111.jaxon,locale=String(navigator.language||'en-US').split('-')[0],english=list.filter(v=>String(v.lang).toLowerCase().startsWith(locale.toLowerCase()));
+ const pool=english.length?english:list,voice=pool.find(v=>cast.patterns.test(v.name))||pool[cast.offset%Math.max(1,pool.length)]||null;
+ if(voice){voiceDirection111.selected[agent]=voice.name;voiceDirection111.distinctVoices=new Set(Object.values(voiceDirection111.selected)).size}return voice
+}
+voicePump=function(){
+ if(combatVoices.speaking||!combatVoices.queue.length)return;const now=performance.now(),item=combatVoices.queue.shift();
+ if(item.expires&&item.expires<now){production101.voice.dropped++;return voicePump()}
+ item.msg=capSentence108(String(item.msg).replace(/\s+/g,' ').trim().slice(0,118));const v=combatVoices[item.agent]||combatVoices.jaxon,gen=++combatVoices.generation;
+ combatVoices.speaking=true;combatVoices.active=item;combatVoices.status='DIRECTED SPEECH';voice109.requested++;voice108.requested++;voice106.requested++;voiceDirection111.requested[item.agent]=(voiceDirection111.requested[item.agent]||0)+1;voiceDirection111.lastSpeaker=v.name;
+ voiceCaption.dataset.agent=item.agent;voiceCaption.textContent=v.name+' // '+item.msg;voiceCaption.hidden=false;combatVoices.subtitleUntil=now+Math.max(1700,item.msg.length*52);
+ if(!combatVoices.enabled||!combatVoices.unlocked||!speechSynthesis||!window.SpeechSynthesisUtterance){voiceDirection111.fallbacks[item.agent]=(voiceDirection111.fallbacks[item.agent]||0)+1;return fallbackVoice109(item,gen)}
+ try{
+  const u=new SpeechSynthesisUtterance(item.msg),voice=selectVoice111(item.agent);if(voice)u.voice=voice;u.lang=voice?.lang||navigator.language||'en-US';u.pitch=v.pitch;u.rate=v.rate;u.volume=.88;voice109.refs.set(item.id,u);
+  u.onstart=()=>{voice109.started++;voice108.synthStarted++;voiceDirection111.started[item.agent]=(voiceDirection111.started[item.agent]||0)+1;if(music104.bus)try{music104.bus.gain.setTargetAtTime(.25,music104.bus.context.currentTime,.04)}catch{}};
+  u.onend=()=>{voiceDirection111.delivered[item.agent]=(voiceDirection111.delivered[item.agent]||0)+1;finishVoice109(item,gen,'GENERATED SPEECH')};
+  u.onerror=()=>{voice109.failures++;voiceDirection111.fallbacks[item.agent]=(voiceDirection111.fallbacks[item.agent]||0)+1;voice109.refs.delete(item.id);fallbackVoice109(item,gen)};
+  speechSynthesis.resume?.();speechSynthesis.speak(u);combatVoices.watchdog=setTimeout(()=>{if(combatVoices.active?.id!==item.id)return;if(speechSynthesis.speaking||speechSynthesis.pending)combatVoices.watchdog=setTimeout(()=>{if(combatVoices.active?.id===item.id)fallbackVoice109(item,gen)},5000);else fallbackVoice109(item,gen)},Math.min(8200,Math.max(3000,item.msg.length*68)))
+ }catch{voice109.failures++;fallbackVoice109(item,gen)}
+};
+const dialoguePools111={
+ griffin:{combat:['I see the opening','Your angle is committed','I have the timing'],action:['I take the high lane','I break left, then counter','I end this route cleanly'],close:['Stay sharp','One exchange at a time','The next choice matters']},
+ lira:{combat:['You are becoming readable','That confidence changed your rhythm','I expected the correction'],action:['I close the safe lane','I attack the choice behind your guard','I change the final beat'],close:['Keep adapting','Do not waste my interest','Show me a better answer']}
+};
+phraseGenerate107=function(agent,context='combat',seed=0){
+ const who=agent==='conner'||agent==='lira'?'lira':'griffin',p=dialoguePools111[who],h=voiceHash101(who+context+seed+phrase107.generated),line=p.combat[h%p.combat.length]+'. '+p.action[(h>>>4)%p.action.length]+'. '+p.close[(h>>>8)%p.close.length]+'.';
+ phrase107.generated++;phrase107.unique++;phrase107.contexts[context]=(phrase107.contexts[context]||0)+1;phrase107.lastByAgent[who]=line;phrase107.history.push({who,ctx:context,line});if(phrase107.history.length>80)phrase107.history.shift();return line
+};
+voiceCompose101=(agent,context,data={})=>phraseGenerate107(agent,context,Number(data.eventId||data.id||data.damage||0));
+dialoguePick104=(agent,context,seed)=>phraseGenerate107(agent,context,seed);
+const originalSpeak111=speak;
+speak=function(msg,force=false){
+ const text=String(msg),ch=storyChapters110.find(c=>text.includes(c.intro)||text.includes(c.clear)),agent=ch?(ch.id===2?'mentor':ch.id===5?'warden':ch.id>=6?'nexus':'narrator'):'jaxon';
+ return aiVoice(agent,text,force)
+};
+const dialoguePriority111={transform:9,finish:10,reversal:8,boss:8,challenge:6,answer:7,combat:3};
+voiceReact101=function(type,data={}){
+ const context=dialogueContext104(type);if(!context)return;const priority=dialoguePriority111[context]||3,now=performance.now()/1000;
+ if(priority<7&&now-dialogue104.lastAt<7.5)return;if(combatVoices.queue.length>=2&&priority<9)return;
+ const first=dialogue104.turn%2?'lira':'griffin';dialogueUpdateRelationship104(type,first);dialogueSpeak104(first,context,type,false);
+ if(priority>=8&&dialogue104.pending.length<2)dialogue104.pending.push({agent:first==='griffin'?'lira':'griffin',context:context==='reversal'?'answer':context,type,at:performance.now()+1700})
+};
+const visual111={worldFrames:0,cleanJoints:0,arenaRings:0,edgeProps:0,targetReframes:0,majorStarts:0,majorCompletes:0,majorActive:false,hudMode:'COMBAT FIRST'};
+owenJoint=function(a,b,r,color,yaw){
+ const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,len=Math.hypot(dx,dy,dz),segments=2;
+ for(let n=0;n<=segments;n++){const q=n/segments,k=1-Math.abs(q-.5)*.08;iylaRound(a.x+dx*q,a.y+dy*q,a.z+dz*q,r*1.12*k,Math.max(r*1.3,len*.38),r*1.12*k,color,yaw);owen.joints++;visual111.cleanJoints++}
+};
+iyla3DWorld=function(){
+ const ch=currentStory110(),palettes={
+  'ORBITAL RUINS':[[.025,.08,.14],[.08,.42,.55],[.36,.8,1]],
+  'SOLAR FORGE':[[.12,.045,.025],[.55,.16,.04],[1,.48,.08]],
+  'SKY TEMPLE':[[.035,.09,.1],[.14,.38,.42],[.5,.94,1]],
+  'NEON CITADEL':[[.04,.025,.12],[.34,.08,.5],[.9,.18,1]],
+  'NULL HORIZON':[[.015,.018,.04],[.08,.12,.24],[.38,.55,1]],
+  'FRACTURE ENGINE':[[.08,.02,.06],[.42,.04,.24],[1,.2,.55]],
+  'CROWN OF STARS':[[.07,.055,.015],[.38,.26,.04],[1,.82,.22]],
+  'RESTORATION CORE':[[.02,.09,.07],[.04,.42,.3],[.25,1,.72]],
+  'NEW DAWN PLAZA':[[.04,.08,.13],[.08,.35,.5],[.4,.9,1]]
+ },p=palettes[ch.arena]||palettes['ORBITAL RUINS'];
+ iylaRound(0,-.12,0,7.8,.1,7.8,p[0],0,.96);iylaRound(0,-.055,0,6.2,.035,6.2,p[1],0,.28);
+ for(let n=0;n<5;n++){const r=2.3+n*1.05,a=elapsed*.025+n;for(let j=0;j<12;j++){const q=j*TAU/12+a;iylaBox(Math.cos(q)*r,-.015,Math.sin(q)*r,.34,.025,.055,p[2],q,.22);visual111.arenaRings++}}
+ const cap=superAI.tier===1?6:10;for(let n=0;n<cap;n++){const a=n*TAU/cap+.22,r=7.1+(n%2)*.35,h=1.1+(n%3)*.48;iylaBox(Math.cos(a)*r,h*.5,Math.sin(a)*r,.22,h*.5,.22,p[1],a,.68);iylaBox(Math.cos(a)*r,h+.18,Math.sin(a)*r,.34,.05,.34,p[2],a,.32);visual111.edgeProps++}
+ for(const s of ultimate.scars.slice(-10))iylaRound((s.x-W/2)/45,.012,(s.y-H/2)/45,s.r/42,.018,s.r/42,[.45,.025,.07],s.a,.52);visual111.worldFrames++
+};
+const cinematic111={active:false,starts:0,completes:0};
+const aiSignal111={};
+function updateAI110(){
+ const draw=clamp((draw107.frame||0)/560,0,1),fps=clamp((iyla.fps||60)/60,0,1),voice=voice109.failures?0.45:1,combat=attackLedger105.invariant?1:.45,dialogue=clamp(1-dialogue104.pending.length/6,.45,1),target=griffin.target&&enemies.includes(griffin.target)?clamp(1-dist(player,griffin.target)/700,.35,1):.8;
+ const v={GRIFFIN:clamp(griffin.confidence||.7,.35,1),LIRA:clamp(lira.confidence||.55,.35,1),OWEN:clamp(1-(owen.hold||0)*2,.4,1),MATTY:clamp(1-matty.rejected/Math.max(1,matty.commands),.4,1),IYLA:fps,XAVIER:1-draw*.45,ZAVIER:target,CHRISTIAN:clamp(1-(destruction.fragments?.length||0)/50,.4,1),ZENITH:clamp(.55+(campaign.stage||1)*.08,.55,1),PEYTEN:clamp(1-(peyten.switches||0)/200,.5,1),ELIJAH:clamp(.55+(elijah.models||0)/20,.55,1),CURTIS:1-draw*.38,VOICE:voice,MUSIC:music104.errors?0.55:1,SFX:clamp(1-soundAI101.active/Math.max(1,soundAI101.maxActive),.4,1),ENVIRONMENT:fps,COMBAT:combat,CAMERA:clamp(1-(shake||0)/30,.45,1),PROGRESSION:clamp(.55+story110.completed.length*.05,.55,1),TELEMETRY:dialogue};
+ for(const [name] of aiProfiles110){ai110.signals[name]=+(v[name]??.75).toFixed(2);aiSignal111[name]=ai110.signals[name];ai110.states[name]=ai110.signals[name]>.82?'NOMINAL':ai110.signals[name]>.6?'BALANCED':'PROTECTED'}
+ ai110.states.VOICE=voice===1?'DISTINCT VOICES':'RECOVERY';ai110.states.COMBAT=combat===1?'VERIFIED':'AUDIT';ai110.states.ZENITH=currentStory110().act
+}
+const p111Omni=omniSystems;
+omniSystems=function(dt){
+ p111Omni(dt);const major=!!(griffin.transformation?.active||griffin.superMove?.active);
+ if(major!==cinematic111.active){cinematic111.active=major;if(major)cinematic111.starts++;else cinematic111.completes++}
+ if(griffin.target&&enemies.includes(griffin.target)&&dist(player,griffin.target)>500&&!griffin.boss){const near=enemies.filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)).sort((a,b)=>dist(player,a)-dist(player,b))[0];if(near&&dist(player,near)<500){griffin.target=near;visual111.targetReframes++}}
+};
+const p111Remember=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p111Remember(frame);if(frame.production110?.cinematic){frame.production110.cinematic={active:cinematic111.active,starts:cinematic111.starts,completes:cinematic111.completes,transitions:cinematic111.starts+cinematic111.completes,invariant:cinematic111.starts-cinematic111.completes===(cinematic111.active?1:0)}}
+ frame.production111={name:production111.name,voiceCast:{profiles:Object.fromEntries(Object.entries(combatVoices).filter(([k,v])=>v&&v.name).map(([k,v])=>[k,{name:v.name,pitch:v.pitch,rate:v.rate,voiceGroup:v.voiceGroup||k}])),selected:{...voiceDirection111.selected},distinctVoices:voiceDirection111.distinctVoices,requested:{...voiceDirection111.requested},started:{...voiceDirection111.started},delivered:{...voiceDirection111.delivered},fallbacks:{...voiceDirection111.fallbacks},lastSpeaker:voiceDirection111.lastSpeaker},dialogue:{pending:dialogue104.pending.length,queued:combatVoices.queue.length,history:dialogue104.history.length,maxPending:2},graphics:{...visual111,drawCalls:draw107.frame,peak:draw107.peak,fps:iyla.fps,arena:currentStory110().arena},cinematic:{...cinematic111,invariant:cinematic111.starts-cinematic111.completes===(cinematic111.active?1:0)},engines:{signals:{...aiSignal111},distinctSignals:new Set(Object.values(aiSignal111)).size},targeting:{distance:griffin.target&&enemies.includes(griffin.target)?+dist(player,griffin.target).toFixed(1):0,reframes:visual111.targetReframes},integrity:{attacks:attackLedger105.invariant,dialogue:dialogue104.pending.length<=2,cinematic:cinematic111.starts-cinematic111.completes===(cinematic111.active?1:0),form:frame.f===(frame.production109?.form?.name||frame.f)}};
+ production111.frames++
+};
+production111.ready=true;combatEvent('PRODUCTION_111_READY',{voices:'6 DISTINCT DIRECTED PROFILES',dialogue:'CHARACTER-SPECIFIC + PRIORITY PACED',graphics:'CLEAN ARENA + CONTIGUOUS LIMBS + COMBAT-FIRST HUD',cinematics:'MAJOR SESSIONS ONLY',engines:'INDEPENDENT SIGNALS'});
+
 })();
