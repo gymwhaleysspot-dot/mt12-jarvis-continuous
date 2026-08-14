@@ -1922,4 +1922,122 @@ const p108Omni=omniSystems;
 omniSystems=function(dt){p108Omni(dt);engines108.ticks++;mechanics108.clashMeter=Math.max(0,mechanics108.clashMeter-dt*4);mechanics108.counterLevel=Math.max(0,mechanics108.counterLevel-dt*.45)};
 production108.ready=true;combatEvent('PRODUCTION_108_READY',{enhancements:engines108.enhancements,mechanics:engineCapabilities108,voice:'GENERATED SPEECH FIRST',telemetry:'AUTHORITATIVE + FRAME CLOCKED',graphics:'ADAPTIVE BUDGET',sound:'COALESCED MIX'});
 
+
+// Survivor Production 109: Safari-safe speech, readable 3D combat and replay-proven invariants.
+const production109={name:'SURVIVOR PRODUCTION 109',version:'1.0',ready:false,frames:0};
+const voice109={primed:false,primeStarts:0,requested:0,started:0,delivered:0,packFallbacks:0,cueFallbacks:0,failures:0,timeouts:0,explicitVoices:0,lastMode:'READY',refs:new Map()};
+const mechanics109={pursuits:0,counters:0,counterChain:0,counterChainBest:0,recoveries:0,lifts:0,slams:0,vanishes:0,kiSpent:0,skillSpent:0,lastContact:-99,lastPursuit:-99};
+const animation109={phase:'NEUTRAL',anticipation:0,impactHold:0,followThrough:0,recovery:0,afterimage:0,speedRibbon:0,cameraEase:0,poseCorrections:0,events:0};
+const graphics109={frames:0,auraBands:0,speedRibbons:0,impactHalos:0,depthPasses:0,budgetMode:'CINEMATIC'};
+const attacks109={started:new Map(),settled:0,staleSettled:0,maxAge:0};
+const invariants109={dialogueCap:3,dialogueCorrections:0,cinematicCorrections:0,formCorrections:0};
+const speechButtons109=['startBtn','autoStart','retry','autoToggle'];
+function selectVoice109(){
+ const synth=window.speechSynthesis,list=synth?.getVoices?.()||[],locale=String(navigator.language||'en-US').toLowerCase(),base=locale.split('-')[0];
+ const voice=list.find(v=>String(v.lang).toLowerCase()===locale)||list.find(v=>String(v.lang).toLowerCase().startsWith(base+'-'))||list.find(v=>String(v.lang).toLowerCase().startsWith('en-'))||list[0]||null;
+ if(voice)voice109.explicitVoices++;return voice
+}
+function primeSpeech109(){
+ if(voice109.primed||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;
+ try{
+  const synth=window.speechSynthesis,u=new SpeechSynthesisUtterance('Voice engine online.'),voice=selectVoice109();if(voice)u.voice=voice;
+  u.lang=voice?.lang||navigator.language||'en-US';u.rate=1;u.pitch=1;u.volume=.32;const key='prime-'+performance.now();voice109.refs.set(key,u);
+  u.onstart=()=>{voice109.primed=true;voice109.primeStarts++};u.onend=u.onerror=()=>voice109.refs.delete(key);
+  synth.resume?.();synth.speak(u)
+ }catch{}
+}
+for(const id of speechButtons109)$('#'+id)?.addEventListener('click',primeSpeech109,{capture:true,passive:true});
+try{speechSynthesis.addEventListener('voiceschanged',()=>{voiceRefresh();selectVoice109()})}catch{}
+function finishVoice109(item,gen,mode){
+ if(combatVoices.active?.id!==item.id||combatVoices.generation!==gen)return;
+ clearTimeout(combatVoices.watchdog);voice109.refs.delete(item.id);combatVoices.active=null;combatVoices.speaking=false;combatVoices.status=mode;voice109.lastMode=mode;
+ if(mode==='GENERATED SPEECH'){voice109.delivered++;voice108.synthDelivered++;voice106.synthesized++}
+ else if(mode==='VOICE PACK FALLBACK'){voice109.packFallbacks++;voice108.packFallbacks++;voice106.pack++}
+ else{voice109.cueFallbacks++;voice108.cueFallbacks++}
+ if(music104.bus)try{music104.bus.gain.cancelScheduledValues(music104.bus.context.currentTime);music104.bus.gain.setTargetAtTime(.76,music104.bus.context.currentTime,.08)}catch{}
+ setTimeout(voicePump,80)
+}
+function fallbackVoice109(item,gen){
+ let began=false;try{began=!!playVoicePack(item.agent,item.msg,()=>finishVoice109(item,gen,'VOICE PACK FALLBACK'))}catch{}
+ if(began){combatVoices.watchdog=setTimeout(()=>finishVoice109(item,gen,'AUDIO CUE FALLBACK'),9000);return}
+ voiceCue(item.agent);setTimeout(()=>finishVoice109(item,gen,'AUDIO CUE FALLBACK'),Math.max(720,item.msg.length*28))
+}
+voicePump=function(){
+ if(combatVoices.speaking||!combatVoices.queue.length)return;
+ const now=performance.now(),item=combatVoices.queue.shift();if(item.expires&&item.expires<now){production101.voice.dropped++;return voicePump()}
+ item.msg=capSentence108(String(item.msg).replace(/\s+/g,' ').trim().slice(0,135));const v=combatVoices[item.agent]||combatVoices.jaxon,gen=++combatVoices.generation;
+ combatVoices.speaking=true;combatVoices.active=item;combatVoices.status='GENERATED SPEECH';voice109.requested++;voice108.requested++;voice106.requested++;
+ voiceCaption.dataset.agent=v.name;voiceCaption.textContent=v.name+' // '+item.msg;voiceCaption.hidden=false;combatVoices.subtitleUntil=now+Math.max(1800,item.msg.length*58);
+ if(!combatVoices.enabled||!combatVoices.unlocked||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return fallbackVoice109(item,gen);
+ try{
+  const synth=window.speechSynthesis,u=new SpeechSynthesisUtterance(item.msg),voice=selectVoice109();if(voice)u.voice=voice;
+  u.lang=voice?.lang||navigator.language||'en-US';u.pitch=v.pitch;u.rate=clamp(v.rate,.92,1.02);u.volume=.86;voice109.refs.set(item.id,u);
+  u.onstart=()=>{voice109.started++;voice108.synthStarted++;voice109.lastMode='GENERATED SPEECH ACTIVE';if(music104.bus)try{music104.bus.gain.setTargetAtTime(.28,music104.bus.context.currentTime,.05)}catch{}};
+  u.onend=()=>finishVoice109(item,gen,'GENERATED SPEECH');
+  u.onerror=()=>{voice109.failures++;voice109.refs.delete(item.id);fallbackVoice109(item,gen)};
+  synth.resume?.();synth.speak(u);
+  combatVoices.watchdog=setTimeout(()=>{if(combatVoices.active?.id!==item.id)return;if(synth.speaking||synth.pending){combatVoices.watchdog=setTimeout(()=>{if(combatVoices.active?.id===item.id){voice109.timeouts++;fallbackVoice109(item,gen)}},5000)}else{voice109.timeouts++;fallbackVoice109(item,gen)}},Math.min(8500,Math.max(3200,item.msg.length*72)))
+ }catch{voice109.failures++;fallbackVoice109(item,gen)}
+};
+function capDialogue109(){
+ const now=performance.now(),before=dialogue104.pending.length;
+ dialogue104.pending=dialogue104.pending.filter(q=>q.at>now-6000).sort((a,b)=>a.at-b.at).slice(0,invariants109.dialogueCap);
+ if(before>dialogue104.pending.length)invariants109.dialogueCorrections+=before-dialogue104.pending.length
+}
+const p109VoiceReact=voiceReact101;
+voiceReact101=function(type,data={}){const r=p109VoiceReact(type,data);capDialogue109();return r};
+const p109DialogueTick=dialogueTick104;
+dialogueTick104=function(){capDialogue109();const r=p109DialogueTick();capDialogue109();return r};
+const p109CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),before=new Set(attackLedger105.open),now=elapsed;
+ const result=p109CombatEvent(type,data);
+ for(const id of attackLedger105.open)if(!before.has(id))attacks109.started.set(id,now);
+ for(const id of before)if(!attackLedger105.open.includes(id)&&attacks109.started.delete(id))attacks109.settled++;
+ if(/MELEE_CONTACT_CONFIRMED|BODY_STRIKE|SUPER_MOVE_IMPACT|FINISHER_CONFIRMED/.test(t)){mechanics109.lastContact=now;animation109.phase='IMPACT';animation109.impactHold=.075;animation109.followThrough=.18;animation109.afterimage=.16;animation109.events++}
+ if(/PARRY_CONFIRMED|COUNTER|SUPER_PERCEPTION|SONIC_SWAY/.test(t)){mechanics109.counters++;mechanics109.counterChain=Math.min(8,mechanics109.counterChain+1);mechanics109.counterChainBest=Math.max(mechanics109.counterChainBest,mechanics109.counterChain);mechanics109.skillSpent++;animation109.phase='COUNTER';animation109.anticipation=.1;animation109.cameraEase=.18;mechanics108.vanishCounters++;mechanics108.escalatingCounters+=mechanics109.counterChain;mechanics108.mastery.counter++}
+ if(/DASH|TELEPORT|HOMING|PURSUIT|CHASE/.test(t)&&now-mechanics109.lastPursuit>.12){mechanics109.lastPursuit=now;mechanics109.pursuits++;mechanics109.kiSpent+=/TELEPORT|VANISH/.test(t)?2:1;animation109.phase='PURSUIT';animation109.speedRibbon=.24;animation109.afterimage=.2;mechanics108.aerialPursuits++;mechanics108.mastery.pursuit++}
+ if(/RECOVER|RESTORE/.test(t)){mechanics109.recoveries++;animation109.phase='RECOVERY';animation109.recovery=.16}
+ if(/LIFT|ASCEND/.test(t))mechanics109.lifts++;if(/SLAM|DESCEND|GROUND/.test(t)&&/STRIKE|ATTACK|IMPACT/.test(t))mechanics109.slams++;if(/VANISH|TELEPORT/.test(t))mechanics109.vanishes++;
+ if(/MISSED|INTERRUPT|LEVEL_CLEAR|ROUND/.test(t))mechanics109.counterChain=0;
+ capDialogue109();return result
+};
+const p109OwenController=owenController;
+owenController=function(dt){
+ p109OwenController(dt);const q=Math.min(.033,dt||.016);
+ animation109.anticipation=Math.max(0,animation109.anticipation-q);animation109.impactHold=Math.max(0,animation109.impactHold-q);animation109.followThrough=Math.max(0,animation109.followThrough-q);animation109.recovery=Math.max(0,animation109.recovery-q);animation109.afterimage=Math.max(0,animation109.afterimage-q);animation109.speedRibbon=Math.max(0,animation109.speedRibbon-q);animation109.cameraEase=Math.max(0,animation109.cameraEase-q);
+ if(animation109.impactHold>0){owen.hold=Math.max(owen.hold,animation109.impactHold);owen.smear=Math.min(.18,Math.max(owen.smear,.08))}
+ if(owen.pose==='HIT'&&owen.wanted==='DASH'&&owen.stateTime<owen.stateLength*.84){owen.wanted='HIT';animation109.poseCorrections++}
+};
+const p109IylaCombat=iyla3DCombat;
+iyla3DCombat=function(){
+ p109IylaCombat();const pressure=render108.mode!=='CINEMATIC',bands=pressure?2:4;
+ if(animation109.speedRibbon>0||animation109.afterimage>0){
+  const strength=clamp((animation109.speedRibbon+animation109.afterimage)*3,0,1),yaw=griffin.heading||0;
+  for(let i=0;i<bands;i++){const side=(i-(bands-1)/2)*.18,back=.45+i*.24;iylaBox(-Math.sin(yaw)*side-Math.cos(yaw)*back,.55+i*.24,-Math.cos(yaw)*side+Math.sin(yaw)*back,.025,.025,.34+strength*.42,griffin.form?.color||'#65faff',yaw,strength*.34);graphics109.speedRibbons++}
+ }
+ if(animation109.impactHold>0){for(let i=0;i<(pressure?4:7);i++){const a=i*TAU/(pressure?4:7)+elapsed*2,r=.72+i*.055;iylaBox(Math.cos(a)*r,1.05+Math.sin(a*2)*.18,Math.sin(a)*r,.03,.03,.18,'#ffffff',a,.45);graphics109.impactHalos++}}
+ if(griffin.transformation?.active)for(let i=0;i<(pressure?3:6);i++){const a=i*TAU/(pressure?3:6)+elapsed*(i%2?-.8:1),r=.62+i*.11;iylaBox(Math.cos(a)*r,.42+(i%3)*.48,Math.sin(a)*r,.025,.22,.025,griffin.form?.color||'#ffe45c',a,.28);graphics109.auraBands++}
+ graphics109.depthPasses++
+};
+const p109OmniSystems=omniSystems;
+omniSystems=function(dt){
+ p109OmniSystems(dt);const ageLimit=2.25;
+ for(const [id,start] of [...attacks109.started])if(!attackLedger105.open.includes(id)){attacks109.started.delete(id);attacks109.settled++}else{const age=elapsed-start;attacks109.maxAge=Math.max(attacks109.maxAge,age);if(age>ageLimit&&!griffin.transformation?.active&&!griffin.superMove?.active){const i=attackLedger105.open.indexOf(id);if(i>=0)attackLedger105.open.splice(i,1);attackLedger105.pending=attackLedger105.open.length;attackLedger105.cancelled++;attacks109.started.delete(id);attacks109.staleSettled++}}
+ attackLedger105.invariant=attackLedger105.attempts===attackLedger105.confirmed+attackLedger105.missed+attackLedger105.cancelled+attackLedger105.interrupted+attackLedger105.pending;
+ graphics109.frames++;graphics109.budgetMode=render108.mode;expansion59.camera.shake=clamp(expansion59.camera.shake+(animation109.impactHold>0?.18:0),.25,1);expansion59.camera.zoom=clamp(expansion59.camera.zoom-(animation109.speedRibbon>0?.035:0),.75,1.02)
+};
+const p109Remember=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ const actualActive=!!(griffin.transformation?.active||griffin.superMove?.active||zStage?.cut>0);
+ if(time108.active!==actualActive){time108.active=actualActive;invariants109.cinematicCorrections++;if(!actualActive)time108.completes++}
+ capDialogue109();p109Remember(frame);
+ const actual=frame.f||griffin.form?.name||'BASE';if(frame.production108?.form?.name!==actual){frame.production108.form.name=actual;frame.production108.form.authoritative=true;invariants109.formCorrections++}
+ const ages=[...attacks109.started.values()].map(start=>Math.max(0,elapsed-start)),stale=ages.filter(a=>a>2.25).length;
+ if(frame.production108?.attacks){frame.production108.attacks.activePending=ages.length;frame.production108.attacks.stalePending=stale;frame.production108.attacks.maxPendingAge=ages.length?+Math.max(...ages).toFixed(3):0;frame.production108.attacks.invariant=stale===0&&attackLedger105.invariant}
+ frame.production109={name:production109.name,voice:{primed:voice109.primed,primeStarts:voice109.primeStarts,requested:voice109.requested,started:voice109.started,delivered:voice109.delivered,packFallbacks:voice109.packFallbacks,cueFallbacks:voice109.cueFallbacks,failures:voice109.failures,timeouts:voice109.timeouts,explicitVoices:voice109.explicitVoices,lastMode:voice109.lastMode,retainedUtterances:voice109.refs.size},mechanics:{...mechanics109},animation:{...animation109},graphics:{...graphics109},attacks:{active:ages.length,stale,maxAge:ages.length?+Math.max(...ages).toFixed(3):0,settled:attacks109.settled,staleSettled:attacks109.staleSettled,invariant:stale===0&&attackLedger105.invariant},dialogue:{pending:dialogue104.pending.length,cap:invariants109.dialogueCap,corrections:invariants109.dialogueCorrections,invariant:dialogue104.pending.length<=invariants109.dialogueCap},cinematic:{active:time108.active,actualActive,corrections:invariants109.cinematicCorrections,invariant:time108.active===actualActive},form:{name:actual,corrections:invariants109.formCorrections,authoritative:true},performance:{fps:iyla.fps,drawCalls:draw107.frame,peak:draw107.peak,budget:render108.mode}};
+ production109.frames++
+};
+production109.ready=true;combatEvent('PRODUCTION_109_READY',{speech:'GESTURE PRIMED + EXPLICIT VOICE + RETAINED UTTERANCE',combat:'PURSUIT + PARRY COUNTERS + RECOVERY',animation:'POSE SAFE + PHASED',graphics:'BUDGETED AURA + DEPTH + IMPACT',invariants:'BOUNDED + TIMESTAMPED + RECONCILED'});
+
 })();
