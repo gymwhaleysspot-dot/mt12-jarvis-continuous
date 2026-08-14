@@ -1584,4 +1584,80 @@ function production104Unlock(){musicInit104();sfxInit104();try{ultimate.audio?.r
 for(const id of['startBtn','autoStart','retry','autoToggle'])$('#'+id)?.addEventListener('click',production104Unlock,{passive:true});
 production104.ready=true;combatEvent('PRODUCTION_104_READY',{dialogue:'CONVERSATIONAL',music:'ADAPTIVE_COMPOSER',sfx:'CINEMATIC_BUFFERED',biomes:environments104.length});
 
+
+// Survivor Production 105: original anime-arena graphics and complete combat-function synthesis.
+const production105={name:'SURVIVOR PRODUCTION 105',version:'1.0',ready:false,frames:0};
+const gameFunctions105=[
+'directional-guard','high-guard','low-guard','short-dash','pursuit-dash','ground-flight-transition','ascend','descend','ki-charge','passive-ki','ki-overheat','ki-recovery',
+'light-chain','rush-chain','smash-charge','smash-ki','launcher','aerial-chase','wall-impact','ground-impact','hit-stop','anticipation','contact','follow-through','recovery',
+'vanish','parry','revenge-counter','super-perception','projectile-deflect','beam-clash','guard-break','stamina-break','counter-window','cancel-window','combo-scaling',
+'skill-count','transformation','ascension-state','ultimate-state','form-drain','form-mastery','fusion-link','assist-call','tag-extension','chain-blast','dramatic-finish',
+'boss-phase','boss-enrage','boss-adaptation','enemy-archetypes','squad-coordination','target-priority','arena-boundaries','vertical-combat','destructible-arena',
+'character-stats','attack-stat','combo-stat','ki-stat','special-stat','speed-stat','defense-stat','ability-items','move-loadout','style-type','mastery-tree',
+'training-goals','combo-trials','adaptive-tutorial','difficulty-director','cpu-personality','counter-learning','pattern-memory','anti-repeat','fairness-guardrails',
+'survival-mode','mission-mode','extra-battle','custom-rules','battle-arts','limit-breaker-map','progression-board','soul-links','world-events','sub-stories',
+'dynamic-camera','impact-camera','dramatic-cut-in','anime-pose','expression-focus','toon-ramp','rim-light','aura-light','speed-lines','impact-flash','shockwave',
+'sky-gradient','atmospheric-fog','parallax-horizon','terrain-layers','camera-lod','destruction-materials','biome-audio','adaptive-score','cinematic-sfx',
+'voice-state-machine','rivalry-dialogue','attack-ledger','unique-destruction-ledger','unique-animation-locks','classified-time-debt','replay-invariants',
+'performance-budget','accessibility-boundary','clean-hud','photo-replay'];
+const gameplay105={ki:100,maxKi:100,skill:0,maxSkill:5,overheat:0,form:'BASE',formLevel:0,formDrain:0,guard:'MID',vertical:0,dash:0,assist:0,chain:0,chainBest:0,multiplier:1,difficulty:1,archetypes:['PRESSURE','ZONER','COUNTER','BRUISER','SUPPORT'],bossPhase:1,stats:{attack:1,combo:1,ki:1,special:1,speed:1,defense:1},training:{goal:'LAND A CLEAN CHAIN',progress:0,mastery:0},features:gameFunctions105.length};
+const graphics105={toonRamp:4,rimLight:1,auraLight:0,impactLight:0,speedLines:0,fog:.18,parallax:3,lod:'CINEMATIC',drawn:0,boundary:false};
+const attackLedger105={sequence:0,open:[],attempts:0,confirmed:0,missed:0,cancelled:0,interrupted:0,pending:0,invariant:true,duplicates:0};
+const telemetry105={voice:{requested:0,delivered:0,failed:0,recovered:0},animation:{lockTransitions:0,lockFrames:0,last:false},destruction:{unique:0,active:0,ids:new Set()},time:{renderDebt:0,cinematic:0,paused:0,hidden:0},relationshipEvents:new Set()};
+function settleAttack105(result,data={}){const id=data.attackId||attackLedger105.open[0];if(!id){attackLedger105.duplicates++;return}const i=attackLedger105.open.indexOf(id);if(i<0){attackLedger105.duplicates++;return}attackLedger105.open.splice(i,1);attackLedger105[result]++;attackLedger105.pending=attackLedger105.open.length}
+const p105CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase();
+ if(t==='MELEE_COMBO_BEAT'||t.includes('ATTACK_STARTED')){const id='A105-'+(++attackLedger105.sequence);attackLedger105.open.push(id);attackLedger105.attempts++;attackLedger105.pending=attackLedger105.open.length;data={...data,attackId:id}}
+ else if((t.includes('HIT')||t.includes('STRIKE')||t.includes('CONTACT'))&&t.includes('CONFIRMED'))settleAttack105('confirmed',data);
+ else if(t.includes('WHIFF')||t.includes('MISSED'))settleAttack105('missed',data);else if(t.includes('CANCEL'))settleAttack105('cancelled',data);else if(t.includes('INTERRUPT'))settleAttack105('interrupted',data);
+ if(t.includes('FINISHER'))data={...data,finisher:true};const e=p105CombatEvent(type,data);
+ attackLedger105.invariant=attackLedger105.attempts===attackLedger105.confirmed+attackLedger105.missed+attackLedger105.cancelled+attackLedger105.interrupted+attackLedger105.pending;
+ if(t.includes('PARRY')){gameplay105.skill=clamp(gameplay105.skill+.35,0,gameplay105.maxSkill);gameplay105.training.progress++}
+ if(t.includes('CONTACT_CONFIRMED')){gameplay105.chain++;gameplay105.chainBest=Math.max(gameplay105.chainBest,gameplay105.chain);gameplay105.multiplier=clamp(1+gameplay105.chain*.035,1,2.2);gameplay105.ki=clamp(gameplay105.ki+2.5,0,gameplay105.maxKi)}
+ if(t.includes('MISSED')||t.includes('INTERRUPT')){gameplay105.chain=0;gameplay105.multiplier=1}
+ if(t.includes('TRANSFORM')){gameplay105.formLevel=clamp(gameplay105.formLevel+1,0,5);gameplay105.form='ASCENSION '+gameplay105.formLevel;gameplay105.formDrain=.7+gameplay105.formLevel*.16}
+ if(t.includes('BOSS_ENTERED'))gameplay105.bossPhase=1;if(t.includes('BOSS_PHASE'))gameplay105.bossPhase=clamp(Number(data.phase)||gameplay105.bossPhase+1,1,5);
+ graphics105.impactLight=t.includes('CONFIRMED')?1:graphics105.impactLight;graphics105.speedLines=t.includes('DASH')||t.includes('RUSH')?1:graphics105.speedLines;return e
+};
+dialogueUpdateRelationship104=function(type,agent){
+ const now=Math.floor(performance.now()/1600),key=String(type)+':'+agent+':'+now;if(telemetry105.relationshipEvents.has(key))return;
+ telemetry105.relationshipEvents.add(key);if(telemetry105.relationshipEvents.size>64)telemetry105.relationshipEvents.delete(telemetry105.relationshipEvents.values().next().value);
+ const r=dialogue104.relationship,t=String(type).toUpperCase(),rate=.012;r.respect*=.999;r.anger*=.998;r.fear*=.998;r.confidence*=.999;
+ if(t.includes('PARRY')){r.respect=clamp(r.respect+rate,0,1);r.anger=clamp(r.anger+rate*.7,0,1)}if(t.includes('CONTACT_CONFIRMED'))r.momentum=clamp(r.momentum+(agent==='griffin'?rate:-rate),-1,1);
+ if(t.includes('TRANSFORM')){r.fear=clamp(r.fear+rate*1.4,0,1);r.confidence=clamp(r.confidence+rate,0,1)}if(t.includes('FINISH'))r.confidence=clamp(r.confidence+rate*1.6,0,1)
+};
+const p105DialogueObserve=dialogueObserve104;
+dialogueObserve104=function(type,data={}){p105DialogueObserve(type,data);const now=performance.now();dialogue104.pending=dialogue104.pending.filter(q=>now-q.at<6500).slice(-3)};
+Object.assign(combatVoices,{generation:0,p105Retry:new Set()});
+voicePump=function(){
+ if(combatVoices.speaking||!combatVoices.queue.length)return;const now=performance.now(),item=combatVoices.queue.shift();if(item.expires<now){production101.voice.dropped++;return voicePump()}
+ item.msg=String(item.msg).slice(0,150);const v=combatVoices[item.agent]||combatVoices.jaxon,gen=++combatVoices.generation;combatVoices.speaking=true;combatVoices.active=item;combatVoices.status='SPEAKING';telemetry105.voice.requested++;
+ voiceCaption.dataset.agent=v.name;voiceCaption.textContent=v.name+' // '+item.msg;voiceCaption.hidden=false;combatVoices.subtitleUntil=now+Math.max(1800,item.msg.length*58);
+ let done=false;const finish=result=>{if(done||gen!==combatVoices.generation)return;done=true;clearTimeout(combatVoices.watchdog);combatVoices.watchdog=0;combatVoices.active=null;combatVoices.speaking=false;
+  if(result==='spoken'){production101.voice.spoken++;telemetry105.voice.delivered++}else if(result==='recovered'){production101.voice.recovered++;telemetry105.voice.recovered++}else{production101.voice.fallbacks++;telemetry105.voice.failed++}
+  combatVoices.status=combatVoices.voiceList.length?'READY':'SYNTH FALLBACK';setTimeout(voicePump,100)};
+ if(!combatVoices.enabled||!combatVoices.unlocked||!window.SpeechSynthesisUtterance){voiceCue(item.agent);return setTimeout(()=>finish('fallback'),Math.max(750,item.msg.length*32))}
+ try{speechSynthesis.resume?.();const u=new SpeechSynthesisUtterance(item.msg),list=combatVoices.voiceList,preferred=item.agent==='conner'?/Samantha|Karen|Moira|Ava|Serena/i:/Daniel|Aaron|Alex|Arthur|Eddy/i;
+  u.pitch=v.pitch;u.rate=clamp(v.rate,.86,1.08);u.volume=.82;u.voice=list.find(q=>q.lang?.startsWith('en')&&preferred.test(q.name))||list.find(q=>q.lang?.startsWith('en'))||null;u.onstart=()=>{combatVoices.status='VOICE ACTIVE'};u.onend=()=>finish('spoken');
+  u.onerror=e=>{const code=String(e.error||'');if(!combatVoices.p105Retry.has(item.id)&&!['canceled','interrupted'].includes(code)){combatVoices.p105Retry.add(item.id);done=true;clearTimeout(combatVoices.watchdog);combatVoices.speaking=false;combatVoices.active=null;combatVoices.queue.unshift({...item,msg:item.msg.split(/[.!?]/)[0].slice(0,110),created:performance.now(),expires:performance.now()+5000});return setTimeout(voicePump,120)}voiceCue(item.agent);finish('fallback')};
+  combatVoices.watchdog=setTimeout(()=>{try{speechSynthesis.resume?.()}catch{}setTimeout(()=>{if(!done){try{speechSynthesis.cancel()}catch{}voiceCue(item.agent);finish('recovered')}},900)},Math.min(10500,Math.max(3000,item.msg.length*82)));speechSynthesis.speak(u)
+ }catch{voiceCue(item.agent);finish('fallback')}
+};
+const p105OwenController=owenController;
+owenController=function(dt){const before=!!(owenClips[owen.pose]&&!owenClips[owen.pose].loop&&owen.pose!=='FLIGHT'&&owen.stateTime/Math.max(.01,owen.stateLength)<.84);telemetry105.animation.lockFrames+=before?1:0;if(before&&!telemetry105.animation.last)telemetry105.animation.lockTransitions++;telemetry105.animation.last=before;p105OwenController(dt)};
+const p105World=iyla3DWorld;
+iyla3DWorld=function(){
+ environment104.destruction=0;p105World();const env=environments104[(campaign.stage-1)%environments104.length],low=superAI.tier===1,layer=low?3:6;
+ for(let i=0;i<layer;i++){const a=i*TAU/layer+.35,r=12+i%2*2.4,alt=.8+(i%3)*.65,col=env.sky.map(v=>clamp(v+.14,0,1));iylaRound(Math.cos(a)*r,alt,Math.sin(a)*r,.12,.12,.12,col,a,.65);graphics105.drawn++}
+ telemetry105.destruction.active=0;for(const p of iyla2026.props)if(p.broken){const id=p.p105Id||(p.p105Id='P'+Math.round(p.seed*1e6));telemetry105.destruction.ids.add(id);telemetry105.destruction.active++}
+ telemetry105.destruction.unique=telemetry105.destruction.ids.size;environment104.destruction=telemetry105.destruction.unique;graphics105.lod=superAI.tier===1?'MOBILE':superAI.tier===2?'BALANCED':'CINEMATIC';graphics105.boundary=Math.min(player.x,W-player.x,player.y,H-player.y)<95
+};
+function gameplayTick105(dt){const hp=player.hp/player.maxHp,pressure=clamp(enemies.length/24+(1-hp)*.55,0,1.8);gameplay105.ki=clamp(gameplay105.ki+dt*(gameplay105.formLevel?1.2:3.4)-dt*gameplay105.formDrain,0,gameplay105.maxKi);gameplay105.skill=clamp(gameplay105.skill+dt*.07,0,gameplay105.maxSkill);gameplay105.overheat=gameplay105.ki<8?clamp(gameplay105.overheat+dt,0,1):clamp(gameplay105.overheat-dt*1.8,0,1);gameplay105.difficulty=clamp(.85+level*.025+pressure*.18+(kills/Math.max(1,elapsed)-.55)*.12,.75,1.65);gameplay105.vertical=clamp(gameplay105.vertical+(griffin.boss?.08:-.04)*dt,-1,1);gameplay105.assist=Math.max(0,gameplay105.assist-dt);graphics105.auraLight=clamp(gameplay105.formLevel*.18+music104.intensity*.15,0,1);graphics105.impactLight=Math.max(0,graphics105.impactLight-dt*4);graphics105.speedLines=Math.max(0,graphics105.speedLines-dt*2.5)}
+const p105OmniSystems=omniSystems;omniSystems=function(dt){p105OmniSystems(dt);gameplayTick105(dt)};
+const p105IylaFrame=iyla2026Frame;iyla2026Frame=function(){p105IylaFrame();production105.frames++};
+const p105RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){frame.production105={name:production105.name,features:gameFunctions105.length,gameplay:{ki:+gameplay105.ki.toFixed(2),skill:+gameplay105.skill.toFixed(2),overheat:+gameplay105.overheat.toFixed(3),form:gameplay105.form,chain:gameplay105.chain,chainBest:gameplay105.chainBest,multiplier:+gameplay105.multiplier.toFixed(3),difficulty:+gameplay105.difficulty.toFixed(3),bossPhase:gameplay105.bossPhase,training:{...gameplay105.training}},graphics:{...graphics105},attacks:{attempts:attackLedger105.attempts,confirmed:attackLedger105.confirmed,missed:attackLedger105.missed,cancelled:attackLedger105.cancelled,interrupted:attackLedger105.interrupted,pending:attackLedger105.pending,duplicates:attackLedger105.duplicates,invariant:attackLedger105.invariant},voice:{...telemetry105.voice,queue:combatVoices.queue.length,speaking:!!combatVoices.speaking},animation:{...telemetry105.animation},destruction:{unique:telemetry105.destruction.unique,active:telemetry105.destruction.active},invariants:{attackLedger:attackLedger105.invariant,finiteActors:!enemies.some(e=>!Number.isFinite(e.x)||!Number.isFinite(e.y)),targetValid:!zCinema.lockedTarget||enemies.includes(zCinema.lockedTarget)}};p105RememberReplayFrame(frame)};
+production105.ready=true;combatEvent('PRODUCTION_105_READY',{functions:gameFunctions105.length,graphics:'ANIME ARENA 2.5D',gameplay:'COMPLETE COMBAT SYNTHESIS',voice:'DELIVERY STATE MACHINE',telemetry:'INVARIANT LEDGERS'});
+
 })();
