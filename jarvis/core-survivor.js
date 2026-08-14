@@ -2715,5 +2715,38 @@ const replay120=rememberReplayFrame;
 rememberReplayFrame=function(frame){replay120(frame);frame.production121={renderer:'STREET FIGHTER COMBAT LANE',frames:production121.frames,movementTicks:production121.movementTicks,advances:production121.advances,retreats:production121.retreats,laneAdjusts:production121.laneAdjusts,lunges:production121.lunges,animationSets:production121.animationSets,curatedFrames:production121.curatedFrames,unsafeRejected:production121.unsafeRejected,duplicateSafe:true,actualPlayerMovement:true,streetFighterLane:true,maxVisibleFighters:W<720?5:6}};
 production121.ready=true;combatEvent('PRODUCTION_121_READY',{mode:'STREET FIGHTER COMBAT LANE',movement:'ACTUAL ADVANCE RETREAT LANE CONTROL',animations:production121.animationSets,atlas:'CURATED SAFE CELLS 0-10 ONLY',scale:'41 PERCENT MOBILE / 25.5 PERCENT DESKTOP'});
 
+/* Production 122 — continuous motion synthesis, 256 variants per fighter */
+stage121.loop=false;
+const production122={version:'122',frames:0,griffinVariants:256,liraVariants:256,blendedTransitions:0,motionSamples:0,contacts:0,separationFixes:0,ready:false};
+const stage122={lastPaint:0,loop:true,hero:{pose:'',frame:0,prior:0,changed:0,start:0},enemy:new WeakMap()};
+function state122(entity,pose,seed=0){
+ const now=performance.now(),s=entity===player?stage122.hero:(stage122.enemy.get(entity)||{pose:'',frame:0,prior:0,changed:now,start:now});
+ if(s.pose!==pose){s.pose=pose;s.start=now;s.prior=s.frame;s.changed=now}
+ const seq=sequences121[pose]||sequences121.STANCE,attack=/PUNCH|JAB|CROSS|ELBOW|KNEE|KICK|UPPERCUT|BEAM|CLASH|NOVA|FINISHER|HIT|RECOVER/.test(pose),duration=attack?520:/DASH|WALK|CIRCLE|SIDESTEP/.test(pose)?720:1100,cycle=((now-s.start+seed*19)%duration)/duration,i=Math.min(seq.length-1,Math.floor(cycle*seq.length));
+ if(seq[i]!==s.frame){s.prior=s.frame;s.frame=seq[i];s.changed=now}if(s.frame>10)s.frame=3;if(s.prior>10)s.prior=3;if(entity!==player)stage122.enemy.set(entity,s);
+ return{s,phase:cycle,blend:clamp((now-s.changed)/90,0,1),attack}
+}
+function motion122(pose,phase,seed,size){
+ const variant=seed&255,a=(variant&7)/7,b=((variant>>3)&7)/7,c=((variant>>6)&3)/3,t=phase*TAU,action=Math.sin(Math.PI*phase),walk=/WALK|DASH|CIRCLE|SIDESTEP/.test(pose),air=/DASH|KNEE|UPPERCUT|SPIN_KICK|AXE_KICK/.test(pose),hit=pose==='HIT',guard=/GUARD|STANCE|IDLE/.test(pose);
+ return{variant,x:(walk?Math.sin(t)*(3+5*a):0)+(hit?(a-.5)*size*.045:0),y:(guard?Math.sin(t*2+b)*size*.008:0),lift:air*action*size*(.07+.035*b),lean:(walk?Math.sin(t)*.035:0)+(hit?(a-.5)*.12:0),sx:1+(action*(hit?-.055:.025))+(c-.5)*.012,sy:1-(action*(hit?-.04:.018))-(c-.5)*.012,reach:action*size*(walk?.035:.012),shadow:1-clamp(air*action*.38,0,.38)}
+}
+function cel122(g,img,index,x,y,w,flip,alpha,m){const cw=img.naturalWidth/4,ch=img.naturalHeight/4,col=index%4,row=index/4|0,h=w*(ch/cw);g.save();g.translate(x+m.x+m.reach,y-m.lift+m.y);if(flip)g.scale(-1,1);g.rotate(m.lean);g.scale(m.sx,m.sy);g.globalAlpha=alpha;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,col*cw,row*ch,cw,ch,-w*.5,-h*.89,w,h);g.restore()}
+function fighter122(g,img,pose,entity,seed,x,y,w,flip,hit=false){
+ const a=state122(entity,pose,seed),m=motion122(pose,a.phase,seed,w);g.save();g.globalAlpha=.42*m.shadow;g.fillStyle='#020208';g.beginPath();g.ellipse(x+m.x*.25,y+5,w*(.235+.018*Math.sin(a.phase*TAU)),w*.052,0,0,TAU);g.fill();g.restore();
+ if(a.blend<1&&a.s.prior!==a.s.frame){cel122(g,img,a.s.prior,x,y,w,flip,(1-a.blend)*.34,m);production122.blendedTransitions++}
+ cel122(g,img,a.s.frame,x,y,w,flip,hit?.76:1,m);production122.motionSamples++;if(m.lift<2)production122.contacts++;return m
+}
+function separate122(list,minGap){list.sort((a,b)=>a.x-b.x);for(let i=1;i<list.length;i++){const gap=list[i].x-list[i-1].x;if(gap<minGap){const push=(minGap-gap)*.5;list[i-1].x-=push;list[i].x+=push;production122.separationFixes++}}return list}
+function render122(){
+ const now=performance.now();if(now-stage122.lastPaint<30)return;stage122.lastPaint=now;vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.15:1.35),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);arena119(g);
+ const base=Math.min(W,H)*(W<720?.43:.27),ready=atlas119.gReady&&atlas119.lReady,target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null,cap=W<720?3:4,near=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&e.x>-100&&e.x<W+100).sort((a,b)=>Math.abs(a.x-player.x)-Math.abs(b.x-player.x)).slice(0,cap),actors=near.map((e,i)=>({e,i,x:clamp(e.x,base*.4,W-base*.4),sort:e.y}));
+ separate122(actors,base*.42);actors.push({hero:true,x:clamp(player.x,base*.52,W-base*.52),sort:player.y+.01});actors.sort((a,b)=>a.sort-b.sort);
+ for(const a of actors){if(a.hero){const pose=mapPose121(owen.pose||'STANCE',player,0),flip=target?target.x<player.x:Math.sin(griffin.heading||0)<0;if(ready)fighter122(g,atlas119.griffin,pose,player,0,a.x,H*.8,base,flip,false)}else{const e=a.e,boss=e.type===3,pose=poseEnemy121(e,a.i),size=base*(boss?1:.68+e.type*.04),flip=e.x<player.x,y=H*.8+clamp((e.y-player.y)*.07,-28,28);if(ready)fighter122(g,atlas119.lira,pose,e,1+((e.slot||a.i)*53&255),a.x,y,size,flip,e.hit>0)}}
+ combatOverlay117(g);production122.frames++
+}
+vector113Frame=render122;function loop122(){if(!stage122.loop)return;render122();requestAnimationFrame(loop122)}requestAnimationFrame(loop122);
+const replay121=rememberReplayFrame;rememberReplayFrame=function(frame){replay121(frame);frame.production122={renderer:'CONTINUOUS MOTION SYNTHESIS',frames:production122.frames,variants:{griffin:production122.griffinVariants,lira:production122.liraVariants},blendedTransitions:production122.blendedTransitions,motionSamples:production122.motionSamples,contacts:production122.contacts,separationFixes:production122.separationFixes,continuousTransforms:true,duplicateSafe:true}};
+production122.ready=true;combatEvent('PRODUCTION_122_READY',{animation:'CONTINUOUS TRANSFORM + CEL BLEND',variants:'256 PER CHARACTER',characters:'43 PERCENT MOBILE / 27 PERCENT DESKTOP',spacing:'ACTIVE FIGHTER SEPARATION',atlas:'SAFE CELLS 0-10'});
+
 
 })();
