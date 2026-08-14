@@ -297,7 +297,7 @@ const mattyCinemaUpdate=zCinemaUpdate;
 zCinemaUpdate=function(dt){
  const before=zCinema.route.length,previous=zCinema.lockedTarget,attackBefore=zCinema.attack,comboBefore=zCinema.combo;
  if(!previous||!enemies.includes(previous)){zCinema.lockedTarget=zTarget();if(zCinema.lockedTarget)zCinema.engagements++}
- mattyCinemaUpdate(dt);
+ zCinema.deferMelee=true;zCinema.deferredDamage=0;mattyCinemaUpdate(dt);zCinema.deferMelee=false;
  const target=zCinema.lockedTarget,d=target&&enemies.includes(target)?dist(player,target):Infinity;
  if(zCinema.attack>0&&(attackBefore<=0||zCinema.combo!==comboBefore)&&target&&enemies.includes(target)){const move=zCinema.route[Math.max(0,zCinema.combo-1)],data=move?.data;if(data)zCinema.contactBeat={target,time:Math.max(.08,zCinema.attack*.42),damage:(data[3]+(griffin.evolution||0)*4)*.42,color:move.finisher?'#ffe66b':'#ffffff',move:data[0],pose:data[1]}}
  const beat=zCinema.contactBeat;if(beat){beat.time-=dt;if(beat.time<=0){zCinema.contactBeat=null;if(enemies.includes(beat.target)){const range=beat.target.type===3?235:185;if(dist(player,beat.target)<=range){hurt(beat.target,beat.damage,beat.color);zImpact(beat.target.x,beat.target.y,beat.color,2);zCinema.confirmedHits++;combatEvent('MELEE_CONTACT_CONFIRMED',{move:beat.move,pose:beat.pose,damage:Math.round(beat.damage),boss:beat.target.type===3})}else combatEvent('MELEE_CONTACT_MISSED',{move:beat.move,distance:Math.round(dist(player,beat.target))})}}}
@@ -484,6 +484,82 @@ owenController=function(dt){
  if(protectedClip&&saved!==owen.pose){zStage.pose=owen.pose;matty.quiet=Math.max(matty.quiet,.12)}
  committedOwenController(dt);zStage.pose=saved;matty.quiet=Math.max(0,matty.quiet-(dt||.016));matty.lastRequest=owen.wanted
 };
+// Owen MAX-6 combat grammar. The million-motion atlas supplies variation;
+// this director supplies meaning, continuity and verified physical contact.
+// It is deliberately original choreography built from general fighting-game
+// principles rather than copied animation frames.
+Object.assign(matty,{version:'4.0',policy:'SINGLE OWNER · CONTACT AUTHORITY',owner:'NAVIGATION',family:'GROUND',sequence:0});
+Object.assign(owen,{version:'MAX-6',grammar:'READ→APPROACH→OPEN→CONFIRM→LAUNCH→PURSUE→FINISH→RESET',quality:{attempts:0,hits:0,whiffs:0,repeats:0,interrupts:0,families:{GROUND:0,AERIAL:0,VANISH:0,POWER:0,GRAPPLE:0,DEFENSE:0},lastPose:'',lastHitAt:0,contactRate:1}});
+const owenFamilies={
+ GROUND:[['JAB','CROSS','HOOK'],['ELBOW','KNEE'],['DRAGON COMET BREAKER','FINISHER']],
+ AERIAL:[['JAB','UPPER','DIVE'],['SPIN','AXE'],['CYCLONE STARFALL','SPIN_KICK']],
+ VANISH:[['BACK','CROSS','ELBOW'],['BACK','KNEE'],['NOVA RUSH FINALE','FINISHER']],
+ POWER:[['ELBOW','UPPER','AXE'],['DIVE','CROSS'],['GALAXY SHOCK UPPERCUT','UPPERCUT']],
+ GRAPPLE:[['KNEE','HOOK','SWEEP'],['ELBOW','BACK'],['HEAVEN-SPLITTING AXE','AXE_KICK']],
+ DEFENSE:[['SWEEP','BACK','JAB'],['KNEE','SPIN'],['INFINITE IMPACT KICK','DIVE_KICK']]
+};
+function owenChooseFamily(target,density){
+ const d=dist(player,target),danger=hostile.filter(h=>Math.hypot(h.x-player.x,h.y-player.y)<150).length,boss=target.type===3,serial=zCinema.routeSerial+campaign.stage+kills;
+ if(danger>2)return'DEFENSE';if(d>220)return'AERIAL';if(boss&&serial%4===0)return'GRAPPLE';if((griffin.evolution||0)>1&&density>5)return'POWER';if(serial%3===0)return'VANISH';return'GROUND'
+}
+const max5ComposeCombo=griffinComposeCombo;
+griffinComposeCombo=function(target,density){
+ const family=owenChooseFamily(target,density),plan=owenFamilies[family],serial=++zCinema.routeSerial,keys=[...plan[0],...plan[1]],finisher=plan[2],boss=target.type===3;
+ const route=keys.map((key,i)=>({key,data:griffinStrikes[key],side:(serial+i+(family==='VANISH'?1:0))%2?1:-1,finisher:false,section:i<plan[0].length?'OPENER':'BRIDGE',family}));
+ route.push({key:'FINISH',data:[finisher[0],finisher[1],boss?1.08:.94,boss?68:52,boss?38:32],side:(serial+keys.length)%2?1:-1,finisher:true,section:'FINISHER',family});
+ zCinema.route=route;zCinema.routeName=`${family}-${plan[0][0]}-${finisher[0]}`;zCinema.recentRoutes.push(zCinema.routeName);if(zCinema.recentRoutes.length>6)zCinema.recentRoutes.shift();zCinema.family=family;matty.family=family;matty.sequence++;owen.quality.families[family]++;combatEvent('OWEN_FIGHT_FAMILY',{family,route:zCinema.routeName,moves:route.map(m=>m.data[0]),boss,density});return route
+};
+// The older controller calculated melee damage at pose start. Suppress only
+// those provisional melee calls; Matty's existing contact beat applies it when
+// the target is still alive and genuinely inside the strike envelope.
+const max5Hurt=hurt;
+hurt=function(e,damage,color='#73f3ff'){
+ if(zCinema.deferMelee&&e===zCinema.lockedTarget&&(color==='#fff2ae'||color==='#ffe66b')){zCinema.deferredDamage=(zCinema.deferredDamage||0)+damage;return}
+ return max5Hurt(e,damage,color)
+};
+const max5CinemaUpdate=zCinemaUpdate;
+zCinemaUpdate=function(dt){
+ max5CinemaUpdate(dt);
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:null;
+ matty.owner=griffin.transformation?.active?'TRANSFORMATION':griffin.superMove?.active?'SUPER':zCinema.route.length?'OWEN':target&&dist(player,target)>190?'NAVIGATION':'COMBAT';
+ if(zCinema.contactBeat&&zCinema.deferredDamage)zCinema.contactBeat.damage=Math.max(zCinema.contactBeat.damage,zCinema.deferredDamage);
+ if(target&&zCinema.attack<=0&&dist(player,target)>190){zCinema.meleePose='FLIGHT';if(!zCinema.route.length)matty.owner='NAVIGATION'}
+};
+// Combat-event QA keeps animation quality measurable without allocating a
+// second replay stream. The metrics travel inside every exported replay frame.
+const max5CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const q=owen.quality;if(type==='MELEE_COMBO_BEAT'){q.attempts++;if(data.pose===q.lastPose)q.repeats++;q.lastPose=data.pose}
+ if(type==='MELEE_CONTACT_CONFIRMED'){q.hits++;q.lastHitAt=elapsed;zStage.cut=data.boss?.46:.22;owen.hold=data.boss?.085:.055}
+ if(type==='MELEE_CONTACT_MISSED'){q.whiffs++;zCinema.route.length=0;zCinema.combo=0;zCinema.attack=.18;owen.pose=owen.wanted='FLIGHT';griffin.mode='MATTY WHIFF RECOVERY'}
+ q.contactRate=q.attempts?clamp(q.hits/q.attempts,0,1):1;return max5CombatEvent(type,data)
+};
+// Give each super its own mechanical silhouette as well as its own pose set.
+// Damage scales with campaign growth so the spectacle remains consequential.
+const max5SuperImpact=superMoveImpact;
+superMoveImpact=function(s){
+ if(s.impact)return;const before=new Map(enemies.map(e=>[e,(e.hp||0)+(e.shield||0)]));max5SuperImpact(s);
+ const scale={SPIRIT_BOMB:1.75,METEOR_RUSH:1.42,DRAGON_BEAM:1.62,FINAL_NOVA:1.55}[s.id]||1.4,bonus=(52+campaign.stage*9+(griffin.evolution||0)*18)*(scale-1);
+ for(const [e,hp] of before)if(enemies.includes(e)&&((e.hp||0)+(e.shield||0))<hp){max5Hurt(e,bonus,s.color);s.confirmedDamage+=bonus}
+ if(s.id==='SPIRIT_BOMB')for(const e of enemies)if(dist({x:s.targetX,y:s.targetY},e)<390){e.speed*=.72;e.slow=Math.max(e.slow||0,1.1)}
+ else if(s.id==='DRAGON_BEAM')zStage.cut=.72;else if(s.id==='FINAL_NOVA')for(const e of enemies){const a=Math.atan2(e.y-player.y,e.x-player.x);e.x+=Math.cos(a)*95;e.y+=Math.sin(a)*95}
+ combatEvent('OWEN_SUPER_RESOLUTION',{move:s.id,hits:s.confirmedHits,damage:Math.round(s.confirmedDamage),scale})
+};
+// Family-specific body language makes identical recipes read differently.
+function owenFamilyMotion(yaw,color){
+ if(!zCinema.route.length||griffin.superMove?.active||griffin.transformation?.active)return;const family=zCinema.family||'GROUND',v=owenAxes(yaw),q=clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1),pulse=Math.sin(q*Math.PI),side=zCinema.meleeSide||1;
+ if(family==='AERIAL'){iylaBox(-v.fx*.65,.42+pulse*.72,-v.fz*.65,.06,.06,.72,color,yaw,.35);zStage.elevation=Math.max(zStage.elevation,.72)}
+ else if(family==='VANISH')for(let n=1;n<=3;n++)iylaBox(-v.fx*n*.36+v.rx*side*.18,1+n*.13,-v.fz*n*.36+v.rz*side*.18,.04,.05,.38,color,yaw,.2);
+ else if(family==='POWER')iylaRound(0,1.18,0,.72+pulse*.32,1.28+pulse*.2,.72+pulse*.32,color,yaw,.11);
+ else if(family==='GRAPPLE')for(const s of[-1,1])iylaRound(v.fx*.72+v.rx*s*.22,1.42,v.fz*.72+v.rz*s*.22,.24,.25,.24,[.9,.58,.39],yaw,.82);
+ else if(family==='DEFENSE')iylaRound(-v.fx*.35,1.12,-v.fz*.35,.62,.18,.46,color,yaw,.2)
+}
+const max5FamilyGriffin=owenGriffin;
+owenGriffin=function(yaw,color,form){max5FamilyGriffin(yaw,color,form);owenFamilyMotion(yaw,color)};
+// Augment replay frames at the storage boundary so all existing exporters and
+// long-memory behavior remain intact.
+const max5RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){frame.owen={...frame.owen,version:owen.version,family:matty.family,owner:matty.owner,recipe:owen.recipe,contactRate:+owen.quality.contactRate.toFixed(3),attempts:owen.quality.attempts,hits:owen.quality.hits,whiffs:owen.quality.whiffs,repeats:owen.quality.repeats};max5RememberReplayFrame(frame)};
 // Boss identity belongs to the HUD, not underneath the fighters. This keeps
 // combat silhouettes and contact poses readable at close range.
 const cleanBossVisuals=ultimateVisuals;
