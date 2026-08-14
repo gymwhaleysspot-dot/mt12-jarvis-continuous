@@ -2456,7 +2456,7 @@ function v115Rig(px,pz,yaw,scale,enemy,boss,entity){
  else if(p==='SUPER_RECOVER'){crouch=.48;lean=-dir*.18;armR={x:.38,y:.18};armL={x:-.46,y:.3};elR={x:.18,y:-.02};elL={x:-.22,y:.05};kneeR={x:.42,y:.25};kneeL={x:-.22,y:.62};footR={x:.72,y:.1};footL={x:-.46,y:0}}
  else if(p==='HIT'){lean=-dir*.4;armR={x:.95,y:.62};armL={x:-.95,y:.7};elR={x:1.25,y:.34};elL={x:-1.18,y:.38};rootX=-dir*unit*.22;rootY=-unit*.06}
  else if(!enemy){production115.unsupported[p]=(production115.unsupported[p]||0)+1}
- const ox=o.x+rootX,oy=o.y+rootY,baseY=oy,py0=baseY-(1-crouch)*unit,px0=ox+lean*unit*.22,pelvis={x:px0,y:py0},chest={x:px0+lean*unit*.55,y:baseY-(2.02-crouch)*unit},head={x:px0+lean*unit*.72,y:baseY-(3.0-crouch)*unit},local=v=>({x:px0+v.x*unit+turn*unit*(1-v.y*.35),y:baseY-v.y*unit+crouch*unit*(v.y/2.1)});
+ const ox=o.x+rootX,oy=o.y+rootY,baseY=oy,py0=baseY-(1-crouch)*unit,px0=ox+lean*unit*.22,pelvis={x:px0,y:py0},chest={x:px0+lean*unit*.55,y:baseY-(2.02-crouch)*unit},head={x:px0+lean*unit*.72,y:baseY-(2.72-crouch)*unit},local=v=>({x:px0+v.x*unit+turn*unit*(1-v.y*.35),y:baseY-v.y*unit+crouch*unit*(v.y/2.1)});
  if(trail)trail115(g,ox,baseY-unit*1.55,dir,unit,accent,6);aura115(g,chest.x,chest.y,unit,accent,aura);
  g.save();g.globalAlpha=.32;g.fillStyle='#02050b';g.beginPath();g.ellipse(ox,baseY+2,unit*(.72+Math.abs(lean)*.2),unit*.2,0,0,TAU);g.fill();g.restore();
  const hL=local({x:-.3,y:1}),hR=local({x:.3,y:1}),kL=local(kneeL),kR=local(kneeR),fL=local(footL),fR=local(footR);
@@ -2480,5 +2480,47 @@ vector113Frame=function(){
 const replay114=rememberReplayFrame;
 rememberReplayFrame=function(frame){replay114(frame);frame.production115={pose:production115.pose,phase:production115.phase,poseChanges:production115.poseChanges,contacts:production115.contacts,rootMotionFrames:production115.rootMotion,unsupported:{...production115.unsupported},fullBody:true,stateMachine:true,frameSynced:true}};
 production115.ready=true;combatEvent('PRODUCTION_115_READY',{poses:18,stateMachine:'FULL BODY',rootMotion:'ACTIVE',timing:'FRAME SYNCED'});
+
+/* Production 116 — unified illustrated 2.5D rendering foundation */
+const production116={version:'116',frames:0,sceneDraws:0,characters:0,worldAnchors:0,webglHidden:false,theme:'',ready:false};
+const themes116=[
+ {sky:['#07172b','#176079','#ef9d66'],ground:['#30283a','#62506a'],rim:'#63efff',mount:'#13293d'},
+ {sky:['#180b21','#74314c','#ff9760'],ground:['#3a1724','#7d3939'],rim:'#ff6b91',mount:'#35152d'},
+ {sky:['#061b23','#19716b','#bddb8a'],ground:['#213b31','#527056'],rim:'#68ffd1',mount:'#153b38'},
+ {sky:['#120d32','#4c3185','#d886b5'],ground:['#261f4b','#594570'],rim:'#c48cff',mount:'#241c54'},
+ {sky:['#071225','#23486f','#85a9c9'],ground:['#1d2a3d','#435a71'],rim:'#8ddcff',mount:'#152a43'}
+];
+function scene116(g){
+ const story=currentStory110(),th=themes116[(story?.id||0)%themes116.length];production116.theme=story?.name||'AURORA RIDGE';
+ let sky=g.createLinearGradient(0,0,0,H*.62);sky.addColorStop(0,th.sky[0]);sky.addColorStop(.58,th.sky[1]);sky.addColorStop(1,th.sky[2]);g.fillStyle=sky;g.fillRect(0,0,W,H);
+ const sunX=W*.76,sunY=H*.22,sun=g.createRadialGradient(sunX,sunY,2,sunX,sunY,Math.min(W,H)*.2);sun.addColorStop(0,'#fff8d8dd');sun.addColorStop(.2,'#ffd98b66');sun.addColorStop(1,'#ffb35a00');g.fillStyle=sun;g.fillRect(0,0,W,H*.55);
+ const horizon=H*.37,scroll=worldX*.018;for(let layer=0;layer<3;layer++){g.fillStyle=layer===0?th.mount:layer===1?th.sky[0]+'cc':th.sky[1]+'55';g.beginPath();g.moveTo(0,horizon+layer*22);for(let n=0;n<=10;n++){const xx=n*W/9-(scroll*(layer+1)% (W/9)),peak=horizon-35-layer*12-Math.abs(Math.sin(n*1.71+layer))*H*(.07+.02*layer);g.lineTo(xx,peak);g.lineTo(xx+W/18,horizon+30+layer*17)}g.lineTo(W,H*.62);g.lineTo(0,H*.62);g.closePath();g.fill()}
+ const ground=g.createLinearGradient(0,horizon,0,H);ground.addColorStop(0,th.ground[1]);ground.addColorStop(.22,th.ground[0]);ground.addColorStop(1,'#090b14');g.fillStyle=ground;g.beginPath();g.moveTo(0,horizon);g.lineTo(W,horizon);g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.fill();
+ const vx=W*.5,vy=horizon+8;g.save();g.strokeStyle=th.rim+'26';g.lineWidth=1;for(let n=-8;n<=8;n++){g.beginPath();g.moveTo(vx,vy);g.lineTo(vx+n*W*.12,H);g.stroke()}for(let n=0;n<9;n++){const t=n/8,y=vy+(H-vy)*t*t;g.globalAlpha=.18*(1-t*.55);g.beginPath();g.moveTo(0,y);g.quadraticCurveTo(vx,y-14*(1-t),W,y);g.stroke()}g.restore();
+ const cx=W*.5,cy=H*.61,rx=Math.min(W*.33,H*.4),ry=rx*.34;g.save();g.fillStyle='#07141e55';g.strokeStyle=th.rim+'88';g.lineWidth=Math.max(2,W*.002);g.beginPath();g.ellipse(cx,cy,rx,ry,0,0,TAU);g.fill();g.stroke();g.setLineDash([10,12]);g.strokeStyle=th.rim+'42';g.beginPath();g.ellipse(cx,cy,rx*.72,ry*.72,0,0,TAU);g.stroke();g.setLineDash([]);g.restore();
+ for(let n=0;n<8;n++){const seed=n*2.17+story.id,px=((Math.sin(seed)*.5+.5)*W+worldX*.06*(n%2?1:-1)+W)%W,py=horizon+80+(Math.cos(seed*1.9)*.5+.5)*(H-horizon-140),sz=8+(n%3)*5;g.fillStyle=n%2?'#172231':'#25283a';g.strokeStyle=th.rim+'33';g.lineWidth=1.5;g.beginPath();g.moveTo(px-sz,py+sz*.35);g.lineTo(px-sz*.45,py-sz*.7);g.lineTo(px+sz*.65,py-sz*.45);g.lineTo(px+sz,py+sz*.45);g.closePath();g.fill();g.stroke()}
+ for(const sc of ultimate.scars.slice(-12)){const px=((sc.x-W/2)*.9+W/2),py=clamp(sc.y,H*.42,H*.86);g.strokeStyle='#ff684a66';g.lineWidth=2;g.beginPath();for(let n=0;n<4;n++){const a=sc.a+n*1.7,r=sc.r*(.5+n*.18);g.moveTo(px,py);g.lineTo(px+Math.cos(a)*r,py+Math.sin(a)*r*.45)}g.stroke()}
+ for(const r of rings.slice(-8)){g.globalAlpha=clamp(r.life/.45,0,1);g.strokeStyle=th.rim;g.lineWidth=4;g.beginPath();g.ellipse(r.x,r.y,r.r,r.r*.38,0,0,TAU);g.stroke()}g.globalAlpha=1;
+ for(const beam of beams.slice(-10)){g.save();g.globalCompositeOperation='screen';g.strokeStyle=beam.color;g.shadowBlur=16;g.shadowColor=beam.color;g.lineWidth=4;g.beginPath();g.moveTo(beam.x1,beam.y1);g.lineTo(beam.x2,beam.y2);g.stroke();g.restore()}production116.sceneDraws++
+}
+v113Point=function(px,py,pz){
+ const zoom=Math.min(W,H)/13.4,xp=W/2+px*45,yp=H/2+pz*45-py*zoom;
+ return{x:xp,y:yp,depth:1,zoom}
+};
+const boot115=vector113Boot;
+vector113Boot=function(){boot115();if(!production116.webglHidden){const st=document.createElement('style');st.textContent='.iyla-3d,.iyla-gpu{display:none!important}.vector-113{z-index:1!important;background:#071225!important}';document.head.appendChild(st);production116.webglHidden=true}};
+vector113Frame=function(){
+ vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.5:2),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);vector113.draws=vector113.culled=0;scene116(g);
+ const ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)).sort((a,b)=>a.y-b.y),cap=W<720?8:14;for(const e of ordered.slice(-cap)){const boss=e.type===3,s=boss?1.62:.76+e.type*.1;v115Rig((e.x-W/2)/45,(e.y-H/2)/45,-Math.atan2(player.x-e.x,player.y-e.y),s,true,boss,e);production113.enemies++;production116.characters++}
+ const sx=clamp(player.x,W*.17,W*.83),sy=clamp(player.y,H*.3,H*.78);v115Rig((sx-W/2)/45,(sy-H/2)/45,griffin.heading||0,W<720?1.42:1.5,false,false,player);production113.frames++;production115.frames++;production115.pose=owen.pose;production115.phase=owen.phase;production116.characters++;production116.worldAnchors++;production116.frames++
+};
+
+iyla3DFrame=function(dt){
+ iyla3d.ready=true;iyla3d.draws=0;iyla3d.faces=0;owenController(dt);vector113Frame();energy114Frame();
+ const el=$('#iylaDetail');if(el)el.innerHTML='UNIFIED ILLUSTRATED 2.5D<br>THEME '+production116.theme+'<br>POSE '+(owen.pose||'FLIGHT')+' / '+(owen.phase||'LOOP')+'<br>ACTORS '+vector113.draws+' · WEBGL DEBUG REMOVED'
+};
+const replay115=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay115(frame);frame.production116={renderer:'UNIFIED ILLUSTRATED 2.5D',theme:production116.theme,webglHidden:production116.webglHidden,sceneDraws:production116.sceneDraws,characters:production116.characters,worldAnchors:production116.worldAnchors,coherentProjection:true,debugGeometry:false}};
+production116.ready=true;combatEvent('PRODUCTION_116_READY',{renderer:'UNIFIED ILLUSTRATED 2.5D',environment:'AUTHORED ARENA',projection:'SCREEN SPACE WORLD ANCHORED',webglDebug:'REMOVED'});
 
 })();
