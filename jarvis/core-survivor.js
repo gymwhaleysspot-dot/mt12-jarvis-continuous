@@ -1430,4 +1430,158 @@ rememberReplayFrame=function(frame){
 };
 combatEvent('PRODUCTION_103_READY',{agents:ai103Roster.length,enhancementsEach:ai103.perAI,total:ai103Roster.length*ai103.perAI,sound:'AGGREGATED',structures:'AUTHORITATIVE',attacks:'SETTLED'});
 
+
+// Survivor Production 104: conversational drama, adaptive score, cinematic SFX and biome direction.
+const production104={name:'SURVIVOR PRODUCTION 104',version:'1.0',frames:0,ready:false};
+const dialogue104={name:'GRIFFIN + LIRA CONVERSATION DIRECTOR',turn:0,lastAt:-99,lastContext:'',pending:[],spoken:0,responses:0,silenced:0,relationship:{respect:0,anger:0,confidence:0,momentum:0,fear:0},history:[],thread:'OPENING'};
+const dialogue104Lexicon={
+ griffin:{
+  opening:['I mapped the field before the first strike landed','Every exchange gives me a clearer route','I am not chasing power; I am controlling when it matters'],
+  challenge:['Lira, commit to the attack and I will show you the gap','Your pressure is strong, but your pattern is becoming visible','You keep closing space; I keep learning what you leave behind'],
+  answer:['I heard the threat. Now watch the adjustment','That would have worked before I understood your timing','You changed the rhythm, so I changed the plan'],
+  reversal:['The momentum turned the moment you overcommitted','That opening belonged to you until you tried to force it','I survived the pressure; now the field belongs to my counter'],
+  transform:['This form is not the plan. It is the power the plan required','The energy is stable. My decisions stay clear','More power means nothing unless the next hit is confirmed'],
+  finish:['The route is complete. I am ending this cleanly','No wasted motion. No second opening','Everything I learned points to this finish'],
+  aftermath:['The fight is over, but the memory stays','That victory came from adaptation, not luck','The next opponent inherits everything this battle taught me']
+ },
+ lira:{
+  opening:['I felt your prediction before you moved','The arena will close around every safe route you choose','You brought a plan into a fight that changes by the second'],
+  challenge:['Griffin, show me a decision I cannot pressure apart','Keep studying me; I will change before the answer arrives','Your safest route is the one I want you to take'],
+  answer:['You adjusted once. I already prepared the next question','I wanted that counter; now I know its exact timing','Your model sees patterns, but I decide when they break'],
+  reversal:['You mistook survival for control','The field did not turn; I allowed you to step deeper into it','That confidence is exactly what I needed you to spend'],
+  transform:['Now the battle has enough power to become honest','I will test whether your control survives this energy','A new form only gives me a stronger pattern to break'],
+  finish:['Your last route ends here','I have measured every escape; there is nowhere left to spend them','This is the answer your model could not delay'],
+  aftermath:['Remember the pressure, Griffin; it will return smarter','The result is temporary. What I learned is permanent','Next time I will begin where this battle ended']
+ }
+};
+function dialogueContext104(type){
+ const t=String(type||'').toUpperCase();if(t.includes('TRANSFORM'))return 'transform';if(t.includes('FINISHER')||t.includes('DRAMATIC_FINISH'))return 'finish';
+ if(t.includes('BOSS_ENTERED')||t.includes('TOURNAMENT_ROUND'))return 'challenge';if(t.includes('PARRY')||t.includes('CONTACT_CONFIRMED'))return 'reversal';
+ if(t.includes('LEVEL_CLEAR')||t.includes('WAVE_CLEAR'))return 'aftermath';if(t.includes('SUPER_MOVE'))return 'answer';return ''
+}
+function dialoguePick104(agent,context,seed){const list=dialogue104Lexicon[agent][context]||dialogue104Lexicon[agent].answer;return list[voiceHash101(agent+context+seed)%list.length]}
+function dialogueUpdateRelationship104(type,agent){
+ const r=dialogue104.relationship,t=String(type).toUpperCase();if(t.includes('PARRY')){r.respect=clamp(r.respect+.04,0,1);r.anger=clamp(r.anger+.03,0,1)}
+ if(t.includes('CONTACT_CONFIRMED'))r.momentum=clamp(r.momentum+(agent==='griffin'?.05:-.04),-1,1);
+ if(t.includes('TRANSFORM')){r.fear=clamp(r.fear+.06,0,1);r.confidence=clamp(r.confidence+.04,0,1)}
+ if(t.includes('FINISH'))r.confidence=clamp(r.confidence+.08,0,1)
+}
+function dialogueSpeak104(agent,context,type,response=false){
+ const now=performance.now()/1000,gap=['transform','finish','aftermath'].includes(context)?4.5:6.5;if(now-dialogue104.lastAt<gap){dialogue104.silenced++;return}
+ const line=dialoguePick104(agent,context,dialogue104.turn+campaign.stage+kills);dialogue104.lastAt=now;dialogue104.lastContext=context;dialogue104.turn++;dialogue104.spoken++;if(response)dialogue104.responses++;
+ dialogue104.history.push({agent,context,line});if(dialogue104.history.length>40)dialogue104.history.shift();
+ voiceEnqueue101(agent==='griffin'?'jaxon':'conner',line,{context:'conversation-'+context,priority:['transform','finish'].includes(context)?8:5,force:false,ttl:10000})
+}
+function dialogueObserve104(type,data={}){
+ const context=dialogueContext104(type);if(!context)return;const first=dialogue104.turn%2?'lira':'griffin',second=first==='griffin'?'lira':'griffin';
+ dialogueUpdateRelationship104(type,first);dialogueSpeak104(first,context,type,false);
+ if(['challenge','transform','reversal','finish'].includes(context))dialogue104.pending.push({agent:second,context:context==='reversal'?'answer':context,type,at:performance.now()+1450+((dialogue104.turn%3)*280)})
+}
+function dialogueTick104(){
+ if(!dialogue104.pending.length)return;const now=performance.now(),next=dialogue104.pending[0];if(now<next.at||combatVoices.speaking)return;
+ dialogue104.pending.shift();dialogueSpeak104(next.agent,next.context,next.type,true)
+}
+voiceReact101=dialogueObserve104;
+// Adaptive original music composer using cached procedural instruments and audio-clock scheduling.
+const music104={name:'IYLA ADAPTIVE SCORE COMPOSER',ready:false,bus:null,filter:null,buffers:{},nextTime:0,step:0,bar:0,bpm:108,state:'EXPLORATION',motif:'GRIFFIN',scheduled:0,dropped:0,errors:0,lastNote:0,intensity:0};
+function musicBuffer104(ac,kind,duration){
+ const n=Math.floor(ac.sampleRate*duration),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);let last=0;
+ for(let i=0;i<n;i++){const t=i/ac.sampleRate,q=i/n,env=kind==='pad'?Math.sin(Math.PI*q)*.42:Math.exp(-q*(kind==='kick'?18:kind==='snare'?24:8)),noise=Math.random()*2-1;
+  if(kind==='kick')d[i]=Math.sin(TAU*(76*t-38*t*t))*env;
+  else if(kind==='snare'){last=(last+noise*.35)/1.35;d[i]=(noise*.72+last*.5)*env}
+  else if(kind==='hat')d[i]=noise*Math.exp(-q*45)*.35;
+  else if(kind==='bass')d[i]=(Math.sin(TAU*55*t)+Math.sin(TAU*110*t)*.3)*env*.55;
+  else if(kind==='pluck')d[i]=(Math.sin(TAU*220*t)+Math.sin(TAU*440*t)*.25)*env*.42;
+  else d[i]=(Math.sin(TAU*110*t)+Math.sin(TAU*165*t)*.35)*env*.32
+ }return b
+}
+function musicInit104(){
+ const ac=soundInit101();if(!ac||music104.ready)return;try{
+  const bus=ac.createGain(),filter=ac.createBiquadFilter();bus.gain.value=.28;filter.type='lowpass';filter.frequency.value=5200;filter.Q.value=.45;bus.connect(filter).connect(soundAI101.master||ac.destination);music104.bus=bus;music104.filter=filter;
+  for(const [k,d] of Object.entries({kick:.42,snare:.3,hat:.09,bass:.5,pluck:.38,pad:1.4}))music104.buffers[k]=musicBuffer104(ac,k,d);
+  music104.nextTime=ac.currentTime+.08;music104.ready=true
+ }catch{music104.errors++}
+}
+function musicPlay104(kind,when,semitones=0,gain=.2,pan=0){
+ const ac=ultimate.audio,b=music104.buffers[kind];if(!ac||!b||!music104.bus)return;try{const s=ac.createBufferSource(),g=ac.createGain();s.buffer=b;s.playbackRate.value=2**(semitones/12);g.gain.value=gain;s.connect(g);soundPan101(g,pan).connect(music104.bus);s.start(when);music104.scheduled++;music104.lastNote=semitones}catch{music104.errors++}
+}
+function musicState104(){
+ const hp=player.hp/player.maxHp,boss=!!griffin.boss,transform=!!griffin.transformation?.active,superMove=!!griffin.superMove?.active;
+ music104.state=transform?'ASCENSION':superMove?'ULTIMATE':boss?'BOSS':hp<.35?'LAST STAND':enemies.length>18?'BATTLE':'PURSUIT';
+ music104.intensity=clamp(enemies.length/28+(boss?.35:0)+(transform?.45:0)+(1-hp)*.3,0,1.4);music104.bpm=Math.round(96+music104.intensity*38);
+ music104.motif=dialogue104.relationship.momentum>=0?'GRIFFIN':'LIRA'
+}
+function musicTick104(){
+ if(!music104.ready)return;const ac=ultimate.audio;if(!ac||ac.state!=='running')return;musicState104();const beat=60/music104.bpm/4,griffinMotif=[0,3,7,10,7,12,10,7],liraMotif=[0,1,6,8,6,11,8,1],motif=music104.motif==='GRIFFIN'?griffinMotif:liraMotif;
+ let guard=0;while(music104.nextTime<ac.currentTime+.12&&guard++<4){const s=music104.step%16,bar=Math.floor(music104.step/16);
+  if(s%4===0)musicPlay104('kick',music104.nextTime,s===12?2:0,.18);
+  if(s===4||s===12)musicPlay104('snare',music104.nextTime,0,.11);
+  if(music104.intensity>.45&&s%2===0)musicPlay104('hat',music104.nextTime,0,.055,(s%4-1.5)*.18);
+  if(s%4===0)musicPlay104('bass',music104.nextTime,[0,0,-2,3][(s/4)%4],.11);
+  if((s%2===0&&music104.intensity>.28)||s%4===0)musicPlay104('pluck',music104.nextTime,motif[(s/2)%8]+(bar%2?0:12),.08,(s%4-1.5)*.16);
+  if(s===0&&music104.state!=='PURSUIT')musicPlay104('pad',music104.nextTime,[0,5,3,-2][bar%4],.07);
+  music104.step++;music104.bar=Math.floor(music104.step/16);music104.nextTime+=beat
+ }
+ const target=combatVoices.speaking?.14:.28;music104.bus.gain.setTargetAtTime(target,ac.currentTime,.08);music104.filter.frequency.setTargetAtTime(2600+music104.intensity*2600,ac.currentTime,.1)
+}
+// Cinematic SFX 104: cached multi-layer transients with distance and variation.
+const sfx104={name:'IYLA CINEMATIC SFX FORGE',ready:false,buffers:{},played:0,dropped:0,errors:0,variants:0,last:'',at:{}};
+function sfxInit104(){const ac=soundInit101();if(!ac||sfx104.ready)return;try{
+ for(const [k,d] of Object.entries({body:.24,crack:.1,air:.32,energy:.48,debris:.5,shield:.16})){const n=Math.floor(ac.sampleRate*d),b=ac.createBuffer(1,n,ac.sampleRate),a=b.getChannelData(0);let brown=0;for(let i=0;i<n;i++){const q=i/n,w=Math.random()*2-1;brown=(brown+w*.12)/1.12;const env=Math.exp(-q*(k==='energy'?5:k==='air'?8:18));a[i]=(k==='body'?Math.sin(TAU*(92-48*q)*i/ac.sampleRate):k==='energy'?Math.sin(TAU*(180+720*q)*i/ac.sampleRate)*.55:k==='shield'?Math.sin(TAU*(920-560*q)*i/ac.sampleRate):k==='debris'?brown:k==='air'?w*.65+brown*.3:w)*env*.55}sfx104.buffers[k]=b}sfx104.ready=true
+ }catch{sfx104.errors++}}
+function sfxPlay104(kind,gain=.12,rate=1,pan=0,delay=0){
+ const ac=ultimate.audio,b=sfx104.buffers[kind];if(!ac||!b||soundAI101.active>=soundAI101.maxActive){sfx104.dropped++;return}try{const s=ac.createBufferSource(),g=ac.createGain(),filter=ac.createBiquadFilter();s.buffer=b;s.playbackRate.value=rate;g.gain.value=gain;filter.type=kind==='body'||kind==='debris'?'lowpass':'bandpass';filter.frequency.value=kind==='body'?480:kind==='debris'?1800:kind==='air'?3200:1900;filter.Q.value=.7;s.connect(filter).connect(g);soundPan101(g,pan).connect(soundBus101(kind==='debris'?'world':kind==='air'?'motion':'impact'));soundAI101.active++;s.onended=()=>soundAI101.active=Math.max(0,soundAI101.active-1);s.start(ac.currentTime+delay);sfx104.played++}catch{sfx104.errors++}
+}
+soundReact101=function(type,data={}){
+ const t=String(type||'').toUpperCase(),category=soundCategory103(t);if(!category)return;const now=performance.now()/1000,gaps={ultimate:.5,transform:1.3,boss:1.5,world:.38,motion:.25,impact:.12,whoosh:.23,shield:.3,charge:.7},last=sfx104.at[category]||-99;
+ if(now-last<gaps[category]){sfx104.dropped++;return}sfx104.at[category]=now;sfx104.last=t;sfx104.variants++;const v=.9+(sfx104.variants%7)*.025,pan=clamp(Number(data.x||player.x)-player.x,-360,360)/460,power=clamp(.65+Number(data.damage||0)/180,0,1.2);
+ if(category==='impact'){sfxPlay104('body',.13*power,v,pan);sfxPlay104('crack',.075*power,1/v,pan,.012)}
+ else if(category==='whoosh'||category==='motion')sfxPlay104('air',.09*power,v,pan);
+ else if(category==='shield')sfxPlay104('shield',.07,v,pan);
+ else if(category==='world'){sfxPlay104('debris',.12*power,v,pan);sfxPlay104('body',.09*power,.72,pan)}
+ else if(category==='charge')sfxPlay104('energy',.08*power,.72,pan);
+ else if(category==='transform'){sfxPlay104('energy',.13,1.25,0);sfxPlay104('air',.08,.7,0,.08)}
+ else if(category==='boss'){sfxPlay104('body',.17,.55,0);sfxPlay104('debris',.08,.8,0,.04)}
+ else if(category==='ultimate'){sfxPlay104('energy',.14,1.4,pan);sfxPlay104('body',.17,.62,pan,.025);sfxPlay104('crack',.08,1.12,pan,.045)}
+};
+// Seven original performance-scaled cinematic biomes.
+const environments104=[
+ {name:'AZURE ARCHIPELAGO',sky:[.08,.32,.36],ground:[.12,.42,.32],accent:[.18,.75,.62],kind:'ISLANDS'},
+ {name:'CRIMSON WASTELAND',sky:[.32,.12,.09],ground:[.38,.16,.08],accent:[.78,.34,.08],kind:'SPIRES'},
+ {name:'ZENITH TOURNAMENT',sky:[.08,.22,.38],ground:[.34,.36,.4],accent:[.85,.72,.25],kind:'ARENA'},
+ {name:'RUINED TOMORROW',sky:[.08,.09,.16],ground:[.12,.14,.19],accent:[.35,.5,.75],kind:'CITY'},
+ {name:'MOLTEN CROWN',sky:[.28,.05,.04],ground:[.2,.08,.04],accent:[1,.22,.03],kind:'VOLCANO'},
+ {name:'SKYFALL SANCTUM',sky:[.28,.14,.38],ground:[.16,.2,.28],accent:[.62,.42,.9],kind:'FLOATING'},
+ {name:'CELESTIAL VOID',sky:[.03,.02,.09],ground:[.06,.05,.14],accent:[.2,.8,1],kind:'VOID'}
+];
+const environment104={index:0,name:'',transitions:0,objects:0,lod:'CINEMATIC',destruction:0};
+iyla3DWorld=function(){
+ const env=environments104[(campaign.stage-1)%environments104.length];if(environment104.name!==env.name){environment104.name=env.name;environment104.index=(campaign.stage-1)%environments104.length;environment104.transitions++}
+ const low=superAI.tier===1,mid=superAI.tier===2,rx=low?2:3,rz=low?3:4,tile=2.35,ox=((worldX/48)%tile+tile)%tile,oz=((worldY/48)%tile+tile)%tile;environment104.objects=0;environment104.lod=low?'MOBILE':mid?'BALANCED':'CINEMATIC';
+ for(let gx=-rx;gx<=rx;gx++)for(let gz=-rz;gz<=rz;gz++){const variation=((gx*7+gz*13)&3)*.018,c=env.ground.map(v=>v+variation);iylaBox(gx*tile-ox,-.12,gz*tile-oz,tile*.5,.09,tile*.5,c,0,.94);environment104.objects++}
+ const horizon=low?8:mid?12:18;for(let i=0;i<horizon;i++){const a=i*TAU/horizon+.2,r=9+(i%3)*1.3,h=.7+(i*7%5)*.45,xp=Math.cos(a)*r,zp=Math.sin(a)*r;
+  if(env.kind==='CITY')iylaBox(xp,h*.5,zp,.55,h,.55,env.accent,a,.8);
+  else if(env.kind==='ARENA'){iylaBox(xp,.35,zp,.8,.34,.8,env.accent,a,.75);if(i%3===0)iylaBox(xp,1.2,zp,.15,.9,.15,[.75,.78,.82],a,.8)}
+  else if(env.kind==='FLOATING')iylaBox(xp,1.5+(i%3)*.6,zp,1.2,.22,.8,env.ground,a,.85);
+  else if(env.kind==='VOID')iylaRound(xp,1+(i%4)*.7,zp,.08,.08,.08,env.accent,a,.8);
+  else{iylaBox(xp,h*.42,zp,.55+(i%2)*.28,h,.55,env.kind==='VOLCANO'?env.accent:env.ground,a,.86);if(env.kind==='ISLANDS'&&i%3===0)iylaRound(xp,h+.35,zp,.42,.32,.42,env.accent,a,.8)}
+  environment104.objects++
+ }
+ if(env.kind==='ARENA'){iylaBox(0,-.01,0,3.4,.12,3.4,[.52,.5,.45],0,.98);for(let i=0;i<4;i++)iylaBox(Math.cos(i*Math.PI/2)*3.7,.4,Math.sin(i*Math.PI/2)*3.7,.18,.7,.18,env.accent,i,.9)}
+ if(env.kind==='VOLCANO')for(let i=0;i<5;i++)iylaBox((i-2)*1.7,.01,-3+(i%2)*1.4,.7,.035,.16,env.accent,.3,.8);
+ const cap=low?8:mid?14:20;for(const p of iyla2026.props.slice(0,cap)){if(p.x<-50||p.x>W+50||p.y<-50||p.y>H+50)continue;const wx=(p.x-W/2)/45,wz=(p.y-H/2)/45,h=p.h/30,col=p.broken?[.1,.11,.13]:env.accent;iylaBox(wx,h*.42,wz,.34+p.type*.06,h*.42,.34+p.type*.06,col,p.seed,p.broken?.5:.88);if(p.broken){iylaBox(wx,.02,wz,.7,.018,.7,[.18,.04,.03],p.seed,.55);environment104.destruction++}environment104.objects++}
+};
+// Frame integration and replay contract.
+function production104Frame(){production104.frames++;dialogueTick104();musicTick104()}
+const p104IylaFrame=iyla2026Frame;
+iyla2026Frame=function(){p104IylaFrame();production104Frame()};
+const p104RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ frame.production104={name:production104.name,dialogue:{thread:dialogue104.thread,turns:dialogue104.turn,spoken:dialogue104.spoken,responses:dialogue104.responses,silenced:dialogue104.silenced,pending:dialogue104.pending.length,lastContext:dialogue104.lastContext,relationship:{...dialogue104.relationship}},music:{state:music104.state,bpm:music104.bpm,motif:music104.motif,bar:music104.bar,scheduled:music104.scheduled,errors:music104.errors,intensity:+music104.intensity.toFixed(3)},sfx:{played:sfx104.played,dropped:sfx104.dropped,errors:sfx104.errors,active:soundAI101.active,last:sfx104.last,variants:sfx104.variants},environment:{...environment104}};
+ p104RememberReplayFrame(frame)
+};
+function production104Unlock(){musicInit104();sfxInit104();try{ultimate.audio?.resume?.()}catch{}}
+for(const id of['startBtn','autoStart','retry','autoToggle'])$('#'+id)?.addEventListener('click',production104Unlock,{passive:true});
+production104.ready=true;combatEvent('PRODUCTION_104_READY',{dialogue:'CONVERSATIONAL',music:'ADAPTIVE_COMPOSER',sfx:'CINEMATIC_BUFFERED',biomes:environments104.length});
+
 })();
