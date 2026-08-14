@@ -876,4 +876,106 @@ const combatLabButton=document.createElement('button');combatLabButton.className
 const zenithBaseLabHud=labHud;labHud=function(){zenithBaseLabHud();const el=$('#brainDetail'),o=zenith20.objective;if(el)el.innerHTML+=`<br><b>${zenith20.name}</b> · ${zenith20.mode}<br>LOCK ${zenith20.lock?.bossName||zenith20.lock?.role||'NONE'} · ALT ${zenith20.altitude.toFixed(2)} · COMBO ${zenith20.combo}<br>OBJECTIVE ${o?.kind||'ACQUIRE'} ${o?.complete?'✓':''}<br>CONTACT ${zenith20.stats.contacts}/${zenith20.stats.contacts+zenith20.stats.whiffs||0} · CLASH ${zenith20.stats.beamClashes+zenith20.stats.rushClashes} · FINISH ${zenith20.stats.finishes}<br>GRAPHICS ${zenith20.graphics.quality} · FX ${rings.length}/${zenith20.graphics.maxEffects}`};
 const forgeHud=iyla3DFrame;
 iyla3DFrame=function(dt){characterForge.heroFeatures=characterForge.factionFeatures=characterForge.bossFeatures=0;forgeHud(dt);characterForge.lod=superAI.tier===1?'MOBILE SAFE':iyla.fps<48?'BALANCED':'HIGH';const el=$('#iylaDetail');if(el)el.innerHTML+=`<br>${characterForge.name} · ${characterForge.style}<br>DETAIL ${characterForge.heroFeatures+characterForge.factionFeatures+characterForge.bossFeatures} · LOD ${characterForge.lod}<br>VOICE MATRIX ${dialogueMatrix.spoken.jaxon+dialogueMatrix.spoken.conner}/200 · UNIQUE WINDOW ${dialogueMatrix.history.length}<br>${vox.name} · ${vox.mode}<br>LIVE ${vox.spoken} · FALLBACK ${vox.fallbacks} · RECOVERY ${vox.interruptions}`};
+
+
+// Survivor Replay v6: bounded causal flight recorder.
+// Samples complete combat state at 5 Hz and records important events immediately.
+const replayV6={version:66,schema:'jarvis-survivor-replay-v6',events:[],eventCap:12000,seq:0,actorSeq:0,actorIds:new WeakMap(),lastReal:0,lastSim:0,dropped:0,resets:0};
+function replayActorId(actor,prefix='E'){
+ if(!actor||typeof actor!=='object')return null;
+ let id=replayV6.actorIds.get(actor);
+ if(!id){id=prefix+(++replayV6.actorSeq);replayV6.actorIds.set(actor,id)}
+ return id
+}
+function replayNumber(value,digits=2){return Number.isFinite(value)?+value.toFixed(digits):null}
+function replayClean(value,depth=0){
+ if(value==null||typeof value==='string'||typeof value==='boolean')return value;
+ if(typeof value==='number')return Number.isFinite(value)?value:null;
+ if(depth>3)return String(value);
+ if(Array.isArray(value))return value.slice(0,48).map(v=>replayClean(v,depth+1));
+ if(typeof value==='object'){
+  if(enemies.includes(value))return{actor:replayActorId(value,value.type===3?'B':'E')};
+  const out={};let n=0;
+  for(const [key,item] of Object.entries(value)){if(n++>=64)break;out[key]=replayClean(item,depth+1)}
+  return out
+ }
+ return String(value)
+}
+function replayEvent(type,data={}){
+ replayV6.events.push({seq:++replayV6.seq,t:replayNumber(elapsed,3),rt:replayNumber(expansion59.captureTime,3),type,data:replayClean(data)});
+ if(replayV6.events.length>replayV6.eventCap)replayV6.events.splice(0,replayV6.events.length-replayV6.eventCap)
+}
+function replayActor(actor){
+ const dx=actor.x-player.x,dy=actor.y-player.y,d=Math.hypot(dx,dy);
+ return{id:replayActorId(actor,actor.type===3?'B':'E'),type:actor.type||0,boss:!!(actor.type===3||actor.campaignBoss),name:actor.bossName||'',role:actor.role||'',variant:actor.variant||'',sx:replayNumber(actor.x,1),sy:replayNumber(actor.y,1),wx:replayNumber(worldX+actor.x,1),wy:replayNumber(worldY+actor.y,1),dx:replayNumber(dx,1),dy:replayNumber(dy,1),distance:replayNumber(d,1),finite:Number.isFinite(actor.x)&&Number.isFinite(actor.y),visible:actor.x>=-36&&actor.x<=W+36&&actor.y>=58&&actor.y<=H+36,hp:replayNumber(actor.hp,1),max:replayNumber(actor.max||actor.maxHp,1),shield:replayNumber(actor.shield||0,1),speed:replayNumber(actor.speed||0,1),damage:replayNumber(actor.damage||0,1),hit:replayNumber(actor.hit||0,3),attack:replayNumber(actor.attackClock||0,3),contact:replayNumber(actor.contactClock||0,3),phase:actor.zPhase||actor.bossForm||0,style:actor.bossStyle||'',element:actor.element||'',campaignLevel:actor.campaignLevel||0}
+}
+const replayV6CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const result=replayV6CombatEvent(type,data);
+ replayEvent(type,{eventId:result?.id,...replayClean(data)});
+ return result
+};
+const replayV6Hurt=hurt;
+hurt=function(actor,damage,color='#73f3ff'){
+ const before=actor&&enemies.includes(actor)?(actor.hp||0)+(actor.shield||0):null,result=replayV6Hurt(actor,damage,color);
+ if(before!=null){
+  const after=(actor.hp||0)+(actor.shield||0),landed=Math.max(0,before-after);
+  replayEvent('DAMAGE_RESOLVED',{actor:replayActorId(actor,actor.type===3?'B':'E'),requested:replayNumber(damage,2),landed:replayNumber(landed,2),before:replayNumber(before,2),after:replayNumber(after,2),source:griffin.superMove?.active?griffin.superMove.id:owen.pose,color})
+ }
+ return result
+};
+const replayV6Kill=kill;
+kill=function(actor){
+ replayEvent('ACTOR_REMOVED',{actor:replayActorId(actor,actor?.type===3?'B':'E'),boss:!!(actor?.type===3||actor?.campaignBoss),name:actor?.bossName||'',role:actor?.role||'',hp:replayNumber(actor?.hp||0,2),cause:griffin.superMove?.active?griffin.superMove.id:owen.pose,stage:campaign.stage});
+ return replayV6Kill(actor)
+};
+const replayV6Reset=reset;
+reset=function(mode=autoMode){
+ const result=replayV6Reset(mode);
+ replayV6.events.length=0;replayV6.seq=0;replayV6.lastReal=0;replayV6.lastSim=0;replayV6.dropped=0;replayV6.resets++;
+ replayEvent('REPLAY_RUN_STARTED',{auto:!!mode,viewport:{w:W,h:H,dpr:D},gpu:iyla3d.gl?'WEBGL':iyla3d.error?'FALLBACK':'CANVAS',sampleHz:REPLAY_SAMPLE_HZ,retentionSeconds:REPLAY_MEMORY_SECONDS});
+ return result
+};
+const replayV6Remember=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:(typeof zenith20!=='undefined'&&zenith20.lock&&enemies.includes(zenith20.lock)?zenith20.lock:omniTarget());
+ const now=performance.now(),realDelta=replayV6.lastReal?(now-replayV6.lastReal)/1000:0,simDelta=replayV6.lastSim?Math.max(0,frame.t-replayV6.lastSim):0;
+ replayV6.lastReal=now;replayV6.lastSim=frame.t;
+ frame.player={sx:replayNumber(player.x,1),sy:replayNumber(player.y,1),wx:replayNumber(worldX+player.x,1),wy:replayNumber(worldY+player.y,1),vx:replayNumber(Math.cos(griffin.heading||0)*player.speed,1),vy:replayNumber(Math.sin(griffin.heading||0)*player.speed,1),hp:replayNumber(player.hp,1),maxHp:replayNumber(player.maxHp,1),shield:replayNumber(griffin.shield||0,1),shieldMax:replayNumber(griffin.shieldMax||0,1),invuln:replayNumber(player.invuln||0,3),speed:replayNumber(player.speed,1),damage:replayNumber(player.damage,1),rate:replayNumber(player.rate,3),armor:replayNumber(player.armor||0,3),form:griffin.evolution||0,power:replayNumber(griffin.power||0,1),plan:griffin.plan,mission:griffin.mission,mode:griffin.mode,reason:griffin.reason||'',risk:replayNumber(griffin.risk||0,3),confidence:replayNumber(griffin.confidence||0,3),heading:replayNumber(griffin.heading||0,4),ki:replayNumber(expansion59.ki,4),ultimate:replayNumber(expansion59.ultimate,4)};
+ frame.target=target?{id:replayActorId(target,target.type===3?'B':'E'),distance:replayNumber(dist(player,target),1),age:replayNumber(zCinema.targetAge||0,2),idle:replayNumber(zCinema.targetIdle||0,2),hp:replayNumber((target.hp||0)+(target.shield||0),1),locked:target===zCinema.lockedTarget,reachable:Number.isFinite(target.x)&&Number.isFinite(target.y)&&dist(player,target)<=Math.hypot(W,H)*1.08+180,visible:target.x>=-36&&target.x<=W+36&&target.y>=58&&target.y<=H+36}:null;
+ frame.actors=enemies.map(replayActor);
+ frame.campaign={stage:campaign.stage,phase:campaign.phase,quota:campaign.quota,spawned:campaign.spawned,defeated:campaign.defeated,bossesDefeated:campaign.bossesDefeated,transition:replayNumber(campaign.transition||0,2)};
+ frame.directors={matty:{owner:matty.owner||'',family:matty.family||'',policy:matty.policy||'',request:matty.lastRequest||'',quiet:replayNumber(matty.quiet||0,3),sequence:matty.sequence||0,commands:matty.commands,accepted:matty.accepted,coalesced:matty.coalesced,superseded:matty.superseded,rejected:matty.rejected},owen:{pose:owen.pose,wanted:owen.wanted,phase:owen.phase,family:matty.family||'',recipe:owen.recipe||0,transition:owen.transitions||0,stateTime:replayNumber(owen.stateTime||0,3),stateLength:replayNumber(owen.stateLength||0,3),reach:replayNumber(owen.contactReach||0,3),tempo:owen.tempo||'',attempts:owen.quality?.attempts||0,hits:owen.quality?.hits||0,whiffs:owen.quality?.whiffs||0,repeats:owen.quality?.repeats||0,interrupts:owen.quality?.interrupts||0},zavier:{recoveries:zCinema.recoveries||0,targetAge:replayNumber(zCinema.targetAge||0,2),targetIdle:replayNumber(zCinema.targetIdle||0,2),targetDistance:replayNumber(zCinema.targetDistance||0,1)},christian:{mode:christian.mode,threat:replayNumber(christian.threat,3),flow:replayNumber(christian.flow,3),guard:replayNumber(christian.guard,3),damageWindow:replayNumber(christian.damageWindow,3),bossCount:christian.bossCount},zenith:typeof zenith20!=='undefined'?{mode:zenith20.mode,lockAge:replayNumber(zenith20.lockAge,2),altitude:replayNumber(zenith20.altitude,3),dash:replayNumber(zenith20.dash,3),defense:replayNumber(zenith20.defense,3),combo:zenith20.combo,clash:zenith20.clash?.kind||'',objective:zenith20.objective?{kind:zenith20.objective.kind,goal:zenith20.objective.goal,complete:zenith20.objective.complete}:null}:null};
+ frame.world={scrollX:replayNumber(worldX,1),scrollY:replayNumber(worldY,1),viewportW:W,viewportH:H,props:iyla2026?.props?.length||0,destruction:{impacts:destruction.impacts,breaches:destruction.breaches,collapses:destruction.collapses,knockThroughs:destruction.knockThroughs,fragments:destruction.fragments.length}};
+ frame.performance={realDelta:replayNumber(realDelta,4),simDelta:replayNumber(simDelta,4),timeDebt:replayNumber(Math.max(0,realDelta-simDelta),4),stall:replayNumber(superAI.stall||0,3),overruns:superAI.overruns||0,recoveries:superAI.recoveries||0,contextLosses:xavier.contextLosses||0,contextRestores:xavier.contextRestores||0,scale:replayNumber(xavier.scale||0,3),gpuError:iyla3d.error||'',hidden:document.hidden};
+ const bad=frame.actors.filter(a=>!a.finite),escaped=frame.actors.filter(a=>a.distance!=null&&a.distance>Math.hypot(W,H)*1.08+180);
+ frame.integrity={nonFiniteActors:bad.map(a=>a.id),escapedActors:escaped.map(a=>a.id),duplicateIds:frame.actors.length-new Set(frame.actors.map(a=>a.id)).size,targetValid:!frame.target||frame.target.reachable,hitAccounting:(owen.quality?.attempts||0)-((owen.quality?.hits||0)+(owen.quality?.whiffs||0))};
+ if(realDelta>.45)replayEvent('FRAME_STALL',{realDelta:replayNumber(realDelta,4),simDelta:replayNumber(simDelta,4),cinematic:frame.cinematic?.type||'COMBAT',gpu:frame.perf?.gpu||'',hidden:document.hidden});
+ if(bad.length||escaped.length||frame.integrity.duplicateIds||!frame.integrity.targetValid)replayEvent('INTEGRITY_ANOMALY',frame.integrity);
+ replayV6Remember(frame)
+};
+function replayV6Summary(frames){
+ const events=replayV6.events,actors=new Set(),forms=new Set(),anomalies=[],gpu={},maxTarget={distance:0,t:0,id:null};let stalls=0,timeDebt=0,nonFinite=0,escaped=0,invalidTargets=0,minFps=Infinity,totalFps=0;
+ for(const frame of frames){
+  forms.add(frame.f);for(const actor of frame.actors||[])actors.add(actor.id);
+  const mode=frame.perf?.gpu||'UNKNOWN';gpu[mode]=(gpu[mode]||0)+1;
+  const fps=frame.perf?.fps||0;minFps=Math.min(minFps,fps);totalFps+=fps;
+  timeDebt+=frame.performance?.timeDebt||0;if((frame.performance?.realDelta||0)>.45)stalls++;
+  nonFinite+=frame.integrity?.nonFiniteActors?.length||0;escaped+=frame.integrity?.escapedActors?.length||0;if(frame.integrity&&!frame.integrity.targetValid)invalidTargets++;
+  if((frame.target?.distance||0)>maxTarget.distance)Object.assign(maxTarget,{distance:frame.target.distance,t:frame.t,id:frame.target.id})
+ }
+ const counts={};for(const event of events)counts[event.type]=(counts[event.type]||0)+1;
+ if(nonFinite)anomalies.push({severity:'CRITICAL',type:'NON_FINITE_ACTOR',count:nonFinite});
+ if(escaped)anomalies.push({severity:'HIGH',type:'ESCAPED_ACTOR',count:escaped});
+ if(invalidTargets)anomalies.push({severity:'HIGH',type:'UNREACHABLE_TARGET',count:invalidTargets});
+ if(stalls)anomalies.push({severity:'MEDIUM',type:'FRAME_STALL',count:stalls});
+ const last=frames.at(-1)||{};
+ return{duration:{simulation:last.t||0,real:last.rt||0,timeDebt:replayNumber(timeDebt,2)},outcome:{kills:last.k||0,hp:last.player?.hp??last.hp,stage:last.campaign?.stage||1,form:last.f||'BASE'},coverage:{frames:frames.length,events:events.length,actors:actors.size,forms:[...forms],dropped:replayV6.dropped},combat:{owen:last.directors?.owen||null,matty:last.directors?.matty||null,maxTarget,eventCounts:counts},performance:{minimumFps:minFps===Infinity?0:minFps,averageFps:frames.length?replayNumber(totalFps/frames.length,2):0,stalls,gpu},integrity:{nonFinite,escaped,invalidTargets,anomalies}}
+}
+exportReplay=function(){
+ const frames=orderedReplayFrames(),summary=replayV6Summary(frames),payload={version:replayV6.version,schema:replayV6.schema,createdAt:new Date().toISOString(),sampleHz:REPLAY_SAMPLE_HZ,retentionSeconds:REPLAY_MEMORY_SECONDS,frameCount:frames.length,eventCount:replayV6.events.length,openingSeconds:30,openingFrames:expansion59.openingReplay,frames,events:replayV6.events,summary,telemetry:['player-state','all-actor-state','stable-actor-identities','target-lock-causality','damage-resolution','actor-removal','griffin-decisions','lira-state','campaign-progression','matty-commands','owen-contact-grammar','zavier-recoveries','christian-mechanics','zenith-20','super-moves','transformations','world-scroll','structural-destruction','frame-stalls','simulation-time-debt','webgl-context','thermal-quality','integrity-anomalies']},a=document.createElement('a'),blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+ a.href=URL.createObjectURL(blob);a.download='jarvis-survivor-replay-v6.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+};
+const replayV6Button=$('#replayExport');if(replayV6Button)replayV6Button.onclick=exportReplay;
+
 })();
