@@ -2577,4 +2577,44 @@ rememberReplayFrame=function(frame){replay117(frame);frame.production118={render
 production118.ready=true;combatEvent('PRODUCTION_118_READY',{renderer:'DEPTH INTEGRATED AUTHORED 2.5D',poses:32,blending:'PHASE CROSSFADE',grounding:'PER FRAME CONTACT ANCHORS',depth:'SORTED ACTOR STAGE + VOLUMETRIC EXTRUSION'});
 
 
+
+/* Production 119 — real 32-frame authored motion library + mobile stage */
+const production119={version:'119',frames:0,actors:0,v1Frames:0,v2Frames:0,renderMs:0,peakMs:0,edgeSaves:0,contacts:0,ready:false};
+const atlas119={griffin:new Image(),lira:new Image(),gReady:false,lReady:false};
+atlas117Load(atlas119.griffin,'gReady','jarvis/assets/survivor/griffin-atlas-v2.webp');
+atlas119.griffin.onload=()=>{atlas119.gReady=true;production117.atlasLoads++};
+atlas119.griffin.onerror=()=>production117.atlasErrors++;
+atlas117Load(atlas119.lira,'lReady','jarvis/assets/survivor/lira-atlas-v2.webp');
+atlas119.lira.onload=()=>{atlas119.lReady=true;production117.atlasLoads++};
+atlas119.lira.onerror=()=>production117.atlasErrors++;
+const pose119={
+ GUARD:['v2',4,3],FLIGHT:['v1',2,3],DASH:['v2',1,2],VANISH:['v2',2,12],
+ PUNCH:['v2',5,6],ELBOW:['v2',7,8],KNEE:['v2',8,9],UPPERCUT:['v2',8,9],
+ BACK_KICK:['v2',10,11],SPIN_KICK:['v2',10,11],AXE_KICK:['v2',10,11],
+ BEAM_BRACE:['v1',9,9],BEAM_CHARGE:['v1',9,10],BEAM_FIRE:['v1',9,10],CLASH:['v1',10,14],
+ CHARGE:['v1',0,9],NOVA_CROUCH:['v1',12,12],NOVA_EXPAND:['v1',12,13],NOVA_RELEASE:['v1',13,14],
+ TRANSFORM:['v1',9,13],FINISHER:['v2',7,11],SUPER_RECOVER:['v2',13,15],HIT:['v2',14,15]
+};
+function pick119(p,q,seed=0){const m=pose119[p]||pose119.GUARD,threshold=.42+((seed%3)-1)*.06;return{set:m[0],frame:q<threshold?m[1]:m[2]}}
+function arena119(g){if(!atlas117.aReady){scene116(g);return}const img=atlas117.arena,iw=img.naturalWidth,ih=img.naturalHeight,parX=clamp((W*.5-player.x)*.012,-9,9),parY=clamp((H*.55-player.y)*.006,-4,4),sc=Math.max((W+30)/iw,(H+18)/ih),sw=(W+30)/sc,sh=(H+18)/sc,sx=clamp((iw-sw)/2-parX/sc,0,Math.max(0,iw-sw)),sy=clamp((ih-sh)/2-parY/sc,0,Math.max(0,ih-sh));g.drawImage(img,sx,sy,sw,sh,-15,-9,W+30,H+18);const grade=g.createLinearGradient(0,H*.35,0,H);grade.addColorStop(0,'#15103a00');grade.addColorStop(.68,'#0b071510');grade.addColorStop(1,'#02030a66');g.fillStyle=grade;g.fillRect(0,0,W,H)}
+function sprite119(g,img,index,x,y,w,flip,hit=false,air=0){
+ const cw=img.naturalWidth/4,ch=img.naturalHeight/4,col=index%4,row=index/4|0,h=w*(ch/cw),ground=y,feet=.885*h;
+ g.save();g.globalAlpha=.32*(1-clamp(air/160,0,.7));g.fillStyle='#05030b';g.beginPath();g.ellipse(x,ground+3,w*.235,w*.052,0,0,TAU);g.fill();g.restore();
+ g.save();g.translate(x,ground-air);if(flip)g.scale(-1,1);g.globalAlpha=hit?.72:1;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,col*cw,row*ch,cw,ch,-w*.5,-feet,w,h);g.restore();production119.actors++;if(air<1)production119.contacts++
+}
+function enemyPose119(e,rank){if(e.hit>0)return'HIT';if(e.attackClock<.24)return['PUNCH','ELBOW','KNEE','BACK_KICK','UPPERCUT'][rank%5];if(e.role==='RUSHER')return rank%2?'DASH':'VANISH';if(e.role==='SNIPER')return rank%2?'BEAM_CHARGE':'BEAM_FIRE';if(e.role==='TANK')return rank%2?'GUARD':'CHARGE';return['GUARD','FLIGHT','CHARGE','SPIN_KICK'][rank%4]}
+vector113Frame=function(){
+ const begin=performance.now();vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.25:1.5),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);arena119(g);
+ const newArt=atlas119.gReady&&atlas119.lReady,baseArt=atlas117.gReady&&atlas117.lReady,heroBase=Math.min(W,H)*(W<720?.26:.17),ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&e.y>-60&&e.y<H+60&&e.x>-60&&e.x<W+60).sort((a,b)=>a.y-b.y),cap=W<720?8:12,actors=[];
+ for(const [rank,e] of ordered.slice(-cap).entries()){const p=enemyPose119(e,rank),q=e.attackClock<.24?clamp((.24-e.attackClock)/.24,0,1):(.5+.5*Math.sin(elapsed*3+rank*1.37));actors.push({e,p,q,rank,sort:e.y})}
+ actors.push({hero:true,p:owen.pose||'GUARD',q:clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1),sort:player.y+.01});actors.sort((a,b)=>a.sort-b.sort);
+ for(const a of actors){if(a.hero){const target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null,flip=target?target.x<player.x:Math.sin(griffin.heading||0)<0,p=pick119(a.p,a.q,0),img=p.set==='v2'&&newArt?atlas119.griffin:atlas117.griffin,frame=p.set==='v2'&&newArt?p.frame:frame117(a.p,a.q),x=clamp(player.x,heroBase*.58,W-heroBase*.58),y=clamp(player.y,H*.38,H*.86),air=/FLIGHT|DASH|VANISH|KNEE|UPPERCUT|SPIN_KICK/.test(a.p)?Math.sin(Math.PI*a.q)*heroBase*.1:0;sprite119(g,img,frame,x,y,heroBase,flip,false,air);if(p.set==='v2'&&newArt)production119.v2Frames++;else production119.v1Frames++}
+ else{const e=a.e,boss=e.type===3,p=pick119(a.p,a.q,a.rank+(e.slot||0)),img=p.set==='v2'&&newArt?atlas119.lira:atlas117.lira,frame=p.set==='v2'&&newArt?p.frame:frame117(a.p,a.q),depth=.82+clamp(e.y/H,0,1)*.22,size=heroBase*(boss?1.02:.52+e.type*.045)*depth,x=clamp(e.x,size*.56,W-size*.56),y=clamp(e.y,H*.38,H*.87),air=/FLIGHT|DASH|VANISH|KNEE|SPIN_KICK/.test(a.p)?Math.sin(Math.PI*a.q)*size*.09:0;if(x!==e.x)production119.edgeSaves++;sprite119(g,img,frame,x,y,size,e.x<player.x,e.hit>0,air);if(p.set==='v2'&&newArt)production119.v2Frames++;else production119.v1Frames++}}
+ combatOverlay117(g);production113.frames++;production115.frames++;production115.pose=owen.pose;production115.phase=owen.phase;production116.characters+=actors.length;production116.worldAnchors++;production116.frames++;production117.frames++;production118.frames++;production119.frames++;const cost=performance.now()-begin;production119.renderMs+=(cost-production119.renderMs)*.05;production119.peakMs=Math.max(production119.peakMs,cost)
+};
+const replay118=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay118(frame);frame.production119={renderer:'AUTHORED 32 FRAME MOBILE STAGE',atlases:{griffinV2:atlas119.gReady,liraV2:atlas119.lReady},actors:production119.actors,v1Frames:production119.v1Frames,v2Frames:production119.v2Frames,contacts:production119.contacts,edgeSaves:production119.edgeSaves,renderMs:+production119.renderMs.toFixed(2),peakMs:+production119.peakMs.toFixed(2),singlePass:true,realAuthoredPoses:32,fakeExtrusion:false,blurFilters:false}};
+production119.ready=true;combatEvent('PRODUCTION_119_READY',{poses:'32 AUTHORED FRAMES PER CHARACTER',renderer:'SINGLE PASS MOBILE STAGE',lighting:'ARENA MATCHED',performance:'NO BLUR OR EXTRUSION LOOPS'});
+
+
 })();
