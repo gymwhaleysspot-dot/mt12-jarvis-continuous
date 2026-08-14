@@ -2617,4 +2617,47 @@ rememberReplayFrame=function(frame){replay118(frame);frame.production119={render
 production119.ready=true;combatEvent('PRODUCTION_119_READY',{poses:'32 AUTHORED FRAMES PER CHARACTER',renderer:'SINGLE PASS MOBILE STAGE',lighting:'ARENA MATCHED',performance:'NO BLUR OR EXTRUSION LOOPS'});
 
 
+
+/* Production 120 — large-character real-time animation director */
+const production120={version:'120',frames:0,independentFrames:0,mainFrames:0,sequenceChanges:0,heroScale:0,enemyScale:0,poses:{},ready:false};
+const sequence120={
+ IDLE:[0,1,0,4],GUARD:[3,4,3,0],FLIGHT:[12,1,2,12],DASH:[1,2,12,1],VANISH:[2,12,1],
+ PUNCH:[5,6,7,4],ELBOW:[5,8,7,4],KNEE:[3,9,8,4],UPPERCUT:[5,8,7,4],
+ BACK_KICK:[3,10,11,4],SPIN_KICK:[10,11,12,4],AXE_KICK:[3,10,11,13],
+ BEAM_BRACE:[3,4,5],BEAM_CHARGE:[3,5,6],BEAM_FIRE:[5,6,7,4],CLASH:[4,5,7,14],
+ CHARGE:[3,4,0,4],NOVA_CROUCH:[3,13,3],NOVA_EXPAND:[13,5,7],NOVA_RELEASE:[5,7,11,13],
+ TRANSFORM:[3,13,0,4],FINISHER:[5,6,7,11,13],SUPER_RECOVER:[13,15,0],HIT:[14,15,3]
+};
+const stage120={lastPaint:0,loopStarted:false,heroState:{pose:'',started:0},enemyState:new WeakMap(),lastSource:'main'};
+function animation120(pose,entity,seed=0){
+ const now=performance.now(),state=entity===player?stage120.heroState:(stage120.enemyState.get(entity)||{pose:'',started:now});
+ if(state.pose!==pose){state.pose=pose;state.started=now;production120.sequenceChanges++}if(entity!==player)stage120.enemyState.set(entity,state);
+ const seq=sequence120[pose]||sequence120.IDLE,action=/PUNCH|ELBOW|KNEE|KICK|UPPERCUT|BEAM|CLASH|NOVA|FINISHER|HIT|RECOVER/.test(pose),step=action?105:155,index=Math.floor((now-state.started+seed*41)/step),frame=seq[index%seq.length];
+ production120.poses[pose]=(production120.poses[pose]||0)+1;return{frame,index:index%seq.length}
+}
+function sprite120(g,img,index,x,y,w,flip,hit=false,air=0){
+ const cw=img.naturalWidth/4,ch=img.naturalHeight/4,col=index%4,row=index/4|0,h=w*(ch/cw),tumble=index===14,landing=index===13,recover=index===15,feet=tumble?.72:landing?.91:recover?.9:.89;
+ g.save();g.globalAlpha=.4*(1-clamp(air/180,0,.72));g.fillStyle='#04020a';g.beginPath();g.ellipse(x,y+4,w*(tumble?.3:.245),w*.058,0,0,TAU);g.fill();g.restore();
+ g.save();g.translate(x,y-air);if(flip)g.scale(-1,1);g.globalAlpha=hit?.76:1;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,col*cw,row*ch,cw,ch,-w*.5,-h*feet,w,h);g.restore()
+}
+function poseEnemy120(e,rank){if(e.hit>0)return'HIT';if(e.attackClock<.24)return['PUNCH','ELBOW','KNEE','BACK_KICK','UPPERCUT','SPIN_KICK'][rank%6];if(e.role==='RUSHER')return rank%2?'DASH':'VANISH';if(e.role==='SNIPER')return rank%2?'BEAM_CHARGE':'BEAM_FIRE';if(e.role==='TANK')return rank%2?'GUARD':'CHARGE';return['IDLE','GUARD','FLIGHT','DASH'][rank%4]}
+function render120(source='main'){
+ const now=performance.now();if(now-stage120.lastPaint<24)return;stage120.lastPaint=now;stage120.lastSource=source;
+ vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.2:1.4),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);arena119(g);
+ const ready=atlas119.gReady&&atlas119.lReady,heroBase=Math.min(W,H)*(W<720?.36:.225),ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&e.y>-80&&e.y<H+80&&e.x>-90&&e.x<W+90).sort((a,b)=>a.y-b.y),cap=W<720?7:11,actors=[];
+ production120.heroScale=heroBase;production120.enemyScale=heroBase*.64;
+ for(const [rank,e] of ordered.slice(-cap).entries())actors.push({e,rank,pose:poseEnemy120(e,rank),sort:e.y});
+ actors.push({hero:true,pose:owen.pose||'IDLE',sort:player.y+.01});actors.sort((a,b)=>a.sort-b.sort);
+ for(const a of actors){if(a.hero){const target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null,flip=target?target.x<player.x:Math.sin(griffin.heading||0)<0,anim=animation120(a.pose,player,0),x=clamp(player.x,heroBase*.56,W-heroBase*.56),y=clamp(player.y,H*.43,H*.87),air=/FLIGHT|DASH|VANISH|KNEE|UPPERCUT|SPIN_KICK/.test(a.pose)?Math.abs(Math.sin(now*.006))*heroBase*.08:0;if(ready)sprite120(g,atlas119.griffin,anim.frame,x,y,heroBase,flip,false,air);else sprite119(g,atlas117.griffin,frame117(a.pose,0),x,y,heroBase,flip,false,air)}
+ else{const e=a.e,boss=e.type===3,depth=.92+clamp(e.y/H,0,1)*.2,size=heroBase*(boss?1.04:.62+e.type*.05)*depth,anim=animation120(a.pose,e,a.rank+(e.slot||0)),x=clamp(e.x,size*.54,W-size*.54),y=clamp(e.y,H*.43,H*.87),air=/FLIGHT|DASH|VANISH|KNEE|SPIN_KICK/.test(a.pose)?Math.abs(Math.sin(now*.006+a.rank))*size*.07:0;if(ready)sprite120(g,atlas119.lira,anim.frame,x,y,size,e.x<player.x,e.hit>0,air);else sprite119(g,atlas117.lira,frame117(a.pose,0),x,y,size,e.x<player.x,e.hit>0,air)}}
+ combatOverlay117(g);production120.frames++;if(source==='loop')production120.independentFrames++;else production120.mainFrames++
+}
+vector113Frame=function(){render120('main')};
+function stage120Loop(){if(!stage120.loopStarted)return;render120('loop');requestAnimationFrame(stage120Loop)}
+stage120.loopStarted=true;requestAnimationFrame(stage120Loop);
+const replay119=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay119(frame);frame.production120={renderer:'LARGE AUTHORED REAL TIME STAGE',frames:production120.frames,independentFrames:production120.independentFrames,mainFrames:production120.mainFrames,sequenceChanges:production120.sequenceChanges,heroScale:production120.heroScale,enemyScale:production120.enemyScale,poses:{...production120.poses},v2Only:atlas119.gReady&&atlas119.lReady,wallClockAnimation:true,actorVisibility:'ENLARGED',animationSets:Object.keys(sequence120).length}};
+production120.ready=true;combatEvent('PRODUCTION_120_READY',{characters:'36 PERCENT MOBILE / 22.5 PERCENT DESKTOP',animations:Object.keys(sequence120).length,frames:'REAL TIME WALL CLOCK',art:'V2 ONLY',renderer:'INDEPENDENT 40FPS CAP'});
+
+
 })();
