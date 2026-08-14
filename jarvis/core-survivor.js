@@ -560,6 +560,17 @@ owenGriffin=function(yaw,color,form){max5FamilyGriffin(yaw,color,form);owenFamil
 // anatomy, distinct boss silhouettes, terrain landmarks and contact lighting
 // without touching combat simulation, hit resolution, or Xavier's frame budget.
 const production={name:'IYLA PRODUCTION RENDER',version:'1.0',terrain:24,bossKits:5,fxCap:36};
+// Curtis Visibility Director owns scene composition while Matty directs combat,
+// Owen directs motion, Iyla renders, and Xavier protects the frame budget.
+// The world-pass boundary keeps terrain from burying either fighter in WebGL
+// and in the software-depth fallback without altering simulation coordinates.
+const curtis={name:'CURTIS VISIBILITY DIRECTOR',version:'1.0',role:'SCENE COMPOSITION + CAMERA SAFETY',mode:'CALIBRATING',worldPass:false,worldObjects:0,culled:0,faded:0,budget:72,clarity:1,focusX:0,focusZ:0};
+const curtisBaseBox=iylaBox,curtisBaseRound=iylaRound;
+function curtisBeginWorld(){curtis.worldPass=true;curtis.worldObjects=curtis.culled=curtis.faded=0;const mobile=W<720,pressure=superAI.tier===1||superAI.stall||iyla.fps<42;curtis.budget=pressure?(mobile?30:42):(mobile?46:68);const target=zTarget(),tx=target?(target.x-W/2)/45:0,tz=target?(target.y-H/2)/45:0;curtis.focusX=tx*.42;curtis.focusZ=tz*.42;curtis.mode=!iyla3d.gl?'SOFTWARE CLARITY':pressure?'FRAME-SAFE CLARITY':zCinema.combo||griffin.superMove?.active?'CONTACT FOCUS':'ARENA COMPOSITION'}
+function curtisEndWorld(){curtis.worldPass=false;const total=Math.max(1,curtis.worldObjects+curtis.culled);curtis.clarity=clamp(1-curtis.faded*.012-curtis.culled/total*.08,.72,1);const desired=(zCinema.combo||griffin.superMove?.active)?.91:enemies.length?.96:1;zStage.zoom+=(clamp(desired,.88,1)-zStage.zoom)*.12}
+function curtisWorldAlpha(px,py,pz,sx,sy,sz,alpha){if(!curtis.worldPass)return alpha;const floor=py+sy<.22||sy<.11;if(floor)return alpha;curtis.worldObjects++;const cap=curtis.budget,dx=px-curtis.focusX,dz=pz-curtis.focusZ,near=Math.hypot(px,pz)<2.7,corridor=Math.abs(dx*.86-dz*.5)<1.55&&Math.hypot(dx,dz)<7.2,projected=iylaIsoPoint(px,py,pz),screenBlock=Math.abs(projected.x-W/2)<Math.max(105,W*.18)&&projected.y>H*.27&&projected.y<H*.79;if(curtis.worldObjects>cap){curtis.culled++;return 0}if(near||corridor||screenBlock){const fade=near?.06:corridor?.14:.2;curtis.faded++;return Math.min(alpha,fade)}return alpha}
+iylaBox=function(px,py,pz,sx,sy,sz,color,yaw=0,alpha=1){alpha=curtisWorldAlpha(px,py,pz,sx,sy,sz,alpha);if(alpha<=.015)return;curtisBaseBox(px,py,pz,sx,sy,sz,color,yaw,alpha)};
+iylaRound=function(px,py,pz,sx,sy,sz,color,yaw=0,alpha=1){alpha=curtisWorldAlpha(px,py,pz,sx,sy,sz,alpha);if(alpha<=.015)return;curtisBaseRound(px,py,pz,sx,sy,sz,color,yaw,alpha)};
 function productionGriffinDetail(yaw,color,form){
  const v=owenAxes(yaw),lift=.12+(zStage.elevation||0)*.28,s=1.14,front=.34*s,headY=1.98*s+lift,skin=[.88,.57,.38],dark=[.045,.025,.035],white=[.9,.96,1],cloth=[.92,.24,.025],blue=[.04,.2,.62];
  // Face planes, ears, brow, nose and mouth remain readable from the tilted camera.
@@ -585,14 +596,16 @@ const productionBaseLira=owenLira;
 owenLira=function(e,boss){productionBaseLira(e,boss);if(boss)productionLiraKit(e)};
 const productionBaseWorld=iyla3DWorld;
 iyla3DWorld=function(){
- productionBaseWorld();const stage=campaign.stage||1,ox=-(((worldX/45)%18+18)%18),oz=-(((worldY/45)%18+18)%18),stone=stage%3===0?[.16,.11,.08]:stage%2?[.075,.13,.15]:[.11,.08,.16],light=stage%3===0?[1,.46,.08]:stage%2?[.08,.75,.68]:[.62,.22,1];
+ curtisBeginWorld();try{productionBaseWorld();const stage=campaign.stage||1,ox=-(((worldX/45)%18+18)%18),oz=-(((worldY/45)%18+18)%18),stone=stage%3===0?[.16,.11,.08]:stage%2?[.075,.13,.15]:[.11,.08,.16],light=stage%3===0?[1,.46,.08]:stage%2?[.08,.75,.68]:[.62,.22,1];
  // Raised paths, broken columns, craters and skyline pylons give each scrolling
  // level navigable landmarks while remaining deterministic and mobile-safe.
  for(let n=0;n<8;n++){const row=Math.floor(n/4),col=n%4,px=ox-7+col*4.6,pz=oz-2+row*5.2,h=.12+(n%3)*.045;iylaBox(px,-.02,pz,1.55,h,1.12,n===stage%8?light:stone,n*.31,.9)}
  for(let n=0;n<6;n++){const a=n*2.399+stage*.47,r=7.2+(n%2)*2.1,px=ox+Math.cos(a)*r,pz=oz+Math.sin(a)*r,h=.8+(n%3)*.7;iylaBox(px,h*.5,pz,.34,h*.5,.34,stone,a,.9);iylaBox(px,h+.08,pz,.52,.09,.52,light,a,.72)}
  for(let n=0;n<5;n++){const a=n*TAU/5+stage,r=3.2+n*.72,px=ox+Math.cos(a)*r,pz=oz+Math.sin(a)*r;iylaRound(px,.015,pz,.7+n*.08,.018,.42+n*.05,[.015,.02,.025],a,.58)}
- for(let n=0;n<5;n++){const a=n*TAU/5+.35,r=15.5+(n&1)*2.2;iylaBox(Math.cos(a)*r,2.4+(n%3)*1.2,Math.sin(a)*r,.34,2.4+(n%3)*1.2,.34,n===stage%5?light:stone,a,.5)}
+ for(let n=0;n<5;n++){const a=n*TAU/5+.35,r=15.5+(n&1)*2.2;iylaBox(Math.cos(a)*r,2.4+(n%3)*1.2,Math.sin(a)*r,.34,2.4+(n%3)*1.2,.34,n===stage%5?light:stone,a,.5)}}finally{curtisEndWorld()}
 };
+const curtisBase3DFrame=iyla3DFrame;
+iyla3DFrame=function(dt){curtisBase3DFrame(dt);const el=$('#iylaDetail');if(el)el.innerHTML+=`<br>CURTIS ${curtis.mode} · CLARITY ${Math.round(curtis.clarity*100)}%<br>SCENE ${curtis.worldObjects}/${curtis.budget} · FADED ${curtis.faded} · CULLED ${curtis.culled}`};
 // Controlled contact lighting makes hits legible without full-screen white wash.
 const productionBaseStageVisuals=zStageVisuals;
 zStageVisuals=function(){productionBaseStageVisuals();const impacts=zCinema.impacts.slice(-4);x.save();x.globalCompositeOperation='screen';for(const p of impacts){const q=clamp((p.life||0)/(p.max||.24),0,1);if(q<=0)continue;const r=12+q*24,g=x.createRadialGradient(p.x,p.y,1,p.x,p.y,r);g.addColorStop(0,`rgba(255,255,255,${q*.72})`);g.addColorStop(.3,`rgba(90,240,255,${q*.28})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,r,0,TAU);x.fill()}x.restore()};
