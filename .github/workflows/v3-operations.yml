@@ -1,0 +1,74 @@
+name: A17Y Engineering OS v3 Operations
+on:
+  workflow_dispatch:
+    inputs:
+      mission:
+        description: Council mission
+        required: false
+        default: Review the highest-value engineering opportunity
+  schedule:
+    - cron: '37 10 * * *'
+  push:
+    branches: [main]
+    paths:
+      - director/v3/**
+      - research/**
+      - director/memory.json
+      - evidence/**
+      - tests/replays/**
+permissions:
+  contents: write
+  models: read
+  actions: read
+concurrency:
+  group: a17y-v3-operations
+  cancel-in-progress: true
+jobs:
+  operate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      V3_MISSION: ${{ inputs.mission || 'Review the highest-value engineering opportunity' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate v3 modules
+        run: |
+          for f in director/v3/knowledge.mjs director/v3/council.mjs director/v3/health.mjs director/v3/report.mjs; do node --check "$f"; done
+          node -e "JSON.parse(require('fs').readFileSync('director/v3/config.json'))"
+          node -e "const x=JSON.parse(require('fs').readFileSync('director/v3/features.json'));if(x.features.length!==100)throw Error('roadmap must contain 100 features')"
+      - name: Build searchable engineering knowledge
+        run: node director/v3/knowledge.mjs
+      - name: Run independent engineering council
+        run: node director/v3/council.mjs
+      - name: Check system health and repository integrity
+        run: node director/v3/health.mjs
+      - name: Build weekly engineering report
+        if: always()
+        run: node director/v3/report.mjs
+      - name: Publish v3 evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: a17y-engineering-os-v3
+          path: dist-v3
+          if-no-files-found: error
+          retention-days: 90
+      - name: Publish latest dashboard data
+        if: always() && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p public/v3-data
+          cp dist-v3/*.json public/v3-data/ || true
+          cp dist-v3/weekly-report.md public/v3-data/ || true
+          git config user.name 'A17Y Engineering OS v3'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/v3-data
+          git commit -m 'Publish v3 engineering status [skip ci]' || true
+          git pull --rebase origin main
+          git push

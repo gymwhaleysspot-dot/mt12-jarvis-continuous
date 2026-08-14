@@ -1,0 +1,115 @@
+name: Jarvis Complete Autonomous Factory
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: scout, deep, architecture, or full
+        required: false
+        default: full
+        type: choice
+        options: [scout, deep, architecture, full]
+
+permissions:
+  contents: read
+  actions: read
+  models: read
+
+concurrency:
+  group: jarvis-complete-factory-manual
+  cancel-in-progress: true
+
+jobs:
+  plan-build-rank:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      mission: ${{ steps.meta.outputs.mission }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install deterministic toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - id: meta
+        run: echo "mission=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Validate factory architecture
+        run: |
+          python3 -m json.tool factory/config.json >/dev/null
+          python3 -m json.tool factory/benchmarks.json >/dev/null
+          python3 -m json.tool factory/vehicle-model.json >/dev/null
+          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py tools/adaptive_digital_twin.py tools/log_identity_imprint.py tools/log_identity_attribution.py tools/historical_log_reingest.py tools/controller_genome.py tools/episode_learning.py tools/active_experiment_planner.py
+          bash -n toolchain/compile_mt12.sh
+      - name: Run unified observe-research-build-learn cycle
+        env:
+          FACTORY_MODE: ${{ inputs.mode || 'full' }}
+          RELEASE_TYPE: X
+          SERIES: a17zx
+        run: python3 tools/jarvis_factory.py
+      - name: Imprint and relearn historical evidence
+        run: |
+          python3 tools/log_identity_imprint.py
+          python3 tools/historical_log_reingest.py
+          python3 tools/episode_learning.py
+          python3 tools/adaptive_digital_twin.py
+          python3 tools/active_experiment_planner.py
+          python3 tools/controller_genome.py
+      - name: Upload manual factory plan and candidates
+        uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-manual-factory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist-jarvis-factory/
+            dist-controller-tournament/
+          if-no-files-found: error
+          retention-days: 90
+
+  parallel-evaluation:
+    needs: plan-build-rank
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [core, sensors, airborne, persistence, adversarial]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
+        with:
+          name: jarvis-manual-factory-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Evaluate scenario group
+        env:
+          EVAL_GROUP: ${{ matrix.group }}
+        run: python3 tools/factory_matrix_eval.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-manual-eval-${{ matrix.group }}-${{ github.run_id }}
+          path: dist-eval-${{ matrix.group }}.json
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    needs: [plan-build-rank, parallel-evaluation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          path: dist-factory-artifacts
+      - name: Package complete manual evaluation
+        run: |
+          set -Eeuo pipefail
+          tar -czf jarvis-manual-factory-evidence-${GITHUB_RUN_ID}.tgz dist-factory-artifacts
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-manual-factory-evidence-${{ github.run_id }}
+          path: jarvis-manual-factory-evidence-${{ github.run_id }}.tgz
+          if-no-files-found: error
+          retention-days: 90

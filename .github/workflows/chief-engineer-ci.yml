@@ -1,0 +1,25 @@
+name: Chief Engineer Backend CI
+on:
+  pull_request:
+    paths:
+      - chief-engineer/**
+      - public/chief-data/**
+      - .github/workflows/chief-engineer.yml
+      - .github/workflows/chief-engineer-ci.yml
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate chief engineer intelligence backend
+        run: |
+          set -euo pipefail
+          node --check chief-engineer/engine.mjs
+          node --check chief-engineer/app.js
+          node -e "const m=JSON.parse(require('fs').readFileSync('chief-engineer/memory.json'));if(m.identity?.name!=='Aegis')throw Error('Chief memory identity missing')"
+          node chief-engineer/engine.mjs > /tmp/chief-output.json
+          for f in dashboard graph backlog contradictions; do test -f "public/chief-data/$f.json"; done
+          grep -q 'RECOMMEND_AND_DISPATCH_ONLY' chief-engineer/engine.mjs
+          grep -q 'autoPromotion:false' chief-engineer/engine.mjs

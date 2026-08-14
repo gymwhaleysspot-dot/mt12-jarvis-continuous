@@ -1,0 +1,34 @@
+name: Jarvis Continuous Mission Handoff
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: jarvis-continuous-mission-handoff
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Report authoritative Jarvis lanes without dispatching successors
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo 'Jarvis orchestration contract:'
+          echo '- Autonomous controller producer: jarvis-complete-rewrite-factory.yml'
+          echo '- Scheduler/health authority: jarvis-always-on.yml'
+          echo '- Intelligence lanes: analysis/evidence only; no controller publication'
+          echo '- Secondary builders: explicit/manual only'
+          echo
+          gh run list --repo "$REPO" --limit 40 \
+            --json databaseId,status,conclusion,workflowName,createdAt \
+            --jq '.[] | "- \(.workflowName) #\(.databaseId): \(.status) / \(.conclusion // "pending")"'

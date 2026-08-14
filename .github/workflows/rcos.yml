@@ -1,0 +1,80 @@
+name: A17Y RC Engineering OS
+on:
+  workflow_dispatch:
+    inputs:
+      child:
+        description: Child Lua path; blank verifies exact A17Y
+        required: false
+        default: ''
+      mission:
+        description: One narrowly scoped engineering mission
+        required: false
+        default: Exact deterministic release
+      logs:
+        description: Space-separated CSV paths under tests/replays
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths:
+      - a17y.lua
+      - candidates/**
+      - protected/**
+      - workbench/**
+      - toolchain/**
+      - scripts/mt12-harness.lua
+      - tests/replays/**
+      - .github/workflows/rcos.yml
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: a17y-rcos-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  engineer-verify-replay-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate RC Engineering OS
+        run: |
+          test -f a17y.lua
+          node --check workbench/rcos.mjs
+          node --check toolchain/normalize_luac53_mt12.js
+          bash -n toolchain/compile_mt12.sh
+          luac5.3 -p scripts/mt12-harness.lua
+      - name: Engineer, verify, replay, explain and stage release
+        env:
+          CHILD: ${{ inputs.child }}
+          MISSION: ${{ inputs.mission }}
+          LOGS: ${{ inputs.logs }}
+        run: |
+          set -Eeuo pipefail
+          C="${CHILD:-a17y.lua}"
+          read -r -a LOG_ARRAY <<< "${LOGS:-}"
+          node workbench/rcos.mjs a17y.lua "$C" "${MISSION:-Exact deterministic release}" "${LOG_ARRAY[@]}"
+      - name: Reproduce child byte-for-byte
+        run: |
+          MAX_BYTES=87000 toolchain/compile_mt12.sh dist-rcos/CHILD.lua dist-rcos/rebuilt.luac
+          cmp dist-rcos/DEPLOY.luac dist-rcos/rebuilt.luac
+          rm dist-rcos/rebuilt.luac
+      - name: Package complete evidence
+        run: |
+          cd dist-rcos
+          zip -9 -r ../a17y-rc-engineering-os.zip .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-rc-engineering-os
+          path: a17y-rc-engineering-os.zip
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,31 @@
+name: Legacy Home Backend CI
+on:
+  pull_request:
+    paths:
+      - home/**
+      - .github/workflows/workbench.yml
+      - .github/workflows/autonomous-director.yml
+      - .github/workflows/home-os-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - home/**
+      - .github/workflows/workbench.yml
+      - .github/workflows/autonomous-director.yml
+permissions: {contents: read}
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate retained backend modules and workflow contracts
+        run: |
+          set -euo pipefail
+          node --check home/api.js
+          node --check home/replay.js
+          node --check home/app.js
+          ruby -e "require 'yaml'; YAML.load_file('.github/workflows/workbench.yml'); YAML.load_file('.github/workflows/autonomous-director.yml')"
+          for key in logs model request_id; do grep -q "$key:" .github/workflows/workbench.yml; done
+          grep -q 'Candidate path outside approved roots' .github/workflows/workbench.yml

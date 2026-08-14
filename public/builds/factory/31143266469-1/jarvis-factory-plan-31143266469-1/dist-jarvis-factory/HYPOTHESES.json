@@ -1,0 +1,111 @@
+[
+  {
+    "confidence": 0.62,
+    "evidence": [
+      "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+      "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv",
+      "{'id': 'q-jump-001', 'question': 'Which recorded signals best distinguish launch wheelspin from true airborne motion?', 'priority': 100, 'status': 'OPEN', 'system': 'jump detection', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}",
+      "{'id': 'q-rpm-001', 'question': 'Can adaptive RPM delay estimation reduce truth-speed error without increasing overshoot?', 'priority': 95, 'status': 'OPEN', 'system': 'truth RPM and MPH', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}"
+    ],
+    "expectedEffects": {
+      "confidenceCalibration": 2.5,
+      "truthAccuracy": 2.0
+    },
+    "id": "3387a22e11b2",
+    "population": "repair",
+    "requiredTests": [
+      "gps_dropout",
+      "rpm_delay",
+      "sensor_disagreement"
+    ],
+    "risk": "medium",
+    "statement": "Improve truth-source confidence calibration and mismatch recovery"
+  },
+  {
+    "confidence": 0.62,
+    "evidence": [
+      "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+      "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv",
+      "{'id': 'q-jump-001', 'question': 'Which recorded signals best distinguish launch wheelspin from true airborne motion?', 'priority': 100, 'status': 'OPEN', 'system': 'jump detection', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}",
+      "{'id': 'q-rpm-001', 'question': 'Can adaptive RPM delay estimation reduce truth-speed error without increasing overshoot?', 'priority': 95, 'status': 'OPEN', 'system': 'truth RPM and MPH', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}"
+    ],
+    "expectedEffects": {
+      "causalExplanation": 2.0,
+      "falsePositiveResistance": 2.5
+    },
+    "id": "3d30d843c007",
+    "population": "exploit",
+    "requiredTests": [
+      "wet_launch",
+      "corner_exit",
+      "throttle_release"
+    ],
+    "risk": "medium",
+    "statement": "Reduce false intervention through causal episode outcome learning"
+  },
+  {
+    "confidence": 0.62,
+    "evidence": [
+      "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+      "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv",
+      "{'id': 'q-jump-001', 'question': 'Which recorded signals best distinguish launch wheelspin from true airborne motion?', 'priority': 100, 'status': 'OPEN', 'system': 'jump detection', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}",
+      "{'id': 'q-rpm-001', 'question': 'Can adaptive RPM delay estimation reduce truth-speed error without increasing overshoot?', 'priority': 95, 'status': 'OPEN', 'system': 'truth RPM and MPH', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}"
+    ],
+    "expectedEffects": {
+      "faultTolerance": 3.0,
+      "recoverySpeed": 1.5
+    },
+    "id": "3134089ac4c3",
+    "population": "repair",
+    "requiredTests": [
+      "telemetry_freeze",
+      "corrupt_memory",
+      "reconnect_storm"
+    ],
+    "risk": "medium",
+    "statement": "Increase fault tolerance under frozen or corrupt telemetry"
+  },
+  {
+    "confidence": 0.62,
+    "evidence": [
+      "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+      "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv",
+      "{'id': 'q-jump-001', 'question': 'Which recorded signals best distinguish launch wheelspin from true airborne motion?', 'priority': 100, 'status': 'OPEN', 'system': 'jump detection', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}",
+      "{'id': 'q-rpm-001', 'question': 'Can adaptive RPM delay estimation reduce truth-speed error without increasing overshoot?', 'priority': 95, 'status': 'OPEN', 'system': 'truth RPM and MPH', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}"
+    ],
+    "expectedEffects": {
+      "learningStability": 0.5,
+      "runtimeEfficiency": 3.0
+    },
+    "id": "9bfdc1625a9f",
+    "population": "compression",
+    "requiredTests": [
+      "long_runtime",
+      "memory_load_save"
+    ],
+    "risk": "medium",
+    "statement": "Compress duplicated decision paths without reducing behavior"
+  },
+  {
+    "confidence": 0.62,
+    "evidence": [
+      "tests/replays/ad3157eb862599301afc0594bf9dc1568fcbfc6ea5863c5ec5c3dd362f69283e-gvbb.csv",
+      "tests/replays/c391939338fbb70c56585cb9e2fdb4cc489c7763b179b9f03f06fa01ca6fd23d-C3AI4H-2026-07-31-203326.csv",
+      "{'id': 'q-jump-001', 'question': 'Which recorded signals best distinguish launch wheelspin from true airborne motion?', 'priority': 100, 'status': 'OPEN', 'system': 'jump detection', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}",
+      "{'id': 'q-rpm-001', 'question': 'Can adaptive RPM delay estimation reduce truth-speed error without increasing overshoot?', 'priority': 95, 'status': 'OPEN', 'system': 'truth RPM and MPH', 'createdAt': '2026-08-02T00:00:00Z', 'evidence': []}"
+    ],
+    "expectedEffects": {
+      "causalExplanation": 2.5,
+      "interventionCorrectness": 2.0
+    },
+    "id": "3f7c412d8a6a",
+    "population": "explore",
+    "requiredTests": [
+      "false_airborne",
+      "jump_landing",
+      "alternating_traction"
+    ],
+    "risk": "medium",
+    "statement": "Explore competing-hypothesis arbitration for traction and airborne events"
+  }
+]

@@ -1,0 +1,77 @@
+name: Jarvis Actions History Cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/actions-history-cleanup.yml
+  workflow_dispatch:
+  schedule:
+    - cron: '17 7 * * *'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: jarvis-actions-history-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Remove completed non-success workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          deleted=0
+          page=1
+          while :; do
+            data="$(gh api "/repos/$REPO/actions/runs?per_page=100&page=$page")"
+            count="$(jq '.workflow_runs | length' <<<"$data")"
+            [ "$count" -eq 0 ] && break
+            while read -r id; do
+              [ -z "$id" ] && continue
+              [ "$id" = "$CURRENT_RUN" ] && continue
+              if gh api --method DELETE "/repos/$REPO/actions/runs/$id" >/dev/null 2>&1; then
+                deleted=$((deleted+1))
+              fi
+            done < <(jq -r '.workflow_runs[] | select(.status == "completed" and (.conclusion != "success")) | .id' <<<"$data")
+            [ "$count" -lt 100 ] && break
+            page=$((page+1))
+          done
+          echo "Deleted $deleted completed non-success workflow runs."
+
+      - name: Remove old Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d '30 days ago' +%s)"
+          deleted=0
+          page=1
+          while :; do
+            data="$(gh api "/repos/$REPO/actions/artifacts?per_page=100&page=$page")"
+            count="$(jq '.artifacts | length' <<<"$data")"
+            [ "$count" -eq 0 ] && break
+            while IFS=$'\t' read -r id created; do
+              [ -z "$id" ] && continue
+              ts="$(date -u -d "$created" +%s)"
+              if [ "$ts" -lt "$cutoff" ]; then
+                if gh api --method DELETE "/repos/$REPO/actions/artifacts/$id" >/dev/null 2>&1; then
+                  deleted=$((deleted+1))
+                fi
+              fi
+            done < <(jq -r '.artifacts[] | [.id,.created_at] | @tsv' <<<"$data")
+            [ "$count" -lt 100 ] && break
+            page=$((page+1))
+          done
+          echo "Deleted $deleted Actions artifacts older than 30 days."

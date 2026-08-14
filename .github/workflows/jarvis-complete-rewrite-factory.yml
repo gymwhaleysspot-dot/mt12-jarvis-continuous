@@ -1,0 +1,162 @@
+name: Jarvis Complete Rewrite LUAC Factory
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: jarvis-complete-rewrite-luac-factory
+  cancel-in-progress: false
+
+jobs:
+  rewrite-build-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Synchronize current Jarvis state
+        run: git pull --rebase origin main
+      - name: Install deterministic MT12 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate canonical floor and evolution authority
+        run: |
+          python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/controller_rewrite_compact.py tools/jarvis_efficiency_cycle.py tools/jarvis_prebuild_reclaim.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import jarvis_canonical_parent as c
+          import jarvis_evolution_parent as e
+          canonical,cpath=c.resolve(); evolution,epath=e.resolve()
+          authority=json.loads(Path('factory/canonical-controller.json').read_text())
+          pointer=json.loads(Path('factory/evolution-controller.json').read_text())
+          assert canonical==authority['release']
+          assert evolution==pointer['release']
+          assert pointer['canonicalFloor']==canonical
+          print({'canonicalFloor':canonical,'canonicalSource':str(cpath),'evolutionParent':evolution,'evolutionSource':str(epath)})
+          PY
+      - name: Refresh verified research evidence and experiment portfolio
+        run: |
+          python3 tools/jarvis_external_research_bridge.py
+          python3 tools/jarvis_intelligence_planner.py
+      - name: Reclaim, generate, score and synthesize novel LUACs
+        env:
+          RELEASE_TYPE: R
+          SERIES: jrw
+        run: python3 tools/jarvis_efficiency_cycle.py
+      - name: Reject duplicate, inefficient, over-budget synthesis and historically published candidates
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
+          compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
+          assert compiled
+          rp=result.get('resourcePolicy',{})
+          assert rp.get('rule')=='PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON'
+          assert rp.get('prebuildSeedNormalizedBytes',10**9)<=rp.get('parentNormalizedBytes',0)
+          assert 0 < rp.get('synthesisByteBudget',0) <= 420
+          src=[c['sourceSha256'] for c in compiled]; bc=[c['luacSha256'] for c in compiled]
+          assert len(src)==len(set(src)); assert len(bc)==len(set(bc))
+          known_src=set(); known_bc=set()
+          for p in Path('public/builds').rglob('*.json'):
+            try: stack=[json.loads(p.read_text())]
+            except Exception: continue
+            while stack:
+              x=stack.pop()
+              if isinstance(x,dict):
+                if isinstance(x.get('sourceSha256'),str): known_src.add(x['sourceSha256'])
+                if isinstance(x.get('luacSha256'),str): known_bc.add(x['luacSha256'])
+                if isinstance(x.get('source'),dict) and isinstance(x['source'].get('sha256'),str): known_src.add(x['source']['sha256'])
+                if isinstance(x.get('luac'),dict) and isinstance(x['luac'].get('sha256'),str): known_bc.add(x['luac']['sha256'])
+                stack.extend(x.values())
+              elif isinstance(x,list): stack.extend(x)
+          assert not (set(src)&known_src), 'source already published'
+          assert not (set(bc)&known_bc), 'LUAC already published'
+          for c in compiled:
+            rc=c['rewriteContract']
+            assert rc['sourceNovel'] is True and rc['bytecodeNovel'] is True
+          print({'compiled':len(compiled),'historicalSources':len(known_src),'historicalLuacs':len(known_bc),'resourcePolicy':rp})
+          PY
+      - name: Publish rewrite candidates into immutable mission directory
+        run: |
+          python3 - <<'PY'
+          import json,os,shutil
+          from pathlib import Path
+          src=Path('dist-controller-tournament'); result=json.loads((src/'TOURNAMENT.json').read_text())
+          mission=f"rewrite-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"; base=Path('public/builds')/mission; base.mkdir(parents=True,exist_ok=True)
+          published=[]
+          for c in result['candidates']:
+            if c.get('status')!='COMPILED': continue
+            cid=c['candidate']; shutil.copytree(src/cid,base/cid,dirs_exist_ok=True)
+            published.append({'candidate':cid,'parent':result['parent'],'sourceSha256':c['sourceSha256'],'luacSha256':c['luacSha256'],'normalizedBytes':c['normalizedBytes'],'profile':c['profile'],'rewriteContract':c['rewriteContract'],'resourceEfficiency':c.get('resourceEfficiency',{}),'promotionEfficiencyEligible':c.get('promotionEfficiencyEligible',False)})
+          plan=json.loads(Path('factory/next-experiment.json').read_text()); canonical=json.loads(Path('factory/canonical-controller.json').read_text())['release']
+          reclaim=json.loads(Path('factory/memory/prebuild-reclaim.json').read_text())
+          manifest={'schema':'JARVIS-COMPLETE-REWRITE-PUBLICATION-10','mission':mission,'evolutionParent':result['parent'],'canonicalFloor':canonical,'experiment':result['rewriteAuthority']['experiment'],'generation':result['rewriteAuthority']['generation'],'externalResearch':plan.get('externalResearchState',{}),'resourcePolicy':result.get('resourcePolicy',{}),'prebuildReclamation':reclaim,'candidates':published,'duplicatePolicy':'HARD_FAIL_AND_REPLAN','historicalDedup':True,'persistencePolicy':'REMOTE_TREE_VERIFIED'}
+          (base/'BUILD-MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n'); (base/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n'); (base/'REWRITE-CONTRACT.json').write_text((src/'REWRITE-CONTRACT.json').read_text()); (base/'EXPERIMENT-PLAN.json').write_text(Path('factory/next-experiment.json').read_text()); (base/'PREBUILD-RECLAIM.json').write_text(Path('factory/memory/prebuild-reclaim.json').read_text())
+          PY
+      - name: Advance experimental evolution parent
+        run: |
+          mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python3 tools/jarvis_evolution_parent.py advance "$mission" "$GITHUB_RUN_NUMBER"
+          python3 tools/jarvis_evolution_parent.py
+      - name: Apply evolution and champion authorities
+        run: |
+          python3 tools/jarvis_evolution_gate.py
+          python3 tools/jarvis_champion_guard.py
+          python3 tools/jarvis_graph_intelligence.py
+      - name: Persist immutable generation and evolution pointer atomically
+        run: |
+          set -Eeuo pipefail
+          mission="rewrite-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          stage="$(mktemp -d)"
+          cp -a "public/builds/${mission}" "$stage/${mission}"
+          cp "factory/evolution-controller.json" "$stage/evolution-controller.json"
+          git config user.name 'Jarvis Complete Rewrite Factory'
+          git config user.email 'actions@users.noreply.github.com'
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            rm -rf -- "public/builds/${mission}"
+            if git ls-tree -d --name-only origin/main "public/builds/${mission}" | grep -qx "public/builds/${mission}"; then
+              git checkout origin/main -- "public/builds/${mission}"
+              if ! diff -qr "$stage/${mission}" "public/builds/${mission}" >/dev/null; then echo "ERROR: immutable mission collision for ${mission}; remote contents differ"; exit 1; fi
+            else
+              cp -a "$stage/${mission}" "public/builds/${mission}"
+            fi
+            cp "$stage/evolution-controller.json" factory/evolution-controller.json
+            git add -- "public/builds/${mission}" factory/evolution-controller.json
+            if git diff --cached --quiet; then echo "Generation and evolution pointer already tracked identically."; exit 0; fi
+            git commit -m "Publish evolutionary MT12 LUAC generation ${mission} [skip ci]"
+            if git push origin HEAD:main; then
+              git fetch origin main
+              git reset --hard origin/main
+              git checkout origin/main -- "public/builds/${mission}" factory/evolution-controller.json
+              diff -qr "$stage/${mission}" "public/builds/${mission}"
+              diff -q "$stage/evolution-controller.json" factory/evolution-controller.json
+              echo "Verified ${mission} and evolution pointer are tracked byte-identically on origin/main."; exit 0
+            fi
+            echo "Publish race on attempt ${n}; retrying from current main."; sleep $((n*5))
+          done
+          echo "ERROR: unable to persist ${mission} and evolution pointer after 5 attempts"; exit 1
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: jarvis-complete-rewrite-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist-controller-tournament/
+            public/builds/rewrite-${{ github.run_id }}-${{ github.run_attempt }}/
+            factory/next-experiment.json
+            factory/memory/external-research.json
+            factory/memory/prebuild-reclaim.json
+            factory/evolution-controller.json
+          if-no-files-found: ignore
+          retention-days: 30

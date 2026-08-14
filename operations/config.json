@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "schedules": {
+    "researchEnabled": true,
+    "discoveryEnabled": true,
+    "directorEnabled": true,
+    "v3Enabled": true
+  },
+  "models": {
+    "primary": "openai/gpt-4.1",
+    "fallbacks": ["openai/gpt-4.1-mini", "openai/gpt-4o"]
+  },
+  "limits": {
+    "maxNormalizedBytes": 87000,
+    "candidateCount": 3,
+    "repairRounds": 2,
+    "maxChangedFraction": 0.12,
+    "monthlyModelCalls": 500,
+    "artifactRetentionDays": 90
+  },
+  "security": {
+    "destructiveConfirmation": true,
+    "sessionTokenAllowed": true,
+    "readOnlyMode": false
+  },
+  "notifications": {
+    "workflowFailure": true,
+    "highPriorityDiscovery": true,
+    "candidateReplayPassed": true,
+    "benchRequired": true,
+    "roadRequired": true
+  }
+}

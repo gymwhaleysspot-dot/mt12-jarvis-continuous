@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const [manifestPath,restoreRoot]=process.argv.slice(2);if(!manifestPath||!restoreRoot)throw Error('Usage: node completion/verify-restore.mjs MANIFEST.json RESTORED_ROOT');
+const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));const files=m.files||m.entries||[];if(!Array.isArray(files)||!files.length)throw Error('Manifest has no files');const failures=[];
+for(const e of files){const rel=e.path||e.name;if(!rel||rel.includes('..')||path.isAbsolute(rel)){failures.push({path:rel,reason:'unsafe path'});continue}const p=path.join(restoreRoot,rel);if(!fs.existsSync(p)){failures.push({path:rel,reason:'missing'});continue}const got=crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),want=(e.sha256||e.hash||'').toLowerCase();if(want&&got!==want)failures.push({path:rel,reason:'hash mismatch',want,got});}
+const r={createdAt:new Date().toISOString(),status:failures.length?'FAIL':'PASS',filesChecked:files.length,failures};fs.writeFileSync('RESTORE-VERIFICATION.json',JSON.stringify(r,null,2));if(failures.length){console.error(JSON.stringify(r,null,2));process.exit(1)}console.log(JSON.stringify(r,null,2));

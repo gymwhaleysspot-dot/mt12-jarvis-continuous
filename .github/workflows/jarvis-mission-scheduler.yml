@@ -1,0 +1,49 @@
+name: Jarvis Mission Planner
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jarvis-mission-planner
+  cancel-in-progress: true
+
+jobs:
+  plan-next-mission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select highest-value unfinished engineering mission
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import json,time
+          from pathlib import Path
+          def read(p):
+            try:return json.loads(Path(p).read_text())
+            except:return {}
+          nxt=read('factory/memory/NEXT-EXPERIMENT.json') or read('factory/next-experiment.json')
+          cycle=read('factory/latest-cycle.json')
+          exp=nxt.get('nextExperiment') or cycle.get('nextExperiment') or {}
+          objective=(exp.get('objective') if isinstance(exp,dict) else str(exp)) or 'Evolve the current controller against the full digital twin and replay archive.'
+          plan={
+            'schema':2,
+            'objective':objective,
+            'selectedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
+            'parentMission':cycle.get('mission'),
+            'champion':cycle.get('winner') or cycle.get('tracks',{}).get('champion'),
+            'reason':'planning-only; autonomous controller dispatch is owned exclusively by Jarvis Always-On Orchestrator'
+          }
+          Path('/tmp/mission.json').write_text(json.dumps(plan,indent=2)+'\n')
+          print(json.dumps(plan,indent=2))
+          PY
+      - name: Publish planner decision
+        uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-next-mission-${{ github.run_id }}
+          path: /tmp/mission.json
+          retention-days: 30

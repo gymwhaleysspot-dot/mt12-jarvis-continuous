@@ -1,0 +1,24 @@
+{
+  "name": "MT12 YA Forge",
+  "version": 1,
+  "target": "RadioMaster MT12 / EdgeTX Lua 5.3",
+  "source": "candidate/a15yb.lua",
+  "baseline_source": "baseline/a15ya.lua",
+  "baseline_luac": "baseline/a15ya.luac",
+  "normalized_output": "dist/a15yb.luac",
+  "raw_output": "dist/a15yb_raw.luac",
+  "report_output": "dist/build.json",
+  "size_limit": 88944,
+  "required_tokens": ["function init", "function run", "io.read", "model.setGlobalVariable", "model.getGlobalVariable"],
+  "forbidden_tokens": ["fileHandle:read"],
+  "policy": {
+    "compile_lua53": true,
+    "strip_debug_symbols": true,
+    "normalize_mt12": true,
+    "reject_oversize": true,
+    "reject_missing_contract": true,
+    "publish_artifact": true,
+    "commit_generated_files": false,
+    "external_ai_dependency": false
+  }
+}

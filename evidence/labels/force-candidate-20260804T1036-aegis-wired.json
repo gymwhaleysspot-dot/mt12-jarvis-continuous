@@ -1,0 +1,33 @@
+{
+  "schema": 3,
+  "requestedAt": "2026-08-04T14:36:00Z",
+  "requestedBy": "user",
+  "mode": "FORCED_UNVERIFIED_DRIVE_CANDIDATE",
+  "mission": "Generate one real bounded A17Y drive candidate from Aegis's latest engineering priorities. First improve low-allocation logging observability so returned logs expose sensor confidence, GPS/RPM disagreement, correction source, dropout cause, and event reasoning. Then make one conservative evidence-supported improvement to GPS/RPM truth arbitration or gyro confidence, whichever is best supported by the selected logs. Preserve the complete controller, driving feel, dashboard, mood, personality, voice, learning, persistence, TC, ABS, jump, gyro, GPS, RPM, dropout, and diagnostic behavior. Do not simplify or remove any function.",
+  "aegisPriorities": [
+    {"topic":"logging","priority":71,"confidence":42,"expectedGain":45},
+    {"topic":"gps","priority":66,"confidence":40,"expectedGain":43},
+    {"topic":"gyro","priority":66,"confidence":40,"expectedGain":43},
+    {"topic":"rpm","priority":62,"confidence":45,"expectedGain":41}
+  ],
+  "logs": [
+    "tests/replays/gvbb.csv",
+    "tests/replays/C3AI4H-2026-07-31-203326.csv"
+  ],
+  "hardRequirements": [
+    "Lua 5.3 syntax",
+    "MT12 normalized bytecode",
+    "maximum 87000 bytes",
+    "use global io.read(fileHandle, ...) compatibility",
+    "GV7 stays 1024 throttle pass-through",
+    "CH3 gyro, CH15 TCT, CH16 GYR stay unchanged",
+    "car-off guard and fail-open behavior preserved",
+    "persistence schema and dashboard preserved",
+    "continuous learning preserved",
+    "publish source, normalized LUAC, hashes, report, Aegis request, and ZIP",
+    "no automatic promotion"
+  ],
+  "automaticPromotion": false,
+  "benchRequired": true,
+  "roadRequired": true
+}

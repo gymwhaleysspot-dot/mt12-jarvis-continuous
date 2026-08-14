@@ -1,0 +1,2285 @@
+{
+  "schema": 1,
+  "generatedAt": "2026-08-11T03:56:50.056Z",
+  "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
+  "upgrades": {
+    "differentiableStyleOptimizer": true,
+    "neuralImplicitBodyRepresentation": true,
+    "perComponentVertexUncertainty": true,
+    "informationGainScheduler": true,
+    "adversarialVisualCritic": true,
+    "separatePhotorealismCritic": true,
+    "crossResolutionIdentity": true,
+    "componentDependencyGraph": true,
+    "automaticMeshSurgery": true,
+    "longTermEvolutionaryDiversity": true,
+    "visualRegressionReplay": true,
+    "ownerPhotoCalibrationDatabase": true,
+    "liveRenderIntrospection": true,
+    "resourceGovernor": true,
+    "convergenceDetector": true,
+    "realityGapScore": true,
+    "selfExpandingTopologyVocabulary": true,
+    "syntheticViewGenerator": true,
+    "separateDamageWearLayer": true,
+    "michaelGraphicsBenchmark": true
+  },
+  "optimizer": {
+    "method": "actual_render_finite_difference_owner_truth",
+    "baselineError": 0.256369,
+    "targets": [],
+    "allGradients": [
+      {
+        "parameter": "headlamp_width",
+        "baselineError": 0.256369,
+        "minusError": 0.261505,
+        "plusError": 0.261167,
+        "gradient": -0.024205,
+        "bestValue": 0.607,
+        "measuredGain": 0,
+        "direction": "increase"
+      },
+      {
+        "parameter": "headlamp_height",
+        "baselineError": 0.256369,
+        "minusError": 0.26116,
+        "plusError": 0.260396,
+        "gradient": -0.090969,
+        "bestValue": 0.3142,
+        "measuredGain": 0,
+        "direction": "increase"
+      },
+      {
+        "parameter": "headlamp_corner_radius",
+        "baselineError": 0.256369,
+        "minusError": 0.261134,
+        "plusError": 0.262785,
+        "gradient": 0.393125,
+        "bestValue": 0.1229,
+        "measuredGain": 0,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "headlamp_lens_width",
+        "baselineError": 0.256369,
+        "minusError": 0.260796,
+        "plusError": 0.261047,
+        "gradient": 0.044803,
+        "bestValue": 0.1422,
+        "measuredGain": 0,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "headlamp_lens_height",
+        "baselineError": 0.256369,
+        "minusError": 0.261147,
+        "plusError": 0.264199,
+        "gradient": 0.87197,
+        "bestValue": 0.08025,
+        "measuredGain": 0,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "headlamp_lens_offset_x",
+        "baselineError": 0.256369,
+        "minusError": 0.263187,
+        "plusError": 0.263587,
+        "gradient": 0.08781,
+        "bestValue": 0.04272,
+        "measuredGain": 0,
+        "direction": "decrease"
+      }
+    ]
+  },
+  "implicitSurface": {
+    "representation": "multiview_feature_conditioned_sdf_proxy",
+    "latent": [
+      -0.01948,
+      0.05456,
+      0.01565,
+      -0.00707,
+      -0.02303,
+      0.02421,
+      0.00969,
+      -0.01381,
+      -0.05885,
+      0.01808,
+      0.00726,
+      -0.01729,
+      0.07123,
+      0.00932,
+      -0.01492,
+      -0.01643,
+      0.02912,
+      0.00498,
+      -0.01928,
+      -0.02809,
+      0.0219,
+      -0.01527,
+      -0.02636,
+      0.03665,
+      0.01509,
+      -0.00754,
+      -0.03421,
+      0.01917,
+      0.00701,
+      -0.00993,
+      -0.08735,
+      0.01513
+    ],
+    "gridResolution": [
+      24,
+      12,
+      40
+    ],
+    "target": "bounded_topology_dsl",
+    "geometryInfluence": {
+      "enabled": true,
+      "method": "uncertainty_weighted_latent_to_bounded_geometry_field",
+      "note": "Latent state now produces bounded deformation priorities; renderer mutation remains protected by the topology DSL.",
+      "components": [
+        {
+          "component": "grille",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 0,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "grilleSpan",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 1,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "projectorShape",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 2,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "sideSilhouette",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 3,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "threeSilhouette",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 4,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "sideDark",
+          "region": "side_body",
+          "weight": 1.155,
+          "latentIndex": 5,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "liveryYellow",
+          "region": "materials_livery",
+          "weight": 1.26,
+          "latentIndex": 6,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "rearMass",
+          "region": "rear_body",
+          "weight": 1.26,
+          "latentIndex": 7,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "frontSymmetry",
+          "region": "front_fascia",
+          "weight": 0.48,
+          "latentIndex": 8,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "headlamp_pods",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 9,
+          "measuredGradientSupport": [
+            "headlamp_width",
+            "headlamp_height",
+            "headlamp_corner_radius",
+            "headlamp_lens_width"
+          ]
+        },
+        {
+          "component": "projector_pods",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 10,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "front_drl",
+          "region": "front_fascia",
+          "weight": 1.26,
+          "latentIndex": 11,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "lower_door_carbon",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 12,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "door_red_authority",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 13,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "yellow_skirt",
+          "region": "side_body",
+          "weight": 1.26,
+          "latentIndex": 14,
+          "measuredGradientSupport": []
+        },
+        {
+          "component": "suspension",
+          "region": "front_fascia",
+          "weight": 0.48,
+          "latentIndex": 15,
+          "measuredGradientSupport": []
+        }
+      ]
+    }
+  },
+  "uncertainty": [
+    {
+      "component": "grille",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
+    },
+    {
+      "component": "grilleSpan",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
+    },
+    {
+      "component": "projectorShape",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
+    },
+    {
+      "component": "sideSilhouette",
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
+    },
+    {
+      "component": "threeSilhouette",
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
+      "views": [
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
+    },
+    {
+      "component": "sideDark",
+      "uncertainty": 0.23,
+      "ownerReferences": 2,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "side_profile"
+    },
+    {
+      "component": "liveryYellow",
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "rearMass",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "rear",
+        "three"
+      ],
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_diffuser"
+    },
+    {
+      "component": "frontSymmetry",
+      "uncertainty": 0.68,
+      "ownerReferences": 0,
+      "views": [
+        "front"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [],
+      "ownerAuthority": null
+    },
+    {
+      "component": "headlamp_pods",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
+    },
+    {
+      "component": "projector_pods",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
+    },
+    {
+      "component": "front_drl",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "headlights"
+    },
+    {
+      "component": "lower_door_carbon",
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "door_red_authority",
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "yellow_skirt",
+      "uncertainty": 0.16,
+      "ownerReferences": 7,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "side_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "suspension",
+      "uncertainty": 0.68,
+      "ownerReferences": 0,
+      "views": [
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [],
+      "ownerAuthority": null
+    },
+    {
+      "component": "roofWhite",
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
+      "views": [
+        "side",
+        "three",
+        "top"
+      ],
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-side-right",
+        "owner-front-three-left",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "roof_greenhouse"
+    },
+    {
+      "component": "wheelFill",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "side",
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "arches"
+    },
+    {
+      "component": "edgeDetail",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear"
+      ],
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "front_arches",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "front",
+        "three",
+        "side"
+      ],
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "arches"
+    },
+    {
+      "component": "roof",
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
+      "views": [
+        "side",
+        "three",
+        "top"
+      ],
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-side-right",
+        "owner-front-three-left",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "roof_greenhouse"
+    },
+    {
+      "component": "wheels",
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
+      "views": [
+        "side",
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_arches",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-three-right",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "wheels"
+    },
+    {
+      "component": "materials",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear"
+      ],
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "lighting",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear",
+        "top"
+      ],
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "decals",
+      "uncertainty": 0.125,
+      "ownerReferences": 7,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear",
+        "top"
+      ],
+      "protected": false,
+      "region": "materials_livery",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right",
+        "owner-side-right",
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "livery_materials"
+    },
+    {
+      "component": "front_grille",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "front",
+        "three"
+      ],
+      "protected": false,
+      "region": "front_fascia",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-straight",
+        "owner-front-three-right"
+      ],
+      "ownerAuthority": "grille"
+    },
+    {
+      "component": "rear_diffuser",
+      "uncertainty": 0.16,
+      "ownerReferences": 3,
+      "views": [
+        "rear",
+        "three"
+      ],
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-rear-three-left",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_diffuser"
+    },
+    {
+      "component": "roof_scoop",
+      "uncertainty": 0.125,
+      "ownerReferences": 3,
+      "views": [
+        "three",
+        "side",
+        "top"
+      ],
+      "protected": false,
+      "region": "hood_roof",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-front-three-right",
+        "owner-side-right"
+      ],
+      "ownerAuthority": "roof_scoop"
+    },
+    {
+      "component": "rear_wing",
+      "uncertainty": 0.125,
+      "ownerReferences": 5,
+      "views": [
+        "rear",
+        "side",
+        "three"
+      ],
+      "protected": false,
+      "region": "rear_body",
+      "ownerPhotoIds": [
+        "owner-front-three-left",
+        "owner-rear-three-left",
+        "owner-side-right",
+        "owner-rear-three-right",
+        "owner-rear-straight"
+      ],
+      "ownerAuthority": "rear_wing"
+    }
+  ],
+  "informationGain": [
+    {
+      "component": "edgeDetail",
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "materials",
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "lighting",
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear",
+        "top"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "decals",
+      "region": "materials_livery",
+      "informationGain": 0.635,
+      "uncertainty": 0.125,
+      "views": [
+        "front",
+        "three",
+        "side",
+        "rear",
+        "top"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "suspension",
+      "region": "front_fascia",
+      "informationGain": 0.536,
+      "uncertainty": 0.68,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 0
+    },
+    {
+      "component": "roofWhite",
+      "region": "hood_roof",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "side",
+        "three",
+        "top"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "wheelFill",
+      "region": "front_arches",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "side",
+        "front",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "front_arches",
+      "region": "front_arches",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "front",
+        "three",
+        "side"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "roof",
+      "region": "hood_roof",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "side",
+        "three",
+        "top"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "wheels",
+      "region": "front_arches",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "side",
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "roof_scoop",
+      "region": "hood_roof",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "three",
+        "side",
+        "top"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "rear_wing",
+      "region": "rear_body",
+      "informationGain": 0.53,
+      "uncertainty": 0.125,
+      "views": [
+        "rear",
+        "side",
+        "three"
+      ],
+      "ownerReferences": 5
+    },
+    {
+      "component": "sideSilhouette",
+      "region": "side_body",
+      "informationGain": 0.446,
+      "uncertainty": 0.23,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 2
+    },
+    {
+      "component": "sideDark",
+      "region": "side_body",
+      "informationGain": 0.446,
+      "uncertainty": 0.23,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 2
+    },
+    {
+      "component": "grille",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "grilleSpan",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "projectorShape",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "liveryYellow",
+      "region": "materials_livery",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "rearMass",
+      "region": "rear_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "rear",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "headlamp_pods",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "projector_pods",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "front_drl",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "lower_door_carbon",
+      "region": "side_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "door_red_authority",
+      "region": "side_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "yellow_skirt",
+      "region": "side_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "side",
+        "three"
+      ],
+      "ownerReferences": 7
+    },
+    {
+      "component": "front_grille",
+      "region": "front_fascia",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "front",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "rear_diffuser",
+      "region": "rear_body",
+      "informationGain": 0.432,
+      "uncertainty": 0.16,
+      "views": [
+        "rear",
+        "three"
+      ],
+      "ownerReferences": 3
+    },
+    {
+      "component": "frontSymmetry",
+      "region": "front_fascia",
+      "informationGain": 0.431,
+      "uncertainty": 0.68,
+      "views": [
+        "front"
+      ],
+      "ownerReferences": 0
+    },
+    {
+      "component": "threeSilhouette",
+      "region": "side_body",
+      "informationGain": 0.341,
+      "uncertainty": 0.23,
+      "views": [
+        "three"
+      ],
+      "ownerReferences": 2
+    }
+  ],
+  "critics": {
+    "adversarial": {
+      "score": 0.7545,
+      "pass": true,
+      "attacks": [
+        "toy_like_proportions",
+        "fake_depth",
+        "lighting_mask",
+        "hidden_regression"
+      ]
+    },
+    "photorealism": {
+      "score": 0.5611,
+      "pass": false,
+      "geometryIndependent": true
+    },
+    "combined": 0.5885,
+    "semanticOwnerTruth": {
+      "score": 0.4421,
+      "signals": {
+        "ownerSemanticCoverage": 0.931,
+        "cameraConfidence": 0,
+        "measuredGradientSupport": 0,
+        "photoCoverage": 31
+      },
+      "requiredForPromotion": true
+    }
+  },
+  "crossResolution": {
+    "front": {
+      "scores": [
+        {
+          "scale": 1,
+          "identity": 1
+        },
+        {
+          "scale": 0.66,
+          "identity": 0.9571
+        },
+        {
+          "scale": 0.42,
+          "identity": 0.8973
+        },
+        {
+          "scale": 0.28,
+          "identity": 0.8483
+        }
+      ],
+      "minimum": 0.8483,
+      "pass": false
+    },
+    "three": {
+      "scores": [
+        {
+          "scale": 1,
+          "identity": 1
+        },
+        {
+          "scale": 0.66,
+          "identity": 0.9155
+        },
+        {
+          "scale": 0.42,
+          "identity": 0.857
+        },
+        {
+          "scale": 0.28,
+          "identity": 0.8342
+        }
+      ],
+      "minimum": 0.8342,
+      "pass": false
+    },
+    "side": {
+      "scores": [
+        {
+          "scale": 1,
+          "identity": 1
+        },
+        {
+          "scale": 0.66,
+          "identity": 0.8576
+        },
+        {
+          "scale": 0.42,
+          "identity": 0.863
+        },
+        {
+          "scale": 0.28,
+          "identity": 0.8448
+        }
+      ],
+      "minimum": 0.8448,
+      "pass": false
+    },
+    "rear": {
+      "scores": [
+        {
+          "scale": 1,
+          "identity": 1
+        },
+        {
+          "scale": 0.66,
+          "identity": 0.9382
+        },
+        {
+          "scale": 0.42,
+          "identity": 0.8934
+        },
+        {
+          "scale": 0.28,
+          "identity": 0.832
+        }
+      ],
+      "minimum": 0.832,
+      "pass": false
+    },
+    "top": {
+      "scores": [
+        {
+          "scale": 1,
+          "identity": 1
+        },
+        {
+          "scale": 0.66,
+          "identity": 0.929
+        },
+        {
+          "scale": 0.42,
+          "identity": 0.8954
+        },
+        {
+          "scale": 0.28,
+          "identity": 0.864
+        }
+      ],
+      "minimum": 0.864,
+      "pass": true
+    }
+  },
+  "dependencies": {
+    "focusRegion": "hood_roof",
+    "assembly": [
+      "front_fascia",
+      "roof_scoop",
+      "greenhouse"
+    ],
+    "mode": "constrained_assembly"
+  },
+  "meshSurgery": [
+    {
+      "component": "projectorShape",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "cut_region",
+        "local_recess",
+        "bevel"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "grille",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "cut_region",
+        "local_recess",
+        "bevel"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "grilleSpan",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "cut_region",
+        "local_recess",
+        "bevel"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "frontSymmetry",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "wheelFill",
+      "priority": 0.95,
+      "uncertainty": 0.64,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "sideSilhouette",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "threeSilhouette",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "sideDark",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "roofWhite",
+      "priority": 0.95,
+      "uncertainty": 0.64,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "liveryYellow",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "edgeDetail",
+      "priority": 0.95,
+      "uncertainty": 0.64,
+      "operations": [
+        "insert_loop",
+        "local_extrude",
+        "weld"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    },
+    {
+      "component": "rearMass",
+      "priority": 0.95,
+      "uncertainty": 0.69,
+      "operations": [
+        "local_extrude",
+        "insert_loop",
+        "retopologize_local"
+      ],
+      "boundedBy": "semantic_component",
+      "status": "proposed",
+      "requiresTopologyGate": true
+    }
+  ],
+  "diversity": {
+    "lineages": {
+      "owner_accuracy": {
+        "generation": 4,
+        "score": 0,
+        "lastFocus": "hood_roof",
+        "objective": "owner_accuracy"
+      },
+      "mobile_efficiency": {
+        "generation": 4,
+        "score": 0,
+        "lastFocus": "hood_roof",
+        "objective": "mobile_efficiency"
+      },
+      "photorealism": {
+        "generation": 4,
+        "score": 0,
+        "lastFocus": "hood_roof",
+        "objective": "photorealism"
+      },
+      "topology_exploration": {
+        "generation": 4,
+        "score": 0,
+        "lastFocus": "hood_roof",
+        "objective": "topology_exploration"
+      }
+    },
+    "synthesize": false,
+    "minimumDistinct": 3
+  },
+  "replayNegatives": [
+    {
+      "id": "grille_slab",
+      "hits": 331,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of grille slab"
+    },
+    {
+      "id": "giant_rectangular_lamps",
+      "hits": 209,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of giant rectangular lamps"
+    },
+    {
+      "id": "oversimplified_arches",
+      "hits": 206,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of oversimplified arches"
+    },
+    {
+      "id": "flat_rear_mass",
+      "hits": 115,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of flat rear mass"
+    },
+    {
+      "id": "toy_like_materials",
+      "hits": 115,
+      "weight": 1.4,
+      "rule": "Avoid recurrence of toy like materials"
+    }
+  ],
+  "calibrationDatabase": {
+    "IMG_4328.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4329.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4330.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4331.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4332.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4333.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4334.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    },
+    "IMG_4335.jpeg": {
+      "matchedView": "front",
+      "aspect": 1.3333,
+      "crop": "auto_fullframe",
+      "exposure": "owner_native",
+      "occlusion": "learned_mask",
+      "confidence": 1,
+      "updatedAt": "2026-08-11T03:56:50.059Z"
+    }
+  },
+  "introspection": {
+    "front_grille": {
+      "meshAuthority": "native_topology_v42",
+      "ancestry": {
+        "component": "front_grille",
+        "authority": "native_topology_v42",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "grille_half_bottom",
+        "grille_half_top",
+        "grille_bottom_y",
+        "grille_top_y",
+        "grille_corner_radius",
+        "grille_frame_thickness"
+      ],
+      "ownerReferences": 3,
+      "confidence": 0.803,
+      "lastDecision": "EVOLVING"
+    },
+    "grille": {
+      "meshAuthority": "native_topology_v42",
+      "ancestry": {
+        "component": "grille",
+        "authority": "native_topology_v42",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "grille_half_bottom",
+        "grille_half_top",
+        "grille_bottom_y",
+        "grille_top_y",
+        "grille_corner_radius",
+        "grille_frame_thickness"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "grilleSpan": {
+      "meshAuthority": "native_topology_v42",
+      "ancestry": {
+        "component": "grilleSpan",
+        "authority": "native_topology_v42",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "grille_half_bottom",
+        "grille_half_top",
+        "grille_corner_radius"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "headlamp_pods": {
+      "meshAuthority": "native_topology_v41",
+      "ancestry": {
+        "component": "headlamp_pods",
+        "authority": "native_topology_v41",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "headlamp_width",
+        "headlamp_height",
+        "headlamp_corner_radius",
+        "headlamp_lens_width",
+        "headlamp_lens_height",
+        "headlamp_lens_offset_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "projector_pods": {
+      "meshAuthority": "native_topology_v41",
+      "ancestry": {
+        "component": "projector_pods",
+        "authority": "native_topology_v41",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "headlamp_width",
+        "headlamp_height",
+        "headlamp_corner_radius",
+        "headlamp_lens_width",
+        "headlamp_lens_height",
+        "headlamp_lens_offset_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "projectorShape": {
+      "meshAuthority": "native_topology_v41",
+      "ancestry": {
+        "component": "projectorShape",
+        "authority": "native_topology_v41",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "headlamp_width",
+        "headlamp_height",
+        "headlamp_corner_radius",
+        "headlamp_lens_width",
+        "headlamp_lens_height",
+        "headlamp_lens_offset_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "front_drl": {
+      "meshAuthority": "native_topology_v41",
+      "ancestry": {
+        "component": "front_drl",
+        "authority": "native_topology_v41",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "front_arches": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "front_arches",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "arch_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "sideSilhouette": {
+      "meshAuthority": "hybrid",
+      "ancestry": {
+        "component": "sideSilhouette",
+        "authority": "hybrid",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "arch_x",
+        "wheel_track_x",
+        "wheel_radius",
+        "wheel_y"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "threeSilhouette": {
+      "meshAuthority": "hybrid",
+      "ancestry": {
+        "component": "threeSilhouette",
+        "authority": "hybrid",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "arch_x",
+        "wheel_track_x",
+        "wheel_radius"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "lower_door_carbon": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "lower_door_carbon",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "door_black_bottom",
+        "door_black_top"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "sideDark": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "sideDark",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "door_black_bottom",
+        "door_black_top"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "door_red_authority": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "door_red_authority",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "door_red_bottom",
+        "door_red_top"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "yellow_skirt": {
+      "meshAuthority": "projected_panel_authority",
+      "ancestry": {
+        "component": "yellow_skirt",
+        "authority": "projected_panel_authority",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "skirt_y_bottom",
+        "skirt_y_top"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "liveryYellow": {
+      "meshAuthority": "projected_panel_authority",
+      "ancestry": {
+        "component": "liveryYellow",
+        "authority": "projected_panel_authority",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "skirt_y_bottom",
+        "skirt_y_top"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "roof": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "roof",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "roof_y_front",
+        "roof_y_rear"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "roofWhite": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "roofWhite",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "roof_y_front",
+        "roof_y_rear"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.36,
+      "lastDecision": "EVOLVING"
+    },
+    "roof_scoop": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "roof_scoop",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "scoop_width",
+        "scoop_height",
+        "scoop_length"
+      ],
+      "ownerReferences": 3,
+      "confidence": 0.853,
+      "lastDecision": "EVOLVING"
+    },
+    "rear_wing": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "rear_wing",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "wing_end_x"
+      ],
+      "ownerReferences": 5,
+      "confidence": 0.853,
+      "lastDecision": "EVOLVING"
+    },
+    "rear_diffuser": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "rear_diffuser",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "diffuser_half_bottom",
+        "diffuser_half_top"
+      ],
+      "ownerReferences": 3,
+      "confidence": 0.803,
+      "lastDecision": "EVOLVING"
+    },
+    "rearMass": {
+      "meshAuthority": "visual_genome",
+      "ancestry": {
+        "component": "rearMass",
+        "authority": "visual_genome",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "diffuser_half_bottom",
+        "diffuser_half_top",
+        "wing_end_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    },
+    "wheels": {
+      "meshAuthority": "native_renderer_v40",
+      "ancestry": {
+        "component": "wheels",
+        "authority": "native_renderer_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "wheel_radius",
+        "wheel_track_x",
+        "wheel_width",
+        "wheel_y"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "wheelFill": {
+      "meshAuthority": "native_renderer_v40",
+      "ancestry": {
+        "component": "wheelFill",
+        "authority": "native_renderer_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "wheel_radius",
+        "wheel_track_x",
+        "wheel_width",
+        "wheel_y"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.36,
+      "lastDecision": "EVOLVING"
+    },
+    "suspension": {
+      "meshAuthority": "native_renderer_v40",
+      "ancestry": {
+        "component": "suspension",
+        "authority": "native_renderer_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "wheel_y",
+        "wheel_track_x"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.343,
+      "lastDecision": "EVOLVING"
+    },
+    "materials": {
+      "meshAuthority": "graphics_renderer_v40",
+      "ancestry": {
+        "component": "materials",
+        "authority": "graphics_renderer_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "paint_roughness_scale",
+        "dark_roughness_scale"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "edgeDetail": {
+      "meshAuthority": "graphics_renderer_v40",
+      "ancestry": {
+        "component": "edgeDetail",
+        "authority": "graphics_renderer_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "paint_roughness_scale",
+        "dark_roughness_scale",
+        "key_light_scale"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.36,
+      "lastDecision": "EVOLVING"
+    },
+    "lighting": {
+      "meshAuthority": "graphics_director_v40",
+      "ancestry": {
+        "component": "lighting",
+        "authority": "graphics_director_v40",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "exposure_scale",
+        "key_light_scale",
+        "ambient_scale"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "decals": {
+      "meshAuthority": "projected_panel_authority",
+      "ancestry": {
+        "component": "decals",
+        "authority": "projected_panel_authority",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [
+        "door_red_bottom",
+        "door_red_top",
+        "door_black_bottom",
+        "door_black_top",
+        "skirt_y_bottom",
+        "skirt_y_top",
+        "roof_y_front",
+        "roof_y_rear"
+      ],
+      "ownerReferences": 0,
+      "confidence": 0.393,
+      "lastDecision": "EVOLVING"
+    },
+    "frontSymmetry": {
+      "meshAuthority": "protected_geometry",
+      "ancestry": {
+        "component": "frontSymmetry",
+        "authority": "protected_geometry",
+        "generations": [],
+        "current": null
+      },
+      "parameters": [],
+      "ownerReferences": 0,
+      "confidence": 0.31,
+      "lastDecision": "EVOLVING"
+    }
+  },
+  "resourceGovernor": {
+    "mode": "heavy_topology",
+    "debt": 0.5,
+    "topologyQueue": 12
+  },
+  "convergence": {
+    "window": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "improvement": 0,
+    "stalled": false,
+    "cooldownCycles": 0,
+    "action": "continue"
+  },
+  "realityGap": {
+    "score": 0.5746,
+    "gap": 0.4254,
+    "signals": {
+      "geometry": 0.5,
+      "proportions": 0.5,
+      "livery": 0.5,
+      "materials": 0.5611,
+      "interiorFit": 0.7,
+      "temporal": 0.82,
+      "mobile": 0.84,
+      "photorealism": 0.5611,
+      "lodIdentity": 0.8447
+    }
+  },
+  "vocabularyExpansion": [
+    {
+      "name": "bounded_cut_region",
+      "derivedFrom": "cut_region",
+      "repeatedNeed": 3,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    },
+    {
+      "name": "bounded_local_recess",
+      "derivedFrom": "local_recess",
+      "repeatedNeed": 3,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    },
+    {
+      "name": "bounded_bevel",
+      "derivedFrom": "bevel",
+      "repeatedNeed": 3,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    },
+    {
+      "name": "bounded_insert_loop",
+      "derivedFrom": "insert_loop",
+      "repeatedNeed": 9,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    },
+    {
+      "name": "bounded_local_extrude",
+      "derivedFrom": "local_extrude",
+      "repeatedNeed": 9,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    },
+    {
+      "name": "bounded_weld",
+      "derivedFrom": "weld",
+      "repeatedNeed": 8,
+      "status": "isolation_test_required",
+      "autoActivate": false
+    }
+  ],
+  "syntheticViews": [
+    {
+      "from": "front",
+      "to": "three",
+      "fraction": 0.25,
+      "consistency": 0.9938,
+      "pass": true
+    },
+    {
+      "from": "front",
+      "to": "three",
+      "fraction": 0.5,
+      "consistency": 0.9938,
+      "pass": true
+    },
+    {
+      "from": "front",
+      "to": "three",
+      "fraction": 0.75,
+      "consistency": 0.9938,
+      "pass": true
+    },
+    {
+      "from": "three",
+      "to": "side",
+      "fraction": 0.25,
+      "consistency": 0.9847,
+      "pass": true
+    },
+    {
+      "from": "three",
+      "to": "side",
+      "fraction": 0.5,
+      "consistency": 0.9847,
+      "pass": true
+    },
+    {
+      "from": "three",
+      "to": "side",
+      "fraction": 0.75,
+      "consistency": 0.9847,
+      "pass": true
+    },
+    {
+      "from": "side",
+      "to": "rear",
+      "fraction": 0.25,
+      "consistency": 0.9852,
+      "pass": true
+    },
+    {
+      "from": "side",
+      "to": "rear",
+      "fraction": 0.5,
+      "consistency": 0.9852,
+      "pass": true
+    },
+    {
+      "from": "side",
+      "to": "rear",
+      "fraction": 0.75,
+      "consistency": 0.9852,
+      "pass": true
+    },
+    {
+      "from": "rear",
+      "to": "top",
+      "fraction": 0.25,
+      "consistency": 0.8849,
+      "pass": true
+    },
+    {
+      "from": "rear",
+      "to": "top",
+      "fraction": 0.5,
+      "consistency": 0.8849,
+      "pass": true
+    },
+    {
+      "from": "rear",
+      "to": "top",
+      "fraction": 0.75,
+      "consistency": 0.8849,
+      "pass": true
+    }
+  ],
+  "wearLayer": {
+    "canonicalGeometry": "clean_owner_truth",
+    "separateRuntimeLayer": true,
+    "enabled": false,
+    "classes": [
+      "dust",
+      "mud",
+      "scratches",
+      "tire_deformation",
+      "heat_discoloration"
+    ],
+    "policy": "wear never trains canonical geometry"
+  },
+  "benchmark": {
+    "name": "Michael Graphics Intelligence Benchmark",
+    "score": 0.7167,
+    "minimumPromotionScore": 0.7,
+    "pass": true,
+    "dimensions": {
+      "owner_similarity": 1,
+      "topology_correctness": 0.04,
+      "geometry": 0.5,
+      "materials": 0.5611,
+      "photorealism": 0.5611,
+      "temporal": 0.82,
+      "mobile": 0.84,
+      "lod_identity": 0.8447,
+      "causal_explainability": 1,
+      "protected_invariants": 1,
+      "certainty": 0.4118
+    },
+    "hash": "9cfecb3fbb95a5c323e2817a6561204da3dbd53f52dccc30ab65fe286dd3d7a2"
+  },
+  "parentAutonomyGeneratedAt": "2026-08-11T03:37:38.543Z",
+  "qualityRepair": {
+    "schema": 1,
+    "allEightWeaknessesAddressed": true,
+    "ownerAliasNormalization": true,
+    "correctRegionRouting": true,
+    "actualRenderFiniteDifference": true,
+    "latentGeometryInfluence": true,
+    "semanticOwnerCritic": true,
+    "immediateEvidenceTopologyEscalation": true,
+    "safeMultiviewLocks": true,
+    "globalSchedulerExpected": true
+  }
+}

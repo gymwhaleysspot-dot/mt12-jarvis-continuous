@@ -1,0 +1,137 @@
+name: A17Y Device Release and Flash Certification
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        required: true
+        type: choice
+        options: [IOS_SIGNED_RELEASE, ANDROID_BUILD, ELRS_SECURE_BUILD, POST_FLASH_CERTIFY]
+      certificate_path:
+        required: false
+        default: ''
+      elrs_target:
+        required: false
+        default: 'RadioMaster MT12 Internal 2.4GHz TX'
+      regulatory_domain:
+        required: false
+        type: choice
+        options: [FCC_915, EU_CE_2400, ISM_2400]
+        default: ISM_2400
+permissions:
+  contents: write
+  actions: read
+jobs:
+  android:
+    if: ${{ inputs.action == 'ANDROID_BUILD' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '17'}
+      - name: Build installable Android package
+        run: |
+          set -euo pipefail
+          ROOT=$(find mobile -maxdepth 3 -name gradlew -printf '%h\n' | head -1)
+          test -n "$ROOT"
+          cd "$ROOT"; chmod +x gradlew; ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v6
+        with: {name: a17y-android-installable, path: '**/build/outputs/apk/**/*.apk', if-no-files-found: error, retention-days: 90}
+  ios:
+    if: ${{ inputs.action == 'IOS_SIGNED_RELEASE' }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Require Apple signing material
+        env:
+          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+          CERT_PASS: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          test -n "$CERT_B64" && test -n "$CERT_PASS" && test -n "$PROFILE_B64" || { echo 'Apple signing secrets are required'; exit 1; }
+      - name: Install temporary signing identity
+        env:
+          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+          CERT_PASS: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          echo "$CERT_B64" | base64 --decode > /tmp/cert.p12
+          echo "$PROFILE_B64" | base64 --decode > /tmp/profile.mobileprovision
+          security create-keychain -p temp a17y.keychain
+          security import /tmp/cert.p12 -k a17y.keychain -P "$CERT_PASS" -T /usr/bin/codesign
+          security list-keychains -d user -s a17y.keychain
+          security unlock-keychain -p temp a17y.keychain
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp /tmp/profile.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/a17y.mobileprovision"
+      - name: Archive and export signed IPA
+        run: |
+          set -euo pipefail
+          PROJ=$(find mobile -name '*.xcodeproj' | head -1); test -n "$PROJ"
+          SCHEME=$(xcodebuild -project "$PROJ" -list -json | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["project"]["schemes"][0])')
+          xcodebuild -project "$PROJ" -scheme "$SCHEME" -configuration Release -sdk iphoneos -archivePath /tmp/A17Y.xcarchive archive CODE_SIGN_STYLE=Manual
+          cat > /tmp/ExportOptions.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>method</key><string>development</string><key>signingStyle</key><string>manual</string></dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath /tmp/A17Y.xcarchive -exportPath /tmp/export -exportOptionsPlist /tmp/ExportOptions.plist
+      - uses: actions/upload-artifact@v6
+        with: {name: a17y-ios-signed-ipa, path: '/tmp/export/*.ipa', if-no-files-found: error, retention-days: 30}
+  elrs-request:
+    if: ${{ inputs.action == 'ELRS_SECURE_BUILD' }}
+    runs-on: ubuntu-24.04
+    outputs: {request: '${{ steps.req.outputs.request }}'}
+    steps:
+      - uses: actions/checkout@v5
+      - id: req
+        env:
+          BINDING: ${{ secrets.ELRS_BINDING_PHRASE }}
+        run: |
+          set -euo pipefail
+          test '${{ inputs.elrs_target }}' = 'RadioMaster MT12 Internal 2.4GHz TX'
+          test -n "$BINDING" || { echo 'ELRS_BINDING_PHRASE secret is required'; exit 1; }
+          H=$(printf %s "$BINDING"|sha256sum|cut -d' ' -f1)
+          mkdir -p elrs-request
+          printf '{"target":"%s","regulatoryDomain":"%s","bindingPhraseSha256":"%s","createdAt":"%s"}\n' '${{ inputs.elrs_target }}' '${{ inputs.regulatory_domain }}' "$H" "$(date -u +%FT%TZ)" > elrs-request/request.json
+          echo "request=elrs-request/request.json" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v6
+        with: {name: elrs-secure-build-request, path: elrs-request/request.json, retention-days: 30}
+  elrs-build:
+    if: ${{ inputs.action == 'ELRS_SECURE_BUILD' }}
+    needs: elrs-request
+    runs-on: [self-hosted, elrs-builder]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build through installed official ExpressLRS toolchain
+        env:
+          ELRS_BINDING_PHRASE: ${{ secrets.ELRS_BINDING_PHRASE }}
+          ELRS_WIFI_SSID: ${{ secrets.ELRS_WIFI_SSID }}
+          ELRS_WIFI_PASSWORD: ${{ secrets.ELRS_WIFI_PASSWORD }}
+          ELRS_TARGET: ${{ inputs.elrs_target }}
+          ELRS_DOMAIN: ${{ inputs.regulatory_domain }}
+        run: |
+          set -euo pipefail
+          command -v a17y-elrs-official-build
+          a17y-elrs-official-build --target "$ELRS_TARGET" --domain "$ELRS_DOMAIN" --output elrs-output
+          test -f elrs-output/firmware.bin
+          sha256sum elrs-output/firmware.bin > elrs-output/SHA256SUMS
+          printf '{"target":"%s","domain":"%s","firmwareSha256":"%s","createdAt":"%s"}\n' "$ELRS_TARGET" "$ELRS_DOMAIN" "$(sha256sum elrs-output/firmware.bin|cut -d' ' -f1)" "$(date -u +%FT%TZ)" > elrs-output/BUILD-MANIFEST.json
+      - uses: actions/upload-artifact@v6
+        with: {name: a17y-elrs-mt12-firmware, path: elrs-output, if-no-files-found: error, retention-days: 90}
+  certificate:
+    if: ${{ inputs.action == 'POST_FLASH_CERTIFY' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate post-flash certificate
+        env: {CERT: '${{ inputs.certificate_path }}'}
+        run: |
+          set -euo pipefail
+          test -n "$CERT" && test -f "$CERT"
+          node -e "let j=require('./'+process.env.CERT);if(j.type!=='POST_FLASH'||j.status!=='PASS')throw Error('PASS POST_FLASH certificate required');if(!/^[a-f0-9]{64}$/.test(j.subject.sourceSha256))throw Error('source hash missing');if(!j.evidence.installedVersion||!j.evidence.targetIdentity||!j.evidence.reconnected)throw Error('installed version, target identity and reconnection required')"
+          mkdir -p completion/evidence
+          cp "$CERT" "completion/evidence/$(basename "$CERT")"
+          node completion/run.mjs
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add completion/evidence public/completion-data
+          git commit -m 'Record post-flash verification' || exit 0
+          git push

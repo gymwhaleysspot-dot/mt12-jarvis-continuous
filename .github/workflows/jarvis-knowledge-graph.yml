@@ -1,0 +1,64 @@
+name: Jarvis Persistent Engineering Knowledge Graph
+on:
+  schedule:
+    - cron: '37 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'factory/**'
+      - 'research/**'
+      - 'tests/replays/**'
+      - 'logs/**'
+      - 'tools/engineering_knowledge_graph.py'
+permissions:
+  contents: write
+concurrency:
+  group: jarvis-engineering-knowledge-graph
+  cancel-in-progress: true
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Validate graph builder
+        run: python3 -m py_compile tools/engineering_knowledge_graph.py
+      - name: Rebuild controller, evidence, log, episode and simulation relationships
+        run: python3 tools/engineering_knowledge_graph.py
+      - name: Validate graph integrity
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('factory/knowledge-graph.json');g=json.loads(p.read_text())
+          nodes={n['id'] for n in g['nodes']}
+          assert g['schema']=='JARVIS-KG-1'
+          assert g['nodeCount']==len(g['nodes'])
+          assert g['relationshipCount']==len(g['relationships'])
+          for e in g['relationships']:
+              assert e['source'] in nodes and e['target'] in nodes
+          print(f"validated {g['nodeCount']} nodes and {g['relationshipCount']} relationships")
+          PY
+      - name: Persist Jarvis knowledge
+        shell: bash
+        run: |
+          git config user.name 'Jarvis Engineering Intelligence'
+          git config user.email 'actions@users.noreply.github.com'
+          git add factory/knowledge-graph.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Refresh Jarvis persistent engineering knowledge [skip ci]'
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-knowledge-graph
+          path: factory/knowledge-graph.json
+          if-no-files-found: error
+          retention-days: 90

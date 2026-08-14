@@ -1,0 +1,91 @@
+name: Guaranteed MT12 LUAC Output
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: Build label
+        required: false
+        default: guaranteed-baseline
+
+permissions:
+  contents: write
+
+concurrency:
+  group: guaranteed-mt12-luac
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install Lua 5.3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Compile guaranteed deployable baseline
+        env:
+          BUILD_ID: guaranteed-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -Eeuo pipefail
+          BUILD="public/builds/$BUILD_ID"
+          mkdir -p "$BUILD"
+          cp a17y.lua "$BUILD/candidate.lua"
+          MAX_BYTES=87000 toolchain/compile_mt12.sh "$BUILD/candidate.lua" "$BUILD/candidate.luac"
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          bid=os.environ['BUILD_ID']; d=Path('public/builds')/bid
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          status={'schema':4,'mission':bid,'profile':'trusted-parent-guaranteed-build','authority':'GUARANTEED_BASELINE_DRIVE_BUILD','automaticPromotion':False,'behaviorChanged':False,'hardGatesPassed':True,'benchRequired':True,'roadRequired':True,'source':{'file':'candidate.lua','sha256':h(d/'candidate.lua'),'bytes':(d/'candidate.lua').stat().st_size},'luac':{'file':'candidate.luac','sha256':h(d/'candidate.luac'),'bytes':(d/'candidate.luac').stat().st_size,'format':'MT12 normalized Lua 5.3'}}
+          (d/'STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
+          (d/'BUILD-REPORT.json').write_text(json.dumps({'status':status,'reason':'Manual fallback build only; autonomous production belongs to the complete rewrite factory.'},indent=2)+'\n')
+          (d/'SHA256SUMS.txt').write_text('\n'.join(f"{h(p)}  {p.name}" for p in sorted(d.iterdir()) if p.is_file())+'\n')
+          PY
+          (cd "$BUILD" && zip -9 -r mission-build.zip . -x mission-build.zip)
+      - name: Reject duplicate permanent publication
+        id: dedup
+        env:
+          BUILD_ID: guaranteed-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          cur=json.loads((Path('public/builds')/os.environ['BUILD_ID']/'STATUS.json').read_text())['luac']['sha256']
+          duplicate=None
+          for p in Path('public/builds').glob('guaranteed-*/STATUS.json'):
+            if os.environ['BUILD_ID'] in str(p): continue
+            try:
+              if json.loads(p.read_text()).get('luac',{}).get('sha256')==cur:
+                duplicate=str(p.parent); break
+            except Exception: pass
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"duplicate={'true' if duplicate else 'false'}\n")
+          print('duplicate of '+duplicate if duplicate else 'novel fallback LUAC')
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: guaranteed-mt12-luac-${{ github.run_id }}-${{ github.run_attempt }}
+          path: public/builds/guaranteed-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 180
+      - name: Commit permanent phone download only when hash is new
+        if: steps.dedup.outputs.duplicate != 'true'
+        env:
+          BUILD_ID: guaranteed-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -Eeuo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "public/builds/$BUILD_ID"
+          git commit -m "Publish unique guaranteed MT12 LUAC $BUILD_ID"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,32 @@
+// MJX 7303 Racing V37 — digital twin asset + Jarvis V37 adaptive cinematic graphics director
+import {JarvisXRRenderer} from './jarvis-ai-graphics-v37.js?v=xr37b';
+import {JarvisDynamics} from './jarvis-dynamics-v30.js?v=xr37b';
+const $=s=>document.querySelector(s),canvas=$('#raceCanvas'),status=$('#assetState');
+let xr,dyn,mode='garage',drag=false,lx=0,ly=0,yaw=-.72,pitch=.11,dist=10.8,last=performance.now();
+const input={steer:0,throttle:0,brake:0,surface:'asphalt'},keys=new Set(),tune={motor:1,grip:1,brake:1,aero:1};
+const asset37=new URL('../assets/mjx7303/mjx7303-v37.glb?v=xr37b',import.meta.url).href;
+const asset36=new URL('../assets/mjx7303/mjx7303-v33.glb?v=xr37b-fallback',import.meta.url).href;
+async function loadVehicle(){
+  xr=new JarvisXRRenderer(canvas);xr.setMode('garage');xr.addGround();dyn=new JarvisDynamics();
+  status.textContent='JARVIS V37 · DIGITAL TWIN · LOADING…';
+  try{
+    const info=await xr.loadGLB(asset37);status.textContent=`JARVIS V37 · ${info.drawables} GPU DRAWS · DIGITAL TWIN · ${info.shadowSize||4096}px SHADOW`;status.className='asset-state ok';window.__V37_MODEL=true;window.__V37_FALLBACK=false;window.__JARVIS_AI_GRAPHICS=xr.getAIStats?.();return info;
+  }catch(primary){
+    console.warn('V37 asset unavailable; using continuity fallback until Pages asset is live',primary);
+    status.textContent='JARVIS V37 ASSET DEPLOYING · CONTINUITY MODEL';status.className='asset-state warn';
+    const info=await xr.loadGLB(asset36);status.textContent=`JARVIS V37 · CONTINUITY MODEL · ${info.drawables} GPU DRAWS`;window.__V37_MODEL=false;window.__V37_FALLBACK=true;window.__JARVIS_AI_GRAPHICS=xr.getAIStats?.();return info;
+  }
+}
+try{await loadVehicle()}catch(e){console.error(e);status.textContent='JARVIS MODEL LOAD FAILED · '+e.message;status.className='asset-state warn'}
+function orbit(){xr?.orbit(yaw,pitch,dist,1.02)}orbit();
+const views={front:[Math.PI,.045,10.8],three:[-.72,.105,10.6],side:[-Math.PI/2,.055,10.9],rear:[0,.06,10.8],top:[-.42,1.08,12.4]};
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));[yaw,pitch,dist]=views[b.dataset.view];orbit()}));
+canvas.addEventListener('pointerdown',e=>{if(mode!=='garage')return;drag=true;lx=e.clientX;ly=e.clientY;canvas.setPointerCapture?.(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag||mode!=='garage')return;yaw-=(e.clientX-lx)*.006;pitch=Math.max(-.05,Math.min(1.10,pitch+(e.clientY-ly)*.004));lx=e.clientX;ly=e.clientY;orbit()});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointercancel',()=>drag=false);canvas.addEventListener('wheel',e=>{if(mode!=='garage')return;e.preventDefault();dist=Math.max(7.7,Math.min(15,dist+Math.sign(e.deltaY)*.35));orbit()},{passive:false});
+addEventListener('keydown',e=>{keys.add(e.code);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault()},{passive:false});addEventListener('keyup',e=>keys.delete(e.code));
+function hold(sel,on,off){const b=$(sel);if(!b)return;const d=e=>{e.preventDefault();on();b.setPointerCapture?.(e.pointerId)},u=e=>{e.preventDefault();off()};b.addEventListener('pointerdown',d,{passive:false});b.addEventListener('pointerup',u,{passive:false});b.addEventListener('pointercancel',u,{passive:false})}
+hold('#left',()=>input.steer=-1,()=>input.steer=0);hold('#right',()=>input.steer=1,()=>input.steer=0);hold('#throttle',()=>input.throttle=1,()=>input.throttle=0);hold('#brake',()=>input.brake=1,()=>input.brake=0);
+function setMode(m){mode=m;xr?.setMode(m);document.body.dataset.mode=m;$('#garageBtn')?.classList.toggle('active',m==='garage');$('#driveBtn')?.classList.toggle('active',m==='drive');if(m==='garage'){dyn?.reset();xr?.setRoot(0,0,0,0);yaw=-.72;pitch=.105;dist=10.6;orbit()}}
+$('#garageBtn')?.addEventListener('click',()=>setMode('garage'));$('#driveBtn')?.addEventListener('click',()=>setMode('drive'));
+document.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.upgrade;tune[k]=Math.min(1.30,(tune[k]||1)+.05);b.textContent=Math.round(tune[k]*100)+'%';dyn?.setTune(tune)}));
+function frame(now){const dt=Math.min(.04,(now-last)/1000||.016);last=now;if(xr){xr.resize();if(mode==='drive'&&dyn){const steerKey=(keys.has('ArrowLeft')||keys.has('KeyA'))?-1:(keys.has('ArrowRight')||keys.has('KeyD'))?1:null,thKey=keys.has('ArrowUp')||keys.has('KeyW'),brKey=keys.has('ArrowDown')||keys.has('KeyS')||keys.has('Space');dyn.setInput({steer:steerKey??input.steer,throttle:thKey?1:input.throttle,brake:brKey?1:input.brake,surface:input.surface});dyn.setTune(tune);const s=dyn.step(dt),p=s.position;xr.setRoot(p.x*3,p.y*.5,p.z*3,s.rotation.yaw);xr.chase(p.x*3,p.y*.5,p.z*3,s.rotation.yaw);$('#mph').textContent=Math.round(s.truthMph);$('#rpm').textContent=Math.round(s.truthRpm);$('#battery').textContent=s.batteryV.toFixed(1)+'V';$('#tc').textContent=s.tc?'TC':'—';$('#abs').textContent=s.abs?'ABS':'—';$('#damage').textContent=Math.round(s.damage*100)+'%';$('#reason').textContent=s.reason}xr.render();const ai=xr.getAIStats?.()||{};window.__JARVIS_AI_GRAPHICS=ai;$('#frame').textContent=(xr.avgMs||0).toFixed(1)+' ms';$('#scale').textContent=Math.round((xr.quality||1)*100)+'%';const tier=$('#tier');if(tier)tier.textContent=ai.qualityTier||'ULTRA'}requestAnimationFrame(frame)}
+requestAnimationFrame(frame);window.__V30_READY=true;window.__V31_READY=true;window.__V32_READY=true;window.__V33_READY=true;window.__V34_READY=true;window.__V35_READY=true;window.__V36_READY=true;window.__V37_READY=true;addEventListener('resize',()=>xr?.resize());
