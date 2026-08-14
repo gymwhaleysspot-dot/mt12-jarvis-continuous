@@ -1036,8 +1036,6 @@ const p100Hud=labHud;labHud=function(){p100Hud();const el=$('#brainDetail');if(e
 const p100Reset=reset;reset=function(mode=autoMode){const r=p100Reset(mode);production100.mode='PLAY';production100.flash=production100.watchdog=production100.rounds=production100.heroChains=production100.enemyChains=production100.worldObjects=0;Object.assign(production100.camera,{zoom:1,offset:0,pitch:.58,impulse:0});return r};
 const p100Export=exportReplay;exportReplay=function(){replayEvent('PRODUCTION_100_EXPORT',{features:100,watchdog:production100.watchdog,rounds:production100.rounds});return p100Export()};const p100Button=$('#replayExport');if(p100Button)p100Button.onclick=exportReplay;
 
-})();
-
 
 // Production 101: resilient Griffin/Lira voice direction and replay-proven authority fixes.
 const production101={
@@ -1187,7 +1185,7 @@ combatEvent=function(type,data={}){
  else if(t.includes('CANCEL')){production101.attacks.cancelled++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
  else if(t.includes('INTERRUPT')){production101.attacks.interrupted++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
  if(t.includes('TARGET')&&(t.includes('RECOVER')||t.includes('RESTORE'))){const reason=String(data.reason||data.cause||'watchdog');production101.recovery.targets++;production101.recovery.reasons[reason]=(production101.recovery.reasons[reason]||0)+1}
- voiceReact101(type,data);return e
+ voiceReact101(type,data);soundReact101(type,data);return e
 };
 const p101OwenController=owenController;
 owenController=function(dt){
@@ -1221,7 +1219,86 @@ campaignUpdate=function(dt){
 const p101RememberReplayFrame=rememberReplayFrame;
 rememberReplayFrame=function(frame){
  frame.production100={rigs:{hero:production100.heroChains,enemy:production100.enemyChains},camera:{...production100.camera},watchdog:production100.watchdog,rounds:production100.rounds,worldObjects:production100.worldObjects};
- frame.production101={voice:{queued:production101.voice.queued,spoken:production101.voice.spoken,dropped:production101.voice.dropped,interrupted:production101.voice.interrupted,recovered:production101.voice.recovered,fallbacks:production101.voice.fallbacks,repeats:production101.voice.repeats,errors:production101.voice.errors,queue:combatVoices.queue.length,status:combatVoices.status,lastId:production101.voice.lastId,lastContext:production101.voice.lastContext},attacks:{...production101.attacks},recovery:{targets:production101.recovery.targets,reasons:{...production101.recovery.reasons}},structures:{...production101.structures},animation:{...production101.animation},round:production101.roundLogged};
+ frame.production101={voice:{queued:production101.voice.queued,spoken:production101.voice.spoken,dropped:production101.voice.dropped,interrupted:production101.voice.interrupted,recovered:production101.voice.recovered,fallbacks:production101.voice.fallbacks,repeats:production101.voice.repeats,errors:production101.voice.errors,queue:combatVoices.queue.length,status:combatVoices.status,lastId:production101.voice.lastId,lastContext:production101.voice.lastContext},attacks:{...production101.attacks},recovery:{targets:production101.recovery.targets,reasons:{...production101.recovery.reasons}},structures:{...production101.structures},animation:{...production101.animation},sound:{played:soundAI101.played,dropped:soundAI101.dropped,errors:soundAI101.errors,active:soundAI101.active,mode:soundAI101.mode,last:soundAI101.last,byType:{...soundAI101.byType}},round:production101.roundLogged};
  p101RememberReplayFrame(frame)
 };
-combatEvent('PRODUCTION_101_READY',{voice:'GRIFFIN_LIRA_DYNAMIC',queue:combatVoices.maxQueue,history:combatVoices.historyMax,structureCap:12,round:production101.roundLogged});
+
+// Sound AI 102: original procedural anime-combat sound direction.
+const soundAI101={name:'IYLA SOUND AI 102',version:'1.0',enabled:true,ready:false,master:null,compressor:null,buses:{},noise:null,active:0,maxActive:superAI.tier===1?10:18,played:0,dropped:0,errors:0,last:'',lastAt:{},byType:{},mode:'LOCKED',intensity:0};
+function soundInit101(){
+ initUltimateAudio();const ac=ultimate.audio;if(!ac||soundAI101.ready)return ac;
+ try{
+  const master=ac.createGain(),compressor=ac.createDynamicsCompressor();
+  master.gain.value=.72;compressor.threshold.value=-17;compressor.knee.value=18;compressor.ratio.value=5;compressor.attack.value=.003;compressor.release.value=.19;
+  master.connect(compressor).connect(ac.destination);soundAI101.master=master;soundAI101.compressor=compressor;
+  const config={impact:[.92,'lowpass',6800],energy:[.78,'bandpass',1700],motion:[.62,'highpass',180],world:[.7,'lowpass',2400],ui:[.48,'highpass',420]};
+  for(const [name,c] of Object.entries(config)){const gain=ac.createGain(),filter=ac.createBiquadFilter();gain.gain.value=c[0];filter.type=c[1];filter.frequency.value=c[2];filter.Q.value=name==='energy'?1.4:.7;filter.connect(gain).connect(master);soundAI101.buses[name]={gain,filter}}
+  const length=Math.max(1,Math.floor(ac.sampleRate*1.4)),buffer=ac.createBuffer(1,length,ac.sampleRate),d=buffer.getChannelData(0);
+  let brown=0;for(let i=0;i<length;i++){const white=Math.random()*2-1;brown=(brown+white*.18)/1.18;d[i]=clamp(white*.58+brown*.72,-1,1)}
+  soundAI101.noise=buffer;soundAI101.ready=true;soundAI101.mode='READY';return ac
+ }catch{soundAI101.errors++;soundAI101.mode='FALLBACK';return ac}
+}
+function soundBus101(name){return soundAI101.buses[name]?.filter||soundAI101.master}
+function soundPan101(node,pan){
+ const ac=ultimate.audio;if(!ac?.createStereoPanner)return node;
+ const p=ac.createStereoPanner();p.pan.value=clamp(pan||0,-.85,.85);node.connect(p);return p
+}
+function soundTone101(bus,f0,f1,duration,gain=.1,wave='sine',delay=0,pan=0){
+ const ac=soundInit101();if(!ac||!soundAI101.ready)return;
+ try{
+  const now=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=wave;o.frequency.setValueAtTime(Math.max(20,f0),now);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),now+duration);
+  g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),now+.008);g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  o.connect(g);soundPan101(g,pan).connect(soundBus101(bus));soundAI101.active++;o.onended=()=>soundAI101.active=Math.max(0,soundAI101.active-1);o.start(now);o.stop(now+duration+.02)
+ }catch{soundAI101.errors++}
+}
+function soundNoise101(bus,duration,gain=.12,low=100,high=6000,delay=0,pan=0){
+ const ac=soundInit101();if(!ac||!soundAI101.ready||!soundAI101.noise)return;
+ try{
+  const now=ac.currentTime+delay,s=ac.createBufferSource(),filter=ac.createBiquadFilter(),g=ac.createGain();s.buffer=soundAI101.noise;filter.type='bandpass';filter.frequency.setValueAtTime(Math.max(40,(low+high)*.5),now);filter.Q.value=Math.max(.25,(low+high)/Math.max(80,high-low));
+  g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),now+.006);g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  s.connect(filter).connect(g);soundPan101(g,pan).connect(soundBus101(bus));soundAI101.active++;s.onended=()=>soundAI101.active=Math.max(0,soundAI101.active-1);s.start(now,Math.random()*.35,duration+.02)
+ }catch{soundAI101.errors++}
+}
+function soundImpact101(power,pan=0){
+ const p=clamp(power,0,1.5);soundTone101('impact',82+18*p,36,.18+.08*p,.13+.075*p,'sine',0,pan);soundTone101('impact',310+260*p,84,.075+.035*p,.055+.04*p,'square',.006,pan);soundNoise101('impact',.1+.07*p,.09+.05*p,180,7200,.002,pan)
+}
+function soundWhoosh101(power,pan=0){
+ const p=clamp(power,0,1.3);soundNoise101('motion',.16+.12*p,.045+.05*p,240,9600,0,pan);soundTone101('motion',180+520*p,72,.2+.08*p,.035+.025*p,'sawtooth',0,pan)
+}
+function soundEnergy101(power,release=false,pan=0){
+ const p=clamp(power,0,1.5),d=release?.38:.62;soundTone101('energy',release?920:110,release?74:720,d,.065+.055*p,'sawtooth',0,pan);soundTone101('energy',release?1280:180,release?120:940,d*.78,.04+.04*p,'triangle',.018,pan);soundNoise101('energy',d*.55,.035+.035*p,520,9800,.01,pan)
+}
+function soundTransform101(power){
+ const p=clamp(power,0,1.5);for(let i=0;i<5;i++)soundTone101('energy',90+i*55,360+i*180,.5,.045+.018*p,'sawtooth',i*.09,(i-2)*.18);soundNoise101('world',.9,.1+.04*p,60,2600,0,0)
+}
+function soundWorldBreak101(power,pan=0){
+ const p=clamp(power,0,1.4);soundTone101('world',74,27,.48,.14+.05*p,'sine',0,pan);soundNoise101('world',.34,.12+.05*p,45,3200,.015,pan);for(let i=0;i<3;i++)soundNoise101('world',.08,.035,700,9000,.07+i*.055,pan+(i-1)*.18)
+}
+function soundPriority101(type){return /FINISHER|TRANSFORM|BOSS_ENTERED|SUPER_MOVE_IMPACT/.test(type)?10:/PARRY|CONTACT_CONFIRMED|STRUCTURE|TELEPORT/.test(type)?6:3}
+function soundReact101(type,data={}){
+ if(!soundAI101.enabled)return;const t=String(type||'').toUpperCase(),now=performance.now()/1000,priority=soundPriority101(t),last=soundAI101.lastAt[t]||-99;
+ const gap=/DAMAGE_RESOLVED|SHIELD_HIT/.test(t)?.09:/CONTACT|PARRY/.test(t)?.055:.16;
+ if(now-last<gap){soundAI101.dropped++;return}
+ soundAI101.maxActive=superAI.tier===1?9:superAI.tier===2?14:20;
+ if(soundAI101.active>=soundAI101.maxActive&&priority<9){soundAI101.dropped++;return}
+ soundAI101.lastAt[t]=now;soundAI101.last=t;soundAI101.byType[t]=(soundAI101.byType[t]||0)+1;soundAI101.played++;
+ const damage=clamp(Number(data.damage||data.amount||0)/90,0,1),boss=data.boss||griffin.boss?1:0,form=clamp((griffin.form?.stage||player.form||0)/5,0,1),intensity=clamp(.28+damage*.45+boss*.18+form*.18,0,1.35);
+ soundAI101.intensity=intensity;soundAI101.mode=superAI.tier===1?'CULLED':combatVoices.speaking?'VOICE DUCK':'CINEMATIC';
+ if(soundAI101.master){const ac=ultimate.audio,g=combatVoices.speaking?.42:.72;soundAI101.master.gain.cancelScheduledValues(ac.currentTime);soundAI101.master.gain.setTargetAtTime(g,ac.currentTime,.035)}
+ const pan=clamp(Number(data.x||player.x)-player.x,-360,360)/420;
+ if(t.includes('TRANSFORM'))soundTransform101(intensity);
+ else if(t==='SUPER_MOVE_TRIGGERED'||t.includes('CHARGE'))soundEnergy101(intensity,false,pan);
+ else if(t==='SUPER_MOVE_IMPACT'||t.includes('FINISHER')){soundEnergy101(intensity,true,pan);soundImpact101(intensity+0.35,pan);soundWorldBreak101(intensity,pan)}
+ else if(t.includes('STRUCTURE')||t.includes('PENETRATION')||t.includes('EXIT_BURST'))soundWorldBreak101(intensity,pan);
+ else if(t.includes('TELEPORT')||t.includes('VANISH')){soundWhoosh101(intensity+.25,pan);soundTone101('energy',1400,240,.12,.055,'sine',0,pan)}
+ else if(t.includes('CONTACT_CONFIRMED')||t.includes('PARRY')||t.includes('BODY_STRIKE'))soundImpact101(intensity,pan);
+ else if(t.includes('MISSED')||t.includes('COMBO_BEAT'))soundWhoosh101(intensity*.72,pan);
+ else if(t.includes('BOSS_ENTERED')){soundTone101('world',96,31,.9,.2,'sawtooth');soundNoise101('world',.75,.11,35,1800)}
+ else if(t.includes('SHIELD_HIT')){soundTone101('energy',760,260,.09,.035,'triangle',0,pan);soundNoise101('energy',.07,.028,1200,9000,0,pan)}
+}
+function soundUnlock101(){soundInit101();try{ultimate.audio?.resume?.();soundAI101.mode='READY'}catch{soundAI101.errors++}}
+for(const id of['startBtn','autoStart','retry','autoToggle'])$('#'+id)?.addEventListener('click',soundUnlock101,{passive:true});
+
+combatEvent('PRODUCTION_101_READY',{voice:'GRIFFIN_LIRA_DYNAMIC',queue:combatVoices.maxQueue,history:combatVoices.historyMax,structureCap:12,sound:'IYLA_SOUND_AI_102',round:production101.roundLogged});
+
+})();
