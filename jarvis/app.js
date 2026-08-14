@@ -1,6 +1,6 @@
 import{state,subscribe,refresh,setWorkspace,runMission,syncMT12,metrics,health,latestGeneration,selectedGeneration,selectGeneration,producerState,planner,evidence,intelligence,hypothesisMap}from'./state.js';
 import{GitHubAPI as api}from'./api.js';
-import'./survivor-tab.js?v=20260814production103';
+import'./survivor-tab.js?v=20260814production104';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString():'—',short=s=>s?String(s).slice(0,12):'—';
