@@ -1,6 +1,6 @@
 (()=>{'use strict';
-const H='survivor',SRC='survivor.html?v=20260814production114';let observer,timer;
-if(!document.querySelector('link[data-survivor-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='jarvis/survivor-tab.css?v=20260814production114';link.dataset.survivorStyle='1';document.head.append(link)}
+const H='survivor',SRC='survivor.html?v=20260814production115';let observer,timer;
+if(!document.querySelector('link[data-survivor-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='jarvis/survivor-tab.css?v=20260814production115';link.dataset.survivorStyle='1';document.head.append(link)}
 const active=()=>location.hash.slice(1)===H;
 function mount(){
  document.body.classList.toggle('survivor-active',active());if(!active())return;
@@ -9,7 +9,7 @@ function mount(){
  document.getElementById('workspaceDescription').textContent='Hold the reactor line, evolve your weapons and survive the machine swarm.';
  document.getElementById('workspaceKicker').textContent='ARCADE PROTOCOL // SURVIVE · ADAPT · EVOLVE';
  document.getElementById('heroFacts').innerHTML='';
- const frame=body.querySelector('.survivor-frame');if(frame?.src.includes('20260814production114'))return;
+ const frame=body.querySelector('.survivor-frame');if(frame?.src.includes('20260814production115'))return;
  body.innerHTML=`<section class="survivor-card"><div class="survivor-load">Initializing Core Survivor…</div><iframe class="survivor-frame" src="${SRC}" title="Jarvis Core Survivor" allow="autoplay; fullscreen" loading="eager"></iframe></section>`;
  const load=body.querySelector('.survivor-load'),f=body.querySelector('iframe');
  f.addEventListener('load',()=>load.hidden=true,{once:true});clearTimeout(timer);timer=setTimeout(()=>{if(load)load.textContent='Still loading game systems…'},8000);
