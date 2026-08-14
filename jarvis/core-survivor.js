@@ -1797,7 +1797,7 @@ combatEvent=function(type,data={}){
  if(authoritative){const n=clamp(Number(data.form)||0,0,formNames107.length-1);gameplay105.formLevel=n;gameplay105.form=formNames107[n];gameplay105.formDrain=n?(.7+n*.16):0;transform106.form=n;transform106.name=formNames107[n]}
  else if(t.includes('TRANSFORM')){gameplay105.form=beforeName;gameplay105.formLevel=beforeLevel;gameplay105.formDrain=beforeDrain;transform106.form=beforeLevel;transform106.name=beforeName}
  const terminal=(t.includes('CONTACT')&&(t.includes('CONFIRMED')||t.includes('MISSED')));if(terminal&&beforeOpen===0&&attackLedger105.duplicates>beforeDup){attackLedger105.duplicates=beforeDup;attack107.orphanContacts++;attackRecount106()}
- const now=performance.now();if(['TRANSFORMATION_TRIGGERED','STRUCTURAL_CINEMATIC_STARTED','IMPACT_CINEMA_SHOT','DRAMATIC_FINISH'].includes(t)){cinematic107.active=true;cinematic107.starts++;cinematic107.lastType=t;cinematic107.until=Math.max(cinematic107.until,now+Math.max(900,Number(data.duration||0)*1000||t==='TRANSFORMATION_TRIGGERED'?7800:2200))}
+ const now=performance.now();if(['TRANSFORMATION_TRIGGERED','STRUCTURAL_CINEMATIC_STARTED','IMPACT_CINEMA_SHOT','DRAMATIC_FINISH'].includes(t)){cinematic107.active=true;cinematic107.starts++;cinematic107.lastType=t;const duration=Number(data.duration||0)*1000||(t==='TRANSFORMATION_TRIGGERED'?7800:2200);cinematic107.until=Math.max(cinematic107.until,now+Math.max(900,duration))}
  if(['STRUCTURAL_CINEMATIC_COMPLETE','CINEMATIC_EXIT_BURST'].includes(t)){cinematic107.completes++;cinematic107.until=Math.min(cinematic107.until,now+250)}
  return e
 };
