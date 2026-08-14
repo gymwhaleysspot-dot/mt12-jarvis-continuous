@@ -248,7 +248,7 @@ function zStageUpdate(dt){for(const b of zStage.blasts)b.life-=dt;zStage.blasts=
 function zRig3D(yaw,color,form){const fx=Math.sin(yaw),fz=Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),p=zStage.pose,t=Math.max(0,zStage.poseT),pulse=Math.sin(elapsed*22),skin=[.9,.6,.4],armor=[.06,.26,.68],lift=zStage.elevation*.16;if(p==='PUNCH'||p==='FINISHER'||p==='CAST'){const side=zCinema.combo%2?1:-1,reach=p==='FINISHER'?1.12:p==='CAST'?.72:.9,h=p==='CAST'?1.48:1.62;iylaRound(rx*side*.42+fx*reach,h+lift,rz*side*.42+fz*reach,.2,.34,.2,skin,yaw);iylaRound(rx*side*.28+fx*(reach*.55),h+.08+lift,rz*side*.28+fz*(reach*.55),.22,.3,.22,skin,yaw);iylaRound(rx*side*.42+fx*(reach+Math.max(0,pulse)*.08),h+lift,rz*side*.42+fz*(reach+Math.max(0,pulse)*.08),.25,.22,.25,armor,yaw);if(p==='CAST')iylaRound(fx*1.02,1.5+lift,fz*1.02,.22+t*.25,.22+t*.25,.22+t*.25,color,yaw,.85)}if(p==='KICK'){const side=zCinema.combo%2?1:-1;iylaRound(rx*side*.28+fx*.55,.7+lift,rz*side*.28+fz*.55,.24,.45,.25,[.92,.24,.025],yaw);iylaRound(rx*side*.28+fx*1.02,.58+lift,rz*side*.28+fz*1.02,.27,.22,.42,armor,yaw)}if(p==='HIT')for(const side of [-1,1]){iylaRound(rx*side*.25+fx*.45,1.55+side*.12,rz*side*.25+fz*.45,.2,.34,.2,skin,yaw);iylaRound(rx*side*.12+fx*.68,1.5+side*.12,rz*side*.12+fz*.68,.23,.2,.23,armor,yaw)}if(p==='DASH')for(let n=0;n<3;n++)iylaBox(-fx*(.8+n*.35),1.2+n*.16,-fz*(.8+n*.35),.05,.05,.5,color,yaw,.3);if(p==='TRANSFORM'||p==='POWER')for(let n=0;n<(superAI.tier===1?6:10);n++){const a=n*TAU/(superAI.tier===1?6:10)+elapsed*.9;iylaBox(Math.cos(a)*(1.05+t*.4),.5+(n%4)*.55,Math.sin(a)*(1.05+t*.4),.04,.35,.04,color,a,.5)}}
 function zLiraRig(e,boss){if(!e||!enemies.includes(e))return;const px=(e.x-W/2)/45,pz=(e.y-H/2)/45,yaw=-Math.atan2(player.x-e.x,player.y-e.y),fx=Math.sin(yaw),fz=Math.cos(yaw),attack=e.attackClock<.24||e.hit>0;if(!attack)return;const col=e.hit>0?[1,1,1]:boss?[1,.03,.35]:[.65,.04,.2],reach=boss?.9:.55;iylaRound(px+fx*reach,1.2*(boss?1.25:.72),pz+fz*reach,.2,.25,.2,col,yaw);if(e.hit>0)for(let n=0;n<4;n++){const a=n*TAU/4+elapsed;iylaBox(px+Math.cos(a)*.5,.9,pz+Math.sin(a)*.5,.04,.18,.04,[1,.2,.4],a,.6)}}
 const matty={name:'MATTY',role:'COMBAT + ANIMATION DIRECTOR',version:'3.1',policy:'COMMITTED CLIPS + HYSTERESIS',commands:0,accepted:0,coalesced:0,superseded:0,rejected:0,quiet:0,lastRequest:'FLIGHT',commitRatio:.72};
-const owen={name:'OWEN MAX NEURAL MOTION ENGINE',version:'MAX-3',pose:'FLIGHT',wanted:'FLIGHT',phase:'LOOP',stateTime:0,stateLength:1,blend:1,dt:.016,frames:0,joints:0,errors:0,jointCursor:0,poseMemory:new Map(),queue:[],transitions:0,stability:1,hold:0,lastImpact:0,comboBeat:0,smear:0,director:matty.name};
+const owen={name:'OWEN MAX NEURAL MOTION ENGINE',version:'MAX-4',pose:'FLIGHT',wanted:'FLIGHT',phase:'LOOP',stateTime:0,stateLength:1,blend:1,dt:.016,frames:0,joints:0,errors:0,jointCursor:0,poseMemory:new Map(),queue:[],transitions:0,stability:1,hold:0,lastImpact:0,comboBeat:0,smear:0,director:matty.name,librarySize:10000,recipe:0,recipeTransition:-1};
 const owenClips={FLIGHT:{length:1,loop:1,priority:1},DASH:{length:.42,priority:4},VANISH:{length:.28,priority:7},PUNCH:{length:.34,priority:5},HOOK:{length:.4,priority:6},ELBOW:{length:.38,priority:6},KNEE:{length:.44,priority:7},KICK:{length:.48,priority:5},UPPERCUT:{length:.5,priority:6},SPIN_KICK:{length:.58,priority:7},SWEEP:{length:.5,priority:7},BACK_KICK:{length:.54,priority:7},AXE_KICK:{length:.62,priority:8},DIVE_KICK:{length:.6,priority:8},CAST:{length:.72,priority:5},CHARGE:{length:1.05,priority:7},HIT:{length:.34,priority:8},POWER:{length:1.1,priority:9},FINISHER:{length:.9,priority:10},TRANSFORM:{length:3.2,priority:20}};
 function owenPhase(){const q=clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1);return q<.22?'ANTICIPATION':q<.67?'ACTION':q<.88?'FOLLOW THROUGH':'RECOVERY'}
 function owenController(dt){owen.dt=Math.min(.033,dt||.016);if(elapsed<.08){owen.pose='FLIGHT';owen.wanted='FLIGHT';owen.stateTime=0;owen.blend=1;owen.hold=0;owen.queue.length=0;owen.poseMemory.clear();matty.commands=matty.accepted=matty.coalesced=matty.superseded=matty.rejected=0}const cinematic=griffin.transformation?.active,superMove=griffin.superMove?.active;if(cinematic){owen.pose=owen.wanted='TRANSFORM';owen.queue.length=0;owen.stateLength=griffin.transformation.duration;owen.stateTime=griffin.transformation.time;owen.blend=Math.min(1,owen.blend+owen.dt*2);owen.phase=griffin.transformation.phase;owen.hold=owen.smear=0;owen.stability=1;owen.jointCursor=0;return}if(superMove){const pose=superMovePose(griffin.superMove);owen.pose=owen.wanted=pose;owen.queue.length=0;owen.stateLength=griffin.superMove.duration;owen.stateTime=griffin.superMove.time;owen.blend=Math.min(1,owen.blend+owen.dt*2);owen.phase=pose;owen.hold=owen.smear=0;owen.stability=1;owen.jointCursor=0;return}if(zCinema.impacts.length!==owen.lastImpact){owen.lastImpact=zCinema.impacts.length;owen.hold=superAI.tier===1?.035:.065;owen.smear=.16;owen.comboBeat++}owen.hold=Math.max(0,owen.hold-owen.dt);owen.smear=Math.max(0,owen.smear-owen.dt);const mode=griffin.mode||'',requested=zCinema.transform>0?'TRANSFORM':mode.includes('VANISH')?'VANISH':mode.includes('BEAM')?'CHARGE':zStage.pose||'FLIGHT';if(requested!==owen.wanted){owen.wanted=requested;matty.commands++;const clip=owenClips[requested]||owenClips.FLIGHT;if(requested===owen.pose||owen.queue.includes(requested)||requested==='FLIGHT')matty.coalesced++;else{for(let i=owen.queue.length-1;i>=0;i--){const queued=owenClips[owen.queue[i]]||owenClips.FLIGHT;if(clip.priority>queued.priority){owen.queue.splice(i,1);matty.superseded++}}if(owen.queue.length<2){owen.queue.push(requested);owen.queue.sort((a,b)=>(owenClips[b]?.priority||1)-(owenClips[a]?.priority||1));matty.accepted++}else matty.rejected++}}let wanted=owen.queue[0]||requested,current=owenClips[owen.pose]||owenClips.FLIGHT,next=owenClips[wanted]||owenClips.FLIGHT,done=owen.stateTime>=owen.stateLength;if(wanted!==owen.pose&&(done||next.priority>=current.priority||owen.pose==='FLIGHT')){owen.pose=wanted;owen.queue.shift();owen.stateTime=0;owen.stateLength=next.length;owen.blend=0;owen.transitions++;current=next}else if(done&&!current.loop){owen.pose=owen.queue.shift()||'FLIGHT';owen.stateTime=0;owen.stateLength=(owenClips[owen.pose]||owenClips.FLIGHT).length;owen.blend=0}if(!owen.hold)owen.stateTime+=owen.dt;owen.blend+=(1-owen.blend)*(1-Math.exp(-owen.dt*14));owen.phase=owenPhase();owen.stability=clamp(1-Math.abs(peyten.turn||0)*.28-(owen.pose==='HIT'?.22:0),.35,1);owen.jointCursor=0}
@@ -389,11 +389,14 @@ function campaignBossAI(dt,b){
 // screen-relative coordinates prevents Matty from chasing an unreachable lock
 // while preserving the infinite scrolling world coordinates themselves.
 function zavierCombatBounds(){
- const maxX=Math.max(W*.82,520),maxY=Math.max(H*.7,520),edge=Math.min(360,Math.max(250,Math.min(W,H)*.48));
+ // Use the visible diagonal, not a fixed mobile radius. Actors at a valid
+ // portrait-screen corner are not escaped; only objects beyond the complete
+ // viewport plus a spawn margin are repaired here.
+ const envelope=Math.hypot(W,H)*1.08+180,edge=Math.min(360,Math.max(250,Math.min(W,H)*.48));
  let recovered=0;
  for(const e of enemies){
   const dx=e.x-player.x,dy=e.y-player.y,d=Math.hypot(dx,dy);
-  if(Number.isFinite(e.x)&&Number.isFinite(e.y)&&d<=Math.max(maxX,maxY))continue;
+  if(Number.isFinite(e.x)&&Number.isFinite(e.y)&&d<=envelope)continue;
   const seed=Number.isFinite(e.slot)?e.slot:recovered,angle=Number.isFinite(dx)&&Number.isFinite(dy)&&d>1?Math.atan2(dy,dx):(seed*2.399963+elapsed*.17)%TAU;
   const radius=e.campaignBoss?Math.min(edge,Math.max(W,H)*.42):edge+(seed%4)*24;
   e.x=clamp(player.x+Math.cos(angle)*radius,-48,W+48);
@@ -402,7 +405,7 @@ function zavierCombatBounds(){
  }
  if(recovered){
   const locked=zCinema.lockedTarget;
-  if(!locked||!enemies.includes(locked)||!Number.isFinite(locked.x)||!Number.isFinite(locked.y)||dist(player,locked)>Math.max(W,H)*1.5)zCinema.lockedTarget=null;
+  if(!locked||!enemies.includes(locked)||!Number.isFinite(locked.x)||!Number.isFinite(locked.y)||dist(player,locked)>envelope*1.15)zCinema.lockedTarget=null;
   griffin.mode='ZAVIER WORLD RECOVERY';griffin.reason=`RECOVERED ${recovered} ESCAPED ACTOR${recovered===1?'':'S'}`;
   combatEvent('WORLD_ACTOR_RECOVERED',{count:recovered,worldX:Math.round(worldX),worldY:Math.round(worldY)})
  }
@@ -444,10 +447,30 @@ const campaignTournamentUpdate=tournamentUpdate;
 tournamentUpdate=function(){campaignTournamentUpdate();const now=performance.now(),dt=Math.min(.033,Math.max(0,(now-(campaign.lastTick||now))/1000)||.016);campaign.lastTick=now;campaignUpdate(dt)};
 const campaignHud=hud;
 hud=function(force=false){campaignHud(force);const label=$('#levelLabel');if(label)label.textContent=`LEVEL ${campaign.stage} · ${campaign.phase==='BOSS'?campaignBoss().name:campaign.phase==='WAVE'?`FIGHTERS ${campaign.defeated}/${campaign.quota}`:campaign.phase.replace('_',' ')}`+(autoMode?' · GRIFFIN':'')};
+// Owen MAX-4 procedural choreography atlas. Four independently selected
+// motion dimensions (10 x 10 x 10 x 10) create exactly 10,000 authored,
+// deterministic recipes without shipping 10,000 heavy keyframe objects.
+function owenRecipe(id){id=((id%owen.librarySize)+owen.librarySize)%owen.librarySize;return{id,side:id%10,height:Math.floor(id/10)%10,reach:Math.floor(id/100)%10,arc:Math.floor(id/1000)%10}}
+function owenSelectRecipe(){
+ if(owen.recipeTransition===owen.transitions)return owenRecipe(owen.recipe);
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:null,context=(target?.slot||0)*97+(target?.bossForm||0)*613+(griffin.evolution||0)*1291;
+ owen.recipe=(owen.transitions*137+owen.comboBeat*811+kills*43+context)%owen.librarySize;owen.recipeTransition=owen.transitions;return owenRecipe(owen.recipe)
+}
+function owenChoreographyMotion(yaw,color){
+ const combat=!['FLIGHT','TRANSFORM','HIT','SUPER_RECOVER'].includes(owen.pose);if(!combat)return;
+ const r=owenSelectRecipe(),v=owenAxes(yaw),q=clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1),tempo=.82+r.arc*.04,beat=clamp(q*tempo,0,1),action=Math.sin(beat*Math.PI),side=r.side<5?-1:1;
+ const height=.64+r.height*.105,reach=.68+r.reach*.075,curve=(r.arc-4.5)*.055,kick=/KICK|KNEE|SWEEP/.test(owen.pose),spin=/SPIN|SWEEP|FINISHER|RUSH/.test(owen.pose),twist=spin?(r.arc-4.5)*.13*action:0;
+ const start=owenPoint(0,0,side*(kick?.24:.46),kick?.72:1.48,kick?.08:.2,yaw),mid=owenPoint(0,0,side*(.34+curve),height+(kick?.08:.55),reach*.48*action,yaw+twist),end=owenPoint(0,0,side*(.18+curve*.4),height+(kick?0:.58),reach*action,yaw+twist);
+ const limb=kick?[.06,.26,.68]:[.9,.58,.39];owenJoint(start,mid,kick?.21:.17,limb,yaw+twist);owenJoint(mid,end,kick?.19:.15,limb,yaw+twist);iylaRound(end.x,end.y,end.z,kick?.3:.22,kick?.16:.2,kick?.48:.24,color,yaw+twist,.82);
+ const trails=superAI.tier===1?2:4;for(let n=1;n<=trails;n++){const fade=1-n/(trails+1),back=owenPoint(0,0,side*(.18+curve*.4),height+(kick?0:.58),reach*Math.max(0,action-n*.1),yaw+twist-n*.035);iylaBox(back.x,back.y,back.z,.035,.045,.22+n*.08,color,yaw+twist,.12*fade)}
+}
+const atlasOwenGriffin=owenGriffin;
+owenGriffin=function(yaw,color,form){atlasOwenGriffin(yaw,color,form);owenChoreographyMotion(yaw,color)};
 // Matty 3.1 protects Owen's anticipation/action/follow-through from routine
 // navigation chatter. Only a hit reaction or a cinematic can break commitment.
 const committedOwenController=owenController;
 owenController=function(dt){
+ if(elapsed<.08){owen.transitions=0;owen.recipe=0;owen.recipeTransition=-1}
  const clip=owenClips[owen.pose]||owenClips.FLIGHT,q=owen.stateTime/Math.max(.01,owen.stateLength),saved=zStage.pose;
  const protectedClip=!clip.loop&&q<matty.commitRatio&&!griffin.transformation?.active&&!griffin.superMove?.active&&saved!=='HIT';
  if(protectedClip&&saved!==owen.pose){zStage.pose=owen.pose;matty.quiet=Math.max(matty.quiet,.12)}
