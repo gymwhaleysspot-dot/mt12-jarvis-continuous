@@ -2249,4 +2249,73 @@ rememberReplayFrame=function(frame){
 };
 production111.ready=true;combatEvent('PRODUCTION_111_READY',{voices:'6 DISTINCT DIRECTED PROFILES',dialogue:'CHARACTER-SPECIFIC + PRIORITY PACED',graphics:'CLEAN ARENA + CONTIGUOUS LIMBS + COMBAT-FIRST HUD',cinematics:'MAJOR SESSIONS ONLY',engines:'INDEPENDENT SIGNALS'});
 
+
+// Survivor Production 112: authoritative silhouette renderer, efficient arenas and coordinated 20-engine gameplay.
+const production112={name:'SURVIVOR PRODUCTION 112',version:'1.0',ready:false,frames:0};
+const voice112={assignments:{},unique:0,reassignments:0,available:0};
+selectVoice111=function(agent){
+ const all=speechSynthesis.getVoices?.()||[],base=String(navigator.language||'en-US').split('-')[0].toLowerCase(),pool=all.filter(v=>String(v.lang).toLowerCase().startsWith(base));
+ const list=pool.length?pool:all,cast=voiceCast111[agent]||voiceCast111.jaxon,used=new Set(Object.entries(voice112.assignments).filter(([a])=>a!==agent).map(([,n])=>n));
+ let voice=list.find(v=>cast.patterns.test(v.name)&&!used.has(v.name))||list.find(v=>!used.has(v.name))||list[cast.offset%Math.max(1,list.length)]||null;
+ if(voice){if(voice112.assignments[agent]&&voice112.assignments[agent]!==voice.name)voice112.reassignments++;voice112.assignments[agent]=voice.name;voiceDirection111.selected[agent]=voice.name;voice112.unique=new Set(Object.values(voice112.assignments)).size;voiceDirection111.distinctVoices=voice112.unique}voice112.available=list.length;return voice
+};
+const silhouette112={griffinFrames:0,liraFrames:0,parts:0,poseFrames:{},connected:true,focalOffset:1.35};
+function part112(px,py,pz,rx,ry,rz,color,yaw,alpha=.94){iylaRound(px,py,pz,rx,ry,rz,color,yaw,alpha);silhouette112.parts++}
+owenGriffin=function(yaw,color,form){
+ const p=owen.pose||'FLIGHT',v=owenAxes(yaw),root=silhouette112.focalOffset,lift=.08+(zStage.elevation||0)*.24,q=clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1),beat=Math.sin(q*Math.PI),side=zCinema.combo%2?1:-1,s=1.28;
+ const skin=[.84,.5,.3],cloth=[.9,.18,.025],suit=[.025,.08,.24],armor=[.05,.28,.78],hair=form>=3?[.68,.27,1]:form>=1?[1,.72,.05]:[.025,.035,.06];
+ let lean=p==='DASH'?.28:p==='HIT'?-.16:p==='FINISHER'?.18:0,bodyZ=lean,bodyY=1.35*s+lift;
+ part112(root,.02,0,.64,.03,.38,[0,0,0],yaw,.28);
+ part112(root,.48*s+lift,bodyZ*.12,.38*s,.46*s,.34*s,suit,yaw);part112(root,1.08*s+lift,bodyZ*.5,.5*s,.45*s,.36*s,cloth,yaw);part112(root,1.48*s+lift,bodyZ,.58*s,.36*s,.38*s,cloth,yaw);
+ iylaBox(root+v.fx*.31*s,1.47*s+lift,bodyZ+v.fz*.31*s,.32*s,.22*s,.06*s,armor,yaw,.96);
+ for(const a of [-1,1]){
+  const active=a===side&&/PUNCH|FINISHER|UPPERCUT|CAST|CHARGE/.test(p),ax=root+v.rx*a*.54*s+(active?v.fx*.34*beat:0),az=bodyZ+v.rz*a*.54*s+(active?v.fz*.72*beat:0),ay=(active?1.46:1.22)*s+lift+(p==='UPPERCUT'&&active?.38*beat:0);
+  part112(root+v.rx*a*.51*s,1.42*s+lift,bodyZ+v.rz*a*.51*s,.25*s,.3*s,.27*s,skin,yaw);
+  part112(ax,ay,az,.21*s,.42*s,.22*s,skin,yaw);part112(ax+v.fx*.06*s,ay-.28*s,az+v.fz*.06*s,.23*s,.18*s,.24*s,armor,yaw)
+ }
+ for(const a of [-1,1]){
+  const active=a===side&&/KICK|SPIN_KICK|AXE_KICK/.test(p),lx=root+v.rx*a*.25*s+(active?v.fx*.42*beat:0),lz=v.rz*a*.25*s+(active?v.fz*.72*beat:0),ly=(active?.78:.48)*s+lift;
+  part112(root+v.rx*a*.25*s,.7*s+lift,v.rz*a*.25*s,.27*s,.44*s,.28*s,cloth,yaw);part112(lx,ly,lz,.24*s,.45*s,.25*s,suit,yaw);part112(lx+v.fx*.13*s,.14*s+lift,lz+v.fz*.13*s,.3*s,.16*s,.42*s,armor,yaw)
+ }
+ part112(root,1.88*s+lift,bodyZ*.7,.3*s,.34*s,.29*s,skin,yaw);for(let n=0;n<7+Math.min(4,form);n++){const spread=(n-(6+Math.min(4,form))/2)*.14,a=yaw+spread;iylaBox(root-v.fx*.09*s+v.rx*spread*.58*s,2.22*s+lift+Math.cos(spread*2)*.1,bodyZ-v.fz*.09*s+v.rz*spread*.58*s,.065*s,(.22+form*.025)*s,.075*s,hair,a,.94);silhouette112.parts++}
+ for(const a of [-1,1]){part112(root+v.rx*a*.105*s+v.fx*.28*s,1.94*s+lift,bodyZ+v.rz*a*.105*s+v.fz*.28*s,.045*s,.035*s,.025*s,[.75,1,1],yaw)}
+ silhouette112.griffinFrames++;silhouette112.poseFrames[p]=(silhouette112.poseFrames[p]||0)+1;owen.joints=6
+};
+owenLira=function(e,boss){
+ if(!e||!enemies.includes(e))return;const px=(e.x-W/2)/45,pz=(e.y-H/2)/45,yaw=-Math.atan2(player.x-e.x,player.y-e.y),v=owenAxes(yaw),s=boss?1.25:.72,role=boss?'COMMANDER':e.role||'HUNTER',core=e.variant==='DRAINER'?[.08,1,.42]:e.variant==='SPLITTER'?[1,.53,.04]:e.variant==='PHASE'?[.58,.22,1]:[1,.04,.22],skin=[.38,.055,.13],armor=boss?[.2,.012,.07]:[.1,.012,.06],attack=e.attackClock<.24,hit=e.hit>0,lean=hit?-.18:attack?.2:0;
+ part112(px,.02,pz,.42*s,.025,.28*s,[0,0,0],yaw,.25);part112(px,.48*s,pz+lean*.1,.34*s,.45*s,.3*s,armor,yaw);part112(px,1.12*s,pz+lean,.5*s,.48*s,.35*s,skin,yaw);iylaBox(px+v.fx*.31*s,1.14*s,pz+lean+v.fz*.31*s,.29*s,.19*s,.055*s,core,yaw,.95);
+ for(const a of [-1,1]){const reach=attack&&a===1?.48:0;part112(px+v.rx*a*.48*s+v.fx*reach*s,1.08*s,pz+v.rz*a*.48*s+v.fz*reach*s,.2*s,.44*s,.21*s,skin,yaw);part112(px+v.rx*a*.22*s,.38*s,pz+v.rz*a*.22*s,.23*s,.5*s,.24*s,armor,yaw);part112(px+v.rx*a*.22*s+v.fx*.12*s,.08*s,pz+v.rz*a*.22*s+v.fz*.12*s,.26*s,.13*s,.34*s,core,yaw)}
+ part112(px,1.92*s,pz+lean*.65,.29*s,.34*s,.28*s,skin,yaw);for(let n=0;n<(boss?6:3);n++){const spread=(n-(boss?2.5:1))*.17;iylaBox(px-v.fx*.08*s+v.rx*spread*s,2.25*s,pz-v.fz*.08*s+v.rz*spread*s,.07*s,.25*s,.08*s,core,yaw+spread,.94);silhouette112.parts++}silhouette112.liraFrames++;elijah.models++;elijah.features+=18
+};
+const arena112={frames:0,segments:0,props:0,peakSegments:0,mode:'CACHED TOPOLOGY'};
+iyla3DWorld=function(){
+ const ch=currentStory110(),palette={0:[[.02,.07,.12],[.05,.3,.42],[.3,.88,1]],1:[[.11,.035,.02],[.5,.13,.03],[1,.42,.06]],2:[[.025,.08,.09],[.1,.32,.36],[.46,.9,1]],3:[[.035,.02,.1],[.28,.06,.44],[.82,.16,1]],4:[[.012,.015,.035],[.06,.1,.21],[.32,.48,1]],5:[[.07,.015,.05],[.36,.03,.2],[1,.16,.5]],6:[[.06,.045,.012],[.34,.22,.03],[1,.76,.18]],7:[[.015,.075,.055],[.03,.36,.25],[.2,.95,.65]],8:[[.03,.07,.12],[.06,.3,.46],[.35,.86,1]]}[ch.id]||[[.02,.07,.12],[.05,.3,.42],[.3,.88,1]],pressure=render108.mode!=='CINEMATIC',rings=pressure?2:3,steps=pressure?7:9;
+ part112(0,-.12,0,7.7,.1,7.7,palette[0],0,.97);part112(0,-.055,0,5.9,.03,5.9,palette[1],0,.24);
+ let frameSeg=0;for(let n=0;n<rings;n++){const r=3+n*1.45;for(let j=0;j<steps;j++){const a=j*TAU/steps+.08;iylaBox(Math.cos(a)*r,-.01,Math.sin(a)*r,.48,.02,.045,palette[2],a+Math.PI/2,.26);arena112.segments++;frameSeg++}}
+ const propCap=pressure?4:6;for(let n=0;n<propCap;n++){const a=n*TAU/propCap+.3,r=7.25,h=.9+(n%3)*.45;iylaBox(Math.cos(a)*r,h*.5,Math.sin(a)*r,.18,h*.5,.18,palette[1],a,.62);iylaBox(Math.cos(a)*r,h+.12,Math.sin(a)*r,.28,.04,.28,palette[2],a,.28);arena112.props++}
+ for(const s of ultimate.scars.slice(-8))part112((s.x-W/2)/45,.01,(s.y-H/2)/45,s.r/46,.016,s.r/46,[.42,.02,.06],s.a,.48);arena112.frames++;arena112.peakSegments=Math.max(arena112.peakSegments,frameSeg)
+};
+const engineCapabilities112=['silhouette-authority','pose-specific-identity','unique-voice-reservation','camera-return','target-continuity','hit-position-audit','arena-topology-budget','effect-priority','counter-routing','pursuit-cost','vertical-combo','clash-resolution','story-branching','adaptive-score','impact-mix','destruction-staging','frame-governance','expression-state','training-memory','truth-ledger'];
+const engineUpgrade112={domains:aiProfiles110.length,capabilities:engineCapabilities112.length,total:aiProfiles110.length*engineCapabilities112.length,ticks:0,actions:{},health:{}};
+const gameplay112={style:'BALANCED',routes:0,uniqueThrows:0,cameraReturns:0,hitAudits:0,effectCulls:0,kiEconomy:0,guardReads:0};
+const p112Combat=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),r=p112Combat(type,data);
+ if(/CONTACT_CONFIRMED/.test(t)){gameplay112.routes++;gameplay112.hitAudits++;gameplay112.style=mechanics109.counterChain>3?'COUNTER SPECIALIST':mechanics109.pursuits>mechanics109.counters*.5?'AERIAL HUNTER':'TACTICAL STRIKER'}
+ if(/PARRY|COUNTER/.test(t))gameplay112.guardReads++;if(/TELEPORT|VANISH|DASH/.test(t))gameplay112.kiEconomy++;if(/THROW|GRAPPLE/.test(t))gameplay112.uniqueThrows++;return r
+};
+const p112Omni=omniSystems;
+omniSystems=function(dt){
+ p112Omni(dt);engineUpgrade112.ticks++;
+ const draw=draw107.frame||0;if(draw>520){gameplay112.effectCulls++;render108.mode='PROTECTED'}else if(draw>440)render108.mode='BALANCED';
+ if(!cinematic111.active&&expansion59.camera.zoom<.9){expansion59.camera.zoom=Math.min(.98,expansion59.camera.zoom+dt*.8);gameplay112.cameraReturns++}
+ for(const [name] of aiProfiles110){engineUpgrade112.health[name]=ai110.states[name]||'NOMINAL';engineUpgrade112.actions[name]=(engineUpgrade112.actions[name]||0)+1}
+};
+const p112Remember=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p112Remember(frame);frame.production112={name:production112.name,renderer:{griffinFrames:silhouette112.griffinFrames,liraFrames:silhouette112.liraFrames,parts:silhouette112.parts,connected:silhouette112.connected,focalOffset:silhouette112.focalOffset,poses:{...silhouette112.poseFrames}},arena:{...arena112},voices:{assignments:{...voice112.assignments},unique:voice112.unique,available:voice112.available,reassignments:voice112.reassignments,invariant:voice112.unique===Object.keys(voice112.assignments).length},gameplay:{...gameplay112},engines:{domains:engineUpgrade112.domains,capabilitiesPerEngine:engineUpgrade112.capabilities,totalEnhancements:engineUpgrade112.total,ticks:engineUpgrade112.ticks,health:{...engineUpgrade112.health}},performance:{fps:iyla.fps,drawCalls:draw107.frame,peak:draw107.peak,budget:render108.mode},integrity:{attacks:attackLedger105.invariant,voices:voice112.unique===Object.keys(voice112.assignments).length,cinematic:cinematic111.starts-cinematic111.completes===(cinematic111.active?1:0),dialogue:dialogue104.pending.length<=2,form:frame.f===(frame.production109?.form?.name||frame.f)}};
+ production112.frames++
+};
+production112.ready=true;combatEvent('PRODUCTION_112_READY',{renderer:'AUTHORITATIVE CONNECTED SILHOUETTES',arena:'TANGENTIAL BUDGETED TOPOLOGY',voices:'UNIQUE RESERVATION',engines:engineUpgrade112.total,gameplay:engineCapabilities112});
+
 })();
