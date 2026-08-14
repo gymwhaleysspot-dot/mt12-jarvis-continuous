@@ -681,4 +681,110 @@ const characterEnemy=enemy;
 enemy=function(forceBoss=false){const before=enemies.filter(e=>e.type===3).length,r=characterEnemy(forceBoss);if(forceBoss&&!before&&enemies.some(e=>e.type===3))characterBeat('BOSS');return r};
 const characterCampaignUpdate=campaignUpdate;
 campaignUpdate=function(dt){const stage=campaign.stage,answer=characterCampaignUpdate(dt);if(campaign.stage!==stage)characterBeat('CLEAR');return answer};
+
+// Christian Mechanics AI: a bounded mechanics authority informed by modern
+// arena-fighter resource, contact, recovery and readability rules.
+memory.christian||={version:1,runs:0,seconds:0,contactAttempts:0,contactHits:0,damageIn:0,damageOut:0,bestStage:1,assistBias:0,lessons:[]};
+const christian={name:'CHRISTIAN MECHANICS AI',version:'1.0',mode:'CALIBRATING',doctrine:'READABLE FAIRNESS',threat:0,flow:0,kiGain:0,skillStock:0,guard:1,contactClock:0,damageWindow:0,damageTaken:0,hpLast:player.hp,enemyHpLast:0,target:null,lastStrike:-1,learnClock:0,saveClock:0,bossCount:0,voice:'ORIGINAL PACK'};
+function christianEnemyHp(){let total=0;for(const e of enemies)total+=Math.max(0,e.hp||0);return total}
+function christianReset(){Object.assign(christian,{mode:'OPENING READ',threat:0,flow:0,kiGain:0,skillStock:0,guard:1,contactClock:0,damageWindow:1,damageTaken:0,hpLast:player.hp,enemyHpLast:christianEnemyHp(),target:null,lastStrike:-1,learnClock:0,saveClock:0,bossCount:0});expansion59.ki=Math.max(expansion59.ki,.28)}
+const christianBaseReset=reset;
+reset=function(mode=autoMode){const answer=christianBaseReset(mode);christianReset();memory.christian.runs++;return answer};
+function christianContact(target){if(!target||!enemies.includes(target))return;const damage=Math.max(8,player.damage*(.42+(griffin.evolution||0)*.05));hurt(target,damage,'#fff3bd');christian.flow=clamp(christian.flow+.14,0,1);christian.skillStock=clamp(christian.skillStock+.08,0,3);christian.contactClock=0;christian.mode='CONTACT CONFIRMED';combatEvent('CHRISTIAN_CONTACT',{damage:Math.round(damage),target:target.type===3?'BOSS':'FIGHTER'})}
+function christianUpdate(dt){
+ if(!running)return;if(elapsed<.08)christianReset();
+ christian.damageWindow-=dt;if(christian.damageWindow<=0){christian.damageWindow=1;christian.damageTaken=0}
+ const rawLoss=Math.max(0,christian.hpLast-player.hp),cap=player.maxHp*(autoMode?(elapsed<30?.12:.18):.24),allowed=Math.max(0,cap-christian.damageTaken),accepted=Math.min(rawLoss,allowed);if(rawLoss>accepted){player.hp=Math.min(player.maxHp,player.hp+rawLoss-accepted);griffin.shield=Math.min(griffin.shieldMax||0,(griffin.shield||0)+(rawLoss-accepted)*.35);christian.mode='BURST DAMAGE GOVERNOR'}christian.damageTaken+=accepted;memory.christian.damageIn+=accepted;christian.hpLast=player.hp;
+ const enemyHp=christianEnemyHp(),damageOut=Math.max(0,christian.enemyHpLast-enemyHp);christian.enemyHpLast=enemyHp;if(damageOut>0){memory.christian.damageOut+=damageOut;christian.kiGain=Math.min(.16,damageOut/Math.max(120,player.damage*16));expansion59.ki=clamp(expansion59.ki+christian.kiGain,0,1);christian.flow=clamp(christian.flow+damageOut/500,0,1)}else christian.flow=Math.max(0,christian.flow-dt*.025);
+ const boss=enemies.filter(e=>e.type===3);christian.bossCount=boss.length;if(boss.length>1){const keep=campaign.boss&&boss.includes(campaign.boss)?campaign.boss:boss.reduce((a,b)=>(b.max||0)>(a.max||0)?b:a);for(const extra of boss)if(extra!==keep){const i=enemies.indexOf(extra);if(i>=0)enemies.splice(i,1)}christian.mode='ONE BOSS CONTRACT'}
+ christian.target=zTarget();const target=christian.target,d=target?dist(player,target):Infinity;christian.threat=clamp(enemies.length*.045+hostile.length*.065+(target?.type===3?.65:0)+(1-player.hp/player.maxHp)*1.2,0,3);
+ if(autoMode&&target&&!griffin.transformation?.active&&!griffin.superMove?.active){const a=Math.atan2(target.y-player.y,target.x-player.x);if(d>108&&d<520&&christian.threat<2.35){griffin.heading=a;griffin.mode=target.type===3?'CHRISTIAN BOSS PURSUIT':'CHRISTIAN TARGET PURSUIT'}if(d<145&&owen.phase==='CONTACT'&&owen.transitions!==christian.lastStrike){christian.lastStrike=owen.transitions;memory.christian.contactAttempts++;christianContact(target);memory.christian.contactHits++}else if(d>175&&/PUNCH|KICK|ELBOW|KNEE|FINISHER/.test(owen.pose))christian.mode='RANGE RECOVERY'}
+ const projectileCap=Math.round(18+campaign.stage*3+(player.hp/player.maxHp)*14);if(hostile.length>projectileCap)hostile.splice(0,hostile.length-projectileCap);
+ const lowHealth=player.hp/player.maxHp<.38,lowClear=kills/Math.max(1,elapsed)<.42;christian.guard=clamp((lowHealth?.9:.35)+(christian.threat/3)*.4,0,1);if(lowHealth)griffin.plan='FORTRESS';else if(lowClear&&christian.threat<1.5)griffin.plan='HUNTER';
+ christian.learnClock+=dt;christian.saveClock+=dt;if(christian.learnClock>=5){christian.learnClock=0;memory.christian.seconds+=5;memory.christian.bestStage=Math.max(memory.christian.bestStage,campaign.stage);const ratio=memory.christian.contactHits/Math.max(1,memory.christian.contactAttempts);memory.christian.assistBias=clamp(memory.christian.assistBias+(ratio<.45?.01:-.003),0,.2);christian.mode=lowHealth?'SURVIVAL ECONOMY':lowClear?'OFFENSE ECONOMY':christian.threat>1.8?'THREAT BUDGET':'FLOW BALANCED'}if(christian.saveClock>=15){christian.saveClock=0;try{localStorage.griffinMemory=JSON.stringify(memory)}catch{}}
+}
+const christianBaseOmni=omniSystems;
+omniSystems=function(dt){christianBaseOmni(dt);christianUpdate(dt)};
+const christianBaseLabHud=labHud;
+labHud=function(){christianBaseLabHud();const el=$('#brainDetail');if(el)el.innerHTML+=`<br><b>${christian.name}</b> · ${christian.mode}<br>THREAT ${christian.threat.toFixed(2)} · FLOW ${Math.round(christian.flow*100)}% · GUARD ${Math.round(christian.guard*100)}%<br>KI +${Math.round(christian.kiGain*100)} · SKILL ${christian.skillStock.toFixed(1)} · BOSS ${christian.bossCount}/1`};
+
+// Bundled original Jaxon and Conner performances are the primary path. Native
+// browser speech remains a fallback for unmapped dynamic dialogue.
+const voicePack={jaxon:{start:'jarvis/audio/voices/jaxon/start.mp3',boss:'jarvis/audio/voices/jaxon/boss.mp3',danger:'jarvis/audio/voices/jaxon/danger.mp3',clear:'jarvis/audio/voices/jaxon/clear.mp3'},conner:{start:'jarvis/audio/voices/conner/start.mp3',boss:'jarvis/audio/voices/conner/boss.mp3',danger:'jarvis/audio/voices/conner/danger.mp3',clear:'jarvis/audio/voices/conner/clear.mp3'}};
+const voiceAudio={current:null};
+function voicePackKey(msg){return /clear|victory|horizon/i.test(msg)?'clear':/boss|form|target|pattern|worthy|technique/i.test(msg)?'boss':/recover|guard|pressure|fall|slowing|swarm/i.test(msg)?'danger':'start'}
+function playVoicePack(agent,msg,finish){try{const src=voicePack[agent]?.[voicePackKey(msg)];if(!src)return false;voiceAudio.current?.pause();const a=new Audio(src);voiceAudio.current=a;a.preload='auto';a.volume=.86;a.onended=finish;a.onerror=finish;const promise=a.play();if(promise?.catch)promise.catch(finish);combatVoices.status='VOICE PACK';return true}catch{return false}}
+voicePump=function(){if(combatVoices.speaking||!combatVoices.queue.length)return;const item=combatVoices.queue.shift(),v=combatVoices[item.agent];combatVoices.speaking=true;voiceCaption.dataset.agent=v.name;voiceCaption.textContent=`${v.name} // ${item.msg}`;voiceCaption.hidden=false;combatVoices.subtitleUntil=performance.now()+Math.max(1800,item.msg.length*58);let done=false;const finish=()=>{if(done)return;done=true;combatVoices.speaking=false;combatVoices.status='PACK READY';setTimeout(voicePump,90)};if(combatVoices.enabled&&combatVoices.unlocked&&playVoicePack(item.agent,item.msg,finish))return;if(combatVoices.enabled&&combatVoices.unlocked&&window.SpeechSynthesisUtterance){try{const u=new SpeechSynthesisUtterance(item.msg),list=combatVoices.voiceList;u.pitch=v.pitch;u.rate=v.rate;u.volume=.82;u.voice=list.find(q=>q.lang?.startsWith('en'))||null;u.onend=finish;u.onerror=finish;speechSynthesis.speak(u);combatVoices.status='SYSTEM VOICE';return}catch{}}voiceCue(item.agent);setTimeout(finish,Math.max(700,item.msg.length*35))};
+for(const group of Object.values(voicePack))for(const src of Object.values(group)){const a=new Audio();a.preload='auto';a.src=src}
+
+// Causal arena destruction. Structures have health and staged failure; heavy
+// strikes carry fighters through a trajectory, breach intervening geometry and
+// leave persistent scars instead of producing unrelated decorative debris.
+const destruction={name:'CHRISTIAN STRUCTURAL COMBAT',impacts:0,breaches:0,collapses:0,knockThroughs:0,lastBroken:new WeakSet(),fragments:[],maxFragments:34};
+function structureReady(p){if(p.structure)return;p.structure={kind:p.type===0?'MOUNTAIN':p.type===1?'BUILDING':p.type===2?'TOWER':p.type===3?'WALL':'FORTRESS',max:55+p.h*2.4,hp:55+p.h*2.4,stage:0,angle:0,source:'NONE'};if(p.broken){p.structure.hp=0;p.structure.stage=3}}
+function structuralFragments(p,count,color){const s=p.structure;for(let n=0;n<count;n++){const a=s.angle+(n/count-.5)*1.7,r=8+n*3;destruction.fragments.push({parent:p,ox:Math.cos(a)*r,oy:Math.sin(a)*r,z:(n%3)*.18,spin:(n%2?1:-1)*(.3+n*.08),size:Math.max(.14,p.h/180)*(1+(n%3)*.18),color,life:8+n*.45})}if(destruction.fragments.length>destruction.maxFragments)destruction.fragments.splice(0,destruction.fragments.length-destruction.maxFragments)}
+function structureImpact(p,power,angle,source='KI IMPACT'){structureReady(p);const s=p.structure;if(s.stage>=3)return false;s.angle=angle;s.source=source;s.hp-=power;const ratio=s.hp/s.max,next=ratio<=0?3:ratio<.34?2:ratio<.7?1:0;if(next>s.stage){s.stage=next;destruction.impacts++;if(next===1){structuralFragments(p,3,[.38,.34,.3]);burst(p.x,p.y,'#d3b07a',8)}else if(next===2){destruction.breaches++;structuralFragments(p,6,[.45,.3,.2]);burst(p.x,p.y,'#ffb05a',18);ultimate.scars.push({x:p.x,y:p.y,r:30+p.h*.35,a:angle,life:30,structural:true})}else{destruction.collapses++;p.broken=true;structuralFragments(p,10,[.33,.25,.2]);burst(p.x,p.y,'#ff7b35',32);rings.push({x:p.x,y:p.y,r:12,max:120+p.h,life:.7});ultimate.scars.push({x:p.x,y:p.y,r:44+p.h*.55,a:angle,life:60,structural:true});combatEvent('STRUCTURE_COLLAPSED',{kind:s.kind,source})}}return next>0}
+function knockThrough(target,power=1.5,source='HEAVY STRIKE'){if(!target||!enemies.includes(target))return;const a=Math.atan2(target.y-player.y,target.x-player.x),travel=120+power*78,startX=target.x,startY=target.y,endX=startX+Math.cos(a)*travel,endY=startY+Math.sin(a)*travel;let broken=0;for(const p of iyla2026.props){structureReady(p);const vx=endX-startX,vy=endY-startY,len2=vx*vx+vy*vy||1,t=clamp(((p.x-startX)*vx+(p.y-startY)*vy)/len2,0,1),px=startX+vx*t,py=startY+vy*t;if(Math.hypot(p.x-px,p.y-py)<32+p.h*.25&&structureImpact(p,34+power*38,a,source))broken++}target.x=endX;target.y=endY;target.hit=.24;if(broken){destruction.knockThroughs++;hurt(target,player.damage*(.35+broken*.18),'#ffd28b');christian.mode='STRUCTURAL KNOCK-THROUGH';zStage.zoom=Math.min(zStage.zoom,.88);shake=Math.max(shake,12+broken*3);speak('Impact path confirmed. Structure breached.',true)}}
+const structuralBurst=zStageBurst;
+zStageBurst=function(px,py,color='#ffe66b',power=1){const answer=structuralBurst(px,py,color,power);if(power>=1.15){const target=enemies.reduce((best,e)=>{const d=Math.hypot(e.x-px,e.y-py);return !best||d<best.d?{e,d}:best},null);if(target&&target.d<115+power*35)knockThrough(target.e,power,'SUPER IMPACT');else for(const p of iyla2026.props)if(Math.hypot(p.x-px,p.y-py)<70+power*45)structureImpact(p,28+power*32,Math.atan2(p.y-py,p.x-px),'BLAST WAVE')}return answer};
+const structuralChristianUpdate=christianUpdate;
+christianUpdate=function(dt){structuralChristianUpdate(dt);for(const p of iyla2026.props){structureReady(p);if(p.broken&&p.structure.stage<3)structureImpact(p,p.structure.max*2,Math.atan2(p.y-player.y,p.x-player.x),'COLLISION');if(p.broken&&!destruction.lastBroken.has(p)){destruction.lastBroken.add(p);p.structure.stage=3;structuralFragments(p,7,[.31,.26,.22])}}for(let i=destruction.fragments.length-1;i>=0;i--){const f=destruction.fragments[i];f.life-=dt;if(f.life<=0||!iyla2026.props.includes(f.parent))destruction.fragments.splice(i,1)}};
+const structuralContact=christianContact;
+christianContact=function(target){const finisher=/FINISHER|UPPERCUT|SPIN_KICK|AXE_KICK/.test(owen.pose)||expansion59.combo>4;structuralContact(target);if(finisher&&christian.flow>.3)knockThrough(target,1+christian.flow+(griffin.evolution||0)*.16,'MELEE FINISHER')};
+function structuralWorld3D(){for(const p of iyla2026.props){structureReady(p);const s=p.structure;if(!s.stage)continue;const wx=(p.x-W/2)/45,wz=(p.y-H/2)/45,size=.38+p.type*.09,h=p.h/28;if(s.stage===1){for(let n=-1;n<=1;n++)iylaBox(wx+n*size*.36,h*(.35+n*.08),wz+.02,size*.08,h*.28,.05,[.75,.38,.16],s.angle+n,.72)}else if(s.stage===2){iylaBox(wx-size*.38,h*.28,wz,size*.18,h*.28,size,[.25,.22,.2],s.angle,.9);iylaBox(wx+size*.38,h*.28,wz,size*.18,h*.28,size,[.25,.22,.2],s.angle,.9);iylaBox(wx,h*.7,wz,size,.12,size*.32,[.32,.25,.2],s.angle,.82)}else{iylaBox(wx,.035,wz,size*1.25,.035,size*1.25,[.2,.08,.04],s.angle,.7)}}for(const f of destruction.fragments){const p=f.parent,wx=(p.x+f.ox-W/2)/45,wz=(p.y+f.oy-H/2)/45;iylaBox(wx,.08+f.z,wz,f.size,.08+f.size*.25,f.size*.7,f.color,f.spin*elapsed,.75)}}
+const structural3DWorldBase=iyla3DWorld;
+iyla3DWorld=function(){structural3DWorldBase();structuralWorld3D()};
+const structuralTerrainBase=iylaTerrain;
+iylaTerrain=function(){structuralTerrainBase();x.save();for(const p of iyla2026.props){structureReady(p);if(!p.structure.stage)continue;x.translate(p.x,p.y);x.rotate(p.structure.angle);x.strokeStyle=p.structure.stage===1?'#ffb26688':'#ff6b3599';x.lineWidth=2;const r=14+p.h*.38;x.beginPath();x.moveTo(-r,0);x.lineTo(-r*.25,-r*.35);x.lineTo(r*.2,r*.18);x.lineTo(r,0);x.stroke();x.rotate(-p.structure.angle);x.translate(-p.x,-p.y)}x.restore()};
+const structuralOmniHud=omniHud;
+omniHud=function(){structuralOmniHud();const el=$('#ultimateDetail');if(el)el.innerHTML+=`<br><b>${destruction.name}</b><br>IMPACTS ${destruction.impacts} · BREACHES ${destruction.breaches} · COLLAPSES ${destruction.collapses}<br>KNOCK-THROUGHS ${destruction.knockThroughs} · PERSISTENT FRAGMENTS ${destruction.fragments.length}`};
+
+// Curtis/Owen/Matty structural impact cinematics. These are short gameplay
+// vignettes, not videos: the actual target, structures and damage simulation
+// remain authoritative while the directors stage six readable shots.
+const impactCinema={name:'CURTIS STRUCTURAL IMPACT CINEMA',active:false,time:0,duration:2.45,phase:'READY',target:null,startX:0,startY:0,endX:0,endY:0,angle:0,power:0,source:'',structures:[],triggered:new Set(),serial:0,completed:0,blackout:0,exitBurst:false};
+function impactPhase(q){return q<.08?'ANTICIPATION CLOSE-UP':q<.16?'CONTACT FREEZE':q<.38?'TRACKING KNOCKBACK':q<.61?'STRUCTURE PENETRATION':q<.76?'EXIT BURST':'RECOVERY CRATER'}
+function beginImpactCinema(target,power,source,a,startX,startY,endX,endY,structures){
+ if(impactCinema.active||!target||!enemies.includes(target)||!structures.length)return false;
+ Object.assign(impactCinema,{active:true,time:0,duration:superAI.tier===1?1.85:2.45,phase:'ANTICIPATION CLOSE-UP',target,startX,startY,endX,endY,angle:a,power,source,structures:structures.map((p,index)=>({p,index,t:clamp(Math.hypot(p.x-startX,p.y-startY)/Math.max(1,Math.hypot(endX-startX,endY-startY)),.12,.82)})).sort((u,v)=>u.t-v.t),triggered:new Set(),serial:impactCinema.serial+1,blackout:0,exitBurst:false});
+ player.invuln=Math.max(player.invuln||0,impactCinema.duration+.3);target.hit=Math.max(target.hit||0,.4);zStage.cut=.55;zStage.zoom=.82;owen.pose=owen.wanted='FINISHER';owen.phase='ANTICIPATION';owen.hold=.11;matty.commands++;matty.accepted++;matty.lastRequest='STRUCTURAL IMPACT SEQUENCE';curtis.mode='IMPACT VIGNETTE';christian.mode='CINEMATIC IMPACT AUTHORITY';
+ for(let i=hostile.length-1;i>=0;i--)if(Math.hypot(hostile[i].x-player.x,hostile[i].y-player.y)<=175)hostile.splice(i,1);combatEvent('STRUCTURAL_CINEMATIC_STARTED',{source,structures:structures.map(p=>p.structure?.kind||'STRUCTURE'),power:Number(power.toFixed(2)),serial:impactCinema.serial});return true
+}
+function impactCinemaUpdate(dt){
+ const c=impactCinema;if(!c.active)return;c.time=Math.min(c.duration,c.time+Math.min(dt,.034));const q=c.time/c.duration,next=impactPhase(q),target=c.target;if(!target||!enemies.includes(target)){c.active=false;zStage.zoom=1;return}
+ if(next!==c.phase){c.phase=next;matty.commands++;matty.accepted++;combatEvent('IMPACT_CINEMA_SHOT',{phase:next,serial:c.serial})}
+ player.invuln=Math.max(player.invuln||0,.16);target.attackClock=Math.max(target.attackClock||0,.3);target.hit=Math.max(target.hit||0,.08);
+ let travel=0;if(q<.16)travel=0;else if(q<.38)travel=(q-.16)/.22*.46;else if(q<.61)travel=.46+(q-.38)/.23*.43;else travel=.89+Math.min(1,(q-.61)/.15)*.11;
+ const eased=1-Math.pow(1-clamp(travel,0,1),3);target.x=c.startX+(c.endX-c.startX)*eased;target.y=c.startY+(c.endY-c.startY)*eased;
+ if(c.phase==='ANTICIPATION CLOSE-UP'){zStage.zoom+=(.8-zStage.zoom)*Math.min(1,dt*14);owen.phase='ANTICIPATION';owen.hold=Math.max(owen.hold,.035)}
+ else if(c.phase==='CONTACT FREEZE'){zStage.zoom=.78;owen.phase='CONTACT FREEZE';owen.hold=Math.max(owen.hold,.045);shake=Math.max(shake,4)}
+ else if(c.phase==='TRACKING KNOCKBACK'){zStage.zoom+=(.89-zStage.zoom)*Math.min(1,dt*10);owen.phase='FOLLOW THROUGH'}
+ else if(c.phase==='STRUCTURE PENETRATION'){
+   zStage.zoom=.9;owen.phase='PENETRATION';for(const hit of c.structures)if(!c.triggered.has(hit.index)&&eased>=hit.t){c.triggered.add(hit.index);structureImpact(hit.p,48+c.power*46,c.angle,c.source);hurt(target,player.damage*(.18+c.power*.06),'#ffd28b');c.blackout=.28;shake=Math.max(shake,14+c.power*2);zImpact(hit.p.x,hit.p.y,'#ffbd7a',3);rings.push({x:hit.p.x,y:hit.p.y,r:10,max:145,life:.54});combatEvent('CINEMATIC_STRUCTURE_PENETRATION',{kind:hit.p.structure.kind,serial:c.serial})}}
+ else if(c.phase==='EXIT BURST'&&!c.exitBurst){c.exitBurst=true;zStage.zoom=.86;shake=Math.max(shake,16);zImpact(target.x,target.y,'#ffffff',4);rings.push({x:target.x,y:target.y,r:12,max:190,life:.62});hurt(target,player.damage*(.28+c.structures.length*.1),'#ffffff');combatEvent('CINEMATIC_EXIT_BURST',{serial:c.serial})}
+ else if(c.phase==='RECOVERY CRATER'){zStage.zoom+=(.96-zStage.zoom)*Math.min(1,dt*6);owen.phase='RECOVERY';target.hit=Math.max(target.hit||0,.12)}
+ c.blackout=Math.max(0,c.blackout-dt);
+ if(c.time>=c.duration){target.x=c.endX;target.y=c.endY;target.hit=.22;ultimate.scars.push({x:c.endX,y:c.endY,r:48+c.power*9,a:c.angle,life:70,structural:true});rings.push({x:c.endX,y:c.endY,r:14,max:105,life:.55});destruction.knockThroughs++;c.completed++;c.active=false;zStage.zoom=.96;zStage.cut=.18;owen.phase='RECOVERY';christian.mode='STRUCTURAL DAMAGE CONFIRMED';speak('Impact path confirmed. Structure breached.',true);combatEvent('STRUCTURAL_CINEMATIC_COMPLETE',{serial:c.serial,structures:c.triggered.size})}
+}
+// Replace the instantaneous transport with a staged, physically continuous
+// path whenever the trajectory intersects destructible arena geometry.
+knockThrough=function(target,power=1.5,source='HEAVY STRIKE'){
+ if(!target||!enemies.includes(target)||impactCinema.active)return;const a=Math.atan2(target.y-player.y,target.x-player.x),travel=120+power*78,startX=target.x,startY=target.y,endX=startX+Math.cos(a)*travel,endY=startY+Math.sin(a)*travel,vx=endX-startX,vy=endY-startY,len2=vx*vx+vy*vy||1,path=[];
+ for(const p of iyla2026.props){structureReady(p);if(p.structure.stage>=3)continue;const t=clamp(((p.x-startX)*vx+(p.y-startY)*vy)/len2,0,1),px=startX+vx*t,py=startY+vy*t;if(Math.hypot(p.x-px,p.y-py)<32+p.h*.25)path.push(p)}
+ if(path.length&&beginImpactCinema(target,power,source,a,startX,startY,endX,endY,path))return;
+ target.x=endX;target.y=endY;target.hit=.24;hurt(target,player.damage*(.2+power*.08),'#ffd28b');zImpact(endX,endY,'#ffd28b',2)
+};
+function impactCinemaVisuals(){
+ const c=impactCinema;if(!c.active)return;const q=c.time/c.duration,contact=c.phase==='CONTACT FREEZE',penetrating=c.phase==='STRUCTURE PENETRATION';x.save();
+ if(c.phase==='TRACKING KNOCKBACK'||penetrating){x.globalAlpha=.22;x.strokeStyle='#fff1d0';x.lineWidth=2;for(let n=-5;n<=5;n++){const side=n*17,px=c.target.x-Math.cos(c.angle)*220-Math.sin(c.angle)*side,py=c.target.y-Math.sin(c.angle)*220+Math.cos(c.angle)*side;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(c.angle)*150,py+Math.sin(c.angle)*150);x.stroke()}}
+ if(contact){x.globalAlpha=.32;x.fillStyle='#ffffff';x.fillRect(0,0,W,H);x.globalAlpha=1;x.strokeStyle='#fff7ca';x.lineWidth=5;x.beginPath();x.arc(c.startX,c.startY,38+Math.sin(c.time*70)*8,0,TAU);x.stroke()}
+ if(c.blackout>0){const a=clamp(c.blackout/.28,0,1);x.globalAlpha=.54*a;x.fillStyle='#1a0f0b';x.fillRect(0,0,W,H);x.globalAlpha=.7*a;x.fillStyle='#c59b73';for(let n=0;n<12;n++){const r=18+(n%4)*12;x.beginPath();x.arc(c.target.x+Math.cos(n*2.4)*r,c.target.y+Math.sin(n*1.7)*r,r,0,TAU);x.fill()}}
+ x.globalAlpha=.9;x.fillStyle='#fff';x.font='700 11px system-ui';x.textAlign='center';x.fillText(c.phase,c.target.x,Math.max(78,c.target.y-94));x.restore()
+}
+const impactSystemsBase=omniSystems;
+omniSystems=function(dt){impactSystemsBase(dt);impactCinemaUpdate(dt)};
+const impactVisualsBase=omniVisuals;
+omniVisuals=function(){impactVisualsBase();impactCinemaVisuals()};
+const impactHudBase=omniHud;
+omniHud=function(){impactHudBase();const el=$('#ultimateDetail');if(el)el.innerHTML+=`<br><b>${impactCinema.name}</b><br>${impactCinema.active?impactCinema.phase:'READY'} · SEQUENCES ${impactCinema.completed} · SHOT ${impactCinema.serial}`};
 })();
