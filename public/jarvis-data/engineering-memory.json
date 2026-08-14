@@ -1,9 +1,9 @@
 {
   "champion": "j00003",
   "counts": {
-    "controller": 6,
+    "controller": 5,
     "digital_twin": 1,
-    "experiment": 2,
+    "experiment": 1,
     "log": 3,
     "mission": 3,
     "mutation": 10,
@@ -13,8 +13,8 @@
     "track": 2
   },
   "currentExperiment": "EXP-20260814074703",
-  "generatedAt": "2026-08-14T07:47:26.977614+00:00",
-  "nodeCount": 187,
+  "generatedAt": "2026-08-14T07:51:51.400502+00:00",
+  "nodeCount": 185,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -71,7 +71,7 @@
       "kind": "controller",
       "label": "j00003",
       "luacSha": "13f1d8e8967722d16c6383048a3f77f67b1b1959338dc3c2cb601052de434947",
-      "recommended": false,
+      "recommended": true,
       "role": "champion",
       "sourceSha": "461bd332f299d9a377304fbf770624d9994235ce164a9ad49aa0f56f258c4908"
     },
@@ -1177,16 +1177,16 @@
     {
       "expectedInformationGain": 0.6727,
       "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-      "id": "experiment:414640d144f0d242",
+      "id": "experiment:a2b729c2bf6212bd",
       "kind": "experiment",
       "label": "Research-aware evolutionary five-hypothesis generation plus synthesis",
       "measurement": "maximize information gained per generation while preserving defended behavior",
       "status": "PLANNED"
     },
     {
-      "id": "controller:428b124a45497460",
+      "id": "controller:6dca16935c0e7554",
       "kind": "controller",
-      "label": "jrw4-859"
+      "label": "jrw4-861"
     },
     {
       "id": "mutation:3fa263a6223e98fc",
@@ -1272,23 +1272,9 @@
       "id": "test:3a3ab60dbad64cfa",
       "kind": "test",
       "label": "bench and road evidence before canonical promotion"
-    },
-    {
-      "expectedInformationGain": 0.6727,
-      "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-      "id": "experiment:a2b729c2bf6212bd",
-      "kind": "experiment",
-      "label": "Research-aware evolutionary five-hypothesis generation plus synthesis",
-      "measurement": "maximize information gained per generation while preserving defended behavior",
-      "status": "PLANNED"
-    },
-    {
-      "id": "controller:6dca16935c0e7554",
-      "kind": "controller",
-      "label": "jrw4-861"
     }
   ],
-  "relationshipCount": 198,
+  "relationshipCount": 180,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -2263,114 +2249,6 @@
       "relation": "DUPLICATES",
       "source": "rejection:e747f1c11700a70c",
       "target": "controller:a0206f4b0721cac1"
-    },
-    {
-      "id": "edge:19926d15d6b90cf1",
-      "relation": "USES_PARENT",
-      "source": "experiment:414640d144f0d242",
-      "target": "controller:428b124a45497460"
-    },
-    {
-      "id": "edge:b1d022c380ba24c5",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:3fa263a6223e98fc"
-    },
-    {
-      "id": "edge:6a2170121bcd3582",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:5a7c6e240bcab7e6"
-    },
-    {
-      "id": "edge:f301a36e44a5ba19",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:6c110f9626d9d4ce"
-    },
-    {
-      "id": "edge:4f51f87aaf9a1af7",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:6ec99fb4521921a0"
-    },
-    {
-      "id": "edge:6b90e94402e9ecf2",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:815b1274c28658ed"
-    },
-    {
-      "id": "edge:549b1a098f36a699",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:45f7e0cb0e6c5f80"
-    },
-    {
-      "id": "edge:953a877e4a405a2c",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:3d53a3d9623490be"
-    },
-    {
-      "id": "edge:ae8e1917c2ab4c18",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:280d7a2eb3f92442"
-    },
-    {
-      "id": "edge:709072549265c806",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:35fec75f0c96621e"
-    },
-    {
-      "id": "edge:74ba6238e43a5a96",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:414640d144f0d242",
-      "target": "mutation:18f553d0fc6d0c7e"
-    },
-    {
-      "id": "edge:cb755e3e4999d2ed",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:d0ceba208d208f3d"
-    },
-    {
-      "id": "edge:08b5de64fb381cbd",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:af354b232c193ef9"
-    },
-    {
-      "id": "edge:6e8f25eacbdb28d9",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:9e7a610f94776e69"
-    },
-    {
-      "id": "edge:f50e978ff92ef61a",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:46a7939a0bb91296"
-    },
-    {
-      "id": "edge:1b7bd3c209025a90",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:db5c2d09f1adc47a"
-    },
-    {
-      "id": "edge:1b70533f6129a004",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:0dc8b008f43f14a0"
-    },
-    {
-      "id": "edge:6222633750b4db2a",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:414640d144f0d242",
-      "target": "test:3a3ab60dbad64cfa"
     },
     {
       "id": "edge:09526c59574cca6a",
