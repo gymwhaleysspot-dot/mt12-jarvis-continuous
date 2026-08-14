@@ -1,0 +1,58 @@
+name: A17Y Engineering Discovery Engine
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 10 * * *'
+  push:
+    branches: [main]
+    paths:
+      - tests/replays/**
+      - evidence/**
+      - research/**
+      - director/memory.json
+      - director/v3/features.json
+      - public/v3-data/health.json
+      - discovery/**
+      - .github/workflows/discovery.yml
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: a17y-engineering-discovery
+  cancel-in-progress: true
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate Discovery Engine
+        run: |
+          node --check discovery/run.mjs
+          node -e "JSON.parse(require('fs').readFileSync('discovery/state.json'))"
+      - name: Mine evidence and rank discoveries
+        run: node discovery/run.mjs | tee discovery/discovery-run.log
+      - name: Commit visible discoveries
+        shell: bash
+        run: |
+          git config user.name 'A17Y Discovery Engine'
+          git config user.email 'actions@users.noreply.github.com'
+          git add discovery/state.json discovery/discovery-run.log public/v3-data/discovery.json
+          git commit -m 'Record ranked engineering discoveries [skip ci]' || true
+          git pull --rebase origin main
+          git push
+      - uses: actions/upload-artifact@v6
+        with:
+          name: a17y-engineering-discoveries
+          path: |
+            discovery/state.json
+            discovery/discovery-run.log
+            public/v3-data/discovery.json
+          if-no-files-found: error
+          retention-days: 90

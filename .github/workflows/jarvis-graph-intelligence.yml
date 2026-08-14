@@ -1,0 +1,66 @@
+name: Jarvis Causal Engineering Memory
+on:
+  schedule:
+    - cron: '22,52 * * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Jarvis Persistent Engineering Knowledge Graph
+      - Jarvis Intelligence Planner
+      - Jarvis Champion Protection Gate
+      - Jarvis Complete Autonomous Factory
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - tools/jarvis_graph_intelligence.py
+permissions:
+  contents: write
+concurrency:
+  group: jarvis-causal-engineering-memory
+  cancel-in-progress: true
+jobs:
+  enrich:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - name: Build causal relationship memory
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/jarvis_graph_intelligence.py
+          python3 tools/jarvis_graph_intelligence.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          g=json.loads(Path('public/jarvis-data/engineering-memory.json').read_text())
+          assert g['schema']=='JARVIS-KG-2'
+          ids={n['id'] for n in g['nodes']}
+          assert len(ids)==g['nodeCount']
+          assert len(g['relationships'])==g['relationshipCount']
+          for e in g['relationships']:
+              assert e['source'] in ids and e['target'] in ids
+          required={'DERIVED_FROM','PROPOSES_MUTATION','REQUIRES_TEST'}
+          present={e['relation'] for e in g['relationships']}
+          print('relations',sorted(present))
+          assert required & present
+          PY
+      - name: Persist engineering memory
+        run: |
+          git config user.name 'Jarvis Engineering Memory'
+          git config user.email 'actions@users.noreply.github.com'
+          git add factory/knowledge-graph.json public/jarvis-data/engineering-memory.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Expand Jarvis causal engineering memory [skip ci]'
+          for n in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git rebase --abort || true
+            sleep $((n*5))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jarvis-causal-engineering-memory
+          path: public/jarvis-data/engineering-memory.json
+          retention-days: 90

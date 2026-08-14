@@ -1,0 +1,82 @@
+name: Keleb Measured Cockpit Validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '18,48 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keleb-measured-cockpit-validation
+  cancel-in-progress: true
+
+jobs:
+  measured-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      KELEB_INTERIOR_BLEND: /tmp/keleb-interior.blend
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v5
+        with: {node-version: '22', package-manager-cache: false}
+      - name: Validate measured evaluator
+        run: |
+          node --check tools/keleb_measured_truth.mjs
+          python3 -m py_compile tools/build_keleb_interior.py tools/render_keleb_interior.py
+      - name: Refresh direct cockpit evidence
+        run: node keleb/direct-evidence-run.mjs
+      - name: Download bounded reference set
+        run: |
+          set -Eeuo pipefail
+          mkdir -p /tmp/keleb-truth
+          node - <<'NODE'
+          const fs=require('fs');const d=require('./keleb/research/direct-evidence.json');const urls=[...new Set((d.images||[]).map(x=>x.imageUrl).filter(Boolean))].slice(0,12);fs.writeFileSync('/tmp/keleb-urls.txt',urls.join('\n')+'\n');
+          NODE
+          n=0; while read -r u; do [ -n "$u" ] || continue; n=$((n+1)); curl -L --fail --max-time 20 -A 'Keleb-Truth/1.0' "$u" -o "/tmp/keleb-truth/ref-$n.jpg" || rm -f "/tmp/keleb-truth/ref-$n.jpg"; done </tmp/keleb-urls.txt
+          test "$(find /tmp/keleb-truth -type f | wc -l)" -ge 3
+      - name: Install Blender runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender python3-numpy xvfb libegl1 libegl-mesa0 libgl1-mesa-dri libglx-mesa0 >/dev/null
+      - name: Build and render current Keleb interior
+        env: {PYTHONPATH: '/usr/lib/python3/dist-packages'}
+        run: |
+          blender -b --python tools/build_keleb_interior.py
+          xvfb-run -a -s '-screen 0 1280x1024x24' blender -b --python tools/render_keleb_interior.py
+      - name: Measure cockpit against direct evidence
+        run: |
+          npm install --no-save --package-lock=false pngjs@7.0.0 jpeg-js@0.4.4
+          node tools/keleb_measured_truth.mjs /tmp/keleb-render /tmp/keleb-truth /tmp/keleb-measured-state.json
+          node - <<'NODE'
+          const x=require('/tmp/keleb-measured-state.json');if(!x.measured||x.truthImages<3||x.views.length!==5)throw Error('Keleb measured validation incomplete');console.log(`Keleb measured mean=${x.meanError} pass=${x.promotionGate.pass}`)
+          NODE
+      - name: Persist measured cockpit state only to ai-state
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Keleb Measured Validation'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin ai-state
+          state_tree="$(mktemp -d /tmp/keleb-measured-ai-state.XXXXXX)/tree"
+          git worktree add --detach "$state_tree" origin/ai-state
+          (
+            cd "$state_tree"
+            mkdir -p keleb
+            cp /tmp/keleb-measured-state.json keleb/measured-state.json
+            git add keleb/measured-state.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Update isolated Keleb measured cockpit state [skip ci]'
+            git push origin HEAD:ai-state
+          )
+      - name: Archive measured evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: keleb-measured-${{ github.run_number }}
+          path: |
+            /tmp/keleb-measured-state.json
+            /tmp/keleb-render
+            /tmp/keleb-truth
+          retention-days: 60

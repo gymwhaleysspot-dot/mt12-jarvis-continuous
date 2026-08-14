@@ -1,0 +1,55 @@
+name: MT12 Official Firmware Catalog
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '13 */6 * * *'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: mt12-firmware-catalog
+  cancel-in-progress: true
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate catalog service
+        run: node --check device/fetch-releases.mjs
+      - name: Fetch official EdgeTX and ExpressLRS releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node device/fetch-releases.mjs | tee device/firmware-catalog.log
+      - name: Validate target catalog
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('public/device-data/releases.json'));
+          if(d.target.radio!=='RadioMaster MT12')throw Error('wrong radio target');
+          if(!d.edgeTx.stable)throw Error('no stable EdgeTX release found');
+          if(!d.expressLrs.stable)throw Error('no stable ExpressLRS release found');
+          console.log({edgeTx:d.edgeTx.stable.version,mt12Assets:d.edgeTx.stable.mt12Firmware.length,elrs:d.expressLrs.stable.version});
+          NODE
+      - name: Commit refreshed catalog
+        shell: bash
+        run: |
+          git config user.name 'MT12 Firmware Catalog'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/device-data/releases.json device/firmware-catalog.log
+          git commit -m 'Refresh official MT12 firmware catalog [skip ci]' || exit 0
+          git pull --rebase origin main
+          git push
+      - uses: actions/upload-artifact@v6
+        with:
+          name: mt12-official-firmware-catalog
+          path: |
+            public/device-data/releases.json
+            device/firmware-catalog.log
+          if-no-files-found: error
+          retention-days: 30

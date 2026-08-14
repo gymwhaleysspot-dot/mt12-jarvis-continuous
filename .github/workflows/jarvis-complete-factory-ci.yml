@@ -1,0 +1,51 @@
+name: Jarvis Complete Factory CI
+on:
+  pull_request:
+    paths:
+      - factory/**
+      - tools/jarvis_factory.py
+      - tools/factory_matrix_eval.py
+      - tools/controller_tournament.py
+      - toolchain/**
+      - .github/workflows/jarvis-complete-factory*.yml
+permissions:
+  contents: read
+concurrency:
+  group: jarvis-complete-factory-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  validate-kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 zip
+          chmod +x toolchain/compile_mt12.sh
+      - name: Validate architecture and execute factory kernel
+        env:
+          RELEASE_TYPE: X
+          SERIES: a17zx
+        run: |
+          python3 -m json.tool factory/config.json >/dev/null
+          python3 -m json.tool factory/benchmarks.json >/dev/null
+          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py
+          python3 tools/jarvis_factory.py
+          test -s dist-jarvis-factory/FACTORY-RESULT.json
+          test -s dist-jarvis-factory/KPIS.json
+          test -s dist-jarvis-factory/META-AUDIT.json
+      - name: Validate all parallel evaluator groups
+        run: |
+          for g in core sensors airborne persistence adversarial; do EVAL_GROUP="$g" python3 tools/factory_matrix_eval.py; test -s "dist-eval-$g.json"; done
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: jarvis-complete-factory-ci-${{ github.run_id }}
+          path: |
+            dist-jarvis-factory/
+            dist-controller-tournament/
+            dist-eval-*.json
+          if-no-files-found: warn
+          retention-days: 30

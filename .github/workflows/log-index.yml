@@ -1,0 +1,30 @@
+name: A17Y Replay Hash Index
+on:
+  push:
+    branches: [main]
+    paths:
+      - tests/replays/**
+      - scripts/build-log-index.mjs
+      - .github/workflows/log-index.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: replay-hash-index
+  cancel-in-progress: true
+jobs:
+  index:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: node scripts/build-log-index.mjs
+      - name: Commit index
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/control-data/log-hashes.json
+          git diff --cached --quiet || git commit -m 'Update replay hash index'
+          git push

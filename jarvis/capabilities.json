@@ -1,0 +1,36 @@
+{
+  "schema": 7,
+  "identity": {"name":"Jarvis","role":"RadioMaster MT12 closed-loop engineering workstation","repository":"gymwhaleysspot-dot/mt12-jarvis-continuous"},
+  "orchestration": {"scheduler":"jarvis-always-on.yml","controllerProducer":"jarvis-complete-rewrite-factory.yml","policy":"ONE_SCHEDULER_ONE_PRODUCER","historicalDedup":true,"immutableGenerationPattern":"public/builds/rewrite-<run-id>-<attempt>/"},
+  "controllerLineage": {"canonicalAuthority":"factory/canonical-controller.json","canonicalManifestPattern":"public/builds/releases/<release>/MANIFEST.json","candidateIdentity":"<candidate>-<rewrite run number>","promotion":"NEVER_AUTOMATIC; bench and returned road evidence required"},
+  "generationModel": {"architecture":"FIVE_INDEPENDENT_HYPOTHESES_PLUS_SYNTHESIS","hypotheses":["sensor-dropout-recovery","traction-control","jump-landing-classification","truth-speed-fusion","abs-control"],"synthesis":"JRW6 combines all five compatible mutations","tournament":"TOURNAMENT.json","publication":"BUILD-MANIFEST.json","displayHistory":20,"inheritedCapabilityBonusForbidden":true},
+  "workspaces": [
+    {"id":"command","label":"Command"},{"id":"racing","label":"Racing"},{"id":"survivor","label":"Survivor"},{"id":"factory","label":"Factory"},{"id":"evidence","label":"Evidence"},{"id":"intelligence","label":"Intelligence"},{"id":"vehicle","label":"Vehicle AI"},{"id":"releases","label":"Releases"},{"id":"radio","label":"MT12"},{"id":"firmware","label":"Firmware"},{"id":"system","label":"System"},{"id":"tools","label":"Tools"}
+  ],
+  "missions": [
+    {"id":"rewrite-factory","label":"Build new 5+1 synthesis generation","workflow":"jarvis-complete-rewrite-factory.yml","workspace":"factory","inputs":{},"mode":"automatic-producer"},
+    {"id":"engineering-mission","label":"Run Jarvis engineering intelligence mission","workflow":"research.yml","workspace":"command","inputs":{"topic":""}},
+    {"id":"historical-learning","label":"Relearn all historical logs","workflow":"historical-log-reingest.yml","workspace":"intelligence","inputs":{}},
+    {"id":"chief-engineer","label":"Run chief engineer analysis","workflow":"chief-engineer.yml","workspace":"intelligence","inputs":{}},
+    {"id":"knowledge-graph","label":"Rebuild engineering knowledge graph","workflow":"jarvis-knowledge-graph.yml","workspace":"intelligence","inputs":{}},
+    {"id":"log-index","label":"Reindex uploaded logs","workflow":"log-index.yml","workspace":"evidence","inputs":{}},
+    {"id":"evolution-gate","label":"Run lineage and promotion authority","workflow":"jarvis-evolution-gate.yml","workspace":"releases","inputs":{}},
+    {"id":"completion","label":"Evaluate real-world completion","workflow":"real-world-completion.yml","workspace":"releases","inputs":{}},
+    {"id":"device-release","label":"Build MT12 device release package","workflow":"device-release.yml","workspace":"radio","inputs":{}},
+    {"id":"control-center","label":"Promotion, rollback or recovery","workflow":"control-center.yml","workspace":"releases","inputs":{}},
+    {"id":"firmware-catalog","label":"Refresh firmware catalog","workflow":"firmware-catalog.yml","workspace":"firmware","inputs":{}},
+    {"id":"firmware-build-flash","label":"Prepare or flash firmware","workflow":"firmware-build-flash.yml","workspace":"firmware","inputs":{}},
+    {"id":"mobile-companions","label":"Build mobile companion tools","workflow":"mobile-companions.yml","workspace":"tools","inputs":{}},
+    {"id":"native-helper","label":"Build desktop/native helper","workflow":"native-helper.yml","workspace":"tools","inputs":{}},
+    {"id":"discovery","label":"Discover repository capabilities","workflow":"discovery.yml","workspace":"system","inputs":{}}
+  ],
+  "dataSources": [
+    {"id":"canonical-authority","path":"factory/canonical-controller.json","required":true},
+    {"id":"controller-build-index","path":"public/builds/index.json","required":true},
+    {"id":"experiment-plan","path":"public/jarvis-data/experiment-plan.json","required":false},
+    {"id":"knowledge-graph","path":"public/jarvis-data/knowledge-graph.json","required":false},
+    {"id":"evidence-sync","path":"public/evidence-data/sync.json","required":false},
+    {"id":"historical-log-index","path":"factory/memory/historical-log-index.json","required":false},
+    {"id":"episode-memory","path":"factory/memory/episodes.json","required":false}
+  ]
+}

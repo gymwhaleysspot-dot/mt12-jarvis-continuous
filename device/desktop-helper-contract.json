@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "A17Y MT12 Desktop Helper",
+  "platforms": ["Windows", "macOS", "Linux"],
+  "capabilities": {
+    "detectMountedMT12": true,
+    "watchLogFolders": true,
+    "deduplicateBySha256": true,
+    "uploadToEngineeringOS": true,
+    "backupRadioStorage": true,
+    "restoreRadioStorage": true,
+    "detectSerialPorts": true,
+    "detectDfuDevices": true,
+    "edgetxFlashAdapter": true,
+    "elrsPassthroughAdapter": true,
+    "postFlashVerification": true,
+    "rollbackPackage": true
+  },
+  "safetyRules": [
+    "Never flash on device detection alone",
+    "Require exact RadioMaster MT12 target match",
+    "Require verified backup before flashing",
+    "Require SHA-256 verification",
+    "Require explicit user approval",
+    "Record command, target, firmware hash, result and recovery data",
+    "Never expose binding phrases or Wi-Fi passwords in logs"
+  ],
+  "sync": {
+    "sourcePatterns": ["LOGS/*.csv", "Logs/*.csv", "logs/*.csv"],
+    "destination": "tests/replays/",
+    "onDuplicate": "skip",
+    "onSuccess": "trigger-engineering-director"
+  }
+}

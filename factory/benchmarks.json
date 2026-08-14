@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "version": "2026.08.05",
+  "scenarios": [
+    "dry_launch","wet_launch","loose_launch","straight_acceleration","corner_entry","corner_exit","braking","wheel_lock","gps_dropout","rpm_delay","sensor_disagreement","telemetry_freeze","reconnect","low_battery","jump_landing","false_airborne","cliff_anomaly","throttle_release","car_off","bench_state","memory_load_save","long_runtime"
+  ],
+  "adversarial": [
+    "impossible_gps_jump","rpm_stuck","opposed_sensor_disagreement","throttle_spike","temporary_zero","duplicate_timestamp","delayed_stream","alternating_traction","corrupt_memory","partial_memory","reconnect_storm","clamp_boundaries"
+  ],
+  "metrics": [
+    "truthAccuracy","interventionCorrectness","falsePositiveResistance","falseNegativeResistance","controlSmoothness","recoverySpeed","oscillationResistance","confidenceCalibration","causalExplanation","learningStability","runtimeEfficiency","persistenceCorrectness"
+  ],
+  "requiredEvidence": {
+    "static": ["source","normalizedLuac","protectedContracts","mutationRecord"],
+    "replay": ["scenarioResults","parentComparison","explanationAudit","calibrationTable"],
+    "physical": ["candidateSha","device","benchOrRoad","logs","outcome"]
+  }
+}

@@ -1,0 +1,17 @@
+name: Dispatch JRW6D Rewrite Final
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/dispatch-jrw6d-rewrite-final.yml
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Launch remote-tree-verified JRW6D generation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${GITHUB_REPOSITORY}/actions/workflows/jarvis-complete-rewrite-factory.yml/dispatches" -f ref=main

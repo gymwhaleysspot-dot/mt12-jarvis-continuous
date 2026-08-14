@@ -1,0 +1,422 @@
+{
+  "id": "20260802072328-18d2d36b",
+  "question": "Automatically investigate new evidence",
+  "hypothesis": "New evidence may reveal a safe measurable improvement",
+  "createdAt": "2026-08-02T07:23:28.284Z",
+  "updatedAt": "2026-08-02T07:23:32.443Z",
+  "stage": "SIMULATION_PASSED",
+  "hardwareFingerprint": {
+    "radio": "RadioMaster MT12",
+    "edgeTx": "unknown",
+    "elrs": "unknown",
+    "modelYamlSha256": "",
+    "luaSha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+    "luacSha256": "",
+    "vehicle": "MJX Hyper Go 7303",
+    "gearing": "unknown",
+    "tires": "stock/unknown",
+    "battery": "unknown",
+    "surface": "unknown",
+    "weather": "unknown",
+    "driver": "Michael"
+  },
+  "evidence": {
+    "logs": [],
+    "labels": [],
+    "research": [],
+    "bench": [],
+    "road": []
+  },
+  "baseline": {
+    "controller": "a17y.lua",
+    "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+    "logs": [],
+    "eventCounts": {
+      "launch": 0,
+      "tc": 0,
+      "abs": 0,
+      "jump": 0,
+      "landing": 0,
+      "gps-loss": 0,
+      "rpm-lag": 0,
+      "dropout": 0,
+      "corner-entry": 0,
+      "corner-exit": 0,
+      "calm": 0
+    },
+    "fresh": true,
+    "generatedAt": "2026-08-02T07:23:28.284Z"
+  },
+  "events": [],
+  "counterfactuals": [
+    {
+      "id": "gps-early",
+      "mutation": "remove GPS 500 ms before each observed loss",
+      "status": "GENERATED",
+      "evidence": "counterfactual/gps-early.json"
+    },
+    {
+      "id": "rpm-freeze",
+      "mutation": "freeze RPM for bounded windows",
+      "status": "GENERATED",
+      "evidence": "counterfactual/rpm-freeze.json"
+    },
+    {
+      "id": "throttle-drop",
+      "mutation": "drop throttle for one frame",
+      "status": "GENERATED",
+      "evidence": "counterfactual/throttle-drop.json"
+    },
+    {
+      "id": "short-jump",
+      "mutation": "shorten airborne evidence",
+      "status": "GENERATED",
+      "evidence": "counterfactual/short-jump.json"
+    },
+    {
+      "id": "steered-landing",
+      "mutation": "inject steering during landing",
+      "status": "GENERATED",
+      "evidence": "counterfactual/steered-landing.json"
+    },
+    {
+      "id": "memory-corrupt",
+      "mutation": "load truncated and corrupt memory",
+      "status": "GENERATED",
+      "evidence": "counterfactual/memory-corrupt.json"
+    }
+  ],
+  "fuzz": {
+    "seed": 20260802,
+    "cases": 10000,
+    "domains": {
+      "extreme-values": 1250,
+      "rapid-transitions": 1250,
+      "missing-fields": 1250,
+      "non-finite-substitutes": 1250,
+      "sensor-freezes": 1250,
+      "restart-sequences": 1250,
+      "low-speed-noise": 1250,
+      "high-speed-dropouts": 1250
+    },
+    "invariants": [
+      "no-crash",
+      "finite-gvars",
+      "car-off-safe",
+      "fail-open",
+      "protected-channel-map"
+    ],
+    "status": "GENERATED",
+    "note": "Cases are deterministic and packaged for source/runtime harnesses. Real MT12 scheduler and heap authority still require bench execution."
+  },
+  "candidates": [
+    {
+      "id": "20260802072328-18d2d36b-conservative",
+      "profile": "conservative",
+      "status": "EVALUATED",
+      "metrics": {
+        "score": 116.036,
+        "replay": 0,
+        "changedRows": 0,
+        "maxDelta": 0,
+        "bytes": 86982,
+        "missionPassed": true
+      },
+      "artifacts": [
+        "tournament/conservative"
+      ]
+    },
+    {
+      "id": "20260802072328-18d2d36b-performance",
+      "profile": "performance",
+      "status": "EVALUATED",
+      "metrics": {
+        "score": 116.036,
+        "replay": 0,
+        "changedRows": 0,
+        "maxDelta": 0,
+        "bytes": 86982,
+        "missionPassed": true
+      },
+      "artifacts": [
+        "tournament/performance"
+      ]
+    },
+    {
+      "id": "20260802072328-18d2d36b-learning",
+      "profile": "learning",
+      "status": "EVALUATED",
+      "metrics": {
+        "score": 116.036,
+        "replay": 0,
+        "changedRows": 0,
+        "maxDelta": 0,
+        "bytes": 86982,
+        "missionPassed": true
+      },
+      "artifacts": [
+        "tournament/learning"
+      ]
+    },
+    {
+      "id": "20260802072328-18d2d36b-memory-efficient",
+      "profile": "memory-efficient",
+      "status": "EVALUATED",
+      "metrics": {
+        "score": 116.036,
+        "replay": 0,
+        "changedRows": 0,
+        "maxDelta": 0,
+        "bytes": 86982,
+        "missionPassed": true
+      },
+      "artifacts": [
+        "tournament/memory-efficient"
+      ]
+    },
+    {
+      "id": "20260802072328-18d2d36b-alternative-algorithm",
+      "profile": "alternative-algorithm",
+      "status": "EVALUATED",
+      "metrics": {
+        "score": 116.036,
+        "replay": 0,
+        "changedRows": 0,
+        "maxDelta": 0,
+        "bytes": 86982,
+        "missionPassed": true
+      },
+      "artifacts": [
+        "tournament/alternative-algorithm"
+      ]
+    }
+  ],
+  "adversarialReview": {
+    "status": "REQUEST_EVIDENCE",
+    "winner": "conservative",
+    "objections": [
+      "conservative: no recorded replay authority",
+      "performance: no recorded replay authority",
+      "learning: no recorded replay authority",
+      "memory-efficient: no recorded replay authority",
+      "alternative-algorithm: no recorded replay authority"
+    ],
+    "checks": {
+      "overfit": "unproven",
+      "hiddenRegression": "bounded",
+      "unreachableProtection": "delegated to protected runtime checks",
+      "falseConfidence": "not-found",
+      "sensorStates": "counterfactual/fuzz stage required",
+      "memoryRisk": "high-margin-risk",
+      "dashboardBreakage": "protected contract required",
+      "persistenceBreakage": "memory laboratory required"
+    }
+  },
+  "memoryCompatibility": {
+    "status": "STATIC_CHECKED",
+    "staticChecks": {
+      "controller": "a17y.lua",
+      "sha256": "340788ea2a3f4a2bffb996f52828bae957c14494e5063f5140889c80a83f23a0",
+      "usesMT12GlobalIoRead": true,
+      "containsLoadPath": true,
+      "containsSavePath": true,
+      "sourceBytes": 84849
+    },
+    "cases": [
+      {
+        "name": "empty",
+        "status": "PLANNED",
+        "expected": "clean defaults",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "current-schema",
+        "status": "PLANNED",
+        "expected": "lossless load",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "older-schema",
+        "status": "PLANNED",
+        "expected": "compatible migration",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "truncated",
+        "status": "PLANNED",
+        "expected": "safe rejection or bounded recovery",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "corrupt-row",
+        "status": "PLANNED",
+        "expected": "safe rejection or bounded recovery",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "oversized-values",
+        "status": "PLANNED",
+        "expected": "safe rejection or bounded recovery",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "partial-write",
+        "status": "PLANNED",
+        "expected": "safe rejection or bounded recovery",
+        "authority": "MT12 bench required"
+      },
+      {
+        "name": "repeated-load-save",
+        "status": "PLANNED",
+        "expected": "safe rejection or bounded recovery",
+        "authority": "MT12 bench required"
+      }
+    ],
+    "benchScenarios": [
+      "empty memory boot",
+      "valid memory boot",
+      "old schema boot",
+      "truncated row boot",
+      "corrupt numeric values",
+      "oversized values",
+      "partial-write recovery",
+      "100 repeated load/save cycles",
+      "car-on memory load",
+      "logging plus memory save"
+    ],
+    "note": "Host checks cannot certify EdgeTX heap behavior. Bench evidence must record free memory and peak GC pressure."
+  },
+  "runtimeProfile": {
+    "radioCertificateRequired": true,
+    "metrics": [
+      "free-before-load",
+      "after-init",
+      "after-car-connect",
+      "after-memory-load",
+      "event-peak",
+      "logging-peak",
+      "ten-minute-memory",
+      "gc-pressure",
+      "average-frame-time",
+      "worst-frame-time",
+      "allocations-per-frame"
+    ],
+    "status": "AWAITING_BENCH"
+  },
+  "driverPreference": {
+    "smoothVsAggressive": "balanced",
+    "earlyVsLate": "balanced",
+    "launch": "strong-smooth",
+    "landing": "soft-stable"
+  },
+  "surfaceProfile": {
+    "requested": "auto-cluster",
+    "clusters": []
+  },
+  "calibration": {
+    "watch": [
+      "rpm-to-mph",
+      "gps-lag",
+      "rpm-lag",
+      "tire-diameter",
+      "battery-sag",
+      "steering-center",
+      "dropout-rate"
+    ],
+    "status": "MONITOR"
+  },
+  "protectedTests": [
+    "TCT=1024 pass-through",
+    "CH15 TCT preserved",
+    "CH16 GYR preserved",
+    "car-off safe",
+    "no static brake",
+    "dropout fail-open",
+    "dashboard contract",
+    "io.read(fileHandle,...)",
+    "memory schema compatibility"
+  ],
+  "releaseLadder": [
+    {
+      "stage": "GENERATED",
+      "passed": true,
+      "evidence": [
+        "mission:20260802072328-18d2d36b"
+      ]
+    },
+    {
+      "stage": "STATIC_CHECKED",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "stage": "COMPILED",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "stage": "NORMALIZED",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "stage": "SIMULATION_PASSED",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "stage": "LOG_REPLAY_PASSED",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "stage": "ADVERSARIAL_REVIEW_PASSED",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "stage": "MT12_BENCH_PASSED",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "stage": "ROAD_TESTED",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "stage": "TRUSTED_RELEASE",
+      "passed": false,
+      "evidence": []
+    }
+  ],
+  "rollback": {
+    "recommended": false,
+    "reason": "No trusted road regression comparison available",
+    "confidence": 0
+  },
+  "notifications": [
+    {
+      "level": "info",
+      "type": "candidate-selected",
+      "message": "conservative leads the tournament",
+      "mission": "20260802072328-18d2d36b"
+    },
+    {
+      "level": "warning",
+      "type": "replay-required",
+      "message": "Recorded replay authority is incomplete",
+      "mission": "20260802072328-18d2d36b"
+    }
+  ],
+  "audit": {
+    "claimsMustLinkMetrics": true,
+    "offlineQueueSupported": true,
+    "retention": {
+      "trusted": "permanent",
+      "rejected": "keep-reason",
+      "intermediateDays": 90
+    }
+  },
+  "selectedCandidate": "conservative"
+}

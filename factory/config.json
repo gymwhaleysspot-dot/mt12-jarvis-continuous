@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "cycle": {"hourlyScout": true, "dailyDeepResearch": true, "weeklyArchitectureReview": true},
+  "states": ["DISCOVERING","RESEARCHING","DESIGNING","BUILDING","TESTING","ADVERSARIAL_TESTING","RANKING","PUBLISHING","AWAITING_EVIDENCE","LEARNING"],
+  "populations": ["exploit","explore","repair","compression"],
+  "tracks": ["champion","challenger","experimental"],
+  "promotionLevels": ["GENERATED","COMPILED","STATICALLY_VALIDATED","REPLAY_VALIDATED","DIGITAL_TWIN_VALIDATED","BENCH_CANDIDATE","BENCH_VALIDATED","ROAD_VALIDATED","CHAMPION"],
+  "dimensions": {
+    "truthAccuracy": 14,
+    "interventionCorrectness": 14,
+    "falsePositiveResistance": 10,
+    "falseNegativeResistance": 10,
+    "controlSmoothness": 8,
+    "recoverySpeed": 8,
+    "confidenceCalibration": 8,
+    "causalExplanation": 8,
+    "learningStability": 8,
+    "faultTolerance": 7,
+    "runtimeEfficiency": 5
+  },
+  "guardrails": ["GV7=1024","io.read(handle,...)","car-off guard","AIC9Z 18/24 persistence","dashboard","channel mapping","MT12 normalized Lua 5.3"],
+  "minimumImprovement": 0.5,
+  "allowNoWinner": true,
+  "automaticPromotionCeiling": "BENCH_CANDIDATE",
+  "physicalEvidenceRequired": ["BENCH_VALIDATED","ROAD_VALIDATED","CHAMPION"],
+  "cacheKeyParts": ["parentSha","candidateSha","benchmarkVersion","replayHash","toolchainHash"],
+  "factoryKpis": ["candidatesPerDay","uniqueHypotheses","duplicateRate","compileSuccessRate","replayPassRate","measurableImprovementRate","hypothesisToCandidateMinutes","logToDiagnosisMinutes","researchUtilizationRate","preBenchRegressionsCaught","roadConfirmedImprovementRate","championDelta"]
+}

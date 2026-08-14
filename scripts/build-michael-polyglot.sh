@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+generated="jarvis/generated"
+mkdir -p "$generated"
+
+required=(em++ rustup cargo npm go dotnet lua5.4 curl python3 node)
+missing=()
+for tool in "${required[@]}"; do
+  command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
+done
+if ((${#missing[@]})); then
+  printf 'MICHAEL build prerequisites missing: %s\n' "${missing[*]}" >&2
+  printf 'Install the pinned CI toolchain before building; this script never mutates its host.\n' >&2
+  exit 2
+fi
+
+em++ -O3 -std=c++20 engine/cpp/michael_core.cpp engine/c/michael_math.c \
+  -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web \
+  -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=16777216 \
+  -sEXPORTED_FUNCTIONS='["_michael_boot","_michael_visual_tick","_michael_step","_michael_get_exposure","_michael_get_speed","_michael_get_rpm","_michael_get_heading","_michael_abi"]' \
+  -o "$generated/michael-core.js"
+
+rustup target add wasm32-unknown-unknown
+cargo build --manifest-path engine/rust/Cargo.toml --release --target wasm32-unknown-unknown
+cp engine/rust/target/wasm32-unknown-unknown/release/michael_rust.wasm "$generated/michael-rust.wasm"
+
+npm ci --prefix engine --ignore-scripts
+npm run --prefix engine build:typescript
+npm run --prefix engine build:assembly
+
+(cd engine/go && go run . ../../jarvis/generated/go-build.json)
+dotnet run --project engine/csharp/Michael.Engine.csproj --configuration Release -- "$generated/capability-schema.json"
+lua5.4 engine/lua/michael_rules.lua "$generated/michael-rules.json"
+
+zig_archive="/tmp/michael-zig-0.16.0.tar.xz"
+zig_root="/tmp/michael-zig-0.16.0"
+curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o "$zig_archive"
+echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/michael-zig-0.16.0.tar.xz' | sha256sum -c -
+rm -rf "$zig_root"
+mkdir -p "$zig_root"
+tar -xf "$zig_archive" -C "$zig_root" --strip-components=1
+"$zig_root/zig" build-exe engine/zig/michael_spatial.zig -target wasm32-freestanding -O ReleaseSmall -fno-entry -rdynamic -femit-bin="$generated/michael-zig.wasm"
+
+# Derived provenance is required by the runtime manifest. Rebuild it every time so a
+# missing/stale generated file repairs itself instead of aborting the whole pipeline.
+python3 - <<'PY'
+import json, pathlib, subprocess, datetime
+out=pathlib.Path('jarvis/generated/compiler-provenance.json')
+def first(cmd):
+    try:
+        p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,check=False,timeout=20)
+        return (p.stdout or '').strip().splitlines()[0][:240] if p.stdout else 'unknown'
+    except Exception as e:
+        return f'unavailable: {e}'
+provenance={
+  'engine':'MICHAEL_V57',
+  'generatedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+  'compilers':{
+    'emscripten':first(['em++','--version']),
+    'rustc':first(['rustc','--version']),
+    'cargo':first(['cargo','--version']),
+    'node':first(['node','--version']),
+    'npm':first(['npm','--version']),
+    'go':first(['go','version']),
+    'dotnet':first(['dotnet','--version']),
+    'lua':first(['lua5.4','-v']),
+    'zig':first(['/tmp/michael-zig-0.16.0/zig','version']),
+    'python':first(['python3','--version'])
+  }
+}
+out.write_text(json.dumps(provenance,indent=2)+'\n')
+print('self-healed',out)
+PY
+
+python3 engine/python/build_manifest.py "$generated"
+
+python3 -m json.tool engine/polyglot.json >/dev/null
+for file in "$generated"/*.json; do python3 -m json.tool "$file" >/dev/null; done
+node --check "$generated/michael-core.js"
+node --check "$generated/michael-polyglot.js"
+node - <<'NODE'
+const fs=require('fs');
+for(const file of ['michael-core.wasm','michael-rust.wasm','michael-assembly.wasm','michael-zig.wasm']){
+  const path='jarvis/generated/'+file;
+  if(!fs.existsSync(path))throw Error('Missing '+path);
+  new WebAssembly.Module(fs.readFileSync(path));
+}
+const manifest=JSON.parse(fs.readFileSync('jarvis/generated/polyglot-manifest.json','utf8'));
+if(manifest.engine!=='MICHAEL_V57'||manifest.languages.length!==12)throw Error('Wrong polyglot manifest');
+const provenance=JSON.parse(fs.readFileSync('jarvis/generated/compiler-provenance.json','utf8'));
+if(provenance.engine!=='MICHAEL_V57'||!provenance.compilers?.emscripten)throw Error('Compiler provenance incomplete');
+for(const token of ['#version 300 es','MICHAEL_V56','energy-aware clearcoat'])if(!fs.readFileSync('engine/shaders/michael-v48.glsl','utf8').includes(token))throw Error('GLSL contract missing '+token);
+for(const token of ['@vertex','@fragment','MICHAEL_V56'])if(!fs.readFileSync('engine/shaders/michael-v48.wgsl','utf8').includes(token))throw Error('WGSL contract missing '+token);
+console.log({polyglot:'PASS',languages:manifest.languages,artifacts:manifest.artifacts.length});
+NODE
+
+rm -rf engine/node_modules engine/rust/target engine/csharp/bin engine/csharp/obj
