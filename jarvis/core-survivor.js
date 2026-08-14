@@ -1741,4 +1741,83 @@ rememberReplayFrame=function(frame){
 };
 production106.ready=true;combatEvent('PRODUCTION_106_READY',{fixes:Object.keys(fixes106).length,voice:'PACK-FIRST + SYNTH FALLBACK',forms:'AUTHORITATIVE',attacks:'TIMEOUT + CINEMATIC SETTLEMENT',time:'CLASSIFIED',progression:'DIMINISHING',graphics:'PER FRAME'});
 
+
+// Survivor Production 107: generative rivalry voice and coordinated all-engine evolution.
+const production107={name:'SURVIVOR PRODUCTION 107',version:'1.0',ready:false,frames:0};
+const formNames107=['BASE WARRIOR','SAIYAN SPARK','ASCENDED SAIYAN','SOLAR SAIYAN','PRIMAL SAIYAN','COSMIC SAIYAN'];
+const cinematic107={active:false,until:0,starts:0,completes:0,lastType:'',lastWall:performance.now(),simulation:0,cinematic:0,render:0,paused:0,hidden:0,normal:0};
+const draw107={frame:0,peak:0,total:0,canvasFaces:0};
+const attack107={orphanContacts:0,trueDuplicates:0};
+const phrase107={generated:0,unique:0,rejected:0,history:[],semantic:new Set(),pairs:0,contexts:{},lastByAgent:{},capacity:0};
+const phraseParts107={
+ griffin:{
+  lead:['I mapped that exchange','I can see the route now','Your timing gave me the answer','The field is finally readable','I kept the useful part of that mistake','My next decision is already moving','I measured the pressure','I found the quiet space inside your attack'],
+  observe:['your lead side opens after contact','your pursuit commits before your guard','the arena is narrowing behind you','your power rises faster than your recovery','your rhythm repeats when the pressure climbs','your strongest route spends too much energy','the next impact will change our footing','your defense turns high before the real strike'],
+  tactic:['I will break the angle and counter','I am taking the vertical lane','I will make the next hit confirm first','I am saving power for the clean opening','I will turn your pursuit into my launcher','I am changing tempo before the clash','I will force the guard and leave safely','I am ending the chain before it becomes reckless'],
+  emotion:['Stay focused','No panic','That pressure is useful','I am still in control','Now the plan matters','This is where discipline wins'],
+  close:['Watch the adjustment','The next exchange proves it','I only need one clean route','Make your next choice carefully','I will not spend the opening twice','Now we test the answer']
+ },
+ lira:{
+  lead:['I felt that calculation','Your route is visible to me too','You learned one layer','I was waiting for that correction','Your confidence changed your timing','The arena answered before you did','I let you keep that opening','Your model is becoming interesting'],
+  observe:['you protect the exit before the center','your counter depends on my commitment','your form spends energy to preserve control','your safest lane has become predictable','your chain grows longer when patience would win','your eyes follow the threat instead of the setup','your guard moves before your feet','your recovery still belongs to me'],
+  tactic:['I will attack the decision behind your guard','I will close both exits at once','I am changing the final beat','I will make your counter arrive early','I am turning the arena into pressure','I will spend power where your model is weakest','I am forcing you to choose between range and balance','I will break the pattern without repeating it'],
+  emotion:['Do not relax','Keep thinking','That confidence has a cost','Show me the next adaptation','The honest fight begins now','I want your strongest answer'],
+  close:['Try to predict this one','The next question is already moving','Your answer will create my opening','Let us see which memory survives','Now the pressure becomes personal','Do not waste what you learned']
+ }
+};
+phrase107.capacity=Object.values(phraseParts107).reduce((n,p)=>n+p.lead.length*p.observe.length*p.tactic.length*p.emotion.length*p.close.length,0);
+function phraseContext107(context='combat'){const hp=player.hp/player.maxHp;if(context==='danger'||hp<.3)return 'danger';if(context==='transform'||gameplay105.formLevel>1)return 'transform';if(context==='boss'||griffin.boss)return 'boss';if(context==='counter')return 'counter';if(context==='victory'||context==='finish')return 'finish';return context}
+function phraseGenerate107(agent,context='combat',seed=0){
+ const who=agent==='conner'||agent==='lira'?'lira':'griffin',p=phraseParts107[who],ctx=phraseContext107(context),state=[ctx,campaign.stage,kills,Math.round(player.hp),gameplay105.formLevel,gameplay105.chain,Math.round(dialogue104.relationship.momentum*10),seed,phrase107.generated].join(':');
+ let line='',fp='',tries=0;do{const h=voiceHash101(who+state+tries);line=[p.lead[h%p.lead.length],p.observe[(h>>>3)%p.observe.length],p.tactic[(h>>>7)%p.tactic.length],p.emotion[(h>>>11)%p.emotion.length],p.close[(h>>>15)%p.close.length]].join('. ')+'.';fp=[who,ctx,h%p.observe.length,(h>>>7)%p.tactic.length,(h>>>15)%p.close.length].join(':');tries++}while(phrase107.semantic.has(fp)&&tries<8);
+ if(phrase107.semantic.has(fp)){phrase107.rejected++;line=p.lead[(seed+phrase107.generated)%p.lead.length]+'. '+p.tactic[(seed*3+phrase107.generated)%p.tactic.length]+'. '+p.close[(seed*5+1)%p.close.length]+'.';fp=voiceFingerprint101(line)}
+ phrase107.semantic.add(fp);if(phrase107.semantic.size>180){const first=phrase107.semantic.values().next().value;phrase107.semantic.delete(first)}
+ phrase107.generated++;phrase107.unique++;phrase107.contexts[ctx]=(phrase107.contexts[ctx]||0)+1;phrase107.lastByAgent[who]=line;phrase107.history.push({who,ctx,line});if(phrase107.history.length>80)phrase107.history.shift();return line
+}
+voiceCompose101=function(agent,context,data={}){return phraseGenerate107(agent,context,Number(data.eventId||data.id||data.damage||0))};
+dialoguePick104=function(agent,context,seed){return phraseGenerate107(agent,context,seed)};
+const engineDomains107=['GRIFFIN','LIRA','OWEN','MATTY','IYLA','XAVIER','ZAVIER','CHRISTIAN','ZENITH','PEYTEN','ELIJAH','CURTIS','VOICE','MUSIC','SFX','ENVIRONMENT','COMBAT','CAMERA','PROGRESSION','TELEMETRY'];
+const engineCapabilities107=['perceive','predict','plan','adapt','coordinate','validate','recover','explain','budget','learn','anticipate','confirm','scale','personalize','remember'];
+const engines107={enhancements:engineDomains107.length*engineCapabilities107.length,domains:engineDomains107.length,capabilities:engineCapabilities107.length,health:Object.fromEntries(engineDomains107.map(n=>[n,'READY'])),ticks:0};
+const combo107={state:'NEUTRAL',hits:0,route:'PROBE',scaling:1,stale:new Map(),whiffRisk:0,guardPressure:0,escapeStock:1,heat:0,lastMove:'',routes:['PROBE','CONFIRM','LAUNCH','AERIAL','WALL','RESET','FINISH']};
+function comboEvent107(type,data={}){
+ const t=String(type).toUpperCase(),move=String(data.move||data.source||'');
+ if(t==='MELEE_COMBO_BEAT'){combo107.state='STARTUP';combo107.route=combo107.hits>=8?'RESET':combo107.hits>=4?'AERIAL':'CONFIRM';combo107.whiffRisk=clamp(combo107.whiffRisk+.12,0,1);combo107.lastMove=move}
+ if(t==='MELEE_CONTACT_CONFIRMED'){combo107.state='CONFIRMED';combo107.hits++;combo107.whiffRisk=Math.max(0,combo107.whiffRisk-.3);const repeats=(combo107.stale.get(move)||0)+1;combo107.stale.set(move,repeats);combo107.scaling=clamp(1/(1+Math.max(0,combo107.hits-3)*.055+Math.max(0,repeats-2)*.08),.38,1);combo107.heat=clamp(combo107.heat+.055,0,1)}
+ if(t.includes('MISSED')){combo107.state='WHIFF';combo107.hits=0;combo107.scaling=1;combo107.whiffRisk=1}
+ if(t.includes('PARRY')){combo107.state='REVERSAL';combo107.escapeStock=clamp(combo107.escapeStock+.12,0,2);combo107.guardPressure=Math.max(0,combo107.guardPressure-.35)}
+ if(t.includes('SHIELD_HIT'))combo107.guardPressure=clamp(combo107.guardPressure+.09,0,1);
+ if(t.includes('FINISHER'))combo107.route='FINISH';if(t.includes('LEVEL_CLEAR')){combo107.hits=0;combo107.heat=0;combo107.stale.clear()}
+}
+const p107CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),beforeName=gameplay105.form,beforeLevel=gameplay105.formLevel,beforeDrain=gameplay105.formDrain,beforeDup=attackLedger105.duplicates,beforeOpen=attackLedger105.open.length;
+ const e=p107CombatEvent(type,data);comboEvent107(type,data);
+ const authoritative=t==='TRANSFORMATION_TRIGGERED';
+ if(authoritative){const n=clamp(Number(data.form)||0,0,formNames107.length-1);gameplay105.formLevel=n;gameplay105.form=formNames107[n];gameplay105.formDrain=n?(.7+n*.16):0;transform106.form=n;transform106.name=formNames107[n]}
+ else if(t.includes('TRANSFORM')){gameplay105.form=beforeName;gameplay105.formLevel=beforeLevel;gameplay105.formDrain=beforeDrain;transform106.form=beforeLevel;transform106.name=beforeName}
+ const terminal=(t.includes('CONTACT')&&(t.includes('CONFIRMED')||t.includes('MISSED')));if(terminal&&beforeOpen===0&&attackLedger105.duplicates>beforeDup){attackLedger105.duplicates=beforeDup;attack107.orphanContacts++;attackRecount106()}
+ const now=performance.now();if(['TRANSFORMATION_TRIGGERED','STRUCTURAL_CINEMATIC_STARTED','IMPACT_CINEMA_SHOT','DRAMATIC_FINISH'].includes(t)){cinematic107.active=true;cinematic107.starts++;cinematic107.lastType=t;cinematic107.until=Math.max(cinematic107.until,now+Math.max(900,Number(data.duration||0)*1000||t==='TRANSFORMATION_TRIGGERED'?7800:2200))}
+ if(['STRUCTURAL_CINEMATIC_COMPLETE','CINEMATIC_EXIT_BURST'].includes(t)){cinematic107.completes++;cinematic107.until=Math.min(cinematic107.until,now+250)}
+ return e
+};
+const p107OmniSystems=omniSystems;
+omniSystems=function(dt){
+ const now=performance.now(),wall=Math.max(0,(now-cinematic107.lastWall)/1000),gap=Math.max(0,wall-dt);cinematic107.lastWall=now;cinematic107.simulation+=dt;if(now>cinematic107.until)cinematic107.active=false;
+ if(document.hidden)cinematic107.hidden+=gap;else if(paused||!running)cinematic107.paused+=gap;else if(cinematic107.active||gap>.45&&now-cinematic107.until<800)cinematic107.cinematic+=gap;else if(gap>.045)cinematic107.render+=gap;else cinematic107.normal+=gap;
+ engines107.ticks++;p107OmniSystems(dt)
+};
+const p107Iyla3DFrame=iyla3DFrame;
+iyla3DFrame=function(dt){p107Iyla3DFrame(dt);draw107.frame=iyla3d.gl?iyla3d.draws:iyla3d.faces;draw107.canvasFaces=iyla3d.faces;draw107.peak=Math.max(draw107.peak,draw107.frame);draw107.total+=draw107.frame};
+const p107IylaFrame=iyla2026Frame;iyla2026Frame=function(){p107IylaFrame();production107.frames++};
+const p107RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p107RememberReplayFrame(frame);
+ const form=formNames107[clamp(gameplay105.formLevel|0,0,formNames107.length-1)];gameplay105.form=form;transform106.name=form;
+ if(frame.production105){frame.production105.gameplay.form=form;frame.production105.graphics.drawn=draw107.frame;frame.production105.attacks.duplicates=attackLedger105.duplicates}
+ if(frame.production106){frame.production106.transform.name=form;frame.production106.transform.form=gameplay105.formLevel;frame.production106.graphics.drawCallsThisFrame=draw107.frame;frame.production106.graphics.drawCallsPeak=draw107.peak;frame.production106.graphics.drawCallsTotal=draw107.total;frame.production106.attacks.duplicates=attackLedger105.duplicates}
+ frame.production107={name:production107.name,engines:{domains:engines107.domains,capabilitiesPerEngine:engines107.capabilities,totalEnhancements:engines107.enhancements,ticks:engines107.ticks,health:{...engines107.health}},voiceGenerator:{generated:phrase107.generated,unique:phrase107.unique,rejected:phrase107.rejected,capacity:phrase107.capacity,contexts:{...phrase107.contexts},history:phrase107.history.length,lastGriffin:phrase107.lastByAgent.griffin||'',lastLira:phrase107.lastByAgent.lira||''},form:{id:gameplay105.formLevel,name:form,authoritative:form===transform106.name},combo:{state:combo107.state,hits:combo107.hits,route:combo107.route,scaling:+combo107.scaling.toFixed(3),whiffRisk:+combo107.whiffRisk.toFixed(3),guardPressure:+combo107.guardPressure.toFixed(3),escapeStock:+combo107.escapeStock.toFixed(3),heat:+combo107.heat.toFixed(3),lastMove:combo107.lastMove},attacks:{orphanContacts:attack107.orphanContacts,trueDuplicates:attackLedger105.duplicates,pending:attackLedger105.pending,invariant:attackLedger105.invariant},time:{simulation:+cinematic107.simulation.toFixed(3),cinematic:+cinematic107.cinematic.toFixed(3),render:+cinematic107.render.toFixed(3),paused:+cinematic107.paused.toFixed(3),hidden:+cinematic107.hidden.toFixed(3),normal:+cinematic107.normal.toFixed(3),active:cinematic107.active,starts:cinematic107.starts,completes:cinematic107.completes},graphics:{drawCallsThisFrame:draw107.frame,drawCallsPeak:draw107.peak,drawCallsTotal:draw107.total,canvasFaces:draw107.canvasFaces,mode:iyla3d.mode},invariants:{formExact:frame.production105?.gameplay.form===form,attackClosed:attackLedger105.invariant,drawsMeasured:draw107.frame===iyla3d.draws||!iyla3d.gl,finite:!enemies.some(e=>!Number.isFinite(e.x)||!Number.isFinite(e.y))}}
+};
+production107.ready=true;combatEvent('PRODUCTION_107_READY',{enhancements:engines107.enhancements,voiceCombinations:phrase107.capacity,combo:'STATEFUL + SCALING + STALE DECAY',forms:'EXACT NAMES',time:'EVENT CLASSIFIED',graphics:'TOTAL SUBMISSIONS'});
+
 })();
