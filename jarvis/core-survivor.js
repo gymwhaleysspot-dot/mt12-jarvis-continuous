@@ -2523,4 +2523,38 @@ const replay115=rememberReplayFrame;
 rememberReplayFrame=function(frame){replay115(frame);frame.production116={renderer:'UNIFIED ILLUSTRATED 2.5D',theme:production116.theme,webglHidden:production116.webglHidden,sceneDraws:production116.sceneDraws,characters:production116.characters,worldAnchors:production116.worldAnchors,coherentProjection:true,debugGeometry:false}};
 production116.ready=true;combatEvent('PRODUCTION_116_READY',{renderer:'UNIFIED ILLUSTRATED 2.5D',environment:'AUTHORED ARENA',projection:'SCREEN SPACE WORLD ANCHORED',webglDebug:'REMOVED'});
 
+/* Production 117 — authored sprite-atlas character and environment pipeline */
+const production117={version:'117',frames:0,spriteDraws:0,fallbackFrames:0,atlasLoads:0,atlasErrors:0,poseCoverage:{},ready:false};
+const atlas117={griffin:new Image(),lira:new Image(),arena:new Image(),gReady:false,lReady:false,aReady:false};
+function atlas117Load(img,key,src){img.decoding='async';img.onload=()=>{atlas117[key]=true;production117.atlasLoads++};img.onerror=()=>production117.atlasErrors++;img.src=src}
+atlas117Load(atlas117.griffin,'gReady','jarvis/assets/survivor/griffin-atlas-v1.webp');
+atlas117Load(atlas117.lira,'lReady','jarvis/assets/survivor/lira-atlas-v1.webp');
+atlas117Load(atlas117.arena,'aReady','jarvis/assets/survivor/arena-highland-v1.webp');
+const poseFrame117={FLIGHT:2,DASH:4,VANISH:3,PUNCH:5,ELBOW:6,KNEE:7,BACK_KICK:8,SPIN_KICK:8,AXE_KICK:8,BEAM_BRACE:9,BEAM_CHARGE:9,BEAM_FIRE:10,CLASH:10,CHARGE:9,NOVA_CROUCH:12,NOVA_EXPAND:13,NOVA_RELEASE:14,TRANSFORM:13,FINISHER:14,SUPER_RECOVER:15,HIT:11,GUARD:0,UPPERCUT:7};
+function frame117(p,q=1){if(p==='DASH')return q<.35?3:4;const n=poseFrame117[p];production117.poseCoverage[p]=(production117.poseCoverage[p]||0)+1;return n==null?0:n}
+function cover117(g,img){const iw=img.naturalWidth,ih=img.naturalHeight,sc=Math.max(W/iw,H/ih),sw=W/sc,sh=H/sc,sx=(iw-sw)/2,sy=(ih-sh)/2;g.drawImage(img,sx,sy,sw,sh,0,0,W,H);const shade=g.createLinearGradient(0,0,0,H);shade.addColorStop(0,'#08051a22');shade.addColorStop(.62,'#06081708');shade.addColorStop(1,'#02040b88');g.fillStyle=shade;g.fillRect(0,0,W,H)}
+function sprite117(g,img,index,sx,sy,size,flip=false,glow='#65efff',alpha=1){
+ const cw=img.naturalWidth/4,ch=img.naturalHeight/4,col=index%4,row=index/4|0,depth=.78+clamp((sy-H*.28)/(H*.58),0,1)*.3,dw=size*depth,dh=dw*(ch/cw);
+ g.save();g.translate(sx,sy);if(flip)g.scale(-1,1);g.globalAlpha=alpha;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+ g.fillStyle='#03040a66';g.beginPath();g.ellipse(0,0,dw*.28,dw*.075,0,0,TAU);g.fill();g.shadowBlur=Math.max(5,dw*.08);g.shadowColor=glow;
+ g.drawImage(img,col*cw,row*ch,cw,ch,-dw*.5,-dh*.88,dw,dh);g.restore();production117.spriteDraws++
+}
+function combatOverlay117(g){
+ const th=themes116[(currentStory110()?.id||0)%themes116.length];for(const sc of ultimate.scars.slice(-10)){g.strokeStyle='#ff6b4f88';g.lineWidth=2;g.beginPath();for(let n=0;n<3;n++){const a=sc.a+n*2.1;g.moveTo(sc.x,sc.y);g.lineTo(sc.x+Math.cos(a)*sc.r,sc.y+Math.sin(a)*sc.r)}g.stroke()}
+ for(const r of rings.slice(-6)){g.globalAlpha=clamp(r.life/.45,0,1);g.strokeStyle=th.rim;g.lineWidth=4;g.beginPath();g.ellipse(r.x,r.y,r.r,r.r*.36,0,0,TAU);g.stroke()}g.globalAlpha=1;
+ for(const beam of beams.slice(-8)){g.save();g.globalCompositeOperation='screen';g.strokeStyle=beam.color;g.shadowBlur=18;g.shadowColor=beam.color;g.lineWidth=5;g.beginPath();g.moveTo(beam.x1,beam.y1);g.lineTo(beam.x2,beam.y2);g.stroke();g.restore()}
+}
+vector113Frame=function(){
+ vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.5:2),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);vector113.draws=vector113.culled=0;production117.spriteDraws=0;
+ if(atlas117.aReady)cover117(g,atlas117.arena);else scene116(g);combatOverlay117(g);
+ const art=atlas117.gReady&&atlas117.lReady,ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)).sort((a,b)=>a.y-b.y),cap=W<720?7:12,heroSize=Math.min(W,H)*(W<720?.38:.24);
+ for(const e of ordered.slice(-cap)){if(e.y>H-82||e.x<-80||e.x>W+80)continue;const boss=e.type===3,p=e.hit>0?'HIT':e.attackClock<.24?'PUNCH':e.role==='RUSHER'?'DASH':'FLIGHT',idx=frame117(p,clamp((.24-(e.attackClock||1))/.24,0,1)),sz=heroSize*(boss?1.08:.63+e.type*.06);if(art)sprite117(g,atlas117.lira,idx,e.x,e.y,sz,e.x<player.x,'#ff3bbd',e.hit>0?.72:1);else v115Rig((e.x-W/2)/45,(e.y-H/2)/45,-Math.atan2(player.x-e.x,player.y-e.y),boss?1.62:.76+e.type*.1,true,boss,e)}
+ const hp=owen.pose||'FLIGHT',hq=clamp(owen.stateTime/Math.max(.01,owen.stateLength),0,1),hi=frame117(hp,hq),sx=clamp(player.x,W*.14,W*.86),sy=clamp(player.y,H*.3,H*.79),target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null,flip=target?target.x<sx:Math.sin(griffin.heading||0)<0;
+ if(art)sprite117(g,atlas117.griffin,hi,sx,sy,heroSize,flip,griffin.form?.color||'#65efff');else{v115Rig((sx-W/2)/45,(sy-H/2)/45,griffin.heading||0,W<720?1.42:1.5,false,false,player);production117.fallbackFrames++}
+ production113.frames++;production115.frames++;production115.pose=hp;production115.phase=owen.phase;production116.characters+=ordered.length+1;production116.worldAnchors++;production116.frames++;production117.frames++
+};
+const replay116=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay116(frame);frame.production117={renderer:'AUTHORED CEL SHADED SPRITE ATLASES',atlas:{griffin:atlas117.gReady,lira:atlas117.lReady,arena:atlas117.aReady,loads:production117.atlasLoads,errors:production117.atlasErrors},spriteDraws:production117.spriteDraws,fallbackFrames:production117.fallbackFrames,poseCoverage:{...production117.poseCoverage},authoredCharacters:true,authoredEnvironment:true}};
+production117.ready=true;combatEvent('PRODUCTION_117_READY',{characters:'AUTHORED CEL SHADED ATLASES',poses:16,environment:'ALIEN HIGHLAND ARENA',pipeline:'SPRITE ATLAS + ROOT MOTION'});
+
 })();
