@@ -1599,7 +1599,7 @@ const gameFunctions105=[
 'dynamic-camera','impact-camera','dramatic-cut-in','anime-pose','expression-focus','toon-ramp','rim-light','aura-light','speed-lines','impact-flash','shockwave',
 'sky-gradient','atmospheric-fog','parallax-horizon','terrain-layers','camera-lod','destruction-materials','biome-audio','adaptive-score','cinematic-sfx',
 'voice-state-machine','rivalry-dialogue','attack-ledger','unique-destruction-ledger','unique-animation-locks','classified-time-debt','replay-invariants',
-'performance-budget','accessibility-boundary','clean-hud','photo-replay'];
+'performance-budget','accessibility-boundary','clean-hud','photo-replay','ai-sparring','spectator-director','combat-accessibility'];
 const gameplay105={ki:100,maxKi:100,skill:0,maxSkill:5,overheat:0,form:'BASE',formLevel:0,formDrain:0,guard:'MID',vertical:0,dash:0,assist:0,chain:0,chainBest:0,multiplier:1,difficulty:1,archetypes:['PRESSURE','ZONER','COUNTER','BRUISER','SUPPORT'],bossPhase:1,stats:{attack:1,combo:1,ki:1,special:1,speed:1,defense:1},training:{goal:'LAND A CLEAN CHAIN',progress:0,mastery:0},features:gameFunctions105.length};
 const graphics105={toonRamp:4,rimLight:1,auraLight:0,impactLight:0,speedLines:0,fog:.18,parallax:3,lod:'CINEMATIC',drawn:0,boundary:false};
 const attackLedger105={sequence:0,open:[],attempts:0,confirmed:0,missed:0,cancelled:0,interrupted:0,pending:0,invariant:true,duplicates:0};
