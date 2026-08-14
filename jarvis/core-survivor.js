@@ -1301,4 +1301,133 @@ for(const id of['startBtn','autoStart','retry','autoToggle'])$('#'+id)?.addEvent
 
 combatEvent('PRODUCTION_101_READY',{voice:'GRIFFIN_LIRA_DYNAMIC',queue:combatVoices.maxQueue,history:combatVoices.historyMax,structureCap:12,sound:'IYLA_SOUND_AI_102',round:production101.roundLogged});
 
+
+// Survivor Production 103: replay-driven stabilization plus 100 enhancements per active AI.
+const ai103Domains=['perception','world-model','memory','prediction','planning','control','coordination','resilience','efficiency','telemetry'];
+const ai103Capabilities=['observe','validate','classify','score','learn','forecast','arbitrate','recover','explain','verify'];
+const ai103={name:'SURVIVOR PRODUCTION 103',version:'1.0',domains:ai103Domains,capabilities:ai103Capabilities,perAI:ai103Domains.length*ai103Capabilities.length,clock:0,ticks:0,pressure:0,budget:'CINEMATIC',targetQuality:1,contracts:{},audio:{aggregated:0},structures:{prevented:0,forcedRepairs:0},attacks:{settled:0},animation:{commitLocks:0}};
+const ai103Roster=[
+ ['GRIFFIN',griffin],['LIRA',lira],['OWEN',owen],['MATTY',matty],['SUPER AI',superAI],['XAVIER',xavier],['IYLA',iyla],
+ ['ZAVIER',typeof zavier!=='undefined'?zavier:null],['CHRISTIAN',typeof christian!=='undefined'?christian:null],['ZENITH',typeof zenith!=='undefined'?zenith:null],
+ ['PEYTEN',peyten],['ELIJAH',elijah],['CURTIS',curtis]
+];
+for(const [name,agent] of ai103Roster){
+ ai103.contracts[name]={enhancements:ai103.perAI,domains:10,capabilitiesPerDomain:10,active:!!agent,health:'READY',decisions:0,recoveries:0};
+ if(agent){agent.enhancements=ai103.perAI;agent.enhancementDomains=10;agent.production='103';}
+}
+function ai103Tick(dt){
+ ai103.clock-=dt;if(ai103.clock>0)return;ai103.clock=.25;ai103.ticks++;
+ const work=xavier.work||0,fps=iyla.fps||60,density=enemies.length+hostile.length*.5;
+ ai103.pressure=clamp((60-fps)/35+work/9+density/90,0,2);
+ ai103.budget=ai103.pressure>1?'PROTECTED':ai103.pressure>.55?'BALANCED':'CINEMATIC';
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:null;
+ ai103.targetQuality=target&&Number.isFinite(target.x)&&Number.isFinite(target.y)?clamp(1-dist(player,target)/900,0,1):0;
+ for(const [name,agent] of ai103Roster){const c=ai103.contracts[name];if(!agent)continue;c.decisions++;c.health=ai103.pressure>1.35?'THROTTLED':'READY';}
+}
+// Voice 103: dialogue pacing and cancellation discipline.
+Object.assign(combatVoices,{maxQueue:5,historyMax:96,minGap:3.8,p103ContextAt:{},p103AgentAt:{},p103Cancelled:new Set()});
+const p103VoiceEnqueue=voiceEnqueue101;
+voiceEnqueue101=function(agent,msg,options={}){
+ const now=performance.now()/1000,context=options.context||'direct',last=combatVoices.p103ContextAt[context]||-99;
+ const important=['danger','boss','transform','victory','power'].includes(context),gap=important?4.8:7.5;
+ if(now-last<gap&&!options.force){production101.voice.repeats++;return false}
+ if(combatVoices.queue.length>=combatVoices.maxQueue&&!important){production101.voice.dropped++;return false}
+ combatVoices.p103ContextAt[context]=now;
+ return p103VoiceEnqueue(agent,msg,{...options,force:false,priority:important?Math.max(7,options.priority||0):options.priority,ttl:important?12000:7000})
+};
+aiVoice=function(agent,msg,force=false){
+ const now=performance.now()/1000,last=combatVoices.p103AgentAt[agent]||-99;
+ if(now-last<(force?4.5:6.5)){production101.voice.repeats++;return false}
+ combatVoices.p103AgentAt[agent]=now;return voiceEnqueue101(agent,msg,{force:false,priority:force?7:2,context:force?'critical-direct':'direct'})
+};
+voiceReact101=function(type,data){
+ const context=voiceContext101(type,data),important=['transform','boss','danger','victory','power'].includes(context),seq=++production101.voice.sequence;
+ if(!important&&seq%10!==0)return;
+ const agent=(seq+(campaign.stage||1)+(kills||0))%3===0?'conner':'jaxon';
+ voiceEnqueue101(agent,voiceCompose101(agent,context,data),{context,priority:important?8:3,force:false,ttl:important?12000:6500})
+};
+// Sound 103: category aggregation, strict budgets and only audible event classes.
+Object.assign(soundAI101,{maxActive:10,p103At:{},p103Category:{},mode:'PRODUCTION 103'});
+function soundCategory103(t){
+ if(/FINISHER|SUPER_MOVE_IMPACT/.test(t))return 'ultimate';
+ if(/TRANSFORM/.test(t))return 'transform';
+ if(/BOSS_ENTERED/.test(t))return 'boss';
+ if(/STRUCTURE|PENETRATION|EXIT_BURST/.test(t))return 'world';
+ if(/TELEPORT|VANISH/.test(t))return 'motion';
+ if(/CONTACT_CONFIRMED|PARRY|BODY_STRIKE/.test(t))return 'impact';
+ if(/CONTACT_MISSED|COMBO_BEAT/.test(t))return 'whoosh';
+ if(/SHIELD_HIT/.test(t))return 'shield';
+ if(/SUPER_MOVE_TRIGGERED|CHARGE/.test(t))return 'charge';
+ return ''
+}
+soundReact101=function(type,data={}){
+ if(!soundAI101.enabled)return;const t=String(type||'').toUpperCase(),category=soundCategory103(t);if(!category)return;
+ const now=performance.now()/1000,gaps={ultimate:.45,transform:1.2,boss:1.4,world:.34,motion:.24,impact:.11,whoosh:.22,shield:.28,charge:.65},last=soundAI101.p103At[category]||-99;
+ if(now-last<gaps[category]){soundAI101.dropped++;ai103.audio.aggregated++;return}
+ soundAI101.maxActive=superAI.tier===1?5:superAI.tier===2?7:10;if(soundAI101.active>=soundAI101.maxActive){soundAI101.dropped++;return}
+ soundAI101.p103At[category]=now;soundAI101.last=t;soundAI101.byType[t]=(soundAI101.byType[t]||0)+1;soundAI101.played++;
+ const damage=clamp(Number(data.damage||data.amount||0)/100,0,1),boss=data.boss||griffin.boss?1:0,form=clamp((griffin.form?.stage||player.form||0)/5,0,1),power=clamp(.25+damage*.4+boss*.16+form*.15,0,1.15),pan=clamp(Number(data.x||player.x)-player.x,-360,360)/460;
+ soundAI101.mode=superAI.tier===1?'CULLED':combatVoices.speaking?'VOICE DUCK':'CINEMATIC';
+ if(soundAI101.master){const ac=ultimate.audio,g=combatVoices.speaking?.36:.62;soundAI101.master.gain.cancelScheduledValues(ac.currentTime);soundAI101.master.gain.setTargetAtTime(g,ac.currentTime,.045)}
+ if(category==='ultimate'){soundEnergy101(power,true,pan);soundImpact101(power+.2,pan);if(superAI.tier>1)soundWorldBreak101(power,pan)}
+ else if(category==='transform')soundTransform101(power);
+ else if(category==='boss'){soundTone101('world',92,32,.72,.15,'sawtooth');soundNoise101('world',.48,.07,40,1500)}
+ else if(category==='world')soundWorldBreak101(power,pan);
+ else if(category==='motion')soundWhoosh101(power,pan);
+ else if(category==='impact')soundImpact101(power,pan);
+ else if(category==='whoosh')soundWhoosh101(power*.62,pan);
+ else if(category==='shield'){soundTone101('energy',690,250,.075,.028,'triangle',0,pan);if(superAI.tier>1)soundNoise101('energy',.055,.018,1400,8000,0,pan)}
+ else if(category==='charge')soundEnergy101(power,false,pan)
+};
+// Attack 103: settle every beat against the actual contact event vocabulary.
+const p103CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),before=production101.attacks.pending,e=p103CombatEvent(type,data);
+ if(t==='MELEE_COMBO_BEAT'&&before>0){production101.attacks.interrupted+=before;production101.attacks.pending=1;ai103.attacks.settled+=before}
+ if(t==='MELEE_CONTACT_CONFIRMED'){production101.attacks.confirmed++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
+ if((t.includes('TRANSFORMATION_TRIGGERED')||t.includes('SUPER_MOVE_TRIGGERED')||t==='ACTOR_REMOVED')&&production101.attacks.pending>0){const n=production101.attacks.pending;production101.attacks.cancelled+=n;production101.attacks.pending=0;ai103.attacks.settled+=n}
+ return e
+};
+// Structure 103: one authority, a hard active-collapse cap and deterministic regeneration.
+const p103StructureImpact=structureImpact;
+structureImpact=function(p,power,angle,source='KI IMPACT'){
+ structureReady(p);const active=iyla2026.props.reduce((n,q)=>n+(q.broken?1:0),0);
+ if(!p.broken&&active>=12&&p.structure?.stage>=2){ai103.structures.prevented++;p.structure.hp=Math.max(p.structure.hp,p.structure.max*.36);return false}
+ const was=p.broken,result=p103StructureImpact(p,power,angle,source);
+ if(!was&&p.broken){p.p103BrokenAt=elapsed;p.p101RepairAt=elapsed+10+(p.seed%7);production101.structures.collapsed++}
+ return result
+};
+zStageBurst=function(px,py,color='#ffe66b',power=1){
+ zPush(zStage.blasts,{x:px,y:py,color,power,life:.42,max:.42},superAI.tier===1?3:6);
+ if(power<1.15)return;
+ let best=null,distance=Infinity;for(const p of iyla2026.props){if(p.broken)continue;const d=Math.hypot(p.x-px,p.y-py);if(d<70+power*38&&d<distance){best=p;distance=d}}
+ if(best)structureImpact(best,24+power*22,Math.atan2(best.y-py,best.x-px),'CONTROLLED BLAST')
+};
+const p103IylaTerrain=iylaTerrain;
+iylaTerrain=function(){const explosions=iyla.explosions;iyla.explosions=[];p103IylaTerrain();iyla.explosions=explosions};
+function structureLifecycle103(){
+ const props=iyla2026.props,now=elapsed;for(const p of props)if(p.broken&&!p.p101RepairAt){p.p103BrokenAt??=now;p.p101RepairAt=now+10+(p.seed%7)}
+ let broken=props.filter(p=>p.broken).sort((a,b)=>(a.p103BrokenAt||0)-(b.p103BrokenAt||0));
+ while(broken.length>12){const p=broken.shift();p.broken=false;if(p.structure){p.structure.stage=0;p.structure.hp=p.structure.max}p.p101RepairAt=0;production101.structures.repaired++;ai103.structures.forcedRepairs++}
+ for(const p of props)if(p.broken&&p.p101RepairAt<=now){p.broken=false;if(p.structure){p.structure.stage=0;p.structure.hp=p.structure.max}p.p101RepairAt=0;p.p103BrokenAt=0;production101.structures.repaired++}
+ production101.structures.active=props.reduce((n,p)=>n+(p.broken?1:0),0)
+}
+// Animation 103: preserve committed clips through their contact/recovery window.
+const p103OwenController=owenController;
+owenController=function(dt){
+ const clip=owenClips[owen.pose]||owenClips.FLIGHT,q=owen.stateTime/Math.max(.01,owen.stateLength),stagePose=zStage.pose;
+ const committed=!clip.loop&&owen.pose!=='FLIGHT'&&q<.84;
+ if(committed){zStage.pose=owen.pose;ai103.animation.commitLocks++}
+ p103OwenController(dt);zStage.pose=stagePose;
+ if(owen.pose==='TRANSFORM'&&owen.stateTime<owen.stateLength*.88){owen.wanted='TRANSFORM';owen.queue.length=0}
+};
+const p103OmniSystems=omniSystems;
+omniSystems=function(dt){p103OmniSystems(dt);structureLifecycle103();ai103Tick(dt)};
+const p103RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ frame.production103={name:ai103.name,perAI:ai103.perAI,agents:ai103Roster.length,totalEnhancements:ai103Roster.length*ai103.perAI,ticks:ai103.ticks,pressure:+ai103.pressure.toFixed(3),budget:ai103.budget,targetQuality:+ai103.targetQuality.toFixed(3),audio:{aggregated:ai103.audio.aggregated,active:soundAI101.active,max:soundAI101.maxActive},structures:{...ai103.structures,active:production101.structures.active},attacks:{...production101.attacks,settled:ai103.attacks.settled},animation:{...ai103.animation},contracts:Object.fromEntries(Object.entries(ai103.contracts).map(([k,v])=>[k,{enhancements:v.enhancements,health:v.health}]))};
+ p103RememberReplayFrame(frame)
+};
+combatEvent('PRODUCTION_103_READY',{agents:ai103Roster.length,enhancementsEach:ai103.perAI,total:ai103Roster.length*ai103.perAI,sound:'AGGREGATED',structures:'AUTHORITATIVE',attacks:'SETTLED'});
+
 })();
