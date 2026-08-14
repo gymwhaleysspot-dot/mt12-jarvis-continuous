@@ -1037,3 +1037,191 @@ const p100Reset=reset;reset=function(mode=autoMode){const r=p100Reset(mode);prod
 const p100Export=exportReplay;exportReplay=function(){replayEvent('PRODUCTION_100_EXPORT',{features:100,watchdog:production100.watchdog,rounds:production100.rounds});return p100Export()};const p100Button=$('#replayExport');if(p100Button)p100Button.onclick=exportReplay;
 
 })();
+
+
+// Production 101: resilient Griffin/Lira voice direction and replay-proven authority fixes.
+const production101={
+ name:'SURVIVOR VOICE + AUTHORITY 101',version:'1.0',roundLogged:campaign.stage||1,
+ voice:{queued:0,spoken:0,dropped:0,interrupted:0,recovered:0,fallbacks:0,repeats:0,errors:0,lastId:'',lastContext:'',lastText:'',byContext:{}},
+ attacks:{attempts:0,confirmed:0,missed:0,cancelled:0,interrupted:0,pending:0},
+ recovery:{targets:0,reasons:{}},structures:{collapsed:0,repaired:0,active:0},animation:{hitLocks:0,poseCorrections:0}
+};
+Object.assign(combatVoices,{
+ minGap:1.75,maxQueue:9,speaking:false,status:'BOOTING',unlocked:false,voiceList:[],history:[],historyMax:72,
+ active:null,watchdog:0,sequence:0,
+ jaxon:{...combatVoices.jaxon,name:'GRIFFIN',pitch:.91,rate:1.03,last:0},
+ conner:{...combatVoices.conner,name:'LIRA',pitch:1.08,rate:.98,last:0}
+});
+const voiceLexicon101={
+ common:{
+  opening:['The field is shifting','I can feel the pressure rise','This fight just changed','The next exchange decides our route','Power is gathering around us','The arena is answering every impact','A new pattern is forming','The tempo belongs to whoever adapts first'],
+  tactic:['hold the center line','break the attack rhythm','draw them into open space','save power for the counter','change elevation before the next strike','force a clean angle','make the next hit undeniable','keep the escape lane clear','separate the strongest target','turn their momentum against them'],
+  close:['Stay sharp','Do not waste this opening','Commit when the angle is clean','We control the next beat','Make every movement count','No blind swings','Keep the pressure intelligent','The plan evolves now','Finish the sequence cleanly','Watch the counter'],
+  transform:['The energy curve just broke its limit','That form changes every safe distance','The transformation is stabilizing','Power is climbing faster than the arena can absorb it','The new form is rewriting the matchup'],
+  boss:['The real opponent has entered','Boss signature confirmed','This one is controlling the whole field','The strongest fighter is finally moving','The battle just reached its true phase'],
+  danger:['Health is falling; create distance','The current line ends in damage','Pressure is too high for a direct trade','One clean escape matters more than three reckless hits','Defensive timing is now the priority'],
+  victory:['The field is clear','That sequence ended exactly where we aimed it','Another level belongs to us','The final opening became the finish','The plan survived contact'],
+  miss:['That strike found empty space','The target read the first angle','The attack line was late','No contact; reset the rhythm','The opponent escaped the committed frame'],
+  recover:['Target restored inside the combat envelope','The lock is clean again','Unreachable target corrected','The fight is back inside valid space','Target authority recovered']
+ },
+ griffin:{
+  lead:['I have the route','Reading the next exchange','My model found an opening','I am changing the plan','Combat memory updated','I have their timing now','The risk map is clear','I see the winning line'],
+  rival:['Lira, your pressure is improving','Lira, I expected that counter','Lira, the next angle is mine','Lira, you are forcing a better plan','Lira, I have learned this rhythm','Lira, that pattern will not work twice'],
+  power:['I am not spending this power blindly','Energy is ready when the finish is real','I will turn this charge into a confirmed hit','The form is stable; the plan stays disciplined','Power without control loses fights']
+ },
+ lira:{
+  lead:['I am closing the distance','Your route is already narrowing','I changed the rhythm before you noticed','The arena favors my pressure','I know where your escape ends','Your model is one step behind','I am forcing the next exchange','This is my tempo now'],
+  rival:['Griffin, adapt faster','Griffin, your safe route is gone','Griffin, show me the plan you trust','Griffin, I will test every prediction','Griffin, your next move needs more than memory','Griffin, I am still inside your decision loop'],
+  power:['I did not raise this power for a warning','The next surge is meant to connect','This form was built for the final exchange','I will make the arena remember this impact','Power answers confidence']
+ }
+};
+function voiceHash101(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function voicePick101(list,seed,offset){return list[(seed+offset*2654435761>>>0)%list.length]}
+function voiceContext101(type,data){
+ const t=String(type||'DIRECT').toUpperCase();
+ if(t.includes('TRANSFORM')||t.includes('FORM'))return 'transform';
+ if(t.includes('BOSS')||t.includes('PHASE'))return 'boss';
+ if(t.includes('LOW_HP')||t.includes('DANGER')||t.includes('CRITICAL'))return 'danger';
+ if(t.includes('FINISH')||t.includes('CLEAR')||t.includes('VICTORY'))return 'victory';
+ if(t.includes('WHIFF')||t.includes('MISS'))return 'miss';
+ if(t.includes('RECOVER')||t.includes('RESTORE'))return 'recover';
+ if(t.includes('PARRY')||t.includes('DODGE')||t.includes('BLOCK'))return 'counter';
+ if(t.includes('SUPER')||t.includes('ULTIMATE'))return 'power';
+ return 'combat'
+}
+function voiceCompose101(agent,context,data={}){
+ const profile=voiceLexicon101[agent==='conner'?'lira':'griffin'],common=voiceLexicon101.common;
+ const dynamic=[String(context),String(campaign.stage||1),String(kills||0),String(Math.round(player.hp||0)),String(production101.voice.sequence||0),String(data.id||data.move||data.name||'')].join(':');
+ const seed=voiceHash101(agent+':'+dynamic),lead=voicePick101(profile.lead,seed,1);
+ let middle;
+ if(context==='transform')middle=voicePick101(common.transform,seed,2);
+ else if(context==='boss')middle=voicePick101(common.boss,seed,2);
+ else if(context==='danger')middle=voicePick101(common.danger,seed,2);
+ else if(context==='victory')middle=voicePick101(common.victory,seed,2);
+ else if(context==='miss')middle=voicePick101(common.miss,seed,2);
+ else if(context==='recover')middle=voicePick101(common.recover,seed,2);
+ else if(context==='power')middle=voicePick101(profile.power,seed,2);
+ else if(context==='counter')middle=voicePick101(profile.rival,seed,2);
+ else middle=voicePick101(common.opening,seed,2)+', '+voicePick101(common.tactic,seed,3);
+ const close=voicePick101(common.close,seed,4);
+ return lead+'. '+middle+'. '+close+'.'
+}
+function voiceFingerprint101(text){return String(text).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function voiceRefresh101(){
+ if(!window.speechSynthesis)return;
+ try{
+  const list=speechSynthesis.getVoices()||[];
+  combatVoices.voiceList=list.slice();
+  combatVoices.status=list.length?'READY':'WAITING FOR VOICES';
+ }catch{combatVoices.voiceList=[];combatVoices.status='SYNTH FALLBACK'}
+}
+voiceRefresh=voiceRefresh101;
+voiceRefresh101();
+if(window.speechSynthesis&&!combatVoices.p101VoiceListener){combatVoices.p101VoiceListener=true;speechSynthesis.addEventListener?.('voiceschanged',voiceRefresh101)}
+function voiceSelect101(agent){
+ const list=combatVoices.voiceList||[],english=list.filter(v=>/^en([-_]|$)/i.test(v.lang||''));
+ const preferred=agent==='conner'?/Samantha|Karen|Moira|Ava|Serena|Zira|Female/i:/Daniel|Aaron|Alex|Arthur|Eddy|Male/i;
+ return english.find(v=>preferred.test(v.name||''))||english[agent==='conner'&&english.length>1?1:0]||list[0]||null
+}
+function voiceFinish101(item,result){
+ if(!combatVoices.active||combatVoices.active.id!==item.id)return;
+ clearTimeout(combatVoices.watchdog);combatVoices.watchdog=0;combatVoices.active=null;combatVoices.speaking=false;
+ if(result==='spoken')production101.voice.spoken++;
+ else if(result==='fallback')production101.voice.fallbacks++;
+ else if(result==='recovered')production101.voice.recovered++;
+ combatVoices.status=combatVoices.voiceList.length?'READY':'SYNTH FALLBACK';
+ setTimeout(voicePump,85)
+}
+voicePump=function(){
+ if(combatVoices.speaking||!combatVoices.queue.length)return;
+ const now=performance.now(),item=combatVoices.queue.shift();
+ if(item.expires<now){production101.voice.dropped++;return voicePump()}
+ const v=combatVoices[item.agent]||combatVoices.jaxon;
+ combatVoices.speaking=true;combatVoices.active=item;combatVoices.status='SPEAKING';
+ voiceCaption.dataset.agent=v.name;voiceCaption.textContent=v.name+' // '+item.msg;voiceCaption.hidden=false;
+ combatVoices.subtitleUntil=now+Math.max(1900,item.msg.length*62);
+ production101.voice.lastId=item.id;production101.voice.lastContext=item.context;production101.voice.lastText=item.msg;
+ const timeout=Math.min(16000,Math.max(2600,item.msg.length*115));
+ combatVoices.watchdog=setTimeout(()=>{production101.voice.errors++;try{speechSynthesis.cancel()}catch{}voiceCue(item.agent);voiceFinish101(item,'recovered')},timeout);
+ if(!combatVoices.enabled||!combatVoices.unlocked||!window.SpeechSynthesisUtterance){
+  voiceCue(item.agent);return setTimeout(()=>voiceFinish101(item,'fallback'),Math.max(780,item.msg.length*38))
+ }
+ try{
+  const u=new SpeechSynthesisUtterance(item.msg);u.pitch=v.pitch;u.rate=v.rate;u.volume=.84;u.lang='en-US';u.voice=voiceSelect101(item.agent);
+  u.onstart=()=>{combatVoices.status='SPEAKING'};
+  u.onend=()=>voiceFinish101(item,'spoken');
+  u.onerror=()=>{production101.voice.errors++;voiceCue(item.agent);voiceFinish101(item,'fallback')};
+  speechSynthesis.resume?.();speechSynthesis.speak(u)
+ }catch{production101.voice.errors++;voiceCue(item.agent);voiceFinish101(item,'fallback')}
+};
+function voiceEnqueue101(agent,msg,options={}){
+ const v=combatVoices[agent],now=performance.now(),text=String(msg||'').trim();if(!v||!text)return false;
+ const fp=voiceFingerprint101(text),context=options.context||'direct',recent=combatVoices.history.includes(fp);
+ if(recent&&!options.force){production101.voice.repeats++;return false}
+ const item={id:'V'+(++combatVoices.sequence),agent,msg:text,context,priority:options.priority||1,created:now,expires:now+(options.ttl||11000)};
+ if(options.force&&combatVoices.active&&item.priority>=8){production101.voice.interrupted++;try{speechSynthesis.cancel()}catch{}clearTimeout(combatVoices.watchdog);combatVoices.active=null;combatVoices.speaking=false}
+ if(combatVoices.queue.length>=combatVoices.maxQueue){
+  let low=0;for(let i=1;i<combatVoices.queue.length;i++)if(combatVoices.queue[i].priority<combatVoices.queue[low].priority)low=i;
+  if(combatVoices.queue[low].priority>item.priority){production101.voice.dropped++;return false}
+  combatVoices.queue.splice(low,1);production101.voice.dropped++
+ }
+ combatVoices.history.push(fp);if(combatVoices.history.length>combatVoices.historyMax)combatVoices.history.shift();
+ combatVoices.queue.push(item);combatVoices.queue.sort((a,b)=>b.priority-a.priority||a.created-b.created);
+ production101.voice.queued++;production101.voice.byContext[context]=(production101.voice.byContext[context]||0)+1;
+ voices.push(v.name+' // '+text);if(voices.length>10)voices.shift();voicePump();return true
+}
+aiVoice=function(agent,msg,force=false){return voiceEnqueue101(agent,msg,{force,priority:force?8:2,context:'direct'})};
+function voiceReact101(type,data){
+ const context=voiceContext101(type,data),important=['transform','boss','danger','victory','power'].includes(context);
+ const seq=++production101.voice.sequence,agent=(seq+(campaign.stage||1)+(kills||0))%3===0?'conner':'jaxon';
+ if(!important&&seq%3!==0)return;
+ const line=voiceCompose101(agent,context,data);
+ voiceEnqueue101(agent,line,{context,priority:important?context==='danger'?9:8:3,force:context==='danger'||context==='boss',ttl:important?15000:8500})
+}
+const p101CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const e=p101CombatEvent(type,data),t=String(type||'').toUpperCase();
+ if(t==='MELEE_COMBO_BEAT'||t.includes('ATTACK_STARTED')){production101.attacks.attempts++;production101.attacks.pending++}
+ if(t.includes('CONFIRMED')&&(t.includes('HIT')||t.includes('STRIKE')||t.includes('FINISH'))){production101.attacks.confirmed++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
+ else if(t.includes('WHIFF')||t.includes('MISSED')){production101.attacks.missed++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
+ else if(t.includes('CANCEL')){production101.attacks.cancelled++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
+ else if(t.includes('INTERRUPT')){production101.attacks.interrupted++;production101.attacks.pending=Math.max(0,production101.attacks.pending-1)}
+ if(t.includes('TARGET')&&(t.includes('RECOVER')||t.includes('RESTORE'))){const reason=String(data.reason||data.cause||'watchdog');production101.recovery.targets++;production101.recovery.reasons[reason]=(production101.recovery.reasons[reason]||0)+1}
+ voiceReact101(type,data);return e
+};
+const p101OwenController=owenController;
+owenController=function(dt){
+ const stagePose=zStage.pose,hitLocked=owen.pose==='HIT'&&owen.stateTime<Math.max(.12,owen.stateLength*.84);
+ if(hitLocked){zStage.pose='HIT';production101.animation.hitLocks++}
+ p101OwenController(dt);zStage.pose=stagePose;
+ if(owen.pose==='HIT'&&owen.wanted==='DASH'&&owen.stateTime<owen.stateLength*.84){owen.wanted='HIT';owen.queue=owen.queue.filter(p=>p!=='DASH');production101.animation.poseCorrections++}
+};
+omniEnvironment=function(){
+ if(!iyla2026?.props)return;
+ const now=elapsed,props=iyla2026.props;
+ for(const p of props)if(p.broken&&p.p101RepairAt&&now>=p.p101RepairAt){p.broken=false;p.p101RepairAt=0;p.p101Damage=0;production101.structures.repaired++}
+ const broken=props.filter(p=>p.broken).length;production101.structures.active=broken;if(broken>=12)return;
+ let best=null,bestD=Infinity;
+ for(const b of beams)for(const p of props){if(p.broken||now<(p.p101Cooldown||0))continue;const d=Math.hypot(p.x-b.x2,p.y-b.y2);if(d<26&&d<bestD){best={p,b};bestD=d}}
+ if(!best)return;
+ const p=best.p;p.p101Damage=(p.p101Damage||0)+1;p.p101Cooldown=now+.9;
+ if(p.p101Damage<2&&!(best.b.damage>35||best.b.power>1.2))return;
+ p.broken=true;p.p101RepairAt=now+14+(voiceHash101(String(p.x)+':'+String(p.y))%900)/100;
+ expansion59.destruction++;production101.structures.collapsed++;burst(p.x,p.y,'#ffb34d',10);
+ combatEvent('STRUCTURE_COLLAPSED',{x:Math.round(p.x),y:Math.round(p.y),repairAt:+p.p101RepairAt.toFixed(1)})
+};
+const p101CampaignUpdate=campaignUpdate;
+campaignUpdate=function(dt){
+ const before=campaign.stage;p101CampaignUpdate(dt);
+ if(campaign.stage!==production101.roundLogged){
+  production101.roundLogged=campaign.stage;tournament.lastRound=before;tournament.round=campaign.stage;production100.rounds++;
+  combatEvent('TOURNAMENT_ROUND',{round:campaign.stage,name:tournament.roundNames[Math.min(tournament.roundNames.length-1,campaign.stage-1)]||('LEVEL '+campaign.stage),authority:'CAMPAIGN_P101'})
+ }
+};
+const p101RememberReplayFrame=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ frame.production100={rigs:{hero:production100.heroChains,enemy:production100.enemyChains},camera:{...production100.camera},watchdog:production100.watchdog,rounds:production100.rounds,worldObjects:production100.worldObjects};
+ frame.production101={voice:{queued:production101.voice.queued,spoken:production101.voice.spoken,dropped:production101.voice.dropped,interrupted:production101.voice.interrupted,recovered:production101.voice.recovered,fallbacks:production101.voice.fallbacks,repeats:production101.voice.repeats,errors:production101.voice.errors,queue:combatVoices.queue.length,status:combatVoices.status,lastId:production101.voice.lastId,lastContext:production101.voice.lastContext},attacks:{...production101.attacks},recovery:{targets:production101.recovery.targets,reasons:{...production101.recovery.reasons}},structures:{...production101.structures},animation:{...production101.animation},round:production101.roundLogged};
+ p101RememberReplayFrame(frame)
+};
+combatEvent('PRODUCTION_101_READY',{voice:'GRIFFIN_LIRA_DYNAMIC',queue:combatVoices.maxQueue,history:combatVoices.historyMax,structureCap:12,round:production101.roundLogged});
