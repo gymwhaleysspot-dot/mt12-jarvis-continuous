@@ -2660,4 +2660,60 @@ rememberReplayFrame=function(frame){replay119(frame);frame.production120={render
 production120.ready=true;combatEvent('PRODUCTION_120_READY',{characters:'36 PERCENT MOBILE / 22.5 PERCENT DESKTOP',animations:Object.keys(sequence120).length,frames:'REAL TIME WALL CLOCK',art:'V2 ONLY',renderer:'INDEPENDENT 40FPS CAP'});
 
 
+
+/* Production 121 — Street Fighter combat lane and curated animation safety */
+stage120.loopStarted=false;
+const production121={version:'121',frames:0,movementTicks:0,advances:0,retreats:0,laneAdjusts:0,lunges:0,curatedFrames:0,unsafeRejected:0,animationSets:0,ready:false};
+const sequences121={
+ IDLE:[0,1,0,3],STANCE:[0,3,4,3],GUARD_LOW:[3,4,3],GUARD_HIGH:[4,3,4],WALK_FORWARD:[0,1,2,1],WALK_BACK:[2,1,0,1],
+ DASH_FORWARD:[1,2,1],DASH_BACK:[2,1,2],SIDESTEP:[0,2,0],CIRCLE:[1,0,2,0],PUNCH:[4,5,6,4],JAB:[4,5,4],
+ CROSS:[4,6,7,4],ELBOW:[4,7,8,4],KNEE:[3,8,9,3],UPPERCUT:[4,7,8,3],BACK_KICK:[3,9,10,3],
+ SPIN_KICK:[9,10,9,3],AXE_KICK:[3,10,9,3],BEAM_BRACE:[3,4,5],BEAM_CHARGE:[4,5,6],BEAM_FIRE:[5,6,7,4],
+ CLASH:[4,6,8,3],CHARGE:[3,0,4,0],NOVA_CROUCH:[3,4,3],NOVA_EXPAND:[3,5,7,3],
+ NOVA_RELEASE:[5,7,8,3],TRANSFORM:[3,0,4,3],FINISHER:[4,5,6,7,8,3],SUPER_RECOVER:[8,3,0],HIT:[7,8,3]
+};
+production121.animationSets=Object.keys(sequences121).length;
+const stage121={lastPaint:0,loop:true,hero:{pose:'',start:0},enemy:new WeakMap(),visualX:W*.45,visualY:H*.78};
+function mapPose121(p,entity,rank=0){
+ if(p==='GUARD')return rank%2?'GUARD_LOW':'GUARD_HIGH';if(p==='FLIGHT')return'MOVE' in entity&&entity.MOVE<0?'WALK_BACK':'WALK_FORWARD';
+ if(p==='DASH')return'DASH_FORWARD';if(p==='VANISH')return'DASH_BACK';if(p==='BACK_KICK'||p==='SPIN_KICK'||p==='AXE_KICK')return p;
+ if(p==='SUPER_RECOVER'||p==='HIT'||p==='TRANSFORM'||p==='FINISHER'||p==='PUNCH'||p==='ELBOW'||p==='KNEE'||p==='UPPERCUT'||p==='BEAM_BRACE'||p==='BEAM_CHARGE'||p==='BEAM_FIRE'||p==='CLASH'||p==='CHARGE'||p==='NOVA_CROUCH'||p==='NOVA_EXPAND'||p==='NOVA_RELEASE')return p;
+ return rank%3===0?'STANCE':rank%3===1?'CIRCLE':'IDLE'
+}
+function anim121(pose,entity,seed=0){
+ const now=performance.now(),state=entity===player?stage121.hero:(stage121.enemy.get(entity)||{pose:'',start:now});
+ if(state.pose!==pose){state.pose=pose;state.start=now}if(entity!==player)stage121.enemy.set(entity,state);
+ const seq=sequences121[pose]||sequences121.STANCE,attack=/PUNCH|JAB|CROSS|ELBOW|KNEE|KICK|UPPERCUT|BEAM|CLASH|NOVA|FINISHER|HIT|RECOVER/.test(pose),step=attack?115:165,i=Math.floor((now-state.start+seed*37)/step)%seq.length,frame=seq[i];
+ if(frame>10){production121.unsafeRejected++;return{frame:3,index:i,phase:i/seq.length}}production121.curatedFrames++;return{frame,index:i,phase:i/seq.length}
+}
+const omni120=omniSystems;
+omniSystems=function(dt){
+ omni120(dt);const target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null;if(!target||!Number.isFinite(dt)||dt<=0)return;
+ const dx=target.x-player.x,dy=target.y-player.y,dist=Math.hypot(dx,dy)||1,desired=105+(target.type===3?28:0),step=Math.min(3.2,dt*115);
+ if(dist>desired+28){player.x+=dx/dist*step;player.y+=dy/dist*step*.42;production121.advances++}
+ else if(dist<desired-30){player.x-=dx/dist*step*.7;player.y-=dy/dist*step*.22;production121.retreats++}
+ else{const lane=target.y-player.y;player.y+=clamp(lane,-1,1)*Math.min(Math.abs(lane),step*.3);production121.laneAdjusts++}
+ player.x=clamp(player.x,34,W-34);player.y=clamp(player.y,H*.43,H*.84);production121.movementTicks++
+};
+function poseEnemy121(e,rank){if(e.hit>0)return'HIT';if(e.attackClock<.24)return['JAB','CROSS','ELBOW','KNEE','BACK_KICK','SPIN_KICK'][rank%6];if(e.role==='RUSHER')return rank%2?'DASH_FORWARD':'CIRCLE';if(e.role==='SNIPER')return rank%2?'BEAM_CHARGE':'BEAM_FIRE';if(e.role==='TANK')return rank%2?'GUARD_HIGH':'CHARGE';return rank%2?'WALK_FORWARD':'STANCE'}
+function sprite121(g,img,index,x,y,w,flip,hit=false,lunge=0){
+ const cw=img.naturalWidth/4,ch=img.naturalHeight/4,col=index%4,row=index/4|0,h=w*(ch/cw),feet=.89;
+ g.save();g.globalAlpha=.42;g.fillStyle='#030209';g.beginPath();g.ellipse(x+lunge*.3,y+4,w*.24,w*.055,0,0,TAU);g.fill();g.restore();
+ g.save();g.translate(x+lunge,y);if(flip)g.scale(-1,1);g.globalAlpha=hit?.75:1;g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,col*cw,row*ch,cw,ch,-w*.5,-h*feet,w,h);g.restore()
+}
+function render121(source='main'){
+ const now=performance.now();if(now-stage121.lastPaint<30)return;stage121.lastPaint=now;vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.15:1.35),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);arena119(g);
+ const heroBase=Math.min(W,H)*(W<720?.41:.255),ready=atlas119.gReady&&atlas119.lReady,ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&e.x>-100&&e.x<W+100).sort((a,b)=>Math.abs(a.x-player.x)-Math.abs(b.x-player.x)),cap=W<720?4:5,visible=ordered.slice(0,cap),actors=visible.map((e,rank)=>({e,rank,sort:e.y}));actors.push({hero:true,sort:player.y+.01});actors.sort((a,b)=>a.sort-b.sort);
+ const target=griffin.target&&enemies.includes(griffin.target)?griffin.target:null;
+ for(const a of actors){if(a.hero){const raw=mapPose121(owen.pose||'STANCE',player,0),anim=anim121(raw,player,0),flip=target?target.x<player.x:Math.sin(griffin.heading||0)<0,attack=/PUNCH|CROSS|JAB|ELBOW|KNEE|KICK|UPPERCUT|FINISHER/.test(raw),dir=flip?-1:1,lunge=attack?Math.sin(Math.PI*anim.phase)*heroBase*.18*dir:0,x=clamp(player.x,heroBase*.54,W-heroBase*.54),y=H*.79;if(attack&&Math.abs(lunge)>2)production121.lunges++;if(ready)sprite121(g,atlas119.griffin,anim.frame,x,y,heroBase,flip,false,lunge)}
+ else{const e=a.e,boss=e.type===3,raw=poseEnemy121(e,a.rank),anim=anim121(raw,e,a.rank+(e.slot||0)),size=heroBase*(boss?1.02:.7+e.type*.045),flip=e.x<player.x,screenX=clamp(e.x,size*.53,W-size*.53),laneOffset=clamp((e.y-player.y)*.08,-34,34),y=H*.79+laneOffset,attack=/PUNCH|CROSS|JAB|ELBOW|KNEE|KICK|UPPERCUT/.test(raw),lunge=attack?Math.sin(Math.PI*anim.phase)*size*.13*(flip?-1:1):0;if(ready)sprite121(g,atlas119.lira,anim.frame,screenX,y,size,flip,e.hit>0,lunge)}}
+ combatOverlay117(g);production121.frames++
+}
+vector113Frame=function(){render121('main')};
+function loop121(){if(!stage121.loop)return;render121('loop');requestAnimationFrame(loop121)}requestAnimationFrame(loop121);
+const replay120=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay120(frame);frame.production121={renderer:'STREET FIGHTER COMBAT LANE',frames:production121.frames,movementTicks:production121.movementTicks,advances:production121.advances,retreats:production121.retreats,laneAdjusts:production121.laneAdjusts,lunges:production121.lunges,animationSets:production121.animationSets,curatedFrames:production121.curatedFrames,unsafeRejected:production121.unsafeRejected,duplicateSafe:true,actualPlayerMovement:true,streetFighterLane:true,maxVisibleFighters:W<720?5:6}};
+production121.ready=true;combatEvent('PRODUCTION_121_READY',{mode:'STREET FIGHTER COMBAT LANE',movement:'ACTUAL ADVANCE RETREAT LANE CONTROL',animations:production121.animationSets,atlas:'CURATED SAFE CELLS 0-10 ONLY',scale:'41 PERCENT MOBILE / 25.5 PERCENT DESKTOP'});
+
+
 })();
