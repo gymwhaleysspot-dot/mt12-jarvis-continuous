@@ -276,7 +276,7 @@ const zStageVisualBase=omniVisuals;omniVisuals=function(){zStageVisualBase();zSt
 // Matty Combat Authority 3.0: navigation commits to Owen's selected opponent.
 // This turns composed clips into real pursuit, contact, damage and completed routes.
 Object.assign(tournament,{started:false,phase:'OPENING',fighters:0,knockouts:0});
-Object.assign(zCinema,{lockedTarget:null,pursuit:0,engagements:0,completedRoutes:0});
+Object.assign(zCinema,{lockedTarget:null,pursuit:0,engagements:0,completedRoutes:0,targetAge:0,targetIdle:0,targetHp:0,targetDistance:0,recoveries:0});
 const mattyTarget=zTarget;
 zTarget=function(){return zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:mattyTarget()};
 const mattyAutoVector=autoVector;
@@ -286,7 +286,7 @@ autoVector=function(dt){
  const d=dist(player,target),a=Math.atan2(target.y-player.y,target.x-player.x),danger=hostile.some(h=>Math.hypot(h.x-player.x,h.y-player.y)<64);
  if(danger&&zCinema.vanish<=0)return planned;
  // Commit hard inside combat range; close deliberately outside it instead of orbiting forever.
- const committed=zCinema.route.length||zCinema.combo||d<520||target.type===3;
+ const committed=zCinema.route.length||zCinema.combo||d<520||target.type===3||target.campaignLevel===campaign.stage;
  if(committed){griffin.heading=a;zCinema.pursuit=Math.max(zCinema.pursuit,dt);griffin.mode=d>142?'MATTY COMBAT PURSUIT':griffin.mode;return{dx:Math.cos(a),dy:Math.sin(a)}}
  return planned
 };
@@ -319,10 +319,10 @@ iyla3DWorld=function(){
  for(let n=0;n<8;n++){const a=n*TAU/8,r=10.1;iylaBox(sx+Math.cos(a)*r,2.15,sz+Math.sin(a)*r,.14,2.15,.14,gold,-a,.72)}
 };
 grid=function(){
- tournamentGrid();const round=tournament.round||1,ox=-((worldX*.18)%468),oy=-((worldY*.18)%244);
- x.save();x.translate(W/2+ox,H*.52+oy);x.scale(1,.52);x.strokeStyle=round>4?'#ffbd5550':'#71fff052';x.lineWidth=2;
- for(let n=1;n<=5;n++){x.beginPath();x.arc(0,0,n*78,0,TAU);x.stroke()}
- for(let n=0;n<16;n++){const a=n*TAU/16;x.beginPath();x.moveTo(Math.cos(a)*35,Math.sin(a)*35);x.lineTo(Math.cos(a)*440,Math.sin(a)*440);x.stroke()}
+ tournamentGrid();const round=tournament.round||1,ox=-((worldX*.12)%312),oy=-((worldY*.12)%168);
+ x.save();x.translate(W/2+ox,H*.52+oy);x.scale(1,.52);x.globalAlpha=.28;x.strokeStyle=round>4?'#ffbd5550':'#71fff052';x.lineWidth=1.35;
+ for(let n=1;n<=3;n++){x.beginPath();x.arc(0,0,n*82,0,TAU);x.stroke()}
+ for(let n=0;n<8;n++){const a=n*TAU/8;x.beginPath();x.moveTo(Math.cos(a)*42,Math.sin(a)*42);x.lineTo(Math.cos(a)*285,Math.sin(a)*285);x.stroke()}
  x.restore()
 };
 const mattyTournamentUpdate=tournamentUpdate;
@@ -387,7 +387,7 @@ function campaignBossAI(dt,b){
 // screen-relative coordinates prevents Matty from chasing an unreachable lock
 // while preserving the infinite scrolling world coordinates themselves.
 function zavierCombatBounds(){
- const maxX=Math.max(W*1.35,960),maxY=Math.max(H*1.2,960),edge=Math.max(W,H)*.62;
+ const maxX=Math.max(W*.82,520),maxY=Math.max(H*.7,520),edge=Math.min(360,Math.max(250,Math.min(W,H)*.48));
  let recovered=0;
  for(const e of enemies){
   const dx=e.x-player.x,dy=e.y-player.y,d=Math.hypot(dx,dy);
@@ -405,9 +405,30 @@ function zavierCombatBounds(){
   combatEvent('WORLD_ACTOR_RECOVERED',{count:recovered,worldX:Math.round(worldX),worldY:Math.round(worldY)})
  }
 }
+function zavierTargetWatchdog(dt){
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:zTarget();
+ if(!target){zCinema.targetAge=zCinema.targetIdle=zCinema.targetDistance=0;zCinema.targetHp=0;return}
+ if(target!==zCinema.lockedTarget){zCinema.lockedTarget=target;zCinema.targetAge=zCinema.targetIdle=0;zCinema.targetHp=(target.hp||0)+(target.shield||0);zCinema.engagements++}
+ const d=dist(player,target),hp=(target.hp||0)+(target.shield||0),progress=hp<zCinema.targetHp-.01;
+ zCinema.targetAge+=dt;zCinema.targetDistance=d;
+ if(progress){zCinema.targetIdle=0;zCinema.targetHp=hp}else zCinema.targetIdle+=dt;
+ const offscreen=target.x<-36||target.x>W+36||target.y<58||target.y>H+36,stalled=d>360&&zCinema.targetIdle>1.25;
+ if(offscreen||!Number.isFinite(d)||stalled){
+  const a=Number.isFinite(griffin.heading)?griffin.heading:0,r=target.type===3?235:190;
+  target.x=clamp(player.x+Math.cos(a)*r,52,W-52);target.y=clamp(player.y+Math.sin(a)*r,94,H-52);
+  target.role='RUSHER';target.contactClock=Math.max(target.contactClock||0,.18);zCinema.route.length=0;zCinema.combo=0;zCinema.comboClock=0;zCinema.attack=0;zCinema.volley=0;zCinema.targetIdle=0;zCinema.targetHp=(target.hp||0)+(target.shield||0);zCinema.recoveries++;
+  griffin.heading=Math.atan2(target.y-player.y,target.x-player.x);griffin.mode='ZAVIER TARGET RECOVERY';griffin.reason=`RECOVERED UNREACHABLE TARGET · ${Math.round(d)||0} RANGE`;combatEvent('COMBAT_TARGET_RECOVERED',{distance:Math.round(d)||0,boss:target.type===3,level:campaign.stage})
+ }
+ // A lone wave fighter must never hold the campaign open. Bring it into a
+ // guaranteed contact beat if it has survived without taking damage.
+ if(campaign.phase==='WAVE'&&campaign.spawned>=campaign.quota&&enemies.length===1&&zCinema.targetIdle>5){
+  const a=Math.atan2(target.y-player.y,target.x-player.x),r=118;target.x=player.x+Math.cos(a)*r;target.y=player.y+Math.sin(a)*r;target.role='RUSHER';zCinema.attack=0;zCinema.volley=0;zCinema.route.length=0;zCinema.combo=0;zCinema.targetIdle=0;griffin.mode='MATTY FINAL FIGHTER ENGAGE';combatEvent('FINAL_FIGHTER_ENGAGED',{level:campaign.stage})
+ }
+}
 function campaignUpdate(dt){
  if(!running)return;if(elapsed<.08)return
  zavierCombatBounds();
+ zavierTargetWatchdog(dt);
  if(campaign.phase==='WAVE'){
   tournament.phase=`LEVEL ${campaign.stage} · FIGHTERS ${campaign.defeated}/${campaign.quota}`;
   if(campaign.spawned>=campaign.quota&&!enemies.some(e=>!e.campaignBoss)){campaign.phase='BOSS_READY';hostile.length=0;iylaScene(`LEVEL ${campaign.stage} WAVE CLEAR`,'BOSS APPROACHING · PREPARE','#79fff0',2.2,24);combatEvent('CAMPAIGN_WAVE_CLEAR',{level:campaign.stage});enemy(true)}
