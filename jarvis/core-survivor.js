@@ -2343,7 +2343,7 @@ iyla3DWorld=function(){
  ],p=palettes[ch.id]||palettes[0],cin=render108.mode==='CINEMATIC';
  iylaBox(0,-.2,1.4,11,.12,8.7,p[0],0,1);
  for(let z=-3;z<=6;z+=1.5)for(let q=-5;q<=5;q+=2){const alt=((q+z*2)|0)&1;iylaBox(q,-.055,z,.94,.025,.69,alt?p[0]:p[1],0,.84)}
- for(let n=0;n<3;n++){const r=2.6+n*1.65,steps=cin?16:12;for(let j=0;j<steps;j++){const a=j*TAU/steps;iylaBox(Math.cos(a)*r,-.012,Math.sin(a)*r+.5,.38,.018,.055,p[2],a+Math.PI/2,.38)}}
+ for(let n=0;n<3;n++){const r=2.05+n*1.18,steps=cin?16:12;for(let j=0;j<steps;j++){const a=j*TAU/steps;iylaBox(Math.cos(a)*r,-.012,Math.sin(a)*r+.5,.38,.018,.055,p[2],a+Math.PI/2,.38)}}
  for(let n=0;n<7;n++){const a=(n/6-.5)*2.2,xx=Math.sin(a)*9.2,zz=6.8+Math.cos(a)*1.2,h=1.4+(n%3)*.7;iylaBox(xx,h*.32,zz,.8,h*.32,.72,p[1],a,.94);iylaBox(xx,h*.82,zz,.52,h*.3,.5,p[2],a,.5)}
  for(const s of ultimate.scars.slice(-6))part113((s.x-W/2)/45,.008,(s.y-H/2)/45,s.r/48,.012,s.r/48,[.55,.04,.03],s.a,.42)
 };
@@ -2356,7 +2356,7 @@ function vector113Boot(){
  if(vector113.cv)return;const cv=document.createElement('canvas');cv.className='vector-113';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.querySelector('.hud'));const g=cv.getContext('2d',{alpha:true,desynchronized:true});Object.assign(vector113,{cv,g});
  const st=document.createElement('style');st.textContent='.vector-113{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;background:transparent!important;z-index:1}.brain-panel,.lira-panel,.iyla-panel{opacity:.28!important;max-height:72px!important;max-width:190px!important;overflow:hidden!important}.voice-caption{max-width:520px!important;background:#06101ee6!important}@media(max-width:720px){.brain-panel,.lira-panel,.iyla-panel{display:none!important}.voice-caption{width:86vw!important;bottom:max(54px,calc(env(safe-area-inset-bottom) + 40px))!important;font-size:10px!important}.tip{opacity:.32!important}}';document.head.appendChild(st)
 }
-function v113Point(px,py,pz){const rx=px*.993-pz*.12,rz=px*.12+pz*.993,zoom=Math.min(W,H)/13.4,depth=clamp(1+rz*.018,.88,1.12);return{x:W/2+rx*zoom*depth,y:H*.58+rz*zoom*.5-py*zoom*depth,depth,zoom}}
+function v113Point(px,py,pz){const rx=px*.993-pz*.12,rz=px*.12+pz*.993,zoom=Math.min(W,H)/13.4,depth=clamp(1+rz*.018,.88,1.12);return{x:W/2+rx*zoom*depth,y:H*.65+rz*zoom*.46-py*zoom*depth,depth,zoom}}
 function v113Bone(g,a,b,w,c,edge='#140d17'){
  g.lineCap='round';g.lineJoin='round';g.strokeStyle=edge;g.lineWidth=w+5;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()
 }
@@ -2389,13 +2389,38 @@ function v113Rig(px,pz,yaw,scale,enemy,boss,entity){
 }
 function vector113Frame(){
  vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.5:2),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);vector113.draws=vector113.culled=0;
- const ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)).sort((a,b)=>a.y-b.y),cap=W<720?12:20;for(const e of ordered.slice(-cap)){const boss=e.type===3,s=(boss?1.18:.54+e.type*.1);v113Rig((e.x-W/2)/45,(e.y-H/2)/45,-Math.atan2(player.x-e.x,player.y-e.y),s,true,boss,e);production113.enemies++}
- v113Rig(0,0,griffin.heading||0,1.02,false,false,player);production113.frames++
+ const ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)).sort((a,b)=>a.y-b.y),cap=W<720?10:18;for(const e of ordered.slice(-cap)){const boss=e.type===3,s=(boss?1.78:.8+e.type*.12);v113Rig((e.x-W/2)/45,(e.y-H/2)/45,-Math.atan2(player.x-e.x,player.y-e.y),s,true,boss,e);production113.enemies++}
+ v113Rig(0,0,griffin.heading||0,1.68,false,false,player);production113.frames++
 }
 const iyla3DFrame112=iyla3DFrame;
 iyla3DFrame=function(dt){const r=iyla3DFrame112(dt);vector113Frame();return r};
 const remember113=rememberReplayFrame;
 rememberReplayFrame=function(frame){remember113(frame);frame.production113={renderer:production113.renderer,camera:production113.camera,environment:production113.environment,vectorDraws:vector113.draws,culled:vector113.culled,hud:W<720?'COMBAT CLEAR':'COMPACT',projection:'LOW TILT',continuousLimbs:true}};
 production113.ready=true;combatEvent('PRODUCTION_113_READY',{renderer:production113.renderer,camera:production113.camera,environment:production113.environment});
+
+/* Production 114 — live screenshot cleanup */
+const production114={version:'114',frames:0,legacyPassesDisabled:0,energyShapes:0,scale:'PHONE COMBAT',ready:false};
+iyla3DFighter=function(){production114.legacyPassesDisabled++};
+peytenGriffin=function(){production114.legacyPassesDisabled++};
+const combat113=iyla3DCombat;
+iyla3DCombat=function(){
+ const friendly=shots.splice(0,shots.length),enemy=hostile.splice(0,hostile.length);
+ try{return combat113()}finally{shots.push(...friendly);hostile.push(...enemy)}
+};
+function energy114One(g,s,hostileShot){
+ const p=v113Point((s.x-W/2)/45,.58,(s.y-H/2)/45),mag=Math.hypot(s.vx||0,s.vy||0)||1,dx=(s.vx||1)/mag,dy=(s.vy||0)/mag,a=Math.atan2(dy,dx),r=hostileShot?9:7,col=hostileShot?'#ff315c':s.drone?'#ffe66b':'#65efff';
+ g.save();g.translate(p.x,p.y);g.rotate(a);g.globalCompositeOperation='screen';g.shadowBlur=18;g.shadowColor=col;
+ const tail=g.createLinearGradient(-r*4,0,r,0);tail.addColorStop(0,'rgba(255,255,255,0)');tail.addColorStop(.62,col+'55');tail.addColorStop(1,col);
+ g.fillStyle=tail;g.beginPath();g.moveTo(-r*4,0);g.quadraticCurveTo(-r*.4,-r*.72,r,0);g.quadraticCurveTo(-r*.4,r*.72,-r*4,0);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.ellipse(r*.18,0,r*.52,r*.32,0,0,TAU);g.fill();g.restore();production114.energyShapes++
+}
+function energy114Frame(){
+ const g=vector113.g;if(!g)return;for(const s of shots.slice(0,W<720?18:28))energy114One(g,s,false);for(const s of hostile.slice(0,W<720?14:24))energy114One(g,s,true);production114.frames++
+}
+const frame113=iyla3DFrame;
+iyla3DFrame=function(dt){const r=frame113(dt);energy114Frame();return r};
+const replay113=rememberReplayFrame;
+rememberReplayFrame=function(frame){replay113(frame);frame.production114={legacyPassesDisabled:production114.legacyPassesDisabled,energyShapes:production114.energyShapes,characterScale:W<720?'168%':'168%',arenaRadius:'TIGHT',cameraAnchor:'LOWER',invariant:vector113.draws>0}};
+production114.ready=true;combatEvent('PRODUCTION_114_READY',{legacy:'DISABLED',characters:'ENLARGED',arena:'TIGHTENED',projectiles:'SHAPED ENERGY'});
 
 })();
