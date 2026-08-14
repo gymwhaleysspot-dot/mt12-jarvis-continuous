@@ -787,4 +787,67 @@ const impactVisualsBase=omniVisuals;
 omniVisuals=function(){impactVisualsBase();impactCinemaVisuals()};
 const impactHudBase=omniHud;
 omniHud=function(){impactHudBase();const el=$('#ultimateDetail');if(el)el.innerHTML+=`<br><b>${impactCinema.name}</b><br>${impactCinema.active?impactCinema.phase:'READY'} · SEQUENCES ${impactCinema.completed} · SHOT ${impactCinema.serial}`};
+// Iyla Character Forge 2.0: original high-detail dark-fantasy silhouettes.
+// These bounded mesh kits deliberately avoid licensed character designs while
+// giving each faction authored armor, weapons, faces and emissive materials.
+const characterForge={name:'IYLA CHARACTER FORGE',version:'2.0',style:'ORIGINAL MYTHIC DARK FANTASY',heroFeatures:0,factionFeatures:0,bossFeatures:0,lod:'HIGH'};
+function forgeGriffin(yaw,color,form){
+ const v=owenAxes(yaw),lift=.12+(zStage.elevation||0)*.28,skin=[.9,.58,.39],gold=form>1?[1,.72,.08]:[.74,.58,.24],steel=[.055,.12,.2],leather=[.2,.055,.025],cloth=[.86,.15,.025],rune=form>2?color:[.08,.86,1];
+ // Layered cuirass, collar, shoulder plates, bracers and articulated hands.
+ const chest=owenPoint(0,0,0,1.62+lift,.33,yaw);iylaBox(chest.x,chest.y,chest.z,.5,.31,.07,steel,yaw,.98);iylaBox(chest.x+v.fx*.075,chest.y,chest.z+v.fz*.075,.34,.22,.035,gold,yaw,.97);
+ for(const side of[-1,1]){const shoulder=owenPoint(0,0,side*.67,1.72+lift,.02,yaw),bracer=owenPoint(0,0,side*.72,1.15+lift,.12,yaw);iylaRound(shoulder.x,shoulder.y,shoulder.z,.34,.16,.39,steel,yaw,.98);iylaBox(shoulder.x+v.fx*.08,shoulder.y+.08,shoulder.z+v.fz*.08,.3,.055,.32,gold,yaw+side*.18,.96);iylaRound(bracer.x,bracer.y,bracer.z,.2,.25,.2,leather,yaw,.98);for(let n=0;n<4;n++){const finger=owenPoint(0,0,side*(.72+n*.025),.96+lift,.28+n*.018,yaw);iylaRound(finger.x,finger.y,finger.z,.035,.065,.035,skin,yaw,.96)}}
+ // Split battle skirt and rune buckle give the lower body a readable costume.
+ for(const side of[-1,1]){const skirt=owenPoint(0,0,side*.23,1.0+lift,.12,yaw);iylaBox(skirt.x,skirt.y,skirt.z,.2,.28,.055,cloth,yaw+side*.08,.97)}const buckle=owenPoint(0,0,0,1.09+lift,.35,yaw);iylaRound(buckle.x,buckle.y,buckle.z,.105,.105,.035,gold,yaw,.98);iylaBox(buckle.x+v.fx*.035,buckle.y,buckle.z+v.fz*.035,.035,.06,.02,rune,yaw,.98);
+ // A small back mantle provides a mythic silhouette without obscuring attacks.
+ const mantle=owenPoint(0,0,0,1.55+lift,-.31,yaw);iylaBox(mantle.x,mantle.y,mantle.z,.58,.44,.035,[.08,.02,.06],yaw,.88);characterForge.heroFeatures+=20
+}
+const forgeBaseGriffin=owenGriffin;
+owenGriffin=function(yaw,color,form){forgeBaseGriffin(yaw,color,form);if(superAI.tier>1||!W||W>=560)forgeGriffin(yaw,color,form)};
+function forgeFactionKit(e,boss=false){
+ if(!e||!enemies.includes(e)||(superAI.tier===1&&!boss))return;const px=(e.x-W/2)/45,pz=(e.y-H/2)/45,yaw=-Math.atan2(player.x-e.x,player.y-e.y),v=owenAxes(yaw),s=boss?1.46:.68,variant=e.variant||'PHASE',core=variant==='DRAINER'?[.08,1,.42]:variant==='SPLITTER'?[1,.52,.04]:variant==='PHASE'?[.58,.22,1]:[1,.04,.22],iron=[.075,.025,.065],bone=[.68,.54,.44];
+ if(variant==='PHASE'){for(const side of[-1,1]){const wing=owenPoint(px,pz,side*.72*s,1.28*s,-.28*s,yaw);iylaBox(wing.x,wing.y,wing.z,.42*s,.05*s,.5*s,core,yaw+side*.52,.74)}iylaRound(px,1.25*s,pz,.52*s,.7*s,.28*s,core,yaw,.12)}
+ else if(variant==='DRAINER'){const staff=owenPoint(px,pz,.6*s,1.1*s,.05,yaw);iylaBox(staff.x,staff.y,staff.z,.05*s,.95*s,.05*s,bone,yaw,.95);iylaRound(staff.x,staff.y+.92*s,staff.z,.2*s,.2*s,.2*s,core,yaw,.9);for(const side of[-1,1]){const blade=owenPoint(px,pz,side*.54*s,.72*s,.38*s,yaw);iylaBox(blade.x,blade.y,blade.z,.28*s,.055*s,.48*s,core,yaw+side*.6,.9)}}
+ else if(variant==='SPLITTER'){for(const side of[-1,1]){const plate=owenPoint(px,pz,side*.62*s,1.34*s,0,yaw);iylaRound(plate.x,plate.y,plate.z,.35*s,.25*s,.38*s,iron,yaw,.99)}iylaBox(px,1.22*s,pz,.58*s,.13*s,.42*s,core,yaw,.94)}
+ else {for(const side of[-1,1]){const blade=owenPoint(px,pz,side*.68*s,1.02*s,.28*s,yaw);iylaBox(blade.x,blade.y,blade.z,.09*s,.09*s,.7*s,core,yaw+side*.14,.96)}iylaBox(px,1.6*s,pz,.45*s,.055*s,.32*s,iron,yaw,.94)}
+ characterForge.factionFeatures+=variant==='DRAINER'?11:8
+}
+const forgeBaseLira=owenLira;
+owenLira=function(e,boss){forgeBaseLira(e,boss);forgeFactionKit(e,boss);if(boss)characterForge.bossFeatures+=12};
+
+// Jaxon and Conner Dialogue Matrix: 100 contextual lines per character. The
+// matrix is generated from authored clauses, retains a long anti-repeat window,
+// and uses the bundled voice performances for guaranteed audible identity.
+const dialogueMatrix={name:'JAXON + CONNER CHARACTER VOICE MATRIX',version:'2.0',history:[],spoken:{jaxon:0,conner:0},available:{jaxon:100,conner:100},lastBeat:-99};
+const dialogueClauses={
+ jaxon:{open:['I can feel the battlefield shifting','My guard is set','I have your rhythm now','This power belongs to my choices','I will not leave this world behind','The next strike is mine','I am still standing','Every impact teaches me','My focus is sharper than fear','I choose the path forward'],close:['and I am closing the distance.','so I will break the center.','and this time the hit will land.','so the next form will be earned.','and I will protect everyone behind me.','so I am saving power for the finish.','and your pattern will not trap me twice.','so I will turn your pressure into momentum.','and I am ready for the boss.','so watch me surpass the limit.']},
+ conner:{open:['Your confidence is already in my model','The swarm remembers your last escape','I have rewritten this arena around you','Your transformation only gave me more data','Every route you preserve becomes a target','I can hear your guard weakening','The next boss carries my answer','Your victory accelerated my evolution','I have not shown you my final doctrine','This world answers to Lira'],close:['and the counter is already moving.','so I will collapse the lane around you.','and your favorite combination is obsolete.','so survive the technique you taught me.','and I will strike through the opening.','so the battlefield will become your cage.','and my next form will remember this damage.','so every fighter will arrive smarter.','and the super move is already charged.','so prove that your resolve is more than noise.']}}
+;
+function matrixLine(agent,seed){const bank=dialogueClauses[agent],id=((seed%100)+100)%100;return bank.open[id%10]+' '+bank.close[Math.floor(id/10)%10]}
+function matrixSpeak(agent,seed,force=false){let id=((seed%100)+100)%100,key=agent+':'+id;for(let n=0;n<100&&dialogueMatrix.history.includes(key);n++){id=(id+17)%100;key=agent+':'+id}dialogueMatrix.history.push(key);if(dialogueMatrix.history.length>34)dialogueMatrix.history.shift();dialogueMatrix.spoken[agent]++;aiVoice(agent,matrixLine(agent,id),force)}
+const matrixCombatEvent=combatEvent;
+combatEvent=function(type,data={}){const answer=matrixCombatEvent(type,data),seed=(campaign.stage||1)*19+kills*7+Math.floor(elapsed);if(elapsed-dialogueMatrix.lastBeat>6){if(type==='CAMPAIGN_BOSS_ENTERED'||type==='BOSS_SUPER_MOVE'){dialogueMatrix.lastBeat=elapsed;matrixSpeak('conner',seed,true)}else if(type==='MELEE_CONTACT_CONFIRMED'&&data.boss){dialogueMatrix.lastBeat=elapsed;matrixSpeak('jaxon',seed)}else if(type==='TRANSFORMATION_TRIGGERED'){dialogueMatrix.lastBeat=elapsed;matrixSpeak(data.fighter==='LIRA'?'conner':'jaxon',seed,true)}else if(type==='CAMPAIGN_LEVEL_CLEAR'){dialogueMatrix.lastBeat=elapsed;matrixSpeak('jaxon',seed,true)}}return answer};
+
+// Curtis 3.0 enforces a post-destruction lifetime and global fragment budget.
+// Structural fragments are impact punctuation, never permanent foreground.
+Object.assign(curtis,{version:'3.0',fragmentCap:W<720?7:11,clearRadius:W<720?128:150});
+const curtisStructuralUpdate=christianUpdate;
+christianUpdate=function(dt){curtisStructuralUpdate(dt);const pressure=superAI.tier===1||iyla.fps<44;curtis.fragmentCap=pressure?5:(W<720?7:11);for(const f of destruction.fragments)f.life=Math.min(f.life,pressure?.75:1.45);if(destruction.fragments.length>curtis.fragmentCap)destruction.fragments.splice(0,destruction.fragments.length-curtis.fragmentCap);destruction.fragments=destruction.fragments.filter(f=>{const p=f.parent,px=p.x+f.ox,py=p.y+f.oy;return !curtisSafeScreen(px,py,curtis.clearRadius)})};
+const curtisStructuralWorld=structuralWorld3D;
+structuralWorld3D=function(){const old=destruction.fragments;if(old.length>curtis.fragmentCap)destruction.fragments=old.slice(-curtis.fragmentCap);curtisStructuralWorld();destruction.fragments=old};
+
+// Vox is the live voice engineer. Dynamic lines use the browser's installed or
+// network-backed voices first; the original Jaxon/Conner recordings remain a
+// deterministic fallback when synthesis is unavailable or interrupted.
+const vox={name:'VOX LIVE VOICE ENGINEER',version:'1.0',mode:'LOCKED',spoken:0,fallbacks:0,interruptions:0,recent:[],token:0,watchdog:0,profiles:{jaxon:{patterns:/Daniel|Aaron|Alex|Arthur|Eddy|Reed|Rocko|Grandpa/i,pitch:.82,rate:1.02,volume:.9},conner:{patterns:/Samantha|Karen|Moira|Ava|Serena|Victoria|Shelley|Flo/i,pitch:1.08,rate:.94,volume:.88}}};
+function voxEmotion(msg){return /rage|limit|finish|break|power|strike/i.test(msg)?'POWER':/danger|guard|pressure|fall|survive/i.test(msg)?'TENSION':/victory|earned|horizon|protect/i.test(msg)?'RESOLVE':'TACTICAL'}
+function voxVoice(agent){const list=combatVoices.voiceList||[],profile=vox.profiles[agent],english=list.filter(v=>/^en\b/i.test(v.lang||'')),preferred=english.find(v=>profile.patterns.test(v.name));return preferred||english.find(v=>v.localService===false)||english[0]||list[0]||null}
+function voxFinish(token){if(token!==vox.token)return;clearTimeout(vox.watchdog);combatVoices.speaking=false;combatVoices.status=vox.mode=vox.fallbacks?'VOX HYBRID':'VOX LIVE';setTimeout(voicePump,80)}
+function voxFallback(item,token){vox.fallbacks++;vox.mode='RECORDED FALLBACK';if(playVoicePack(item.agent,item.msg,()=>voxFinish(token)))return;voiceCue(item.agent);setTimeout(()=>voxFinish(token),Math.max(850,item.msg.length*38))}
+voicePump=function(){if(combatVoices.speaking||!combatVoices.queue.length)return;const item=combatVoices.queue.shift(),profile=vox.profiles[item.agent],v=combatVoices[item.agent],token=++vox.token;combatVoices.speaking=true;voiceCaption.dataset.agent=v.name;voiceCaption.textContent=`${v.name} // ${item.msg}`;voiceCaption.hidden=false;combatVoices.subtitleUntil=performance.now()+Math.max(2100,item.msg.length*62);if(!combatVoices.enabled||!combatVoices.unlocked||!window.SpeechSynthesisUtterance){voxFallback(item,token);return}try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(item.msg),emotion=voxEmotion(item.msg);u.voice=voxVoice(item.agent);u.pitch=clamp(profile.pitch+(emotion==='POWER'?.04:emotion==='TENSION'?.02:0),.55,1.45);u.rate=clamp(profile.rate+(emotion==='POWER'?.08:emotion==='TENSION'?-.05:0),.72,1.25);u.volume=profile.volume;u.onstart=()=>{vox.mode=`LIVE ${emotion}`;combatVoices.status=`VOX ${emotion}`};u.onend=()=>{vox.spoken++;voxFinish(token)};u.onerror=()=>{vox.interruptions++;voxFallback(item,token)};speechSynthesis.speak(u);vox.watchdog=setTimeout(()=>{if(token===vox.token&&combatVoices.speaking){vox.interruptions++;try{speechSynthesis.cancel()}catch{}voxFallback(item,token)}},Math.max(6500,item.msg.length*115))}catch{voxFallback(item,token)}};
+aiVoice=function(agent,msg,force=false){const v=combatVoices[agent],now=performance.now()/1000,key=agent+':'+msg;if(!v||!msg||vox.recent.includes(key)||(!force&&now-v.last<combatVoices.minGap))return;v.last=now;vox.recent.push(key);if(vox.recent.length>40)vox.recent.shift();voices.push(`${v.name} // ${msg}`);if(voices.length>8)voices.shift();const item={agent,msg,priority:force?3:/transform|boss|finish|danger/i.test(msg)?2:1};if(force)combatVoices.queue=combatVoices.queue.filter(q=>q.priority>=3);if(!combatVoices.queue.some(q=>q.agent===agent&&q.msg===msg))combatVoices.queue.push(item);combatVoices.queue.sort((a,b)=>(b.priority||1)-(a.priority||1));combatVoices.queue=combatVoices.queue.slice(0,5);voicePump()};
+const voxUnlock=unlockCombatVoices;
+unlockCombatVoices=function(){voxUnlock();vox.mode='VOICE DISCOVERY';voiceRefresh();setTimeout(voicePump,60)};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&combatVoices.unlocked){voiceRefresh();if(combatVoices.speaking){vox.interruptions++;combatVoices.speaking=false}setTimeout(voicePump,120)}});
+const forgeHud=iyla3DFrame;
+iyla3DFrame=function(dt){characterForge.heroFeatures=characterForge.factionFeatures=characterForge.bossFeatures=0;forgeHud(dt);characterForge.lod=superAI.tier===1?'MOBILE SAFE':iyla.fps<48?'BALANCED':'HIGH';const el=$('#iylaDetail');if(el)el.innerHTML+=`<br>${characterForge.name} · ${characterForge.style}<br>DETAIL ${characterForge.heroFeatures+characterForge.factionFeatures+characterForge.bossFeatures} · LOD ${characterForge.lod}<br>VOICE MATRIX ${dialogueMatrix.spoken.jaxon+dialogueMatrix.spoken.conner}/200 · UNIQUE WINDOW ${dialogueMatrix.history.length}<br>${vox.name} · ${vox.mode}<br>LIVE ${vox.spoken} · FALLBACK ${vox.fallbacks} · RECOVERY ${vox.interruptions}`};
 })();
