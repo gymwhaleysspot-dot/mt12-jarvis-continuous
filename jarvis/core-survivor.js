@@ -2824,7 +2824,7 @@ production126.ready=true;combatEvent('PRODUCTION_126_READY',{renderer:'CLEAN FUL
 /* Production 127 — distinct form art, safe motion cells and truthful wall clock */
 stage126.loop=false;
 const production127={version:'127',frames:0,safeCells:0,rejectedCells:0,formDraws:0,formChanges:0,flameAuras:0,spacingLocks:0,contacts:0,wallRecovery:true,ready:false};
-const forms127=new Image();let forms127Ready=false;forms127.onload=()=>forms127Ready=true;forms127.src='jarvis/assets/survivor/griffin-forms-v1.png';
+const forms127=new Image();let forms127Ready=false;forms127.onload=()=>forms127Ready=true;forms127.src='jarvis/assets/survivor/griffin-forms-v1.webp';
 const stage127={lastPaint:0,loop:true,heroX:W*.45,hero:{},enemy:new WeakMap(),impact:null,lastImpact:0,lastForm:0,cutInUntil:0};
 const seq127={GUARD:[0,3,4,3],STEP:[0,1,2,1],DASH:[1,2,1,3],JAB:[4,5,6,4],CROSS:[4,6,7,4],KICK:[3,7,6,3],SPIN:[3,7,5,3],BEAM:[4,5,6,7,4],HIT:[3,4,3],RECOVER:[3,0]};
 function state127(entity,pose,seed=0){const now=performance.now(),s=entity===player?stage127.hero:(stage127.enemy.get(entity)||{});if(s.pose!==pose){s.pose=pose;s.started=now}if(!s.started)s.started=now;const q=seq127[pose]||seq127.GUARD,step=/JAB|CROSS|KICK|SPIN|BEAM|HIT/.test(pose)?86:118,index=Math.floor((now-s.started+seed*19)/step)%q.length,frame=q[index];if(frame>7){production127.rejectedCells++;return{frame:3,phase:0}}if(entity!==player)stage127.enemy.set(entity,s);production127.safeCells++;return{frame,phase:index/Math.max(1,q.length-1)}}
