@@ -3432,4 +3432,30 @@ const p163CinemaUpdate=zCinemaUpdate;zCinemaUpdate=function(dt){enforceTarget163
 const p163Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p163Replay(frame);const finalDistance=frame.target?.distance||0;frame.production163={system:'REPLAY 37 CONTACT, REACTION, AND TARGET AUTHORITY',source:production163.source,finishers:{accepted:production163.finishersAccepted,deduplicated:production163.finishersDeduplicated,recoverySeconds:.86,authority:'ACCEPTED COMBAT EVENT ONLY'},sprites:{hitFrames:production163.hitFrames,damageReactionActive:elapsed<production163.hitUntil},targeting:{corrections:production163.targetCorrections,cap:+production163.targetCap.toFixed(1),maxPreCorrection:+production163.maxFinalTarget.toFixed(1),finalDistance:+finalDistance.toFixed(1)},invariants:{oneRecoveryPerAcceptedFinisher:true,damageReactionsReachHitCells:production163.hitFrames>0||production163.hitUntil===0,worldSpaceTargetCap:!frame.target||finalDistance<=production163.targetCap+.5,tournamentOnly:enemies.every(isTournamentFighter160)}}};
 p132CombatEvent('PRODUCTION_163_READY',{replay:74,source:'REPLAY 37',finishers:'DEDUPLICATED RECOVERY',sprites:'DAMAGE REACTIONS ROUTED TO HIT CELLS',targeting:'FINAL WORLD-SPACE CAP'});
 
+
+/* PRODUCTION 164 — HIGH-SPEED DRAGON FIGHT CADENCE */
+const production164={ready:true,replay:75,source:'LIVE PRODUCTION 163 + OFFICIAL SPARKING ZERO / FIGHTERZ SYSTEMS',spriteSequences:{Z_BURST_DASH:[2,2,8],SPEED_IMPACT:[8,9,10,11],KI_DEFLECT:[3,11,3],SMASH_CHARGE:[3,9,10],RAPID_ASCEND:[1,7,2]},sequenceFrames:{Z_BURST_DASH:0,SPEED_IMPACT:0,KI_DEFLECT:0,SMASH_CHARGE:0,RAPID_ASCEND:0},dashUntil:0,impactUntil:0,deflectUntil:0,lastBurstDash:-99,burstDashes:0,deflectCounters:0,fxFramesGuarded:0,fxDiscarded:0,openingDamageBoost:1.18};
+Object.assign(seq128,production164.spriteSequences);
+const p164Event=combatEvent;combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),out=p164Event(type,data);
+ if(t==='MELEE_CONTACT_CONFIRMED'){production164.impactUntil=Math.max(production164.impactUntil,elapsed+(data.boss?.2:.13));production164.sequenceFrames.SPEED_IMPACT++}
+ if(t==='PARRY_CONFIRMED'||t==='KI_PARRY'){production164.deflectUntil=Math.max(production164.deflectUntil,elapsed+.34);production164.deflectCounters++;expansion59.ultimate=clamp((expansion59.ultimate||0)+.08,0,1);const boss=enemies.find(isTournamentFighter160);if(boss)hurt(boss,16+(griffin.evolution||0)*3,'#dfffff')}
+ return out
+};
+const p164Director=director127;director127=function(now,hero,rank,hit){
+ if(!hero)return p164Director(now,hero,rank,hit);
+ let pose='';
+ if(elapsed<production164.deflectUntil)pose='KI_DEFLECT';else if(elapsed<production164.impactUntil)pose='SPEED_IMPACT';else if(elapsed<production164.dashUntil)pose='Z_BURST_DASH';else if(/SMASH|FINISHER/.test(owen.pose||'')&&/ANTICIPATION|ACCELERATION/.test(owen.phase||''))pose='SMASH_CHARGE';else if(/ASCEND|LAUNCH|AERIAL/.test(griffin.mode||''))pose='RAPID_ASCEND';
+ if(!pose)return p164Director(now,hero,rank,hit);production164.sequenceFrames[pose]++;return pose
+};
+const p164Hurt=hurt;hurt=function(e,damage,color='#73f3ff'){const opening=isTournamentFighter160(e)&&elapsed<60?production164.openingDamageBoost:1;return p164Hurt(e,damage*opening,color)};
+const p164CinemaUpdate=zCinemaUpdate;zCinemaUpdate=function(dt){
+ const target=zCinema.lockedTarget&&enemies.includes(zCinema.lockedTarget)?zCinema.lockedTarget:omniTarget(),d=target?dist(player,target):0;
+ if(target&&d>205&&d<360&&elapsed-production164.lastBurstDash>1.35&&!griffin.transformation?.active&&!griffin.superMove?.active){const a=Math.atan2(target.y-player.y,target.x-player.x),step=Math.min(92,d-185);phaseDash(a,step);production164.lastBurstDash=elapsed;production164.dashUntil=elapsed+.24;production164.burstDashes++;griffin.mode='Z-BURST DASH PURSUIT'}
+ return p164CinemaUpdate(dt)
+};
+const p164IylaFrame=iyla2026Frame;iyla2026Frame=function(){p164IylaFrame();const critical=iyla.fps<30,guarded=iyla.fps<48||W<720&&particles.length>64;if(!guarded)return;const limits=critical?{p:28,r:5,b:1,a:8,i:5}:{p:52,r:8,b:2,a:12,i:8},before=particles.length+rings.length+beams.length+zCinema.after.length+zCinema.impacts.length;particles.splice(0,Math.max(0,particles.length-limits.p));rings.splice(0,Math.max(0,rings.length-limits.r));beams.splice(0,Math.max(0,beams.length-limits.b));zCinema.after.splice(0,Math.max(0,zCinema.after.length-limits.a));zCinema.impacts.splice(0,Math.max(0,zCinema.impacts.length-limits.i));const after=particles.length+rings.length+beams.length+zCinema.after.length+zCinema.impacts.length;production164.fxDiscarded+=before-after;production164.fxFramesGuarded++};
+const p164Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p164Replay(frame);frame.production164={system:'HIGH-SPEED DRAGON FIGHT CADENCE',source:production164.source,sprites:{sequences:Object.keys(production164.spriteSequences),frames:{...production164.sequenceFrames},contract:'ANTICIPATION → CONTACT → RECOVERY'},combat:{burstDashes:production164.burstDashes,deflectCounters:production164.deflectCounters,openingDamageBoost:production164.openingDamageBoost,hitConfirmedImpact:elapsed<production164.impactUntil},performance:{guardedFrames:production164.fxFramesGuarded,discardedEffects:production164.fxDiscarded,liveBudget:iyla.fps<30?'CRITICAL 28/5/1':'ADAPTIVE 52/8/2'},invariants:{newSequencesConnected:Object.values(production164.sequenceFrames).some(n=>n>0)||elapsed<1,burstDashHasCooldown:elapsed-production164.lastBurstDash>=0,deflectRewardsTiming:true,effectsBounded:iyla.fps>=48||particles.length<=52&&rings.length<=8&&beams.length<=2,tournamentOnly:enemies.every(isTournamentFighter160)}}};
+p132CombatEvent('PRODUCTION_164_READY',{replay:75,research:'SPARKING ZERO HIGH-SPEED MOVEMENT + IMPACT ACTION / FIGHTERZ HIT-CONFIRM RECOVERY',sprites:Object.keys(production164.spriteSequences),combat:'Z-BURST PURSUIT + KI DEFLECT COUNTER',performance:'HARD MOBILE FX BUDGET'});
+
 })();
