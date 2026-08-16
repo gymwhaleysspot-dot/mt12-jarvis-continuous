@@ -1,0 +1,10 @@
+/* PRODUCTION 197 — replay-42 combat-contact refinement. Original characters/assets/dialogue only. */
+const production197={name:'SURVIVOR PRODUCTION 197',source:'REPLAY 42',principles:['CONTACT BEFORE VFX','RUSH CHAIN FOLLOW THROUGH','BLAST IMPACT AT DEFENDER','EARNED TRANSFORMATION TURNING POINT','RECOVERY BEFORE RE-ENGAGE'],replay42:{seconds:66,kills:2,forms:2,owenAttempts:67,owenHits:65,owenWhiffs:1,minimumFps:21,stalls:1},impactContacts:0,transformBeats:0,invariants:{impactRequiresContact:true,blastEndpointDefenderBound:true,transformationCannotSpam:true,recoveryIsReadable:true,oneVisible2DStage:true}};
+const p197ImpactTypes=new Set(['MELEE_CONTACT_CONFIRMED','DAMAGE_CONFIRMED','SUPER_MOVE_IMPACT','RIVAL_SUPER_IMPACT','LIRA_SUPER_IMPACT','FINISHER_CONFIRMED','ZENITH_CLASH_RESOLVED','KI_BLAST_CONTACT','BEAM_CONTACT','LIGHTNING_CONTACT']);
+const p197TransformTypes=new Set(['TRANSFORMATION_TRIGGERED','RIVAL_TRANSFORMATION','LIRA_FORM_SWITCH']);
+let p197LastImpact=-99,p197LastTransform=-99;
+function p197TargetPoint(e){const id=e?.targetId||griffin?.target?.id||griffin?.boss?.id,a=enemies.find(v=>v&&v.id===id)||griffin?.boss;return a&&Number.isFinite(a.x)&&Number.isFinite(a.y)?{x:a.x,y:a.y}:null}
+function p197ContactBurst(e){if(elapsed-p197LastImpact<.045)return;const p=p197TargetPoint(e);if(!p)return;p197LastImpact=elapsed;production197.impactContacts++;rings.push({x:p.x,y:p.y,r:8,max:58,life:.24});particles.push({x:p.x,y:p.y,vx:0,vy:0,life:.16,size:18,kind:'CONTACT_FLASH'});ultimateTone(e?.type==='FINISHER_CONFIRMED'?92:185,.07)}
+function p197TransformBeat(){if(elapsed-p197LastTransform<1.15)return;p197LastTransform=elapsed;production197.transformBeats++;iyla.intensity=1;iyla.shake=Math.max(iyla.shake||0,.7);ultimateTone(132,.18)}
+const p197CombatEvent=combatEvent;combatEvent=function(type,data={}){const e=p197CombatEvent(type,data);if(p197ImpactTypes.has(type))p197ContactBurst(e);if(p197TransformTypes.has(type))p197TransformBeat();return e};
+combatEvent('PRODUCTION_197_READY',{replay:42,contactAuthority:true,dragonCombatResearch:true});
