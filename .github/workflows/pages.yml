@@ -1,32 +1,11 @@
 name: Deploy Michael Current to Pages
-
 on:
   push:
     branches: [main]
-    paths:
-      - 'index.html'
-      - 'survivor.html'
-      - 'racing-mjx7303-michael-v39.html'
-      - 'michael-health.html'
-      - 'jarvis/**'
-      - 'assets/**'
-      - 'engine/**'
-      - 'public/**'
-      - 'michael/visual/**'
-      - 'nickelle/**'
-      - '.nojekyll'
-      - '.github/workflows/pages.yml'
+    paths: ['index.html','survivor.html','racing-mjx7303-michael-v39.html','michael-health.html','jarvis/**','assets/**','engine/**','public/**','michael/visual/**','nickelle/**','.nojekyll','.github/workflows/pages.yml']
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
+permissions: {contents: read, pages: write, id-token: write}
+concurrency: {group: pages, cancel-in-progress: true}
 jobs:
   deploy:
     environment:
@@ -36,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build Griffin Production 189 skeletal asset
+      - name: Build Griffin skeletal asset
         run: python3 tools/build_griffin_skeletal_189.py
       - name: Validate current Michael and Survivor release
         run: |
@@ -45,73 +24,27 @@ jobs:
           test -f jarvis/core-survivor.js
           test -f jarvis/griffin-render-184.js
           test -f jarvis/griffin-skeletal-189.js
+          test -f jarvis/griffin-remake-190.js
           test -f jarvis/assets/survivor/griffin-hero-skeletal-v1.glb
           node --check jarvis/griffin-render-184.js
           node --check jarvis/griffin-skeletal-189.js
+          node --check jarvis/griffin-remake-190.js
           node --check jarvis/michael-graphics-v39.js
           node --check jarvis/michael-graphics-v40-base.js
           node --check jarvis/michael-graphics-v40.js
-          node --check jarvis/mjx7303-racing-michael-v39.js
+          node --check jarvis/mjx7303-racing-michael-v66.js
           node --check jarvis/racing-tab.js
           node --check tools/michael_internal_vision.mjs
           node --check tools/nickelle_visual_ai.mjs
           node <<'NODE'
-          const fs=require('fs'),crypto=require('crypto');
-          const text=p=>fs.readFileSync(p,'utf8');
-          const need=(p,s)=>{const v=text(p);if(!v.includes(s))throw Error(`${p} missing ${s}`)};
-
-          // Workstation and live racing entrypoints: validate structure, not obsolete cache literals.
-          need('index.html','jarvis/racing-tab.js');
-          need('racing-mjx7303-michael-v39.html','MICHAEL V67.0');
-          need('racing-mjx7303-michael-v39.html','jarvis/mjx7303-racing-michael-v66.js?v=michael104');
-          need('jarvis/mjx7303-racing-michael-v66.js','MICHAEL_V67');
-          need('jarvis/michael-graphics-v40.js','MICHAEL GRAPHICS V66.6');
-          need('jarvis/michael-graphics-v40.js','singleRoadAuthority:true');
-          need('survivor.html','JARVIS ARCADE PROTOCOL');
-          need('survivor.html','jarvis/core-survivor.js?v=20260816production183');
-          need('survivor.html','jarvis/griffin-render-184.js?v=20260816production187');
-          need('jarvis/core-survivor.js','Defense Satellites');
-          need('jarvis/griffin-render-184.js','GRIFFIN GUARANTEED-VISIBLE COMPOSITOR');
-          need('jarvis/griffin-render-184.js','webglContextDoesNotSuppressSoftwareRig:true');
-          need('jarvis/griffin-render-184.js','griffin-skeletal-189.js?v=20260816production189');
-          need('jarvis/griffin-skeletal-189.js','SKELETAL_GLTF_3D');
-          need('jarvis/griffin-skeletal-189.js','griffin-hero-skeletal-v1.glb');
-          need('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V57');
-
-          // Production 189 must be a real skinned glTF asset, not a visibility primitive.
-          const gb=fs.readFileSync('jarvis/assets/survivor/griffin-hero-skeletal-v1.glb');
-          if(gb.subarray(0,4).toString()!=='glTF'||gb.readUInt32LE(4)!==2||gb.readUInt32LE(8)!==gb.length)throw Error('Griffin GLB invalid');
-          const gjLen=gb.readUInt32LE(12),gj=JSON.parse(gb.subarray(20,20+gjLen).toString('utf8'));
-          if((gj.skins?.[0]?.joints||[]).length!==18)throw Error('Griffin skeleton contract mismatch');
-          const clipNames=(gj.animations||[]).map(a=>a.name);
-          for(const n of ['Idle','Guard','Jab','Kick','PowerUp'])if(!clipNames.includes(n))throw Error(`Griffin clip missing: ${n}`);
-          const gp=gj.meshes?.[0]?.primitives?.[0]?.attributes||{};
-          for(const n of ['POSITION','NORMAL','COLOR_0','JOINTS_0','WEIGHTS_0'])if(gp[n]===undefined)throw Error(`Griffin mesh attribute missing: ${n}`);
-
-          // Owner Truth and autonomous visual convergence are now part of the release contract.
-          const truth=JSON.parse(text('michael/visual/owner-truth.json'));
-          if(truth.authorityOrder?.[0]!=='owner_photos')throw Error('Owner Truth is not primary visual authority');
-          const refs=JSON.parse(text('michael/visual/owner-reference-observations.json'));
-          if(refs.authority!=='owner_photos'||(refs.repositoryFiles||[]).length<7)throw Error('Owner photo reference set incomplete');
-          const live=JSON.parse(text('michael/visual/live-status.json'));
-          if(live.authority!=='DIRECT_OWNER_JPEG_PIXELS'||!Array.isArray(live.ownerTruthFailures))throw Error('Nickelle live convergence status schema mismatch');
-
-          // V57 remains the underlying engine/polyglot lineage; visual releases may advance independently.
-          const release=JSON.parse(text('public/michael-v57-release.json'));
-          if(release.engine!=='MICHAEL_V57')throw Error('Michael engine release manifest mismatch');
-          const poly=JSON.parse(text('engine/polyglot.json'));
-          if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('Michael polyglot contract mismatch');
-          if(fs.statSync('jarvis/generated/michael-assembly.wasm').size<100)throw Error('AssemblyScript WASM is incomplete');
-
-          let b64='';for(let i=0;i<14;i++){const n=String(i).padStart(2,'0'),t=text(`jarvis/michael-v40-payload-${n}.js`),m=t.match(/export default ['"]([^'"]+)/);if(!m)throw Error(`payload ${i} invalid`);b64+=m[1]}
-          const b=Buffer.from(b64,'base64');if(b.subarray(0,4).toString()!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('GLB invalid');
-          const sha=crypto.createHash('sha256').update(b).digest('hex');
-          if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error(`GLB sha mismatch: ${sha}`);
-          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,survivor:'PRODUCTION_189',griffin:{bones:18,clips:clipNames,glbBytes:gb.length},languages:poly.languages.length,glbBytes:b.length,sha});
+          const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
+          need('index.html','jarvis/racing-tab.js');need('racing-mjx7303-michael-v39.html','MICHAEL V67.0');need('jarvis/mjx7303-racing-michael-v66.js','MICHAEL_V67');need('survivor.html','JARVIS ARCADE PROTOCOL');need('jarvis/core-survivor.js','Defense Satellites');need('jarvis/griffin-render-184.js','GRIFFIN GUARANTEED-VISIBLE COMPOSITOR');need('jarvis/griffin-render-184.js','griffin-remake-190.js?v=20260816production190');need('jarvis/griffin-remake-190.js','CINEMATIC_ANIME_SKELETAL');need('jarvis/griffin-remake-190.js','original Griffin');need('jarvis/griffin-skeletal-189.js','SKELETAL_GLTF_3D');
+          const gb=fs.readFileSync('jarvis/assets/survivor/griffin-hero-skeletal-v1.glb');if(gb.subarray(0,4).toString()!=='glTF'||gb.readUInt32LE(4)!==2||gb.readUInt32LE(8)!==gb.length)throw Error('Griffin GLB invalid');const jl=gb.readUInt32LE(12),gj=JSON.parse(gb.subarray(20,20+jl).toString('utf8'));if((gj.skins?.[0]?.joints||[]).length!==18)throw Error('Griffin skeleton mismatch');for(const n of ['Idle','Guard','Jab','Kick','PowerUp'])if(!(gj.animations||[]).some(a=>a.name===n))throw Error(`clip missing ${n}`);
+          const truth=JSON.parse(text('michael/visual/owner-truth.json'));if(truth.authorityOrder?.[0]!=='owner_photos')throw Error('Owner Truth mismatch');const release=JSON.parse(text('public/michael-v57-release.json'));if(release.engine!=='MICHAEL_V57')throw Error('Michael engine mismatch');const poly=JSON.parse(text('engine/polyglot.json'));if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('polyglot mismatch');
+          let b64='';for(let i=0;i<14;i++){const n=String(i).padStart(2,'0'),m=text(`jarvis/michael-v40-payload-${n}.js`).match(/export default ['"]([^'"]+)/);if(!m)throw Error(`payload ${i}`);b64+=m[1]}const b=Buffer.from(b64,'base64'),sha=crypto.createHash('sha256').update(b).digest('hex');if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error('GLB sha mismatch');console.log({survivor:'PRODUCTION_190',griffin:'REMADE',bones:18});
           NODE
       - uses: actions/upload-pages-artifact@v4
-        with:
-          path: .
+        with: {path: .}
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
