@@ -1,61 +1,31 @@
-/* Production 187 — Griffin DOM/SVG visibility renderer; independent of WebGL/canvas engine */
+/* Production 188 — cinematic illustrated Griffin fighter; reliable DOM/SVG mobile renderer */
 (()=>{
 'use strict';
 const LEGACY_CONTRACT={name:'GRIFFIN GUARANTEED-VISIBLE COMPOSITOR',webglContextDoesNotSuppressSoftwareRig:true};
-const state={ready:true,replay:97,frames:0,visibleFrames:0,mode:'DOM_SVG_2_5D',source:'LIVE REPORT: 3D ENGINE PATH STILL INVISIBLE; MOVE GRIFFIN OUTSIDE GPU/CANVAS STACK'};
-const style=document.createElement('style');
-style.textContent=`
-#griffin-dom-187{position:fixed;left:42%;bottom:15%;width:clamp(128px,18vw,210px);height:auto;z-index:4;pointer-events:none;overflow:visible;filter:drop-shadow(0 15px 10px #0009);transform-origin:50% 100%;will-change:transform,opacity}
-#griffin-dom-187 .aura{transform-origin:75px 118px;animation:g187aura 1.25s ease-in-out infinite alternate}
-#griffin-dom-187 .body{transform-origin:75px 188px;animation:g187bob .82s ease-in-out infinite alternate}
-#griffin-dom-187 .arm-r{transform-origin:91px 83px;animation:g187punch 1.65s ease-in-out infinite}
-#griffin-dom-187 .arm-l{transform-origin:58px 84px;animation:g187guard 1.65s ease-in-out infinite}
-#griffin-dom-187 .leg-l{transform-origin:68px 139px;animation:g187step .82s ease-in-out infinite alternate}
-#griffin-dom-187 .leg-r{transform-origin:82px 139px;animation:g187step .82s ease-in-out infinite alternate-reverse}
-body .hud{z-index:6!important}
-@keyframes g187aura{from{opacity:.36;transform:scale(.94)}to{opacity:.72;transform:scale(1.06)}}
-@keyframes g187bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
-@keyframes g187punch{0%,55%,100%{transform:rotate(3deg)}72%{transform:rotate(-24deg) translate(16px,-4px)}}
-@keyframes g187guard{0%,55%,100%{transform:rotate(-4deg)}72%{transform:rotate(14deg) translate(3px,-5px)}}
-@keyframes g187step{from{transform:rotate(-2deg)}to{transform:rotate(3deg)}}
-@media(max-width:720px){#griffin-dom-187{left:43%;bottom:17%;width:clamp(145px,34vw,190px)}}`;
-document.head.appendChild(style);
-const NS='http://www.w3.org/2000/svg';
-const svg=document.createElementNS(NS,'svg');
-svg.id='griffin-dom-187';svg.setAttribute('viewBox','0 0 150 220');svg.setAttribute('aria-label','Griffin fighter');
-svg.innerHTML=`<defs>
-<radialGradient id="g187Aura"><stop offset="0" stop-color="#e9fbff" stop-opacity=".36"/><stop offset=".42" stop-color="#59dfff" stop-opacity=".28"/><stop offset="1" stop-color="#159bff" stop-opacity="0"/></radialGradient>
-<linearGradient id="g187Skin" x1="0" x2="1"><stop stop-color="#8b4f39"/><stop offset=".42" stop-color="#f1b08f"/><stop offset=".72" stop-color="#ffd4b7"/><stop offset="1" stop-color="#6f382b"/></linearGradient>
-<linearGradient id="g187Blue" x1="0" x2="1"><stop stop-color="#102746"/><stop offset=".45" stop-color="#317bb5"/><stop offset=".72" stop-color="#4aa2dc"/><stop offset="1" stop-color="#0c1d36"/></linearGradient>
-<linearGradient id="g187Dark" x1="0" x2="1"><stop stop-color="#09162a"/><stop offset=".5" stop-color="#244d7d"/><stop offset="1" stop-color="#07101f"/></linearGradient>
-<linearGradient id="g187Orange" x1="0" x2="1"><stop stop-color="#8d2f13"/><stop offset=".5" stop-color="#ff8a35"/><stop offset="1" stop-color="#7d260e"/></linearGradient>
-</defs>
-<ellipse class="aura" cx="75" cy="116" rx="69" ry="101" fill="url(#g187Aura)"/>
-<ellipse cx="75" cy="206" rx="42" ry="9" fill="#000" opacity=".42"/>
+const state={ready:true,replay:98,frames:0,visibleFrames:0,mode:'DOM_SVG_CINEMATIC_FIGHTER',source:'REPLAY 41 + MOBILE CAPTURE: match authored rival fidelity without fragile GPU skinning'};
+const style=document.createElement('style');style.textContent=`#griffin-dom-188{position:fixed;left:42%;bottom:14%;width:clamp(155px,22vw,245px);height:auto;z-index:4;pointer-events:none;overflow:visible;filter:drop-shadow(0 18px 14px #000b);transform-origin:50% 100%;will-change:transform,opacity}#griffin-dom-188 .aura{transform-origin:110px 145px;animation:g188a 1.15s ease-in-out infinite alternate}#griffin-dom-188 .body{transform-origin:110px 270px;animation:g188b .9s ease-in-out infinite alternate}#griffin-dom-188 .forearm{transform-origin:158px 135px;animation:g188p 1.7s cubic-bezier(.2,.7,.3,1) infinite}#griffin-dom-188 .hairglow{animation:g188h .72s ease-in-out infinite alternate}body .hud{z-index:6!important}@keyframes g188a{from{opacity:.3;transform:scale(.94)}to{opacity:.7;transform:scale(1.06)}}@keyframes g188b{from{transform:translateY(1px) rotate(-.4deg)}to{transform:translateY(-4px) rotate(.4deg)}}@keyframes g188p{0%,58%,100%{transform:rotate(0)}72%{transform:rotate(-17deg) translate(10px,-7px)}}@keyframes g188h{from{opacity:.28}to{opacity:.7}}@media(max-width:720px){#griffin-dom-188{left:42%;bottom:15.5%;width:clamp(170px,42vw,220px)}}`;document.head.appendChild(style);
+const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.id='griffin-dom-188';svg.setAttribute('viewBox','0 0 220 310');svg.setAttribute('aria-label','Griffin cinematic fighter');svg.innerHTML=`<defs>
+<radialGradient id="a"><stop stop-color="#efffff" stop-opacity=".55"/><stop offset=".3" stop-color="#6de8ff" stop-opacity=".34"/><stop offset=".7" stop-color="#1689ff" stop-opacity=".13"/><stop offset="1" stop-color="#2e53ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="skin" x1="0" x2="1"><stop stop-color="#542c27"/><stop offset=".2" stop-color="#b7654f"/><stop offset=".48" stop-color="#f3b28d"/><stop offset=".7" stop-color="#ffd0aa"/><stop offset="1" stop-color="#6b382f"/></linearGradient>
+<linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07162b"/><stop offset=".32" stop-color="#124d7b"/><stop offset=".58" stop-color="#149ad0"/><stop offset=".77" stop-color="#0b4775"/><stop offset="1" stop-color="#04101f"/></linearGradient>
+<linearGradient id="navy"><stop stop-color="#020817"/><stop offset=".48" stop-color="#173f69"/><stop offset=".72" stop-color="#246c9c"/><stop offset="1" stop-color="#020817"/></linearGradient>
+<linearGradient id="orange"><stop stop-color="#6d1d08"/><stop offset=".42" stop-color="#ff6d16"/><stop offset=".65" stop-color="#ffb14d"/><stop offset="1" stop-color="#711d08"/></linearGradient>
+<linearGradient id="hair" x1="0" x2="1"><stop stop-color="#030713"/><stop offset=".45" stop-color="#14283d"/><stop offset=".7" stop-color="#315977"/><stop offset="1" stop-color="#02040b"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="5"/></filter><filter id="rim"><feGaussianBlur stdDeviation="2"/></filter></defs>
+<ellipse class="aura" cx="110" cy="151" rx="101" ry="143" fill="url(#a)"/><path class="hairglow" d="M63 85L48 34 78 56 78 15 101 51 119 5 128 51 158 20 151 65 181 49 160 95Z" fill="#57ddff" opacity=".25" filter="url(#soft)"/><ellipse cx="111" cy="289" rx="58" ry="12" fill="#000" opacity=".48" filter="url(#soft)"/>
 <g class="body">
-<g class="leg-l"><path d="M70 137 C61 151 57 172 52 194" stroke="url(#g187Dark)" stroke-width="18" stroke-linecap="round"/><path d="M52 193 L40 204" stroke="#0b172b" stroke-width="13" stroke-linecap="round"/></g>
-<g class="leg-r"><path d="M80 137 C90 153 94 173 99 194" stroke="url(#g187Dark)" stroke-width="18" stroke-linecap="round"/><path d="M99 193 L112 204" stroke="#0b172b" stroke-width="13" stroke-linecap="round"/></g>
-<path d="M61 95 C58 112 61 132 68 145 L82 145 C90 129 92 109 88 94 Z" fill="url(#g187Blue)" stroke="#75c9f5" stroke-opacity=".18"/>
-<path d="M57 82 C59 64 91 62 94 83 L88 112 C82 120 67 120 61 112 Z" fill="url(#g187Blue)"/>
-<path d="M62 106 L88 106 L94 115 L56 115 Z" fill="url(#g187Orange)"/>
-<g class="arm-l"><path d="M61 82 C46 87 41 100 37 117" stroke="url(#g187Skin)" stroke-width="13" stroke-linecap="round"/><path d="M37 117 L33 136" stroke="url(#g187Blue)" stroke-width="11" stroke-linecap="round"/><circle cx="32" cy="141" r="7" fill="url(#g187Skin)"/></g>
-<g class="arm-r"><path d="M91 83 C106 89 111 101 116 115" stroke="url(#g187Skin)" stroke-width="13" stroke-linecap="round"/><path d="M116 115 L124 132" stroke="url(#g187Blue)" stroke-width="11" stroke-linecap="round"/><circle cx="127" cy="137" r="7" fill="url(#g187Skin)"/></g>
-<path d="M61 60 C61 43 70 34 83 35 C98 37 103 51 97 66 C91 78 67 77 61 60Z" fill="url(#g187Skin)"/>
-<path d="M58 45 L52 22 L67 34 L68 13 L80 32 L91 8 L93 35 L109 20 L101 50 C92 42 70 40 58 45Z" fill="#101827" stroke="#426084" stroke-width="1"/>
-<path d="M70 58 Q75 54 80 58" stroke="#2b1a18" stroke-width="2" fill="none"/><path d="M84 57 Q89 53 94 57" stroke="#2b1a18" stroke-width="2" fill="none"/>
-<ellipse cx="77" cy="59" rx="2.4" ry="1.2" fill="#dffaff"/><ellipse cx="91" cy="58" rx="2.4" ry="1.2" fill="#dffaff"/>
-<path d="M80 69 Q86 72 92 68" stroke="#6b3026" stroke-width="2" fill="none"/>
-<path d="M67 80 Q75 89 83 80" fill="#f1b08f" opacity=".55"/>
-</g>`;
-document.body.appendChild(svg);
-function active(){
- const start=document.getElementById('start'),over=document.getElementById('over');
- const startOff=!start||start.hidden||getComputedStyle(start).display==='none';
- const overOff=!over||over.hidden||getComputedStyle(over).display==='none';
- return startOff&&overOff;
-}
-function frame(t){state.frames++;const on=active();svg.style.opacity=on?'1':'0';if(on){state.visibleFrames++;const mobile=innerWidth<720;const sway=Math.sin(t*.0013)*3;svg.style.transform=`translateX(${sway}px) perspective(600px) rotateY(${mobile?-7:-10}deg) rotateX(2deg)`;}requestAnimationFrame(frame)}
-requestAnimationFrame(frame);
-window.__griffinProduction187={state,legacyContract:LEGACY_CONTRACT,element:svg};
-console.info('PRODUCTION_187_READY',state.mode,state.source,LEGACY_CONTRACT);
+<!-- rear limbs --> <path d="M97 205 C78 222 72 251 68 278" stroke="url(#navy)" stroke-width="28" stroke-linecap="round"/><path d="M68 276 C59 285 49 291 40 294" stroke="#030a17" stroke-width="19" stroke-linecap="round"/><path d="M122 204 C140 224 146 250 153 276" stroke="url(#navy)" stroke-width="29" stroke-linecap="round"/><path d="M153 275 C164 284 174 289 184 291" stroke="#030a17" stroke-width="19" stroke-linecap="round"/>
+<!-- torso silhouette --> <path d="M76 126 C79 107 91 98 109 97 C130 97 144 108 148 129 L140 191 C134 208 87 209 79 191Z" fill="url(#blue)" stroke="#62dfff" stroke-opacity=".24" stroke-width="2"/><path d="M82 124 Q110 145 143 122 L139 145 Q110 158 79 143Z" fill="#07192b" opacity=".72"/><path d="M79 184 Q110 194 141 182 L150 199 Q110 213 70 198Z" fill="url(#orange)"/>
+<!-- left arm, foreshortened --> <path d="M80 126 C58 132 47 151 42 176" stroke="url(#skin)" stroke-width="21" stroke-linecap="round"/><path d="M43 174 C39 191 41 205 47 218" stroke="url(#navy)" stroke-width="17" stroke-linecap="round"/><path d="M46 216 C41 222 42 234 51 237 C61 239 67 229 61 221Z" fill="url(#skin)"/>
+<!-- right arm with armor and fist --> <path d="M143 126 C163 133 172 148 177 165" stroke="url(#skin)" stroke-width="22" stroke-linecap="round"/><g class="forearm"><path d="M176 163 C184 180 187 194 188 207" stroke="url(#navy)" stroke-width="18" stroke-linecap="round"/><path d="M181 204 C180 214 187 222 197 219 C206 216 206 204 198 199Z" fill="url(#skin)"/></g>
+<!-- neck/head --> <path d="M96 108 L98 91 L124 91 L126 108Z" fill="url(#skin)"/><path d="M77 74 C76 43 91 29 113 30 C139 31 153 52 144 78 C137 101 88 101 77 74Z" fill="url(#skin)" stroke="#3a211f" stroke-width="1.5"/>
+<!-- ears --> <ellipse cx="77" cy="68" rx="7" ry="11" fill="#b66b54"/><ellipse cx="145" cy="68" rx="7" ry="11" fill="#9a5547"/>
+<!-- detailed hair --> <path d="M72 51 L56 14 L84 36 L84 2 L104 35 L121 -7 L128 36 L158 7 L149 43 L178 28 L158 65 C145 43 91 36 72 51Z" fill="url(#hair)" stroke="#4c7795" stroke-width="1.5"/><path d="M82 42 Q110 25 145 44" stroke="#74b4d4" stroke-opacity=".32" stroke-width="3" fill="none"/>
+<!-- brows eyes nose --> <path d="M88 62 Q97 56 105 61" stroke="#201313" stroke-width="3.4" fill="none"/><path d="M116 60 Q126 55 136 61" stroke="#201313" stroke-width="3.4" fill="none"/><path d="M91 65 Q98 62 104 65" stroke="#111827" stroke-width="2"/><path d="M118 64 Q126 61 133 64" stroke="#111827" stroke-width="2"/><ellipse cx="99" cy="64" rx="2.2" ry="1.5" fill="#d9fbff"/><ellipse cx="126" cy="63" rx="2.2" ry="1.5" fill="#d9fbff"/><path d="M112 65 L108 76 L115 77" stroke="#8a4b3d" stroke-width="1.6" fill="none"/><path d="M98 84 Q112 91 127 82" stroke="#5c2725" stroke-width="2.2" fill="none"/><path d="M103 84 Q112 87 121 83" stroke="#f3c5b4" stroke-width="1.4" fill="none"/>
+<!-- armor detail --> <path d="M87 132 L108 145 L132 130 L127 173 L94 173Z" fill="#0786bd" opacity=".5"/><path d="M91 136 L108 147" stroke="#8de8ff" stroke-opacity=".35"/><path d="M132 134 L112 148" stroke="#8de8ff" stroke-opacity=".25"/><path d="M86 177 Q110 185 136 175" stroke="#6bdfff" stroke-opacity=".22" stroke-width="2"/>
+<!-- cel shadow planes --> <path d="M77 73 Q89 91 104 94 Q87 96 80 82Z" fill="#532b2c" opacity=".28"/><path d="M80 129 Q94 143 96 190 L79 191Z" fill="#020b18" opacity=".36"/><path d="M122 206 Q139 229 145 263" stroke="#020916" stroke-opacity=".42" stroke-width="9" stroke-linecap="round"/>
+<!-- rim highlights --> <path d="M75 55 Q70 80 89 96" stroke="#78eaff" stroke-opacity=".34" stroke-width="2" fill="none"/><path d="M146 126 Q169 135 179 164" stroke="#7de9ff" stroke-opacity=".3" stroke-width="2" fill="none"/>
+</g>`;document.body.appendChild(svg);
+function active(){const a=document.getElementById('start'),b=document.getElementById('over');return (!a||a.hidden||getComputedStyle(a).display==='none')&&(!b||b.hidden||getComputedStyle(b).display==='none')}
+function frame(t){state.frames++;const on=active();svg.style.opacity=on?'1':'0';if(on){state.visibleFrames++;const m=innerWidth<720,sway=Math.sin(t*.0011)*2.5;svg.style.transform=`translateX(${sway}px) perspective(720px) rotateY(${m?-5:-8}deg) rotateX(1deg)`}requestAnimationFrame(frame)}requestAnimationFrame(frame);window.__griffinProduction188={state,legacyContract:LEGACY_CONTRACT,element:svg};console.info('PRODUCTION_188_READY',state.mode,state.source);
 })();
