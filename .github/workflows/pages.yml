@@ -64,10 +64,11 @@ jobs:
           need('jarvis/michael-graphics-v40.js','singleRoadAuthority:true');
           need('survivor.html','JARVIS ARCADE PROTOCOL');
           need('survivor.html','jarvis/core-survivor.js?v=20260816production183');
-          need('survivor.html','jarvis/griffin-render-184.js?v=20260816production184');
+          need('survivor.html','jarvis/griffin-render-184.js?v=20260816production187');
           need('jarvis/core-survivor.js','Defense Satellites');
           need('jarvis/griffin-render-184.js','GRIFFIN GUARANTEED-VISIBLE COMPOSITOR');
           need('jarvis/griffin-render-184.js','webglContextDoesNotSuppressSoftwareRig:true');
+          need('jarvis/griffin-render-184.js','DOM_SVG_2_5D');
           need('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V57');
 
           // Owner Truth and autonomous visual convergence are now part of the release contract.
@@ -89,7 +90,7 @@ jobs:
           const b=Buffer.from(b64,'base64');if(b.subarray(0,4).toString()!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('GLB invalid');
           const sha=crypto.createHash('sha256').update(b).digest('hex');
           if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error(`GLB sha mismatch: ${sha}`);
-          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,survivor:'PRODUCTION_184',languages:poly.languages.length,glbBytes:b.length,sha});
+          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,survivor:'PRODUCTION_187',languages:poly.languages.length,glbBytes:b.length,sha});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with:
