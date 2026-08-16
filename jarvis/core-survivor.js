@@ -3635,4 +3635,10 @@ transitionOverlay176=function(g){const fx=production176.current;if(!fx||performa
 const p177Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p177Replay(frame);frame.production177={system:'COHESIVE FIGHTER-OWNED VFX DIRECTION',source:production177.source,live:{frames:production177.frames,ownerDraws:{...production177.ownerDraws},routineDraws:production177.routineDraws,cinematicDraws:production177.cinematicDraws,sharedIllustrationDraws:production177.sharedIllustrationDraws,scaleClamps:production177.scaleClamps,missingOwner:production177.missingOwner},invariants:{routineTransitionsUseActiveFighterAtlas:true,noRockDebrisIllustrations:true,noGrayMaterialSprites:true,noAlphaFringeAtlasDraws:true,ordinaryCountersStaySmallerThanUltimates:true,cinematicEffectsRemainFighterColored:true,characterAndArenaArtRemainUnchanged:true,hyperionDecisionAIStillAuthoritative:true}}};
 p132CombatEvent('PRODUCTION_177_READY',{replay:88,diagnosis:['SHARED TRANSITION ART USED PAINTERLY ROCK/GRAY MATERIAL','ROUTINE COUNTERS RENDERED AT ULTIMATE SCALE','SHARED CYAN/GOLD FOUGHT FIGHTER COLOR OWNERSHIP'],fix:['ROUTE ALL 21 TRANSITIONS THROUGH ACTIVE FIGHTER VFX ATLAS','CAP ROUTINE SCALE AT 18–22% VIEWPORT','CAP CINEMATIC SCALE AT 34% VIEWPORT','LOWER SCREEN-BLEND OPACITY','PRESERVE HYPERION AI + PRODUCTION 175 ARENAS']});
 
+/* PRODUCTION 178 — REMOVE LEGACY FULL-SCREEN ROUTINE IMPACT STAR */
+const production178={ready:true,replay:89,legacyStarsSuppressed:0,source:'LIVE PRODUCTION 177 POWER SMASH FRAME AUDIT'};
+accent137=function(){production178.legacyStarsSuppressed++};
+const p178Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p178Replay(frame);frame.production178={system:'LEGACY ROUTINE IMPACT STAR QUARANTINE',source:production178.source,suppressed:production178.legacyStarsSuppressed,invariants:{noFullScreenWhiteStarOnPowerSmash:true,routineImpactUsesFighterOwnedVfx:true,cinematicClashRendererUnaffected:true}}};
+p132CombatEvent('PRODUCTION_178_READY',{replay:89,fix:'DISABLED PRODUCTION 137 EIGHT-RAY FULL-SCREEN WHITE IMPACT STAR',replacement:'PRODUCTION 177 COMPACT FIGHTER-OWNED IMPACT CELL'});
+
 })();
