@@ -16,6 +16,7 @@ on:
       - 'tools/build-survivor-production198.mjs'
       - 'tools/build-survivor-production199.mjs'
       - 'tools/build-survivor-production200.mjs'
+      - 'tools/build-survivor-production201.mjs'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -28,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 200
+      - name: Build and validate Survivor Production 201
         run: |
           set -Eeuo pipefail
           test -f survivor.html
@@ -38,25 +39,28 @@ jobs:
           test -f jarvis/production198-full-fight-pass.inc.js
           test -f jarvis/production199-replay43-closures.inc.js
           test -f jarvis/production200-replay44-authority.inc.js
-          test -f tools/build-survivor-production200.mjs
+          test -f jarvis/production201-replay46-total-repair.inc.js
+          test -f tools/build-survivor-production201.mjs
           node --check jarvis/production196-contact-choreography.inc.js
           node --check "$(compgen -G 'jarvis/production197*.inc.js' | head -1)"
           node --check jarvis/production198-full-fight-pass.inc.js
           node --check jarvis/production199-replay43-closures.inc.js
           node --check jarvis/production200-replay44-authority.inc.js
-          node --check tools/build-survivor-production200.mjs
-          node tools/build-survivor-production200.mjs
+          node --check jarvis/production201-replay46-total-repair.inc.js
+          node --check tools/build-survivor-production201.mjs
+          node tools/build-survivor-production201.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
-          need('survivor.html','jarvis/core-survivor.js?v=20260816production200');
-          for(const stale of ['production198','production199'])if(text('survivor.html').includes(`core-survivor.js?v=20260816${stale}`))throw Error(`Stale ${stale} cache key remains`);
-          for(const marker of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY'])need('jarvis/core-survivor.js',marker);
+          need('survivor.html','jarvis/core-survivor.js?v=20260816production201');
+          for(const stale of ['production198','production199','production200'])if(text('survivor.html').includes(`core-survivor.js?v=20260816${stale}`))throw Error(`Stale ${stale} cache key remains`);
+          for(const marker of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY'])need('jarvis/core-survivor.js',marker);
           for(const marker of [
-            'p200ForceForm','p200EarnedForm','transformEventsAdvanceAuthoritativeForm:','damageEventsOwnVisibleHitCell:',
-            'decorativeVfxShedsBeforeCombat:true','effectsBoundToConfirmedEvents:true','authoredSpritesOnly:true','oneVisible2DStage:true',
-            "source:'REPLAY 44'","replay:44","minimumFps:20","owenAttempts:52","owenHits:50"
+            'p201SyncForm','p201DueForm','p201DamagePose','p201Voice',
+            'liveLayerPresent:true','canonicalFormSynchronized:true','staleTransformPoseCleared:true',
+            'griffinDamageUsesAuthoredHitCells:true','targetKeptVisible:true','vfxBoundedUnderLoad:true','voiceHasFallback:true','oneVisible2DStage:true',
+            "source:'REPLAY 46'","replay:46","minimumFps:50","owenAttempts:111","owenHits:108","damageReactions:25"
           ])need('jarvis/core-survivor.js',marker);
           const html=text('survivor.html');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(html))throw Error('Standalone Griffin renderer reintroduced');
@@ -64,7 +68,7 @@ jobs:
           for(const name of assets){const p='jarvis/assets/survivor/'+name;if(!fs.existsSync(p)||fs.statSync(p).size<100000)throw Error(`Missing/undersized authored fighter asset ${p}`)}
           const vfxDir='jarvis/assets/survivor/vfx',vfx=fs.existsSync(vfxDir)?fs.readdirSync(vfxDir).filter(n=>/-energy-atlas-v1\.webp$/.test(n)):[];
           if(vfx.length<10)throw Error(`Expected ten fighter VFX atlases, found ${vfx.length}`);
-          console.log({survivor:'PRODUCTION_200',source:'REPLAY_44',transform:'AUTHORITATIVE_FORM_ADVANCE',sprites:'DAMAGE_HIT_RECOVERY_AUTHORITY',vfx:'CONFIRMED_CONTACT_BOUNDED',performance:'STALL_SHEDS_DECORATIVE_VFX',cache:'PRODUCTION_200',vfxAtlases:vfx.length,renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          console.log({survivor:'PRODUCTION_201',source:'REPLAY_46',runtime:'LIVE_LAYER_PROOF',forms:'CANONICAL_SYNC',sprites:'DAMAGE_HIT_RECOVERY_AUTHORITY',targeting:'VISIBLE_BOSS_REFRAME',vfx:'LOAD_SHEDDING_PLUS_STRUCTURE_COALESCING',voice:'QUEUE_PLUS_BROWSER_FALLBACK',cache:'PRODUCTION_201',vfxAtlases:vfx.length,renderer:'SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
