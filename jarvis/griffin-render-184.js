@@ -29,3 +29,4 @@ const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg
 function active(){const a=document.getElementById('start'),b=document.getElementById('over');return (!a||a.hidden||getComputedStyle(a).display==='none')&&(!b||b.hidden||getComputedStyle(b).display==='none')}
 function frame(t){state.frames++;const on=active();svg.style.opacity=on?'1':'0';if(on){state.visibleFrames++;const m=innerWidth<720,sway=Math.sin(t*.0011)*2.5;svg.style.transform=`translateX(${sway}px) perspective(720px) rotateY(${m?-5:-8}deg) rotateX(1deg)`}requestAnimationFrame(frame)}requestAnimationFrame(frame);window.__griffinProduction188={state,legacyContract:LEGACY_CONTRACT,element:svg};console.info('PRODUCTION_188_READY',state.mode,state.source);
 })();
+;(()=>{const s=document.createElement('script');s.src='jarvis/griffin-skeletal-189.js?v=20260816production189';s.async=false;s.dataset.griffinSkeletal='189';document.head.appendChild(s)})();
