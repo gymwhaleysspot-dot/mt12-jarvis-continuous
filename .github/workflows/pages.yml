@@ -2,7 +2,7 @@ name: Deploy Michael Current to Pages
 on:
   push:
     branches: [main]
-    paths: ['index.html','survivor.html','racing-mjx7303-michael-v39.html','michael-health.html','jarvis/**','assets/**','engine/**','public/**','michael/visual/**','nickelle/**','tools/build-survivor-production196.mjs','.nojekyll','.github/workflows/pages.yml']
+    paths: ['index.html','survivor.html','racing-mjx7303-michael-v39.html','michael-health.html','jarvis/**','assets/**','engine/**','public/**','michael/visual/**','nickelle/**','tools/build-survivor-production196.mjs','tools/build-survivor-production197.mjs','.nojekyll','.github/workflows/pages.yml']
   workflow_dispatch:
 permissions: {contents: read, pages: write, id-token: write}
 concurrency: {group: pages, cancel-in-progress: true}
@@ -13,27 +13,32 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 196
+      - name: Build and validate Survivor Production 197
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
           test -f jarvis/production196-contact-choreography.inc.js
+          test -f jarvis/production197-replay42.inc.js
           node tools/build-survivor-production196.mjs
+          node tools/build-survivor-production197.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
           need('jarvis/core-survivor.js','PRODUCTION_196_READY');
+          need('jarvis/core-survivor.js','PRODUCTION_197_READY');
           need('jarvis/core-survivor.js','KI_BLAST_CONTACT');
           need('jarvis/core-survivor.js','BEAM_CONTACT');
           need('jarvis/core-survivor.js','LIGHTNING_CONTACT');
-          need('jarvis/core-survivor.js','explosionsRequireContact:true');
-          need('jarvis/core-survivor.js','transformationsHaveStagedBeat:true');
+          need('jarvis/core-survivor.js','impactRequiresContact:true');
+          need('jarvis/core-survivor.js','blastEndpointDefenderBound:true');
+          need('jarvis/core-survivor.js','transformationCannotSpam:true');
+          need('jarvis/core-survivor.js','recoveryIsReadable:true');
           need('jarvis/core-survivor.js','proceduralCharacterOverlayRetired:true');
           need('jarvis/core-survivor.js','SINGLE VISIBLE 2D STAGE');
           const html=text('survivor.html');if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(html))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_196',combat:'CONTACT_BOUND',ki:true,beams:true,lightning:true,transformations:'STAGED',renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          console.log({survivor:'PRODUCTION_197',source:'REPLAY_42',combat:'CONTACT_BOUND',transformations:'TURNING_POINT',renderer:'SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
