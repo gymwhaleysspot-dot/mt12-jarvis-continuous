@@ -49,14 +49,22 @@ jobs:
           need('survivor.html','JARVIS ARCADE PROTOCOL');
           need('survivor.html','jarvis/core-survivor.js?v=20260816production203');
           for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY','PRODUCTION_203_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true','uniqueSpriteSourcePerOpponent:true'])need('jarvis/core-survivor.js',m);
-          const root='jarvis/assets/survivor/arenas/';
-          const arenas=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];
-          for(const n of arenas){const p=root+n;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized round arena '+n)}
+          for(const m of ['ROUND-LOCKED ARENA + AUTHORED ROSTER SPRITE AUTHORITY','allTournamentOpponentsHaveAuthoredSprites:true','allTournamentOpponentsHaveTransformationSprites:true','firstFightUsesRoundOneAssets:true','noPreviousRoundArtCarryover:true','noProceduralReplacementSprites:true','uniqueSpriteAtlasPerOpponent:true'])need('jarvis/core-survivor.js',m);
+          const root='jarvis/assets/survivor/';
+          const arenas=['lira-nexus-v1.webp','kairox-caldera-v1.webp','solenne-corona-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp','sable-eclipse-v1.webp','kraken-abyss-v1.webp'];
+          if(new Set(arenas).size!==9)throw Error('Arena mapping is not unique');
+          for(const n of arenas){const p=root+'arenas/'+n;if(!fs.existsSync(p)||fs.statSync(p).size<80000)throw Error('Missing/undersized round arena '+n)}
+          const base=['lira-atlas-v2.webp','rivals/kairox-atlas-v2.webp','rivals/solenne-atlas-v2.webp','rivals/mireya-atlas-v2.webp','rivals/zephyra-atlas-v2.webp','rivals/orun-atlas-v2.webp','rivals/mordren-atlas-v2.webp','rivals/sable-atlas-v2.webp','rivals/kraken-atlas-v2.webp'];
+          if(new Set(base).size!==9)throw Error('Base fighter atlas mapping is not unique');
+          for(const n of base){const p=root+n;if(!fs.existsSync(p)||fs.statSync(p).size<150000)throw Error('Missing/undersized authored base fighter atlas '+n)}
+          const transforms=['lira-vanguard-atlas-v2.webp','lira-empress-atlas-v3.webp','rivals/kairox-awakened-atlas-v3.webp','rivals/kairox-ultimate-atlas-v1.webp','rivals/solenne-awakened-atlas-v4.webp','rivals/solenne-ultimate-atlas-v1.webp','rivals/mireya-awakened-atlas-v3.webp','rivals/mireya-ultimate-atlas-v1.webp','rivals/zephyra-awakened-atlas-v3.webp','rivals/zephyra-ultimate-atlas-v1.webp','rivals/orun-awakened-atlas-v3.webp','rivals/orun-ultimate-atlas-v1.webp','rivals/mordren-awakened-atlas-v3.webp','rivals/mordren-ultimate-atlas-v1.webp','rivals/sable-awakened-atlas-v3.webp','rivals/sable-ultimate-atlas-v1.webp','rivals/kraken-awakened-atlas-v3.webp','rivals/kraken-ultimate-atlas-v1.webp'];
+          if(new Set(transforms).size!==18)throw Error('Transformation atlas mapping is not unique');
+          for(const n of transforms){const p=root+n;if(!fs.existsSync(p)||fs.statSync(p).size<200000)throw Error('Missing/undersized authored transformation atlas '+n)}
           const core=text('jarvis/core-survivor.js');
-          for(const n of ['LIRA','KRAKEN','KAIROX','MIREYA','ZEPHYRA','SOLENNE','SABLE','ORUN','MORDREN'])need('jarvis/core-survivor.js',`name:'${n}'`);
+          for(const id of ['LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])need('jarvis/core-survivor.js',id+':{arena:');
+          if(core.includes('p203BuildAtlas'))throw Error('Procedural Production 203 replacement sprites reintroduced');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_203',rounds:9,arenaAuthority:'UNIQUE_AUTHORED_ARENA_PER_OPPONENT',spriteAuthority:'LIRA_AUTHORED_PLUS_EIGHT_DEDICATED_RUNTIME_4X4_VECTOR_ATLASES',firstFight:'LIRA_LOCKED',renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          console.log({survivor:'PRODUCTION_203',rounds:9,arenaAuthority:'UNIQUE_AUTHORED_ARENA_PER_OPPONENT',spriteAuthority:'NINE_AUTHORED_BASE_ATLASES_PLUS_EIGHTEEN_TRANSFORM_ATLASES',firstFight:'LIRA_NEXUS_PLUS_LIRA_ATLAS',renderer:'SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
