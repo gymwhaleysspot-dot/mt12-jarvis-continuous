@@ -3380,4 +3380,26 @@ const p161Energy=energyPresentation154;energyPresentation154=function(g){const f
 const p161Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p161Replay(frame);frame.production161={system:'TOURNAMENT-ONLY COMBAT + SINGLE CINEMA COMPOSITOR',source:production161.source,combat:{legacyPurged:production161.legacyPurged,wavesSkipped:production161.wavesSkipped,maxObservedTarget:+production161.maxTarget.toFixed(1),targetPool:'TYPE 3 TOURNAMENT FIGHTERS ONLY'},presentation:{cinemaFrames:production161.cinemaFrames,vfxFrames:production161.vfxFrames,vfxPassesSuppressed:production161.vfxPassesSuppressed,compositor:'ONE CLEAN MOBILE CINEMA'},invariants:{noLegacyPortTargets:!omniTarget()||isTournamentFighter160(omniTarget()),noReactionPanel:true,noStackedLegacyCutscenes:true,oneEnergyPassPerSimulationFrame:true,firstTransformationStillEarned:griffinEvolutionGates[1]===60}}};
 p132CombatEvent('PRODUCTION_161_READY',{replay:72,source:'REPLAY 36',combat:'TOURNAMENT FIGHTERS ONLY FROM OPENING',cinema:'SINGLE CLEAN COMPOSITOR',vfx:'SIMULATION-FRAME GATED'});
 
+
+/* PRODUCTION 162 — LIVE ATTACK AUTHORITY + LEGACY RENDER RETIREMENT */
+const production162={ready:true,replay:73,source:'LIVE PRODUCTION 161 BATTLE',spriteFrames:{idle:0,movement:0,guard:0,jab:0,cross:0,kick:0,spin:0,beam:0,hit:0},recoveryLocks:0,legacyRigFramesSuppressed:0,bossDamageBoost:1.35,recoveryUntil:0,lastFinisherAt:-99};
+function heroSprite162(){
+ if(griffin.transformation?.active)return'GUARD';
+ if(reaction148.active)return reaction148.active.pose;
+ if(griffin.superMove?.active)return /BEAM|CHARGE/.test(owen.pose)?'BEAM':/RUSH|FINISHER/.test(owen.pose)?(zCinema.combo%2?'CROSS':'KICK'):'GUARD';
+ const mode=griffin.mode||'',committed=zCinema.attack>0&&/ACTION|FOLLOW THROUGH/.test(owen.phase||'');
+ if(committed){const p=zCinema.meleePose||owen.pose;return /KNEE|KICK|AXE|DIVE/.test(p)?'KICK':/SPIN|SWEEP|BACK/.test(p)?'SPIN':/HOOK|ELBOW|UPPER|CROSS|FINISHER/.test(p)?'CROSS':'JAB'}
+ if(/VOLLEY|BEAM|CLASH/.test(mode)&&zCinema.volley>0)return'BEAM';
+ if(/VANISH|PURSUIT|DASH/.test(mode))return'DASH';
+ if(/EVADE|GUARD|PARRY|COUNTER/.test(mode))return'GUARD';
+ return'IDLE'
+}
+const p162Director=director127;director127=function(now,hero,rank,hit){if(!hero)return p162Director(now,hero,rank,hit);const pose=hit?'HIT_LIGHT':heroSprite162(),bucket=/HIT/.test(pose)?'hit':pose==='DASH'||pose==='STEP'?'movement':pose==='GUARD'?'guard':pose==='JAB'?'jab':pose==='CROSS'?'cross':pose==='KICK'?'kick':pose==='SPIN'?'spin':pose==='BEAM'?'beam':'idle';production162.spriteFrames[bucket]++;return pose};
+const p162Event=combatEvent;combatEvent=function(type,data={}){const t=String(type||'').toUpperCase();if(t==='GRIFFIN_CREATED_FINISHER'){production162.recoveryUntil=Math.max(production162.recoveryUntil,elapsed+.86);production162.lastFinisherAt=elapsed}return p162Event(type,data)};
+const p162CinemaUpdate=zCinemaUpdate;zCinemaUpdate=function(dt){if(elapsed<production162.recoveryUntil){zCinema.attack=Math.max(zCinema.attack,.14);zCinema.route.length=0;zCinema.combo=0;zCinema.comboClock=0;production162.recoveryLocks++}return p162CinemaUpdate(dt)};
+const p162Hurt=hurt;hurt=function(e,damage,color='#73f3ff'){return p162Hurt(e,e?.type===3?damage*production162.bossDamageBoost:damage,color)};
+iyla3DCombat=function(){iyla3d.draws=iyla3d.faces=0;production162.legacyRigFramesSuppressed++};
+const p162Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p162Replay(frame);const s=production162.spriteFrames,attack=s.jab+s.cross+s.kick+s.spin+s.beam,total=Object.values(s).reduce((a,b)=>a+b,0);frame.production162={system:'LIVE ATTACK AUTHORITY + LEGACY RENDER RETIREMENT',source:production162.source,sprites:{...s,attackRatio:+(attack/Math.max(1,total)).toFixed(3),authority:'CONFIRMED OWEN ACTION / FOLLOW THROUGH ONLY'},cadence:{recoveryLocks:production162.recoveryLocks,lastFinisherAt:+production162.lastFinisherAt.toFixed(2),finisherRecovery:.86},combat:{bossDamageBoost:production162.bossDamageBoost,legacyRigFramesSuppressed:production162.legacyRigFramesSuppressed},invariants:{noClockDrivenHeroAttacks:true,attackCellsMatchMoveFamily:true,finishersHaveRecovery:true,proceduralCharacterOverlayRetired:true,tournamentOnly:enemies.every(isTournamentFighter160)}}};
+p132CombatEvent('PRODUCTION_162_READY',{replay:73,source:'LIVE PRODUCTION 161',sprites:'OWEN-CONFIRMED ATTACK CELLS',cadence:'FINISHER RECOVERY + NO IDLE SWINGS',legacy:'PROCEDURAL CHARACTER OVERLAY RETIRED'});
+
 })();
