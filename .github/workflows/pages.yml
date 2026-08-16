@@ -36,13 +36,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
+      - name: Build Griffin Production 189 skeletal asset
+        run: python3 tools/build_griffin_skeletal_189.py
       - name: Validate current Michael and Survivor release
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
           test -f jarvis/griffin-render-184.js
+          test -f jarvis/griffin-skeletal-189.js
+          test -f jarvis/assets/survivor/griffin-hero-skeletal-v1.glb
           node --check jarvis/griffin-render-184.js
+          node --check jarvis/griffin-skeletal-189.js
           node --check jarvis/michael-graphics-v39.js
           node --check jarvis/michael-graphics-v40-base.js
           node --check jarvis/michael-graphics-v40.js
@@ -68,8 +73,20 @@ jobs:
           need('jarvis/core-survivor.js','Defense Satellites');
           need('jarvis/griffin-render-184.js','GRIFFIN GUARANTEED-VISIBLE COMPOSITOR');
           need('jarvis/griffin-render-184.js','webglContextDoesNotSuppressSoftwareRig:true');
-          need('jarvis/griffin-render-184.js','DOM_SVG_2_5D');
+          need('jarvis/griffin-render-184.js','griffin-skeletal-189.js?v=20260816production189');
+          need('jarvis/griffin-skeletal-189.js','SKELETAL_GLTF_3D');
+          need('jarvis/griffin-skeletal-189.js','GriffinHumanoidSkin');
           need('jarvis/michael-engine-v45.js','MICHAEL_ENGINE_V57');
+
+          // Production 189 must be a real skinned glTF asset, not a visibility primitive.
+          const gb=fs.readFileSync('jarvis/assets/survivor/griffin-hero-skeletal-v1.glb');
+          if(gb.subarray(0,4).toString()!=='glTF'||gb.readUInt32LE(4)!==2||gb.readUInt32LE(8)!==gb.length)throw Error('Griffin GLB invalid');
+          const gjLen=gb.readUInt32LE(12),gj=JSON.parse(gb.subarray(20,20+gjLen).toString('utf8'));
+          if((gj.skins?.[0]?.joints||[]).length!==18)throw Error('Griffin skeleton contract mismatch');
+          const clipNames=(gj.animations||[]).map(a=>a.name);
+          for(const n of ['Idle','Guard','Jab','Kick','PowerUp'])if(!clipNames.includes(n))throw Error(`Griffin clip missing: ${n}`);
+          const gp=gj.meshes?.[0]?.primitives?.[0]?.attributes||{};
+          for(const n of ['POSITION','NORMAL','COLOR_0','JOINTS_0','WEIGHTS_0'])if(gp[n]===undefined)throw Error(`Griffin mesh attribute missing: ${n}`);
 
           // Owner Truth and autonomous visual convergence are now part of the release contract.
           const truth=JSON.parse(text('michael/visual/owner-truth.json'));
@@ -90,7 +107,7 @@ jobs:
           const b=Buffer.from(b64,'base64');if(b.subarray(0,4).toString()!=='glTF'||b.readUInt32LE(4)!==2||b.readUInt32LE(8)!==b.length)throw Error('GLB invalid');
           const sha=crypto.createHash('sha256').update(b).digest('hex');
           if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error(`GLB sha mismatch: ${sha}`);
-          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,survivor:'PRODUCTION_187',languages:poly.languages.length,glbBytes:b.length,sha});
+          console.log({engine:release.engine,visual:'MICHAEL_V60_V61',ownerTruth:true,survivor:'PRODUCTION_189',griffin:{bones:18,clips:clipNames,glbBytes:gb.length},languages:poly.languages.length,glbBytes:b.length,sha});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with:
