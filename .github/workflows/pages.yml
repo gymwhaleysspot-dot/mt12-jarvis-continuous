@@ -18,6 +18,7 @@ on:
       - 'tools/build-survivor-production200.mjs'
       - 'tools/build-survivor-production201.mjs'
       - 'tools/build-survivor-production202.mjs'
+      - 'tools/build-survivor-production203.mjs'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -30,28 +31,31 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 202
+      - name: Build and validate Survivor Production 203
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
-          test -f jarvis/production201-replay46-total-repair.inc.js
           test -f jarvis/production202-state-of-art-fight-engine.inc.js
-          test -f tools/build-survivor-production202.mjs
-          node --check jarvis/production201-replay46-total-repair.inc.js
+          test -f jarvis/production203-round-art-sprite-authority.inc.js
+          test -f tools/build-survivor-production203.mjs
           node --check jarvis/production202-state-of-art-fight-engine.inc.js
-          node --check tools/build-survivor-production202.mjs
-          node tools/build-survivor-production202.mjs
+          node --check jarvis/production203-round-art-sprite-authority.inc.js
+          node --check tools/build-survivor-production203.mjs
+          node tools/build-survivor-production203.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
-          need('survivor.html','JARVIS ARCADE PROTOCOL');need('survivor.html','jarvis/core-survivor.js?v=20260816production202');
-          for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['STATE-OF-ART 2D ARENA FIGHT ENGINE','confirmedHitsDriveChains:true','whiffsHaveRecovery:true','vanishCostsResource:true','blastClashesRequireCollision:true','transformationsChangeState:true','firstFightUsesSameCombatAuthority:true'])need('jarvis/core-survivor.js',m);
-          const html=text('survivor.html');if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(html))throw Error('Standalone Griffin renderer reintroduced');
-          const root='jarvis/assets/survivor/';const griffin=['griffin-atlas-v3.webp','griffin-ascended-atlas-v3.webp','griffin-speed-form-atlas-v1.webp','griffin-guardian-form-atlas-v1.webp','griffin-destroyer-form-atlas-v1.webp','griffin-instinct-form-atlas-v1.webp','griffin-celestial-overdrive-atlas-v1.webp','griffin-omega-instinct-atlas-v1.webp'];for(const n of griffin){if(!fs.existsSync(root+n)||fs.statSync(root+n).size<100000)throw Error('Missing Griffin atlas '+n)}
-          const portraits=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];for(const n of portraits)if(!fs.existsSync(root+'arenas/'+n))throw Error('Missing opponent arena art '+n);
-          console.log({survivor:'PRODUCTION_202',engine:'RUSH_CHAIN_VANISH_CLASH_RECOVERY_RESOURCE_STATE_MACHINE',spriteAudit:'GRIFFIN_FULL_ATLASES_OPPONENT_FULL_COMBAT_ATLASES_NOT_YET_PROVEN',renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          need('survivor.html','JARVIS ARCADE PROTOCOL');
+          need('survivor.html','jarvis/core-survivor.js?v=20260816production203');
+          for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY','PRODUCTION_203_READY'])need('jarvis/core-survivor.js',m);
+          for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true','uniqueSpriteSourcePerOpponent:true'])need('jarvis/core-survivor.js',m);
+          const root='jarvis/assets/survivor/arenas/';
+          const arenas=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];
+          for(const n of arenas){const p=root+n;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized round arena '+n)}
+          for(const n of ['LIRA','KRAKEN','KAIROX','MIREYA','ZEPHYRA','SOLENNE','SABLE','ORUN','MORDREN'])need('jarvis/core-survivor.js',`name:'${n}'`);
+          if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
+          console.log({survivor:'PRODUCTION_203',rounds:9,arenaAuthority:'UNIQUE_AUTHORED_ARENA_PER_OPPONENT',spriteAuthority:'LIRA_AUTHORED_PLUS_EIGHT_DEDICATED_RUNTIME_4X4_VECTOR_ATLASES',firstFight:'LIRA_LOCKED',renderer:'SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
