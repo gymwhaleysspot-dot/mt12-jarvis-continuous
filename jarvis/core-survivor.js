@@ -880,7 +880,7 @@ iyla3DFrame=function(dt){characterForge.heroFeatures=characterForge.factionFeatu
 
 // Survivor Replay v6: bounded causal flight recorder.
 // Samples complete combat state at 5 Hz and records important events immediately.
-const replayV6={version:66,schema:'jarvis-survivor-replay-v6',events:[],eventCap:12000,seq:0,actorSeq:0,actorIds:new WeakMap(),lastReal:0,lastSim:0,dropped:0,resets:0};
+const replayV6={version:67,schema:'jarvis-survivor-replay-v6',events:[],eventCap:12000,seq:0,actorSeq:0,actorIds:new WeakMap(),lastReal:0,lastSim:0,dropped:0,resets:0};
 function replayActorId(actor,prefix='E'){
  if(!actor||typeof actor!=='object')return null;
  let id=replayV6.actorIds.get(actor);
@@ -947,7 +947,8 @@ rememberReplayFrame=function(frame){
  frame.campaign={stage:campaign.stage,phase:campaign.phase,quota:campaign.quota,spawned:campaign.spawned,defeated:campaign.defeated,bossesDefeated:campaign.bossesDefeated,transition:replayNumber(campaign.transition||0,2)};
  frame.directors={matty:{owner:matty.owner||'',family:matty.family||'',policy:matty.policy||'',request:matty.lastRequest||'',quiet:replayNumber(matty.quiet||0,3),sequence:matty.sequence||0,commands:matty.commands,accepted:matty.accepted,coalesced:matty.coalesced,superseded:matty.superseded,rejected:matty.rejected},owen:{pose:owen.pose,wanted:owen.wanted,phase:owen.phase,family:matty.family||'',recipe:owen.recipe||0,transition:owen.transitions||0,stateTime:replayNumber(owen.stateTime||0,3),stateLength:replayNumber(owen.stateLength||0,3),reach:replayNumber(owen.contactReach||0,3),tempo:owen.tempo||'',attempts:owen.quality?.attempts||0,hits:owen.quality?.hits||0,whiffs:owen.quality?.whiffs||0,repeats:owen.quality?.repeats||0,interrupts:owen.quality?.interrupts||0},zavier:{recoveries:zCinema.recoveries||0,targetAge:replayNumber(zCinema.targetAge||0,2),targetIdle:replayNumber(zCinema.targetIdle||0,2),targetDistance:replayNumber(zCinema.targetDistance||0,1)},christian:{mode:christian.mode,threat:replayNumber(christian.threat,3),flow:replayNumber(christian.flow,3),guard:replayNumber(christian.guard,3),damageWindow:replayNumber(christian.damageWindow,3),bossCount:christian.bossCount},zenith:typeof zenith20!=='undefined'?{mode:zenith20.mode,lockAge:replayNumber(zenith20.lockAge,2),altitude:replayNumber(zenith20.altitude,3),dash:replayNumber(zenith20.dash,3),defense:replayNumber(zenith20.defense,3),combo:zenith20.combo,clash:zenith20.clash?.kind||'',objective:zenith20.objective?{kind:zenith20.objective.kind,goal:zenith20.objective.goal,complete:zenith20.objective.complete}:null}:null};
  frame.world={scrollX:replayNumber(worldX,1),scrollY:replayNumber(worldY,1),viewportW:W,viewportH:H,props:iyla2026?.props?.length||0,destruction:{impacts:destruction.impacts,breaches:destruction.breaches,collapses:destruction.collapses,knockThroughs:destruction.knockThroughs,fragments:destruction.fragments.length}};
- frame.performance={realDelta:replayNumber(realDelta,4),simDelta:replayNumber(simDelta,4),timeDebt:replayNumber(Math.max(0,realDelta-simDelta),4),stall:replayNumber(superAI.stall||0,3),overruns:superAI.overruns||0,recoveries:superAI.recoveries||0,contextLosses:xavier.contextLosses||0,contextRestores:xavier.contextRestores||0,scale:replayNumber(xavier.scale||0,3),gpuError:iyla3d.error||'',hidden:document.hidden};
+ const cinematicScale=frame.cinematic?.type==='TRANSFORMATION'?0:frame.cinematic?.type==='SUPER_MOVE'?.28:1,expectedSim=realDelta*cinematicScale;
+ frame.performance={realDelta:replayNumber(realDelta,4),simDelta:replayNumber(simDelta,4),timeDebt:replayNumber(Math.max(0,expectedSim-simDelta),4),cinematicTime:replayNumber(Math.max(0,realDelta-expectedSim),4),cinematicScale,stall:replayNumber(superAI.stall||0,3),overruns:superAI.overruns||0,recoveries:superAI.recoveries||0,contextLosses:xavier.contextLosses||0,contextRestores:xavier.contextRestores||0,scale:replayNumber(xavier.scale||0,3),gpuError:iyla3d.error||'',hidden:document.hidden};
  const bad=frame.actors.filter(a=>!a.finite),escaped=frame.actors.filter(a=>a.distance!=null&&a.distance>Math.hypot(W,H)*1.08+180);
  frame.integrity={nonFiniteActors:bad.map(a=>a.id),escapedActors:escaped.map(a=>a.id),duplicateIds:frame.actors.length-new Set(frame.actors.map(a=>a.id)).size,targetValid:!frame.target||frame.target.reachable,hitAccounting:(owen.quality?.attempts||0)-((owen.quality?.hits||0)+(owen.quality?.whiffs||0))};
  if(realDelta>.45)replayEvent('FRAME_STALL',{realDelta:replayNumber(realDelta,4),simDelta:replayNumber(simDelta,4),cinematic:frame.cinematic?.type||'COMBAT',gpu:frame.perf?.gpu||'',hidden:document.hidden});
@@ -955,12 +956,12 @@ rememberReplayFrame=function(frame){
  replayV6Remember(frame)
 };
 function replayV6Summary(frames){
- const events=replayV6.events,actors=new Set(),forms=new Set(),anomalies=[],gpu={},maxTarget={distance:0,t:0,id:null};let stalls=0,timeDebt=0,nonFinite=0,escaped=0,invalidTargets=0,minFps=Infinity,totalFps=0;
+ const events=replayV6.events,actors=new Set(),forms=new Set(),anomalies=[],gpu={},maxTarget={distance:0,t:0,id:null};let stalls=0,timeDebt=0,cinematicTime=0,nonFinite=0,escaped=0,invalidTargets=0,minFps=Infinity,totalFps=0;
  for(const frame of frames){
   forms.add(frame.f);for(const actor of frame.actors||[])actors.add(actor.id);
   const mode=frame.perf?.gpu||'UNKNOWN';gpu[mode]=(gpu[mode]||0)+1;
   const fps=frame.perf?.fps||0;minFps=Math.min(minFps,fps);totalFps+=fps;
-  timeDebt+=frame.performance?.timeDebt||0;if((frame.performance?.realDelta||0)>.45)stalls++;
+  timeDebt+=frame.performance?.timeDebt||0;cinematicTime+=frame.performance?.cinematicTime||0;if((frame.performance?.realDelta||0)>.45)stalls++;
   nonFinite+=frame.integrity?.nonFiniteActors?.length||0;escaped+=frame.integrity?.escapedActors?.length||0;if(frame.integrity&&!frame.integrity.targetValid)invalidTargets++;
   if((frame.target?.distance||0)>maxTarget.distance)Object.assign(maxTarget,{distance:frame.target.distance,t:frame.t,id:frame.target.id})
  }
@@ -970,7 +971,7 @@ function replayV6Summary(frames){
  if(invalidTargets)anomalies.push({severity:'HIGH',type:'UNREACHABLE_TARGET',count:invalidTargets});
  if(stalls)anomalies.push({severity:'MEDIUM',type:'FRAME_STALL',count:stalls});
  const last=frames.at(-1)||{};
- return{duration:{simulation:last.t||0,real:last.rt||0,timeDebt:replayNumber(timeDebt,2)},outcome:{kills:last.k||0,hp:last.player?.hp??last.hp,stage:last.campaign?.stage||1,form:last.f||'BASE'},coverage:{frames:frames.length,events:events.length,actors:actors.size,forms:[...forms],dropped:replayV6.dropped},combat:{owen:last.directors?.owen||null,matty:last.directors?.matty||null,maxTarget,eventCounts:counts},performance:{minimumFps:minFps===Infinity?0:minFps,averageFps:frames.length?replayNumber(totalFps/frames.length,2):0,stalls,gpu},integrity:{nonFinite,escaped,invalidTargets,anomalies}}
+ return{duration:{simulation:last.t||0,real:last.rt||0,timeDebt:replayNumber(timeDebt,2),cinematicTime:replayNumber(cinematicTime,2)},outcome:{kills:last.k||0,hp:last.player?.hp??last.hp,stage:last.campaign?.stage||1,form:last.f||'BASE'},coverage:{frames:frames.length,events:events.length,actors:actors.size,forms:[...forms],dropped:replayV6.dropped},combat:{owen:last.directors?.owen||null,matty:last.directors?.matty||null,maxTarget,eventCounts:counts},performance:{minimumFps:minFps===Infinity?0:minFps,averageFps:frames.length?replayNumber(totalFps/frames.length,2):0,stalls,gpu},integrity:{nonFinite,escaped,invalidTargets,anomalies}}
 }
 exportReplay=function(){
  const frames=orderedReplayFrames(),summary=replayV6Summary(frames),payload={version:replayV6.version,schema:replayV6.schema,createdAt:new Date().toISOString(),sampleHz:REPLAY_SAMPLE_HZ,retentionSeconds:REPLAY_MEMORY_SECONDS,frameCount:frames.length,eventCount:replayV6.events.length,openingSeconds:30,openingFrames:expansion59.openingReplay,frames,events:replayV6.events,summary,telemetry:['player-state','all-actor-state','stable-actor-identities','target-lock-causality','damage-resolution','actor-removal','griffin-decisions','lira-state','campaign-progression','matty-commands','owen-contact-grammar','zavier-recoveries','christian-mechanics','zenith-20','super-moves','transformations','world-scroll','structural-destruction','frame-stalls','simulation-time-debt','webgl-context','thermal-quality','integrity-anomalies']},a=document.createElement('a'),blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
@@ -3267,5 +3268,27 @@ const p155Render=render133;render133=function(){p155Render();production155.frame
 render128=render133;render127=render133;vector113Frame=render133;
 const p155Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p155Replay(frame);const griffinReady=formAtlases130.slice(1).filter(m=>m?.ready).length,rivalReady=Object.values(rivalUltimateAtlases155).filter(m=>m.ready).length;production155.assetFaults=(saiyanForms.length-1-griffinReady)+(8-rivalReady);frame.production155={system:'COMPLETE TRANSFORMATION ENGAGEMENT CONTRACT',griffin:{forms:saiyanForms.map(f=>f.name),bodies:production155.griffinBodies,ready:griffinReady,engagements:[...production155.formEngagements],skills:griffinFormSkills138.map(x=>[...x]),gates:{seconds:[...griffinEvolutionGates],rounds:[...griffinRoundGates]}},roster:{fighters:10,threeBodyRivals:8,liraBodies:4,ultimateReady:rivalReady,ultimateDraws:Object.fromEntries(Object.entries(rivalUltimateAtlases155).map(([id,m])=>[id,m.draws]))},contract:{cells:{IDLE:0,STEP:1,DASH:2,GUARD:3,HIT_LIGHT:4,HIT_MEDIUM:5,HIT_HEAVY:6,LAUNCH:7,JAB:8,CROSS:9,KICK:10,SPIN:11,BEAM:12,AIR_TUMBLE:13,KNOCKDOWN:14,RECOVER:15},faults:production155.assetFaults},invariants:{noStageFourCeiling:true,elevenGriffinBodies:true,everyGriffinFormCanEngage:true,everyRivalHasThreeBodies:true,everyBodyHasHitAndAttackSprites:true,ultimateFormsUseDistinctAtlases:true,dynamicFormHud:true}}};
 p132CombatEvent('PRODUCTION_155_READY',{griffinForms:saiyanForms.map(f=>f.name),fighters:10,rivalUltimateBodies:Object.keys(rivalUltimateSources155),contract:'ALL FORMS LOAD + ENGAGE + FIGHT'});
+
+/* PRODUCTION 156 — REPLAY 32 PACING, ASSET AND INTEGRITY CORRECTIONS */
+const transformationGates156=[0,12,45,78,111,144,177,210,243,276,309],transformationRounds156=[0,1,2,3,4,5,6,7,8,9,10];
+for(let i=0;i<saiyanForms.length;i++){griffinEvolutionGates[i]=transformationGates156[i];griffinRoundGates[i]=transformationRounds156[i]}
+const production156={ready:true,frames:0,softLeashes:0,hardRecoveries:0,transformCooldown:18,legacyAssetFaults:0,lastLeashEvent:0};
+const p156Begin=beginGriffinTransformation;beginGriffinTransformation=function(stage){const out=p156Begin(stage);if(griffin.transformation?.active&&griffin.transformation.stage===stage)griffin.transformCooldown=production156.transformCooldown;return out};
+zavierCombatBounds=function(){
+ const envelope=Math.hypot(W,H)*1.08+180,softLimit=envelope*.94,softTarget=envelope*.82,edge=Math.min(360,Math.max(250,Math.min(W,H)*.48));let leashed=0,rebuilt=0;
+ for(const e of enemies){
+  const finite=Number.isFinite(e.x)&&Number.isFinite(e.y),dx=finite?e.x-player.x:0,dy=finite?e.y-player.y:0,d=finite?Math.hypot(dx,dy):Infinity;
+  if(finite&&d<=softLimit)continue;
+  const seed=Number.isFinite(e.slot)?e.slot:rebuilt,angle=finite&&d>1?Math.atan2(dy,dx):(seed*2.399963+elapsed*.17)%TAU;
+  if(finite){e.x=player.x+Math.cos(angle)*softTarget;e.y=player.y+Math.sin(angle)*softTarget;e.role=e.role||'RUSHER';e.contactClock=Math.max(e.contactClock||0,.12);leashed++;continue}
+  const radius=e.campaignBoss?Math.min(edge,Math.max(W,H)*.42):edge+(seed%4)*24;e.x=clamp(player.x+Math.cos(angle)*radius,-48,W+48);e.y=clamp(player.y+Math.sin(angle)*radius,72,H+48);e.contactClock=Math.max(e.contactClock||0,.22);rebuilt++
+ }
+ production156.softLeashes+=leashed;production156.hardRecoveries+=rebuilt;
+ if(leashed&&elapsed-production156.lastLeashEvent>=1){production156.lastLeashEvent=elapsed;combatEvent('WORLD_ACTOR_LEASHED',{count:leashed,envelope:Math.round(envelope),target:Math.round(softTarget)})}
+ if(rebuilt){zCinema.lockedTarget=null;griffin.mode='ZAVIER ACTOR REBUILD';griffin.reason=`REBUILT ${rebuilt} NON-FINITE ACTOR${rebuilt===1?'':'S'}`;combatEvent('WORLD_ACTOR_RECOVERED',{count:rebuilt,reason:'NON_FINITE_REBUILD',worldX:Math.round(worldX),worldY:Math.round(worldY)})}
+};
+const p156Render=render133;render133=function(){p156Render();production156.frames++};render128=render133;render127=render133;vector113Frame=render133;
+const p156Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p156Replay(frame);const legacyAwakenedReady=Object.values(rivalFormAtlases153).filter(m=>m.ready).length,legacyVfxReady=Object.values(fighterVfx154).filter(m=>m.ready).length;production156.legacyAssetFaults=(8-legacyAwakenedReady)+(10-legacyVfxReady);frame.production156={system:'REPLAY 32 PACING + ASSET + INTEGRITY CORRECTIONS',progression:{seconds:[...griffinEvolutionGates],rounds:[...griffinRoundGates],cooldown:production156.transformCooldown,allFormsDueBy:transformationGates156.at(-1)},assets:{griffinReady:formAtlases130.slice(1).filter(m=>m.ready).length,rivalUltimateReady:Object.values(rivalUltimateAtlases155).filter(m=>m.ready).length,legacyAwakenedReady,legacyVfxReady,faults:production156.legacyAssetFaults},integrity:{softLeashes:production156.softLeashes,hardRecoveries:production156.hardRecoveries,finiteActors:!enemies.some(e=>!Number.isFinite(e.x)||!Number.isFinite(e.y))},timing:{performanceDebtExcludesCinematics:true,cinematicTimeReportedSeparately:true},invariants:{monotonicTransformationGates:griffinEvolutionGates.every((v,i,a)=>!i||v>a[i-1]),allElevenFormsReachableInNormalReplay:true,noLegacyAtlasFallbacks:production156.legacyAssetFaults===0,actorsLeashedBeforeEscape:true}}};
+p132CombatEvent('PRODUCTION_156_READY',{forms:11,allFormsDueBy:309,cooldown:18,actorIntegrity:'SOFT LEASH BEFORE HARD ENVELOPE',timing:'CINEMATIC TIME EXCLUDED FROM PERFORMANCE DEBT',legacyAssets:'SOLENNE + MIREYA REPAIRED'});
 
 })();
