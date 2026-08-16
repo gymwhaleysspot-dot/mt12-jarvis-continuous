@@ -3402,4 +3402,34 @@ iyla3DCombat=function(){iyla3d.draws=iyla3d.faces=0;production162.legacyRigFrame
 const p162Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p162Replay(frame);const s=production162.spriteFrames,attack=s.jab+s.cross+s.kick+s.spin+s.beam,total=Object.values(s).reduce((a,b)=>a+b,0);frame.production162={system:'LIVE ATTACK AUTHORITY + LEGACY RENDER RETIREMENT',source:production162.source,sprites:{...s,attackRatio:+(attack/Math.max(1,total)).toFixed(3),authority:'CONFIRMED OWEN ACTION / FOLLOW THROUGH ONLY'},cadence:{recoveryLocks:production162.recoveryLocks,lastFinisherAt:+production162.lastFinisherAt.toFixed(2),finisherRecovery:.86},combat:{bossDamageBoost:production162.bossDamageBoost,legacyRigFramesSuppressed:production162.legacyRigFramesSuppressed},invariants:{noClockDrivenHeroAttacks:true,attackCellsMatchMoveFamily:true,finishersHaveRecovery:true,proceduralCharacterOverlayRetired:true,tournamentOnly:enemies.every(isTournamentFighter160)}}};
 p132CombatEvent('PRODUCTION_162_READY',{replay:73,source:'LIVE PRODUCTION 161',sprites:'OWEN-CONFIRMED ATTACK CELLS',cadence:'FINISHER RECOVERY + NO IDLE SWINGS',legacy:'PROCEDURAL CHARACTER OVERLAY RETIRED'});
 
+
+/* PRODUCTION 163 — REPLAY 37 CONTACT, REACTION, AND TARGET AUTHORITY */
+const production163={ready:true,replay:74,source:'REPLAY 37',finisherKeys:new Map(),finishersAccepted:0,finishersDeduplicated:0,hitUntil:0,hitFrames:0,targetCorrections:0,maxFinalTarget:0,targetCap:0};
+const finisherKey163=data=>[data?.route||'',data?.beat??'',data?.move||'',data?.pose||'',data?.side??''].join('|');
+const p163Event=combatEvent;combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),beforeUntil=production162.recoveryUntil,beforeLast=production162.lastFinisherAt;
+ if(t==='GRIFFIN_DAMAGE_REACTION')production163.hitUntil=Math.max(production163.hitUntil,elapsed+.34);
+ if(t!=='GRIFFIN_CREATED_FINISHER')return p163Event(type,data);
+ const key=finisherKey163(data),out=p163Event(type,data);
+ if(!out){production162.recoveryUntil=beforeUntil;production162.lastFinisherAt=beforeLast;production163.finishersDeduplicated++}
+ else{production163.finisherKeys.set(key,out.id||elapsed);production163.finishersAccepted++}
+ return out
+};
+const p163Director=director127;director127=function(now,hero,rank,hit){
+ if(hero&&(hit||elapsed<production163.hitUntil)){production162.spriteFrames.hit++;production163.hitFrames++;return hit||reaction148.active?.heavy?'HIT_HEAVY':'HIT_LIGHT'}
+ return p163Director(now,hero,rank,hit)
+};
+function enforceTarget163(e){
+ if(!isTournamentFighter160(e))return e;
+ const cap=Math.min(360,Math.hypot(W,H)*.42),dx=e.x-player.x,dy=e.y-player.y,d=Math.hypot(dx,dy);production163.targetCap=cap;
+ if(Number.isFinite(d))production163.maxFinalTarget=Math.max(production163.maxFinalTarget,d);
+ if(Number.isFinite(d)&&d<=cap)return e;
+ const a=Number.isFinite(d)&&d>1?Math.atan2(dy,dx):0;e.x=player.x+Math.cos(a)*cap;e.y=player.y+Math.sin(a)*cap;e.contactClock=Math.max(e.contactClock||0,.18);production163.targetCorrections++;return e
+}
+const p163Target=omniTarget;omniTarget=function(){return enforceTarget163(p163Target())};
+const p163Bounds=zavierCombatBounds;zavierCombatBounds=function(){p163Bounds();for(const e of enemies)enforceTarget163(e);enforceTarget163(zCinema.lockedTarget);if(typeof zenith20==='object')enforceTarget163(zenith20.lock)};
+const p163CinemaUpdate=zCinemaUpdate;zCinemaUpdate=function(dt){enforceTarget163(zCinema.lockedTarget);return p163CinemaUpdate(dt)};
+const p163Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p163Replay(frame);const finalDistance=frame.target?.distance||0;frame.production163={system:'REPLAY 37 CONTACT, REACTION, AND TARGET AUTHORITY',source:production163.source,finishers:{accepted:production163.finishersAccepted,deduplicated:production163.finishersDeduplicated,recoverySeconds:.86,authority:'ACCEPTED COMBAT EVENT ONLY'},sprites:{hitFrames:production163.hitFrames,damageReactionActive:elapsed<production163.hitUntil},targeting:{corrections:production163.targetCorrections,cap:+production163.targetCap.toFixed(1),maxPreCorrection:+production163.maxFinalTarget.toFixed(1),finalDistance:+finalDistance.toFixed(1)},invariants:{oneRecoveryPerAcceptedFinisher:true,damageReactionsReachHitCells:production163.hitFrames>0||production163.hitUntil===0,worldSpaceTargetCap:!frame.target||finalDistance<=production163.targetCap+.5,tournamentOnly:enemies.every(isTournamentFighter160)}}};
+p132CombatEvent('PRODUCTION_163_READY',{replay:74,source:'REPLAY 37',finishers:'DEDUPLICATED RECOVERY',sprites:'DAMAGE REACTIONS ROUTED TO HIT CELLS',targeting:'FINAL WORLD-SPACE CAP'});
+
 })();
