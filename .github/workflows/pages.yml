@@ -13,30 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Validate Survivor Production 194
+      - name: Validate Survivor Production 162 rollback
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
-          test -f jarvis/griffin-render-184.js
-          test -f jarvis/griffin-sprite-193.js
-          test -s jarvis/assets/survivor/griffin-ascended-atlas-v3.webp
-          test -s jarvis/assets/survivor/griffin-atlas-v3.webp
-          node --check jarvis/griffin-render-184.js
-          node --check jarvis/griffin-sprite-193.js
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
-          need('jarvis/core-survivor.js','Defense Satellites');
-          need('jarvis/griffin-render-184.js','PRODUCTION_194_SPRITE_ONLY_BOOTSTRAP');
-          need('jarvis/griffin-render-184.js','griffin-sprite-193.js?v=20260816production194');
-          if(text('jarvis/griffin-render-184.js').includes('griffin-3d-192.js'))throw Error('Production 194 must not load legacy Griffin 3D');
-          need('jarvis/griffin-sprite-193.js','AUTHORED_SPRITE_ONLY');
-          need('jarvis/griffin-sprite-193.js','griffin-ascended-atlas-v3.webp');
-          need('jarvis/griffin-sprite-193.js','griffin-skeletal-189');
-          const a=fs.statSync('jarvis/assets/survivor/griffin-ascended-atlas-v3.webp').size,b=fs.statSync('jarvis/assets/survivor/griffin-atlas-v3.webp').size;if(a<400000||b<300000)throw Error('Griffin authored atlas quality gate failed');
-          console.log({survivor:'PRODUCTION_194',griffin:'AUTHORED_SPRITE_ONLY',ascendedBytes:a,baseBytes:b});
+          need('survivor.html','jarvis/core-survivor.js?v=20260816production162');
+          need('jarvis/core-survivor.js','PRODUCTION 162');
+          need('jarvis/core-survivor.js','proceduralCharacterOverlayRetired:true');
+          need('jarvis/core-survivor.js','SINGLE VISIBLE 2D STAGE');
+          const html=text('survivor.html');
+          if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(html))throw Error('Standalone Griffin renderer reintroduced into live entrypoint');
+          console.log({survivor:'PRODUCTION_162_RESTORED',renderer:'SINGLE_VISIBLE_2D_STAGE',standaloneGriffinOverlay:false});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
