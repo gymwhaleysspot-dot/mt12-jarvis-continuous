@@ -880,7 +880,7 @@ iyla3DFrame=function(dt){characterForge.heroFeatures=characterForge.factionFeatu
 
 // Survivor Replay v6: bounded causal flight recorder.
 // Samples complete combat state at 5 Hz and records important events immediately.
-const replayV6={version:68,schema:'jarvis-survivor-replay-v6',events:[],eventCap:12000,seq:0,actorSeq:0,actorIds:new WeakMap(),lastReal:0,lastSim:0,dropped:0,resets:0};
+const replayV6={version:69,schema:'jarvis-survivor-replay-v6',events:[],eventCap:12000,seq:0,actorSeq:0,actorIds:new WeakMap(),lastReal:0,lastSim:0,dropped:0,resets:0};
 function replayActorId(actor,prefix='E'){
  if(!actor||typeof actor!=='object')return null;
  let id=replayV6.actorIds.get(actor);
@@ -3300,5 +3300,50 @@ const production157={ready:true,frames:0,order:[...transformationOrder157],singl
 const p157Render=render133;render133=function(){p157Render();production157.frames++};render128=render133;render127=render133;vector113Frame=render133;
 const p157Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p157Replay(frame);const liveOrder=saiyanForms.map(f=>f.name),aligned=formAtlases130.every((m,i)=>i===0||m?.src?.includes(liveOrder[i].toLowerCase().replaceAll(' ','-'))||m?.name===liveOrder[i]||m?.name===liveOrder[i].toLowerCase().replaceAll(' ','-'));production157.orderFaults=liveOrder.reduce((n,name,i)=>n+(name!==transformationOrder157[i]),0);frame.production157={system:'CANONICAL GRIFFIN POWER LADDER + SINGLE BODY AUTHORITY',order:liveOrder,skills:griffinFormSkills138.map((skills,i)=>({form:liveOrder[i],skills:[...skills]})),gates:{seconds:[...griffinEvolutionGates],rounds:[...griffinRoundGates]},render:{singleBodyAuthority:production157.singleBodyAuthority,legacyLateOverlay:false},faults:{order:production157.orderFaults,alignment:aligned?0:1},invariants:{canonicalOrder:production157.orderFaults===0,autonomousInstinctIsFinal:liveOrder.at(-1)==='AUTONOMOUS INSTINCT',bodySkillIndicesAligned:aligned,noDuplicateLateFormDraw:true}}};
 p132CombatEvent('PRODUCTION_157_READY',{order:transformationOrder157,final:'AUTONOMOUS INSTINCT',render:'ONE BODY PER FIGHTER',replay:68});
+
+/* PRODUCTION 158 — EARNED ASCENSION + ALPHA-SAFE ENERGY CINEMATOGRAPHY */
+const transformationGates158=[0,60,105,150,195,245,300,360,425,495,570],transformationRounds158=[0,2,3,4,5,6,7,8,9,10,11];
+for(let i=0;i<saiyanForms.length;i++){griffinEvolutionGates[i]=transformationGates158[i];griffinRoundGates[i]=transformationRounds158[i];griffinEliminationGates[i]=i?4+i*3:0}
+const production158={ready:true,frames:0,cleanCells:0,cleanFailures:0,proceduralBeams:0,impactBursts:0,blockedEarlyTransforms:0,maxBeamLength:0};
+const p158Begin=beginGriffinTransformation;beginGriffinTransformation=function(stage){
+ const gate=transformationGates158[stage]??Infinity,round=typeof tournament140==='object'?(tournament140.round||0):0;
+ if(elapsed<gate){production158.blockedEarlyTransforms++;return}
+ if(stage===1&&elapsed<90&&kills<4&&round<2){production158.blockedEarlyTransforms++;return}
+ return p158Begin(stage)
+};
+function cleanVfxCell158(model,cell){
+ if(!model?.ready||!model.image)return null;
+ model.clean158||=(Array(16).fill(null));if(model.clean158[cell])return model.clean158[cell];
+ try{
+  const c=document.createElement('canvas');c.width=c.height=320;const q=c.getContext('2d',{willReadFrequently:true}),sx=(cell&3)*320,sy=(cell>>2)*320;
+  q.drawImage(model.image,sx,sy,320,320,0,0,320,320);const im=q.getImageData(0,0,320,320),d=im.data,corners=[[4,4],[315,4],[4,315],[315,315]],bg=corners.reduce((a,[x,y])=>{const n=(y*320+x)*4;return[a[0]+d[n]/4,a[1]+d[n+1]/4,a[2]+d[n+2]/4]},[0,0,0]);
+  for(let y=0;y<320;y++)for(let x=0;x<320;x++){const n=(y*320+x)*4,r=d[n],g=d[n+1],b=d[n+2],distBg=Math.hypot(r-bg[0],g-bg[1],b-bg[2]),bright=Math.max(r,g,b),chroma=bright-Math.min(r,g,b),edge=Math.min(x,y,319-x,319-y),feather=clamp((edge-5)/34,0,1),signal=clamp((distBg-14)/66+(bright-92)/290+chroma/520,0,1);d[n+3]=Math.round(d[n+3]*feather*signal)}
+  q.clearRect(0,0,320,320);q.putImageData(im,0,0);model.clean158[cell]=c;production158.cleanCells++;return c
+ }catch(error){production158.cleanFailures++;return null}
+}
+function vfxCell158(g,id,cell,cx,cy,size,angle=0,stretch=1){
+ const model=fighterVfx154[id]||fighterVfx154.LIRA,clean=cleanVfxCell158(model,cell);if(!clean)return false;
+ g.save();g.translate(cx,cy);g.rotate(angle);g.globalCompositeOperation='lighter';g.globalAlpha=.92;g.shadowBlur=Math.min(36,size*.18);g.shadowColor=id==='GRIFFIN'?'#68f5ff':'#ff426d';g.drawImage(clean,-size*.5*stretch,-size*.5,size*stretch,size);g.restore();model.draws++;return true
+}
+function dbzImpact158(g,x,y,color,power=1){
+ const pulse=.72+.28*Math.sin(performance.now()*.018),r=(18+power*22)*pulse;g.save();g.translate(x,y);g.globalCompositeOperation='lighter';g.shadowBlur=22;g.shadowColor=color;g.strokeStyle='#fff';g.lineWidth=2.5+power;g.globalAlpha=.9;g.beginPath();g.arc(0,0,r*.34,0,TAU);g.stroke();g.strokeStyle=color;g.lineWidth=2;g.globalAlpha=.72;g.beginPath();g.arc(0,0,r,0,TAU);g.stroke();for(let i=0;i<10;i++){const a=i*TAU/10+elapsed*.4,len=r*(1.25+(i%3)*.28);g.globalAlpha=.28+(i%2)*.18;g.beginPath();g.moveTo(Math.cos(a)*r*.42,Math.sin(a)*r*.42);g.lineTo(Math.cos(a)*len,Math.sin(a)*len);g.stroke()}g.restore();production158.impactBursts++
+}
+function dbzBeam158(g,b,color){
+ let dx=b.x2-b.x1,dy=b.y2-b.y1,len=Math.hypot(dx,dy);if(!Number.isFinite(len)||len<2)return;const cap=Math.min(Math.hypot(W,H)*.52,680),drawLen=Math.min(len,cap),ux=dx/len,uy=dy/len,x2=b.x1+ux*drawLen,y2=b.y1+uy*drawLen,width=clamp(10+drawLen*.018,12,32);
+ g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.shadowColor=color;g.shadowBlur=30;g.globalAlpha=.26;g.strokeStyle=color;g.lineWidth=width*2.5;g.beginPath();g.moveTo(b.x1,b.y1);g.lineTo(x2,y2);g.stroke();g.globalAlpha=.92;g.strokeStyle=color;g.lineWidth=width;g.beginPath();g.moveTo(b.x1,b.y1);g.lineTo(x2,y2);g.stroke();g.shadowBlur=12;g.strokeStyle='#fff';g.lineWidth=Math.max(3,width*.34);g.beginPath();g.moveTo(b.x1,b.y1);g.lineTo(x2,y2);g.stroke();g.restore();dbzImpact158(g,x2,y2,color,1.2);production158.proceduralBeams++;production158.maxBeamLength=Math.max(production158.maxBeamLength,drawLen)
+}
+energyPresentation154=function(g){
+ const o=owner154(),boss=enemies.find(e=>e.type===3),id=boss?.identity||'LIRA';
+ if(o.tier===4){vfxCell158(g,id,14,W*.5,H*.52,Math.min(W,H)*.72);dbzImpact158(g,W*.5,H*.52,o.id==='GRIFFIN'?'#68f5ff':'#ff315c',2.6);production154.finishers++;return}
+ if(o.tier===3){const hero=griffin.superMove?.active,cx=hero?stage131.heroX:(stage131.enemy.get(boss)?.x||W*.65),cy=H*.58;vfxCell158(g,o.id,12,cx,cy,Math.min(W,H)*.42);if(griffin.superMove?.impact||lira133.move?.impact||stage139.move?.impact)dbzImpact158(g,W*.5,H*.5,hero?'#68f5ff':'#ff315c',2.2);production154.supers++;return}
+ for(const b of beams.slice(-3))dbzBeam158(g,b,b.color||'#68f5ff');
+ for(const s of shots.slice(-10)){vfxCell158(g,'GRIFFIN',s.zKi?1:0,s.x,s.y,22,Math.atan2(s.vy,s.vx));if(s.zKi)dbzImpact158(g,s.x,s.y,'#68f5ff',.35);production154.projectiles++}
+ for(const s of hostile.slice(-10)){vfxCell158(g,id,s.homing?3:1,s.x,s.y,24,Math.atan2(s.vy,s.vx));production154.projectiles++}
+};
+const style158=document.createElement('style');style158.textContent='.combat-focus .brain-panel,.combat-focus .lira-panel,.combat-focus .iyla-panel{opacity:.055!important;transform:translateY(-10px) scale(.94)!important}.combat-focus .ascension-bracket{opacity:.11!important}.combat-focus .tip{opacity:.06!important}.combat-focus .voice-caption{opacity:.82!important;backdrop-filter:blur(8px)}.combat-focus .omni-controls{opacity:.32;transition:opacity .2s}.combat-focus .omni-controls:hover,.combat-focus .omni-controls:active{opacity:1}.combat-focus .form-badge{filter:drop-shadow(0 0 14px #000);}@media(max-width:720px){.combat-focus .brain-panel,.combat-focus .lira-panel,.combat-focus .iyla-panel{opacity:.03!important}.combat-focus .ascension-bracket{opacity:.06!important}}';document.head.appendChild(style158);
+const p158Render=render133;render133=function(){p158Render();production158.frames++};render128=render133;render127=render133;vector113Frame=render133;
+const p158Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p158Replay(frame);frame.production158={system:'EARNED ASCENSION + ALPHA-SAFE DRAGON COMBAT',progression:{seconds:[...transformationGates158],rounds:[...transformationRounds158],firstForm:{minimumSeconds:60,combatRequirement:'4 ELIMINATIONS OR ROUND 2; 90 SECOND FAILSAFE'},blockedEarly:production158.blockedEarlyTransforms},vfx:{cleanCells:production158.cleanCells,cleanFailures:production158.cleanFailures,proceduralBeams:production158.proceduralBeams,impactBursts:production158.impactBursts,maxBeamLength:production158.maxBeamLength,beamCap:Math.min(Math.hypot(W,H)*.52,680)},presentation:['ALPHA-SAFE ENERGY CELLS','BOUNDED PROCEDURAL BEAMS','IMPACT RINGS AND RADIAL STREAKS','COMBAT-FIRST HUD','EARNED TRANSFORMATIONS'],invariants:{noTwelveSecondTransformation:true,noRoundOneTransformation:true,noOpaqueVfxEdges:production158.cleanFailures===0,beamsRemainStageBounded:production158.maxBeamLength<=680,combatHudUnobstructed:true}}};
+p132CombatEvent('PRODUCTION_158_READY',{firstTransformation:'60S + COMBAT, 90S FAILSAFE',finalTransformation:570,vfx:'ALPHA CLEAN + PROCEDURAL BEAMS',presentation:'RUSH / CLASH / IMPACT'});
+
 
 })();
