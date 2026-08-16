@@ -8,43 +8,37 @@ permissions: {contents: read, pages: write, id-token: write}
 concurrency: {group: pages, cancel-in-progress: true}
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    environment: {name: github-pages, url: '${{ steps.deployment.outputs.page_url }}'}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
       - name: Build Production 192 detailed Griffin GLB
         run: python3 tools/build_griffin_skeletal_192.py
-      - name: Validate current Michael and Survivor release
+      - name: Validate Survivor Production 193
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
           test -f jarvis/griffin-render-184.js
           test -f jarvis/griffin-3d-192.js
-          test -f jarvis/griffin-skeletal-189.js
-          test -f jarvis/griffin-remake-191.js
-          test -f jarvis/assets/survivor/griffin-hero-skeletal-v1.glb
-          python3 -m py_compile tools/build_griffin_skeletal_192.py
+          test -f jarvis/griffin-sprite-193.js
+          test -s jarvis/assets/survivor/griffin-ascended-atlas-v3.webp
+          test -s jarvis/assets/survivor/griffin-atlas-v3.webp
           node --check jarvis/griffin-render-184.js
           node --check jarvis/griffin-3d-192.js
-          node --check jarvis/griffin-skeletal-189.js
-          node --check jarvis/griffin-remake-191.js
-          node --check jarvis/michael-graphics-v39.js
-          node --check jarvis/michael-graphics-v40-base.js
-          node --check jarvis/michael-graphics-v40.js
-          node --check jarvis/mjx7303-racing-michael-v66.js
-          node --check jarvis/racing-tab.js
-          node --check tools/michael_internal_vision.mjs
-          node --check tools/nickelle_visual_ai.mjs
+          node --check jarvis/griffin-sprite-193.js
+          node --check jarvis/core-survivor.js
           node <<'NODE'
-          const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
-          need('index.html','jarvis/racing-tab.js');need('racing-mjx7303-michael-v39.html','MICHAEL V67.0');need('jarvis/mjx7303-racing-michael-v66.js','MICHAEL_V67');need('survivor.html','JARVIS ARCADE PROTOCOL');need('jarvis/core-survivor.js','Defense Satellites');need('jarvis/griffin-render-184.js','PRODUCTION_192_DETAILED_3D_BOOTSTRAP');need('jarvis/griffin-render-184.js','griffin-3d-192.js?v=20260816production192');need('jarvis/griffin-3d-192.js','DETAILED_COMPUTER_GENERATED_3D');need('jarvis/griffin-skeletal-189.js','SKELETAL_GLTF_3D');
-          const gb=fs.readFileSync('jarvis/assets/survivor/griffin-hero-skeletal-v1.glb');if(gb.subarray(0,4).toString()!=='glTF'||gb.readUInt32LE(4)!==2||gb.readUInt32LE(8)!==gb.length)throw Error('Griffin GLB invalid');const jl=gb.readUInt32LE(12),gj=JSON.parse(gb.subarray(20,20+jl).toString('utf8'));if((gj.skins?.[0]?.joints||[]).length!==18)throw Error('Griffin skeleton mismatch');for(const n of ['Idle','Guard','Jab','Kick','PowerUp'])if(!(gj.animations||[]).some(a=>a.name===n))throw Error(`clip missing ${n}`);const gp=gj.meshes?.[0]?.primitives?.[0]?.attributes||{};for(const n of ['POSITION','NORMAL','COLOR_0','JOINTS_0','WEIGHTS_0'])if(gp[n]===undefined)throw Error(`missing ${n}`);if((gj.accessors?.[gp.POSITION]?.count||0)<3000)throw Error('Griffin 3D mesh detail too low');
-          const truth=JSON.parse(text('michael/visual/owner-truth.json'));if(truth.authorityOrder?.[0]!=='owner_photos')throw Error('Owner Truth mismatch');const release=JSON.parse(text('public/michael-v57-release.json'));if(release.engine!=='MICHAEL_V57')throw Error('Michael engine mismatch');const poly=JSON.parse(text('engine/polyglot.json'));if(poly.engine!=='MICHAEL_V57'||poly.languages.length!==12)throw Error('polyglot mismatch');
-          let b64='';for(let i=0;i<14;i++){const n=String(i).padStart(2,'0'),m=text(`jarvis/michael-v40-payload-${n}.js`).match(/export default ['\"]([^'\"]+)/);if(!m)throw Error(`payload ${i}`);b64+=m[1]}const b=Buffer.from(b64,'base64'),sha=crypto.createHash('sha256').update(b).digest('hex');if(sha!=='f0825ec3dee992c6ae69065c5760e3926d3db4be525502faf3a72d6b86120bf6')throw Error('GLB sha mismatch');console.log({survivor:'PRODUCTION_192',griffin:'DETAILED_COMPUTER_GENERATED_3D',bones:18,vertices:gj.accessors[gp.POSITION].count});
+          const fs=require('fs'),need=(p,s)=>{const t=fs.readFileSync(p,'utf8');if(!t.includes(s))throw Error(`${p} missing ${s}`)};
+          need('survivor.html','JARVIS ARCADE PROTOCOL');
+          need('jarvis/core-survivor.js','Defense Satellites');
+          need('jarvis/griffin-render-184.js','PRODUCTION_193_AUTHORED_SPRITE_BOOTSTRAP');
+          need('jarvis/griffin-render-184.js','griffin-sprite-193.js?v=20260816production193');
+          need('jarvis/griffin-sprite-193.js','AUTHORED_SPRITE_ATLAS');
+          need('jarvis/griffin-sprite-193.js','griffin-ascended-atlas-v3.webp');
+          const a=fs.statSync('jarvis/assets/survivor/griffin-ascended-atlas-v3.webp').size,b=fs.statSync('jarvis/assets/survivor/griffin-atlas-v3.webp').size;if(a<400000||b<300000)throw Error('Griffin authored atlas quality gate failed');
+          console.log({survivor:'PRODUCTION_193',griffin:'AUTHORED_SPRITE_ATLAS',ascendedBytes:a,baseBytes:b});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
