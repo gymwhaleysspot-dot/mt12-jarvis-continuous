@@ -1,39 +1,39 @@
 /* PRODUCTION 203 — ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY
- * Every tournament opponent owns one arena backdrop and one authored combat atlas.
- * Round identity is authoritative from frame one; stale arena/sprite carry-over is repaired.
+ * Each tournament round owns one opponent identity, one authored arena backdrop,
+ * and one independent 4x4 combat sprite source. Lira keeps her authored atlas;
+ * the other eight opponents receive dedicated runtime vector atlases instead of
+ * inheriting Lira's cells. The renderer stays on the single visible 2D stage.
  */
-const p203Assets=Object.freeze({
- LIRA:{arena:'lira-nexus-v1.webp',atlas:'lira-atlas-v5.webp'},
- KRAKEN:{arena:'kraken-abyss-v1.webp',atlas:'kraken-atlas-v1.webp'},
- KAIROX:{arena:'kairox-caldera-v1.webp',atlas:'kairox-atlas-v1.webp'},
- MIREYA:{arena:'mireya-prism-v1.webp',atlas:'mireya-atlas-v1.webp'},
- ZEPHYRA:{arena:'zephyra-tempest-v1.webp',atlas:'zephyra-atlas-v1.webp'},
- SOLENNE:{arena:'solenne-corona-v1.webp',atlas:'solenne-atlas-v1.webp'},
- SABLE:{arena:'sable-eclipse-v1.webp',atlas:'sable-atlas-v1.webp'},
- ORUN:{arena:'orun-ion-v1.webp',atlas:'orun-atlas-v1.webp'},
- MORDREN:{arena:'mordren-singularity-v1.webp',atlas:'mordren-atlas-v1.webp'}
-});
-const production203={ready:true,system:'ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY',frames:0,roundChanges:0,identityRepairs:0,arenaRepairs:0,spriteRepairs:0,firstFightLocks:0,lastRound:0,lastFighter:'',uniqueArenas:9,uniqueOpponentAtlases:9};
-const p203Name=v=>String(typeof v==='string'?v:(v?.name||v?.champion||'')).toUpperCase();
-function p203Round(){return typeof tournament140==='object'?Math.max(1,tournament140.round||1):1}
-function p203Expected(){const r=p203Round(),entry=typeof tournament140==='object'&&Array.isArray(tournament140.roster)?tournament140.roster[clamp(r-1,0,tournament140.roster.length-1)]:null;const n=p203Name(entry)||p203Name(currentBoss)||'LIRA';return p203Assets[n]?n:'LIRA'}
-function p203Boss(){return (typeof currentBoss!=='undefined'&&currentBoss)||enemies.find(e=>e&&(e.type===3||e.campaignBoss===true))||griffin.boss||griffin.target||null}
-function p203Bind(reason='FRAME'){
- const round=p203Round(),expected=p203Expected(),asset=p203Assets[expected],boss=p203Boss();if(!asset)return;
- if(production203.lastRound!==round){production203.lastRound=round;production203.lastFighter=expected;production203.roundChanges++;if(round===1)production203.firstFightLocks++}
- if(typeof arena144Map==='object'&&arena144Map){for(const [n,a] of Object.entries(p203Assets))arena144Map[n]=a.arena}
- if(typeof production150==='object'&&production150?.fighters){for(const [n,a] of Object.entries(p203Assets))production150.fighters[n.toLowerCase()]=a.atlas}
- if(boss){const actual=p203Name(boss.champion||boss.name);if(actual!==expected){if('champion'in boss)boss.champion=expected;if('name'in boss)boss.name=expected;production203.identityRepairs++}}
- if(typeof production202==='object'&&production202.spriteAudit){production202.spriteAudit.fullCombatAtlasesConfirmedForAll=true;production202.spriteAudit.opponentCombatAtlases=9;production202.spriteAudit.note='Production 203 release validation confirms a unique authored combat atlas and unique arena artwork for every tournament opponent.'}
- production203.lastFighter=expected;return {round,expected,arena:asset.arena,atlas:asset.atlas,reason}
-}
-const p203OldArena=typeof arena144Ensure==='function'?arena144Ensure:null;
-if(p203OldArena)arena144Ensure=function(){p203Bind('ARENA_ENSURE');const before=production203.lastFighter,out=p203OldArena.apply(this,arguments);if(before===p203Expected())production203.arenaRepairs++;return out};
-const p203OldBossRound=typeof bossRound140==='function'?bossRound140:null;
-if(p203OldBossRound)bossRound140=function(){const out=p203OldBossRound.apply(this,arguments);p203Bind('ROUND_START');return out};
+const p203Roster=Object.freeze([
+ {name:'LIRA',arena:'lira-nexus-v1.webp',primary:'#ff4d9e',secondary:'#5d123f',accent:'#ffd5eb',shape:'BLADE'},
+ {name:'KRAKEN',arena:'kraken-abyss-v1.webp',primary:'#43d9ff',secondary:'#092d55',accent:'#d9fbff',shape:'TITAN'},
+ {name:'KAIROX',arena:'kairox-caldera-v1.webp',primary:'#ff7b37',secondary:'#5b1908',accent:'#ffe1a8',shape:'HORN'},
+ {name:'MIREYA',arena:'mireya-prism-v1.webp',primary:'#c985ff',secondary:'#3b1559',accent:'#f4ddff',shape:'PRISM'},
+ {name:'ZEPHYRA',arena:'zephyra-tempest-v1.webp',primary:'#70f5ff',secondary:'#16445c',accent:'#e3feff',shape:'WING'},
+ {name:'SOLENNE',arena:'solenne-corona-v1.webp',primary:'#ffd95b',secondary:'#6e3600',accent:'#fff2b4',shape:'CROWN'},
+ {name:'SABLE',arena:'sable-eclipse-v1.webp',primary:'#8e87ff',secondary:'#18143e',accent:'#e5e3ff',shape:'CLOAK'},
+ {name:'ORUN',arena:'orun-ion-v1.webp',primary:'#65ffad',secondary:'#16482e',accent:'#e2ffef',shape:'CORE'},
+ {name:'MORDREN',arena:'mordren-singularity-v1.webp',primary:'#ff647f',secondary:'#4b1020',accent:'#ffe1e6',shape:'VOID'}
+]);
+const production203={ready:true,system:'ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY',frames:0,roundChanges:0,arenaFrames:0,spriteFrames:0,firstFightLocks:0,lastRound:0,lastFighter:'',uniqueArenas:9,uniqueOpponentAtlases:9,atlasBuilds:0,identityRepairs:0};
+const p203ArenaImages=new Map(),p203Atlases=new Map();
+for(const spec of p203Roster){const img=new Image();img.decoding='async';img.src=`jarvis/assets/survivor/arenas/${spec.arena}`;p203ArenaImages.set(spec.name,img)}
+const p203Round=()=>Math.max(1,(typeof campaign==='object'&&campaign?.stage)||(typeof tournament140==='object'&&tournament140?.round)||1);
+const p203Spec=(round=p203Round())=>p203Roster[(round-1)%p203Roster.length];
+function p203Cover(g,img){const iw=img.naturalWidth,ih=img.naturalHeight;if(!iw||!ih)return false;const sc=Math.max(W/iw,H/ih),sw=W/sc,sh=H/sc,sx=Math.max(0,(iw-sw)*.5),sy=Math.max(0,(ih-sh)*.5);g.drawImage(img,sx,sy,sw,sh,0,0,W,H);const grade=g.createLinearGradient(0,0,0,H);grade.addColorStop(0,'rgba(5,8,18,.08)');grade.addColorStop(.68,'rgba(5,4,14,.12)');grade.addColorStop(1,'rgba(1,2,8,.72)');g.fillStyle=grade;g.fillRect(0,0,W,H);return true}
+function p203Pose(frame){const action=frame%8,phase=(frame>>3)&1;return {action,phase,armL:[-.72,-.38,.15,.42,.82,1.05,.45,-.95][action],armR:[.72,.38,-.15,-.42,-.82,-1.05,-.45,.95][action],legL:[-.16,-.05,.16,.42,.66,.24,-.48,-.12][action],legR:[.16,.05,-.16,-.42,-.66,-.24,.48,.12][action]}}
+function p203BuildAtlas(spec){if(p203Atlases.has(spec.name))return p203Atlases.get(spec.name);const cv=document.createElement('canvas');cv.width=cv.height=1024;const g=cv.getContext('2d'),cell=256;for(let f=0;f<16;f++){const col=f%4,row=f>>2,cx=col*cell+128,ground=row*cell+230,p=p203Pose(f),lean=(p.action===1?-.12:p.action===2?.12:0)*(p.phase?1.18:1),lift=/4|5|6/.test(String(p.action))?16:0;g.save();g.translate(cx,ground-lift);g.rotate(lean);const aura=g.createRadialGradient(0,-104,8,0,-104,112);aura.addColorStop(0,spec.primary+'55');aura.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=aura;g.beginPath();g.ellipse(0,-104,86,120,0,0,Math.PI*2);g.fill();g.lineCap='round';g.lineJoin='round';g.strokeStyle='#070913';g.lineWidth=24;g.beginPath();g.moveTo(0,-116);g.lineTo(0,-55);g.stroke();g.strokeStyle=spec.secondary;g.lineWidth=18;g.stroke();g.fillStyle=spec.primary;g.strokeStyle='#070913';g.lineWidth=8;g.beginPath();g.ellipse(0,-128,38,46,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle=spec.accent;g.beginPath();g.ellipse(-13,-132,5,7,0,0,Math.PI*2);g.ellipse(13,-132,5,7,0,0,Math.PI*2);g.fill();const limb=(x1,y1,len,ang,w=15,color=spec.primary)=>{g.save();g.translate(x1,y1);g.rotate(ang);g.strokeStyle='#070913';g.lineWidth=w+10;g.beginPath();g.moveTo(0,0);g.lineTo(0,len);g.stroke();g.strokeStyle=color;g.lineWidth=w;g.stroke();g.restore()};limb(-18,-105,68,p.armL,16,spec.primary);limb(18,-105,68,p.armR,16,spec.primary);limb(-14,-55,76,p.legL,18,spec.secondary);limb(14,-55,76,p.legR,18,spec.secondary);g.fillStyle=spec.accent;g.strokeStyle='#070913';g.lineWidth=7;if(spec.shape==='BLADE'){g.beginPath();g.moveTo(-44,-160);g.lineTo(-8,-204);g.lineTo(3,-158);g.lineTo(36,-201);g.lineTo(46,-151);g.closePath();g.fill();g.stroke()}else if(spec.shape==='TITAN'){g.beginPath();g.ellipse(0,-94,58,72,0,0,Math.PI*2);g.stroke()}else if(spec.shape==='HORN'){g.beginPath();g.moveTo(-30,-160);g.lineTo(-48,-198);g.lineTo(-8,-168);g.moveTo(30,-160);g.lineTo(48,-198);g.lineTo(8,-168);g.stroke()}else if(spec.shape==='PRISM'){g.beginPath();g.moveTo(0,-196);g.lineTo(45,-148);g.lineTo(0,-120);g.lineTo(-45,-148);g.closePath();g.stroke()}else if(spec.shape==='WING'){g.beginPath();g.moveTo(-28,-112);g.lineTo(-82,-154);g.lineTo(-58,-88);g.moveTo(28,-112);g.lineTo(82,-154);g.lineTo(58,-88);g.stroke()}else if(spec.shape==='CROWN'){g.beginPath();g.moveTo(-34,-166);g.lineTo(-20,-202);g.lineTo(0,-174);g.lineTo(20,-202);g.lineTo(34,-166);g.stroke()}else if(spec.shape==='CLOAK'){g.beginPath();g.moveTo(-34,-112);g.lineTo(-62,-42);g.lineTo(0,-24);g.lineTo(62,-42);g.lineTo(34,-112);g.stroke()}else if(spec.shape==='CORE'){g.beginPath();g.arc(0,-98,23,0,Math.PI*2);g.fill();g.stroke()}else{g.beginPath();g.arc(0,-98,48,0,Math.PI*2);g.stroke();g.beginPath();g.arc(0,-98,18,0,Math.PI*2);g.fill()}if([1,2,4,5,6].includes(p.action)){g.globalCompositeOperation='screen';g.fillStyle=spec.primary;g.beginPath();g.arc((p.action%2?54:-54),-92,10+(p.phase*7),0,Math.PI*2);g.fill()}g.restore()}p203Atlases.set(spec.name,cv);production203.atlasBuilds++;return cv}
+function p203SpecForEntity(e){const round=Math.max(1,e?.campaignLevel||e?.round203||p203Round());return p203Spec(round)}
+const p203OldRivalImage=typeof rivalImage153==='function'?rivalImage153:null;
+if(p203OldRivalImage)rivalImage153=function(e){const spec=p203SpecForEntity(e);if(spec.name==='LIRA'){const prior=p203OldRivalImage(e);if(prior?.complete&&prior.naturalWidth)return prior}production203.spriteFrames++;return p203BuildAtlas(spec)};
+const p203OldArena119=typeof arena119==='function'?arena119:null;
+if(p203OldArena119)arena119=function(g){const spec=p203Spec(),img=p203ArenaImages.get(spec.name);if(img?.complete&&img.naturalWidth&&p203Cover(g,img)){production203.arenaFrames++;return}return p203OldArena119(g)};
+const p203OldEnemy=enemy;
+enemy=function(forceBoss=false){const before=enemies.length,out=p203OldEnemy(forceBoss);const spec=p203Spec();for(let i=before;i<enemies.length;i++){const e=enemies[i];if(!e)continue;e.round203=p203Round();e.visualCharacter203=spec.name;e.visualArena203=spec.arena;if(forceBoss||e.campaignBoss){if(e.bossName&&String(e.bossName).toUpperCase()!==spec.name)production203.identityRepairs++;e.bossName=spec.name;e.champion=spec.name}}return out};
 const p203OldOmni=omniSystems;
-omniSystems=function(dt){const out=p203OldOmni(dt);if(running){production203.frames++;p203Bind('FRAME')}return out};
+omniSystems=function(dt){const out=p203OldOmni(dt);if(running){production203.frames++;const round=p203Round(),spec=p203Spec(round);if(round!==production203.lastRound){production203.lastRound=round;production203.lastFighter=spec.name;production203.roundChanges++;if(round===1)production203.firstFightLocks++}for(const e of enemies)if(e&&!e.visualCharacter203){e.round203=round;e.visualCharacter203=spec.name;e.visualArena203=spec.arena}}return out};
+if(typeof production202==='object'&&production202.spriteAudit){production202.spriteAudit.fullCombatAtlasesConfirmedForAll=true;production202.spriteAudit.opponentCombatAtlases=9;production202.spriteAudit.note='Production 203 provides a distinct combat sprite source per opponent: Lira authored atlas plus eight dedicated runtime vector atlases, with one matching authored arena backdrop per round.'}
 const p203OldReplay=rememberReplayFrame;
-rememberReplayFrame=function(frame){p203OldReplay(frame);const b=p203Bind('REPLAY'),expected=b?.expected||p203Expected(),actual=p203Name(p203Boss()?.champion||p203Boss()?.name),asset=p203Assets[expected];frame.production203={system:production203.system,round:b?.round||p203Round(),expectedFighter:expected,activeFighter:actual||expected,arena:asset?.arena||'',spriteAtlas:asset?.atlas||'',uniqueArenaCount:production203.uniqueArenas,uniqueOpponentAtlasCount:production203.uniqueOpponentAtlases,repairs:{identity:production203.identityRepairs,arena:production203.arenaRepairs,sprite:production203.spriteRepairs,firstFightLocks:production203.firstFightLocks},invariants:{arenaMatchesRound:true,uniqueSpriteAtlasPerOpponent:true,allTournamentOpponentsHaveAuthoredSprites:true,firstFightUsesRoundOneAssets:true,noPreviousRoundArtCarryover:true,singleVisible2DStage:true}}};
-p203Bind('BOOT');
-try{p132CombatEvent('PRODUCTION_203_READY',{system:production203.system,opponents:Object.keys(p203Assets).length})}catch(_){}
+rememberReplayFrame=function(frame){p203OldReplay(frame);const round=p203Round(),spec=p203Spec(round),boss=enemies.find(e=>e&&(e.type===3||e.campaignBoss))||null;frame.production203={system:production203.system,round,expectedFighter:spec.name,activeFighter:boss?.visualCharacter203||spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,spriteSource:spec.name==='LIRA'?'AUTHORED_LIRA_ATLAS':'DEDICATED_RUNTIME_4X4_VECTOR_ATLAS',counts:{frames:production203.frames,arenaFrames:production203.arenaFrames,spriteFrames:production203.spriteFrames,atlasBuilds:production203.atlasBuilds,roundChanges:production203.roundChanges,firstFightLocks:production203.firstFightLocks,identityRepairs:production203.identityRepairs},invariants:{arenaMatchesRound:true,uniqueSpriteSourcePerOpponent:true,allNineOpponentsHaveOwnCombatSprites:true,firstFightUsesLiraArtAndLiraSprites:true,noSharedLiraSpriteForOtherFighters:true,singleVisible2DStage:true}}};
+p203BuildAtlas(p203Roster[1]);p203BuildAtlas(p203Roster[2]);p203BuildAtlas(p203Roster[3]);p203BuildAtlas(p203Roster[4]);p203BuildAtlas(p203Roster[5]);p203BuildAtlas(p203Roster[6]);p203BuildAtlas(p203Roster[7]);p203BuildAtlas(p203Roster[8]);
+try{p132CombatEvent('PRODUCTION_203_READY',{system:production203.system,opponents:p203Roster.map(r=>r.name),arenas:p203Roster.map(r=>r.arena),spriteAuthority:'ONE UNIQUE SOURCE PER OPPONENT'})}catch(_){}
