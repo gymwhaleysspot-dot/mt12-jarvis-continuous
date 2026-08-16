@@ -58,9 +58,7 @@ combatEvent=function(type,data={}){
  if(t==='GRIFFIN_DAMAGE_REACTION'){
   production200.damageEvents++;stage200.hitPose=p200PoseFromDamage(data);stage200.hitUntil=elapsed+(/KNOCK|LAUNCH/.test(stage200.hitPose)?.58:.34);stage200.recoverUntil=stage200.hitUntil+.24;p200Sfx('GRIFFIN_DAMAGE_REACTION',1.15)
  }
- if((t==='MELEE_CONTACT_CONFIRMED'||t==='KI_BLAST_CONTACT'||t==='BEAM_CONTACT'||t==='LIGHTNING_CONTACT'||t==='SUPER_MOVE_IMPACT'||t==='RIVAL_SUPER_IMPACT')&&p200AllowedImpact()){
-  p200Sfx(t,/SUPER|BEAM/.test(t)?1.4:1);
- }
+ if((t==='MELEE_CONTACT_CONFIRMED'||t==='KI_BLAST_CONTACT'||t==='BEAM_CONTACT'||t==='LIGHTNING_CONTACT'||t==='SUPER_MOVE_IMPACT'||t==='RIVAL_SUPER_IMPACT')&&p200AllowedImpact())p200Sfx(t,/SUPER|BEAM/.test(t)?1.4:1);
  return out
 };
 const p200Director=director127;
@@ -77,9 +75,10 @@ omniSystems=function(dt){
  const out=p200Omni(dt);if(!running)return out;
  const due=p200EarnedForm();if(due>(griffin.evolution||0))p200ForceForm(due,'LIVE_GATE');
  const fps=(typeof production109==='object'&&production109.performance?.fps)||60;
- if(fps<42||performanceState?.stall>0){production200.stallFrames++;
+ const stalled=(typeof performanceState==='object'&&performanceState&&performanceState.stall>0)||(typeof performanceMetrics==='object'&&performanceMetrics&&performanceMetrics.stall>0);
+ if(fps<42||stalled){production200.stallFrames++;
   if(Array.isArray(rings)&&rings.length>10){production200.vfxDropped+=rings.length-10;rings.length=10}
-  if(Array.isArray(particles)&&particles.length>70){production200.vfxDropped+=particles.length-70;particles.length=70}
+  if(typeof particles!=='undefined'&&Array.isArray(particles)&&particles.length>70){production200.vfxDropped+=particles.length-70;particles.length=70}
  }
  return out
 };
