@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 220 direct arena bindings
+      - name: Build and validate Survivor Production 222 Replay 57 fixes
         run: |
           set -Eeuo pipefail
           required=(
@@ -48,6 +48,8 @@ jobs:
             jarvis/production218-engine-kernel-stage-runtime.inc.js
             jarvis/production219-replay55-runtime-cleanup.inc.js
             jarvis/production220-direct-nine-arena-bindings.inc.js
+            jarvis/production221-replay56-runtime-fixes.inc.js
+            jarvis/production222-replay57-performance-contact-fixes.inc.js
             tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs
             tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs
             tools/build-survivor-production209.mjs tools/build-survivor-production210.mjs
@@ -55,6 +57,7 @@ jobs:
             tools/build-survivor-production213.mjs tools/build-survivor-production215.mjs
             tools/build-survivor-production217.mjs tools/build-survivor-production218.mjs
             tools/build-survivor-production219.mjs tools/build-survivor-production220.mjs
+            tools/build-survivor-production222.mjs
           )
           for f in "${required[@]}"; do test -f "$f"; done
           for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
@@ -72,17 +75,20 @@ jobs:
           node tools/build-survivor-production218.mjs
           node tools/build-survivor-production219.mjs
           node tools/build-survivor-production220.mjs
+          node tools/build-survivor-production222.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
           const core=text('jarvis/core-survivor.js');
-          for(const n of [203,204,205,206,207,209,210,211,212,213,214,215,216,217,218,219,220])need('jarvis/core-survivor.js',`PRODUCTION_${n}_READY`);
-          for(const n of [204,205,206,207,209,210,211,212,213,214,215,216,217,218,219,220])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
+          for(const n of [203,204,205,206,207,209,210,211,212,213,214,215,216,217,218,219,220,221,222])need('jarvis/core-survivor.js',`PRODUCTION_${n}_READY`);
+          for(const n of [204,205,206,207,209,210,211,212,213,214,215,216,217,218,219,220,221,222])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
           const inc220=text('jarvis/production220-direct-nine-arena-bindings.inc.js');
           for(const m of ['p220ArenaManifest','p220ArenaSlots','p220Activate','p220LoadingPlate','noPreviousArenaFallback:true','legacyFallbackRendererNotUsed:true','stageChangeCannotRetainPreviousImage:true'])if(!inc220.includes(m))throw Error('Production 220 missing '+m);
           if(/\bp205FallbackArena\s*\(/.test(inc220))throw Error('Production 220 may not call legacy arena fallback');
-          if(/document\.createElement\(['\"]canvas['\"]\)/.test(inc220)||/requestAnimationFrame\s*\(/.test(inc220))throw Error('Production 220 must not create a canvas or RAF');
+          const inc222=text('jarvis/production222-replay57-performance-contact-fixes.inc.js');
+          for(const m of ['p222Gates','p200EarnedForm=function(){return p222TimedForm()}','p201DueForm=function(){return p222TimedForm()}','p222ArenaCache','p222SceneCache','p222PrePlanContact','p222SpriteAccounting','earnedFormGatesUnified','arenaBindingEdgeTriggered','falseMissingGrowthQuarantined','prePlanContactBounded'])if(!inc222.includes(m))throw Error('Production 222 missing '+m);
+          for(const inc of [inc220,inc222])if(/document\.createElement\(['\"]canvas['\"]\)/.test(inc)||/requestAnimationFrame\s*\(/.test(inc))throw Error('Production 220/222 must not create a canvas or RAF');
           const expected=[
             ['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],
             ['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],
@@ -90,7 +96,7 @@ jobs:
           ];
           for(let i=0;i<expected.length;i++){const [opponent,arena]=expected[i],stage=i+1;if(!inc220.includes(`{stage:${stage},opponent:'${opponent}',arena:'${arena}'`))throw Error(`Stage ${stage} direct binding missing`)}
           const hashes=new Set();for(const [,arena] of expected){const p=`jarvis/assets/survivor/arenas/${arena}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+arena);hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==9)throw Error('All nine arena files must be byte-distinct');
-          console.log({survivor:'PRODUCTION_220',stageAuthority:'CAMPAIGN_STAGE_ONLY',arenas:9,binding:'NINE_STAGE_SPECIFIC_IMAGE_SLOTS',fallback:'NEUTRAL_LOADING_PLATE_ONLY',previousSceneFallback:false,renderer:'EXISTING_SINGLE'});
+          console.log({survivor:'PRODUCTION_222',source:'REPLAY_57',formGates:'60S_EARNED',arenaBinding:'TRUE_STAGE_EDGE',sceneBinding:'CACHED_BY_CAMPAIGN_STAGE',contact:'PRE_PLAN',sprites:'FALSE_MISSING_QUARANTINED',arenas:9,previousSceneFallback:false,renderer:'EXISTING_SINGLE'});
           NODE
       - name: Stamp Survivor deployment authority
         env:
@@ -101,15 +107,15 @@ jobs:
           const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
           const path='survivor.html';let html=fs.readFileSync(path,'utf8'),rx=/jarvis\/core-survivor\.js\?v=[^"'<>\s]+/g,refs=html.match(rx)||[];if(refs.length!==1)throw Error(`Expected exactly one Survivor core script reference, found ${refs.length}`);html=html.replace(rx,`jarvis/core-survivor.js?v=${sha}`);
           const marker=`<meta name="survivor-build" content="${sha}"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;if(!html.includes('name="survivor-build"'))html=html.replace('<head>',`<head>${marker}`);else html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:220,deploySha:sha,core:'jarvis/core-survivor.js',engineAuthority:'CUSTOM_HTML5_CANVAS_FIXED_STEP_60HZ',sceneAuthority:'CAMPAIGN_STAGE_DIRECT_TO_NINE_ARENA_FILES',assetAuthority:'NINE_STAGE_SPECIFIC_IMAGE_SLOTS_CURRENT_NEXT_PRELOAD',fallbackAuthority:'NO_PREVIOUS_OR_HIGHLAND_SCENE_FALLBACK',progressionAuthority:'BOSS_DEATH_TO_NEXT_ROUND',opponentAuthority:'ONE_CANONICAL_TOURNAMENT_ACTOR_BOUNDED_DUEL',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',voiceAuthority:'DEDUPED_BOUNDED_SAFARI_QUEUE',replayAuthority:'DETERMINISTIC_STATE_HASH_PLUS_DIRECT_ARENA_BINDING_PROOF',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:222,deploySha:sha,core:'jarvis/core-survivor.js',engineAuthority:'CUSTOM_HTML5_CANVAS_FIXED_STEP_60HZ',sceneAuthority:'CAMPAIGN_STAGE_DIRECT_TO_NINE_ARENA_FILES_EDGE_CACHED',assetAuthority:'NINE_STAGE_SPECIFIC_IMAGE_SLOTS_CURRENT_NEXT_PRELOAD',fallbackAuthority:'NO_PREVIOUS_OR_HIGHLAND_SCENE_FALLBACK',progressionAuthority:'EARNED_60_105_150_195_245_300_360_425_495_570_SECONDS',opponentAuthority:'ONE_CANONICAL_TOURNAMENT_ACTOR_PREPLAN_CONTACT_BOUNDED',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',spriteAuthority:'DECODED_ATLAS_READINESS_FALSE_MISSING_QUARANTINE',performanceAuthority:'NO_FORM_SYNC_STORM_NO_PER_FRAME_SCENE_REBIND_DECORATIVE_VFX_SHED',replayAuthority:'REPLAY57_PRODUCTION222_ACCEPTANCE',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
           node <<'NODE'
           const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,html=fs.readFileSync('survivor.html','utf8'),core=fs.readFileSync('jarvis/core-survivor.js','utf8'),manifest=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));
           if(!html.includes(`jarvis/core-survivor.js?v=${sha}`))throw Error('Survivor HTML is not bound to this deployment SHA');
           if(!html.includes(`name="survivor-build" content="${sha}"`))throw Error('Survivor build marker missing');
-          if(!core.includes('PRODUCTION_220_READY'))throw Error('Production 220 missing from deployed core');
-          if(manifest.deploySha!==sha||manifest.production!==220||manifest.fallbackAuthority!=='NO_PREVIOUS_OR_HIGHLAND_SCENE_FALLBACK')throw Error('Survivor build manifest disagrees with deployment');
-          console.log({deploySha:sha,production:manifest.production,cacheKey:'COMMIT_SHA',scene:manifest.sceneAuthority,fallback:manifest.fallbackAuthority});
+          if(!core.includes('PRODUCTION_222_READY'))throw Error('Production 222 missing from deployed core');
+          if(manifest.deploySha!==sha||manifest.production!==222||manifest.fallbackAuthority!=='NO_PREVIOUS_OR_HIGHLAND_SCENE_FALLBACK')throw Error('Survivor build manifest disagrees with deployment');
+          console.log({deploySha:sha,production:manifest.production,cacheKey:'COMMIT_SHA',scene:manifest.sceneAuthority,progression:manifest.progressionAuthority,performance:manifest.performanceAuthority});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
