@@ -47,7 +47,7 @@ jobs:
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
-          need('survivor.html','JARVIS ARCADE PROTOCOL');need('survivor.html','jarvis/core-survivor.js?v=20260817production207levelscene');
+          need('survivor.html','JARVIS ARCADE PROTOCOL');
           for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY','PRODUCTION_207_READY'])need('jarvis/core-survivor.js',m);
           for(const m of ['LEVEL SCENE AUTHORITY + DRAGON-BATTLE PACING','levelOwnsArenaImage:true','arenaImageReboundAtLevelBoundary:true','tournamentCampaignBossSceneAgree:true','eachLevelHasDistinctArena:true','singleRendererPreserved:true','eventDrivenBattlePacing:true'])need('jarvis/core-survivor.js',m);
           const core=text('jarvis/core-survivor.js');for(const n of [204,205,206,207])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
@@ -57,6 +57,38 @@ jobs:
           if(!inc.includes("PRESSURE_RUSH")||!inc.includes("AERIAL_LAUNCH_CHAIN")||!inc.includes("ULTIMATE_BEAT"))throw Error('Dragon-battle pacing enhancements missing');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
           console.log({survivor:'PRODUCTION_207',scene:'LEVEL_REBINDS_EXISTING_ARENA_IMAGE',levels:9,combat:['PRESSURE_RUSH','AERIAL_LAUNCH_CHAIN','ULTIMATE_BEAT'],renderer:'EXISTING_SINGLE'});
+          NODE
+      - name: Stamp Survivor deployment authority
+        env:
+          SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const sha=process.env.SURVIVOR_DEPLOY_SHA;
+          if(!/^[0-9a-f]{40}$/.test(sha||'')) throw Error('Missing exact deployment SHA');
+          const path='survivor.html';
+          let html=fs.readFileSync(path,'utf8');
+          const rx=/jarvis\/core-survivor\.js\?v=[^"'<>\s]+/g;
+          const refs=html.match(rx)||[];
+          if(refs.length!==1) throw Error(`Expected exactly one Survivor core script reference, found ${refs.length}`);
+          html=html.replace(rx,`jarvis/core-survivor.js?v=${sha}`);
+          const marker=`<meta name="survivor-build" content="${sha}"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;
+          if(!html.includes('name="survivor-build"')) html=html.replace('<head>',`<head>${marker}`);
+          fs.writeFileSync(path,html);
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:207,deploySha:sha,core:'jarvis/core-survivor.js',sceneAuthority:'LEVEL_REBINDS_EXISTING_ARENA_IMAGE',generatedAt:new Date().toISOString()},null,2)+'\n');
+          NODE
+          node <<'NODE'
+          const fs=require('fs');
+          const sha=process.env.SURVIVOR_DEPLOY_SHA;
+          const html=fs.readFileSync('survivor.html','utf8');
+          const core=fs.readFileSync('jarvis/core-survivor.js','utf8');
+          const manifest=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));
+          if(!html.includes(`jarvis/core-survivor.js?v=${sha}`)) throw Error('Survivor HTML is not bound to this deployment SHA');
+          if(!html.includes(`name="survivor-build" content="${sha}"`)) throw Error('Survivor build marker missing');
+          if(!core.includes('PRODUCTION_207_READY')) throw Error('Production 207 missing from deployed core');
+          if(manifest.deploySha!==sha||manifest.production!==207) throw Error('Survivor build manifest disagrees with deployment');
+          console.log({deploySha:sha,production:manifest.production,cacheKey:'COMMIT_SHA',manifest:'jarvis/survivor-build.json'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
