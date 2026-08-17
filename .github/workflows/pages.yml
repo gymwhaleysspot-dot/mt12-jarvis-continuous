@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 204
+      - name: Build and validate Survivor Replay 48 authority
         run: |
           set -Eeuo pipefail
           test -f survivor.html
@@ -48,12 +48,14 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
-          need('survivor.html','jarvis/core-survivor.js?v=20260816production204');
+          need('survivor.html','jarvis/core-survivor.js?v=20260816replay48authority');
           for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY','PRODUCTION_203_READY','PRODUCTION_204_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['REPLAY 47 AUTHORITY UNIFICATION','allElevenFormsReachable:true','engagementTelemetryTracksLiveForm:true','damageEventsDriveHitCells:true','rivalContactsCounted:true','voiceHasFallback:true','oneAuthoritativeAssetRegistry:true','singleVisible2DStage:true'])need('jarvis/core-survivor.js',m);
+          for(const m of ['REPLAY 48 AUTHORITY UNIFICATION','production151State.transformStarts','production152State.formsSeen','production155.formEngagements','production162State.sprites.hit','voiceDirection111','readyNeverExceedsExpected:true','singleVisible2DStage:true','BRIDGE_NOT_RENDERER'])need('jarvis/core-survivor.js',m);
           for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true'])need('jarvis/core-survivor.js',m);
+          const core=text('jarvis/core-survivor.js');
+          if((core.match(/REPLAY 48 AUTHORITY UNIFICATION/g)||[]).length!==1)throw Error('Replay 48 authority must be assembled exactly once');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_204',source:'REPLAY_47',forms:'LIVE_ENGAGEMENT_AUTHORITY',damage:'HIT_CELL_AUTHORITY',rivals:'CONTACT_LEDGER',voice:'QUEUE_PLUS_BROWSER_FALLBACK',assets:'PRODUCTION_203_REGISTRY',renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          console.log({survivor:'PRODUCTION_204',source:'REPLAY_48',forms:'LIVE_STATE_TO_151_152_155',damage:'EVENT_TO_162_HIT_CELLS',rivals:'CONTACT_LEDGER',voice:'DIRECTED_QUEUE_PLUS_BROWSER_FALLBACK',assets:'CANONICAL_17_BODY_CONTRACT',renderer:'EXISTING_SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
