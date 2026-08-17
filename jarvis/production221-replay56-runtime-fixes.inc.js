@@ -60,7 +60,7 @@ function p221SyncSpriteReadiness(){
 function p221FormAuthority(){
  let actual=0;try{actual=typeof p219FormIndex==='function'?p219FormIndex():Math.max(0,Number(griffin?.evolution)||0)}catch(_){actual=Math.max(0,Number(griffin?.evolution)||0)}
  if((Number(elapsed)||0)<60&&!griffin?.transformation?.active)actual=0;
- const names=typeof forms!=='undefined'&&Array.isArray(forms)?forms:[],legacy=typeof saiyanForms!=='undefined'&&Array.isArray(saiyanForms)?saiyanForms:[],entry=names[actual]||legacy[actual],name=String(entry?.name||entry||actual===0?'BASE WARRIOR':`FORM ${actual}`);
+ const names=typeof forms!=='undefined'&&Array.isArray(forms)?forms:[],legacy=typeof saiyanForms!=='undefined'&&Array.isArray(saiyanForms)?saiyanForms:[],entry=names[actual]||legacy[actual],name=String(entry?.name||entry||(actual===0?'BASE WARRIOR':`FORM ${actual}`));
  if(griffin&&!griffin.transformation?.active){if(Number(griffin.evolution)!==actual){griffin.evolution=actual;production221.formMirrorRepairs++}if(entry&&griffin.form!==entry)griffin.form=entry}
  if(player&&Number(player.form)!==actual)player.form=actual;
  for(const obj of [typeof production200==='object'?production200?.progression:null,typeof production201==='object'?production201?.progression:null,typeof production204==='object'?production204?.progression:null])if(obj){if(Number(obj.current)!==actual||String(obj.name||'')!==name){obj.current=actual;obj.form=actual;obj.name=name;obj.due=actual;production221.formMirrorRepairs++}}
