@@ -24,6 +24,7 @@ on:
       - 'tools/build-survivor-production206.mjs'
       - 'tools/build-survivor-production207.mjs'
       - 'tools/build-survivor-production209.mjs'
+      - 'tools/build-survivor-production210.mjs'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -36,30 +37,33 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 209 canonical arena source
+      - name: Build and validate Survivor Production 210 live stage arena authority
         run: |
           set -Eeuo pipefail
-          for f in survivor.html jarvis/core-survivor.js jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js jarvis/production209-canonical-arena-render-source.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs tools/build-survivor-production209.mjs; do test -f "$f"; done
-          for f in jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js jarvis/production209-canonical-arena-render-source.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs tools/build-survivor-production209.mjs; do node --check "$f"; done
+          for f in survivor.html jarvis/core-survivor.js jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js jarvis/production209-canonical-arena-render-source.inc.js jarvis/production210-live-stage-arena-authority.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs tools/build-survivor-production209.mjs tools/build-survivor-production210.mjs; do test -f "$f"; done
+          for f in jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js jarvis/production209-canonical-arena-render-source.inc.js jarvis/production210-live-stage-arena-authority.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs tools/build-survivor-production209.mjs tools/build-survivor-production210.mjs; do node --check "$f"; done
           node tools/build-survivor-production204.mjs
           node tools/build-survivor-production205.mjs
           node tools/build-survivor-production206.mjs
           node tools/build-survivor-production207.mjs
           node tools/build-survivor-production209.mjs
+          node tools/build-survivor-production210.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
-          for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY','PRODUCTION_207_READY','PRODUCTION_209_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['CANONICAL VISIBLE ARENA RENDER SOURCE','finalRendererConsumesCanonicalActiveImage:true','levelChangeCreatesNewImage:true','production206DrawUsesProduction209Source:true','production207RebindRedirectedToCanonicalSource:true','noSecondRenderer:true'])need('jarvis/core-survivor.js',m);
-          const core=text('jarvis/core-survivor.js');for(const n of [204,205,206,207,209])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
-          const inc=text('jarvis/production209-canonical-arena-render-source.inc.js');
-          if(!inc.includes('p203ArenaImages.set(spec.name,img)'))throw Error('Canonical arena image must replace the exact Production 206 registry entry');
-          if(!inc.includes('p206DrawArena=function(g)'))throw Error('Existing Production 206 final draw function must consume canonical image');
-          if(inc.includes('arena119=function'))throw Error('Production 209 must not add another arena renderer wrapper');
+          for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY','PRODUCTION_207_READY','PRODUCTION_209_READY','PRODUCTION_210_READY'])need('jarvis/core-survivor.js',m);
+          for(const m of ['LIVE STAGE + EXISTING ARENA IMAGE AUTHORITY','campaignStageParticipatesInAuthority:true','stuckTournamentRoundCannotPinArena:true','existingArenaImageRebound:true','finalRendererConsumesExistingArenaImage:true','staleArenaRegistryReferencesCleared:true','singleRendererPreserved:true'])need('jarvis/core-survivor.js',m);
+          const core=text('jarvis/core-survivor.js');for(const n of [204,205,206,207,209,210])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
+          const inc=text('jarvis/production210-live-stage-arena-authority.inc.js');
+          if(!inc.includes("p210Positive(typeof campaign==='object'&&campaign?.stage)"))throw Error('Campaign stage must participate in live stage authority');
+          if(!inc.includes("p203ArenaImages.clear()"))throw Error('Stale arena registry references must be cleared');
+          if(!inc.includes("p210ArenaImage.src=wanted"))throw Error('Existing arena image object must be rebound');
+          if(!inc.includes('p206DrawArena=function(g)'))throw Error('Existing Production 206 draw must consume Production 210 image');
+          if(inc.includes('arena119=function'))throw Error('Production 210 must not add another arena renderer');
           const arenaDir='jarvis/assets/survivor/arenas';const arenas=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];const hashes=new Set();for(const n of arenas){const p=`${arenaDir}/${n}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+n);hashes.add(require('crypto').createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==arenas.length)throw Error('Arena artwork must be byte-distinct for every level');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_209',scene:'CANONICAL_ACTIVE_IMAGE_TO_PRODUCTION_206_FINAL_DRAW',arenas:arenas.length,distinctArenaHashes:hashes.size,renderer:'EXISTING_SINGLE'});
+          console.log({survivor:'PRODUCTION_210',scene:'MAX_LIVE_STAGE_TO_EXISTING_ARENA_IMAGE',arenas:arenas.length,distinctArenaHashes:hashes.size,renderer:'EXISTING_SINGLE'});
           NODE
       - name: Stamp Survivor deployment authority
         env:
@@ -72,11 +76,11 @@ jobs:
           if(!/^[0-9a-f]{40}$/.test(sha||'')) throw Error('Missing exact deployment SHA');
           const path='survivor.html';let html=fs.readFileSync(path,'utf8');const rx=/jarvis\/core-survivor\.js\?v=[^"'<>\s]+/g;const refs=html.match(rx)||[];if(refs.length!==1)throw Error(`Expected exactly one Survivor core script reference, found ${refs.length}`);html=html.replace(rx,`jarvis/core-survivor.js?v=${sha}`);
           const marker=`<meta name="survivor-build" content="${sha}"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;if(!html.includes('name="survivor-build"'))html=html.replace('<head>',`<head>${marker}`);else html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:209,deploySha:sha,core:'jarvis/core-survivor.js',sceneAuthority:'CANONICAL_ACTIVE_IMAGE_TO_PRODUCTION_206_FINAL_DRAW',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:210,deploySha:sha,core:'jarvis/core-survivor.js',sceneAuthority:'MAX_LIVE_STAGE_TO_EXISTING_ARENA_IMAGE',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
           node <<'NODE'
           const fs=require('fs');const sha=process.env.SURVIVOR_DEPLOY_SHA,html=fs.readFileSync('survivor.html','utf8'),core=fs.readFileSync('jarvis/core-survivor.js','utf8'),manifest=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));
-          if(!html.includes(`jarvis/core-survivor.js?v=${sha}`))throw Error('Survivor HTML is not bound to this deployment SHA');if(!html.includes(`name="survivor-build" content="${sha}"`))throw Error('Survivor build marker missing');if(!core.includes('PRODUCTION_209_READY'))throw Error('Production 209 missing from deployed core');if(manifest.deploySha!==sha||manifest.production!==209)throw Error('Survivor build manifest disagrees with deployment');console.log({deploySha:sha,production:manifest.production,cacheKey:'COMMIT_SHA',manifest:'jarvis/survivor-build.json'});
+          if(!html.includes(`jarvis/core-survivor.js?v=${sha}`))throw Error('Survivor HTML is not bound to this deployment SHA');if(!html.includes(`name="survivor-build" content="${sha}"`))throw Error('Survivor build marker missing');if(!core.includes('PRODUCTION_210_READY'))throw Error('Production 210 missing from deployed core');if(manifest.deploySha!==sha||manifest.production!==210)throw Error('Survivor build manifest disagrees with deployment');console.log({deploySha:sha,production:manifest.production,cacheKey:'COMMIT_SHA',manifest:'jarvis/survivor-build.json'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
