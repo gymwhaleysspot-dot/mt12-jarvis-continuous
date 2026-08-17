@@ -22,6 +22,7 @@ on:
       - 'tools/build-survivor-production204.mjs'
       - 'tools/build-survivor-production205.mjs'
       - 'tools/build-survivor-production206.mjs'
+      - 'tools/build-survivor-production207.mjs'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -34,34 +35,28 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 206 scene and fight authority
+      - name: Build and validate Survivor Production 207 level scene authority
         run: |
           set -Eeuo pipefail
-          for f in survivor.html jarvis/core-survivor.js jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs; do test -f "$f"; done
-          node --check jarvis/production203-round-art-sprite-authority.inc.js
-          node --check jarvis/production204-replay47-authority.inc.js
-          node --check jarvis/production205-stage-authority.inc.js
-          node --check jarvis/production206-scene-fight-authority.inc.js
-          node --check tools/build-survivor-production204.mjs
-          node --check tools/build-survivor-production205.mjs
-          node --check tools/build-survivor-production206.mjs
+          for f in survivor.html jarvis/core-survivor.js jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs; do test -f "$f"; done
+          for f in jarvis/production203-round-art-sprite-authority.inc.js jarvis/production204-replay47-authority.inc.js jarvis/production205-stage-authority.inc.js jarvis/production206-scene-fight-authority.inc.js jarvis/production207-level-scene-authority.inc.js tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs; do node --check "$f"; done
           node tools/build-survivor-production204.mjs
           node tools/build-survivor-production205.mjs
           node tools/build-survivor-production206.mjs
+          node tools/build-survivor-production207.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
-          need('survivor.html','JARVIS ARCADE PROTOCOL');need('survivor.html','jarvis/core-survivor.js?v=20260817production206scenefight');
-          for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['VISIBLE SCENE + HIGH-IMPACT FIGHT AUTHORITY','tournamentRoundOwnsVisibleScene:true','visibleArenaChangesWithRound:true','oldSceneCacheCannotWin:true','singleArenaRenderer:true','eventDrivenFightEnhancements:true','readyNeverExceedsExpected:true'])need('jarvis/core-survivor.js',m);
-          const core=text('jarvis/core-survivor.js');
-          for(const n of [204,205,206])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
-          const inc=text('jarvis/production206-scene-fight-authority.inc.js');
-          if(!inc.includes('arena119=function(g){p206DrawArena(g)}'))throw Error('Production 206 must own final visible arena draw');
-          if(!inc.includes("p203ArenaImages.get(spec.name)"))throw Error('Visible arena must resolve from current round fighter');
-          if(!inc.includes('production151.sprites.ready=Math.min(17'))throw Error('Replay sprite readiness must be capped to canonical 17');
+          need('survivor.html','JARVIS ARCADE PROTOCOL');need('survivor.html','jarvis/core-survivor.js?v=20260817production207levelscene');
+          for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY','PRODUCTION_207_READY'])need('jarvis/core-survivor.js',m);
+          for(const m of ['LEVEL SCENE AUTHORITY + DRAGON-BATTLE PACING','levelOwnsArenaImage:true','arenaImageReboundAtLevelBoundary:true','tournamentCampaignBossSceneAgree:true','eachLevelHasDistinctArena:true','singleRendererPreserved:true','eventDrivenBattlePacing:true'])need('jarvis/core-survivor.js',m);
+          const core=text('jarvis/core-survivor.js');for(const n of [204,205,206,207])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
+          const inc=text('jarvis/production207-level-scene-authority.inc.js');
+          if(!inc.includes("img.src=wanted"))throw Error('Existing arena image must be rebound at level boundary');
+          if(!inc.includes('p203Roster[(level-1)%p203Roster.length]'))throw Error('Level must map to a distinct roster arena');
+          if(!inc.includes("PRESSURE_RUSH")||!inc.includes("AERIAL_LAUNCH_CHAIN")||!inc.includes("ULTIMATE_BEAT"))throw Error('Dragon-battle pacing enhancements missing');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_206',scene:'ROUND_TO_VISIBLE_ARENA',combat:['RUSH','BEAM_CLASH','DESTRUCTION','IMPACT'],assets:'CANONICAL_17_CAP',renderer:'SINGLE_FINAL_ARENA_AUTHORITY'});
+          console.log({survivor:'PRODUCTION_207',scene:'LEVEL_REBINDS_EXISTING_ARENA_IMAGE',levels:9,combat:['PRESSURE_RUSH','AERIAL_LAUNCH_CHAIN','ULTIMATE_BEAT'],renderer:'EXISTING_SINGLE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
