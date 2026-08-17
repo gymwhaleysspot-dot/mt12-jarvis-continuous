@@ -53,7 +53,7 @@ jobs:
           for(const m of ['REPLAY 48 AUTHORITY UNIFICATION','production151State.transformStarts','production152State.formsSeen','production155.formEngagements','production162State.sprites.hit','voiceDirection111','readyNeverExceedsExpected:true','singleVisible2DStage:true','BRIDGE_NOT_RENDERER'])need('jarvis/core-survivor.js',m);
           for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true'])need('jarvis/core-survivor.js',m);
           const core=text('jarvis/core-survivor.js');
-          if((core.match(/REPLAY 48 AUTHORITY UNIFICATION/g)||[]).length!==1)throw Error('Replay 48 authority must be assembled exactly once');
+          if((core.match(/const production204=/g)||[]).length!==1)throw Error('Production 204 authority bridge must be assembled exactly once');
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
           console.log({survivor:'PRODUCTION_204',source:'REPLAY_48',forms:'LIVE_STATE_TO_151_152_155',damage:'EVENT_TO_162_HIT_CELLS',rivals:'CONTACT_LEDGER',voice:'DIRECTED_QUEUE_PLUS_BROWSER_FALLBACK',assets:'CANONICAL_17_BODY_CONTRACT',renderer:'EXISTING_SINGLE_VISIBLE_2D_STAGE'});
           NODE
