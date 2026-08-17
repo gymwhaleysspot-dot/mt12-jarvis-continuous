@@ -19,6 +19,7 @@ on:
       - 'tools/build-survivor-production201.mjs'
       - 'tools/build-survivor-production202.mjs'
       - 'tools/build-survivor-production203.mjs'
+      - 'tools/build-survivor-production204.mjs'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -31,31 +32,28 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 203
+      - name: Build and validate Survivor Production 204
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor.js
-          test -f jarvis/production202-state-of-art-fight-engine.inc.js
           test -f jarvis/production203-round-art-sprite-authority.inc.js
-          test -f tools/build-survivor-production203.mjs
-          node --check jarvis/production202-state-of-art-fight-engine.inc.js
+          test -f jarvis/production204-replay47-authority.inc.js
+          test -f tools/build-survivor-production204.mjs
           node --check jarvis/production203-round-art-sprite-authority.inc.js
-          node --check tools/build-survivor-production203.mjs
-          node tools/build-survivor-production203.mjs
+          node --check jarvis/production204-replay47-authority.inc.js
+          node --check tools/build-survivor-production204.mjs
+          node tools/build-survivor-production204.mjs
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
-          need('survivor.html','jarvis/core-survivor.js?v=20260816production203');
-          for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY','PRODUCTION_203_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true','uniqueSpriteSourcePerOpponent:true'])need('jarvis/core-survivor.js',m);
-          const root='jarvis/assets/survivor/arenas/';
-          const arenas=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];
-          for(const n of arenas){const p=root+n;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized round arena '+n)}
-          for(const n of ['LIRA','KRAKEN','KAIROX','MIREYA','ZEPHYRA','SOLENNE','SABLE','ORUN','MORDREN'])need('jarvis/core-survivor.js',`name:'${n}'`);
+          need('survivor.html','jarvis/core-survivor.js?v=20260816production204');
+          for(const m of ['PRODUCTION_196_READY','PRODUCTION_197_READY','PRODUCTION_198_READY','PRODUCTION_199_READY','PRODUCTION_200_READY','PRODUCTION_201_READY','PRODUCTION_202_READY','PRODUCTION_203_READY','PRODUCTION_204_READY'])need('jarvis/core-survivor.js',m);
+          for(const m of ['REPLAY 47 AUTHORITY UNIFICATION','allElevenFormsReachable:true','engagementTelemetryTracksLiveForm:true','damageEventsDriveHitCells:true','rivalContactsCounted:true','voiceHasFallback:true','oneAuthoritativeAssetRegistry:true','singleVisible2DStage:true'])need('jarvis/core-survivor.js',m);
+          for(const m of ['ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY','allNineOpponentsHaveOwnCombatSprites:true','firstFightUsesLiraArtAndLiraSprites:true','noSharedLiraSpriteForOtherFighters:true'])need('jarvis/core-survivor.js',m);
           if(/griffin-(?:dom|character|skeletal|3d|sprite|render)-/i.test(text('survivor.html')))throw Error('Standalone Griffin renderer reintroduced');
-          console.log({survivor:'PRODUCTION_203',rounds:9,arenaAuthority:'UNIQUE_AUTHORED_ARENA_PER_OPPONENT',spriteAuthority:'LIRA_AUTHORED_PLUS_EIGHT_DEDICATED_RUNTIME_4X4_VECTOR_ATLASES',firstFight:'LIRA_LOCKED',renderer:'SINGLE_VISIBLE_2D_STAGE'});
+          console.log({survivor:'PRODUCTION_204',source:'REPLAY_47',forms:'LIVE_ENGAGEMENT_AUTHORITY',damage:'HIT_CELL_AUTHORITY',rivals:'CONTACT_LEDGER',voice:'QUEUE_PLUS_BROWSER_FALLBACK',assets:'PRODUCTION_203_REGISTRY',renderer:'SINGLE_VISIBLE_2D_STAGE'});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
