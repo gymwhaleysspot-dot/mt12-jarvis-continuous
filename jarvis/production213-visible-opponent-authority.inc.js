@@ -5,9 +5,10 @@
  * repairs missing/off-stage boss state, and makes the existing final renderer choose the
  * active rival's own atlas instead of reusing Lira art for the whole ladder.
  */
-const production213={ready:true,system:'VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER',frames:0,missingBossRepairs:0,phaseRepairs:0,visibilityRepairs:0,identityRepairs:0,atlasRepairs:0,atlasFallbacks:0,renderedBossFrames:0,lastOpponent:'',lastAtlas:'',seenOpponents:new Set(),errors:[]};
+const production213={ready:true,system:'VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER',frames:0,missingBossRepairs:0,phaseRepairs:0,visibilityRepairs:0,identityRepairs:0,duplicateBossRepairs:0,atlasRepairs:0,atlasFallbacks:0,renderedBossFrames:0,lastOpponent:'',lastAtlas:'',seenOpponents:new Set(),errors:[]};
 function p213Expected(){const stage=Math.max(1,Math.min(p211Ladder.length,Math.round(Number(campaign?.stage)||1)));return p211Ladder[(stage-1)%p211Ladder.length]}
-function p213TournamentBoss(){return enemies.find(e=>isTournamentFighter160(e)&&Number(e.hp)>0)||null}
+function p213TournamentBosses(){return enemies.filter(e=>isTournamentFighter160(e)&&Number(e.hp)>0)}
+function p213TournamentBoss(){return p213TournamentBosses()[0]||null}
 function p213BossVisible(b){return !!b&&Number.isFinite(b.x)&&Number.isFinite(b.y)&&b.x>=36&&b.x<=W-36&&b.y>=108&&b.y<=H-58}
 function p213BindBoss(b,reason='LIVE'){
  if(!b)return null;const id=p213Expected();
@@ -18,7 +19,11 @@ function p213BindBoss(b,reason='LIVE'){
 }
 function p213EnsureBoss(reason='LIVE'){
  if(!running||campaign.phase==='LEVEL_CLEAR')return p213TournamentBoss();
- let b=p213TournamentBoss();
+ let bosses=p213TournamentBosses(),b=bosses[0]||null;
+ if(bosses.length>1){for(const stale of bosses.slice(1)){const i=enemies.indexOf(stale);if(i>=0)enemies.splice(i,1);stage131.enemy?.delete(stale);if(zCinema.lockedTarget===stale)zCinema.lockedTarget=null;production213.duplicateBossRepairs++}bosses=[b]}
+ /* Production 161 intentionally skips wave actors. Do not wait for a legacy spawn tick:
+    opening tournament play goes directly to the round boss. */
+ if(!b&&campaign.phase==='WAVE'&&typeof production161==='object'&&production161?.ready&&elapsed>.08){campaign.spawned=campaign.quota;campaign.defeated=campaign.quota;campaign.phase='BOSS_READY';production213.phaseRepairs++}
  if(!b&&campaign.phase==='WAVE'&&campaign.spawned>=campaign.quota&&campaign.defeated>=campaign.quota){campaign.phase='BOSS_READY';production213.phaseRepairs++}
  if(!b&&campaign.phase==='BOSS'){campaign.phase='BOSS_READY';campaign.boss=null;griffin.boss=null;tournament140.boss=null;tournament140.bossSeen=false;production213.phaseRepairs++}
  if(!b&&campaign.phase==='BOSS_READY'){const before=enemies.length;enemy(true);b=p213TournamentBoss();if(b){production213.missingBossRepairs++;p132CombatEvent('PRODUCTION_213_BOSS_REPAIRED',{reason,stage:campaign.stage,opponent:p213Expected(),before,after:enemies.length})}}
@@ -46,5 +51,5 @@ render121=function(source='main'){
 };
 const p213CampaignUpdate=campaignUpdate;campaignUpdate=function(dt){const out=p213CampaignUpdate(dt);p213EnsureBoss('CAMPAIGN_UPDATE');return out};
 const p213Omni=omniSystems;omniSystems=function(dt){const out=p213Omni(dt);p213EnsureBoss('OMNI');return out};
-const p213Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p213Replay(frame);const b=p213EnsureBoss('REPLAY'),id=p213Expected(),atlas=b?p213AtlasFor(b):{label:`${id}:NONE`};frame.production213={system:production213.system,stage:campaign.stage,phase:campaign.phase,expectedOpponent:id,activeOpponent:b?.identity||null,bossPresent:!!b,bossVisible:p213BossVisible(b),bossInEnemies:!!b&&enemies.includes(b),bossRenderFrames:production213.renderedBossFrames,atlas:atlas.label,counts:{missingBossRepairs:production213.missingBossRepairs,phaseRepairs:production213.phaseRepairs,visibilityRepairs:production213.visibilityRepairs,identityRepairs:production213.identityRepairs,atlasRepairs:production213.atlasRepairs,atlasFallbacks:production213.atlasFallbacks,uniqueOpponents:production213.seenOpponents.size},errors:production213.errors.slice(-4),invariants:{activeDuelHasExactlyOneBoss:campaign.phase==='LEVEL_CLEAR'||enemies.filter(isTournamentFighter160).length===1,hudOpponentHasRenderableBoss:campaign.phase==='LEVEL_CLEAR'||(!!b&&b.identity===id),bossForcedIntoVisibleStage:campaign.phase==='LEVEL_CLEAR'||p213BossVisible(b),rivalUsesIdentityAtlas:id==='LIRA'||atlas.label.startsWith(id.toLowerCase())||atlas.label.includes(id),production121IsSingleFinalRenderer:true,noSecondCanvasRenderer:true}}};
-try{p132CombatEvent('PRODUCTION_213_READY',{system:production213.system,fixes:['MISSING_ACTIVE_BOSS_WATCHDOG','VISIBLE_STAGE_REPAIR','IDENTITY_CORRECT_RIVAL_ATLAS','PRODUCTION_121_FINAL_RENDERER_ONLY'],renderer:'EXISTING VECTOR113 / PRODUCTION121'})}catch(_){}
+const p213Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p213Replay(frame);const b=p213EnsureBoss('REPLAY'),id=p213Expected(),atlas=b?p213AtlasFor(b):{label:`${id}:NONE`},atlasOk=id==='LIRA'?!!atlas.label:atlas.label.toLowerCase().includes(id.toLowerCase());frame.production213={system:production213.system,stage:campaign.stage,phase:campaign.phase,expectedOpponent:id,activeOpponent:b?.identity||null,bossPresent:!!b,bossVisible:p213BossVisible(b),bossInEnemies:!!b&&enemies.includes(b),bossRenderFrames:production213.renderedBossFrames,atlas:atlas.label,counts:{missingBossRepairs:production213.missingBossRepairs,phaseRepairs:production213.phaseRepairs,visibilityRepairs:production213.visibilityRepairs,identityRepairs:production213.identityRepairs,duplicateBossRepairs:production213.duplicateBossRepairs,atlasRepairs:production213.atlasRepairs,atlasFallbacks:production213.atlasFallbacks,uniqueOpponents:production213.seenOpponents.size},errors:production213.errors.slice(-4),invariants:{activeDuelHasExactlyOneBoss:campaign.phase==='LEVEL_CLEAR'||p213TournamentBosses().length===1,hudOpponentHasRenderableBoss:campaign.phase==='LEVEL_CLEAR'||(!!b&&b.identity===id),bossForcedIntoVisibleStage:campaign.phase==='LEVEL_CLEAR'||p213BossVisible(b),rivalUsesIdentityAtlas:atlasOk,production121IsSingleFinalRenderer:true,noSecondCanvasRenderer:true}}};
+try{p132CombatEvent('PRODUCTION_213_READY',{system:production213.system,fixes:['TOURNAMENT_ONLY_OPENING_SPAWNS_BOSS','MISSING_ACTIVE_BOSS_WATCHDOG','DUPLICATE_BOSS_PURGE','VISIBLE_STAGE_REPAIR','IDENTITY_CORRECT_RIVAL_ATLAS','PRODUCTION_121_FINAL_RENDERER_ONLY'],renderer:'EXISTING VECTOR113 / PRODUCTION121'})}catch(_){}
