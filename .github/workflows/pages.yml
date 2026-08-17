@@ -59,7 +59,7 @@ jobs:
           const fs=require('fs'),text=p=>fs.readFileSync(p,'utf8'),need=(p,s)=>{if(!text(p).includes(s))throw Error(`${p} missing ${s}`)};
           need('survivor.html','JARVIS ARCADE PROTOCOL');
           for(const m of ['PRODUCTION_203_READY','PRODUCTION_204_READY','PRODUCTION_205_READY','PRODUCTION_206_READY','PRODUCTION_207_READY','PRODUCTION_209_READY','PRODUCTION_210_READY','PRODUCTION_211_READY','PRODUCTION_212_READY','PRODUCTION_213_READY'])need('jarvis/core-survivor.js',m);
-          for(const m of ['VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER','hudOpponentHasRenderableBoss:true','bossForcedIntoVisibleStage:true','rivalUsesIdentityAtlas:true','production121IsSingleFinalRenderer:true','noSecondCanvasRenderer:true'])need('jarvis/core-survivor.js',m);
+          for(const m of ['VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER','hudOpponentHasRenderableBoss:','bossForcedIntoVisibleStage:','rivalUsesIdentityAtlas:','production121IsSingleFinalRenderer:true','noSecondCanvasRenderer:true'])need('jarvis/core-survivor.js',m);
           const core=text('jarvis/core-survivor.js');for(const n of [204,205,206,207,209,210,211,212,213])if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`);
           const inc211=text('jarvis/production211-canonical-round-scene-authority.inc.js');
           if(!inc211.includes("const p211Ladder=Object.freeze(['LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])"))throw Error('Production 211 ladder must match Production 140');
@@ -70,6 +70,8 @@ jobs:
           if(!inc213.includes('p213EnsureBoss')||!inc213.includes("campaign.phase='BOSS_READY'"))throw Error('Production 213 active-opponent watchdog missing');
           if(!inc213.includes('p213AtlasFor')||!inc213.includes('liraAtlases131'))throw Error('Production 213 rival atlas selection missing');
           if(!inc213.includes('if(boss)visible.push(boss)'))throw Error('Active tournament boss must be guaranteed into the render list');
+          if(!inc213.includes("production161?.ready&&elapsed>.08"))throw Error('Tournament-only opening must not wait for legacy wave ticks');
+          if(!inc213.includes('p213TournamentBosses().length===1'))throw Error('Exactly-one active boss invariant missing');
           if(/document\.createElement\(['\"]canvas['\"]\)/.test(inc213))throw Error('Production 213 must not create a second canvas renderer');
           const rivalAssets=['kairox-atlas-v2.webp','mireya-atlas-v2.webp','orun-atlas-v2.webp','sable-atlas-v2.webp','kraken-atlas-v2.webp','solenne-atlas-v2.webp','zephyra-atlas-v2.webp','mordren-atlas-v2.webp'];for(const n of rivalAssets){const p=`jarvis/assets/survivor/rivals/${n}`;if(!fs.existsSync(p)||fs.statSync(p).size<10000)throw Error('Missing/undersized rival atlas '+n)}
           const arenaDir='jarvis/assets/survivor/arenas';const arenas=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];const hashes=new Set();for(const n of arenas){const p=`${arenaDir}/${n}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+n);hashes.add(require('crypto').createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==arenas.length)throw Error('Arena artwork must be byte-distinct for every level');
