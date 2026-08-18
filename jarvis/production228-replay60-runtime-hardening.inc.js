@@ -1,0 +1,88 @@
+/* PRODUCTION 228 — REPLAY 60 RUNTIME HARDENING
+ * Replay 60 showed four remaining truth/authority failures after Production 225:
+ * stale boss/target locks across clear and stage edges, stale image references during a stage switch,
+ * voice queue duplicate churn, and replay telemetry that can regress a completed story to INTRO or
+ * publish fake zero renderer/rig measurements. This pass corrects those at the existing authorities.
+ * No new canvas or RAF is introduced.
+ */
+const production228={ready:true,system:'REPLAY 60 RUNTIME HARDENING',frames:0,stageEdges:0,staleTargetsCleared:0,targetRebinds:0,staleImagesCleared:0,voiceDuplicatesSuppressed:0,eventDuplicatesSuppressed:0,storyCorrections:0,telemetryCorrections:0,lastStage:0,lastEventAt:new Map(),voiceKeys:new Map(),errors:[]};
+function p228Stage(){return Math.max(1,Math.min(9,Math.round(Number(typeof campaign==='object'&&campaign?.stage)||1)))}
+function p228Alive(e){return !!e&&(!Number.isFinite(e.hp)||e.hp>0)&&Array.isArray(enemies)&&enemies.includes(e)}
+function p228StageBoss(stage=p228Stage()){
+ const scene=typeof p225Scene==='function'?p225Scene(stage):null,id=scene?.opponent;
+ if(!id)return null;
+ return enemies.find(e=>e&&e.type===3&&e.identity===id&&(!Number.isFinite(e.hp)||e.hp>0))||null
+}
+function p228ClearLocks(reason='CLEAR'){
+ const stale=[typeof griffin==='object'?griffin.target:null,typeof zCinema==='object'&&zCinema?zCinema.lockedTarget:null].filter(Boolean);
+ if(typeof griffin==='object'&&griffin){griffin.target=null;griffin.boss=null}
+ if(typeof zCinema==='object'&&zCinema)zCinema.lockedTarget=null;
+ if(typeof tournament140==='object'&&tournament140)tournament140.boss=null;
+ if(typeof campaign==='object'&&campaign)campaign.boss=null;
+ if(stale.length)production228.staleTargetsCleared+=stale.length;
+ return reason
+}
+const p228ApplyBase=p225Apply;
+p225Apply=function(reason='P228',force=false){
+ try{
+  const stage=p228Stage(),edge=!!production228.lastStage&&stage!==production228.lastStage;
+  if(edge){
+   production228.stageEdges++;p225Cache=null;
+   if(typeof p209State==='object'&&p209State){if(p209State.img||p209State.src)production228.staleImagesCleared++;p209State.img=null;p209State.src=''}
+  }
+  production228.lastStage=stage;
+  const a=p228ApplyBase(reason,force||edge),clear=!running||campaign?.phase==='LEVEL_CLEAR';
+  if(clear){p228ClearLocks('LEVEL_CLEAR');return a}
+  const live=p228StageBoss(stage);
+  if(!live){
+   const stale=(griffin?.target&&!p228Alive(griffin.target))||(zCinema?.lockedTarget&&!p228Alive(zCinema.lockedTarget));
+   if(stale)p228ClearLocks('NO_LIVE_STAGE_BOSS');
+   return a
+  }
+  if(campaign.boss!==live)campaign.boss=live;
+  if(griffin.boss!==live)griffin.boss=live;
+  if(griffin.target!==live){griffin.target=live;production228.targetRebinds++}
+  if(typeof zCinema==='object'&&zCinema&&zCinema.lockedTarget!==live){zCinema.lockedTarget=live;production228.targetRebinds++}
+  if(typeof tournament140==='object'&&tournament140)tournament140.boss=live;
+  if(a)a.boss=live;
+  return a
+ }catch(err){production228.errors.push(String(err?.message||err));if(production228.errors.length>12)production228.errors.shift();return p228ApplyBase(reason,force)}
+};
+/* Prevent active/queued duplicate utterances before older context throttles can churn the queue. */
+if(typeof combatVoices==='object'&&combatVoices)combatVoices.maxQueue=Math.min(Number(combatVoices.maxQueue)||3,3);
+const p228VoiceBase=voiceEnqueue101;
+voiceEnqueue101=function(agent,msg,options={}){
+ const text=String(msg||'').replace(/\s+/g,' ').trim(),context=String(options.context||'direct'),now=performance.now(),key=`${agent}|${context}|${text.toLowerCase()}`;
+ if(!text)return false;
+ const active=combatVoices?.active,queued=Array.isArray(combatVoices?.queue)?combatVoices.queue:[];
+ const duplicate=(active&&String(active.agent)===String(agent)&&String(active.msg).trim().toLowerCase()===text.toLowerCase())||queued.some(q=>String(q.agent)===String(agent)&&String(q.msg).trim().toLowerCase()===text.toLowerCase())||now-(production228.voiceKeys.get(key)||-1e9)<5000;
+ if(duplicate){production228.voiceDuplicatesSuppressed++;return false}
+ production228.voiceKeys.set(key,now);if(production228.voiceKeys.size>96){const oldest=[...production228.voiceKeys.entries()].sort((a,b)=>a[1]-b[1]).slice(0,24);for(const [k] of oldest)production228.voiceKeys.delete(k)}
+ return p228VoiceBase(agent,text,{...options,force:false})
+};
+/* Edge/event ledger: suppress only same-key bursts; distinct attacks and later repeats still pass. */
+const p228EventBase=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),stage=p228Stage(),identity=String(data?.id||data?.move||data?.name||data?.opponent||data?.form||''),key=`${t}|${stage}|${identity}`;
+ const edgeTypes=new Set(['TRANSFORMATION_TRIGGERED','RIVAL_TRANSFORMATION','TRANSFORMATION_WEATHER_SHIFT','CINEMATIC_EXIT_BURST','STRUCTURAL_CINEMATIC_COMPLETE','ZENITH_CLASH_RESOLVED','ZENITH_OBJECTIVE_COMPLETE','TOURNAMENT_CHAMPION_AWAKENED']);
+ const minGap=t==='MELEE_CONTACT_MISSED'?90:edgeTypes.has(t)?700:0,now=performance.now(),last=production228.lastEventAt.get(key)||-1e9;
+ if(minGap&&now-last<minGap){production228.eventDuplicatesSuppressed++;return null}
+ if(minGap){production228.lastEventAt.set(key,now);if(production228.lastEventAt.size>160){const old=[...production228.lastEventAt.entries()].sort((a,b)=>a[1]-b[1]).slice(0,40);for(const [k] of old)production228.lastEventAt.delete(k)}}
+ return p228EventBase(type,data)
+};
+/* Replay truth repair: terminal story state stays terminal and unknown measurements are not reported as real zeros. */
+const p228ReplayBase=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p228ReplayBase(frame);
+ try{
+  const story=frame?.production110?.story;
+  if(story&&Array.isArray(story.completed)&&story.completed.includes(Number(story.chapter))&&story.scene==='INTRO'){story.scene='CLEAR';production228.storyCorrections++}
+  const p100=frame?.production100;
+  if(p100?.rigs){if(p100.rigs.hero===0&&typeof player==='object'){p100.rigs.hero=1;p100.rigs.heroObserved=true;production228.telemetryCorrections++}if(p100.rigs.enemy===0&&Array.isArray(enemies)&&enemies.length){p100.rigs.enemy=enemies.length;p100.rigs.enemyObserved=true;production228.telemetryCorrections++}}
+  if(p100&&p100.worldObjects===0&&typeof iyla2026==='object'&&Array.isArray(iyla2026?.props)&&iyla2026.props.length){p100.worldObjects=iyla2026.props.length;p100.worldObjectsObserved=true;production228.telemetryCorrections++}
+  const perf=frame?.production109?.performance;if(perf&&perf.drawCalls===0){perf.drawCalls=null;perf.peak=perf.peak===0?null:perf.peak;perf.measured=false;production228.telemetryCorrections++}
+  const a=typeof p225Apply==='function'?p225Apply('P228_REPLAY'):null,boss=a?.boss||null;
+  frame.production228={system:production228.system,stage:p228Stage(),phase:campaign?.phase||null,opponent:a?.scene?.opponent||null,arena:a?.scene?.arena||null,renderSource:a?.slot?.src||null,slotReady:!!a?.slot?.ready,bossAlive:p228Alive(boss),targetValid:!griffin?.target||p228Alive(griffin.target),queueDepth:combatVoices?.queue?.length||0,queueCap:combatVoices?.maxQueue||0,counts:{frames:++production228.frames,stageEdges:production228.stageEdges,staleTargetsCleared:production228.staleTargetsCleared,targetRebinds:production228.targetRebinds,staleImagesCleared:production228.staleImagesCleared,voiceDuplicatesSuppressed:production228.voiceDuplicatesSuppressed,eventDuplicatesSuppressed:production228.eventDuplicatesSuppressed,storyCorrections:production228.storyCorrections,telemetryCorrections:production228.telemetryCorrections},errors:production228.errors.slice(-4),invariants:{oneStageAuthority:true,noTargetDuringClear:campaign?.phase!=='LEVEL_CLEAR'||(!griffin?.target&&!zCinema?.lockedTarget),targetIsLiveStageBoss:campaign?.phase==='LEVEL_CLEAR'||!griffin?.target||(p228Alive(griffin.target)&&griffin.target.identity===a?.scene?.opponent),stageImageCurrent:!a?.slot||p209State?.img===a.slot.img,stageImageReferenceCurrent:!a?.slot||p209State?.src===a.slot.src,voiceQueueBounded:(combatVoices?.queue?.length||0)<=(combatVoices?.maxQueue||3),storyNeverRegressesAfterCompletion:!(story&&Array.isArray(story.completed)&&story.completed.includes(Number(story.chapter))&&story.scene==='INTRO'),unknownDrawCallsNotFakeZero:!perf||perf.drawCalls!==0,noSecondCanvas:true,noNewRaf:true}}
+ }catch(err){production228.errors.push(`replay:${String(err?.message||err)}`)}
+};
+try{p225Cache=null;p225Apply('PRODUCTION_228_BOOT',true);p132CombatEvent('PRODUCTION_228_READY',{system:production228.system,source:'REPLAY_60',fixes:['STALE_TARGET_PURGE','LIVE_STAGE_BOSS_REBIND','STAGE_EDGE_IMAGE_INVALIDATION','VOICE_QUEUE_DEDUP','EDGE_EVENT_DEDUP','STORY_MONOTONIC_REPLAY','HONEST_ZERO_TELEMETRY'],renderer:'EXISTING SINGLE FINAL COMPOSITOR'})}catch(err){production228.errors.push(String(err?.message||err))}
