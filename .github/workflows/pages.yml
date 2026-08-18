@@ -18,7 +18,7 @@ on:
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions: {contents: read, pages: write, id-token: write}
-concurrency: {group: pages, cancel-in-progress: true}
+concurrency: {group: pages, cancel-in-progress: false}
 jobs:
   deploy:
     environment: {name: github-pages, url: '${{ steps.deployment.outputs.page_url }}'}
@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Assemble Survivor through Production 231
+      - name: Assemble canonical Survivor Production 234
         run: |
           set -Eeuo pipefail
           required=(
@@ -41,6 +41,7 @@ jobs:
             jarvis/production229-replay61-live-runtime-fix.inc.js
             jarvis/production230-hard-cache-runtime.inc.js
             jarvis/production231-replay63-authority-sync.inc.js
+            jarvis/production234-canonical-survivor-runtime.inc.js
             tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs
             tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs
             tools/build-survivor-production209.mjs tools/build-survivor-production210.mjs
@@ -51,45 +52,37 @@ jobs:
             tools/build-survivor-production222.mjs tools/build-survivor-production224.mjs
             tools/build-survivor-production225.mjs tools/build-survivor-production227.mjs
             tools/build-survivor-production229.mjs tools/build-survivor-production230.mjs
-            tools/build-survivor-production231.mjs
+            tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs
           )
-          for f in "${required[@]}"; do test -f "$f"; done
+          for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
           for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
-          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231; do node "tools/build-survivor-production${n}.mjs"; done
-          node --check jarvis/core-survivor-231.js
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234; do node "tools/build-survivor-production${n}.mjs"; done
+          node --check jarvis/core-survivor-234.js
           node <<'NODE'
-          const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8');
-          const core=text('jarvis/core-survivor-231.js'),required=[196,199,204,220,221,222,223,224,225,228,229,230,231];
-          for(const n of required){if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`Production ${n} missing from Production 231 artifact`);if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`Production ${n} must be assembled exactly once`)}
-          const inc231=text('jarvis/production231-replay63-authority-sync.inc.js');
-          for(const m of ['TRANSFORMATION_TELEMETRY_BRIDGE','AUTHORED_HIT_REACTION_BRIDGE','SINGLE_STAGE_ROUND_OPPONENT_ARENA_AUTHORITY','DISTINCT_VOICE_DELIVERY_ACCOUNTING','VFX_EVENT_FRAME_SEPARATION','ACTIVE_RENDERER_PERFORMANCE_TRUTH'])if(!inc231.includes(m))throw Error('Production 231 marker missing '+m);
-          const executable=inc231.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');if(/document\.createElement\(['\"]canvas['\"]\)/.test(executable)||/requestAnimationFrame\s*\(/.test(executable))throw Error('Production 231 may not create canvas/RAF');
-          const expected=[['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],['MORDREN','mordren-singularity-v1.webp'],['SABLE','sable-eclipse-v1.webp'],['KRAKEN','kraken-abyss-v1.webp']],hashes=new Set(),inc220=text('jarvis/production220-direct-nine-arena-bindings.inc.js');
-          for(let i=0;i<expected.length;i++){const [opponent,arena]=expected[i],stage=i+1;if(!inc220.includes(`{stage:${stage},opponent:'${opponent}',arena:'${arena}'`))throw Error(`Stage ${stage} mapping missing`);const p=`jarvis/assets/survivor/arenas/${arena}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+arena);hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==9)throw Error('Arena files must be byte-distinct');
-          console.log({survivor:'PRODUCTION_231',runtime:'PRODUCTION_231',replay:63,artifact:'jarvis/core-survivor-231.js',assembly:required.join(','),arenas:9,renderer:'EXISTING_SINGLE',result:'PASS'});
+          const fs=require('fs'),crypto=require('crypto'),t=p=>fs.readFileSync(p,'utf8');
+          const core=t('jarvis/core-survivor-234.js'),inc=t('jarvis/production234-canonical-survivor-runtime.inc.js');
+          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231,234]){if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`missing Production ${n}`);if((core.match(new RegExp(`const production${n}=`, 'g'))||[]).length!==1)throw Error(`duplicate/missing Production ${n}`)}
+          for(const m of ['ONE_CANONICAL_STATE_TRANSACTION','ROUND_OPPONENT_ACTOR_ARENA_ATOMIC','STALE_ACTOR_TARGET_REBOUND','STALE_ARENA_IMAGE_REBOUND','LEGACY_AUTHORITIES_PROJECTED'])if(!inc.includes(m))throw Error('missing 234 marker '+m);
+          const executable=inc.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');if(/document\.createElement\(['\"]canvas['\"]\)/.test(executable)||/requestAnimationFrame\s*\(/.test(executable))throw Error('234 may not create canvas/RAF');
+          const expected=[['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],['MORDREN','mordren-singularity-v1.webp'],['SABLE','sable-eclipse-v1.webp'],['KRAKEN','kraken-abyss-v1.webp']],hashes=new Set();
+          for(const [opponent,arena] of expected){const p=`jarvis/assets/survivor/arenas/${arena}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('missing arena '+arena);hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'));if(!inc.includes(`opponent:'${opponent}',arena:'${arena}'`))throw Error('canonical mapping missing '+opponent)}if(hashes.size!==9)throw Error('arenas must be byte distinct');
+          console.log({survivor:'PRODUCTION_234',runtime:234,authority:'ONE_CANONICAL_STATE_TRANSACTION',arenas:9,result:'PASS'});
           NODE
-      - name: Stamp Production 231 exact artifact identity
-        env:
-          SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
+      - name: Stamp canonical runtime identity
+        env: {SURVIVOR_DEPLOY_SHA: '${{ github.sha }}'}
         run: |
           set -Eeuo pipefail
           node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
-          const path='survivor.html';let html=fs.readFileSync(path,'utf8');
-          const rx=/jarvis\/core-survivor(?:-(?:230|231))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=html.match(rx)||[];if(refs.length!==1)throw Error(`Expected exactly one Survivor core reference, found ${refs.length}`);
-          html=html.replace(rx,`jarvis/core-survivor-231.js?v=${sha}`);
-          const marker=`<meta name="survivor-build" content="${sha}"><meta name="survivor-runtime" content="231"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;
-          if(!html.includes('name="survivor-build"'))html=html.replace('<head>',`<head>${marker}`);else{html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);if(!html.includes('name="survivor-runtime"'))html=html.replace(/<meta name="survivor-build" content="[^"]+">/,m=>m+'<meta name="survivor-runtime" content="231">');else html=html.replace(/<meta name="survivor-runtime" content="[^"]+">/,'<meta name="survivor-runtime" content="231">')}
-          fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:231,runtimeProduction:231,replay:63,deploySha:sha,core:'jarvis/core-survivor-231.js',cacheIdentity:'NEW_FILENAME_PLUS_EXACT_SHA',runtimeAssemblyAuthority:'PRODUCTIONS_196_199_204_220_221_222_223_224_225_228_229_230_231_REQUIRED',animationAuthority:'PRODUCTION_199_AUTHORED_POSE_PLUS_231_HIT_BRIDGE',transformationAuthority:'PRODUCTION_231_CANONICAL_FORM_TELEMETRY',sceneAuthority:'PRODUCTION_225_SINGLE_STAGE_TRANSACTION_MIRRORED_BY_231',voiceAuthority:'PRODUCTION_231_DISTINCT_DELIVERY_ACCOUNTING',vfxAuthority:'EVENT_COUNTS_SEPARATED_FROM_RENDER_FRAMES',performanceAuthority:'ACTIVE_RENDERER_OBSERVABILITY_LEGACY_DRAWCALLS_NON_AUTHORITATIVE',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',generatedAt:new Date().toISOString()},null,2)+'\n');
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('invalid deploy sha');
+          let html=fs.readFileSync('survivor.html','utf8');const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=html.match(rx)||[];if(refs.length!==1)throw Error(`expected one Survivor core ref, found ${refs.length}`);html=html.replace(rx,`jarvis/core-survivor-234.js?v=${sha}`);
+          if(/name="survivor-runtime"/.test(html))html=html.replace(/<meta name="survivor-runtime" content="[^"]+">/,'<meta name="survivor-runtime" content="234">');else html=html.replace('<head>','<head><meta name="survivor-runtime" content="234">');
+          if(/name="survivor-build"/.test(html))html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);else html=html.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);
+          fs.writeFileSync('survivor.html',html);fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:234,runtimeProduction:234,deploySha:sha,core:'jarvis/core-survivor-234.js',authority:'ONE_CANONICAL_STATE_TRANSACTION',legacyAuthority:'PROJECTIONS_ONLY',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF'},null,2)+'\n');
           NODE
-          node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,html=fs.readFileSync('survivor.html','utf8'),core=fs.readFileSync('jarvis/core-survivor-231.js','utf8'),m=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));
-          if(!html.includes(`jarvis/core-survivor-231.js?v=${sha}`)||!html.includes(`name="survivor-build" content="${sha}"`)||!html.includes('name="survivor-runtime" content="231"'))throw Error('Production 231 HTML identity mismatch');
-          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`Runtime ${n} missing from deployed 231 artifact`);
-          if(m.deploySha!==sha||m.production!==231||m.runtimeProduction!==231||m.core!=='jarvis/core-survivor-231.js')throw Error('Production 231 manifest mismatch');
-          console.log({deploySha:sha,production:m.production,runtimeProduction:m.runtimeProduction,core:m.core,replay:m.replay});
-          NODE
+          grep -F 'name="survivor-runtime" content="234"' survivor.html
+          grep -F 'jarvis/core-survivor-234.js?v=' survivor.html
+          grep -F 'PRODUCTION_234_READY' jarvis/core-survivor-234.js
+          ! grep -F 'core-survivor-231.js' survivor.html
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy
