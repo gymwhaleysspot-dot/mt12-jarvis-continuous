@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const text=p=>fs.readFileSync(p,'utf8');
+const stripComments=s=>s.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');
+const inc224='jarvis/production224-replay59-global-scene-authority.inc.js';
+const inc225='jarvis/production225-post224-hardening.inc.js';
+for(const p of [inc224,inc225,'tools/build-survivor-production224.mjs','survivor.html','jarvis/core-survivor.js'])if(!fs.existsSync(p))throw Error('Missing '+p);
+const src224=text(inc224),src225=text(inc225),code224=stripComments(src224),code225=stripComments(src225);
+if(!src224.includes('atlas117.arena'))throw Error('Production 227 fixture missing historical comment token; self-test would not prove false-positive immunity');
+if(/atlas117\.arena/.test(code224)||/atlas117\.arena/.test(code225))throw Error('Executable static arena reference detected');
+for(const code of [code224,code225])if(/document\.createElement\(['\"]canvas['\"]\)/.test(code)||/requestAnimationFrame\s*\(/.test(code))throw Error('Executable code creates forbidden canvas/RAF');
+if(!/arena119=function\(g\)/.test(code224))throw Error('Final arena119 stage-slot painter missing');
+const builder=text('tools/build-survivor-production224.mjs');if(!builder.includes('const executable=src.replace'))throw Error('Production 224 builder is not comment-aware');
+const core=text('jarvis/core-survivor.js');for(const n of [224,225])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`Production ${n} missing from core`);
+let html=text('survivor.html'),rx=/jarvis\/core-survivor\.js(?:\?v=[^"'<>\s]*)?/;if(!rx.test(html))throw Error('Survivor core script reference missing');html=html.replace(rx,'jarvis/core-survivor.js?v=20260818production227validatorselftest');fs.writeFileSync('survivor.html',html);
+console.log({production:227,runtimeProduction:225,validator:'COMMENT_FALSE_POSITIVE_SELF_TESTED',staticArenaExecutableUse:false,renderer:'EXISTING_SINGLE',result:'PASS'});

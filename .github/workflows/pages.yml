@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Build and validate Survivor Production 225 post-224 hardening
+      - name: Build and validate Survivor Production 227 validator self-test
         run: |
           set -Eeuo pipefail
           required=(
@@ -45,11 +45,11 @@ jobs:
             tools/build-survivor-production217.mjs tools/build-survivor-production218.mjs
             tools/build-survivor-production219.mjs tools/build-survivor-production220.mjs
             tools/build-survivor-production222.mjs tools/build-survivor-production224.mjs
-            tools/build-survivor-production225.mjs
+            tools/build-survivor-production225.mjs tools/build-survivor-production227.mjs
           )
           for f in "${required[@]}"; do test -f "$f"; done
           for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
-          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225; do node "tools/build-survivor-production${n}.mjs"; done
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227; do node "tools/build-survivor-production${n}.mjs"; done
           node --check jarvis/core-survivor.js
           node <<'NODE'
           const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8');
@@ -60,14 +60,15 @@ jobs:
           for(const m of ['arena119=function(g)','FINAL_ARENA119_USES_STAGE_SLOT','ATOMIC_STAGE_OPPONENT_ARENA','stageOpponentAtomic','bossMatchesStage','finalRendererUsesStageSlot','legacyAtlas117ArenaRetired:true','singleSceneAuthority:true'])if(!inc224.includes(m))throw Error('Production 224 missing '+m);
           for(const m of ['p225RosterByName','p225Apply','p203SpecForEntity=function','p213AtlasFor=function','p220Activate=function','p223Repair=function','p224Apply=function','ONE_STAGE_TRANSACTION','P203_ROSTER_ORDER_MISMATCH_NEUTRALIZED','OPPONENT_ART_BY_STAGE_IDENTITY','FINAL_ARENA119_STAGE_SLOT','positionalRosterMismatchNeutralized','bossVisualIdentityMatchesStage','bossVisualArenaMatchesStage'])if(!inc225.includes(m))throw Error('Production 225 missing '+m);
           for(const code of [code224,code225])if(/document\.createElement\(['\"]canvas['\"]\)/.test(code)||/requestAnimationFrame\s*\(/.test(code))throw Error('Production 224/225 executable code must not create canvas/RAF');
+          if(!inc224.includes('atlas117.arena'))throw Error('Validator regression fixture missing historical atlas117 comment token');
           if(/atlas117\.arena/.test(code224)||/atlas117\.arena/.test(code225))throw Error('Production 224/225 executable code may not use the static arena image');
           const expected=[['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],['MORDREN','mordren-singularity-v1.webp'],['SABLE','sable-eclipse-v1.webp'],['KRAKEN','kraken-abyss-v1.webp']];
           const inc220=text('jarvis/production220-direct-nine-arena-bindings.inc.js'),hashes=new Set();
           for(let i=0;i<expected.length;i++){const [opponent,arena]=expected[i],stage=i+1;if(!inc220.includes(`{stage:${stage},opponent:'${opponent}',arena:'${arena}'`))throw Error(`Stage ${stage} mapping missing`);const p=`jarvis/assets/survivor/arenas/${arena}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+arena);hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==9)throw Error('Arena files must be byte-distinct');
           const roster203=text('jarvis/production203-round-art-sprite-authority.inc.js');if(!roster203.includes("{name:'KRAKEN'")||!inc225.includes('p225RosterByName'))throw Error('Production 225 roster-order neutralization missing');
-          console.log({survivor:'PRODUCTION_225',source:'POST_224_AUDIT',scene:'ONE_STAGE_TRANSACTION',opponent:'STAGE_IDENTITY',finalPainter:'ARENA119_STAGE_SLOT',arenas:9,legacySceneAuthorities:'REDIRECTED',validator:'EXECUTABLE_CODE_ONLY',renderer:'EXISTING_SINGLE'});
+          console.log({survivor:'PRODUCTION_227',runtime:'PRODUCTION_225',scene:'ONE_STAGE_TRANSACTION',opponent:'STAGE_IDENTITY',finalPainter:'ARENA119_STAGE_SLOT',arenas:9,validator:'COMMENT_FALSE_POSITIVE_SELF_TESTED',renderer:'EXISTING_SINGLE'});
           NODE
-      - name: Stamp Survivor Production 225 deployment authority
+      - name: Stamp Survivor Production 227 deployment authority
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
@@ -76,10 +77,10 @@ jobs:
           const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
           const path='survivor.html';let html=fs.readFileSync(path,'utf8'),rx=/jarvis\/core-survivor\.js\?v=[^"'<>\s]+/g,refs=html.match(rx)||[];if(refs.length!==1)throw Error(`Expected exactly one Survivor core reference, found ${refs.length}`);html=html.replace(rx,`jarvis/core-survivor.js?v=${sha}`);
           const marker=`<meta name="survivor-build" content="${sha}"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;if(!html.includes('name="survivor-build"'))html=html.replace('<head>',`<head>${marker}`);else html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:225,deploySha:sha,core:'jarvis/core-survivor.js',engineAuthority:'CUSTOM_HTML5_CANVAS_FIXED_STEP_60HZ',sceneAuthority:'ONE_TRANSACTION_CAMPAIGN_STAGE_OPPONENT_BOSS_TARGET_ARENA',finalArenaPainter:'ARENA119_STAGE_SPECIFIC_IMAGE_SLOT',assetAuthority:'NINE_DISTINCT_STAGE_IMAGE_SLOTS',fallbackAuthority:'NO_PREVIOUS_STATIC_OR_HIGHLAND_SCENE',opponentAuthority:'CANONICAL_STAGE_IDENTITY_WITH_UNIQUE_ATLAS_FALLBACK',legacyAuthority:'P220_P223_P224_REDIRECTED_TO_P225',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',replayAuthority:'POST224_PRODUCTION225_ACCEPTANCE',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:227,runtimeProduction:225,deploySha:sha,core:'jarvis/core-survivor.js',engineAuthority:'CUSTOM_HTML5_CANVAS_FIXED_STEP_60HZ',sceneAuthority:'ONE_TRANSACTION_CAMPAIGN_STAGE_OPPONENT_BOSS_TARGET_ARENA',finalArenaPainter:'ARENA119_STAGE_SPECIFIC_IMAGE_SLOT',assetAuthority:'NINE_DISTINCT_STAGE_IMAGE_SLOTS',fallbackAuthority:'NO_PREVIOUS_STATIC_OR_HIGHLAND_SCENE',opponentAuthority:'CANONICAL_STAGE_IDENTITY_WITH_UNIQUE_ATLAS_FALLBACK',validatorAuthority:'COMMENT_FALSE_POSITIVE_SELF_TESTED_EXECUTABLE_ONLY',legacyAuthority:'P220_P223_P224_REDIRECTED_TO_P225',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
           node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,html=fs.readFileSync('survivor.html','utf8'),core=fs.readFileSync('jarvis/core-survivor.js','utf8'),m=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));if(!html.includes(`jarvis/core-survivor.js?v=${sha}`)||!html.includes(`name="survivor-build" content="${sha}"`))throw Error('Exact-SHA Survivor cache identity missing');if(!core.includes('PRODUCTION_225_READY'))throw Error('Production 225 missing from deployed core');if(m.deploySha!==sha||m.production!==225||m.finalArenaPainter!=='ARENA119_STAGE_SPECIFIC_IMAGE_SLOT'||m.legacyAuthority!=='P220_P223_P224_REDIRECTED_TO_P225')throw Error('Production 225 manifest mismatch');console.log({deploySha:sha,production:m.production,scene:m.sceneAuthority,painter:m.finalArenaPainter,legacy:m.legacyAuthority});
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,html=fs.readFileSync('survivor.html','utf8'),core=fs.readFileSync('jarvis/core-survivor.js','utf8'),m=JSON.parse(fs.readFileSync('jarvis/survivor-build.json','utf8'));if(!html.includes(`jarvis/core-survivor.js?v=${sha}`)||!html.includes(`name="survivor-build" content="${sha}"`))throw Error('Exact-SHA Survivor cache identity missing');if(!core.includes('PRODUCTION_225_READY'))throw Error('Production 225 runtime missing from deployed core');if(m.deploySha!==sha||m.production!==227||m.runtimeProduction!==225||m.validatorAuthority!=='COMMENT_FALSE_POSITIVE_SELF_TESTED_EXECUTABLE_ONLY')throw Error('Production 227 manifest mismatch');console.log({deploySha:sha,production:m.production,runtimeProduction:m.runtimeProduction,validator:m.validatorAuthority});
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
