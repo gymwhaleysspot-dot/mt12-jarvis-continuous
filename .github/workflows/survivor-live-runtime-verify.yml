@@ -10,30 +10,29 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Production 231 reached Pages
+      - name: Verify Production 234 reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
         run: |
           set -Eeuo pipefail
-          html=""
-          core=""
-          manifest=""
           for attempt in 1 2 3 4 5 6 7 8 9 10; do
             html="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/survivor.html?verify=$DEPLOY_SHA-$attempt" || true)"
             manifest="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/survivor-build.json?verify=$DEPLOY_SHA-$attempt" || true)"
-            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="231"' && \
-               printf '%s' "$html" | grep -q "jarvis/core-survivor-231.js?v=$DEPLOY_SHA" && \
-               printf '%s' "$manifest" | grep -q '"runtimeProduction": 231' && \
-               printf '%s' "$manifest" | grep -q '"core": "jarvis/core-survivor-231.js"'; then
-              core="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/core-survivor-231.js?v=$DEPLOY_SHA&verify=$attempt" || true)"
-              if printf '%s' "$core" | grep -q 'PRODUCTION_231_READY' && printf '%s' "$core" | grep -q 'const production231='; then
-                echo "Production 231 live runtime verified at $DEPLOY_SHA"
+            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="234"' && \
+               printf '%s' "$html" | grep -q "jarvis/core-survivor-234.js?v=$DEPLOY_SHA" && \
+               printf '%s' "$manifest" | grep -q '"runtimeProduction": 234' && \
+               printf '%s' "$manifest" | grep -q '"authority": "ONE_CANONICAL_STATE_TRANSACTION"'; then
+              core="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/core-survivor-234.js?v=$DEPLOY_SHA&verify=$attempt" || true)"
+              if printf '%s' "$core" | grep -q 'PRODUCTION_234_READY' && \
+                 printf '%s' "$core" | grep -q 'const production234=' && \
+                 printf '%s' "$core" | grep -q 'ONE_CANONICAL_STATE_TRANSACTION'; then
+                echo "Production 234 canonical runtime verified at $DEPLOY_SHA"
                 exit 0
               fi
             fi
             sleep 3
           done
-          echo 'Live Survivor deployment did not satisfy Production 231 runtime identity.' >&2
+          echo 'Live Survivor deployment did not satisfy Production 234 canonical runtime identity.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
