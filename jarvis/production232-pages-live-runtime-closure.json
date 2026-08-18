@@ -1,0 +1,26 @@
+{
+  "production": 232,
+  "runtimeProduction": 231,
+  "purpose": "Force a fresh Pages deployment after Replay 64 proved the browser was still executing a pre-231 runtime.",
+  "requiredArtifact": "jarvis/core-survivor-231.js",
+  "requiredRuntimeObject": "production231",
+  "requiredReadyEvent": "PRODUCTION_231_READY",
+  "requiredHtmlRuntime": "231",
+  "requiredAssembly": [196,199,204,220,221,222,223,224,225,228,229,230,231],
+  "cacheContract": "NEW_FILENAME_PLUS_EXACT_DEPLOY_SHA",
+  "releaseContract": {
+    "transformationTelemetry": "PRODUCTION_231",
+    "hitReactionBridge": "PRODUCTION_231_TO_PRODUCTION_199",
+    "stageRoundOpponentArena": "PRODUCTION_225_MIRRORED_BY_231",
+    "voiceDeliveryAccounting": "PRODUCTION_231",
+    "vfxEventAccounting": "EVENTS_SEPARATE_FROM_RENDER_FRAMES",
+    "renderer": "ONE_FINAL_COMPOSITOR_SINGLE_RAF"
+  },
+  "acceptance": [
+    "live survivor.html references core-survivor-231.js with the exact deployment SHA",
+    "live survivor.html declares survivor-runtime 231",
+    "live core-survivor-231.js contains PRODUCTION_231_READY",
+    "fresh replay contains production231 telemetry",
+    "fresh replay cannot be accepted as current if production231 is absent"
+  ]
+}
