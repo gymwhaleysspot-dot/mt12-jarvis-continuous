@@ -1,4 +1,4 @@
-name: Survivor Production 231 Dedicated Pages
+name: Survivor Production 234 Canonical Pages
 on:
   push:
     branches: [main]
@@ -14,7 +14,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: survivor-pages-231
+  group: survivor-pages-canonical
   cancel-in-progress: false
 jobs:
   deploy:
@@ -25,84 +25,47 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
-      - name: Assemble exact Survivor Production 231 artifact
+      - name: Assemble canonical Survivor Production 234
         run: |
           set -Eeuo pipefail
-          required=(
-            survivor.html jarvis/core-survivor.js
-            jarvis/production220-direct-nine-arena-bindings.inc.js
-            jarvis/production221-replay56-runtime-fixes.inc.js
-            jarvis/production222-replay57-performance-contact-fixes.inc.js
-            jarvis/production223-replay58-stage-pixel-authority.inc.js
-            jarvis/production224-replay59-global-scene-authority.inc.js
-            jarvis/production225-post224-hardening.inc.js
-            jarvis/production228-replay60-truth-hardening.inc.js
-            jarvis/production229-replay61-live-runtime-fix.inc.js
-            jarvis/production230-hard-cache-runtime.inc.js
-            jarvis/production231-replay63-authority-sync.inc.js
-            tools/build-survivor-production204.mjs tools/build-survivor-production205.mjs
-            tools/build-survivor-production206.mjs tools/build-survivor-production207.mjs
-            tools/build-survivor-production209.mjs tools/build-survivor-production210.mjs
-            tools/build-survivor-production211.mjs tools/build-survivor-production212.mjs
-            tools/build-survivor-production213.mjs tools/build-survivor-production215.mjs
-            tools/build-survivor-production217.mjs tools/build-survivor-production218.mjs
-            tools/build-survivor-production219.mjs tools/build-survivor-production220.mjs
-            tools/build-survivor-production222.mjs tools/build-survivor-production224.mjs
-            tools/build-survivor-production225.mjs tools/build-survivor-production227.mjs
-            tools/build-survivor-production229.mjs tools/build-survivor-production230.mjs
-            tools/build-survivor-production231.mjs
-          )
+          required=(survivor.html jarvis/core-survivor.js jarvis/production234-canonical-runtime-rewrite.inc.js tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs)
           for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
-          for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
-          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231; do
-            node "tools/build-survivor-production${n}.mjs"
-          done
-          node --check jarvis/core-survivor-231.js
+          for f in jarvis/production234-canonical-runtime-rewrite.inc.js tools/build-survivor-production234.mjs; do node --check "$f"; done
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234; do node "tools/build-survivor-production${n}.mjs"; done
+          node --check jarvis/core-survivor-234.js
           node <<'NODE'
-          const fs=require('fs');
-          const core=fs.readFileSync('jarvis/core-survivor-231.js','utf8');
-          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231]){
-            if(!core.includes(`PRODUCTION_${n}_READY`)) throw Error(`missing PRODUCTION_${n}_READY`);
-          }
-          if(!core.includes('const production231=')) throw Error('production231 runtime object missing');
+          const fs=require('fs'),core=fs.readFileSync('jarvis/core-survivor-234.js','utf8');
+          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231,234])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`missing PRODUCTION_${n}_READY`);
+          for(const m of ['ONE_CANONICAL_STAGE_MANIFEST','ATOMIC_OPPONENT_ACTOR_TARGET_ARENA_BIND','LEGACY_SCENE_AUTHORITY_RETIREMENT','EVENT_IDENTITY_NORMALIZATION','STALE_BOSS_PRUNING','REPLAY_RUNTIME_PROOF'])if(!core.includes(m))throw Error('missing Production 234 marker '+m);
+          if((core.match(/const production234=/g)||[]).length!==1)throw Error('Production 234 must exist exactly once');
           NODE
-      - name: Stamp exact live runtime identity
+      - name: Stamp canonical live runtime identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           node <<'NODE'
-          const fs=require('fs');
-          const sha=process.env.SURVIVOR_DEPLOY_SHA;
-          if(!/^[0-9a-f]{40}$/.test(sha||'')) throw Error('invalid deploy sha');
-          const p='survivor.html';
-          let html=fs.readFileSync(p,'utf8');
-          const rx=/jarvis\/core-survivor(?:-(?:221|230|231))?\.js(?:\?v=[^"'<>\s]*)?/g;
-          const refs=html.match(rx)||[];
-          if(refs.length!==1) throw Error(`expected one Survivor core ref, found ${refs.length}`);
-          html=html.replace(rx,`jarvis/core-survivor-231.js?v=${sha}`);
-          if(/core-survivor-221\.js/.test(html)||/core-survivor-230\.js/.test(html)) throw Error('stale Survivor core reference survived stamping');
-          const metas=`<meta name="survivor-build" content="${sha}"><meta name="survivor-runtime" content="231"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`;
-          if(!html.includes('name="survivor-build"')) html=html.replace('<head>',`<head>${metas}`);
-          else {
-            html=html.replace(/<meta name="survivor-build" content="[^"]+">/,`<meta name="survivor-build" content="${sha}">`);
-            html=html.replace(/<meta name="survivor-runtime" content="[^"]+">/,'<meta name="survivor-runtime" content="231">');
-          }
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('invalid deploy sha');
+          const p='survivor.html';let html=fs.readFileSync(p,'utf8');
+          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=html.match(rx)||[];
+          if(refs.length!==1)throw Error(`expected one Survivor core ref, found ${refs.length}`);
+          html=html.replace(rx,`jarvis/core-survivor-234.js?v=${sha}`);
+          html=html.replace(/<meta name="survivor-runtime" content="[^"]+">/g,'').replace(/<meta name="survivor-build" content="[^"]+">/g,'');
+          html=html.replace('<head>',`<head><meta name="survivor-build" content="${sha}"><meta name="survivor-runtime" content="234"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`);
           fs.writeFileSync(p,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:231,runtimeProduction:231,deploySha:sha,core:'jarvis/core-survivor-231.js',acceptance:'PRODUCTION_231_READY_REQUIRED',deploymentAuthority:'DEDICATED_SURVIVOR_PAGES_231'},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:234,runtimeProduction:234,deploySha:sha,core:'jarvis/core-survivor-234.js',acceptance:'PRODUCTION_234_READY_REQUIRED',authority:'ONE_CANONICAL_STAGE_OPPONENT_ACTOR_TARGET_ARENA_EVENT_TRANSACTION'},null,2)+'\n');
           NODE
-      - name: Fail closed on stale runtime
+      - name: Fail closed on any stale runtime
         run: |
           set -Eeuo pipefail
-          grep -F 'name="survivor-runtime" content="231"' survivor.html
-          grep -F 'jarvis/core-survivor-231.js?v=' survivor.html
-          ! grep -F 'core-survivor-221.js' survivor.html
-          ! grep -F 'core-survivor-230.js' survivor.html
-          grep -F 'PRODUCTION_231_READY' jarvis/core-survivor-231.js
-          grep -F 'const production231=' jarvis/core-survivor-231.js
+          grep -F 'name="survivor-runtime" content="234"' survivor.html
+          grep -F 'jarvis/core-survivor-234.js?v=' survivor.html
+          ! grep -E 'core-survivor-(221|230|231)\.js' survivor.html
+          grep -F 'PRODUCTION_234_READY' jarvis/core-survivor-234.js
+          grep -F 'const production234=' jarvis/core-survivor-234.js
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
-      - name: Deploy exact Survivor 231 artifact
+      - name: Deploy canonical Survivor 234 artifact
         id: deployment
         uses: actions/deploy-pages@v4
