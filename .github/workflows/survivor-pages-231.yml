@@ -7,6 +7,7 @@ on:
       - 'jarvis/**'
       - 'tools/build-survivor-production*.mjs'
       - 'tools/test-survivor-production*.mjs'
+      - 'tools/survivor-runtime-smoke.mjs'
       - '.github/workflows/survivor-pages-231.yml'
       - '.github/workflows/pages.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - 'jarvis/**'
       - 'tools/build-survivor-production*.mjs'
       - 'tools/test-survivor-production*.mjs'
+      - 'tools/survivor-runtime-smoke.mjs'
       - '.github/workflows/survivor-pages-231.yml'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -31,9 +33,10 @@ jobs:
       - name: Assemble and verify canonical Survivor Production 235
         run: |
           set -Eeuo pipefail
-          required=(survivor.html jarvis/core-survivor.js jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs)
+          required=(survivor.html jarvis/core-survivor.js jarvis/core-survivor-235.js jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs tools/survivor-runtime-smoke.mjs)
           for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
-          for f in jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs; do node --check "$f"; done
+          for f in jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs tools/survivor-runtime-smoke.mjs; do node --check "$f"; done
+          cp jarvis/core-survivor-235.js /tmp/core-survivor-235.committed.js
           cp survivor.html /tmp/survivor-production235-source.html
           node <<'NODE'
           const fs=require('fs'),p='survivor.html';let h=fs.readFileSync(p,'utf8');
@@ -45,6 +48,7 @@ jobs:
           cp /tmp/survivor-production235-source.html survivor.html
           node --check jarvis/core-survivor-235.js
           node tools/test-survivor-production235-contract.mjs
+          cmp --silent /tmp/core-survivor-235.committed.js jarvis/core-survivor-235.js || { echo 'Committed Production 235 artifact differs from fresh assembly' >&2; sha256sum /tmp/core-survivor-235.committed.js jarvis/core-survivor-235.js; exit 1; }
           node <<'NODE'
           const fs=require('fs'),core=fs.readFileSync('jarvis/core-survivor-235.js','utf8');
           for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231,234,235])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`missing PRODUCTION_${n}_READY`);
@@ -52,3 +56,24 @@ jobs:
           if((core.match(/const production235=/g)||[]).length!==1)throw Error('Production 235 must exist exactly once');
           if(!core.includes('__JARVIS_SURVIVOR_RUNTIME__'))throw Error('global runtime proof missing');
           NODE
+      - name: Install Playwright browser engines
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
+      - name: Execute Survivor 235 in Chromium and WebKit
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts
+          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit
+      - name: Upload Survivor browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: survivor-browser-${{ github.sha }}
+          path: artifacts/
+          retention-days: 30
