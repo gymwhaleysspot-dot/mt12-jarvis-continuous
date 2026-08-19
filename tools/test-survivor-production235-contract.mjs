@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const html=fs.readFileSync('survivor.html','utf8');
 const tab=fs.readFileSync('jarvis/survivor-tab.js','utf8');
+const tabCss=fs.readFileSync('jarvis/survivor-tab.css','utf8');
 const pages=fs.readFileSync('.github/workflows/pages.yml','utf8');
 const verify=fs.readFileSync('.github/workflows/survivor-pages-231.yml','utf8');
 const expected=[['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],['MORDREN','mordren-singularity-v1.webp'],['SABLE','sable-eclipse-v1.webp'],['KRAKEN','kraken-abyss-v1.webp']];
@@ -28,7 +29,8 @@ if(!(heroParry>bossParry&&heroParry>=.15&&bossParry<=.1))throw Error(`Griffin pa
 if(!html.includes("f.hero?12:6"))throw Error('Griffin KI regeneration advantage missing');
 if(!html.includes("st.hero.hp+Math.max(80,HERO_MAX_HP*.42)"))throw Error('round recovery missing');
 if(!html.includes('st.target=st.boss'))throw Error('boss and target must bind atomically');
-if(!tab.includes('scratch300balance2'))throw Error('adaptive balance iframe cache identity not updated');
+for(const marker of ['GRAPHICS_VERSION=3','scratch300graphics3','function applyGraphics','survivor-cinematic-graphics-v3','FORM_COLORS','RIVAL_COLORS','--heroAura','--rivalAura','survivorAuraPulse'])if(!tab.includes(marker))throw Error('cinematic graphics contract missing '+marker);
+if(!tabCss.includes('survivor-card:before')||!tabCss.includes('0 28px 90px'))throw Error('outer cinematic frame styling missing');
 if(!pages.includes('uses: actions/deploy-pages@v4')||!pages.includes('node tools/test-survivor-production235-contract.mjs'))throw Error('Pages runtime gate missing');
 if(verify.includes('uses: actions/deploy-pages@v4')||verify.includes('pages: write')||verify.includes('id-token: write'))throw Error('verification workflow must not deploy');
-console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,heroHp:240,bossRounds:9,heroParry,bossParry,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
+console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,graphicsVersion:3,heroHp:240,bossRounds:9,heroParry,bossParry,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_CINEMATIC_PRESENTATION',result:'PASS'});
