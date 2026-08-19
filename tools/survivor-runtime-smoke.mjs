@@ -5,7 +5,7 @@ import { chromium, webkit, devices } from 'playwright';
 const engineName=process.argv[2]||'chromium';
 const engine=engineName==='webkit'?webkit:chromium;
 const url=process.env.SURVIVOR_URL||'http://127.0.0.1:4173/survivor.html';
-const expectedProduction=Number(process.env.SURVIVOR_EXPECTED_PRODUCTION||235);
+const expectedProduction=Number(process.env.SURVIVOR_EXPECTED_PRODUCTION||236);
 const expectedSha=process.env.SURVIVOR_EXPECTED_SHA||'';
 const out=path.resolve(process.env.SURVIVOR_SMOKE_OUT||`artifacts/survivor-${engineName}`);
 fs.mkdirSync(out,{recursive:true});
@@ -39,7 +39,7 @@ try{
  const result={engine:engineName,url,expectedProduction,expectedSha,state,consoleMessages,pageErrors,requestFailures,responses};
  fs.writeFileSync(path.join(out,'runtime.json'),JSON.stringify(result,null,2)+'\n');
  await page.screenshot({path:path.join(out,'boot.png'),fullPage:true});
- const coreFailure=requestFailures.some(x=>/core-survivor-235\.js/.test(x.url));
+ const coreFailure=requestFailures.some(x=>/core-survivor-236\.js/.test(x.url));
  const wrongRuntime=state.runtime?.production!==expectedProduction;
  const blocked=/BUILD\s+MISMATCH/i.test(state.blockerText);
  const badSha=!!expectedSha&&state.deploySha!==expectedSha;

@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -20,6 +20,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 12
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+      deploy_sha: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -27,41 +31,26 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
-      - name: Verify committed canonical Survivor Production 235
+      - name: Build and verify Survivor Production 236
         run: |
           set -Eeuo pipefail
           test -f survivor.html
           test -f jarvis/core-survivor-235.js
+          test -f tools/build-survivor-production236.mjs
           test -f tools/survivor-runtime-smoke.mjs
           node --check jarvis/core-survivor-235.js
+          node --check tools/build-survivor-production236.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node tools/test-survivor-production235-contract.mjs
-          grep -F 'name="survivor-runtime" content="235"' survivor.html
-          grep -F 'jarvis/core-survivor-235.js' survivor.html
-          ! grep -E 'core-survivor-(221|230|231|234)\.js' survivor.html
-          grep -F 'PRODUCTION_235_READY' jarvis/core-survivor-235.js
-          grep -F '__JARVIS_SURVIVOR_RUNTIME__' jarvis/core-survivor-235.js
-          for n in 196 199 204 220 221 222 223 224 225 228 229 230 231 234 235; do
-            grep -F "PRODUCTION_${n}_READY" jarvis/core-survivor-235.js >/dev/null
-          done
+          node tools/build-survivor-production236.mjs
+          node --check jarvis/core-survivor-236.js
+          grep -F 'PRODUCTION_236_READY' jarvis/core-survivor-236.js
+          grep -F "production:236,core:'jarvis/core-survivor-236.js'" jarvis/core-survivor-236.js
+          ! grep -F 'Production 235 boss factory failed at stage ${stage}' jarvis/core-survivor-236.js
+          grep -F "campaign?.phase==='BOSS')boss=p235CanonicalizeExisting" jarvis/core-survivor-236.js
+          grep -F "reason:'SPAWN_DEFERRED'" jarvis/core-survivor-236.js
 
-      - name: Install Playwright browser engines
-        run: |
-          set -Eeuo pipefail
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium webkit
-
-      - name: Browser-boot committed Production 235 before deployment
-        run: |
-          set -Eeuo pipefail
-          mkdir -p artifacts/predeploy
-          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/predeploy/http.log 2>&1 &
-          server=$!
-          trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
-
-      - name: Stamp exact Production 235 deployment identity
+      - name: Stamp exact Production 236 deployment identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
@@ -72,29 +61,30 @@ jobs:
           if(!/^[0-9a-f]{40}$/.test(sha||'')) throw Error('Missing exact deployment SHA');
           const path='survivor.html';
           let html=fs.readFileSync(path,'utf8');
-          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235))?\.js(?:\?v=[^"'<>\s]*)?/g;
+          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235|236))?\.js(?:\?v=[^"'<>\s]*)?/g;
           const refs=html.match(rx)||[];
           if(refs.length!==1) throw Error(`Expected exactly one Survivor core reference, found ${refs.length}`);
-          html=html.replace(rx,`jarvis/core-survivor-235.js?v=${sha}`);
+          html=html.replace(rx,`jarvis/core-survivor-236.js?v=${sha}`);
           html=html.replace(/<meta name="survivor-build" content="[^"]+">/g,'');
-          if(!/<meta name="survivor-runtime" content="235">/.test(html)) throw Error('Source HTML missing Production 235 runtime meta');
+          html=html.replace(/<meta name="survivor-runtime" content="\d+">/, '<meta name="survivor-runtime" content="236">');
           html=html.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);
           html=html.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);
           fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:235,runtimeProduction:235,deploySha:sha,core:'jarvis/core-survivor-235.js',runtimeAssemblyAuthority:'COMMITTED_PRODUCTION_235_ARTIFACT',pagesAuthority:'SOLE_DIRECT_DEPLOY_WORKFLOW',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:236,runtimeProduction:236,deploySha:sha,core:'jarvis/core-survivor-236.js',runtimeAssemblyAuthority:'DETERMINISTIC_REPLAY_68_REPAIR_BUILD',pagesAuthority:'SOLE_FAST_DEPLOY_WORKFLOW',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
-          grep -F "jarvis/core-survivor-235.js?v=${GITHUB_SHA}" survivor.html
+          grep -F "jarvis/core-survivor-236.js?v=${GITHUB_SHA}" survivor.html
+          grep -F 'name="survivor-runtime" content="236"' survivor.html
           grep -F "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" survivor.html
 
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
 
-      - name: Deploy
+      - name: Deploy immediately after deterministic checks
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify live Production 235 identity bytes
+      - name: Verify live Production 236 identity bytes
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -102,30 +92,47 @@ jobs:
           base="${PAGE_URL%/}"
           ok=0
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            html="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
-            core="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/jarvis/core-survivor-235.js?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="235"' <<<"$html" \
+            html="$(curl -fsSL -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
+            core="$(curl -fsSL -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${base}/jarvis/core-survivor-236.js?verify=${GITHUB_SHA}-${attempt}" || true)"
+            if grep -Fq 'name="survivor-runtime" content="236"' <<<"$html" \
               && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" \
-              && grep -Fq "jarvis/core-survivor-235.js?v=${GITHUB_SHA}" <<<"$html" \
-              && grep -Fq 'PRODUCTION_235_READY' <<<"$core" \
-              && grep -Fq '__JARVIS_SURVIVOR_RUNTIME__' <<<"$core"; then ok=1; break; fi
-            sleep 10
+              && grep -Fq "jarvis/core-survivor-236.js?v=${GITHUB_SHA}" <<<"$html" \
+              && grep -Fq 'PRODUCTION_236_READY' <<<"$core" \
+              && grep -Fq "production:236,core:'jarvis/core-survivor-236.js'" <<<"$core"; then ok=1; break; fi
+            sleep 5
           done
-          test "$ok" -eq 1 || { echo 'Live Pages identity did not converge to the exact Production 235 deployment' >&2; exit 1; }
+          test "$ok" -eq 1 || { echo 'Live Pages identity did not converge to exact Production 236 deployment' >&2; exit 1; }
 
-      - name: Browser-verify live Production 235
+  verify-live-browser:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Install Playwright browser engines after site is live
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
+
+      - name: Browser-verify live Production 236
         env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+          DEPLOY_SHA: ${{ needs.deploy.outputs.deploy_sha }}
         run: |
           set -Eeuo pipefail
           base="${PAGE_URL%/}"
-          SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
+          mkdir -p artifacts/live/chromium artifacts/live/webkit
+          SURVIVOR_URL="${base}/survivor.html?browser=${DEPLOY_SHA}" SURVIVOR_EXPECTED_PRODUCTION=236 SURVIVOR_EXPECTED_SHA="${DEPLOY_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_URL="${base}/survivor.html?browser=${DEPLOY_SHA}" SURVIVOR_EXPECTED_PRODUCTION=236 SURVIVOR_EXPECTED_SHA="${DEPLOY_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
 
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: survivor-pages-browser-${{ github.sha }}
+          name: survivor-pages-browser-${{ needs.deploy.outputs.deploy_sha }}
           path: artifacts/
           retention-days: 30
