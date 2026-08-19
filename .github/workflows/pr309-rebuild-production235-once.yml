@@ -11,7 +11,7 @@ concurrency:
   group: pr309-rebuild-production235-once
   cancel-in-progress: true
 jobs:
-  rebuild:
+  rebuild-and-browser-gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -31,15 +31,47 @@ jobs:
           cp /tmp/survivor-source.html survivor.html
           node --check jarvis/core-survivor-235.js
           node tools/test-survivor-production235-contract.mjs
-      - name: Commit regenerated canonical artifact
+          git diff --exit-code -- jarvis/core-survivor-235.js
+      - name: Install Playwright browser engines
         run: |
           set -Eeuo pipefail
-          if git diff --quiet -- jarvis/core-survivor-235.js; then
-            echo 'Production 235 artifact already canonical.'
-            exit 0
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
+      - name: Execute Chromium and WebKit runtime gates
+        id: browser
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mkdir -p artifacts
+          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          status=0
+          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium > artifacts/chromium.log 2>&1 || status=$?
+          if [ "$status" -eq 0 ]; then
+            SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit > artifacts/webkit.log 2>&1 || status=$?
           fi
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Record executable runtime gate result
+        run: |
+          set -Eeuo pipefail
+          code='${{ steps.browser.outputs.exit_code }}'
+          {
+            echo "PR309 Survivor Production 235 executable runtime gate"
+            echo "head=$(git rev-parse HEAD)"
+            echo "production=235"
+            echo "chromium+webkit exit_code=$code"
+            echo
+            echo '--- chromium ---'
+            cat artifacts/chromium.log 2>/dev/null || true
+            echo
+            echo '--- webkit ---'
+            cat artifacts/webkit.log 2>/dev/null || true
+          } > pr309-runtime-gate.txt
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add jarvis/core-survivor-235.js
-          git commit -m 'build(survivor): regenerate Production 235 after runtime fix'
+          git add pr309-runtime-gate.txt
+          git commit -m "test(survivor): record PR309 browser runtime gate" || true
           git push origin HEAD:agent/survivor-235-full-audit-fixes
+          test "$code" = 0
