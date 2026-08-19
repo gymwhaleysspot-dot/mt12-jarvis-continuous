@@ -28,4 +28,4 @@ if(!html.includes('st.target=st.boss'))throw Error('boss and target must bind at
 if(!tab.includes('scratch300balance2'))throw Error('adaptive balance iframe cache identity not updated');
 if(!pages.includes('uses: actions/deploy-pages@v4')||!pages.includes('node tools/test-survivor-production235-contract.mjs'))throw Error('Pages runtime gate missing');
 if(verify.includes('uses: actions/deploy-pages@v4')||verify.includes('pages: write')||verify.includes('id-token: write'))throw Error('verification workflow must not deploy');
-console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,heroHp:240,bossHp:BOSS_HP?.length??9,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
+console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,heroHp:240,bossRounds:9,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
