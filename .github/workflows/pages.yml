@@ -1,32 +1,31 @@
 name: Deploy Michael Current to Pages
+
 on:
   push:
     branches: [main]
-    paths:
-      - 'index.html'
-      - 'survivor.html'
-      - 'racing-mjx7303-michael-v39.html'
-      - 'michael-health.html'
-      - 'jarvis/**'
-      - 'assets/**'
-      - 'engine/**'
-      - 'public/**'
-      - 'michael/visual/**'
-      - 'nickelle/**'
-      - 'tools/build-survivor-production*.mjs'
-      - 'tools/test-survivor-production*.mjs'
-      - '.nojekyll'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
-permissions: {contents: read, pages: write, id-token: write}
-concurrency: {group: pages, cancel-in-progress: true}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
-    environment: {name: github-pages, url: '${{ steps.deployment.outputs.page_url }}'}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/configure-pages@v5
+
       - name: Assemble Survivor through Production 235
         run: |
           set -Eeuo pipefail
@@ -59,6 +58,7 @@ jobs:
           )
           for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
           for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
+
           cp survivor.html /tmp/survivor-production235-source.html
           node <<'NODE'
           const fs=require('fs'),p='survivor.html';let h=fs.readFileSync(p,'utf8');
@@ -66,44 +66,98 @@ jobs:
           if(refs.length!==1)throw Error(`Expected one canonical source loader before assembly, found ${refs.length}`);
           h=h.replace(rx,'jarvis/core-survivor.js?v=production235-assembly-bootstrap');fs.writeFileSync(p,h);
           NODE
-          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234 235; do node "tools/build-survivor-production${n}.mjs"; done
+
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234 235; do
+            node "tools/build-survivor-production${n}.mjs"
+          done
           cp /tmp/survivor-production235-source.html survivor.html
           node --check jarvis/core-survivor-235.js
           node tools/test-survivor-production235-contract.mjs
+
           node <<'NODE'
           const fs=require('fs'),crypto=require('crypto'),text=p=>fs.readFileSync(p,'utf8');
           const core=text('jarvis/core-survivor-235.js'),required=[196,199,204,220,221,222,223,224,225,228,229,230,231,234,235];
           for(const n of required)if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`Production ${n} missing from Production 235 artifact`);
+          if(!core.includes('__JARVIS_SURVIVOR_RUNTIME__'))throw Error('Production 235 global runtime proof missing');
           const inc=text('jarvis/production235-full-survivor-rebuild.inc.js');
           for(const m of ['FRESH_CANONICAL_BOSS_FACTORY','NO_LEGACY_LIRA_BOSS_REUSE','ATOMIC_STAGE_OPPONENT_TARGET_ARENA','DUAL_EVENT_ROUTE_NORMALIZATION','SPAWN_EVENT_SUPPRESSION_AND_REEMIT','AUTHORITATIVE_FORM_TRUTH','AUTHORITATIVE_HIT_TRUTH','GLOBAL_RUNTIME_PROOF','REPLAY_67_ACCEPTANCE'])if(!inc.includes(m))throw Error('Production 235 marker missing '+m);
-          const executable=inc.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');if(/document\.createElement\(['\"]canvas['\"]\)/.test(executable)||/requestAnimationFrame\s*\(/.test(executable))throw Error('Production 235 may not create canvas/RAF');
+          const executable=inc.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');
+          if(/document\.createElement\(['\"]canvas['\"]\)/.test(executable)||/requestAnimationFrame\s*\(/.test(executable))throw Error('Production 235 may not create canvas/RAF');
           const expected=[['LIRA','lira-nexus-v1.webp'],['KAIROX','kairox-caldera-v1.webp'],['SOLENNE','solenne-corona-v1.webp'],['MIREYA','mireya-prism-v1.webp'],['ZEPHYRA','zephyra-tempest-v1.webp'],['ORUN','orun-ion-v1.webp'],['MORDREN','mordren-singularity-v1.webp'],['SABLE','sable-eclipse-v1.webp'],['KRAKEN','kraken-abyss-v1.webp']],hashes=new Set(),inc220=text('jarvis/production220-direct-nine-arena-bindings.inc.js');
-          for(let i=0;i<expected.length;i++){const [opponent,arena]=expected[i],stage=i+1;if(!inc220.includes(`{stage:${stage},opponent:'${opponent}',arena:'${arena}'`))throw Error(`Stage ${stage} mapping missing`);const p=`jarvis/assets/survivor/arenas/${arena}`;if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+arena);hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'))}if(hashes.size!==9)throw Error('Arena files must be byte-distinct');
-          console.log({survivor:'PRODUCTION_235',runtime:'PRODUCTION_235',artifact:'jarvis/core-survivor-235.js',arenas:9,bossFactory:'FRESH_OBJECT_PER_STAGE',authority:'ONE_CANONICAL_TRANSACTION',renderer:'EXISTING_SINGLE',pagesAuthority:'SOLE_DEPLOY_WORKFLOW',result:'PASS'});
+          for(let i=0;i<expected.length;i++){
+            const [opponent,arena]=expected[i],stage=i+1;
+            if(!inc220.includes(`{stage:${stage},opponent:'${opponent}',arena:'${arena}'`))throw Error(`Stage ${stage} mapping missing`);
+            const p=`jarvis/assets/survivor/arenas/${arena}`;
+            if(!fs.existsSync(p)||fs.statSync(p).size<50000)throw Error('Missing/undersized arena '+arena);
+            hashes.add(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'));
+          }
+          if(hashes.size!==9)throw Error('Arena files must be byte-distinct');
+          console.log({survivor:'PRODUCTION_235',artifact:'jarvis/core-survivor-235.js',arenas:9,result:'PASS'});
           NODE
+
+      - name: Persist assembled Production 235 runtime on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -Eeuo pipefail
+          git config user.name 'Survivor Release Authority'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -f jarvis/core-survivor-235.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish canonical Survivor Production 235 runtime [skip ci]'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
       - name: Stamp Production 235 exact artifact identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA;
+          if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
           const path='survivor.html';let html=fs.readFileSync(path,'utf8');
-          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=html.match(rx)||[];if(refs.length!==1)throw Error(`Expected exactly one Survivor core reference, found ${refs.length}`);
+          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=html.match(rx)||[];
+          if(refs.length!==1)throw Error(`Expected exactly one Survivor core reference, found ${refs.length}`);
           html=html.replace(rx,`jarvis/core-survivor-235.js?v=${sha}`);
           html=html.replace(/<meta name="survivor-runtime" content="[^"]+">/g,'').replace(/<meta name="survivor-build" content="[^"]+">/g,'');
           html=html.replace('<head>',`<head><meta name="survivor-build" content="${sha}"><meta name="survivor-runtime" content="235"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">`);
           html=html.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);
           fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:235,runtimeProduction:235,deploySha:sha,core:'jarvis/core-survivor-235.js',runtimeAssemblyAuthority:'PRODUCTION_235_FULL_REBUILD',sceneAuthority:'ONE_STAGE_OPPONENT_FRESH_ACTOR_TARGET_ARENA_EVENT_TRANSACTION',renderAuthority:'ONE_FINAL_COMPOSITOR_SINGLE_RAF',pagesAuthority:'SOLE_DEPLOY_WORKFLOW',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:235,runtimeProduction:235,deploySha:sha,core:'jarvis/core-survivor-235.js',runtimeAssemblyAuthority:'PRODUCTION_235_FULL_REBUILD',pagesAuthority:'SOLE_DEPLOY_WORKFLOW',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
           grep -F 'name="survivor-runtime" content="235"' survivor.html
           grep -F 'jarvis/core-survivor-235.js?v=' survivor.html
           ! grep -E 'core-survivor-(221|230|231|234)\.js' survivor.html
           grep -F 'PRODUCTION_235_READY' jarvis/core-survivor-235.js
           grep -F '__JARVIS_SURVIVOR_RUNTIME__' jarvis/core-survivor-235.js
+
       - uses: actions/upload-pages-artifact@v4
-        with: {path: .}
+        with:
+          path: .
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify live Production 235 identity
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -Eeuo pipefail
+          base="${PAGE_URL%/}"
+          ok=0
+          for attempt in 1 2 3 4 5 6; do
+            html="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
+            core="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/jarvis/core-survivor-235.js?verify=${GITHUB_SHA}-${attempt}" || true)"
+            if grep -Fq 'name="survivor-runtime" content="235"' <<<"$html" \
+              && grep -Fq 'jarvis/core-survivor-235.js?v=' <<<"$html" \
+              && grep -Fq 'PRODUCTION_235_READY' <<<"$core" \
+              && grep -Fq '__JARVIS_SURVIVOR_RUNTIME__' <<<"$core"; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" -eq 1 || { echo 'Live Pages identity did not converge to Production 235' >&2; exit 1; }
+          echo 'Live Survivor Production 235 verified.'
