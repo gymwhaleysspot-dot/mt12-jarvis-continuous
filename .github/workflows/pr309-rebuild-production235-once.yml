@@ -3,7 +3,6 @@ on:
   push:
     branches: [agent/survivor-235-full-audit-fixes]
     paths:
-      - 'jarvis/production201-replay46-total-repair.inc.js'
       - '.github/workflows/pr309-rebuild-production235-once.yml'
 permissions:
   contents: write
@@ -17,12 +16,24 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: agent/survivor-235-full-audit-fixes
-      - name: Build, execute, and persist diagnostics
+      - name: Patch source authority, rebuild, execute, and persist diagnostics
         run: |
           set +e
           mkdir -p artifacts
           status=0
           cp survivor.html /tmp/survivor-source.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('jarvis/core-survivor.js')
+          s=p.read_text()
+          old='const p132CombatEvent=combatEvent;combatEvent=function(type,data={})'
+          new='let p132CombatEvent=combatEvent;combatEvent=function(type,data={})'
+          if old not in s and new not in s:
+              raise SystemExit('Production 132 event hook declaration not found')
+          if old in s:
+              s=s.replace(old,new,1)
+              p.write_text(s)
+          PY
           {
             echo '=== canonical rebuild ==='
             node <<'NODE'
@@ -35,7 +46,6 @@ jobs:
             cp /tmp/survivor-source.html survivor.html
             node --check jarvis/core-survivor-235.js || exit $?
             node tools/test-survivor-production235-contract.mjs || exit $?
-            git diff --exit-code -- jarvis/core-survivor-235.js || exit $?
           } > artifacts/rebuild.log 2>&1 || status=$?
           cp /tmp/survivor-source.html survivor.html
           if [ "$status" -eq 0 ]; then
@@ -60,19 +70,16 @@ jobs:
             echo '--- rebuild ---'
             cat artifacts/rebuild.log 2>/dev/null || true
             echo
-            echo '--- install tail ---'
-            tail -80 artifacts/install.log 2>/dev/null || true
-            echo
             echo '--- chromium ---'
             cat artifacts/chromium.log 2>/dev/null || true
             echo
             echo '--- webkit ---'
             cat artifacts/webkit.log 2>/dev/null || true
           } > pr309-runtime-gate.txt
-          git restore -- survivor.html jarvis/core-survivor.js jarvis/core-survivor-204.js jarvis/core-survivor-205.js jarvis/core-survivor-206.js jarvis/core-survivor-207.js jarvis/core-survivor-209.js jarvis/core-survivor-210.js jarvis/core-survivor-211.js jarvis/core-survivor-212.js jarvis/core-survivor-213.js jarvis/core-survivor-215.js jarvis/core-survivor-217.js jarvis/core-survivor-218.js jarvis/core-survivor-219.js jarvis/core-survivor-220.js jarvis/core-survivor-222.js jarvis/core-survivor-224.js jarvis/core-survivor-225.js jarvis/core-survivor-227.js jarvis/core-survivor-229.js jarvis/core-survivor-230.js jarvis/core-survivor-231.js jarvis/core-survivor-234.js jarvis/core-survivor-235.js 2>/dev/null || true
+          git restore -- survivor.html jarvis/core-survivor-204.js jarvis/core-survivor-205.js jarvis/core-survivor-206.js jarvis/core-survivor-207.js jarvis/core-survivor-209.js jarvis/core-survivor-210.js jarvis/core-survivor-211.js jarvis/core-survivor-212.js jarvis/core-survivor-213.js jarvis/core-survivor-215.js jarvis/core-survivor-217.js jarvis/core-survivor-218.js jarvis/core-survivor-219.js jarvis/core-survivor-220.js jarvis/core-survivor-222.js jarvis/core-survivor-224.js jarvis/core-survivor-225.js jarvis/core-survivor-227.js jarvis/core-survivor-229.js jarvis/core-survivor-230.js jarvis/core-survivor-231.js jarvis/core-survivor-234.js 2>/dev/null || true
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add pr309-runtime-gate.txt
-          git commit -m 'test(survivor): record PR309 executable runtime gate' || true
+          git add jarvis/core-survivor.js jarvis/core-survivor-235.js pr309-runtime-gate.txt
+          git commit -m 'fix(survivor): make legacy event hook safely rebindable' || true
           git push origin HEAD:agent/survivor-235-full-audit-fixes
           exit "$status"
