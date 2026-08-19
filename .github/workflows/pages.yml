@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -20,6 +20,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 12
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+      deploy_sha: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -45,22 +49,6 @@ jobs:
             grep -F "PRODUCTION_${n}_READY" jarvis/core-survivor-235.js >/dev/null
           done
 
-      - name: Install Playwright browser engines
-        run: |
-          set -Eeuo pipefail
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium webkit
-
-      - name: Browser-boot committed Production 235 before deployment
-        run: |
-          set -Eeuo pipefail
-          mkdir -p artifacts/predeploy
-          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/predeploy/http.log 2>&1 &
-          server=$!
-          trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
-
       - name: Stamp exact Production 235 deployment identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
@@ -81,7 +69,15 @@ jobs:
           html=html.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);
           html=html.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);
           fs.writeFileSync(path,html);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({production:235,runtimeProduction:235,deploySha:sha,core:'jarvis/core-survivor-235.js',runtimeAssemblyAuthority:'COMMITTED_PRODUCTION_235_ARTIFACT',pagesAuthority:'SOLE_DIRECT_DEPLOY_WORKFLOW',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({
+            production:235,
+            runtimeProduction:235,
+            deploySha:sha,
+            core:'jarvis/core-survivor-235.js',
+            runtimeAssemblyAuthority:'COMMITTED_PRODUCTION_235_ARTIFACT',
+            pagesAuthority:'SOLE_FAST_DEPLOY_WORKFLOW',
+            generatedAt:new Date().toISOString()
+          },null,2)+'\n');
           NODE
           grep -F "jarvis/core-survivor-235.js?v=${GITHUB_SHA}" survivor.html
           grep -F "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" survivor.html
@@ -90,7 +86,7 @@ jobs:
         with:
           path: .
 
-      - name: Deploy
+      - name: Deploy immediately after deterministic checks
         id: deployment
         uses: actions/deploy-pages@v4
 
@@ -102,30 +98,51 @@ jobs:
           base="${PAGE_URL%/}"
           ok=0
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            html="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
-            core="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/jarvis/core-survivor-235.js?verify=${GITHUB_SHA}-${attempt}" || true)"
+            html="$(curl -fsSL -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
+            core="$(curl -fsSL -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${base}/jarvis/core-survivor-235.js?verify=${GITHUB_SHA}-${attempt}" || true)"
             if grep -Fq 'name="survivor-runtime" content="235"' <<<"$html" \
               && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" \
               && grep -Fq "jarvis/core-survivor-235.js?v=${GITHUB_SHA}" <<<"$html" \
               && grep -Fq 'PRODUCTION_235_READY' <<<"$core" \
-              && grep -Fq '__JARVIS_SURVIVOR_RUNTIME__' <<<"$core"; then ok=1; break; fi
-            sleep 10
+              && grep -Fq '__JARVIS_SURVIVOR_RUNTIME__' <<<"$core"; then
+              echo "Live Survivor Production 235 converged on attempt ${attempt}."
+              ok=1
+              break
+            fi
+            sleep 5
           done
           test "$ok" -eq 1 || { echo 'Live Pages identity did not converge to the exact Production 235 deployment' >&2; exit 1; }
 
+  verify-live-browser:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Install Playwright browser engines after site is live
+        run: |
+          set -Eeuo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
+
       - name: Browser-verify live Production 235
         env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+          DEPLOY_SHA: ${{ needs.deploy.outputs.deploy_sha }}
         run: |
           set -Eeuo pipefail
           base="${PAGE_URL%/}"
-          SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
+          mkdir -p artifacts/live/chromium artifacts/live/webkit
+          SURVIVOR_URL="${base}/survivor.html?browser=${DEPLOY_SHA}" SURVIVOR_EXPECTED_SHA="${DEPLOY_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_URL="${base}/survivor.html?browser=${DEPLOY_SHA}" SURVIVOR_EXPECTED_SHA="${DEPLOY_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
 
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: survivor-pages-browser-${{ github.sha }}
+          name: survivor-pages-browser-${{ needs.deploy.outputs.deploy_sha }}
           path: artifacts/
           retention-days: 30
