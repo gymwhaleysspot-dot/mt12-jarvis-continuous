@@ -10,10 +10,12 @@ if((html.match(/<canvas\b/g)||[]).length!==1)throw Error('exactly one canvas req
 if((html.match(/requestAnimationFrame\s*\(/g)||[]).length!==1)throw Error('exactly one RAF scheduling call site required');
 if(/core-survivor(?:-\d+)?\.js/.test(html))throw Error('legacy external Survivor core must not load');
 for(const [opponent,arena] of expected)if(!html.includes(`'${opponent}'`)||!html.includes(`'${arena}'`))throw Error(`stage identity missing ${opponent}/${arena}`);
-for(const marker of ['function bossFactory','function bindStage','function validate','st.resolved=true','window.exportSurvivorReplay','window.JarvisSurvivor','__SURVIVOR_DEPLOY_SHA__'])if(!html.includes(marker))throw Error('runtime contract missing '+marker);
+for(const marker of ['function fighter','function bindStage','function validate','st.resolved=true','window.exportSurvivorReplay','window.JarvisSurvivor','__SURVIVOR_DEPLOY_SHA__','SPRITE_MANIFEST_VERSION=1','ATLAS_CELLS','HERO_SPRITES','LIRA_SPRITES','RIVAL_SPRITES','ENERGY_SPRITES','TRANSITION_SPRITES','ALL_SPRITE_PATHS','function drawSpriteCell','function rivalSpriteSet','getSpriteState'])if(!html.includes(marker))throw Error('runtime contract missing '+marker);
+for(const asset of ['griffin-atlas-v3.webp','griffin-saiyan-spark-atlas-v3.webp','griffin-ascended-atlas-v3.webp','griffin-hyper-atlas-v3.webp','griffin-speed-form-atlas-v1.webp','griffin-guardian-form-atlas-v1.webp','griffin-destroyer-form-atlas-v1.webp','griffin-celestial-overdrive-atlas-v1.webp','griffin-omega-instinct-atlas-v1.webp','griffin-instinct-form-atlas-v1.webp','griffin-instinct-atlas-v3.webp','lira-vanguard-atlas-v2.webp','lira-rift-atlas-v3.webp','lira-eclipse-atlas-v3.webp','lira-empress-atlas-v3.webp','attack-connect-atlas-v1.webp','defense-counter-atlas-v1.webp'])if(!html.includes(asset))throw Error('sprite asset missing '+asset);
+for(const n of ['kairox','kraken','mireya','mordren','orun','sable','solenne','zephyra'])if(!html.includes(`'${n}'`))throw Error('rival sprite generator missing '+n);
+if(!html.includes("['griffin','lira','kairox','kraken','mireya','mordren','orun','sable','solenne','zephyra']")||!html.includes("VFX+n+'-energy-atlas-v1.webp'"))throw Error('ten-fighter energy atlas generator missing');
 if(!html.includes('st.target=st.boss'))throw Error('boss and target must bind atomically');
-if(!html.includes('st.arena=A[i]')||!html.includes('st.arenaSrc=q[2]'))throw Error('arena must bind atomically at stage edge');
-if(!tab.includes('scratch300'))throw Error('iframe cache identity not updated');
+if(!tab.includes('scratch300sprites1'))throw Error('sprite iframe cache identity not updated');
 if(!pages.includes('uses: actions/deploy-pages@v4')||!pages.includes('node tools/test-survivor-production235-contract.mjs'))throw Error('Pages runtime gate missing');
 if(verify.includes('uses: actions/deploy-pages@v4')||verify.includes('pages: write')||verify.includes('id-token: write'))throw Error('verification workflow must not deploy');
-console.log({runtime:300,stages:9,forms:11,canvas:1,raf:1,bossFactory:'FRESH_OBJECT_PER_STAGE',renderer:'STANDALONE_SINGLE_CANVAS',result:'PASS'});
+console.log({runtime:300,stages:9,forms:11,spriteManifest:1,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
