@@ -29,8 +29,9 @@ if(!(heroParry>bossParry&&heroParry>=.15&&bossParry<=.1))throw Error(`Griffin pa
 if(!html.includes("f.hero?12:6"))throw Error('Griffin KI regeneration advantage missing');
 if(!html.includes("st.hero.hp+Math.max(80,HERO_MAX_HP*.42)"))throw Error('round recovery missing');
 if(!html.includes('st.target=st.boss'))throw Error('boss and target must bind atomically');
-for(const marker of ['GRAPHICS_VERSION=3','scratch300graphics3','function applyGraphics','survivor-cinematic-graphics-v3','FORM_COLORS','RIVAL_COLORS','--heroAura','--rivalAura','survivorAuraPulse'])if(!tab.includes(marker))throw Error('cinematic graphics contract missing '+marker);
+for(const marker of ['GRAPHICS_VERSION=3','scratch300graphics3fix1','function applyGraphics','function stopGraphics','survivor-cinematic-graphics-v3','FORM_COLORS','RIVAL_COLORS','--heroAura','--rivalAura','survivorAuraPulse','!frame.isConnected||!active()'])if(!tab.includes(marker))throw Error('cinematic graphics hardening contract missing '+marker);
+if(!tab.includes('border-color:rgba(101,234,255,.58)')||!tab.includes('box-shadow:0 0 22px rgba(101,234,255,.18)'))throw Error('WebKit-safe graphics fallback missing');
 if(!tabCss.includes('survivor-card:before')||!tabCss.includes('0 28px 90px'))throw Error('outer cinematic frame styling missing');
 if(!pages.includes('uses: actions/deploy-pages@v4')||!pages.includes('node tools/test-survivor-production235-contract.mjs'))throw Error('Pages runtime gate missing');
 if(verify.includes('uses: actions/deploy-pages@v4')||verify.includes('pages: write')||verify.includes('id-token: write'))throw Error('verification workflow must not deploy');
-console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,graphicsVersion:3,heroHp:240,bossRounds:9,heroParry,bossParry,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_CINEMATIC_PRESENTATION',result:'PASS'});
+console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,graphicsVersion:3,graphicsHardening:1,heroHp:240,bossRounds:9,heroParry,bossParry,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_CINEMATIC_PRESENTATION',result:'PASS'});
