@@ -1,0 +1,45 @@
+name: PR309 one-time Survivor 235 artifact rebuild
+on:
+  push:
+    branches: [agent/survivor-235-full-audit-fixes]
+    paths:
+      - 'jarvis/production201-replay46-total-repair.inc.js'
+      - '.github/workflows/pr309-rebuild-production235-once.yml'
+permissions:
+  contents: write
+concurrency:
+  group: pr309-rebuild-production235-once
+  cancel-in-progress: true
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/survivor-235-full-audit-fixes
+      - name: Rebuild canonical Production 235 artifact
+        run: |
+          set -Eeuo pipefail
+          cp survivor.html /tmp/survivor-source.html
+          node <<'NODE'
+          const fs=require('fs'),p='survivor.html';let h=fs.readFileSync(p,'utf8');
+          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=h.match(rx)||[];
+          if(refs.length!==1)throw Error(`Expected one canonical source loader, found ${refs.length}`);
+          h=h.replace(rx,'jarvis/core-survivor.js?v=production235-assembly-bootstrap');fs.writeFileSync(p,h);
+          NODE
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234 235; do node "tools/build-survivor-production${n}.mjs"; done
+          cp /tmp/survivor-source.html survivor.html
+          node --check jarvis/core-survivor-235.js
+          node tools/test-survivor-production235-contract.mjs
+      - name: Commit regenerated canonical artifact
+        run: |
+          set -Eeuo pipefail
+          if git diff --quiet -- jarvis/core-survivor-235.js; then
+            echo 'Production 235 artifact already canonical.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add jarvis/core-survivor-235.js
+          git commit -m 'build(survivor): regenerate Production 235 after runtime fix'
+          git push origin HEAD:agent/survivor-235-full-audit-fixes
