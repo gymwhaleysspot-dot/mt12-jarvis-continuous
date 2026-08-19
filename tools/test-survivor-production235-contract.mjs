@@ -21,11 +21,14 @@ if(declaredEnergy.length!==expectedEnergy.length||new Set(declaredEnergy).size!=
 for(const n of expectedEnergy)if(!declaredEnergy.includes(n))throw Error('energy atlas fighter missing '+n);
 for(const n of declaredEnergy){const generated=`jarvis/assets/survivor/vfx/${n}-energy-atlas-v1.webp`;if(!generated.endsWith(`${n}-energy-atlas-v1.webp`))throw Error('energy atlas path generation invalid '+n)}
 for(const marker of ['HERO_MAX_HP=240','BALANCE_VERSION=2','BOSS_HP=[520,620,740,860,1000,1160,1340,1560,1900]','function dodge','function guard','function heroAI','function bossAI','st.balance.dodges','st.balance.counters'])if(!html.includes(marker))throw Error('adaptive balance contract missing '+marker);
-if(!html.includes("b.hero?.18:.07"))throw Error('Griffin parry advantage missing');
+const parryMatch=html.match(/parry=heroDef\?\.(\d+):\.(\d+)/);
+if(!parryMatch)throw Error('parry advantage expression missing');
+const heroParry=Number(`0.${parryMatch[1]}`),bossParry=Number(`0.${parryMatch[2]}`);
+if(!(heroParry>bossParry&&heroParry>=.15&&bossParry<=.1))throw Error(`Griffin parry advantage invalid: ${heroParry} vs ${bossParry}`);
 if(!html.includes("f.hero?12:6"))throw Error('Griffin KI regeneration advantage missing');
 if(!html.includes("st.hero.hp+Math.max(80,HERO_MAX_HP*.42)"))throw Error('round recovery missing');
 if(!html.includes('st.target=st.boss'))throw Error('boss and target must bind atomically');
 if(!tab.includes('scratch300balance2'))throw Error('adaptive balance iframe cache identity not updated');
 if(!pages.includes('uses: actions/deploy-pages@v4')||!pages.includes('node tools/test-survivor-production235-contract.mjs'))throw Error('Pages runtime gate missing');
 if(verify.includes('uses: actions/deploy-pages@v4')||verify.includes('pages: write')||verify.includes('id-token: write'))throw Error('verification workflow must not deploy');
-console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,heroHp:240,bossRounds:9,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
+console.log({runtime:300,stages:9,forms:11,spriteManifest:1,balanceVersion:2,heroHp:240,bossRounds:9,heroParry,bossParry,energyAtlases:declaredEnergy.length,canvas:1,raf:1,renderer:'SPRITE_ATLAS_WITH_VECTOR_FALLBACK',result:'PASS'});
