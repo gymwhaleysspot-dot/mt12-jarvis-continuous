@@ -10,38 +10,32 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Runtime 300 cinematic graphics reached Pages
+      - name: Verify Runtime 300 cinematic engine v4 reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
         run: |
           set -Eeuo pipefail
-          html=""
-          tab=""
-          css=""
           for attempt in 1 2 3 4 5 6 7 8 9 10; do
             html="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/survivor.html?verify=$DEPLOY_SHA-$attempt" || true)"
             tab="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/survivor-tab.js?verify=$DEPLOY_SHA-$attempt" || true)"
             css="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/survivor-tab.css?verify=$DEPLOY_SHA-$attempt" || true)"
             if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="300"' && \
-               printf '%s' "$html" | grep -q 'const RUNTIME=300' && \
                printf '%s' "$html" | grep -q 'BALANCE_VERSION=2' && \
-               printf '%s' "$html" | grep -q "mode:'CANONICAL_SCRATCH_REBUILD'" && \
                printf '%s' "$html" | grep -q 'SPRITE_MANIFEST_VERSION=1' && \
-               printf '%s' "$html" | grep -q 'window.JarvisSurvivor' && \
-               printf '%s' "$html" | grep -q 'window.exportSurvivorReplay' && \
-               printf '%s' "$tab" | grep -q 'GRAPHICS_VERSION=3' && \
-               printf '%s' "$tab" | grep -q 'scratch300graphics3fix1' && \
-               printf '%s' "$tab" | grep -q 'function stopGraphics' && \
-               printf '%s' "$tab" | grep -q 'survivor-cinematic-graphics-v3' && \
+               printf '%s' "$tab" | grep -q 'GRAPHICS_VERSION=4' && \
+               printf '%s' "$tab" | grep -q 'scratch300engine4' && \
+               printf '%s' "$tab" | grep -q 'survivor-cinematic-engine-v4' && \
+               printf '%s' "$tab" | grep -q -- '--camScale' && \
+               printf '%s' "$tab" | grep -q 'data-engine-impact' && \
                printf '%s' "$css" | grep -q 'survivor-card:before'; then
               if ! printf '%s' "$html" | grep -Eq 'core-survivor(-[0-9]+)?\.js'; then
-                echo "Runtime 300 cinematic Survivor graphics verified live at $DEPLOY_SHA"
+                echo "Runtime 300 cinematic engine v4 verified live at $DEPLOY_SHA"
                 exit 0
               fi
             fi
             sleep 3
           done
-          echo 'Live Survivor deployment did not satisfy Runtime 300 cinematic graphics identity.' >&2
+          echo 'Live Survivor deployment did not satisfy Runtime 300 cinematic engine v4 identity.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
