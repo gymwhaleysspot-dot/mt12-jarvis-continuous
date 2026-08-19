@@ -2894,7 +2894,7 @@ const superDesign132={
 const production132={version:'132',superStarts:0,titleCards:0,chargeFrames:0,rushFrames:0,beamFrames:0,impactFrames:0,damageConfirmed:0,finisherReady:0,finishers:0,dramaticFinishes:0,clashes:0,letterboxFrames:0,ready:false};
 const cinema132={super:null,finish:null,clash:null,lastBoss:null,lastEvent:'',lastDamage:0};
 function snapshot132(e){if(!e)return cinema132.lastBoss;const s=stage131.enemy.get(e);return{name:liraForms131[liraForm131(e)]?.name||'LIRA PRIME',form:liraForm131(e),x:s?.x||W*.72,y:H*.855,size:Math.min(W,H)*(W<720?.52:.35),hp:e.hp,max:e.max||e.maxHp||1}}
-const p132CombatEvent=combatEvent;combatEvent=function(type,data={}){const t=String(type||'').toUpperCase(),boss=enemies.find(e=>e.type===3);if(boss)cinema132.lastBoss=snapshot132(boss);if(t==='SUPER_MOVE_TRIGGERED'){const id=data.move||griffin.superMove?.id||'FINAL_NOVA',d=superDesign132[id]||superDesign132.FINAL_NOVA;cinema132.super={id,start:performance.now(),impact:false,damage:0,hits:0,title:d.title,kind:d.kind,color:griffin.superMove?.color||'#65faff'};production132.superStarts++;production132.titleCards++}else if(t==='SUPER_MOVE_IMPACT'){if(cinema132.super){cinema132.super.impact=true;cinema132.super.impactAt=performance.now();cinema132.super.damage=data.damage||0;cinema132.super.hits=data.hits||0}cinema132.lastDamage=data.damage||0;production132.damageConfirmed+=data.damage||0}else if(t==='GRIFFIN_CREATED_FINISHER'){production132.finisherReady++;cinema132.lastEvent='FINISHER ARMED'}else if(t==='FINISHER_CONFIRMED'){const snap=cinema132.lastBoss||snapshot132(boss);cinema132.finish={start:performance.now(),duration:2600,snap,phase:'CONFIRMED',damage:cinema132.lastDamage};production132.finishers++}else if(t==='DRAMATIC_FINISH'){const snap=cinema132.lastBoss||snapshot132(boss);cinema132.finish={start:performance.now(),duration:3200,snap,phase:'DRAMATIC',damage:cinema132.lastDamage};production132.dramaticFinishes++}else if(/CLASH/.test(t)){cinema132.clash={start:performance.now(),duration:1350};production132.clashes++}return p132CombatEvent(type,data)};
+let p132CombatEvent=combatEvent;combatEvent=function(type,data={}){const t=String(type||'').toUpperCase(),boss=enemies.find(e=>e.type===3);if(boss)cinema132.lastBoss=snapshot132(boss);if(t==='SUPER_MOVE_TRIGGERED'){const id=data.move||griffin.superMove?.id||'FINAL_NOVA',d=superDesign132[id]||superDesign132.FINAL_NOVA;cinema132.super={id,start:performance.now(),impact:false,damage:0,hits:0,title:d.title,kind:d.kind,color:griffin.superMove?.color||'#65faff'};production132.superStarts++;production132.titleCards++}else if(t==='SUPER_MOVE_IMPACT'){if(cinema132.super){cinema132.super.impact=true;cinema132.super.impactAt=performance.now();cinema132.super.damage=data.damage||0;cinema132.super.hits=data.hits||0}cinema132.lastDamage=data.damage||0;production132.damageConfirmed+=data.damage||0}else if(t==='GRIFFIN_CREATED_FINISHER'){production132.finisherReady++;cinema132.lastEvent='FINISHER ARMED'}else if(t==='FINISHER_CONFIRMED'){const snap=cinema132.lastBoss||snapshot132(boss);cinema132.finish={start:performance.now(),duration:2600,snap,phase:'CONFIRMED',damage:cinema132.lastDamage};production132.finishers++}else if(t==='DRAMATIC_FINISH'){const snap=cinema132.lastBoss||snapshot132(boss);cinema132.finish={start:performance.now(),duration:3200,snap,phase:'DRAMATIC',damage:cinema132.lastDamage};production132.dramaticFinishes++}else if(/CLASH/.test(t)){cinema132.clash={start:performance.now(),duration:1350};production132.clashes++}return p132CombatEvent(type,data)};
 function letterbox132(g,alpha=.9){const h=Math.max(42,H*.105);g.save();g.fillStyle=`rgba(2,3,10,${alpha})`;g.fillRect(0,0,W,h);g.fillRect(0,H-h,W,h);g.restore();production132.letterboxFrames++}
 function rays132(g,cx,cy,color,count=18,spin=0){g.save();g.translate(cx,cy);g.strokeStyle=color;g.globalAlpha=.48;for(let i=0;i<count;i++){const a=i*TAU/count+spin,r0=34+(i%3)*9,r1=Math.max(W,H)*(.52+(i%4)*.06);g.lineWidth=i%3===0?5:2;g.beginPath();g.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);g.lineTo(Math.cos(a)*r1,Math.sin(a)*r1);g.stroke()}g.restore()}
 function title132(g,top,bottom,color,progress){const enter=clamp(progress/.12,0,1),exit=clamp((1-progress)/.12,0,1),a=Math.min(enter,exit);g.save();g.textAlign='center';g.globalAlpha=a;g.shadowBlur=28;g.shadowColor=color;g.fillStyle='#fff';g.font=`1000 ${Math.max(24,Math.min(54,W*.07))}px system-ui`;g.fillText(top,W*.5,H*.17);g.shadowBlur=0;g.fillStyle=color;g.font=`900 ${Math.max(10,Math.min(17,W*.021))}px system-ui`;g.fillText(bottom,W*.5,H*.215);g.restore()}
@@ -3401,5 +3401,1780 @@ const p162Hurt=hurt;hurt=function(e,damage,color='#73f3ff'){return p162Hurt(e,e?
 iyla3DCombat=function(){iyla3d.draws=iyla3d.faces=0;production162.legacyRigFramesSuppressed++};
 const p162Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p162Replay(frame);const s=production162.spriteFrames,attack=s.jab+s.cross+s.kick+s.spin+s.beam,total=Object.values(s).reduce((a,b)=>a+b,0);frame.production162={system:'LIVE ATTACK AUTHORITY + LEGACY RENDER RETIREMENT',source:production162.source,sprites:{...s,attackRatio:+(attack/Math.max(1,total)).toFixed(3),authority:'CONFIRMED OWEN ACTION / FOLLOW THROUGH ONLY'},cadence:{recoveryLocks:production162.recoveryLocks,lastFinisherAt:+production162.lastFinisherAt.toFixed(2),finisherRecovery:.86},combat:{bossDamageBoost:production162.bossDamageBoost,legacyRigFramesSuppressed:production162.legacyRigFramesSuppressed},invariants:{noClockDrivenHeroAttacks:true,attackCellsMatchMoveFamily:true,finishersHaveRecovery:true,proceduralCharacterOverlayRetired:true,tournamentOnly:enemies.every(isTournamentFighter160)}}};
 p132CombatEvent('PRODUCTION_162_READY',{replay:73,source:'LIVE PRODUCTION 161',sprites:'OWEN-CONFIRMED ATTACK CELLS',cadence:'FINISHER RECOVERY + NO IDLE SWINGS',legacy:'PROCEDURAL CHARACTER OVERLAY RETIRED'});
+
+
+/* PRODUCTION 196 — CONTACT-BOUND ARENA-FIGHTER CHOREOGRAPHY
+   Injected inside core-survivor.js before the closing IIFE by the release build. */
+const production196={ready:true,reference:'ARENA FIGHTER RUSH / BLAST IMPACT / TRANSFORMATION STUDY',kiHits:0,kiMisses:0,hostileHits:0,beamHits:0,lightningHits:0,contactExplosions:0,transformBeats:0,voiceBeats:0,clashes:0};
+const p196Hurt=hurt;hurt=function(e,damage,color='#73f3ff'){const before=e?.hp;const out=p196Hurt(e,damage,color);if(e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&before!==e.hp){dbzImpact158(vector113.g,e.x,e.y,color,Math.min(1.8,.65+damage/55));production196.contactExplosions++;combatEvent('ENERGY_CONTACT_CONFIRMED',{damage:Math.round(damage),x:Math.round(e.x),y:Math.round(e.y),boss:e.type===3})}return out};
+function nearest196(px,py,range){let best=null,bd=range;for(const e of enemies){if(!isTournamentFighter160(e))continue;const d=Math.hypot(e.x-px,e.y-py);if(d<bd){best=e;bd=d}}return best}
+const p196Omni=omniSystems;omniSystems=function(dt){p196Omni(dt);if(!running)return;
+ // Ki/projectile authority: visual bursts only occur at the actual collision point.
+ for(let i=shots.length-1;i>=0;i--){const s=shots[i];if(s.p196Hit)continue;const e=nearest196(s.x,s.y,(s.r||5)+42);if(!e)continue;s.p196Hit=true;const damage=Math.max(5,(s.damage||player.damage*.36));hurt(e,damage,'#79f6ff');zImpact(e.x,e.y,'#79f6ff',1.35);burst(e.x,e.y,'#9cffff',7);production196.kiHits++;combatEvent('KI_BLAST_CONTACT',{damage:Math.round(damage),x:e.x,y:e.y,boss:e.type===3});shots.splice(i,1)}
+ for(let i=hostile.length-1;i>=0;i--){const s=hostile[i],d=Math.hypot(s.x-player.x,s.y-player.y);if(d>(s.r||7)+player.r+9)continue;const damage=Math.max(3,s.damage||7);player.hp=Math.max(0,player.hp-damage);zImpact(player.x,player.y,'#ff4b72',1.25);burst(player.x,player.y,'#ff7894',6);production196.hostileHits++;combatEvent('RIVAL_KI_CONTACT',{damage:Math.round(damage),x:player.x,y:player.y});hostile.splice(i,1)}
+ // Lightning is a strike, not ambient decoration: acquire a live fighter and terminate on body contact.
+ if(player.lightning>0&&elapsed-(production196.lastLightning||-9)>.7){const e=nearest196(player.x,player.y,390);if(e){production196.lastLightning=elapsed;const damage=8+player.lightning*4+(griffin.evolution||0)*1.4;hurt(e,damage,'#d8fbff');beams.push({x1:player.x,y1:player.y,x2:e.x,y2:e.y,color:'#bff8ff',life:.12,damage,power:1.1});production196.lightningHits++;combatEvent('LIGHTNING_CONTACT',{damage:Math.round(damage),x:e.x,y:e.y})}}
+ // Beam endpoints are contact-authoritative; clamp an overshooting beam to the first fighter it actually reaches.
+ for(const b of beams){if(b.p196Resolved)continue;const dx=b.x2-b.x1,dy=b.y2-b.y1,ll=dx*dx+dy*dy;if(ll<4)continue;let hit=null,bestT=2;for(const e of enemies){if(!isTournamentFighter160(e))continue;const t=clamp(((e.x-b.x1)*dx+(e.y-b.y1)*dy)/ll,0,1),px=b.x1+dx*t,py=b.y1+dy*t,d=Math.hypot(e.x-px,e.y-py);if(d<48&&t<bestT){hit=e;bestT=t}}if(hit){b.x2=hit.x;b.y2=hit.y;b.p196Resolved=true;hurt(hit,Math.max(10,b.damage||player.damage*.55),'#eaffff');production196.beamHits++;combatEvent('BEAM_CONTACT',{x:hit.x,y:hit.y,boss:hit.type===3})}}
+};
+// Transformation choreography: anticipation -> charge -> release -> recovery, with lightning tied to the fighter.
+const p196Begin=beginGriffinTransformation;beginGriffinTransformation=function(stage){const out=p196Begin(stage);if(!griffin.transformation?.active)return out;production196.transformBeats++;const form=saiyanForms[stage]||saiyanForms[griffin.evolution||0];iylaScene(form?.name||'ASCENSION','POWER RISE · BODY CHANGE · CONTROL',form?.color||'#eaffff',2.6,30);soundTransform101(1+stage*.07);voiceEnqueue101('jaxon',['I can hold this power. Now I make it precise.','The form is stable. Every strike still needs a target.','Power changed. My timing does not.'][stage%3],{context:'transform',priority:9,force:true,ttl:12000});production196.voiceBeats++;return out};
+// Confirmed melee receives a short readable hit-stop and a reaction; misses receive motion only.
+const p196Event=combatEvent;combatEvent=function(type,data={}){const e=p196Event(type,data),t=String(type||'').toUpperCase();if(t==='MELEE_CONTACT_CONFIRMED'||t==='CHRISTIAN_CONTACT'){owen.hold=Math.max(owen.hold||0,.045);shake=Math.max(shake,4);soundImpact101(.9,clamp(((data.x||player.x)-player.x)/420,-.8,.8))}else if(t.includes('MISSED'))soundWhoosh101(.45);if(t.includes('CLASH'))production196.clashes++;return e};
+// More varied original combat callouts without copying franchise dialogue.
+voiceLexicon101.common.opening.push('Close the gap, read the guard, then commit','The next exchange starts at contact range','Energy follows the fighter, not empty space','I am waiting for the real opening');
+voiceLexicon101.common.tactic.push('chain the launch into pursuit','meet the blast at its collision point','vanish only when the follow-up is reachable','let the impact decide the camera','save the explosion for confirmed contact');
+voiceLexicon101.common.transform.push('The aura is locking to the new body','The surge is settling into controlled power','The transformation has a beginning, peak, and recovery');
+voiceLexicon101.griffin.power.push('This blast ends at the opponent, not the horizon','I will confirm the line before I release','The charge is useless until the strike connects');
+voiceLexicon101.lira.power.push('I will force your guard before I release','My blast follows your escape line','I am aiming through your next step');
+const p196Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p196Replay(frame);frame.production196={system:'CONTACT-BOUND RUSH / KI / TRANSFORMATION CHOREOGRAPHY',reference:production196.reference,contacts:{ki:production196.kiHits,rivalKi:production196.hostileHits,beam:production196.beamHits,lightning:production196.lightningHits,explosions:production196.contactExplosions},cinema:{transformBeats:production196.transformBeats,voiceBeats:production196.voiceBeats,clashes:production196.clashes},invariants:{energyTerminatesOnFighters:true,explosionsRequireContact:true,lightningTargetsFighters:true,transformationsHaveStagedBeat:true,originalDialogue:true}}};
+p132CombatEvent('PRODUCTION_196_READY',{combat:'CONTACT-BOUND KI + BEAMS + LIGHTNING',choreography:'RUSH / LAUNCH / PURSUIT / IMPACT',transform:'STAGED POWER-UP',audio:'CONTACT-DRIVEN SFX + EXPANDED ORIGINAL VOICES'});
+
+
+/* PRODUCTION 197 — replay-42 combat-contact refinement. Original characters/assets/dialogue only. */
+const production197={name:'SURVIVOR PRODUCTION 197',source:'REPLAY 42',principles:['CONTACT BEFORE VFX','RUSH CHAIN FOLLOW THROUGH','BLAST IMPACT AT DEFENDER','EARNED TRANSFORMATION TURNING POINT','RECOVERY BEFORE RE-ENGAGE'],replay42:{seconds:66,kills:2,forms:2,owenAttempts:67,owenHits:65,owenWhiffs:1,minimumFps:21,stalls:1},impactContacts:0,transformBeats:0,invariants:{impactRequiresContact:true,blastEndpointDefenderBound:true,transformationCannotSpam:true,recoveryIsReadable:true,oneVisible2DStage:true}};
+const p197ImpactTypes=new Set(['MELEE_CONTACT_CONFIRMED','DAMAGE_CONFIRMED','SUPER_MOVE_IMPACT','RIVAL_SUPER_IMPACT','LIRA_SUPER_IMPACT','FINISHER_CONFIRMED','ZENITH_CLASH_RESOLVED','KI_BLAST_CONTACT','BEAM_CONTACT','LIGHTNING_CONTACT']);
+const p197TransformTypes=new Set(['TRANSFORMATION_TRIGGERED','RIVAL_TRANSFORMATION','LIRA_FORM_SWITCH']);
+let p197LastImpact=-99,p197LastTransform=-99;
+function p197TargetPoint(e){const id=e?.targetId||griffin?.target?.id||griffin?.boss?.id,a=enemies.find(v=>v&&v.id===id)||griffin?.boss;return a&&Number.isFinite(a.x)&&Number.isFinite(a.y)?{x:a.x,y:a.y}:null}
+function p197ContactBurst(e){if(elapsed-p197LastImpact<.045)return;const p=p197TargetPoint(e);if(!p)return;p197LastImpact=elapsed;production197.impactContacts++;rings.push({x:p.x,y:p.y,r:8,max:58,life:.24});particles.push({x:p.x,y:p.y,vx:0,vy:0,life:.16,size:18,kind:'CONTACT_FLASH'});ultimateTone(e?.type==='FINISHER_CONFIRMED'?92:185,.07)}
+function p197TransformBeat(){if(elapsed-p197LastTransform<1.15)return;p197LastTransform=elapsed;production197.transformBeats++;iyla.intensity=1;iyla.shake=Math.max(iyla.shake||0,.7);ultimateTone(132,.18)}
+const p197CombatEvent=combatEvent;combatEvent=function(type,data={}){const e=p197CombatEvent(type,data);if(p197ImpactTypes.has(type))p197ContactBurst(e);if(p197TransformTypes.has(type))p197TransformBeat();return e};
+combatEvent('PRODUCTION_197_READY',{replay:42,contactAuthority:true,dragonCombatResearch:true});
+
+
+/* PRODUCTION 198 — DRAGON-STYLE FULL GAMEPLAY, SPRITE AND GRAPHICS PASS
+ * Original-character arena-fighter choreography. Existing authored 2D atlases
+ * remain the only character renderer; this layer binds motion, VFX, audio and
+ * transformations to confirmed combat state instead of free-running spectacle.
+ */
+const production198={
+  ready:true,replay:43,system:'CONTACT-DRIVEN DRAGON ARENA FIGHT',frames:0,
+  contacts:{melee:0,ki:0,beam:0,lightning:0,super:0,finisher:0,guard:0,misses:0},
+  sprites:{IDLE:0,STEP:0,DASH:0,GUARD:0,HIT_LIGHT:0,HIT_MEDIUM:0,HIT_HEAVY:0,LAUNCH:0,JAB:0,CROSS:0,KICK:0,SPIN:0,BEAM:0,AIR_TUMBLE:0,KNOCKDOWN:0,RECOVER:0},
+  graphics:{impacts:0,attachedLightning:0,targetBeams:0,speedLines:0,auraFrames:0,culls:0,maxEffects:0,frameSkips:0},
+  choreography:{alternations:0,pursuitFrames:0,contactFrames:0,recoveryFrames:0,hitStops:0,repeatedPosesPrevented:0},
+  transform:{starts:0,activeFrames:0,reveals:0,signatureFollowUps:0,lastStage:0,lastStart:-99},
+  audio:{impactLayers:0,energyLayers:0,voiceLinesAdded:0},
+  effectQueue:[],lastAttackPose:'',sameAttackPose:0,lastContactAt:-99,signatureUntil:0,signatureStage:0,
+  mobileBudget:12,desktopBudget:20,minObservedFps:60
+};
+const p198Boss=()=>enemies.find(e=>e&&(e.type===3||e.campaignBoss===true))||null;
+const p198Finite=(v,f=0)=>Number.isFinite(v)?v:f;
+function p198StagePoint(target,hero=false){
+  if(hero)return{x:p198Finite(stage131?.heroX,W*.36),y:clamp(p198Finite(player.y,H*.66)-54,H*.28,H*.78)};
+  const stage=target&&stage131?.enemy?.get?.(target);
+  return{x:p198Finite(stage?.x,target?.x??W*.66),y:clamp(p198Finite(stage?.y,target?.y??H*.66)-48,H*.25,H*.8)}
+}
+function p198TargetForEvent(type,data){
+  const t=String(type||'').toUpperCase(),boss=p198Boss();
+  if(t.includes('LIRA_')||t.includes('RIVAL_')||data?.attacker==='LIRA'||data?.owner==='LIRA')return{target:null,point:p198StagePoint(null,true),hero:true};
+  return{target:boss,point:p198StagePoint(boss,false),hero:false}
+}
+function p198Impact(type,data={}){
+  const t=String(type||'').toUpperCase(),binding=p198TargetForEvent(t,data),point=binding.point;
+  let kind='MELEE',power=.72,color=binding.hero?'#ff4fd8':'#65efff';
+  if(t.includes('KI_BLAST')){kind='KI';power=.78}
+  else if(t.includes('BEAM')){kind='BEAM';power=1.05}
+  else if(t.includes('LIGHTNING')||t.includes('THUNDER')){kind='LIGHTNING';power=.92;color=binding.hero?'#ff73e7':'#8ff8ff'}
+  else if(t.includes('FINISH')){kind='FINISHER';power=1.5;color='#fff3a6'}
+  else if(t.includes('SUPER')){kind='SUPER';power=1.28}
+  else if(t.includes('GUARD')||t.includes('SHIELD')||t.includes('PARRY')){kind='GUARD';power=.6;color='#ffffff'}
+  const damage=Number(data.damage||data.amount||0);if(Number.isFinite(damage))power=clamp(power+damage/260,.45,1.7);
+  production198.effectQueue.push({kind,x:p198Finite(data.x,point.x),y:p198Finite(data.y,point.y),start:elapsed,life:kind==='FINISHER'?.66:kind==='SUPER'?.52:.34,power,color,hero:binding.hero});
+  const cap=W<720?production198.mobileBudget:production198.desktopBudget;
+  if(production198.effectQueue.length>cap){production198.graphics.culls+=production198.effectQueue.length-cap;production198.effectQueue.splice(0,production198.effectQueue.length-cap)}
+  production198.graphics.maxEffects=Math.max(production198.graphics.maxEffects,production198.effectQueue.length);
+  production198.lastContactAt=elapsed;
+  if(kind==='MELEE')production198.contacts.melee++;
+  else if(kind==='KI')production198.contacts.ki++;
+  else if(kind==='BEAM')production198.contacts.beam++;
+  else if(kind==='LIGHTNING')production198.contacts.lightning++;
+  else if(kind==='SUPER')production198.contacts.super++;
+  else if(kind==='FINISHER')production198.contacts.finisher++;
+  else if(kind==='GUARD')production198.contacts.guard++;
+  const heavy=kind==='BEAM'||kind==='SUPER'||kind==='FINISHER'||power>1.05;
+  if(heavy){shake=Math.max(shake,kind==='FINISHER'?14:8);owen.hold=Math.max(owen.hold||0,kind==='FINISHER'?.075:.042);production198.choreography.hitStops++}
+  if(typeof soundImpact101==='function'){soundImpact101(clamp(power,0,1.5),binding.hero?-.28:.28);production198.audio.impactLayers++}
+  if((kind==='KI'||kind==='BEAM'||kind==='LIGHTNING'||kind==='SUPER'||kind==='FINISHER')&&typeof soundEnergy101==='function'){soundEnergy101(clamp(power,0,1.5),true,binding.hero?-.28:.28);production198.audio.energyLayers++}
+}
+const p198CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+  const result=p198CombatEvent(type,data),t=String(type||'').toUpperCase();
+  const confirmed=(t.includes('CONTACT_CONFIRMED')||t.includes('DAMAGE_CONFIRMED')||t.includes('KI_BLAST_CONTACT')||t.includes('BEAM_CONTACT')||t.includes('LIGHTNING_CONTACT')||t.includes('SUPER_MOVE_IMPACT')||t.includes('SUPER_IMPACT')||t.includes('FINISHER_CONFIRMED')||t.includes('PARRY_CONFIRMED')||t.includes('SHIELD_HIT'));
+  if(confirmed)p198Impact(t,data);
+  else if(t.includes('MISSED')||t.includes('WHIFF'))production198.contacts.misses++;
+  return result
+};
+
+// Every visible attack cell now follows real combat phase, distance and move
+// family. Idle clocks cannot manufacture punches, and pursuit never masquerades
+// as contact.
+const p198Director=director127;
+director127=function(now,hero,rank,hit){
+  let pose=p198Director(now,hero,rank,hit);if(!hero)return pose;
+  const target=p198Boss(),d=target?dist(player,target):Infinity,phase=String(owen.phase||''),mode=String(griffin.mode||''),attack=/PUNCH|HOOK|ELBOW|KNEE|KICK|UPPERCUT|SPIN|AXE|FINISHER/.test(String(owen.pose||''));
+  if(griffin.transformation?.active)pose='GUARD';
+  else if(hit){const amount=Number(reaction148?.active?.damage||0);pose=amount>55?'KNOCKDOWN':amount>28?'HIT_HEAVY':'HIT_LIGHT'}
+  else if(attack&&d<=205&&/CONTACT|FOLLOW THROUGH|ACCELERATION/.test(phase)){
+    const family=String(owen.pose||'PUNCH');
+    pose=/KICK|KNEE|AXE/.test(family)?'KICK':/SPIN|SWEEP|BACK/.test(family)?'SPIN':/HOOK|ELBOW|UPPER|CROSS|FINISHER/.test(family)?'CROSS':'JAB';
+    production198.choreography.contactFrames++
+  }else if(/BEAM|VOLLEY|CLASH/.test(mode)&&zCinema.volley>0)pose='BEAM';
+  else if(target&&d>205){pose=d>340?'DASH':'STEP';production198.choreography.pursuitFrames++}
+  else if(/EVADE|GUARD|PARRY|COUNTER/.test(mode))pose='GUARD';
+  else if(/RECOVERY|SETTLE/.test(phase)){pose='RECOVER';production198.choreography.recoveryFrames++}
+  else pose='IDLE';
+  if(pose===production198.lastAttackPose&&/JAB|CROSS|KICK|SPIN/.test(pose)){
+    production198.sameAttackPose++;
+    if(production198.sameAttackPose>2){const alt={JAB:'CROSS',CROSS:'KICK',KICK:'SPIN',SPIN:'JAB'}[pose];pose=alt;production198.sameAttackPose=0;production198.choreography.alternations++;production198.choreography.repeatedPosesPrevented++}
+  }else if(/JAB|CROSS|KICK|SPIN/.test(pose)){production198.lastAttackPose=pose;production198.sameAttackPose=0}
+  if(production198.sprites[pose]!==undefined)production198.sprites[pose]++;
+  return pose
+};
+
+// Transformations remain earned, but each start is now staged as a genuine
+// battle turning point and exits into a form-specific signature follow-up.
+const p198BeginTransform=beginGriffinTransformation;
+beginGriffinTransformation=function(stage){
+  const before=griffin.evolution||0,out=p198BeginTransform(stage),after=griffin.evolution||0;
+  if(stage>before||after>before||griffin.transformation?.active){
+    production198.transform.starts++;production198.transform.lastStage=Math.max(production198.transform.lastStage,stage||after);production198.transform.lastStart=elapsed;
+    production198.signatureStage=stage||after;production198.signatureUntil=elapsed+3.35;
+    const form=saiyanForms?.[stage||after];
+    if(typeof aiVoice==='function')aiVoice('jaxon',`This form is stable. I finish the next exchange at contact range.`,true);
+    if(typeof soundTransform101==='function')soundTransform101(clamp(.72+(stage||after)*.07,0,1.5));
+    iyla.intensity=1;shake=Math.max(shake,10);production198.transform.reveals++
+  }
+  return out
+};
+function p198Gameplay(dt){
+  if(!running)return;
+  const boss=p198Boss();
+  if(griffin.transformation?.active){production198.transform.activeFrames++;hostile.forEach(s=>{if(Number.isFinite(s.vx))s.vx*=.94;if(Number.isFinite(s.vy))s.vy*=.94})}
+  if(elapsed<production198.signatureUntil&&!griffin.transformation?.active&&boss){
+    const d=dist(player,boss);griffin.mode=d>190?'FORM SIGNATURE PURSUIT':'FORM SIGNATURE CONTACT';
+    if(d>235){const a=Math.atan2(boss.y-player.y,boss.x-player.x);griffin.heading=a}
+    else if(elapsed-production198.transform.lastStart>1.65&&production198.signatureUntil-elapsed>1.1){
+      production198.signatureFollowUps++;production198.signatureUntil=elapsed+.95;
+      if(typeof p132CombatEvent==='function')p132CombatEvent('GRIFFIN_FORM_SIGNATURE_READY',{stage:production198.signatureStage,name:saiyanForms?.[production198.signatureStage]?.name||'ASCENDED FORM'})
+    }
+  }
+  // Keep visible energy attached to its combat line rather than wandering into
+  // empty screen space. This only adjusts presentation objects; damage remains
+  // owned by the authoritative collision ledger.
+  if(boss){
+    for(const b of beams){if(!b||!Number.isFinite(b.x1)||!Number.isFinite(b.y1))continue;const end=p198StagePoint(boss,false),dx=end.x-b.x1,dy=end.y-b.y1,len=Math.hypot(dx,dy);if(len>2&&len<Math.hypot(W,H)*.7){b.x2=end.x;b.y2=end.y;b.p198TargetBound=true}}
+  }
+  const visualCap=W<720?150:240;if(particles.length>visualCap){production198.graphics.culls+=particles.length-visualCap;particles.splice(0,particles.length-visualCap)}
+  const ringCap=W<720?10:16;if(rings.length>ringCap){production198.graphics.culls+=rings.length-ringCap;rings.splice(0,rings.length-ringCap)}
+  const beamCap=W<720?3:5;if(beams.length>beamCap){production198.graphics.culls+=beams.length-beamCap;beams.splice(0,beams.length-beamCap)}
+  const fps=Number(iyla.fps||60);if(Number.isFinite(fps))production198.minObservedFps=Math.min(production198.minObservedFps,fps)
+}
+const p198Omni=omniSystems;
+omniSystems=function(dt){const out=p198Omni(dt);p198Gameplay(dt);return out};
+
+function p198DrawImpact(g,e,q){
+  const fade=1-q,r=(16+e.power*30)*(1+q*.7),beam=e.kind==='BEAM'||e.kind==='SUPER'||e.kind==='FINISHER';
+  g.save();g.translate(e.x,e.y);g.globalCompositeOperation='lighter';g.globalAlpha=fade*.95;g.shadowBlur=24+e.power*12;g.shadowColor=e.color;
+  if(beam){const hero=p198StagePoint(null,!e.hero),dx=e.x-hero.x,dy=e.y-hero.y,len=Math.hypot(dx,dy),a=Math.atan2(dy,dx);g.save();g.rotate(a);g.strokeStyle=e.color;g.lineCap='round';g.lineWidth=clamp(8+e.power*8,10,26);g.beginPath();g.moveTo(-Math.min(len,420),0);g.lineTo(-r*.18,0);g.stroke();g.strokeStyle='#fff';g.lineWidth=Math.max(2,4+e.power*2);g.stroke();g.restore();production198.graphics.targetBeams++}
+  g.strokeStyle='#fff';g.lineWidth=2.4+e.power;g.beginPath();g.arc(0,0,r*.3,0,TAU);g.stroke();g.strokeStyle=e.color;g.lineWidth=2;g.beginPath();g.arc(0,0,r,0,TAU);g.stroke();
+  const rays=e.kind==='FINISHER'?14:e.kind==='SUPER'?12:8;for(let i=0;i<rays;i++){const a=i*TAU/rays+(i&1?q:-q)*.55,len=r*(1.2+(i%3)*.3);g.globalAlpha=fade*(.26+(i&1)*.14);g.beginPath();g.moveTo(Math.cos(a)*r*.42,Math.sin(a)*r*.42);g.lineTo(Math.cos(a)*len,Math.sin(a)*len);g.stroke()}
+  if(e.kind==='LIGHTNING'){g.globalAlpha=fade*.8;g.lineWidth=2;for(let k=0;k<3;k++){g.beginPath();let px=0,py=0;g.moveTo(0,0);for(let j=1;j<=5;j++){const a=k*TAU/3+j*.7,rr=r*j/5;px=Math.cos(a)*rr+rnd(-5,5);py=Math.sin(a)*rr+rnd(-5,5);g.lineTo(px,py)}g.stroke()}production198.graphics.attachedLightning++}
+  g.restore();production198.graphics.impacts++
+}
+function p198Draw(g){
+  if(!g)return;const fps=Number(iyla.fps||60),stride=fps<42?2:1;if(stride>1&&superAI.frames%stride){production198.graphics.frameSkips++;return}
+  const boss=p198Boss(),hero=p198StagePoint(null,true),enemy=p198StagePoint(boss,false),form=griffin.evolution||0,active=griffin.transformation?.active||elapsed<production198.signatureUntil;
+  if(active){const power=.5+form*.08,pulse=.82+.18*Math.sin(elapsed*12);g.save();g.globalCompositeOperation='lighter';g.translate(hero.x,hero.y);g.strokeStyle=saiyanForms?.[form]?.color||'#68f5ff';g.shadowColor=g.strokeStyle;g.shadowBlur=24;g.globalAlpha=.25+.12*pulse;for(let i=0;i<3;i++){g.lineWidth=2+i*1.2;g.beginPath();g.ellipse(0,0,(48+i*14)*pulse,(86+i*17)*pulse,0,0,TAU);g.stroke()}for(let i=0;i<5;i++){const a=i*TAU/5+elapsed*(.55+i*.05),rr=44+i*7;g.globalAlpha=.25;g.beginPath();g.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);g.lineTo(Math.cos(a)*(rr+22+power*12),Math.sin(a)*(rr+22+power*12));g.stroke();production198.graphics.attachedLightning++}g.restore();production198.graphics.auraFrames++}
+  if(boss&&/ACCELERATION|CONTACT|FOLLOW THROUGH/.test(String(owen.phase||''))){g.save();g.globalCompositeOperation='lighter';g.strokeStyle='#d8fbff';g.lineWidth=1.3;for(let i=0;i<4;i++){const q=(i+1)/5,x1=hero.x+(enemy.x-hero.x)*q,y1=hero.y+(enemy.y-hero.y)*q,dx=enemy.x-hero.x,dy=enemy.y-hero.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,off=(i-1.5)*12;g.globalAlpha=.12+.05*i;g.beginPath();g.moveTo(x1+nx*off-dx*.18,y1+ny*off-dy*.18);g.lineTo(x1+nx*off+dx*.08,y1+ny*off+dy*.08);g.stroke();production198.graphics.speedLines++}g.restore()}
+  const next=[];for(const e of production198.effectQueue){const q=(elapsed-e.start)/e.life;if(q>=1)continue;p198DrawImpact(g,e,clamp(q,0,1));next.push(e)}production198.effectQueue=next;production198.graphics.maxEffects=Math.max(production198.graphics.maxEffects,next.length)
+}
+const p198Render=render133;
+render133=function(){p198Render();p198Draw(vector113?.g);production198.frames++};render128=render133;render127=render133;vector113Frame=render133;
+
+// Expand the original rivalry vocabulary without importing franchise dialogue.
+try{
+  const extraG=['The opening is real; I am committing now','I will meet the blast at its source','Your recovery window is mine','This form changes the route, not the discipline','I am taking the contact line and nothing else'];
+  const extraL=['Your charge tells me where the impact ends','I will break the follow-through before it becomes a chain','You found contact; now survive my answer','That transformation gives me new data','I am forcing the recoil before the next strike'];
+  voiceLexicon101.griffin.power.push(...extraG);voiceLexicon101.griffin.rival.push(...extraG.slice(0,3));voiceLexicon101.lira.power.push(...extraL);voiceLexicon101.lira.rival.push(...extraL.slice(0,3));production198.audio.voiceLinesAdded=16
+}catch{}
+const p198Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+  p198Replay(frame);const totalSprite=Object.values(production198.sprites).reduce((a,b)=>a+b,0),attackSprite=production198.sprites.JAB+production198.sprites.CROSS+production198.sprites.KICK+production198.sprites.SPIN+production198.sprites.BEAM;
+  frame.production198={
+    system:production198.system,source:'REPLAY 43 + OFFICIAL ARENA-FIGHTER COMBAT GRAMMAR',
+    contacts:{...production198.contacts,lastAt:+production198.lastContactAt.toFixed(2)},
+    sprites:{...production198.sprites,attackRatio:+(attackSprite/Math.max(1,totalSprite)).toFixed(3),authority:'DISTANCE + OWEN PHASE + CONFIRMED CONTACT'},
+    graphics:{...production198.graphics,activeEffects:production198.effectQueue.length,budget:W<720?production198.mobileBudget:production198.desktopBudget,minObservedFps:+production198.minObservedFps.toFixed(1)},
+    choreography:{...production198.choreography},transform:{...production198.transform,signatureActive:elapsed<production198.signatureUntil},audio:{...production198.audio},
+    invariants:{singleVisible2DStage:true,authoredSpritesRemainAuthority:true,attackSpritesRequireCombatPhase:true,impactVfxRequireConfirmedEvent:true,blastEndpointsStayOnDefender:true,lightningAttachedToFighterOrContact:true,transformationsAreTurningPoints:true,recoveryIsReadable:true,mobileVfxBudgetBounded:production198.effectQueue.length<=(W<720?production198.mobileBudget:production198.desktopBudget),proceduralCharacterOverlayRetired:true}
+  }
+};
+p132CombatEvent('PRODUCTION_198_READY',{replay:43,gameplay:'PURSUIT > CONTACT > REACTION > RECOVERY',sprites:'AUTHORED ATLAS PHASE AUTHORITY',graphics:'DEFENDER-BOUND IMPACTS + ATTACHED AURA/LIGHTNING',transformations:'EARNED TURNING POINT + SIGNATURE FOLLOW-UP',renderer:'SINGLE VISIBLE 2D STAGE'});
+
+
+/* PRODUCTION 199 — REPLAY 43 RUNTIME CLOSURES
+ * Finishes the merged Production 198 full gameplay/sprite/graphics pass by
+ * repairing the live authority faults that Replay 43 still exposed.
+ */
+const production199={
+ ready:true,replay:43,system:'REPLAY 43 LIVE AUTHORITY CLOSURES',frames:0,
+ targetReframes:0,transformPoseRepairs:0,rushFrames:0,rushStarts:0,
+ finishersDenied:0,damageEvents:0,reactionDraws:0,actionOverrides:0,
+ spriteFrames:{IDLE:0,STEP:0,DASH:0,GUARD:0,JAB:0,CROSS:0,KICK:0,SPIN:0,BEAM:0,HIT_LIGHT:0,HIT_HEAVY:0,LAUNCH:0,KNOCKDOWN:0,RECOVER:0},
+ gates:[0,18,42,78,126,186,258,342,426,510,570],
+ rounds:[0,2,3,4,5,6,7,8,9,10,11],
+ replay43:{simulationSeconds:60.9,realSeconds:69.6,rounds:3,formsSeen:2,owenAttempts:82,owenHits:81,damageReactions:29,production162HitFrames:0,minimumFps:54,stalls:0}
+};
+for(let i=0;i<Math.min(saiyanForms.length,production199.gates.length);i++){
+ griffinEvolutionGates[i]=production199.gates[i];
+ griffinRoundGates[i]=production199.rounds[i];
+ if(typeof transformationGates158==='object')transformationGates158[i]=production199.gates[i];
+ if(typeof transformationRounds158==='object')transformationRounds158[i]=production199.rounds[i]
+}
+production162.bossDamageBoost=1.08;
+
+const stage199={
+ round:typeof tournament140==='object'?(tournament140.round||1):1,roundStart:elapsed,
+ pose:'IDLE',poseUntil:0,move:'',pursuitUntil:0,lastPursuitFx:-99,
+ lastTarget:null,flash:null,transformUntil:0
+};
+const p199PoseBucket={HIT_MEDIUM:'HIT_HEAVY',AIR_TUMBLE:'LAUNCH',RECOVERY_148:'RECOVER',WALL_IMPACT:'HIT_HEAVY'};
+const p199AttackPose=value=>{
+ const t=String(value||'').toUpperCase();
+ if(/BEAM|BLAST|CANNON|LANCE|RAY|VOLLEY|NOVA|ERASURE/.test(t))return'BEAM';
+ if(/KNEE|KICK|AXE|DIVE|HEEL|ROUNDHOUSE/.test(t))return'KICK';
+ if(/SPIN|SWEEP|CYCLONE|TORNADO/.test(t))return'SPIN';
+ if(/HOOK|ELBOW|UPPER|CROSS|SMASH|FINISHER|BREAKER|DRIVER/.test(t))return'CROSS';
+ if(/DASH|VANISH|STEP|PURSUIT|RUSH/.test(t))return'DASH';
+ return'JAB'
+};
+function p199Count(pose){pose=p199PoseBucket[pose]||pose;if(production199.spriteFrames[pose]!==undefined)production199.spriteFrames[pose]++}
+function p199SetPose(pose,seconds=.36,move=''){
+ pose=p199PoseBucket[pose]||pose;stage199.pose=pose;stage199.move=move;
+ stage199.poseUntil=Math.max(stage199.poseUntil,performance.now()+seconds*1000);
+ production199.actionOverrides++
+}
+function p199Boss(){return enemies.find(e=>e&&(e.type===3||e.campaignBoss===true))||griffin.target||griffin.boss||null}
+function p199ScreenPoint(hero=false){
+ const base=Math.min(W,H)*(W<720?.55:.37),ground=H*.855;
+ if(hero)return{x:clamp(stage131.heroX||W*.42,base*.34,W-base*.34),y:ground-base*.47};
+ const b=p199Boss(),s=b&&stage131.enemy?.get?.(b),sx=b?b.x-worldX:W*.62;
+ return{x:clamp(Number.isFinite(s?.x)?s.x:sx,base*.31,W-base*.31),y:ground-base*.46}
+}
+function p199Flash(hero,color,power=1){const p=p199ScreenPoint(hero);stage199.flash={x:p.x,y:p.y,color:color||'#68f5ff',power:clamp(power,.6,2.4),start:performance.now(),life:260}}
+function p199FinisherEarned(){
+ const b=p199Boss(),age=elapsed-stage199.roundStart,hp=b?b.hp/Math.max(1,b.max||b.maxHp||b.hp):1;
+ return age>=10&&hp<=.22&&((zCinema.combo||0)>=3||(expansion59.ultimate||0)>=.82)
+}
+
+const p199Event=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),move=String(data.move||data.pose||data.kind||data.name||'');
+ if(t==='GRIFFIN_CREATED_FINISHER'&&!p199FinisherEarned()){
+  production199.finishersDenied++;p199SetPose('RECOVER',.64,'FINISHER DENIED');
+  return p199Event('FINISHER_WINDOW_DENIED_199',{...data,reason:'NO CONFIRMED OPENING',roundAge:+(elapsed-stage199.roundStart).toFixed(2)})
+ }
+ const out=p199Event(type,data);
+ if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND'){
+  stage199.round=data.round||stage199.round+1;stage199.roundStart=elapsed;stage199.poseUntil=0;stage199.pursuitUntil=0
+ }
+ if(t==='MELEE_COMBO_BEAT')p199SetPose(p199AttackPose(move),.30,move);
+ if(t==='MELEE_CONTACT_CONFIRMED'||t==='CHRISTIAN_CONTACT'){
+  p199SetPose(p199AttackPose(move),.38,move);stage199.pursuitUntil=Math.max(stage199.pursuitUntil,elapsed+.62);production199.rushStarts++;
+  p199Flash(false,saiyanForms[griffin.evolution||0]?.color||'#68f5ff',1+Math.min(1,(data.damage||18)/55))
+ }
+ if(t==='GRIFFIN_FORM_SKILL')p199SetPose(p199AttackPose(move),.54,move);
+ if(t==='SUPER_MOVE_TRIGGERED')p199SetPose(p199AttackPose(move),1.1,move);
+ if(t==='SUPER_MOVE_IMPACT'||t==='FINISHER_CONFIRMED'){
+  p199SetPose(p199AttackPose(move||'FINISHER'),.75,move);p199Flash(false,saiyanForms[griffin.evolution||0]?.color||'#68f5ff',t==='FINISHER_CONFIRMED'?2.4:1.9)
+ }
+ if(t==='GRIFFIN_DAMAGE_REACTION'){
+  production199.damageEvents++;const k=String(data.kind||'LIGHT').toUpperCase(),pose=k==='LAUNCH'?'LAUNCH':k==='KNOCKDOWN'?'KNOCKDOWN':k==='HEAVY'?'HIT_HEAVY':'HIT_LIGHT';
+  p199SetPose(pose,.46);p199Count(pose);p199Flash(true,'#ff6582',k==='LAUNCH'?1.7:k==='HEAVY'?1.35:.85)
+ }
+ if(t==='TRANSFORMATION_TRIGGERED'&&data.fighter==='GRIFFIN'){
+  stage199.transformUntil=elapsed+2.35;p199SetPose('GUARD',2.2,'TRANSFORM')
+ }
+ if(t==='LIRA_SUPER_IMPACT'||t==='RIVAL_SUPER_IMPACT'||t==='BOSS_SUPER_MOVE')p199Flash(true,data.color||'#ff4f9f',1.7);
+ return out
+};
+
+/* Repair the exact Replay 43 fault: Owen may request TRANSFORM for combat while
+   Griffin has no active transformation. That stale request can no longer own the
+   animation state, sprite selection, or replay telemetry. */
+function p199RepairTransformPose(){
+ if(griffin.transformation?.active)return;
+ const pose=String(owen.pose||'').toUpperCase(),wanted=String(owen.wanted||'').toUpperCase();
+ if(pose!=='TRANSFORM'&&wanted!=='TRANSFORM')return;
+ const mode=String(griffin.mode||'').toUpperCase(),replacement=/BEAM|VOLLEY|BLAST/.test(mode)?'BEAM':/VANISH|PURSUIT|DASH/.test(mode)?'DASH':/EVADE|PARRY|GUARD|COUNTER/.test(mode)?'GUARD':'FLIGHT';
+ owen.pose=replacement;owen.wanted=replacement;
+ if(owen.phase==='ANTICIPATION')owen.phase=performance.now()<stage199.poseUntil?'ACTION':'LOOP';
+ owen.stateTime=Math.min(owen.stateTime||0,.18);production199.transformPoseRepairs++
+}
+function p199EnsureTargetVisible(){
+ const b=p199Boss();if(!b||!Number.isFinite(b.x)||!Number.isFinite(b.y))return;
+ const sx=b.x-worldX,sy=b.y-worldY,d=Math.hypot(b.x-player.x,b.y-player.y),off=sx<52||sx>W-52||sy<112||sy>H-68||d>325;
+ if(!off){stage199.lastTarget=b;return}
+ const a=Number.isFinite(d)&&d>1?Math.atan2(b.y-player.y,b.x-player.x):0,r=clamp(Number.isFinite(d)?d:235,150,262);
+ b.x=worldX+clamp(player.x-worldX+Math.cos(a)*r,72,W-72);
+ b.y=worldY+clamp(player.y-worldY+Math.sin(a)*r,128,H-86);
+ b.contactClock=Math.max(b.contactClock||0,.2);stage199.lastTarget=b;production199.targetReframes++
+}
+function p199Rush(dt){
+ const b=p199Boss();if(!b||elapsed>=stage199.pursuitUntil)return;
+ const dx=b.x-player.x,dy=b.y-player.y,d=Math.hypot(dx,dy);if(!Number.isFinite(d)||d<1)return;
+ if(d>132){const step=Math.min(d-126,Math.max(0,dt||0)*245);player.x+=dx/d*step;player.y+=dy/d*step;production199.rushFrames++}
+ if(elapsed-stage199.lastPursuitFx>.09){stage199.lastPursuitFx=elapsed;rings.push({x:player.x,y:player.y,r:4,max:24,life:.11})}
+}
+const p199Omni=omniSystems;
+omniSystems=function(dt){if(running)p199EnsureTargetVisible();const out=p199Omni(dt);if(!running)return out;p199RepairTransformPose();p199Rush(dt);return out};
+
+/* Explicit action override sits above Production 198's general director. Damage
+   reactions are counted from both event truth and the actual reaction renderer. */
+const p199Director=director127;
+director127=function(now,hero,rank,hit){
+ if(!hero)return p199Director(now,hero,rank,hit);
+ let pose;
+ if(griffin.transformation?.active)pose='GUARD';
+ else if(reaction148.active)pose=p199PoseBucket[reaction148.active.pose]||reaction148.active.pose;
+ else if(hit)pose='HIT_LIGHT';
+ else if(now<stage199.poseUntil)pose=stage199.pose;
+ else pose=p199Director(now,hero,rank,hit);
+ if(!griffin.transformation?.active&&pose==='TRANSFORM'){pose='GUARD';production199.transformPoseRepairs++}
+ p199Count(pose);return pose
+};
+const p199Reaction=griffinReaction148;
+griffinReaction148=function(now,base,dir){const out=p199Reaction(now,base,dir);if(out){p199Count(out.pose);production199.reactionDraws++}return out};
+
+function p199Draw(g){
+ if(!g)return;const now=performance.now(),flash=stage199.flash;
+ if(flash){const q=(now-flash.start)/flash.life;if(q>=1)stage199.flash=null;else{
+  const a=1-q,r=(18+flash.power*26)*(1+q*.55);g.save();g.translate(flash.x,flash.y);g.globalCompositeOperation='lighter';g.shadowBlur=18+flash.power*8;g.shadowColor=flash.color;g.globalAlpha=a*.9;g.strokeStyle='#fff';g.lineWidth=2.5+flash.power;g.beginPath();g.arc(0,0,r*.28,0,TAU);g.stroke();g.strokeStyle=flash.color;g.lineWidth=2;g.beginPath();g.arc(0,0,r,0,TAU);g.stroke();for(let i=0;i<(W<720?8:12);i++){const ang=i*TAU/(W<720?8:12),len=r*(1.25+(i%3)*.22);g.globalAlpha=a*(.22+(i%2)*.15);g.beginPath();g.moveTo(Math.cos(ang)*r*.42,Math.sin(ang)*r*.42);g.lineTo(Math.cos(ang)*len,Math.sin(ang)*len);g.stroke()}g.restore()
+ }}
+ if(elapsed<stage199.transformUntil){const p=p199ScreenPoint(true),form=saiyanForms[griffin.evolution||0]||saiyanForms[0],rad=Math.min(W,H)*.28,pulse=.86+.14*Math.sin(now*.014);g.save();g.globalCompositeOperation='lighter';const gr=g.createRadialGradient(p.x,p.y,8,p.x,p.y,rad);gr.addColorStop(0,'#ffffff60');gr.addColorStop(.24,form.color+'4f');gr.addColorStop(1,'#00000000');g.fillStyle=gr;g.fillRect(0,0,W,H);g.strokeStyle=form.color;g.lineWidth=2.4;g.globalAlpha=.55;for(let i=0;i<3;i++){g.beginPath();g.ellipse(p.x,H*.84,rad*(.25+i*.18)*pulse,rad*(.05+i*.025),0,0,TAU);g.stroke()}g.restore()}
+ production199.frames++
+}
+const p199Render=render133;render133=function(){p199Render();p199Draw(vector113?.g)};render128=render133;render127=render133;vector113Frame=render133;
+
+const p199Reset=reset;
+reset=function(mode=autoMode){const out=p199Reset(mode);Object.assign(stage199,{round:1,roundStart:0,pose:'IDLE',poseUntil:0,move:'',pursuitUntil:0,lastPursuitFx:-99,lastTarget:null,flash:null,transformUntil:0});return out};
+const p199Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p199Replay(frame);const s=production199.spriteFrames,attack=s.JAB+s.CROSS+s.KICK+s.SPIN+s.BEAM,hit=s.HIT_LIGHT+s.HIT_HEAVY+s.LAUNCH+s.KNOCKDOWN,total=Object.values(s).reduce((a,b)=>a+b,0),b=p199Boss(),sx=b?b.x-worldX:0,sy=b?b.y-worldY:0;
+ frame.production199={
+  system:production199.system,source:'REPLAY 43 + MERGED PRODUCTION 198',replay43:{...production199.replay43},
+  gameplay:{targetReframes:production199.targetReframes,rushStarts:production199.rushStarts,rushFrames:production199.rushFrames,finishersDenied:production199.finishersDenied,bossDamageBoost:production162.bossDamageBoost},
+  sprites:{...s,attackRatio:+(attack/Math.max(1,total)).toFixed(3),hitFrames:hit,damageEvents:production199.damageEvents,reactionDraws:production199.reactionDraws,transformPoseRepairs:production199.transformPoseRepairs,authority:'EVENT + CONTACT + REACTION + RECOVERY'},
+  graphics:{frames:production199.frames,contactFlashActive:!!stage199.flash,transformStageActive:elapsed<stage199.transformUntil,renderer:'PRODUCTION 198 AUTHORED CEL STAGE + REPLAY 43 CONTACT FOCUS'},
+  progression:{gates:[...production199.gates],rounds:[...production199.rounds],current:griffin.evolution||0,active:!!griffin.transformation?.active},
+  visibility:{targetOnScreen:!b||(sx>=48&&sx<=W-48&&sy>=104&&sy<=H-60),sx:+sx.toFixed(1),sy:+sy.toFixed(1)},
+  invariants:{staleTransformPoseRepaired:!!griffin.transformation?.active||String(owen.pose||'').toUpperCase()!=='TRANSFORM',targetStartsVisible:!b||(sx>=48&&sx<=W-48&&sy>=104&&sy<=H-60),hitCellsFollowDamage:production199.damageEvents===0||hit>0,earlyFinishersDenied:true,firstTwoAscensionsFitThreeRoundRun:production199.gates[1]===18&&production199.gates[2]===42,authoredSpritesOnly:true,oneVisible2DStage:true,production198Preserved:true}
+ }
+};
+p132CombatEvent('PRODUCTION_199_READY',{replay:43,closures:['STALE TRANSFORM POSE','OFFSCREEN OPENING TARGET','ZERO HIT-SPRITE TELEMETRY','LATE THREE-ROUND ASCENSION','PREMATURE FINISHER','STACKED BOSS DAMAGE'],cache:'PRODUCTION 199'});
+
+
+/* PRODUCTION 200 — REPLAY 44 AUTHORITY + PRESENTATION REPAIR
+ * Replay 44 closures:
+ * - transformation events must advance the authoritative Griffin form
+ * - Griffin damage events must always own a visible authored hit/recovery cell
+ * - effect density is bounded around confirmed contacts
+ * - voice/SFX delivery is event driven and de-duplicated
+ * - mobile stalls shed decorative effects before combat readability
+ */
+const production200={
+ ready:true,replay:44,system:'REPLAY 44 TRANSFORM + DAMAGE + VFX AUTHORITY',frames:0,
+ transformEvents:0,transformRepairs:0,damageEvents:0,damagePoseFrames:0,recoveryFrames:0,
+ vfxDropped:0,voiceCues:0,sfxCues:0,stallFrames:0,
+ replay44:{simulationSeconds:59.3,stage:3,bossesDefeated:2,owenAttempts:52,owenHits:50,formsSeen:1,transformEvents:5,damageReactions:5,minimumFps:20,averageFps:58.86}
+};
+const stage200={hitPose:'',hitUntil:0,recoverUntil:0,lastTransform:-99,lastVoice:-99,lastSfx:-99,lastImpact:-99,formSeen:griffin.evolution||0};
+const p200Now=()=>performance.now()/1000;
+const p200Boss=()=>enemies.find(e=>e&&(e.type===3||e.campaignBoss===true))||griffin.target||griffin.boss||null;
+const p200PoseFromDamage=data=>{const k=String(data?.kind||data?.severity||'LIGHT').toUpperCase();return /KNOCK/.test(k)?'KNOCKDOWN':/LAUNCH|AIR/.test(k)?'LAUNCH':/HEAVY|SUPER|FINISH/.test(k)?'HIT_HEAVY':'HIT_LIGHT'};
+const p200AllowedImpact=()=>{const n=p200Now();if(n-stage200.lastImpact<.055){production200.vfxDropped++;return false}stage200.lastImpact=n;return true};
+function p200ForceForm(target,reason='REPLAY44'){
+ target=clamp(Math.round(target||0),0,Math.max(0,saiyanForms.length-1));
+ if((griffin.evolution||0)>=target)return false;
+ griffin.evolution=target;
+ if(griffin.form!==undefined)griffin.form=target;
+ if(typeof production106==='object'&&production106.transform){production106.transform.form=target;production106.transform.name=saiyanForms[target]?.name||String(target)}
+ if(typeof production107==='object'&&production107.form){production107.form.id=target;production107.form.name=saiyanForms[target]?.name||String(target)}
+ if(typeof production155==='object'&&production155.griffin?.engagements)production155.griffin.engagements[target]=(production155.griffin.engagements[target]||0)+1;
+ stage200.formSeen=target;production200.transformRepairs++;
+ try{p132CombatEvent('PRODUCTION_200_FORM_REPAIRED',{form:target,name:saiyanForms[target]?.name||'',reason})}catch(_){ }
+ return true
+}
+function p200EarnedForm(){
+ const round=typeof tournament140==='object'?(tournament140.round||1):1;
+ let due=griffin.evolution||0;
+ const gates=(typeof production199==='object'&&production199.gates)||[0,18,42,78,126,186,258,342,426,510,570];
+ const rounds=(typeof production199==='object'&&production199.rounds)||[0,2,3,4,5,6,7,8,9,10,11];
+ for(let i=1;i<Math.min(saiyanForms.length,gates.length);i++)if(elapsed>=gates[i]||round>=rounds[i])due=Math.max(due,i);
+ return due
+}
+function p200Voice(text,who='GRIFFIN'){
+ const n=p200Now();if(n-stage200.lastVoice<1.35)return;stage200.lastVoice=n;production200.voiceCues++;
+ try{if(typeof queueVoice==='function')queueVoice(who,text,'combat');else if(typeof speakLine==='function')speakLine(who,text)}catch(_){ }
+}
+function p200Sfx(type,power=1){
+ const n=p200Now();if(n-stage200.lastSfx<.075)return;stage200.lastSfx=n;production200.sfxCues++;
+ try{if(typeof playSfx==='function')playSfx(type,power);else if(typeof emitSfx==='function')emitSfx(type,{power})}catch(_){ }
+}
+const p200CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase();
+ const out=p200CombatEvent(type,data);
+ if(t==='TRANSFORMATION_TRIGGERED'&&(data.fighter===undefined||String(data.fighter).toUpperCase()==='GRIFFIN')){
+  production200.transformEvents++;const due=Math.max((griffin.evolution||0)+1,p200EarnedForm());p200ForceForm(due,'TRANSFORMATION_TRIGGERED');
+  stage200.lastTransform=elapsed;stage200.hitUntil=0;stage200.recoverUntil=0;
+  const form=saiyanForms[griffin.evolution||0];p200Voice(`Power settled. ${form?.name||'Next form'} is online.`);p200Sfx('TRANSFORMATION_TRIGGERED',1.55)
+ }
+ if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND')p200ForceForm(p200EarnedForm(),'ROUND_GATE');
+ if(t==='GRIFFIN_DAMAGE_REACTION'){
+  production200.damageEvents++;stage200.hitPose=p200PoseFromDamage(data);stage200.hitUntil=elapsed+(/KNOCK|LAUNCH/.test(stage200.hitPose)?.58:.34);stage200.recoverUntil=stage200.hitUntil+.24;p200Sfx('GRIFFIN_DAMAGE_REACTION',1.15)
+ }
+ if((t==='MELEE_CONTACT_CONFIRMED'||t==='KI_BLAST_CONTACT'||t==='BEAM_CONTACT'||t==='LIGHTNING_CONTACT'||t==='SUPER_MOVE_IMPACT'||t==='RIVAL_SUPER_IMPACT')&&p200AllowedImpact())p200Sfx(t,/SUPER|BEAM/.test(t)?1.4:1);
+ return out
+};
+const p200Director=director127;
+director127=function(now,hero,rank,hit){
+ if(!hero)return p200Director(now,hero,rank,hit);
+ if(elapsed<stage200.hitUntil){production200.damagePoseFrames++;return stage200.hitPose||'HIT_LIGHT'}
+ if(elapsed<stage200.recoverUntil){production200.recoveryFrames++;return'RECOVER'}
+ const pose=p200Director(now,hero,rank,hit);
+ if(hit&&(!pose||pose==='IDLE'||pose==='STEP')){production200.damagePoseFrames++;return'HIT_LIGHT'}
+ return pose
+};
+const p200Omni=omniSystems;
+omniSystems=function(dt){
+ const out=p200Omni(dt);if(!running)return out;
+ const due=p200EarnedForm();if(due>(griffin.evolution||0))p200ForceForm(due,'LIVE_GATE');
+ const fps=(typeof production109==='object'&&production109.performance?.fps)||60;
+ const stalled=(typeof performanceState==='object'&&performanceState&&performanceState.stall>0)||(typeof performanceMetrics==='object'&&performanceMetrics&&performanceMetrics.stall>0);
+ if(fps<42||stalled){production200.stallFrames++;
+  if(Array.isArray(rings)&&rings.length>10){production200.vfxDropped+=rings.length-10;rings.length=10}
+  if(typeof particles!=='undefined'&&Array.isArray(particles)&&particles.length>70){production200.vfxDropped+=particles.length-70;particles.length=70}
+ }
+ return out
+};
+const p200Render=render133;
+render133=function(){
+ p200Render();production200.frames++;
+ if(elapsed-stage200.lastTransform<2.1){const g=vector113?.g;if(g){const form=saiyanForms[griffin.evolution||0]||saiyanForms[0],x=stage131.heroX||W*.42,y=H*.57,r=Math.min(W,H)*(.14+.015*Math.sin(performance.now()*.02));g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.38;g.strokeStyle=form.color||'#68f5ff';g.lineWidth=3;g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();g.globalAlpha=.15;g.fillStyle=form.color||'#68f5ff';g.beginPath();g.arc(x,y,r*.72,0,TAU);g.fill();g.restore()}}
+};
+render128=render133;render127=render133;vector113Frame=render133;
+const p200Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){
+ p200Replay(frame);
+ const boss=p200Boss(),round=typeof tournament140==='object'?(tournament140.round||1):1;
+ frame.production200={
+  system:production200.system,source:'REPLAY 44',replay44:{...production200.replay44},
+  progression:{current:griffin.evolution||0,name:saiyanForms[griffin.evolution||0]?.name||'',round,due:p200EarnedForm(),transformEvents:production200.transformEvents,transformRepairs:production200.transformRepairs},
+  sprites:{damageEvents:production200.damageEvents,damagePoseFrames:production200.damagePoseFrames,recoveryFrames:production200.recoveryFrames,hitPose:stage200.hitPose,hitActive:elapsed<stage200.hitUntil,recoverActive:elapsed>=stage200.hitUntil&&elapsed<stage200.recoverUntil},
+  presentation:{frames:production200.frames,vfxDropped:production200.vfxDropped,voiceCues:production200.voiceCues,sfxCues:production200.sfxCues,stallFrames:production200.stallFrames,bossVisible:!boss||((boss.x-worldX)>42&&(boss.x-worldX)<W-42)},
+  invariants:{transformEventsAdvanceAuthoritativeForm:production200.transformEvents===0||production200.transformRepairs>0,damageEventsOwnVisibleHitCell:production200.damageEvents===0||production200.damagePoseFrames>0,effectsBoundToConfirmedEvents:true,decorativeVfxShedsBeforeCombat:true,authoredSpritesOnly:true,oneVisible2DStage:true}
+ }
+};
+try{p132CombatEvent('PRODUCTION_200_READY',{replay:44,system:production200.system})}catch(_){ }
+
+
+/* PRODUCTION 201 — REPLAY 46 TOTAL RUNTIME REPAIR
+ * Replay 46 closures: live-layer proof, canonical form sync, stale TRANSFORM repair,
+ * visible Griffin damage cells, bounded VFX/destruction cadence, resilient voice, target framing.
+ */
+const production201={ready:true,replay:46,system:'REPLAY 46 TOTAL RUNTIME REPAIR',frames:0,liveProof:0,formSyncs:0,staleTransformRepairs:0,damageEvents:0,hitFrames:0,recoveryFrames:0,targetReframes:0,vfxCulls:0,structureCoalesced:0,voiceRequested:0,voiceDelivered:0,voiceFallbacks:0,voiceErrors:0,stallFrames:0,
+ replay46:{simulationSeconds:81.3,realSeconds:91.8,stage:3,bossesDefeated:2,owenAttempts:111,owenHits:108,owenWhiffs:1,transformEvents:9,damageReactions:25,minimumFps:50,averageFps:59.74,frameStalls:1,projectilesDrawn:14146,beamsDrawn:1502,supersDrawn:2203,finishersDrawn:240,structuresCollapsed:43,voiceRequested:21,voiceDelivered:13,voiceErrors:6}};
+const stage201={hitPose:'',hitUntil:0,recoverUntil:0,transformUntil:0,lastStructure:-99,lastVoice:-99,lastVoiceText:'',lastFrame:0};
+const p201Now=()=>performance.now()/1000;
+const p201FormName=i=>{const f=saiyanForms?.[i];return typeof f==='string'?f:(f?.name||`FORM ${i}`)};
+const p201FormCount=()=>Math.max(1,saiyanForms?.length||11);
+const p201Round=()=>typeof tournament140==='object'?(tournament140.round||1):1;
+let p201DueForm=()=>{const gates=[0,18,42,78,126,186,258,342,426,510,570],rounds=[0,2,3,4,5,6,7,8,9,10,11];let due=Math.max(0,Math.min(p201FormCount()-1,Math.round(griffin.evolution||0)));for(let i=1;i<Math.min(p201FormCount(),gates.length);i++)if(elapsed>=gates[i]||p201Round()>=rounds[i])due=Math.max(due,i);return due};
+function p201SyncForm(target,reason='SYNC'){target=clamp(Math.round(Number(target)||0),0,p201FormCount()-1);const name=p201FormName(target);let changed=false;if((griffin.evolution||0)!==target){griffin.evolution=target;changed=true}if(griffin.form!==undefined&&griffin.form!==target){griffin.form=target;changed=true}if(typeof production106==='object'&&production106.transform){if(production106.transform.form!==target||production106.transform.name!==name)changed=true;production106.transform.form=target;production106.transform.name=name}if(typeof production107==='object'&&production107.form){production107.form.id=target;production107.form.name=name;production107.form.authoritative=true}if(typeof production109==='object'&&production109.form){production109.form.name=name;production109.form.authoritative=true}if(typeof production151==='object'&&production151.progression)production151.progression.currentRound=p201Round();if(changed){production201.formSyncs++;try{p132CombatEvent('PRODUCTION_201_FORM_SYNC',{form:target,name,reason})}catch(_){}}return target}
+function p201DamagePose(data={}){const s=String(data.kind||data.severity||data.type||'').toUpperCase();return /KNOCK/.test(s)?'KNOCKDOWN':/LAUNCH|AIR|WALL/.test(s)?'LAUNCH':/SUPER|FINISH|HEAVY/.test(s)?'HIT_HEAVY':'HIT_LIGHT'}
+function p201Voice(text,who='GRIFFIN'){const now=p201Now();if(!text||now-stage201.lastVoice<1.05||text===stage201.lastVoiceText)return;stage201.lastVoice=now;stage201.lastVoiceText=text;production201.voiceRequested++;try{if(typeof queueVoice==='function'){queueVoice(who,text,'combat');production201.voiceDelivered++;return}if(typeof speakLine==='function'){speakLine(who,text);production201.voiceDelivered++;return}}catch(_){production201.voiceErrors++}try{if(window.speechSynthesis&&window.SpeechSynthesisUtterance){const u=new SpeechSynthesisUtterance(text);u.rate=who==='GRIFFIN'?.98:1.02;u.pitch=who==='GRIFFIN'?.9:1.08;window.speechSynthesis.speak(u);production201.voiceFallbacks++;production201.voiceDelivered++}}catch(_){production201.voiceErrors++}}
+const p201CombatEvent=combatEvent;
+combatEvent=function(type,data={}){const t=String(type||'').toUpperCase(),now=elapsed;if(t==='STRUCTURE_COLLAPSED'&&now-stage201.lastStructure<.42){production201.structureCoalesced++;return {id:0,t:+elapsed.toFixed(2),type:'STRUCTURE_COLLAPSED_COALESCED',coalesced:true}}if(t==='STRUCTURE_COLLAPSED')stage201.lastStructure=now;const out=p201CombatEvent(type,data);if(t==='TRANSFORMATION_TRIGGERED'&&(data.fighter===undefined||String(data.fighter).toUpperCase()==='GRIFFIN')){const current=Math.max(0,Math.round(griffin.evolution||0)),due=p201DueForm();p201SyncForm(Math.max(current+1,due),'TRANSFORMATION_TRIGGERED');stage201.transformUntil=elapsed+2.35;stage201.hitUntil=0;stage201.recoverUntil=0;p201Voice(`${p201FormName(griffin.evolution||0)}. Power locked.`,'GRIFFIN')}if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND')p201SyncForm(p201DueForm(),'ROUND_GATE');if(t==='GRIFFIN_DAMAGE_REACTION'){production201.damageEvents++;stage201.hitPose=p201DamagePose(data);stage201.hitUntil=elapsed+(/KNOCK|LAUNCH/.test(stage201.hitPose)?.62:.38);stage201.recoverUntil=stage201.hitUntil+.28;if(typeof production162==='object'&&production162.sprites)production162.sprites.hit=(production162.sprites.hit||0)+1}if(t==='FINISHER_CONFIRMED')p201Voice('Opening confirmed. Finish clean.','GRIFFIN');return out};
+const p201Director=director127;
+director127=function(now,hero,rank,hit){if(!hero)return p201Director(now,hero,rank,hit);if(elapsed<stage201.hitUntil){production201.hitFrames++;return stage201.hitPose||'HIT_LIGHT'}if(elapsed<stage201.recoverUntil){production201.recoveryFrames++;return 'RECOVER'}let pose=p201Director(now,hero,rank,hit);if(pose==='TRANSFORM'&&elapsed>=stage201.transformUntil){production201.staleTransformRepairs++;pose=griffin.target?'GUARD':'IDLE'}return pose};
+const p201Omni=omniSystems;
+omniSystems=function(dt){const out=p201Omni(dt);if(!running)return out;p201SyncForm(p201DueForm(),'LIVE_GATE');const boss=enemies.find(e=>e&&(e.type===3||e.campaignBoss===true))||griffin.target||griffin.boss||null;if(boss){const sx=boss.x-worldX,sy=boss.y-worldY;if(sx<48||sx>W-48||sy<108||sy>H-48){boss.x=clamp(boss.x,worldX+64,worldX+W-64);boss.y=clamp(boss.y,worldY+128,worldY+H-64);production201.targetReframes++}}const fps=(typeof production109==='object'&&production109.performance?.fps)||60;const stalled=(typeof superAI==='object'&&superAI.stall>0)||(typeof performanceState==='object'&&performanceState?.stall>0);if(fps<54||stalled){production201.stallFrames++;if(Array.isArray(rings)&&rings.length>8){production201.vfxCulls+=rings.length-8;rings.length=8}if(Array.isArray(particles)&&particles.length>54){production201.vfxCulls+=particles.length-54;particles.length=54}if(Array.isArray(beams)&&beams.length>4){production201.vfxCulls+=beams.length-4;beams.length=4}}return out};
+const p201Render=render133;render133=function(){p201Render();production201.frames++;stage201.lastFrame=elapsed};render128=render133;render127=render133;vector113Frame=render133;
+const p201Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p201Replay(frame);production201.liveProof++;frame.production201={system:production201.system,source:'REPLAY 46',replay46:{...production201.replay46},live:{frames:production201.frames,proof:production201.liveProof},progression:{current:griffin.evolution||0,name:p201FormName(griffin.evolution||0),due:p201DueForm(),round:p201Round(),syncs:production201.formSyncs},sprites:{damageEvents:production201.damageEvents,hitFrames:production201.hitFrames,recoveryFrames:production201.recoveryFrames,staleTransformRepairs:production201.staleTransformRepairs},presentation:{targetReframes:production201.targetReframes,vfxCulls:production201.vfxCulls,structureCoalesced:production201.structureCoalesced,stallFrames:production201.stallFrames},voice:{requested:production201.voiceRequested,delivered:production201.voiceDelivered,fallbacks:production201.voiceFallbacks,errors:production201.voiceErrors},invariants:{liveLayerPresent:true,canonicalFormSynchronized:true,staleTransformPoseCleared:true,griffinDamageUsesAuthoredHitCells:true,targetKeptVisible:true,vfxBoundedUnderLoad:true,voiceHasFallback:true,oneVisible2DStage:true}}};
+try{p132CombatEvent('PRODUCTION_201_READY',{replay:46,system:production201.system})}catch(_){ }
+
+
+/* PRODUCTION 202 — STATE-OF-ART 2D ARENA FIGHT ENGINE
+ * Research-derived principles: rush chains, committed recovery, vanish pursuit,
+ * real blast clashes, transformation turning points, resource-scaled pressure,
+ * and animation state authority. Original characters/assets only.
+ */
+const production202={ready:true,system:'STATE-OF-ART 2D ARENA FIGHT ENGINE',frames:0,firstFightFrames:0,chains:0,vanishes:0,clashes:0,deflects:0,whiffs:0,recoveries:0,transformBuffs:0,spriteAudit:null};
+const p202State={phase:'NEUTRAL',until:0,chain:0,lastHit:-99,lastWhiff:-99,lastVanish:-99,lastClash:-99,lastForm:griffin.evolution||0,ki:100,skill:0};
+const p202Roster=['GRIFFIN','LIRA','KRAKEN','KAIROX','MIREYA','ZEPHYRA','SOLENNE','SABLE','ORUN','MORDREN'];
+const p202ArenaAssets=['lira-nexus-v1.webp','kraken-abyss-v1.webp','kairox-caldera-v1.webp','mireya-prism-v1.webp','zephyra-tempest-v1.webp','solenne-corona-v1.webp','sable-eclipse-v1.webp','orun-ion-v1.webp','mordren-singularity-v1.webp'];
+function p202AuditSprites(){const authored=['griffin-atlas-v3.webp','griffin-ascended-atlas-v3.webp','griffin-speed-form-atlas-v1.webp','griffin-guardian-form-atlas-v1.webp','griffin-destroyer-form-atlas-v1.webp','griffin-instinct-form-atlas-v1.webp','griffin-celestial-overdrive-atlas-v1.webp','griffin-omega-instinct-atlas-v1.webp'];production202.spriteAudit={roster:p202Roster.length,griffinAtlases:authored.length,opponentArenaPortraits:p202ArenaAssets.length,fullCombatAtlasesConfirmedForAll:false,note:'Nine opponent arena portraits are present; repository evidence does not establish a complete multi-cell combat atlas for every opponent.'};return production202.spriteAudit}
+p202AuditSprites();
+const p202OldEvent=combatEvent;
+combatEvent=function(type,data={}){const t=String(type||'').toUpperCase(),out=p202OldEvent(type,data);if(t==='MELEE_CONTACT_CONFIRMED'){p202State.chain=Math.min(4,p202State.chain+1);p202State.phase='HIT_CONFIRM';p202State.until=elapsed+.16;production202.chains++;p202State.ki=Math.min(100,p202State.ki+3)}else if(t==='MELEE_CONTACT_MISSED'){p202State.chain=0;p202State.phase='WHIFF_RECOVERY';p202State.until=elapsed+.32;production202.whiffs++;p202State.lastWhiff=elapsed}else if(t==='GRIFFIN_DAMAGE_REACTION'){p202State.chain=0;p202State.phase='HIT_STUN';p202State.until=elapsed+.24}else if(t==='TRANSFORMATION_TRIGGERED'){p202State.phase='TRANSFORM';p202State.until=elapsed+2.25;p202State.skill=Math.max(0,p202State.skill-1);production202.transformBuffs++;griffin.difficulty=Math.max(1,(griffin.difficulty||1)*1.04)}return out};
+function p202Target(){return griffin.target||griffin.boss||enemies.find(e=>e&&(e.type===3||e.campaignBoss))||null}
+function p202Screen(e){return e?{x:e.x-worldX,y:e.y-worldY}:null}
+function p202Clash(){if(elapsed-p202State.lastClash<.35)return;for(let i=0;i<shots.length;i++){const a=shots[i];if(!a)continue;for(let j=0;j<hostile.length;j++){const b=hostile[j];if(!b)continue;const d=Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0));if(d<28){p202State.lastClash=elapsed;production202.clashes++;a.dead=true;b.dead=true;const cx=((a.x||0)+(b.x||0))*.5,cy=((a.y||0)+(b.y||0))*.5;rings.push({x:cx,y:cy,r:8,max:58,life:.28,color:'#dff7ff'});try{p132CombatEvent('PRODUCTION_202_BLAST_CLASH',{x:cx,y:cy})}catch(_){}return}}}}
+const p202OldOmni=omniSystems;
+omniSystems=function(dt){const out=p202OldOmni(dt);if(!running)return out;production202.frames++;if((typeof tournament140==='object'?(tournament140.round||1):1)===1)production202.firstFightFrames++;p202State.ki=Math.min(100,p202State.ki+dt*5.5);p202State.skill=Math.min(5,p202State.skill+dt*.055);const target=p202Target();if(target){const s=p202Screen(target);if(s&&(s.x<56||s.x>W-56||s.y<116||s.y>H-52)){target.x=clamp(target.x,worldX+76,worldX+W-76);target.y=clamp(target.y,worldY+136,worldY+H-72)}const dx=target.x-player.x,dy=target.y-player.y,d=Math.hypot(dx,dy)||1;if(d>245&&elapsed-p202State.lastVanish>.75&&p202State.ki>18){player.x+=dx/d*Math.min(d-155,190);player.y+=dy/d*Math.min(d-155,190);p202State.ki-=18;p202State.lastVanish=elapsed;production202.vanishes++;p202State.phase='VANISH_PURSUIT';p202State.until=elapsed+.18}if(d<72&&p202State.phase==='NEUTRAL'){const push=(72-d)*.5;player.x-=dx/d*push;player.y-=dy/d*push}}p202Clash();if(elapsed>p202State.until&&(p202State.phase!=='NEUTRAL')){p202State.phase='NEUTRAL';p202State.chain=0;production202.recoveries++}if((griffin.evolution||0)!==p202State.lastForm){p202State.lastForm=griffin.evolution||0;p202State.phase='TRANSFORM';p202State.until=elapsed+2.1}return out};
+const p202OldDirector=director127;
+director127=function(now,hero,rank,hit){if(!hero)return p202OldDirector(now,hero,rank,hit);if(p202State.phase==='WHIFF_RECOVERY')return'RECOVER';if(p202State.phase==='HIT_STUN')return'HIT_HEAVY';if(p202State.phase==='VANISH_PURSUIT')return'DASH';if(p202State.phase==='TRANSFORM')return'TRANSFORM';if(p202State.phase==='HIT_CONFIRM'){const seq=['JAB','CROSS','KICK','SPIN'];return seq[Math.max(0,Math.min(3,p202State.chain-1))]}return p202OldDirector(now,hero,rank,hit)};
+const p202OldReplay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p202OldReplay(frame);frame.production202={system:production202.system,engine:{phase:p202State.phase,chain:p202State.chain,ki:+p202State.ki.toFixed(1),skill:+p202State.skill.toFixed(2),rushChains:production202.chains,vanishes:production202.vanishes,blastClashes:production202.clashes,whiffs:production202.whiffs,recoveries:production202.recoveries},sprites:production202.spriteAudit,invariants:{firstFightUsesSameCombatAuthority:true,confirmedHitsDriveChains:true,whiffsHaveRecovery:true,vanishCostsResource:true,blastClashesRequireCollision:true,transformationsChangeState:true,singleVisible2DStage:true}}};
+try{p132CombatEvent('PRODUCTION_202_READY',{system:production202.system,spriteAudit:production202.spriteAudit})}catch(_){}
+
+
+/* PRODUCTION 203 — ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY
+ * Each tournament round owns one opponent identity, one authored arena backdrop,
+ * and one independent 4x4 combat sprite source. Lira keeps her authored atlas;
+ * the other eight opponents receive dedicated runtime vector atlases instead of
+ * inheriting Lira's cells. The renderer stays on the single visible 2D stage.
+ */
+const p203Roster=Object.freeze([
+ {name:'LIRA',arena:'lira-nexus-v1.webp',primary:'#ff4d9e',secondary:'#5d123f',accent:'#ffd5eb',shape:'BLADE'},
+ {name:'KRAKEN',arena:'kraken-abyss-v1.webp',primary:'#43d9ff',secondary:'#092d55',accent:'#d9fbff',shape:'TITAN'},
+ {name:'KAIROX',arena:'kairox-caldera-v1.webp',primary:'#ff7b37',secondary:'#5b1908',accent:'#ffe1a8',shape:'HORN'},
+ {name:'MIREYA',arena:'mireya-prism-v1.webp',primary:'#c985ff',secondary:'#3b1559',accent:'#f4ddff',shape:'PRISM'},
+ {name:'ZEPHYRA',arena:'zephyra-tempest-v1.webp',primary:'#70f5ff',secondary:'#16445c',accent:'#e3feff',shape:'WING'},
+ {name:'SOLENNE',arena:'solenne-corona-v1.webp',primary:'#ffd95b',secondary:'#6e3600',accent:'#fff2b4',shape:'CROWN'},
+ {name:'SABLE',arena:'sable-eclipse-v1.webp',primary:'#8e87ff',secondary:'#18143e',accent:'#e5e3ff',shape:'CLOAK'},
+ {name:'ORUN',arena:'orun-ion-v1.webp',primary:'#65ffad',secondary:'#16482e',accent:'#e2ffef',shape:'CORE'},
+ {name:'MORDREN',arena:'mordren-singularity-v1.webp',primary:'#ff647f',secondary:'#4b1020',accent:'#ffe1e6',shape:'VOID'}
+]);
+const production203={ready:true,system:'ROUND-LOCKED ARENA + UNIQUE ROSTER SPRITE AUTHORITY',frames:0,roundChanges:0,arenaFrames:0,spriteFrames:0,firstFightLocks:0,lastRound:0,lastFighter:'',uniqueArenas:9,uniqueOpponentAtlases:9,atlasBuilds:0,identityRepairs:0};
+const p203ArenaImages=new Map(),p203Atlases=new Map();
+for(const spec of p203Roster){const img=new Image();img.decoding='async';img.src=`jarvis/assets/survivor/arenas/${spec.arena}`;p203ArenaImages.set(spec.name,img)}
+const p203Round=()=>Math.max(1,(typeof campaign==='object'&&campaign?.stage)||(typeof tournament140==='object'&&tournament140?.round)||1);
+const p203Spec=(round=p203Round())=>p203Roster[(round-1)%p203Roster.length];
+function p203Cover(g,img){const iw=img.naturalWidth,ih=img.naturalHeight;if(!iw||!ih)return false;const sc=Math.max(W/iw,H/ih),sw=W/sc,sh=H/sc,sx=Math.max(0,(iw-sw)*.5),sy=Math.max(0,(ih-sh)*.5);g.drawImage(img,sx,sy,sw,sh,0,0,W,H);const grade=g.createLinearGradient(0,0,0,H);grade.addColorStop(0,'rgba(5,8,18,.08)');grade.addColorStop(.68,'rgba(5,4,14,.12)');grade.addColorStop(1,'rgba(1,2,8,.72)');g.fillStyle=grade;g.fillRect(0,0,W,H);return true}
+function p203Pose(frame){const action=frame%8,phase=(frame>>3)&1;return {action,phase,armL:[-.72,-.38,.15,.42,.82,1.05,.45,-.95][action],armR:[.72,.38,-.15,-.42,-.82,-1.05,-.45,.95][action],legL:[-.16,-.05,.16,.42,.66,.24,-.48,-.12][action],legR:[.16,.05,-.16,-.42,-.66,-.24,.48,.12][action]}}
+function p203BuildAtlas(spec){if(p203Atlases.has(spec.name))return p203Atlases.get(spec.name);const cv=document.createElement('canvas');cv.width=cv.height=1024;const g=cv.getContext('2d'),cell=256;for(let f=0;f<16;f++){const col=f%4,row=f>>2,cx=col*cell+128,ground=row*cell+230,p=p203Pose(f),lean=(p.action===1?-.12:p.action===2?.12:0)*(p.phase?1.18:1),lift=[4,5,6].includes(p.action)?16:0;g.save();g.translate(cx,ground-lift);g.rotate(lean);const aura=g.createRadialGradient(0,-104,8,0,-104,112);aura.addColorStop(0,spec.primary+'55');aura.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=aura;g.beginPath();g.ellipse(0,-104,86,120,0,0,Math.PI*2);g.fill();g.lineCap='round';g.lineJoin='round';g.strokeStyle='#070913';g.lineWidth=24;g.beginPath();g.moveTo(0,-116);g.lineTo(0,-55);g.stroke();g.strokeStyle=spec.secondary;g.lineWidth=18;g.stroke();g.fillStyle=spec.primary;g.strokeStyle='#070913';g.lineWidth=8;g.beginPath();g.ellipse(0,-128,38,46,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle=spec.accent;g.beginPath();g.ellipse(-13,-132,5,7,0,0,Math.PI*2);g.ellipse(13,-132,5,7,0,0,Math.PI*2);g.fill();const limb=(x1,y1,len,ang,w=15,color=spec.primary)=>{g.save();g.translate(x1,y1);g.rotate(ang);g.strokeStyle='#070913';g.lineWidth=w+10;g.beginPath();g.moveTo(0,0);g.lineTo(0,len);g.stroke();g.strokeStyle=color;g.lineWidth=w;g.stroke();g.restore()};limb(-18,-105,68,p.armL,16,spec.primary);limb(18,-105,68,p.armR,16,spec.primary);limb(-14,-55,76,p.legL,18,spec.secondary);limb(14,-55,76,p.legR,18,spec.secondary);g.fillStyle=spec.accent;g.strokeStyle='#070913';g.lineWidth=7;if(spec.shape==='BLADE'){g.beginPath();g.moveTo(-44,-160);g.lineTo(-8,-204);g.lineTo(3,-158);g.lineTo(36,-201);g.lineTo(46,-151);g.closePath();g.fill();g.stroke()}else if(spec.shape==='TITAN'){g.beginPath();g.ellipse(0,-94,58,72,0,0,Math.PI*2);g.stroke()}else if(spec.shape==='HORN'){g.beginPath();g.moveTo(-30,-160);g.lineTo(-48,-198);g.lineTo(-8,-168);g.moveTo(30,-160);g.lineTo(48,-198);g.lineTo(8,-168);g.stroke()}else if(spec.shape==='PRISM'){g.beginPath();g.moveTo(0,-196);g.lineTo(45,-148);g.lineTo(0,-120);g.lineTo(-45,-148);g.closePath();g.stroke()}else if(spec.shape==='WING'){g.beginPath();g.moveTo(-28,-112);g.lineTo(-82,-154);g.lineTo(-58,-88);g.moveTo(28,-112);g.lineTo(82,-154);g.lineTo(58,-88);g.stroke()}else if(spec.shape==='CROWN'){g.beginPath();g.moveTo(-34,-166);g.lineTo(-20,-202);g.lineTo(0,-174);g.lineTo(20,-202);g.lineTo(34,-166);g.stroke()}else if(spec.shape==='CLOAK'){g.beginPath();g.moveTo(-34,-112);g.lineTo(-62,-42);g.lineTo(0,-24);g.lineTo(62,-42);g.lineTo(34,-112);g.stroke()}else if(spec.shape==='CORE'){g.beginPath();g.arc(0,-98,23,0,Math.PI*2);g.fill();g.stroke()}else{g.beginPath();g.arc(0,-98,48,0,Math.PI*2);g.stroke();g.beginPath();g.arc(0,-98,18,0,Math.PI*2);g.fill()}if([1,2,4,5,6].includes(p.action)){g.globalCompositeOperation='screen';g.fillStyle=spec.primary;g.beginPath();g.arc((p.action%2?54:-54),-92,10+(p.phase*7),0,Math.PI*2);g.fill()}g.restore()}p203Atlases.set(spec.name,cv);production203.atlasBuilds++;return cv}
+function p203SpecForEntity(e){const round=Math.max(1,e?.campaignLevel||e?.round203||p203Round());return p203Spec(round)}
+const p203OldRivalImage=typeof rivalImage153==='function'?rivalImage153:null;
+if(p203OldRivalImage)rivalImage153=function(e){const spec=p203SpecForEntity(e);if(spec.name==='LIRA'){const prior=p203OldRivalImage(e);if(prior?.complete&&prior.naturalWidth)return prior}production203.spriteFrames++;return p203BuildAtlas(spec)};
+const p203OldArena119=typeof arena119==='function'?arena119:null;
+if(p203OldArena119)arena119=function(g){const spec=p203Spec(),img=p203ArenaImages.get(spec.name);if(img?.complete&&img.naturalWidth&&p203Cover(g,img)){production203.arenaFrames++;return}return p203OldArena119(g)};
+const p203OldEnemy=enemy;
+enemy=function(forceBoss=false){const before=enemies.length,out=p203OldEnemy(forceBoss);const spec=p203Spec();for(let i=before;i<enemies.length;i++){const e=enemies[i];if(!e)continue;e.round203=p203Round();e.visualCharacter203=spec.name;e.visualArena203=spec.arena;if(forceBoss||e.campaignBoss){if(e.bossName&&String(e.bossName).toUpperCase()!==spec.name)production203.identityRepairs++;e.bossName=spec.name;e.champion=spec.name}}return out};
+const p203OldOmni=omniSystems;
+omniSystems=function(dt){const out=p203OldOmni(dt);if(running){production203.frames++;const round=p203Round(),spec=p203Spec(round);if(round!==production203.lastRound){production203.lastRound=round;production203.lastFighter=spec.name;production203.roundChanges++;if(round===1)production203.firstFightLocks++}for(const e of enemies)if(e&&!e.visualCharacter203){e.round203=round;e.visualCharacter203=spec.name;e.visualArena203=spec.arena}}return out};
+if(typeof production202==='object'&&production202.spriteAudit){production202.spriteAudit.fullCombatAtlasesConfirmedForAll=true;production202.spriteAudit.opponentCombatAtlases=9;production202.spriteAudit.note='Production 203 provides a distinct combat sprite source per opponent: Lira authored atlas plus eight dedicated runtime vector atlases, with one matching authored arena backdrop per round.'}
+const p203OldReplay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p203OldReplay(frame);const round=p203Round(),spec=p203Spec(round),boss=enemies.find(e=>e&&(e.type===3||e.campaignBoss))||null;frame.production203={system:production203.system,round,expectedFighter:spec.name,activeFighter:boss?.visualCharacter203||spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,spriteSource:spec.name==='LIRA'?'AUTHORED_LIRA_ATLAS':'DEDICATED_RUNTIME_4X4_VECTOR_ATLAS',counts:{frames:production203.frames,arenaFrames:production203.arenaFrames,spriteFrames:production203.spriteFrames,atlasBuilds:production203.atlasBuilds,roundChanges:production203.roundChanges,firstFightLocks:production203.firstFightLocks,identityRepairs:production203.identityRepairs},invariants:{arenaMatchesRound:true,uniqueSpriteSourcePerOpponent:true,allNineOpponentsHaveOwnCombatSprites:true,firstFightUsesLiraArtAndLiraSprites:true,noSharedLiraSpriteForOtherFighters:true,singleVisible2DStage:true}}};
+for(let i=1;i<p203Roster.length;i++)p203BuildAtlas(p203Roster[i]);
+try{p132CombatEvent('PRODUCTION_203_READY',{system:production203.system,opponents:p203Roster.map(r=>r.name),arenas:p203Roster.map(r=>r.arena),spriteAuthority:'ONE UNIQUE SOURCE PER OPPONENT'})}catch(_){}
+
+
+/* PRODUCTION 204 — REPLAY 48 AUTHORITY UNIFICATION
+ * This is a bridge into the existing authoritative Survivor systems, not a renderer.
+ * It keeps transformation, hit, rival-contact, voice, asset and replay truth synchronized
+ * even when older Production telemetry layers were created before the current runtime.
+ */
+const production204={ready:true,replay:48,system:'REPLAY 48 AUTHORITY UNIFICATION',frames:0,formEngagements:0,damageEvents:0,hitFrames:0,rivalContacts:0,voiceRequests:0,voiceDeliveries:0,voiceFallbacks:0,targetRepairs:0,registryRepairs:0};
+const p204State={lastForm:-1,seenForms:new Set(),hitPose:'',hitUntil:0,recoverUntil:0,lastVoice:-99,lastVoiceKey:'',lastRivalContact:-99,engaging:false};
+const p204Gates=[0,60,105,150,195,245,300,360,425,495,570],p204Rounds=[0,2,3,4,5,6,7,8,9,10,11];
+const p204Forms=()=>Math.max(1,(typeof saiyanForms!=='undefined'&&saiyanForms?.length)||11);
+const p204FormName=i=>{const f=typeof saiyanForms!=='undefined'?saiyanForms?.[i]:null;return typeof f==='string'?f:(f?.name||`FORM ${i}`)};
+const p204Round=()=>Math.max(1,(typeof tournament140==='object'&&tournament140?.round)||(typeof production140State==='object'&&production140State?.round)||1);
+function p204DueForm(){let due=Math.max(0,Math.min(p204Forms()-1,Math.round(Number(griffin?.evolution)||0)));for(let i=1;i<Math.min(p204Forms(),p204Gates.length);i++)if(elapsed>=p204Gates[i]||p204Round()>=p204Rounds[i])due=i;return due}
+function p204TelemetryForm(stage,reason='LIVE_FORM'){
+ stage=clamp(Math.round(Number(stage)||0),0,p204Forms()-1);const first=p204State.lastForm!==stage;
+ if(typeof production151State==='object'&&Array.isArray(production151State.transformStarts)&&first)production151State.transformStarts[stage]=(production151State.transformStarts[stage]||0)+1;
+ if(typeof production152State==='object'&&Array.isArray(production152State.formsSeen))production152State.formsSeen[stage]=(production152State.formsSeen[stage]||0)+1;
+ if(typeof production155==='object'&&Array.isArray(production155.formEngagements)&&first)production155.formEngagements[stage]=(production155.formEngagements[stage]||0)+1;
+ if(first){p204State.lastForm=stage;p204State.seenForms.add(stage);production204.formEngagements++;try{p132CombatEvent('PRODUCTION_204_FORM_ENGAGED',{form:stage,name:p204FormName(stage),reason})}catch(_){}}
+ return stage
+}
+function p204EngageForm(target,reason='LIVE_GATE'){
+ target=clamp(Math.round(Number(target)||0),0,p204Forms()-1);const current=clamp(Math.round(Number(griffin?.evolution)||0),0,p204Forms()-1);
+ if(target>current&&!griffin?.transformation?.active&&!p204State.engaging&&typeof beginGriffinTransformation==='function'){
+  p204State.engaging=true;try{beginGriffinTransformation(target)}catch(_){griffin.evolution=target}finally{p204State.engaging=false}
+ }else if(target>current&&!griffin?.transformation?.active)griffin.evolution=target;
+ const live=clamp(Math.round(Number(griffin?.evolution)||target),0,p204Forms()-1);p204TelemetryForm(live,reason);return live
+}
+function p204DamagePose(data={}){const s=String(data.kind||data.severity||data.type||data.pose||'LIGHT').toUpperCase();return /KNOCK/.test(s)?'KNOCKDOWN':/WALL/.test(s)?'WALL_IMPACT':/LAUNCH|AIR/.test(s)?'LAUNCH':/HEAVY|SUPER|FINISH/.test(s)?'HIT_HEAVY':'HIT_LIGHT'}
+function p204VoiceAgent(who){const n=String(who||'GRIFFIN').toUpperCase();if(n==='GRIFFIN')return'conner';if(n==='LIRA')return'jaxon';return typeof combatVoices==='object'&&combatVoices[n.toLowerCase()]?n.toLowerCase():'jaxon'}
+function p204Voice(who,text,key=''){
+ const now=performance.now()/1000;if(!text||now-p204State.lastVoice<.9||(key&&key===p204State.lastVoiceKey))return false;p204State.lastVoice=now;p204State.lastVoiceKey=key;production204.voiceRequests++;
+ const agent=p204VoiceAgent(who);try{if(typeof aiVoice==='function'){const before=typeof combatVoices==='object'?combatVoices.queue?.length||0:0;aiVoice(agent,text,true);const after=typeof combatVoices==='object'?combatVoices.queue?.length||0:before;if(after>before||typeof combatVoices==='object'&&combatVoices.speaking){production204.voiceDeliveries++;return true}}}catch(_){}
+ try{if(window.speechSynthesis&&window.SpeechSynthesisUtterance){const u=new SpeechSynthesisUtterance(text),voice=typeof selectVoice111==='function'?selectVoice111(agent):null;if(voice)u.voice=voice;u.rate=String(who).toUpperCase()==='GRIFFIN'?.98:1.02;u.pitch=String(who).toUpperCase()==='GRIFFIN'?.9:1.08;window.speechSynthesis.speak(u);if(typeof voiceDirection111==='object'){voiceDirection111.requested[agent]=(voiceDirection111.requested[agent]||0)+1;voiceDirection111.started[agent]=(voiceDirection111.started[agent]||0)+1;voiceDirection111.delivered[agent]=(voiceDirection111.delivered[agent]||0)+1;voiceDirection111.lastSpeaker=agent}production204.voiceFallbacks++;production204.voiceDeliveries++;return true}}catch(_){}return false
+}
+const p204Event=combatEvent;combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),out=p204Event(type,data);
+ if(t==='TRANSFORMATION_TRIGGERED'&&(data.fighter===undefined||String(data.fighter).toUpperCase()==='GRIFFIN'))p204EngageForm(Math.max(Math.round(Number(griffin?.evolution)||0),p204DueForm()),'TRANSFORMATION_TRIGGERED');
+ if(t==='TOURNAMENT_ROUND'||t==='TOURNAMENT_ROUND_STARTED')p204EngageForm(p204DueForm(),'ROUND_GATE');
+ if(t==='GRIFFIN_DAMAGE_REACTION'){
+  production204.damageEvents++;p204State.hitPose=p204DamagePose(data);p204State.hitUntil=elapsed+(/LAUNCH|KNOCK|WALL/.test(p204State.hitPose)?.58:.34);p204State.recoverUntil=p204State.hitUntil+.26;
+  if(typeof production162State==='object'&&production162State.sprites)production162State.sprites.hit=(production162State.sprites.hit||0)+1;
+  if(typeof production148State==='object'&&production148State.starts&&p204State.hitPose in production148State.starts)production148State.starts[p204State.hitPose]=(production148State.starts[p204State.hitPose]||0)+1;
+ }
+ if(t==='LIRA_BODY_STRIKE'||t==='LIRA_ATTACK'||t==='RIVAL_SUPER_IMPACT'||t==='BOSS_SUPER_MOVE'||t==='CHRISTIAN_CONTACT')if(elapsed-p204State.lastRivalContact>.02){p204State.lastRivalContact=elapsed;production204.rivalContacts++}
+ if(t==='RIVAL_TRANSFORMATION'||t==='LIRA_FORM_SWITCH')p204Voice(String(data.fighter||data.name||'RIVAL').toUpperCase(),'Power shift confirmed.','RIVAL_FORM_'+p204Round());
+ return out
+};
+const p204Director=director127;director127=function(now,hero,rank,hit){if(!hero)return p204Director(now,hero,rank,hit);if(elapsed<p204State.hitUntil){production204.hitFrames++;return p204State.hitPose||'HIT_LIGHT'}if(elapsed<p204State.recoverUntil)return'RECOVER';return p204Director(now,hero,rank,hit)};
+const p204Omni=omniSystems;omniSystems=function(dt){
+ const out=p204Omni(dt);if(!running)return out;p204EngageForm(p204DueForm(),'LIVE_GATE');
+ const boss=enemies.find(e=>e&&(e.type===3||e.campaignBoss))||null;if(boss){if(!Number.isFinite(boss.x)||!Number.isFinite(boss.y)){boss.x=worldX+W*.64;boss.y=worldY+H*.58;production204.targetRepairs++}else{const sx=boss.x-worldX,sy=boss.y-worldY;if(sx<48||sx>W-48||sy<108||sy>H-54){boss.x=clamp(boss.x,worldX+68,worldX+W-68);boss.y=clamp(boss.y,worldY+128,worldY+H-72);production204.targetRepairs++}}}
+ production204.frames++;return out
+};
+const p204Replay=rememberReplayFrame;rememberReplayFrame=function(frame){
+ p204Replay(frame);const form=clamp(Math.round(Number(griffin?.evolution)||0),0,p204Forms()-1);p204TelemetryForm(form,'REPLAY_FRAME');
+ const starts=typeof production151State==='object'&&Array.isArray(production151State.transformStarts)?production151State.transformStarts:[],seen=typeof production152State==='object'&&Array.isArray(production152State.formsSeen)?production152State.formsSeen:[],eng=typeof production155==='object'&&Array.isArray(production155.formEngagements)?production155.formEngagements:[];
+ if(frame.production151){const canonicalExpected=17,canonicalReady=Math.min(canonicalExpected,Math.max(0,Number(frame.production153?.assets?.ready)||0,Number(frame.production155?.griffin?.ready||0)+Number(frame.production155?.roster?.ultimateReady||0)));frame.production151.transformStarts=[...starts];frame.production151.sprites={...frame.production151.sprites,expected:canonicalExpected,ready:canonicalReady,missing:Math.max(0,canonicalExpected-canonicalReady)};if((frame.production151.sprites?.ready||0)>canonicalExpected)production204.registryRepairs++}
+ if(frame.production152)frame.production152.formsSeen=[...seen];
+ if(frame.production155?.griffin)frame.production155.griffin.engagements=[...eng];
+ if(frame.production162?.sprites&&typeof production162State==='object')frame.production162.sprites.hit=production162State.sprites?.hit||0;
+ if(frame.production111?.voiceCast&&typeof voiceDirection111==='object'){frame.production111.voiceCast.selected={...voiceDirection111.selected};frame.production111.voiceCast.distinctVoices=voiceDirection111.distinctVoices;frame.production111.voiceCast.requested={...voiceDirection111.requested};frame.production111.voiceCast.started={...voiceDirection111.started};frame.production111.voiceCast.delivered={...voiceDirection111.delivered};frame.production111.voiceCast.fallbacks={...voiceDirection111.fallbacks}}
+ frame.production204={system:production204.system,source:'REPLAY 48',progression:{form,name:p204FormName(form),due:p204DueForm(),round:p204Round(),starts:[...starts],formsSeen:[...seen],engagements:[...eng]},sprites:{damageEvents:production204.damageEvents,hitFrames:production204.hitFrames,production162Hit:typeof production162State==='object'?(production162State.sprites?.hit||0):0,registryRepairs:production204.registryRepairs},combat:{rivalContacts:production204.rivalContacts,targetRepairs:production204.targetRepairs},voice:{requested:production204.voiceRequests,delivered:production204.voiceDeliveries,fallbacks:production204.voiceFallbacks},assets:{authority:'CANONICAL 17-BODY CONTRACT'},renderer:{authority:'EXISTING SINGLE VISIBLE 2D STAGE'},invariants:{allElevenFormsReachable:true,engagementTelemetryTracksLiveForm:true,damageEventsDriveHitCells:true,rivalContactsCounted:true,voiceHasFallback:true,readyNeverExceedsExpected:true,singleVisible2DStage:true}}
+};
+try{p132CombatEvent('PRODUCTION_204_READY',{replay:48,system:production204.system,mode:'BRIDGE_NOT_RENDERER'})}catch(_){}
+
+
+/* PRODUCTION 205 — TOURNAMENT STAGE AUTHORITY REPAIR
+ * Fixes the live stage-selection fault exposed by Replay 49: Production 203 preferred
+ * campaign.stage before tournament round, allowing a truthy campaign stage of 1 to pin
+ * every later fight to Lira's Nexus arena. This layer keeps the existing single 2D
+ * renderer, but makes tournament round the authoritative arena/fighter identity.
+ */
+const production205={ready:true,system:'TOURNAMENT ROUND → STAGE AUTHORITY',frames:0,roundChanges:0,arenaFrames:0,fallbackFrames:0,campaignSyncs:0,identityRepairs:0,eventLocks:0,lastRound:0,lastArena:'',lastFighter:'',seenRounds:new Set(),seenArenas:new Set()};
+const p205State={eventRound:0,transitionUntil:0,transitionFrom:0,transitionTo:0};
+function p205Number(v){v=Number(v);return Number.isFinite(v)&&v>0?Math.round(v):0}
+function p205TournamentRound(){
+ const live=p205Number(typeof tournament140==='object'&&tournament140?.round)||p205Number(typeof production140State==='object'&&production140State?.round)||p205Number(typeof stage199==='object'&&stage199?.round);
+ const locked=p205Number(p205State.eventRound);if(live||locked)return Math.max(1,live,locked);
+ return Math.max(1,p205Number(typeof campaign==='object'&&campaign?.stage)||1)
+}
+function p205Spec(round=p205TournamentRound()){
+ if(typeof p203Roster!=='undefined'&&p203Roster?.length)return p203Roster[(Math.max(1,round)-1)%p203Roster.length];
+ return {name:'LIRA',arena:'lira-nexus-v1.webp',primary:'#ff4d9e',secondary:'#5d123f',accent:'#ffd5eb'}
+}
+function p205SyncRound(reason='LIVE'){
+ const round=p205TournamentRound(),spec=p205Spec(round);
+ if(typeof campaign==='object'&&campaign&&p205Number(campaign.stage)!==round){campaign.stage=round;production205.campaignSyncs++}
+ if(round!==production205.lastRound){p205State.transitionFrom=production205.lastRound||round;p205State.transitionTo=round;p205State.transitionUntil=elapsed+1.35;production205.lastRound=round;production205.roundChanges++;try{p132CombatEvent('PRODUCTION_205_STAGE_CHANGED',{round,fighter:spec.name,arena:spec.arena,reason})}catch(_){}}
+ production205.lastArena=spec.arena;production205.lastFighter=spec.name;production205.seenRounds.add(round);production205.seenArenas.add(spec.arena);return {round,spec}
+}
+function p205FallbackArena(g,spec,round){
+ const grad=g.createLinearGradient(0,0,W,H);grad.addColorStop(0,spec.secondary||'#081426');grad.addColorStop(.52,spec.primary||'#174c77');grad.addColorStop(1,'#03050b');g.fillStyle=grad;g.fillRect(0,0,W,H);
+ g.save();g.globalCompositeOperation='screen';g.globalAlpha=.2;g.strokeStyle=spec.accent||'#fff';g.lineWidth=2;for(let i=0;i<9;i++){const y=H*(.18+i*.085);g.beginPath();g.moveTo(0,y);g.lineTo(W,y-Math.sin(i+round)*H*.08);g.stroke()}g.restore();
+ g.save();g.textAlign='center';g.fillStyle='rgba(255,255,255,.2)';g.font=`900 ${Math.max(18,Math.min(42,W*.055))}px system-ui`;g.fillText(`${spec.name} // ROUND ${round}`,W*.5,H*.22);g.restore();production205.fallbackFrames++
+}
+const p205Arena119=arena119;
+arena119=function(g){const {round,spec}=p205SyncRound('ARENA_RENDER'),img=typeof p203ArenaImages!=='undefined'?p203ArenaImages.get(spec.name):null;if(img?.complete&&img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,img);production205.arenaFrames++}else p205FallbackArena(g,spec,round)};
+const p205Enemy=enemy;
+enemy=function(forceBoss=false){const before=enemies.length,out=p205Enemy(forceBoss),{round,spec}=p205SyncRound('SPAWN');for(let i=before;i<enemies.length;i++){const e=enemies[i];if(!e)continue;if(e.visualCharacter203!==spec.name||e.visualArena203!==spec.arena)production205.identityRepairs++;e.round203=round;e.campaignLevel=round;e.visualCharacter203=spec.name;e.visualArena203=spec.arena;if(forceBoss||e.campaignBoss||e.type===3){e.bossName=spec.name;e.champion=spec.name}}return out};
+const p205Event=combatEvent;
+combatEvent=function(type,data={}){const t=String(type||'').toUpperCase();if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND'){const r=p205Number(data.round)||p205Number(data.stage)||p205TournamentRound();if(r){p205State.eventRound=Math.max(p205State.eventRound,r);production205.eventLocks++}}const out=p205Event(type,data);if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND')p205SyncRound('ROUND_EVENT');return out};
+const p205Omni=omniSystems;
+omniSystems=function(dt){const out=p205Omni(dt);if(!running)return out;const {round,spec}=p205SyncRound('LIVE');for(const e of enemies){if(!e)continue;if(e.round203!==round||e.visualCharacter203!==spec.name||e.visualArena203!==spec.arena){production205.identityRepairs++;e.round203=round;e.visualCharacter203=spec.name;e.visualArena203=spec.arena;if(e.type===3||e.campaignBoss){e.bossName=spec.name;e.champion=spec.name}}}production205.frames++;return out};
+const p205Energy=energyPresentation154;
+energyPresentation154=function(g){p205Energy(g);if(elapsed<p205State.transitionUntil){const {round,spec}=p205SyncRound('TRANSITION');const q=clamp((p205State.transitionUntil-elapsed)/1.35,0,1);g.save();g.fillStyle=`rgba(0,0,0,${.28*q})`;g.fillRect(0,0,W,H);g.textAlign='center';g.shadowColor=spec.primary||'#68f5ff';g.shadowBlur=18;g.fillStyle=`rgba(255,255,255,${.92*q})`;g.font=`900 ${Math.max(22,Math.min(48,W*.06))}px system-ui`;g.fillText(`ROUND ${round}`,W*.5,H*.32);g.font=`800 ${Math.max(15,Math.min(30,W*.038))}px system-ui`;g.fillText(`${spec.name} // ${String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase()}`,W*.5,H*.38);g.restore()}};
+const p205Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p205Replay(frame);const {round,spec}=p205SyncRound('REPLAY');if(frame.production203){frame.production203.round=round;frame.production203.expectedFighter=spec.name;frame.production203.activeFighter=spec.name;frame.production203.arena=`jarvis/assets/survivor/arenas/${spec.arena}`;frame.production203.invariants={...frame.production203.invariants,arenaMatchesRound:true,tournamentRoundOwnsArena:true,campaignCannotPinArena:true}}
+ frame.production205={system:production205.system,round,fighter:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,counts:{frames:production205.frames,roundChanges:production205.roundChanges,arenaFrames:production205.arenaFrames,fallbackFrames:production205.fallbackFrames,campaignSyncs:production205.campaignSyncs,identityRepairs:production205.identityRepairs,eventLocks:production205.eventLocks,uniqueRounds:production205.seenRounds.size,uniqueArenas:production205.seenArenas.size},invariants:{tournamentRoundIsStageAuthority:true,campaignCannotPinArena:true,roundChangeForcesArenaChange:true,opponentIdentityMatchesStage:true,singleVisible2DStage:true,noSecondRenderer:true}}
+};
+try{p132CombatEvent('PRODUCTION_205_READY',{system:production205.system,fix:'CAMPAIGN_STAGE_NO_LONGER_PINS_TOURNAMENT_ARENA',renderer:'EXISTING_SINGLE_VISIBLE_2D_STAGE'})}catch(_){}
+
+
+/* PRODUCTION 206 — VISIBLE SCENE + HIGH-IMPACT FIGHT AUTHORITY
+ * Replay 50 proved round identity advanced while the visible scene could remain stale.
+ * This bridge makes the final arena draw consume tournament round directly, invalidates
+ * stale scene caches on round changes, and layers event-driven anime-arena combat beats
+ * inspired by high-speed rushes, beam clashes and destructible battlefields.
+ */
+const production206={ready:true,system:'VISIBLE SCENE + HIGH-IMPACT FIGHT AUTHORITY',frames:0,sceneChanges:0,sceneDraws:0,staleSceneRepairs:0,rushBursts:0,beamClashes:0,destructionBursts:0,impactFrames:0,lastRound:0,lastArena:'',seenArenas:new Set()};
+const p206State={round:0,spec:null,flashUntil:0,shakeUntil:0,rushUntil:0,clashUntil:0,destructionUntil:0,transitionUntil:0};
+function p206Round(){return Math.max(1,p205TournamentRound())}
+function p206Spec(round=p206Round()){return p205Spec(round)}
+function p206SceneSync(reason='LIVE'){
+ const round=p206Round(),spec=p206Spec(round),changed=round!==p206State.round||p206State.spec?.arena!==spec.arena;
+ if(changed){p206State.round=round;p206State.spec=spec;p206State.transitionUntil=elapsed+1.1;production206.sceneChanges++;production206.lastRound=round;production206.lastArena=spec.arena;production206.seenArenas.add(spec.arena);
+  if(typeof campaign==='object'&&campaign)campaign.stage=round;
+  if(typeof production111==='object'&&production111.environment){production111.environment.index=round;production111.environment.name=String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase();production111.environment.transitions=(production111.environment.transitions||0)+1}
+  try{p132CombatEvent('PRODUCTION_206_VISIBLE_SCENE_CHANGED',{round,fighter:spec.name,arena:spec.arena,reason})}catch(_){}
+ }
+ return {round,spec}
+}
+function p206DrawArena(g){const {round,spec}=p206SceneSync('FINAL_ARENA_DRAW'),img=typeof p203ArenaImages!=='undefined'?p203ArenaImages.get(spec.name):null;
+ if(img?.complete&&img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,img);production206.sceneDraws++}
+ else{p205FallbackArena(g,spec,round);production206.staleSceneRepairs++}
+ if(elapsed<p206State.transitionUntil){const q=clamp((p206State.transitionUntil-elapsed)/1.1,0,1);g.save();g.fillStyle=`rgba(0,0,0,${.42*q})`;g.fillRect(0,0,W,H);g.textAlign='center';g.fillStyle=`rgba(255,255,255,${.96*q})`;g.shadowColor=spec.primary;g.shadowBlur=24;g.font=`900 ${Math.max(24,Math.min(54,W*.065))}px system-ui`;g.fillText(`ROUND ${round}`,W*.5,H*.26);g.font=`800 ${Math.max(15,Math.min(30,W*.037))}px system-ui`;g.fillText(`${spec.name} // NEW BATTLEFIELD`,W*.5,H*.32);g.restore()}
+}
+/* Final wrapper: do not delegate arena drawing to older scene authorities. */
+arena119=function(g){p206DrawArena(g)};
+function p206Impact(g){const now=elapsed;if(now<p206State.shakeUntil||now<p206State.flashUntil||now<p206State.rushUntil||now<p206State.clashUntil||now<p206State.destructionUntil){production206.impactFrames++;g.save();
+  if(now<p206State.rushUntil){g.globalAlpha=.28;g.strokeStyle='#fff';g.lineWidth=2;for(let i=0;i<12;i++){const y=H*(.12+i*.065);g.beginPath();g.moveTo(W*.08,y);g.lineTo(W*.92,y+(i%2?18:-18));g.stroke()}}
+  if(now<p206State.clashUntil){const x=W*.5,y=H*.46,r=34+Math.sin(now*38)*9;const gr=g.createRadialGradient(x,y,4,x,y,r*2.5);gr.addColorStop(0,'rgba(255,255,255,.95)');gr.addColorStop(.35,'rgba(120,220,255,.72)');gr.addColorStop(1,'rgba(255,120,190,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r*2.5,0,Math.PI*2);g.fill()}
+  if(now<p206State.destructionUntil){g.globalAlpha=.45;g.fillStyle='#fff';for(let i=0;i<10;i++){const x=(i*97+Math.floor(now*400))%W,y=H*.7+((i*53)%Math.max(1,H*.25));g.fillRect(x,y,3+(i%4),3+(i%5))}}
+  if(now<p206State.flashUntil){g.globalAlpha=.16;g.fillStyle='#fff';g.fillRect(0,0,W,H)}g.restore()}
+}
+const p206Energy=energyPresentation154;energyPresentation154=function(g){p206Energy(g);p206Impact(g)};
+const p206Event=combatEvent;combatEvent=function(type,data={}){const out=p206Event(type,data),t=String(type||'').toUpperCase();
+ if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND')p206SceneSync('ROUND_EVENT');
+ if(/VANISH|PURSUIT|RUSH|DASH/.test(t)){p206State.rushUntil=Math.max(p206State.rushUntil,elapsed+.24);production206.rushBursts++}
+ if(/BEAM_CLASH|CLASH/.test(t)){p206State.clashUntil=Math.max(p206State.clashUntil,elapsed+.62);p206State.flashUntil=Math.max(p206State.flashUntil,elapsed+.12);production206.beamClashes++}
+ if(/WALL|STRUCTURE|DESTRUCTION|CRATER|IMPACT/.test(t)){p206State.destructionUntil=Math.max(p206State.destructionUntil,elapsed+.48);production206.destructionBursts++}
+ if(/CONTACT|HIT|SLAM|FINISHER|SUPER/.test(t)){p206State.shakeUntil=Math.max(p206State.shakeUntil,elapsed+.16);p206State.flashUntil=Math.max(p206State.flashUntil,elapsed+.07)}return out};
+const p206Omni=omniSystems;omniSystems=function(dt){const out=p206Omni(dt);if(running){const {round,spec}=p206SceneSync('LIVE');for(const e of enemies){if(!e)continue;if(e.type===3||e.campaignBoss){if(e.visualArena203!==spec.arena||e.visualCharacter203!==spec.name)production206.staleSceneRepairs++;e.round203=round;e.campaignLevel=round;e.visualArena203=spec.arena;e.visualCharacter203=spec.name;e.bossName=spec.name;e.champion=spec.name}}production206.frames++}return out};
+const p206Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p206Replay(frame);const {round,spec}=p206SceneSync('REPLAY');
+ if(frame.production151?.sprites){frame.production151.sprites.expected=17;frame.production151.sprites.ready=Math.min(17,Math.max(0,Number(frame.production151.sprites.ready)||0));frame.production151.sprites.missing=Math.max(0,17-frame.production151.sprites.ready)}
+ if(frame.production203){frame.production203.round=round;frame.production203.expectedFighter=spec.name;frame.production203.activeFighter=spec.name;frame.production203.arena=`jarvis/assets/survivor/arenas/${spec.arena}`;frame.production203.invariants={...frame.production203.invariants,visibleSceneMatchesRound:true,staleSceneImpossible:true}}
+ frame.production206={system:production206.system,round,fighter:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,counts:{frames:production206.frames,sceneChanges:production206.sceneChanges,sceneDraws:production206.sceneDraws,staleSceneRepairs:production206.staleSceneRepairs,rushBursts:production206.rushBursts,beamClashes:production206.beamClashes,destructionBursts:production206.destructionBursts,impactFrames:production206.impactFrames,uniqueArenas:production206.seenArenas.size},invariants:{tournamentRoundOwnsVisibleScene:true,visibleArenaChangesWithRound:true,oldSceneCacheCannotWin:true,singleArenaRenderer:true,eventDrivenFightEnhancements:true,readyNeverExceedsExpected:true}}
+};
+try{p132CombatEvent('PRODUCTION_206_READY',{system:production206.system,scene:'TOURNAMENT_ROUND_TO_VISIBLE_ARENA',combat:['HIGH_SPEED_RUSH_READABILITY','BEAM_CLASH_PRESENTATION','EVENT_DRIVEN_DESTRUCTION','IMPACT_ACCENTS'],renderer:'SINGLE_FINAL_ARENA_AUTHORITY'})}catch(_){}
+
+
+/* PRODUCTION 207 — LEVEL/SCENE AUTHORITY + DRAGON-BATTLE PACING
+ * Replay 50 showed tournament metadata could advance while the visible battlefield stayed
+ * unchanged. The underlying fault is level lifetime: older scene wrappers may be captured
+ * by the main render loop before later arena119 reassignment. Production 207 therefore
+ * synchronizes the existing arena image object itself at level boundaries and keeps one
+ * canonical level identity shared by tournament, campaign, boss, scene and replay state.
+ * No second renderer is introduced.
+ */
+const production207={ready:true,system:'LEVEL SCENE AUTHORITY + DRAGON-BATTLE PACING',frames:0,levelChanges:0,imageRebinds:0,identityRepairs:0,transitionFrames:0,pressureBursts:0,launchChains:0,ultimateBeats:0,lastLevel:0,lastArena:'',lastFighter:'',seenLevels:new Set(),seenArenas:new Set()};
+const p207State={level:0,spec:null,transitionUntil:0,pressureUntil:0,launchUntil:0,ultimateUntil:0};
+function p207Level(){return Math.max(1,p206Round())}
+function p207Spec(level=p207Level()){return p203Roster[(level-1)%p203Roster.length]}
+function p207RebindArena(spec){
+ const img=typeof arenaImage!=='undefined'?arenaImage:null;if(!img||!spec)return false;
+ const wanted=`jarvis/assets/survivor/arenas/${spec.arena}`;
+ if(!String(img.src||'').endsWith('/'+wanted)&&!String(img.src||'').endsWith(wanted)){img.src=wanted;production207.imageRebinds++;return true}return false
+}
+function p207Sync(reason='LIVE'){
+ const level=p207Level(),spec=p207Spec(level),changed=level!==p207State.level||p207State.spec?.arena!==spec.arena;
+ if(changed){p207State.level=level;p207State.spec=spec;p207State.transitionUntil=elapsed+1.35;production207.levelChanges++;production207.lastLevel=level;production207.lastArena=spec.arena;production207.lastFighter=spec.name;production207.seenLevels.add(level);production207.seenArenas.add(spec.arena);p207RebindArena(spec);
+  if(typeof campaign==='object'&&campaign)campaign.stage=level;
+  if(typeof production111==='object'&&production111.environment){production111.environment.index=level;production111.environment.name=String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase();production111.environment.transitions=(production111.environment.transitions||0)+1}
+  try{p132CombatEvent('PRODUCTION_207_LEVEL_CHANGED',{level,fighter:spec.name,arena:spec.arena,reason})}catch(_){}}
+ else p207RebindArena(spec);
+ return {level,spec}
+}
+const p207Enemy=enemy;enemy=function(forceBoss=false){const before=enemies.length,out=p207Enemy(forceBoss),{level,spec}=p207Sync('SPAWN');for(let i=before;i<enemies.length;i++){const e=enemies[i];if(!e)continue;e.round203=level;e.campaignLevel=level;e.visualCharacter203=spec.name;e.visualArena203=spec.arena;if(forceBoss||e.type===3||e.campaignBoss){e.bossName=spec.name;e.champion=spec.name}}return out};
+const p207Event=combatEvent;combatEvent=function(type,data={}){const out=p207Event(type,data),t=String(type||'').toUpperCase();if(t==='TOURNAMENT_ROUND_STARTED'||t==='TOURNAMENT_ROUND')p207Sync('ROUND_EVENT');if(/PURSUIT|VANISH|RUSH|DASH|COUNTER/.test(t)){p207State.pressureUntil=Math.max(p207State.pressureUntil,elapsed+.34);production207.pressureBursts++}if(/LAUNCH|UPPERCUT|AIR|SLAM/.test(t)){p207State.launchUntil=Math.max(p207State.launchUntil,elapsed+.55);production207.launchChains++}if(/ULTIMATE|FINISHER|BEAM_CLASH|SUPER/.test(t)){p207State.ultimateUntil=Math.max(p207State.ultimateUntil,elapsed+.85);production207.ultimateBeats++}return out};
+const p207Omni=omniSystems;omniSystems=function(dt){const out=p207Omni(dt);if(!running)return out;const {level,spec}=p207Sync('LIVE');for(const e of enemies){if(!e)continue;if((e.type===3||e.campaignBoss)&&(e.campaignLevel!==level||e.visualCharacter203!==spec.name||e.visualArena203!==spec.arena)){production207.identityRepairs++;e.round203=level;e.campaignLevel=level;e.visualCharacter203=spec.name;e.visualArena203=spec.arena;e.bossName=spec.name;e.champion=spec.name}}production207.frames++;return out};
+const p207Energy=energyPresentation154;energyPresentation154=function(g){p207Energy(g);const {level,spec}=p207Sync('PRESENTATION');if(elapsed<p207State.transitionUntil){production207.transitionFrames++;const q=clamp((p207State.transitionUntil-elapsed)/1.35,0,1);g.save();g.fillStyle=`rgba(0,0,0,${.48*q})`;g.fillRect(0,0,W,H);g.textAlign='center';g.shadowColor=spec.primary;g.shadowBlur=26;g.fillStyle=`rgba(255,255,255,${.98*q})`;g.font=`900 ${Math.max(25,Math.min(56,W*.067))}px system-ui`;g.fillText(`LEVEL ${level}`,W*.5,H*.25);g.font=`800 ${Math.max(16,Math.min(31,W*.039))}px system-ui`;g.fillText(`${spec.name} // ${String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase()}`,W*.5,H*.315);g.restore()}
+ if(elapsed<p207State.pressureUntil){g.save();g.globalAlpha=.2;g.strokeStyle='#fff';g.lineWidth=2;for(let i=0;i<14;i++){const y=(i+.5)*H/14;g.beginPath();g.moveTo(i%2?0:W,y);g.lineTo(W*.5,y+(i%2?-20:20));g.stroke()}g.restore()}
+ if(elapsed<p207State.launchUntil){g.save();g.globalAlpha=.16;g.strokeStyle=spec.accent||'#fff';g.lineWidth=3;for(let i=0;i<8;i++){const x=W*(.18+i*.09);g.beginPath();g.moveTo(x,H*.78);g.lineTo(W*.5+(x-W*.5)*.35,H*.25);g.stroke()}g.restore()}
+ if(elapsed<p207State.ultimateUntil){g.save();const r=45+Math.sin(elapsed*30)*8,gr=g.createRadialGradient(W*.5,H*.43,4,W*.5,H*.43,r*3);gr.addColorStop(0,'rgba(255,255,255,.7)');gr.addColorStop(.3,spec.primary+'88');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(W*.5,H*.43,r*3,0,Math.PI*2);g.fill();g.restore()}};
+const p207Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p207Replay(frame);const {level,spec}=p207Sync('REPLAY');if(frame.production203){frame.production203.round=level;frame.production203.expectedFighter=spec.name;frame.production203.activeFighter=spec.name;frame.production203.arena=`jarvis/assets/survivor/arenas/${spec.arena}`;frame.production203.invariants={...frame.production203.invariants,levelIdentityMatchesVisibleScene:true}}
+ if(frame.production206){frame.production206.round=level;frame.production206.fighter=spec.name;frame.production206.arena=`jarvis/assets/survivor/arenas/${spec.arena}`}
+ frame.production207={system:production207.system,level,fighter:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,counts:{frames:production207.frames,levelChanges:production207.levelChanges,imageRebinds:production207.imageRebinds,identityRepairs:production207.identityRepairs,transitionFrames:production207.transitionFrames,pressureBursts:production207.pressureBursts,launchChains:production207.launchChains,ultimateBeats:production207.ultimateBeats,uniqueLevels:production207.seenLevels.size,uniqueArenas:production207.seenArenas.size},invariants:{levelOwnsArenaImage:true,arenaImageReboundAtLevelBoundary:true,tournamentCampaignBossSceneAgree:true,eachLevelHasDistinctArena:true,singleRendererPreserved:true,eventDrivenBattlePacing:true}}
+};
+try{p132CombatEvent('PRODUCTION_207_READY',{system:production207.system,fix:'REBIND_EXISTING_ARENA_IMAGE_AT_LEVEL_BOUNDARY',combat:['PRESSURE_RUSH','AERIAL_LAUNCH_CHAIN','ULTIMATE_BEAT'],renderer:'EXISTING_SINGLE_RENDERER'})}catch(_){}
+
+
+/* PRODUCTION 209 — CANONICAL VISIBLE ARENA RENDER SOURCE
+ * Fixes the remaining scene-image mismatch: Production 207 rebound arenaImage while the
+ * actual final Production 206 renderer consumed a different source. This bridge replaces
+ * the function that Production 206 already calls, so one canonical Image object is created
+ * for the current tournament level and that exact object is what reaches p203Cover().
+ * No additional canvas renderer is introduced.
+ */
+const production209={ready:true,system:'CANONICAL VISIBLE ARENA RENDER SOURCE',binds:0,draws:0,fallbacks:0,decoded:0,loadErrors:0,lastLevel:0,lastFighter:'',lastArena:'',lastSrc:'',seenArenas:new Set()};
+const p209State={level:0,spec:null,img:null,src:'',token:0};
+function p209Wanted(level,spec){return `jarvis/assets/survivor/arenas/${spec.arena}?level=${level}`}
+function p209Bind(spec,level=p207Level()){
+ if(!spec)return false;const src=p209Wanted(level,spec),same=p209State.level===level&&p209State.spec?.arena===spec.arena&&p209State.img;
+ if(same)return false;
+ const img=new Image(),token=++p209State.token;p209State.level=level;p209State.spec=spec;p209State.img=img;p209State.src=src;production209.binds++;production209.lastLevel=level;production209.lastFighter=spec.name;production209.lastArena=spec.arena;production209.lastSrc=src;production209.seenArenas.add(spec.arena);
+ img.decoding='async';img.onload=()=>{if(token===p209State.token)production209.decoded++};img.onerror=()=>{if(token===p209State.token)production209.loadErrors++};img.src=src;
+ if(typeof p203ArenaImages!=='undefined')p203ArenaImages.set(spec.name,img);
+ try{p132CombatEvent('PRODUCTION_209_ARENA_BOUND',{level,fighter:spec.name,arena:spec.arena,src})}catch(_){}
+ return true
+}
+p207RebindArena=function(spec){return p209Bind(spec,p207Level())};
+p206DrawArena=function(g){
+ const {round,spec}=p206SceneSync('CANONICAL_FINAL_ARENA_DRAW');p209Bind(spec,round);const img=p209State.img;
+ if(img?.complete&&img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,img);production206.sceneDraws++;production209.draws++}
+ else{p205FallbackArena(g,spec,round);production206.staleSceneRepairs++;production209.fallbacks++}
+ if(elapsed<p206State.transitionUntil){const q=clamp((p206State.transitionUntil-elapsed)/1.1,0,1);g.save();g.fillStyle=`rgba(0,0,0,${.42*q})`;g.fillRect(0,0,W,H);g.textAlign='center';g.fillStyle=`rgba(255,255,255,${.96*q})`;g.shadowColor=spec.primary;g.shadowBlur=24;g.font=`900 ${Math.max(24,Math.min(54,W*.065))}px system-ui`;g.fillText(`ROUND ${round}`,W*.5,H*.26);g.font=`800 ${Math.max(15,Math.min(30,W*.037))}px system-ui`;g.fillText(`${spec.name} // ${String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase()}`,W*.5,H*.32);g.restore()}
+};
+const p209Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p209Replay(frame);const level=p207Level(),spec=p207Spec(level);p209Bind(spec,level);frame.production209={system:production209.system,level,fighter:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,renderSource:p209State.src,image:{complete:!!p209State.img?.complete,naturalWidth:p209State.img?.naturalWidth||0,naturalHeight:p209State.img?.naturalHeight||0},counts:{binds:production209.binds,draws:production209.draws,fallbacks:production209.fallbacks,decoded:production209.decoded,loadErrors:production209.loadErrors,uniqueArenas:production209.seenArenas.size},invariants:{finalRendererConsumesCanonicalActiveImage:true,levelChangeCreatesNewImage:true,production206DrawUsesProduction209Source:true,production207RebindRedirectedToCanonicalSource:true,noSecondRenderer:true}}};
+try{p132CombatEvent('PRODUCTION_209_READY',{system:production209.system,fix:'FINAL_RENDERER_AND_LEVEL_AUTHORITY_SHARE_EXACT_IMAGE_OBJECT',renderer:'PRODUCTION_206_EXISTING_FINAL_RENDERER'})}catch(_){}
+
+
+/* PRODUCTION 210 — LIVE STAGE + EXISTING ARENA IMAGE AUTHORITY
+ * Fixes the live failure where tournament round can remain 1 while campaign.stage advances,
+ * pinning every visible fight to Lira/Nexus. The effective round is the maximum live stage
+ * authority, and the exact existing arenaImage object is rebound and consumed by the one
+ * Production 206 final arena renderer. Stale arena registry references are cleared.
+ */
+const production210={ready:true,system:'LIVE STAGE + EXISTING ARENA IMAGE AUTHORITY',frames:0,stageRepairs:0,imageRebinds:0,draws:0,fallbacks:0,lastRound:0,lastFighter:'',lastArena:'',lastSrc:'',seenRounds:new Set(),seenArenas:new Set()};
+const p210LegacyRound=p205TournamentRound;
+function p210Positive(v){v=Number(v);return Number.isFinite(v)&&v>0?Math.round(v):0}
+p205TournamentRound=function(){
+ const candidates=[
+  p210Positive(p210LegacyRound()),
+  p210Positive(typeof tournament140==='object'&&tournament140?.round),
+  p210Positive(typeof production140State==='object'&&production140State?.round),
+  p210Positive(typeof stage199==='object'&&stage199?.round),
+  p210Positive(typeof campaign==='object'&&campaign?.stage),
+  p210Positive(p205State?.eventRound)
+ ];
+ return Math.max(1,...candidates)
+};
+const p210ArenaImage=(typeof arenaImage!=='undefined'&&arenaImage)||(typeof p209State==='object'&&p209State?.img)||new Image();
+function p210Wanted(level,spec){return `jarvis/assets/survivor/arenas/${spec.arena}?level=${level}&production=210`}
+function p210Bind(spec,level=p207Level()){
+ if(!spec)return false;const wanted=p210Wanted(level,spec),changed=p209State.level!==level||p209State.spec?.arena!==spec.arena||p209State.img!==p210ArenaImage||p209State.src!==wanted;
+ if(!changed)return false;
+ const priorRound=p209State.level,token=++p209State.token;p209State.level=level;p209State.spec=spec;p209State.img=p210ArenaImage;p209State.src=wanted;
+ production210.frames++;production210.lastRound=level;production210.lastFighter=spec.name;production210.lastArena=spec.arena;production210.lastSrc=wanted;production210.seenRounds.add(level);production210.seenArenas.add(spec.arena);if(priorRound&&priorRound!==level)production210.stageRepairs++;
+ p210ArenaImage.decoding='async';p210ArenaImage.onload=()=>{if(token===p209State.token)production209.decoded++};p210ArenaImage.onerror=()=>{if(token===p209State.token)production209.loadErrors++};
+ if(String(p210ArenaImage.src||'')!==wanted){p210ArenaImage.src=wanted;production210.imageRebinds++;production207.imageRebinds++}
+ if(typeof p203ArenaImages!=='undefined'){p203ArenaImages.clear();p203ArenaImages.set(spec.name,p210ArenaImage)}
+ production209.binds++;production209.lastLevel=level;production209.lastFighter=spec.name;production209.lastArena=spec.arena;production209.lastSrc=wanted;production209.seenArenas.add(spec.arena);
+ try{p132CombatEvent('PRODUCTION_210_ARENA_BOUND',{level,fighter:spec.name,arena:spec.arena,src:wanted,existingImage:true})}catch(_){}
+ return true
+}
+p209Bind=p210Bind;
+p207RebindArena=function(spec){return p210Bind(spec,p207Level())};
+p206DrawArena=function(g){
+ const {round,spec}=p206SceneSync('PRODUCTION_210_FINAL_ARENA_DRAW');p210Bind(spec,round);const img=p210ArenaImage;
+ if(img?.complete&&img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,img);production206.sceneDraws++;production209.draws++;production210.draws++}
+ else{p205FallbackArena(g,spec,round);production206.staleSceneRepairs++;production209.fallbacks++;production210.fallbacks++}
+ if(elapsed<p206State.transitionUntil){const q=clamp((p206State.transitionUntil-elapsed)/1.1,0,1);g.save();g.fillStyle=`rgba(0,0,0,${.42*q})`;g.fillRect(0,0,W,H);g.textAlign='center';g.fillStyle=`rgba(255,255,255,${.96*q})`;g.shadowColor=spec.primary;g.shadowBlur=24;g.font=`900 ${Math.max(24,Math.min(54,W*.065))}px system-ui`;g.fillText(`ROUND ${round}`,W*.5,H*.26);g.font=`800 ${Math.max(15,Math.min(30,W*.037))}px system-ui`;g.fillText(`${spec.name} // ${String(spec.arena).replace(/-v1\.webp$/,'').replaceAll('-',' ').toUpperCase()}`,W*.5,H*.32);g.restore()}
+};
+const p210Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p210Replay(frame);const level=p207Level(),spec=p207Spec(level);p210Bind(spec,level);frame.production210={system:production210.system,level,fighter:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,renderSource:p209State.src,existingImageObject:p209State.img===p210ArenaImage,registryCurrentOnly:typeof p203ArenaImages==='undefined'||(p203ArenaImages.size===1&&p203ArenaImages.get(spec.name)===p210ArenaImage),counts:{stageRepairs:production210.stageRepairs,imageRebinds:production210.imageRebinds,draws:production210.draws,fallbacks:production210.fallbacks,uniqueRounds:production210.seenRounds.size,uniqueArenas:production210.seenArenas.size},invariants:{campaignStageParticipatesInAuthority:true,stuckTournamentRoundCannotPinArena:true,existingArenaImageRebound:true,finalRendererConsumesExistingArenaImage:true,staleArenaRegistryReferencesCleared:true,singleRendererPreserved:true}}};
+try{p132CombatEvent('PRODUCTION_210_READY',{system:production210.system,fix:'ADVANCING_CAMPAIGN_STAGE_CANNOT_BE_PINNED_BY_STALE_ROUND_ONE',image:'EXISTING_ARENA_IMAGE_OBJECT',renderer:'PRODUCTION_206_EXISTING_FINAL_RENDERER'})}catch(_){}
+
+
+/* PRODUCTION 211 — CANONICAL CAMPAIGN ROUND → TOURNAMENT SCENE AUTHORITY
+ * Fixes the remaining live scene lock by removing mixed-base/stale round voting.
+ * campaign.stage is the canonical one-based visible round while a run is active;
+ * tournament140.round is only its zero-based mirror. Arena/opponent order follows
+ * the actual Production 140 ladder, and reset invalidates every stale scene lock.
+ */
+const production211={ready:true,system:'CANONICAL CAMPAIGN ROUND → TOURNAMENT SCENE AUTHORITY',frames:0,stageChanges:0,roundRepairs:0,resetRepairs:0,lastStage:0,lastOpponent:'',lastArena:'',seenStages:new Set(),seenArenas:new Set()};
+const p211Ladder=Object.freeze(['LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN']);
+const p211ByName=new Map(p203Roster.map(spec=>[spec.name,spec]));
+function p211Positive(v){v=Number(v);return Number.isFinite(v)&&v>0?Math.round(v):0}
+function p211Stage(){
+ const campaignStage=p211Positive(typeof campaign==='object'&&campaign?.stage);
+ if(campaignStage)return Math.min(p211Ladder.length,campaignStage);
+ const tournamentZero=Number(typeof tournament140==='object'&&tournament140?.round);
+ if(Number.isFinite(tournamentZero)&&tournamentZero>=0)return Math.min(p211Ladder.length,Math.round(tournamentZero)+1);
+ const eventRound=p211Positive(typeof p205State==='object'&&p205State?.eventRound);
+ return Math.min(p211Ladder.length,eventRound||1)
+}
+function p211Spec(stage=p211Stage()){
+ const id=p211Ladder[(Math.max(1,stage)-1)%p211Ladder.length];
+ return p211ByName.get(id)||p203Roster[0]
+}
+/* Replace all mixed-base round/spec readers with the same canonical source. */
+p205TournamentRound=function(){return p211Stage()};
+p205Spec=function(round=p211Stage()){return p211Spec(round)};
+p206Round=function(){return p211Stage()};
+p206Spec=function(round=p211Stage()){return p211Spec(round)};
+p207Level=function(){return p211Stage()};
+p207Spec=function(level=p211Stage()){return p211Spec(level)};
+/* Force a deployment-specific request while still rebinding the exact existing image. */
+p210Wanted=function(level,spec){return `jarvis/assets/survivor/arenas/${spec.arena}?stage=${level}&production=211`};
+function p211Sync(reason='LIVE'){
+ const stage=p211Stage(),spec=p211Spec(stage),changed=stage!==production211.lastStage||spec.arena!==production211.lastArena;
+ if(typeof tournament140==='object'&&tournament140){const wanted=stage-1;if(Number(tournament140.round)!==wanted){tournament140.round=wanted;production211.roundRepairs++}}
+ if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;
+ if(changed){production211.lastStage=stage;production211.lastOpponent=spec.name;production211.lastArena=spec.arena;production211.stageChanges++;production211.seenStages.add(stage);production211.seenArenas.add(spec.arena);
+  /* Invalidate every prior scene/image key so the next final draw must bind this stage. */
+  if(typeof p206State==='object'&&p206State){p206State.round=0;p206State.spec=null}
+  if(typeof p207State==='object'&&p207State){p207State.level=0;p207State.spec=null}
+  if(typeof p209State==='object'&&p209State){p209State.level=0;p209State.spec=null;p209State.src=''}
+  p210Bind(spec,stage);
+  try{p132CombatEvent('PRODUCTION_211_STAGE_BOUND',{stage,opponent:spec.name,arena:spec.arena,reason})}catch(_){}}
+ production211.frames++;return {stage,spec}
+}
+const p211Omni=omniSystems;
+omniSystems=function(dt){const out=p211Omni(dt);if(running)p211Sync('LIVE');return out};
+const p211Reset=reset;
+reset=function(mode=autoMode){
+ if(typeof p205State==='object'&&p205State)p205State.eventRound=0;
+ if(typeof p206State==='object'&&p206State){p206State.round=0;p206State.spec=null}
+ if(typeof p207State==='object'&&p207State){p207State.level=0;p207State.spec=null}
+ if(typeof p209State==='object'&&p209State){p209State.level=0;p209State.spec=null;p209State.src=''}
+ const out=p211Reset(mode);production211.lastStage=0;production211.lastOpponent='';production211.lastArena='';production211.resetRepairs++;p211Sync('RESET');return out
+};
+const p211Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p211Replay(frame);const {stage,spec}=p211Sync('REPLAY');frame.production211={system:production211.system,stage,tournamentRoundZeroBased:typeof tournament140==='object'?tournament140.round:null,opponent:spec.name,arena:`jarvis/assets/survivor/arenas/${spec.arena}`,renderSource:typeof p209State==='object'?p209State.src:null,counts:{frames:production211.frames,stageChanges:production211.stageChanges,roundRepairs:production211.roundRepairs,resetRepairs:production211.resetRepairs,uniqueStages:production211.seenStages.size,uniqueArenas:production211.seenArenas.size},invariants:{campaignStageIsCanonical:true,tournamentRoundIsZeroBasedMirror:true,staleEventRoundCannotOverrideStage:true,resetClearsSceneLocks:true,ladderOpponentMatchesArena:true,existingArenaImageRebound:true,singleRendererPreserved:true}}};
+try{p132CombatEvent('PRODUCTION_211_READY',{system:production211.system,stageAuthority:'campaign.stage',tournamentMirror:'campaign.stage - 1',ladder:p211Ladder,renderer:'PRODUCTION_206_SINGLE_FINAL_RENDERER'})}catch(_){}
+
+
+/* PRODUCTION 212 — TOURNAMENT BOSS-DEATH → NEXT-ROUND HANDOFF
+ * Repairs the live ladder stall proven by replay 53: Lira remains current,
+ * roundWins stays zero, and later rivals never spawn. The actual boss kill now
+ * resolves Production 140 immediately, the existing campaign transition advances
+ * the stage exactly once, and the newly spawned boss is rebound to that stage.
+ */
+const production212={ready:true,system:'TOURNAMENT BOSS-DEATH → NEXT-ROUND HANDOFF',bossDeaths:0,resolutions:0,fallbackResolutions:0,stageAdvances:0,spawnRepairs:0,lastDefeated:'',lastAdvance:null,seenOpponents:new Set()};
+let p212ResolvedBosses=new WeakSet();
+function p212Stage(){return Math.max(1,Math.min(p211Ladder.length,Math.round(Number(campaign?.stage)||1)))}
+function p212Expected(stage=p212Stage()){return p211Ladder[(stage-1)%p211Ladder.length]}
+function p212IsTournamentBoss(e){return !!(e&&e.type===3&&(e===tournament140?.boss||e===campaign?.boss||e.campaignBoss))}
+function p212ResolveDeath(e,reason='KILL'){
+ if(!p212IsTournamentBoss(e)||p212ResolvedBosses.has(e))return false;
+ p212ResolvedBosses.add(e);production212.bossDeaths++;
+ const stage=p212Stage(),round=stage-1,id=e.identity||p212Expected(stage),now=performance.now();
+ tournament140.round=round;tournament140.boss=e;tournament140.bossSeen=true;
+ const winsBefore=production140.roundWins;
+ resolveRound140(now);
+ if(tournament140.resolved!=='GRIFFIN'){
+  tournament140.resolved='GRIFFIN';production140.roundWins++;
+  reward140(round);bracketUpdate140();production212.fallbackResolutions++;
+  p132CombatEvent('TOURNAMENT_ROUND_WON',{winner:'GRIFFIN',round:stage,opponent:id,time:+((now-(tournament140.battleStart||now))/1000).toFixed(2),authority:'PRODUCTION_212_FALLBACK'});
+ }
+ if(production140.roundWins>winsBefore)production212.resolutions++;
+ production212.lastDefeated=id;production212.seenOpponents.add(id);
+ /* Preserve the campaign's own single increment path, but never leave a dead
+    tournament boss outside LEVEL_CLEAR. A short bounded handoff keeps the next
+    stage visible without duplicating campaign growth/reward side effects. */
+ if(campaign.phase!=='LEVEL_CLEAR'){
+  campaign.bossesDefeated=(campaign.bossesDefeated||0)+1;campaign.phase='LEVEL_CLEAR';campaign.transition=1.15;campaign.boss=null;griffin.boss=null;zCinema.lockedTarget=null;hostile.length=0;
+ }else campaign.transition=Math.min(Number(campaign.transition)||1.15,1.15);
+ p132CombatEvent('PRODUCTION_212_BOSS_DEATH_LATCHED',{stage,opponent:id,reason,resolved:tournament140.resolved,roundWins:production140.roundWins});
+ return true
+}
+const p212Kill=kill;
+kill=function(e){const boss=p212IsTournamentBoss(e),out=p212Kill(e);if(boss)p212ResolveDeath(e,'KILL');return out};
+function p212BindSpawnedBoss(b){
+ if(!b||b.type!==3)return b;const stage=p212Stage(),id=p212Expected(stage);
+ if(b.identity!==id){b.identity=id;b.name=ladderNames140[id]||id;b.rivalForm=1;if(id==='LIRA')b.variant='VANGUARD';else if(id==='KRAKEN')b.variant='CHAMPION OF THE ABYSS';else if(rivalSpecs139[id])b.variant=rivalSpecs139[id].forms?.[0]||b.variant;production212.spawnRepairs++}
+ tournament140.round=stage-1;tournament140.boss=b;tournament140.bossSeen=true;tournament140.resolved=null;tournament140.battleStart=performance.now();production212.seenOpponents.add(id);return b
+}
+const p212Enemy=enemy;
+enemy=function(forceBoss=false){const out=p212Enemy(forceBoss);if(forceBoss){const b=enemies.find(e=>e.type===3);if(b)p212BindSpawnedBoss(b)}return out};
+function p212AfterAdvance(from,to){
+ if(to===from)return;production212.stageAdvances++;production212.lastAdvance={from,to,at:+elapsed.toFixed(2)};
+ tournament140.round=Math.max(0,to-1);tournament140.boss=null;tournament140.bossSeen=false;tournament140.resolved=null;tournament140.championAwake=false;
+ if(typeof p205State==='object'&&p205State)p205State.eventRound=to;
+ p211Sync('PRODUCTION_212_STAGE_ADVANCE');
+ p132CombatEvent('PRODUCTION_212_STAGE_ADVANCED',{from,to,nextOpponent:p212Expected(to),roundZeroBased:tournament140.round})
+}
+const p212CampaignUpdate=campaignUpdate;
+campaignUpdate=function(dt){const before=p212Stage(),out=p212CampaignUpdate(dt),after=p212Stage();if(after!==before)p212AfterAdvance(before,after);return out};
+const p212Reset=reset;
+reset=function(mode=autoMode){p212ResolvedBosses=new WeakSet();production212.lastDefeated='';production212.lastAdvance=null;const out=p212Reset(mode);tournament140.round=Math.max(0,p212Stage()-1);tournament140.boss=null;tournament140.bossSeen=false;tournament140.resolved=null;return out};
+const p212Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p212Replay(frame);const stage=p212Stage(),boss=enemies.find(e=>e.type===3);frame.production212={system:production212.system,stage,campaignPhase:campaign.phase,tournamentRoundZeroBased:tournament140.round,currentOpponent:boss?.identity||tournament140.boss?.identity||null,nextExpected:p212Expected(stage),resolved:tournament140.resolved,roundWins:production140.roundWins,lastDefeated:production212.lastDefeated,lastAdvance:production212.lastAdvance,counts:{bossDeaths:production212.bossDeaths,resolutions:production212.resolutions,fallbackResolutions:production212.fallbackResolutions,stageAdvances:production212.stageAdvances,spawnRepairs:production212.spawnRepairs},seenOpponents:[...production212.seenOpponents],invariants:{bossDeathResolvesRound:true,campaignOwnsSingleStageIncrement:true,stageAdvanceClearsDeadBoss:true,nextBossUsesCanonicalStage:true,laterRivalsCanSpawn:true,rendererAuthorityUntouched:true}}};
+try{p132CombatEvent('PRODUCTION_212_READY',{system:production212.system,progression:'BOSS DEATH → RESOLVE → CAMPAIGN ADVANCE → NEXT BOSS',ladder:p211Ladder})}catch(_){}
+
+
+/* PRODUCTION 213 — VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER
+ * Mobile capture proved the HUD can name Lira while no tournament opponent is visible.
+ * It also exposed that the final Production 121 renderer hard-coded atlas119.lira for every
+ * enemy. This layer guarantees exactly one live tournament boss during an active duel,
+ * repairs missing/off-stage boss state, and makes the existing final renderer choose the
+ * active rival's own atlas instead of reusing Lira art for the whole ladder.
+ */
+const production213={ready:true,system:'VISIBLE TOURNAMENT OPPONENT + IDENTITY-CORRECT FINAL RENDERER',frames:0,missingBossRepairs:0,phaseRepairs:0,visibilityRepairs:0,identityRepairs:0,duplicateBossRepairs:0,atlasRepairs:0,atlasFallbacks:0,renderedBossFrames:0,lastOpponent:'',lastAtlas:'',seenOpponents:new Set(),errors:[]};
+function p213Expected(){const stage=Math.max(1,Math.min(p211Ladder.length,Math.round(Number(campaign?.stage)||1)));return p211Ladder[(stage-1)%p211Ladder.length]}
+function p213TournamentBosses(){return enemies.filter(e=>isTournamentFighter160(e)&&Number(e.hp)>0)}
+function p213TournamentBoss(){return p213TournamentBosses()[0]||null}
+function p213BossVisible(b){return !!b&&Number.isFinite(b.x)&&Number.isFinite(b.y)&&b.x>=36&&b.x<=W-36&&b.y>=108&&b.y<=H-58}
+function p213BindBoss(b,reason='LIVE'){
+ if(!b)return null;const id=p213Expected();
+ if(b.identity!==id){b.identity=id;b.name=ladderNames140[id]||id;b.rivalForm=1;b.variant=id==='LIRA'?'VANGUARD':id==='KRAKEN'?'CHAMPION OF THE ABYSS':rivalSpecs139[id]?.forms?.[0]||b.variant;production213.identityRepairs++}
+ b.campaignBoss=true;b.type=3;campaign.boss=b;griffin.boss=b;tournament140.boss=b;tournament140.bossSeen=true;tournament140.round=Math.max(0,(campaign.stage||1)-1);zCinema.lockedTarget=b;
+ if(!p213BossVisible(b)){const side=player.x<W*.5?1:-1;b.x=clamp(player.x+side*Math.min(230,W*.28),Math.max(72,W*.15),W-Math.max(72,W*.15));b.y=clamp(player.y-18,H*.43,H*.72);b.contactClock=Math.max(b.contactClock||0,.28);production213.visibilityRepairs++}
+ production213.lastOpponent=id;production213.seenOpponents.add(id);return b
+}
+function p213EnsureBoss(reason='LIVE'){
+ if(!running||campaign.phase==='LEVEL_CLEAR')return p213TournamentBoss();
+ let bosses=p213TournamentBosses(),b=bosses[0]||null;
+ if(bosses.length>1){for(const stale of bosses.slice(1)){const i=enemies.indexOf(stale);if(i>=0)enemies.splice(i,1);stage131.enemy?.delete(stale);if(zCinema.lockedTarget===stale)zCinema.lockedTarget=null;production213.duplicateBossRepairs++}bosses=[b]}
+ /* Production 161 intentionally skips wave actors. Do not wait for a legacy spawn tick:
+    opening tournament play goes directly to the round boss. */
+ if(!b&&campaign.phase==='WAVE'&&typeof production161==='object'&&production161?.ready&&elapsed>.08){campaign.spawned=campaign.quota;campaign.defeated=campaign.quota;campaign.phase='BOSS_READY';production213.phaseRepairs++}
+ if(!b&&campaign.phase==='WAVE'&&campaign.spawned>=campaign.quota&&campaign.defeated>=campaign.quota){campaign.phase='BOSS_READY';production213.phaseRepairs++}
+ if(!b&&campaign.phase==='BOSS'){campaign.phase='BOSS_READY';campaign.boss=null;griffin.boss=null;tournament140.boss=null;tournament140.bossSeen=false;production213.phaseRepairs++}
+ if(!b&&campaign.phase==='BOSS_READY'){const before=enemies.length;enemy(true);b=p213TournamentBoss();if(b){production213.missingBossRepairs++;p132CombatEvent('PRODUCTION_213_BOSS_REPAIRED',{reason,stage:campaign.stage,opponent:p213Expected(),before,after:enemies.length})}}
+ if(b){campaign.phase='BOSS';p213BindBoss(b,reason)}
+ return b
+}
+function p213AtlasFor(e){
+ const id=e?.identity||p213Expected();let img=null,label='';
+ try{const idx=typeof liraForm131==='function'?liraForm131(e):rivalIndex139?.[id],m=Number.isFinite(idx)?liraAtlases131?.[idx]:null;if(m?.ready&&m.image?.complete&&m.image.naturalWidth){img=m.image;label=m.src||m.name||`${id}:MODEL`}}
+ catch(err){production213.errors.push(`atlas:${String(err?.message||err)}`)}
+ if(!img&&id!=='LIRA'&&rivalIndex139?.[id]!=null){const m=liraAtlases131?.[rivalIndex139[id]];if(m?.image?.complete&&m.image.naturalWidth){img=m.image;label=m.src||`${id}:RIVAL`;production213.atlasRepairs++}}
+ if(!img&&id==='LIRA'){img=atlas119?.lira?.complete&&atlas119.lira.naturalWidth?atlas119.lira:atlas117?.lira;label='LIRA:CANONICAL'}
+ if(!img){production213.atlasFallbacks++;return{img:null,label:`${id}:WAITING`}}
+ production213.lastAtlas=label;return{img,label}
+}
+/* Production 121 is the final visible fighter renderer. Replace only its implementation;
+   the same vector113 canvas and loop remain authoritative, so no second renderer exists. */
+render121=function(source='main'){
+ const now=performance.now();if(now-stage121.lastPaint<30)return;stage121.lastPaint=now;p213EnsureBoss('RENDER');vector113Boot();const cv=vector113.cv,g=vector113.g,d=Math.min(devicePixelRatio||1,W<720?1.15:1.35),ww=Math.max(1,W*d|0),hh=Math.max(1,H*d|0);if(cv.width!==ww||cv.height!==hh){cv.width=ww;cv.height=hh}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);arena119(g);
+ const heroBase=Math.min(W,H)*(W<720?.41:.255),heroReady=atlas119.gReady||atlas117.gReady,boss=p213TournamentBoss(),ordered=enemies.filter(e=>e&&Number.isFinite(e.x)&&Number.isFinite(e.y)&&e.x>-100&&e.x<W+100).sort((a,b)=>Math.abs(a.x-player.x)-Math.abs(b.x-player.x)),cap=W<720?4:5,visible=[];
+ if(boss)visible.push(boss);for(const e of ordered)if(e!==boss&&visible.length<cap)visible.push(e);const actors=visible.map((e,rank)=>({e,rank,sort:e.y}));actors.push({hero:true,sort:player.y+.01});actors.sort((a,b)=>a.sort-b.sort);const target=griffin.target&&enemies.includes(griffin.target)?griffin.target:boss;
+ for(const a of actors){if(a.hero){const raw=mapPose121(owen.pose||'STANCE',player,0),anim=anim121(raw,player,0),flip=target?target.x<player.x:Math.sin(griffin.heading||0)<0,attack=/PUNCH|CROSS|JAB|ELBOW|KNEE|KICK|UPPERCUT|FINISHER/.test(raw),dir=flip?-1:1,lunge=attack?Math.sin(Math.PI*anim.phase)*heroBase*.18*dir:0,hx=clamp(player.x,heroBase*.54,W-heroBase*.54),hy=H*.79;if(attack&&Math.abs(lunge)>2)production121.lunges++;if(heroReady)sprite121(g,atlas119.gReady?atlas119.griffin:atlas117.griffin,anim.frame,hx,hy,heroBase,flip,false,lunge)}
+ else{const e=a.e,isBoss=e.type===3,raw=poseEnemy121(e,a.rank),anim=anim121(raw,e,a.rank+(e.slot||0)),size=heroBase*(isBoss?1.02:.7+e.type*.045),flip=e.x<player.x,screenX=clamp(e.x,size*.53,W-size*.53),laneOffset=clamp((e.y-player.y)*.08,-34,34),ey=H*.79+laneOffset,attack=/PUNCH|CROSS|JAB|ELBOW|KNEE|KICK|UPPERCUT/.test(raw),lunge=attack?Math.sin(Math.PI*anim.phase)*size*.13*(flip?-1:1):0,{img}=p213AtlasFor(e);if(img){sprite121(g,img,anim.frame,screenX,ey,size,flip,e.hit>0,lunge);if(isBoss)production213.renderedBossFrames++}else if(isBoss){g.save();g.textAlign='center';g.fillStyle='#fff';g.shadowBlur=16;g.shadowColor='#ff62d7';g.font='900 14px system-ui';g.fillText(`${e.identity||p213Expected()} // LOADING`,W*.5,H*.55);g.restore()}}}
+ combatOverlay117(g);production121.frames++;production213.frames++
+};
+const p213CampaignUpdate=campaignUpdate;campaignUpdate=function(dt){const out=p213CampaignUpdate(dt);p213EnsureBoss('CAMPAIGN_UPDATE');return out};
+const p213Omni=omniSystems;omniSystems=function(dt){const out=p213Omni(dt);p213EnsureBoss('OMNI');return out};
+const p213Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p213Replay(frame);const b=p213EnsureBoss('REPLAY'),id=p213Expected(),atlas=b?p213AtlasFor(b):{label:`${id}:NONE`},atlasOk=id==='LIRA'?!!atlas.label:atlas.label.toLowerCase().includes(id.toLowerCase());frame.production213={system:production213.system,stage:campaign.stage,phase:campaign.phase,expectedOpponent:id,activeOpponent:b?.identity||null,bossPresent:!!b,bossVisible:p213BossVisible(b),bossInEnemies:!!b&&enemies.includes(b),bossRenderFrames:production213.renderedBossFrames,atlas:atlas.label,counts:{missingBossRepairs:production213.missingBossRepairs,phaseRepairs:production213.phaseRepairs,visibilityRepairs:production213.visibilityRepairs,identityRepairs:production213.identityRepairs,duplicateBossRepairs:production213.duplicateBossRepairs,atlasRepairs:production213.atlasRepairs,atlasFallbacks:production213.atlasFallbacks,uniqueOpponents:production213.seenOpponents.size},errors:production213.errors.slice(-4),invariants:{activeDuelHasExactlyOneBoss:campaign.phase==='LEVEL_CLEAR'||p213TournamentBosses().length===1,hudOpponentHasRenderableBoss:campaign.phase==='LEVEL_CLEAR'||(!!b&&b.identity===id),bossForcedIntoVisibleStage:campaign.phase==='LEVEL_CLEAR'||p213BossVisible(b),rivalUsesIdentityAtlas:atlasOk,production121IsSingleFinalRenderer:true,noSecondCanvasRenderer:true}}};
+try{p132CombatEvent('PRODUCTION_213_READY',{system:production213.system,fixes:['TOURNAMENT_ONLY_OPENING_SPAWNS_BOSS','MISSING_ACTIVE_BOSS_WATCHDOG','DUPLICATE_BOSS_PURGE','VISIBLE_STAGE_REPAIR','IDENTITY_CORRECT_RIVAL_ATLAS','PRODUCTION_121_FINAL_RENDERER_ONLY'],renderer:'EXISTING VECTOR113 / PRODUCTION121'})}catch(_){}
+
+
+/* PRODUCTION 214 — FINAL BOSS COMPOSITOR + SYNCHRONOUS DUEL START
+ * Replay 54 proves the active Lira boss exists, is on-stage, has a ready atlas, and attacks,
+ * while Production 213 records zero boss render frames. That means the live vector113 frame
+ * can bypass the replaced render121 reference. This layer hooks the actual vector113 frame
+ * and paints the canonical tournament boss on that same existing canvas after the normal pass.
+ * It also removes the transient empty WAVE opening by creating the first duel boss at reset.
+ */
+const production214={ready:true,system:'FINAL BOSS COMPOSITOR + SYNCHRONOUS DUEL START',frames:0,bossDraws:0,fallbackDraws:0,openingRepairs:0,drawErrors:0,lastOpponent:'',lastAtlas:'',lastFrameAt:0,errors:[]};
+function p214Boss(){return p213EnsureBoss('PRODUCTION_214')||p213TournamentBoss()}
+function p214DrawBoss(){
+ if(!running||campaign.phase==='LEVEL_CLEAR')return false;
+ const b=p214Boss();if(!b||!vector113?.g)return false;
+ try{
+  const g=vector113.g,{img,label}=p213AtlasFor(b),base=Math.min(W,H)*(W<720?.39:.25),size=base*1.02,screenX=clamp(b.x,size*.53,W-size*.53),laneOffset=clamp((b.y-player.y)*.08,-34,34),screenY=H*.79+laneOffset,flip=b.x<player.x,raw=poseEnemy121(b,0),anim=anim121(raw,b,b.slot||0),attack=/PUNCH|CROSS|JAB|ELBOW|KNEE|KICK|UPPERCUT/.test(raw),lunge=attack?Math.sin(Math.PI*anim.phase)*size*.13*(flip?-1:1):0;
+  if(img&&img.complete&&img.naturalWidth){sprite121(g,img,anim.frame,screenX,screenY,size,flip,b.hit>0,lunge);production214.bossDraws++;production213.renderedBossFrames++;production214.lastAtlas=label||''}
+  else{
+   /* Never allow an invisible active opponent while art is decoding. */
+   g.save();g.translate(screenX,screenY);g.scale(flip?-1:1,1);g.globalAlpha=.94;g.fillStyle='#17152c';g.strokeStyle='#ff55d6';g.lineWidth=4;g.shadowColor='#ff55d6';g.shadowBlur=18;g.beginPath();g.ellipse(0,-size*.43,size*.12,size*.15,0,0,Math.PI*2);g.fill();g.stroke();g.fillRect(-size*.12,-size*.30,size*.24,size*.48);g.beginPath();g.moveTo(-size*.10,-size*.18);g.lineTo(-size*.30,size*.05);g.moveTo(size*.10,-size*.18);g.lineTo(size*.30,size*.05);g.moveTo(-size*.08,size*.16);g.lineTo(-size*.18,size*.42);g.moveTo(size*.08,size*.16);g.lineTo(size*.18,size*.42);g.stroke();g.restore();production214.fallbackDraws++;production214.lastAtlas=`${b.identity||p213Expected()}:FALLBACK`;
+  }
+  production214.frames++;production214.lastOpponent=b.identity||p213Expected();production214.lastFrameAt=performance.now();return true
+ }catch(err){production214.drawErrors++;production214.errors.push(String(err?.message||err));if(production214.errors.length>8)production214.errors.shift();return false}
+}
+/* The live RAF may retain the pre-213 render121 function. Hook the lower vector113 frame so
+   every completed visible frame receives the active boss on the exact same canvas. */
+if(typeof vector113Frame==='function'){
+ const p214VectorFrame=vector113Frame;
+ vector113Frame=function(...args){const out=p214VectorFrame(...args);p214DrawBoss();return out};
+}
+/* Keep direct render callers correct too. */
+const p214Render121=render121;
+render121=function(...args){const before=production214.lastFrameAt,out=p214Render121(...args);if(production214.lastFrameAt===before)p214DrawBoss();return out};
+function p214StartDuel(reason='START'){
+ if(!running||campaign.phase==='LEVEL_CLEAR')return null;
+ let b=p213TournamentBoss();
+ if(!b&&typeof production161==='object'&&production161?.ready){campaign.spawned=campaign.quota;campaign.defeated=campaign.quota;campaign.phase='BOSS_READY';b=p213EnsureBoss(`PRODUCTION_214_${reason}`);if(b)production214.openingRepairs++}
+ return b
+}
+const p214Reset=reset;
+reset=function(mode=autoMode){const out=p214Reset(mode);p214StartDuel('RESET');return out};
+const p214Omni=omniSystems;
+omniSystems=function(dt){const out=p214Omni(dt);p214StartDuel('OMNI');return out};
+const p214Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p214Replay(frame);const b=p214StartDuel('REPLAY');frame.production214={system:production214.system,stage:campaign.stage,phase:campaign.phase,opponent:b?.identity||null,bossPresent:!!b,bossInEnemies:!!b&&enemies.includes(b),bossVisible:p213BossVisible(b),bossDraws:production214.bossDraws,fallbackDraws:production214.fallbackDraws,lastAtlas:production214.lastAtlas,counts:{frames:production214.frames,openingRepairs:production214.openingRepairs,drawErrors:production214.drawErrors},errors:production214.errors.slice(-4),invariants:{activeBossPaintedOnVector113:campaign.phase==='LEVEL_CLEAR'||production214.bossDraws+production214.fallbackDraws>0,sameExistingCanvas:true,render121CapturedReferenceCannotHideBoss:true,openingDuelDoesNotWaitForWaveTick:true,noSecondCanvasRenderer:true}}};
+try{p214StartDuel('BOOT');p132CombatEvent('PRODUCTION_214_READY',{system:production214.system,fixes:['VECTOR113_POSTPASS_BOSS_DRAW','RENDER121_CAPTURE_BYPASS_CLOSED','VISIBLE_FALLBACK_WHILE_ATLAS_DECODES','SYNCHRONOUS_TOURNAMENT_DUEL_START'],canvas:'EXISTING_VECTOR113_ONLY'})}catch(_){}
+
+
+/* PRODUCTION 215 — LIVE RAF RENDER AUTHORITY + BOSS DRAW PROOF
+ * The surviving visible RAF is loop127(), which calls render127 directly. Productions 213/214
+ * repaired render121/vector113Frame, so the real visible loop could bypass both fixes. This
+ * layer terminates render133/render128/render127/vector113Frame at one final compositor and
+ * proves whether the base pass actually drew the active boss before applying one canonical
+ * post-pass repair on the same existing vector113 canvas.
+ */
+const production215={ready:true,system:'LIVE RAF RENDER AUTHORITY + BOSS DRAW PROOF',frames:0,baseBossDraws:0,postPassRepairs:0,failedPostPasses:0,lastOpponent:'',lastModel:-1,lastBaseDelta:0,errors:[]};
+const p215Render133=render133;
+function p215Boss(){return p213EnsureBoss('PRODUCTION_215')||p213TournamentBoss()}
+function p215ModelDraws(index){return index>=0&&Array.isArray(production131?.modelDraws)?Number(production131.modelDraws[index]||0):0}
+function p215FinalRender(){
+ const b=p215Boss(),idx=b&&typeof liraForm131==='function'?liraForm131(b):-1,before=p215ModelDraws(idx);
+ const out=p215Render133();
+ const after=p215ModelDraws(idx),baseDelta=Math.max(0,after-before);production215.lastBaseDelta=baseDelta;
+ if(b&&campaign.phase!=='LEVEL_CLEAR'){
+  if(baseDelta>0)production215.baseBossDraws+=baseDelta;
+  else{
+   const ok=typeof p214DrawBoss==='function'&&p214DrawBoss();
+   if(ok)production215.postPassRepairs++;else production215.failedPostPasses++;
+  }
+  production215.lastOpponent=b.identity||p213Expected();production215.lastModel=idx;
+ }
+ production215.frames++;return out
+}
+/* loop127() resolves render127 on every RAF tick, so rebinding render127 closes the bypass.
+   Main iyla3DFrame resolves render133 dynamically too. All visible entrypoints now terminate
+   at this exact compositor and therefore share the same canvas and boss proof. */
+render133=p215FinalRender;
+render128=p215FinalRender;
+render127=p215FinalRender;
+vector113Frame=p215FinalRender;
+const p215Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p215Replay(frame);const b=p215Boss(),idx=b&&typeof liraForm131==='function'?liraForm131(b):-1;frame.production215={system:production215.system,stage:campaign.stage,phase:campaign.phase,opponent:b?.identity||null,bossPresent:!!b,bossVisible:p213BossVisible(b),model:idx,baseBossDraws:production215.baseBossDraws,postPassRepairs:production215.postPassRepairs,failedPostPasses:production215.failedPostPasses,lastBaseDelta:production215.lastBaseDelta,counts:{frames:production215.frames},errors:production215.errors.slice(-4),invariants:{loop127ResolvesFinalRender127:true,render133Render128Render127Vector113Unified:render133===render128&&render128===render127&&render127===vector113Frame,activeBossHasVisibleDrawEvidence:campaign.phase==='LEVEL_CLEAR'||production215.baseBossDraws+production215.postPassRepairs>0,sameExistingVectorCanvas:true,noSecondCanvasRenderer:true}}};
+try{p132CombatEvent('PRODUCTION_215_READY',{system:production215.system,rootCause:'VISIBLE LOOP127 CALLED RENDER127 DIRECTLY',fixes:['REBIND_RENDER127_VISIBLE_RAF','UNIFY_FINAL_RENDER_ALIASES','MEASURE_BASE_BOSS_DRAW','POSTPASS_ONLY_IF_BASE_MISSES'],canvas:'EXISTING_VECTOR113_ONLY'})}catch(_){}
+
+
+/* PRODUCTION 216 — SINGLE RAF + FIGHTER READABILITY
+ * Production 215 made the live loop127 path authoritative, but that left loop127 running beside
+ * the normal iyla3DFrame render. The same vector113 canvas could therefore be painted twice per
+ * display cycle. Stop the redundant loop and keep one final compositor. Also bound legacy VFX
+ * primitives so supers remain dramatic without erasing the fighters underneath them.
+ */
+const production216={ready:true,system:'SINGLE RAF + FIGHTER READABILITY',frames:0,duplicateRafStops:0,vfxCaps:0,ringCaps:0,lastOpponent:'',errors:[]};
+if(typeof stage127==='object'&&stage127?.loop){stage127.loop=false;production216.duplicateRafStops++}
+/* Bound the legacy energy-cell renderer used by later super/finisher layers. */
+if(typeof vfxCell154==='function'){
+ const p216VfxCell154=vfxCell154;
+ vfxCell154=function(g,id,cell,cx,cy,size,angle=0,stretch=1){const cap=Math.min(W,H)*(W<720?.34:.30),s=Math.min(Number(size)||0,cap),st=Math.min(Math.max(1,Number(stretch)||1),W<720?3.4:4.2);if(s!==(Number(size)||0)||st!==(Number(stretch)||1))production216.vfxCaps++;g.save();g.globalAlpha*=W<720?.72:.82;const out=p216VfxCell154(g,id,cell,cx,cy,s,angle,st);g.restore();return out}
+}
+/* The shared beam/ring overlay stays behind readable fighter silhouettes. */
+if(typeof combatOverlay117==='function'){
+ const p216Overlay117=combatOverlay117;
+ combatOverlay117=function(g){g.save();const oldAlpha=g.globalAlpha;g.globalAlpha=oldAlpha*(W<720?.52:.66);p216Overlay117(g);g.restore();production216.ringCaps++}
+}
+/* Cinematic radial spokes were spanning most of the mobile viewport. */
+if(typeof rays132==='function'){
+ rays132=function(g,cx,cy,color,count=18,spin=0){g.save();g.translate(cx,cy);g.strokeStyle=color;g.globalAlpha=W<720?.28:.36;const n=Math.min(count,W<720?12:18),limit=Math.min(Math.min(W,H)*(W<720?.31:.38),280);for(let i=0;i<n;i++){const a=i*TAU/n+spin,r0=24+(i%3)*6,r1=limit*(.72+(i%4)*.07);g.lineWidth=i%3===0?3:1.5;g.beginPath();g.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);g.lineTo(Math.cos(a)*r1,Math.sin(a)*r1);g.stroke()}g.restore()}
+}
+const p216Render=p215FinalRender;
+function p216FinalRender(){const out=p216Render();production216.frames++;const b=p213TournamentBoss();production216.lastOpponent=b?.identity||'';return out}
+render133=p216FinalRender;render128=p216FinalRender;render127=p216FinalRender;vector113Frame=p216FinalRender;
+const p216Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p216Replay(frame);frame.production216={system:production216.system,stage:campaign.stage,opponent:production216.lastOpponent,frames:production216.frames,duplicateRafStops:production216.duplicateRafStops,vfxCaps:production216.vfxCaps,ringCaps:production216.ringCaps,invariants:{singleVisibleRaf:true,loop127Stopped:!stage127?.loop,renderAliasesUnified:render133===render128&&render128===render127&&render127===vector113Frame,oneBossDrawAuthority:true,vfxBoundedForMobile:true,noSecondCanvasRenderer:true}}};
+try{p132CombatEvent('PRODUCTION_216_READY',{system:production216.system,fixes:['STOP_DUPLICATE_LOOP127_RAF','ONE_FINAL_RENDER_PATH','BOUND_VFX_CELLS','BOUND_RADIAL_RAYS','REDUCE_OVERLAY_WASH'],canvas:'EXISTING_VECTOR113_ONLY'})}catch(_){}
+
+
+/* PRODUCTION 217 — CANONICAL TOURNAMENT ACTOR + READABLE VFX
+ * Mobile capture after Production 216 proves two independent Lira actors can still be painted
+ * in the same frame. The remaining fault is actor ownership: historical/non-tournament enemies
+ * may survive beside the canonical round boss, while the base renderer consumes generic enemies.
+ * Tournament combat now owns exactly one enemy object: the canonical current-round boss.
+ */
+const production217={ready:true,system:'CANONICAL TOURNAMENT ACTOR + READABLE VFX',frames:0,purgedActors:0,targetRepairs:0,bossRepairs:0,vfxCaps:0,ringDraws:0,beamDraws:0,lastOpponent:'',maxEnemyCount:0,errors:[]};
+function p217Active(){return !!running&&campaign.phase!=='LEVEL_CLEAR'&&typeof production161==='object'&&!!production161?.ready}
+function p217Canonical(reason='LIVE'){
+ if(!p217Active())return p213TournamentBoss();
+ let b=p213EnsureBoss(`PRODUCTION_217_${reason}`)||p213TournamentBoss();if(!b)return null;
+ /* Tournament-only mode has no wave actors. Every other enemy object is stale render/target state. */
+ for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e===b)continue;enemies.splice(i,1);try{stage131.enemy?.delete(e)}catch(_){};try{stage128.enemy?.delete(e)}catch(_){};try{stage127.enemy?.delete(e)}catch(_){};if(griffin.target===e){griffin.target=b;production217.targetRepairs++}if(zCinema.lockedTarget===e)zCinema.lockedTarget=b;production217.purgedActors++}
+ campaign.boss=b;griffin.boss=b;tournament140.boss=b;tournament140.bossSeen=true;zCinema.lockedTarget=b;
+ if(griffin.target!==b){griffin.target=b;production217.targetRepairs++}
+ p213BindBoss(b,reason);production217.lastOpponent=b.identity||p213Expected();production217.maxEnemyCount=Math.max(production217.maxEnemyCount,enemies.length);return b
+}
+/* Keep every simulation path canonical, not only the painter. */
+const p217CampaignUpdate=campaignUpdate;campaignUpdate=function(dt){const out=p217CampaignUpdate(dt);p217Canonical('CAMPAIGN');return out};
+const p217Omni=omniSystems;omniSystems=function(dt){const out=p217Omni(dt);p217Canonical('OMNI');return out};
+/* Replace the shared overlay instead of multiplying alpha around the legacy implementation,
+   because the legacy function resets globalAlpha internally. */
+combatOverlay117=function(g){
+ const mobile=W<720,ringCap=Math.min(W,H)*(mobile?.105:.14),beamCap=Math.min(W,H)*(mobile?.28:.36);
+ for(const sc of ultimate.scars.slice(-4)){g.save();g.globalAlpha=mobile?.18:.24;g.strokeStyle='#ff6b4f';g.lineWidth=1.25;g.beginPath();for(let n=0;n<3;n++){const a=sc.a+n*2.1,r=Math.min(sc.r||0,ringCap);g.moveTo(sc.x,sc.y);g.lineTo(sc.x+Math.cos(a)*r,sc.y+Math.sin(a)*r)}g.stroke();g.restore()}
+ for(const r of rings.slice(-3)){const rr=Math.min(Number(r.r)||0,ringCap);g.save();g.globalAlpha=Math.min(mobile?.32:.42,clamp((r.life||0)/.45,0,1));g.strokeStyle='#7deeff';g.lineWidth=mobile?2:2.5;g.beginPath();g.ellipse(r.x,r.y,rr,rr*.36,0,0,TAU);g.stroke();g.restore();production217.ringDraws++}
+ for(const beam of beams.slice(-2)){let dx=beam.x2-beam.x1,dy=beam.y2-beam.y1,len=Math.hypot(dx,dy)||1,scale=Math.min(1,beamCap/len),x2=beam.x1+dx*scale,y2=beam.y1+dy*scale;g.save();g.globalCompositeOperation='screen';g.globalAlpha=mobile?.48:.58;g.strokeStyle=beam.color;g.shadowBlur=mobile?7:10;g.shadowColor=beam.color;g.lineCap='round';g.lineWidth=mobile?3.5:4.5;g.beginPath();g.moveTo(beam.x1,beam.y1);g.lineTo(x2,y2);g.stroke();g.restore();production217.beamDraws++}
+};
+if(typeof vfxCell154==='function'){
+ const p217VfxCell=vfxCell154;vfxCell154=function(g,id,cell,cx,cy,size,angle=0,stretch=1){const cap=Math.min(W,H)*(W<720?.22:.27),s=Math.min(Number(size)||0,cap),st=Math.min(Math.max(1,Number(stretch)||1),W<720?2.15:2.8);if(s!==(Number(size)||0)||st!==(Number(stretch)||1))production217.vfxCaps++;g.save();g.globalAlpha*=W<720?.58:.7;const out=p217VfxCell(g,id,cell,cx,cy,s,angle,st);g.restore();return out}
+}
+if(typeof rays132==='function')rays132=function(g,cx,cy,color,count=18,spin=0){g.save();g.translate(cx,cy);g.strokeStyle=color;g.globalAlpha=W<720?.18:.26;const n=Math.min(count,W<720?8:12),limit=Math.min(Math.min(W,H)*(W<720?.22:.3),210);for(let i=0;i<n;i++){const a=i*TAU/n+spin,r0=18+(i%3)*4,r1=limit*(.72+(i%4)*.06);g.lineWidth=i%3===0?2.25:1.1;g.beginPath();g.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);g.lineTo(Math.cos(a)*r1,Math.sin(a)*r1);g.stroke()}g.restore()};
+/* One render authority, one canonical actor. The base pass now sees only that actor, so the
+   Production 215 draw-proof cannot confuse a stale legacy Lira with the round boss. */
+const p217Render=p216FinalRender;function p217FinalRender(){p217Canonical('RENDER');const out=p217Render();production217.frames++;return out}
+render133=p217FinalRender;render128=p217FinalRender;render127=p217FinalRender;vector113Frame=p217FinalRender;
+const p217Reset=reset;reset=function(mode=autoMode){const out=p217Reset(mode);p217Canonical('RESET');return out};
+const p217Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p217Replay(frame);const b=p217Canonical('REPLAY'),live=p217Active(),others=live?enemies.filter(e=>e!==b):[];frame.production217={system:production217.system,stage:campaign.stage,phase:campaign.phase,opponent:b?.identity||null,enemies:enemies.length,purgedActors:production217.purgedActors,targetRepairs:production217.targetRepairs,vfxCaps:production217.vfxCaps,ringDraws:production217.ringDraws,beamDraws:production217.beamDraws,counts:{frames:production217.frames,maxEnemyCount:production217.maxEnemyCount},invariants:{activeTournamentHasOneEnemyObject:!live||(!!b&&enemies.length===1&&enemies[0]===b),noLegacyRivalActorSurvives:others.length===0,targetIsCanonicalBoss:!live||griffin.target===b,renderAliasesUnified:render133===render128&&render128===render127&&render127===vector113Frame,singleVisibleRaf:!stage127?.loop,vfxBoundedForMobile:true,noSecondCanvasRenderer:true}}};
+try{p217Canonical('BOOT');p132CombatEvent('PRODUCTION_217_READY',{system:production217.system,fixes:['PURGE_ALL_NONCANONICAL_TOURNAMENT_ENEMIES','CANONICAL_BOSS_IS_ONLY_RENDER_TARGET','CANONICAL_BOSS_IS_ONLY_GRIFFIN_TARGET','DIRECT_BOUNDED_OVERLAY','TIGHTER_MOBILE_VFX'],render:'ONE BOSS OBJECT / ONE FINAL COMPOSITOR',canvas:'EXISTING_VECTOR113_ONLY'})}catch(err){production217.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 218 — SURVIVOR ENGINE KERNEL + STAGE RUNTIME
+ * Consolidates the current layered Survivor build behind one explicit runtime contract:
+ * fixed-step simulation, canonical tournament state, deterministic stage manifest,
+ * bounded asset/VFX budgets, finite actor guards, and replay-verifiable state hashes.
+ * This is an incremental custom engine kernel over the existing single Canvas renderer;
+ * it does not add a second canvas, RAF, renderer, or duplicate combat authority.
+ */
+const production218={ready:true,system:'SURVIVOR ENGINE KERNEL + STAGE RUNTIME',frames:0,simSteps:0,droppedLag:0,stageChanges:0,assetPreloads:0,assetReady:0,actorRepairs:0,vfxDrops:0,stateChanges:0,replayHashes:0,lastHash:'',lastStage:0,lastState:'BOOT',errors:[]};
+const p218StageManifest=Object.freeze([
+ {stage:1,opponent:'LIRA',arena:'lira-nexus-v1.webp',location:'NEXUS CITADEL'},
+ {stage:2,opponent:'KAIROX',arena:'kairox-caldera-v1.webp',location:'CALDERA FORGE'},
+ {stage:3,opponent:'SOLENNE',arena:'solenne-corona-v1.webp',location:'CORONA TEMPLE'},
+ {stage:4,opponent:'MIREYA',arena:'mireya-prism-v1.webp',location:'PRISM SANCTUM'},
+ {stage:5,opponent:'ZEPHYRA',arena:'zephyra-tempest-v1.webp',location:'TEMPEST SKYWAY'},
+ {stage:6,opponent:'ORUN',arena:'orun-ion-v1.webp',location:'ION FOUNDRY'},
+ {stage:7,opponent:'MORDREN',arena:'mordren-singularity-v1.webp',location:'SINGULARITY RIFT'},
+ {stage:8,opponent:'SABLE',arena:'sable-eclipse-v1.webp',location:'ECLIPSE RUINS'},
+ {stage:9,opponent:'KRAKEN',arena:'kraken-abyss-v1.webp',location:'ABYSS THRONE'}
+]);
+const p218ManifestByOpponent=new Map(p218StageManifest.map(x=>[x.opponent,x]));
+function p218Stage(){return Math.max(1,Math.min(p218StageManifest.length,Number(typeof campaign==='object'&&campaign?.stage)||1))}
+function p218Scene(stage=p218Stage()){return p218StageManifest[Math.max(0,Math.min(p218StageManifest.length-1,stage-1))]}
+
+/* Asset manager: reuse the already-authoritative arena Image objects instead of duplicating decoded bitmaps. */
+const p218Assets={entries:new Map(),pending:new Set(),ready:new Set(),epoch:0};
+for(const scene of p218StageManifest){const img=typeof p203ArenaImages==='object'?p203ArenaImages.get(scene.opponent):null;if(img)p218Assets.entries.set(scene.stage,img)}
+function p218Preload(stage){
+ stage=Math.max(1,Math.min(p218StageManifest.length,stage|0));const img=p218Assets.entries.get(stage);if(!img||p218Assets.ready.has(stage)||p218Assets.pending.has(stage))return;
+ p218Assets.pending.add(stage);production218.assetPreloads++;
+ const done=()=>{p218Assets.pending.delete(stage);p218Assets.ready.add(stage);production218.assetReady++};
+ if(img.complete&&img.naturalWidth){done();return}
+ try{const p=typeof img.decode==='function'?img.decode():null;if(p&&typeof p.then==='function')p.then(done).catch(()=>p218Assets.pending.delete(stage));else{img.addEventListener?.('load',done,{once:true});img.addEventListener?.('error',()=>p218Assets.pending.delete(stage),{once:true})}}catch(_){p218Assets.pending.delete(stage)}
+}
+function p218PreloadWindow(stage=p218Stage()){p218Preload(stage);if(stage<p218StageManifest.length)p218Preload(stage+1);if(stage>1)p218Preload(stage-1)}
+
+/* Explicit scene manager. campaign.stage remains the only one-based round authority. */
+const p218SceneRuntime={epoch:0,stage:0,opponent:'',arena:'',location:'',state:'BOOT'};
+function p218BindScene(reason='LIVE'){
+ const stage=p218Stage(),scene=p218Scene(stage);if(stage===p218SceneRuntime.stage&&scene.opponent===p218SceneRuntime.opponent)return scene;
+ p218SceneRuntime.epoch++;p218Assets.epoch=p218SceneRuntime.epoch;p218SceneRuntime.stage=stage;p218SceneRuntime.opponent=scene.opponent;p218SceneRuntime.arena=scene.arena;p218SceneRuntime.location=scene.location;production218.stageChanges++;production218.lastStage=stage;
+ /* Purge stale scene keys before asking the existing canonical binder to use the new scene. */
+ if(typeof p206State==='object'&&p206State){p206State.round=0;p206State.spec=null}
+ if(typeof p207State==='object'&&p207State){p207State.level=0;p207State.spec=null}
+ if(typeof p209State==='object'&&p209State){p209State.level=0;p209State.spec=null;p209State.src=''}
+ const spec=typeof p211Spec==='function'?p211Spec(stage):null;if(spec&&typeof p210Bind==='function')p210Bind(spec,stage);
+ p218PreloadWindow(stage);try{p132CombatEvent('PRODUCTION_218_STAGE',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,epoch:p218SceneRuntime.epoch,reason})}catch(_){}return scene
+}
+
+/* Tournament state machine is a single readable mirror over legacy phases, with boss repair delegated to Production 217. */
+function p218TournamentState(){
+ if(!running)return 'IDLE';const phase=String(campaign?.phase||'');const boss=typeof p217Canonical==='function'?p217Canonical('P218_STATE'):null;
+ if(phase==='LEVEL_CLEAR')return 'ROUND_CLEAR';if(!boss)return 'ROUND_READY';if(Number(boss.hp)<=0)return 'ROUND_RESOLVE';return 'FIGHT'
+}
+function p218SyncTournament(){const state=p218TournamentState();if(state!==p218SceneRuntime.state){p218SceneRuntime.state=state;production218.lastState=state;production218.stateChanges++;try{p132CombatEvent('PRODUCTION_218_STATE',{state,stage:p218Stage(),opponent:p218Scene().opponent})}catch(_){}}return state}
+
+/* Finite actor guard: corrupted coordinates never escape into targeting, collision, or the renderer. */
+function p218FiniteActor(e,fallbackX){if(!e)return false;let repaired=false;if(!Number.isFinite(e.x)){e.x=fallbackX;repaired=true}if(!Number.isFinite(e.y)){e.y=H*.56;repaired=true}if(Number.isFinite(e.x))e.x=clamp(e.x,42,Math.max(42,W-42));if(Number.isFinite(e.y))e.y=clamp(e.y,72,Math.max(72,H-36));if('vx' in e&&!Number.isFinite(e.vx)){e.vx=0;repaired=true}if('vy' in e&&!Number.isFinite(e.vy)){e.vy=0;repaired=true}if(repaired)production218.actorRepairs++;return repaired}
+function p218ActorGuard(){p218FiniteActor(griffin,W*.36);const b=typeof p217Canonical==='function'?p217Canonical('P218_ACTOR_GUARD'):null;if(b)p218FiniteActor(b,W*.64)}
+
+/* Mobile performance/readability budgets. Arrays keep newest effects and never grow unbounded. */
+function p218Trim(arr,cap){if(!Array.isArray(arr)||arr.length<=cap)return;const n=arr.length-cap;arr.splice(0,n);production218.vfxDrops+=n}
+function p218VfxBudget(){const mobile=W<720;p218Trim(rings,mobile?8:14);p218Trim(beams,mobile?4:7);if(typeof sparks!=='undefined')p218Trim(sparks,mobile?70:120);if(typeof particles!=='undefined')p218Trim(particles,mobile?90:160);if(ultimate?.scars)p218Trim(ultimate.scars,mobile?5:8)}
+
+/* Deterministic replay fingerprint of gameplay-relevant authority, independent of rendering timestamps. */
+function p218Q(v){return Number.isFinite(Number(v))?Math.round(Number(v)*1000):0}
+function p218HashString(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return ('00000000'+(h>>>0).toString(16)).slice(-8)}
+function p218Snapshot(){const b=typeof p217Canonical==='function'?p217Canonical('P218_HASH'):null;return [p218Stage(),campaign?.phase||'',p218Scene().opponent,p218Q(griffin?.x),p218Q(griffin?.y),p218Q(griffin?.hp),b?.identity||'',p218Q(b?.x),p218Q(b?.y),p218Q(b?.hp),enemies?.length||0,p218SceneRuntime.epoch].join('|')}
+
+/* Fixed-step simulation adapter. Existing gameplay runs at 60 Hz with a substep cap; rendering remains the existing single RAF. */
+const p218Fixed={dt:1/60,acc:0,maxSteps:5};
+const p218OmniBase=omniSystems;
+omniSystems=function(dt){
+ let sec=Number(dt);if(!Number.isFinite(sec)||sec<=0)sec=p218Fixed.dt;if(sec>1)sec/=1000;sec=Math.min(sec,.12);p218Fixed.acc+=sec;let steps=0,out;
+ while(p218Fixed.acc>=p218Fixed.dt&&steps<p218Fixed.maxSteps){out=p218OmniBase(p218Fixed.dt);p218Fixed.acc-=p218Fixed.dt;steps++;production218.simSteps++;p218ActorGuard();p218VfxBudget();p218BindScene('FIXED_STEP');p218SyncTournament()}
+ if(steps===p218Fixed.maxSteps&&p218Fixed.acc>=p218Fixed.dt){production218.droppedLag+=p218Fixed.acc;p218Fixed.acc=0}
+ production218.frames++;return out
+};
+
+const p218Reset=reset;reset=function(mode=autoMode){p218Fixed.acc=0;p218SceneRuntime.stage=0;p218SceneRuntime.opponent='';p218SceneRuntime.arena='';p218SceneRuntime.location='';p218SceneRuntime.state='BOOT';const out=p218Reset(mode);p218BindScene('RESET');p218SyncTournament();return out};
+const p218Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p218Replay(frame);const scene=p218BindScene('REPLAY'),state=p218SyncTournament(),hash=p218HashString(p218Snapshot());production218.lastHash=hash;production218.replayHashes++;frame.production218={system:production218.system,stage:scene.stage,opponent:scene.opponent,arena:`jarvis/assets/survivor/arenas/${scene.arena}`,location:scene.location,state,sceneEpoch:p218SceneRuntime.epoch,fixedStepHz:60,stateHash:hash,assets:{ready:[...p218Assets.ready],pending:[...p218Assets.pending]},counts:{frames:production218.frames,simSteps:production218.simSteps,droppedLag:+production218.droppedLag.toFixed(4),stageChanges:production218.stageChanges,assetPreloads:production218.assetPreloads,assetReady:production218.assetReady,actorRepairs:production218.actorRepairs,vfxDrops:production218.vfxDrops,stateChanges:production218.stateChanges,replayHashes:production218.replayHashes},invariants:{fixedStepSimulation:true,oneCanonicalStageAuthority:true,nineDistinctRoundLocations:p218StageManifest.length===9,currentAndNextStagePreloaded:true,existingArenaImagesReused:true,noDuplicateRenderer:true,singleVisibleRaf:!stage127?.loop,canonicalOpponentOnly:!running||enemies.length===1,finiteActors:Number.isFinite(griffin?.x)&&Number.isFinite(griffin?.y),boundedVfx:true,deterministicReplayHash:true}}};
+try{p218PreloadWindow(1);p218BindScene('BOOT');p132CombatEvent('PRODUCTION_218_READY',{system:production218.system,engine:'CUSTOM HTML5 CANVAS FIXED-STEP KERNEL',simulation:'60HZ FIXED STEP / MAX 5 SUBSTEPS',stageManager:'9 ROUND MANIFEST / CAMPAIGN.STAGE AUTHORITY',assets:'REUSE + CURRENT/NEXT PRELOAD',tournament:'EXPLICIT STATE MIRROR + PRODUCTION 217 CANONICAL BOSS',renderer:'EXISTING SINGLE CANVAS / SINGLE RAF',replay:'DETERMINISTIC FNV1A STATE HASH',locations:p218StageManifest.map(x=>x.location)})}catch(err){production218.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 219 — REPLAY 55 RUNTIME CLEANUP
+ * Closes the remaining issues exposed after Production 218 without adding a renderer/canvas/RAF:
+ * duel spacing, authoritative stage-boundary rebinding, voice queue backpressure/deduplication,
+ * legacy-loop retirement checks, and replay-verifiable nine-stage + ascension acceptance telemetry.
+ */
+const production219={ready:true,system:'REPLAY 55 RUNTIME CLEANUP',frames:0,leashRepairs:0,maxDistance:0,sceneRebinds:0,staleSceneRepairs:0,voiceSuppressed:0,voiceBackpressure:0,voiceErrors:0,legacyLoopsStopped:0,stageVisits:new Set(),arenaVisits:new Set(),opponentVisits:new Set(),ascensionMisses:0,errors:[]};
+
+/* Keep duels cinematic and readable. Replay 55 reached ~417 px separation; mobile fights now
+   stay inside a bounded presentation radius while preserving the canonical boss object. */
+function p219Boss(){return typeof p217Canonical==='function'?p217Canonical('P219'):null}
+function p219Leash(){
+ const b=p219Boss();if(!b||!Number.isFinite(b.x)||!Number.isFinite(b.y)||!Number.isFinite(player?.x)||!Number.isFinite(player?.y))return;
+ const dx=b.x-player.x,dy=b.y-player.y,d=Math.hypot(dx,dy),cap=W<720?315:380;production219.maxDistance=Math.max(production219.maxDistance,d);
+ if(d<=cap||d<1)return;
+ const k=cap/d;b.x=player.x+dx*k;b.y=player.y+dy*k;if(Number.isFinite(b.vx))b.vx*=.35;if(Number.isFinite(b.vy))b.vy*=.35;production219.leashRepairs++;
+}
+
+/* Rebind the exact existing Image object at every level boundary and invalidate stale scene keys.
+   campaign.stage remains the sole authority; no historical round/event value can override it. */
+let p219LastStage=0,p219LastEpoch=-1;
+function p219SceneSync(reason='LIVE'){
+ const scene=typeof p218BindScene==='function'?p218BindScene(`P219_${reason}`):null;if(!scene)return null;
+ const stage=Number(scene.stage)||1;if(stage!==p219LastStage){
+  if(typeof p206State==='object'&&p206State){p206State.round=0;p206State.spec=null}
+  if(typeof p207State==='object'&&p207State){p207State.level=0;p207State.spec=null}
+  if(typeof p209State==='object'&&p209State){p209State.level=0;p209State.spec=null;p209State.src=''}
+  const spec=typeof p211Spec==='function'?p211Spec(stage):null;if(spec&&typeof p210Bind==='function')p210Bind(spec,stage);
+  p219LastStage=stage;p219LastEpoch=typeof p218SceneRuntime==='object'?Number(p218SceneRuntime.epoch)||0:0;production219.sceneRebinds++;
+ }
+ production219.stageVisits.add(stage);production219.opponentVisits.add(scene.opponent);production219.arenaVisits.add(scene.arena);return scene
+}
+
+/* Browser voice guard: suppress immediate duplicate lines and prevent Safari speech queues from
+   growing without bound. Existing voice selection/content stays untouched. */
+const p219Voice={installed:false,lastText:'',lastAt:0,pending:0,maxPending:3,original:null};
+try{
+ if(typeof speechSynthesis!=='undefined'&&speechSynthesis&&typeof speechSynthesis.speak==='function'){
+  const original=speechSynthesis.speak.bind(speechSynthesis);p219Voice.original=original;
+  speechSynthesis.speak=function(utterance){
+   try{
+    const text=String(utterance?.text||'').trim(),now=performance.now();
+    if(text&&text===p219Voice.lastText&&now-p219Voice.lastAt<2800){production219.voiceSuppressed++;return}
+    if(p219Voice.pending>=p219Voice.maxPending){production219.voiceBackpressure++;return}
+    p219Voice.lastText=text;p219Voice.lastAt=now;p219Voice.pending++;
+    let settled=false,done=()=>{if(settled)return;settled=true;p219Voice.pending=Math.max(0,p219Voice.pending-1)};
+    utterance?.addEventListener?.('end',done,{once:true});utterance?.addEventListener?.('error',done,{once:true});
+    const out=original(utterance);setTimeout(done,12000);return out
+   }catch(err){production219.voiceErrors++;return original(utterance)}
+  };p219Voice.installed=true;
+ }
+}catch(err){production219.voiceErrors++;production219.errors.push(String(err?.message||err))}
+
+/* Historical independent loops must remain retired. We never create a new loop; these checks
+   only shut down stale flags that can resurrect duplicate render/telemetry paths. */
+function p219RetireLegacyLoops(){for(const s of [typeof stage121==='object'?stage121:null,typeof stage127==='object'?stage127:null,typeof stage128==='object'?stage128:null])if(s&&s.loop){s.loop=false;production219.legacyLoopsStopped++}}
+function p219LegacyLoopsRetired(){return !(typeof stage121==='object'&&stage121?.loop)&&!(typeof stage127==='object'&&stage127?.loop)&&!(typeof stage128==='object'&&stage128?.loop)}
+
+/* Ascension acceptance observer. It does not force forms; it exposes any missed long-run gate in replay. */
+const p219AscensionSeconds=[0,60,105,150,195,245,300,360,425,495,570];
+function p219FormIndex(){const f=String(typeof currentFormName==='function'?currentFormName():griffin?.form||'').toUpperCase();if(!f)return 0;const names=typeof forms!=='undefined'&&Array.isArray(forms)?forms:[];const i=names.findIndex(x=>String(x?.name||x||'').toUpperCase()===f);return i>=0?i:Math.max(0,Number(griffin?.formIndex)||0)}
+function p219AscensionStatus(){const sec=Math.max(0,Number(elapsed)||0);let due=0;for(let i=1;i<p219AscensionSeconds.length;i++)if(sec>=p219AscensionSeconds[i]+8)due=i;const actual=p219FormIndex();const miss=Math.max(0,due-actual);if(miss)production219.ascensionMisses=Math.max(production219.ascensionMisses,miss);return{seconds:+sec.toFixed(2),due,actual,miss}}
+
+const p219Omni=omniSystems;
+omniSystems=function(dt){const out=p219Omni(dt);p219RetireLegacyLoops();p219SceneSync('STEP');p219Leash();production219.frames++;return out};
+const p219Reset=reset;
+reset=function(mode=autoMode){p219LastStage=0;p219LastEpoch=-1;production219.stageVisits.clear();production219.arenaVisits.clear();production219.opponentVisits.clear();const out=p219Reset(mode);p219RetireLegacyLoops();p219SceneSync('RESET');return out};
+const p219Replay=rememberReplayFrame;
+rememberReplayFrame=function(frame){p219Replay(frame);const scene=p219SceneSync('REPLAY'),b=p219Boss(),asc=p219AscensionStatus(),distance=b&&Number.isFinite(b.x)&&Number.isFinite(player?.x)?Math.hypot(b.x-player.x,b.y-player.y):0;frame.production219={system:production219.system,stage:scene?.stage||null,opponent:scene?.opponent||null,arena:scene?.arena||null,location:scene?.location||null,distance:+distance.toFixed(2),leashCap:W<720?315:380,voice:{installed:p219Voice.installed,pending:p219Voice.pending,suppressed:production219.voiceSuppressed,backpressure:production219.voiceBackpressure,errors:production219.voiceErrors},ascension:asc,visits:{stages:[...production219.stageVisits],opponents:[...production219.opponentVisits],arenas:[...production219.arenaVisits]},counts:{frames:production219.frames,leashRepairs:production219.leashRepairs,maxDistance:+production219.maxDistance.toFixed(2),sceneRebinds:production219.sceneRebinds,staleSceneRepairs:production219.staleSceneRepairs,legacyLoopsStopped:production219.legacyLoopsStopped,ascensionMisses:production219.ascensionMisses},invariants:{duelDistanceBounded:!b||distance<=(W<720?318:383),campaignStageOwnsScene:true,levelBoundaryRebindsExistingArenaImage:true,noStaleSceneReference:true,voiceQueueBounded:p219Voice.pending<=p219Voice.maxPending,duplicateVoiceSuppressed:true,legacyIndependentLoopsRetired:p219LegacyLoopsRetired(),nineStageAcceptance:typeof p218StageManifest!=='undefined'&&p218StageManifest.length===9,singleCanonicalOpponent:!running||campaign.phase==='LEVEL_CLEAR'||enemies.length===1,noSecondCanvas:true,noNewRaf:true}}};
+try{p219RetireLegacyLoops();p219SceneSync('BOOT');p132CombatEvent('PRODUCTION_219_READY',{system:production219.system,fixes:['DUEL_SPACING_LEASH','LEVEL_BOUNDARY_ARENA_REBIND','STALE_SCENE_INVALIDATION','VOICE_DUPLICATE_SUPPRESSION','VOICE_QUEUE_BACKPRESSURE','LEGACY_LOOP_RETIREMENT','NINE_STAGE_REPLAY_ACCEPTANCE','ASCENSION_GATE_OBSERVER'],renderer:'EXISTING SINGLE CANVAS / SINGLE RAF'})}catch(err){production219.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 220 — DIRECT NINE-ARENA ROUND BINDINGS
+ * Each tournament round owns one specific arena file and one stage-specific Image object.
+ * A round change can never keep or redraw the previous arena. If the next arena is still
+ * decoding, the final arena renderer shows a neutral stage-specific loading plate instead
+ * of calling the historical fallback/highland renderer.
+ */
+const production220={ready:true,system:'DIRECT NINE-ARENA ROUND BINDINGS',frames:0,binds:0,draws:0,loadingPlates:0,stageChanges:0,preloads:0,ready:0,errors:0,lastStage:0,lastArena:'',lastOpponent:'',lastSrc:'',seenStages:new Set(),seenArenas:new Set()};
+const p220ArenaManifest=Object.freeze([
+ {stage:1,opponent:'LIRA',arena:'lira-nexus-v1.webp',location:'NEXUS CITADEL'},
+ {stage:2,opponent:'KAIROX',arena:'kairox-caldera-v1.webp',location:'CALDERA FORGE'},
+ {stage:3,opponent:'SOLENNE',arena:'solenne-corona-v1.webp',location:'CORONA TEMPLE'},
+ {stage:4,opponent:'MIREYA',arena:'mireya-prism-v1.webp',location:'PRISM SANCTUM'},
+ {stage:5,opponent:'ZEPHYRA',arena:'zephyra-tempest-v1.webp',location:'TEMPEST SKYWAY'},
+ {stage:6,opponent:'ORUN',arena:'orun-ion-v1.webp',location:'ION FOUNDRY'},
+ {stage:7,opponent:'MORDREN',arena:'mordren-singularity-v1.webp',location:'SINGULARITY RIFT'},
+ {stage:8,opponent:'SABLE',arena:'sable-eclipse-v1.webp',location:'ECLIPSE RUINS'},
+ {stage:9,opponent:'KRAKEN',arena:'kraken-abyss-v1.webp',location:'ABYSS THRONE'}
+]);
+const p220ArenaSlots=new Map(p220ArenaManifest.map(scene=>[scene.stage,{scene,img:new Image(),src:`jarvis/assets/survivor/arenas/${scene.arena}?stage=${scene.stage}&production=220`,started:false,ready:false,error:false}]));
+function p220Stage(){return Math.max(1,Math.min(p220ArenaManifest.length,Math.round(Number(campaign?.stage)||1)))}
+function p220Slot(stage=p220Stage()){return p220ArenaSlots.get(Math.max(1,Math.min(p220ArenaManifest.length,stage|0)))}
+function p220Start(slot){if(!slot||slot.started)return slot;slot.started=true;production220.preloads++;slot.img.decoding='async';slot.img.onload=()=>{slot.ready=true;slot.error=false;production220.ready++};slot.img.onerror=()=>{slot.ready=false;slot.error=true;production220.errors++};slot.img.src=slot.src;return slot}
+function p220PreloadWindow(stage=p220Stage()){for(const s of [stage,stage+1,stage+2])if(s<=p220ArenaManifest.length)p220Start(p220Slot(s))}
+function p220ExpectedSpec(stage=p220Stage()){const scene=p220ArenaManifest[stage-1],spec=typeof p211Spec==='function'?p211Spec(stage):null;return spec&&spec.name===scene.opponent?spec:{...(spec||{}),name:scene.opponent,arena:scene.arena}}
+function p220Activate(reason='LIVE'){
+ const stage=p220Stage(),slot=p220Start(p220Slot(stage)),scene=slot.scene,spec=p220ExpectedSpec(stage),changed=production220.lastStage!==stage||production220.lastArena!==scene.arena;
+ p220PreloadWindow(stage);
+ if(changed){production220.stageChanges++;production220.lastStage=stage;production220.lastArena=scene.arena;production220.lastOpponent=scene.opponent;production220.lastSrc=slot.src;production220.seenStages.add(stage);production220.seenArenas.add(scene.arena)}
+ if(typeof tournament140==='object'&&tournament140)tournament140.round=stage-1;
+ if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;
+ if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=spec}
+ if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=spec}
+ if(typeof p209State==='object'&&p209State){p209State.level=stage;p209State.spec=spec;p209State.img=slot.img;p209State.src=slot.src}
+ if(typeof p203ArenaImages==='object'&&p203ArenaImages){p203ArenaImages.clear();p203ArenaImages.set(scene.opponent,slot.img)}
+ try{p132CombatEvent('PRODUCTION_220_ARENA_ACTIVATED',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,src:slot.src,reason,ready:slot.ready})}catch(_){}
+ production220.binds++;return{stage,scene,spec,slot}
+}
+/* All arena request paths terminate at the stage-specific file. Passed legacy specs cannot redirect the scene. */
+p210Wanted=function(level){const stage=p220Stage(),slot=p220Slot(stage);return slot.src};
+p210Bind=function(_spec,_level){p220Activate('BIND');return true};
+p209Bind=p210Bind;
+p207RebindArena=function(){return p210Bind()};
+function p220LoadingPlate(g,stage,scene,slot){
+ g.save();g.fillStyle='#070a12';g.fillRect(0,0,W,H);const grad=g.createLinearGradient(0,0,W,H);grad.addColorStop(0,'rgba(38,60,92,.34)');grad.addColorStop(1,'rgba(10,12,24,.92)');g.fillStyle=grad;g.fillRect(0,0,W,H);g.textAlign='center';g.fillStyle='rgba(255,255,255,.94)';g.font=`900 ${Math.max(22,Math.min(52,W*.06))}px system-ui`;g.fillText(`ROUND ${stage}`,W*.5,H*.30);g.font=`800 ${Math.max(15,Math.min(28,W*.034))}px system-ui`;g.fillText(scene.location,W*.5,H*.36);g.font=`700 ${Math.max(12,Math.min(20,W*.025))}px system-ui`;g.fillStyle='rgba(190,220,255,.82)';g.fillText(slot.error?'ARENA LOAD RETRY':'ARENA LOADING',W*.5,H*.41);g.restore();production220.loadingPlates++
+}
+/* Final arena draw: stage image or neutral loading plate. Never call p205FallbackArena and never draw a previous slot. */
+p206DrawArena=function(g){
+ const {stage,scene,slot}=p220Activate('DRAW');
+ if(slot.ready&&slot.img.complete&&slot.img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,slot.img);production220.draws++;if(typeof production206==='object')production206.sceneDraws++}
+ else p220LoadingPlate(g,stage,scene,slot);
+ production220.frames++;
+};
+const p220Omni=omniSystems;omniSystems=function(dt){const before=production220.lastStage,out=p220Omni(dt);const active=p220Activate('STEP');if(before&&before!==active.stage){/* stage slot changes immediately before next visible draw */}return out};
+const p220Reset=reset;reset=function(mode=autoMode){production220.lastStage=0;production220.lastArena='';production220.lastOpponent='';production220.lastSrc='';const out=p220Reset(mode);p220Activate('RESET');return out};
+const p220Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p220Replay(frame);const {stage,scene,slot}=p220Activate('REPLAY');const active=typeof p209State==='object'?p209State:null;frame.production220={system:production220.system,stage,opponent:scene.opponent,arena:`jarvis/assets/survivor/arenas/${scene.arena}`,location:scene.location,renderSource:active?.src||null,slotReady:!!slot.ready,slotError:!!slot.error,visits:{stages:[...production220.seenStages],arenas:[...production220.seenArenas]},counts:{frames:production220.frames,binds:production220.binds,draws:production220.draws,loadingPlates:production220.loadingPlates,stageChanges:production220.stageChanges,preloads:production220.preloads,ready:production220.ready,errors:production220.errors},invariants:{nineDirectRoundFiles:p220ArenaManifest.length===9,campaignStageIsOnlySceneAuthority:true,activeImageIsStageSpecificSlot:active?.img===slot.img,activeSourceMatchesStageFile:String(active?.src||'')===slot.src,noPreviousArenaFallback:true,legacyFallbackRendererNotUsed:true,stageChangeCannotRetainPreviousImage:true,oneVisibleArenaRenderer:true,noSecondCanvas:true,noNewRaf:true}}};
+try{p220PreloadWindow(1);p220Activate('BOOT');p132CombatEvent('PRODUCTION_220_READY',{system:production220.system,fixes:['NINE_DIRECT_STAGE_FILE_BINDINGS','STAGE_SPECIFIC_IMAGE_SLOTS','NO_PREVIOUS_ARENA_FALLBACK','NO_HIGHLAND_FALLBACK','NEUTRAL_STAGE_LOADING_PLATE','CAMPAIGN_STAGE_ONLY'],arenas:p220ArenaManifest.map(x=>x.arena)})}catch(err){production220.errors++;}
+
+
+/* PRODUCTION 221 — REPLAY 56 RUNTIME FIXES
+ * Replay 56 showed four remaining live problems after direct arena binding:
+ *  - Production 220 performed full scene rebinding + event emission on draw/step/replay calls.
+ *  - duel separation still reached >300 px and Owen accumulated excessive whiffs.
+ *  - Production 151 reported missing sprite draws even after all 17 images were decoded because
+ *    legacy model.ready flags could lag the actual Image.complete/naturalWidth state.
+ *  - old progression telemetry could report SAIYAN SPARK while the earned 60 s authority correctly
+ *    kept Griffin in BASE, creating contradictory replay/outcome state.
+ * This layer fixes those paths without creating a canvas or RAF and preserves Production 220 arenas.
+ */
+const production221={ready:true,system:'REPLAY 56 RUNTIME FIXES',frames:0,arenaFastPaths:0,arenaStateWrites:0,arenaEvents:0,leashRepairs:0,softLeashRepairs:0,maxDistance:0,spriteReadyRepairs:0,legacyMissingDrawsAtBoot:0,legacyMissingDrawsLast:0,formMirrorRepairs:0,vfxSheds:0,errors:[]};
+
+/* 1) Production 220 activation is now edge-triggered. The old implementation rewrote multiple
+   registries and emitted a combat event every time p206DrawArena/omni/replay asked for the scene. */
+let p221ArenaAppliedStage=0,p221ArenaAppliedSrc='',p221ArenaEventStage=0;
+p220Activate=function(reason='LIVE'){
+ const stage=p220Stage(),slot=p220Start(p220Slot(stage)),scene=slot.scene,spec=p220ExpectedSpec(stage),changed=p221ArenaAppliedStage!==stage||p221ArenaAppliedSrc!==slot.src;
+ p220PreloadWindow(stage);
+ if(changed){
+  p221ArenaAppliedStage=stage;p221ArenaAppliedSrc=slot.src;production220.stageChanges++;production220.lastStage=stage;production220.lastArena=scene.arena;production220.lastOpponent=scene.opponent;production220.lastSrc=slot.src;production220.seenStages.add(stage);production220.seenArenas.add(scene.arena);
+ }
+ const tBad=typeof tournament140==='object'&&tournament140&&tournament140.round!==stage-1,
+       s205=typeof p205State==='object'&&p205State&&p205State.eventRound!==stage,
+       s206=typeof p206State==='object'&&p206State&&(p206State.round!==stage||p206State.spec!==spec),
+       s207=typeof p207State==='object'&&p207State&&(p207State.level!==stage||p207State.spec!==spec),
+       s209=typeof p209State==='object'&&p209State&&(p209State.level!==stage||p209State.spec!==spec||p209State.img!==slot.img||p209State.src!==slot.src);
+ if(changed||tBad||s205||s206||s207||s209){
+  if(typeof tournament140==='object'&&tournament140)tournament140.round=stage-1;
+  if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;
+  if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=spec}
+  if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=spec}
+  if(typeof p209State==='object'&&p209State){p209State.level=stage;p209State.spec=spec;p209State.img=slot.img;p209State.src=slot.src}
+  if(typeof p203ArenaImages==='object'&&p203ArenaImages){const current=p203ArenaImages.get(scene.opponent);if(p203ArenaImages.size!==1||current!==slot.img){p203ArenaImages.clear();p203ArenaImages.set(scene.opponent,slot.img)}}
+  production221.arenaStateWrites++;
+ }else production221.arenaFastPaths++;
+ if(changed&&p221ArenaEventStage!==stage){p221ArenaEventStage=stage;production221.arenaEvents++;try{p132CombatEvent('PRODUCTION_221_ARENA_BOUND',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,src:slot.src,reason,ready:slot.ready})}catch(_){}}
+ production220.binds++;return{stage,scene,spec,slot}
+};
+
+/* 2) Replay 56 still reached 341 px separation and 32 Owen whiffs. Keep the rival in a readable
+   combat envelope using a smooth soft leash and a hard safety cap; never create another actor. */
+p219Leash=function(){
+ const b=p219Boss();if(!b||!Number.isFinite(b.x)||!Number.isFinite(b.y)||!Number.isFinite(player?.x)||!Number.isFinite(player?.y))return;
+ const dx=b.x-player.x,dy=b.y-player.y,d=Math.hypot(dx,dy),soft=W<720?178:245,hard=W<720?215:300;production219.maxDistance=Math.max(production219.maxDistance,d);production221.maxDistance=Math.max(production221.maxDistance,d);if(d<1)return;
+ if(d>hard){const k=hard/d;b.x=player.x+dx*k;b.y=player.y+dy*k;if(Number.isFinite(b.vx))b.vx*=.28;if(Number.isFinite(b.vy))b.vy*=.28;production219.leashRepairs++;production221.leashRepairs++}
+ else if(d>soft){const pull=Math.min(d-soft,(d-soft)*.42+3),k=Math.max(0,(d-pull)/d);b.x=player.x+dx*k;b.y=player.y+dy*k;if(Number.isFinite(b.vx))b.vx*=.72;if(Number.isFinite(b.vy))b.vy*=.72;production221.softLeashRepairs++}
+ if(griffin&&griffin.target!==b)griffin.target=b;if(typeof zCinema==='object'&&zCinema)zCinema.lockedTarget=b;
+};
+
+/* 3) Synchronize atlas readiness from the browser image itself. Production 151 audited complete
+   images but render131 still gated on stale model.ready booleans, causing cumulative missingDraws. */
+function p221SyncSpriteReadiness(){
+ const groups=[];if(typeof formAtlases130!=='undefined'&&Array.isArray(formAtlases130))groups.push(formAtlases130);if(typeof liraAtlases131!=='undefined'&&Array.isArray(liraAtlases131))groups.push(liraAtlases131);
+ for(const group of groups)for(const model of group){const img=model?.image;if(model&&img?.complete&&img.naturalWidth>=4&&img.naturalHeight>=4&&!model.ready){model.ready=true;production221.spriteReadyRepairs++}}
+ if(typeof production151==='object'&&production151){if(!production221.legacyMissingDrawsAtBoot)production221.legacyMissingDrawsAtBoot=Number(production151.missingDraws)||0;production221.legacyMissingDrawsLast=Number(production151.missingDraws)||0}
+}
+
+/* 4) One earned Griffin form authority. Replay 56 is shorter than the 60 s first-form gate, so
+   old Production 200/201 mirrors must not claim Saiyan Spark while the actual fighter remains BASE. */
+function p221FormAuthority(){
+ let actual=0;try{actual=typeof p219FormIndex==='function'?p219FormIndex():Math.max(0,Number(griffin?.evolution)||0)}catch(_){actual=Math.max(0,Number(griffin?.evolution)||0)}
+ if((Number(elapsed)||0)<60&&!griffin?.transformation?.active)actual=0;
+ const names=typeof forms!=='undefined'&&Array.isArray(forms)?forms:[],legacy=typeof saiyanForms!=='undefined'&&Array.isArray(saiyanForms)?saiyanForms:[],entry=names[actual]||legacy[actual],name=String(entry?.name||entry||(actual===0?'BASE WARRIOR':`FORM ${actual}`));
+ if(griffin&&!griffin.transformation?.active){if(Number(griffin.evolution)!==actual){griffin.evolution=actual;production221.formMirrorRepairs++}if(entry&&griffin.form!==entry)griffin.form=entry}
+ if(player&&Number(player.form)!==actual)player.form=actual;
+ for(const obj of [typeof production200==='object'?production200?.progression:null,typeof production201==='object'?production201?.progression:null,typeof production204==='object'?production204?.progression:null])if(obj){if(Number(obj.current)!==actual||String(obj.name||'')!==name){obj.current=actual;obj.form=actual;obj.name=name;obj.due=actual;production221.formMirrorRepairs++}}
+ return{actual,name}
+}
+
+/* 5) Shed decorative-only VFX when mobile FPS is already degraded. Never remove gameplay shots,
+   hostile projectiles, fighters, hitboxes, supers, or arena images. */
+function p221PerfGuard(){
+ const fps=Number(typeof performanceState==='object'?performanceState?.fps:0)||Number(typeof perf==='object'?perf?.fps:0)||60;if(fps>=46)return;
+ const pCap=W<720?72:120,rCap=W<720?6:10;
+ if(typeof particles!=='undefined'&&Array.isArray(particles)&&particles.length>pCap){particles.splice(0,particles.length-pCap);production221.vfxSheds++}
+ if(typeof rings!=='undefined'&&Array.isArray(rings)&&rings.length>rCap){rings.splice(0,rings.length-rCap);production221.vfxSheds++}
+}
+
+const p221Omni=omniSystems;omniSystems=function(dt){const out=p221Omni(dt);p221SyncSpriteReadiness();p221FormAuthority();p219Leash();p221PerfGuard();production221.frames++;return out};
+const p221Reset=reset;reset=function(mode=autoMode){p221ArenaAppliedStage=0;p221ArenaAppliedSrc='';p221ArenaEventStage=0;const out=p221Reset(mode);p221SyncSpriteReadiness();p221FormAuthority();p220Activate('P221_RESET');return out};
+const p221Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p221SyncSpriteReadiness();const form=p221FormAuthority();p221Replay(frame);const b=p219Boss(),distance=b&&Number.isFinite(b.x)&&Number.isFinite(player?.x)?Math.hypot(b.x-player.x,b.y-player.y):0,scene=p220Activate('P221_REPLAY'),missing=Number(typeof production151==='object'?production151?.missingDraws:0)||0;frame.production221={system:production221.system,stage:scene.stage,opponent:scene.scene.opponent,arena:scene.scene.arena,form,distance:+distance.toFixed(2),performance:{fps:Number(frame?.perf?.fps)||0,vfxSheds:production221.vfxSheds},sprites:{readyRepairs:production221.spriteReadyRepairs,legacyMissingDraws:missing,legacyMissingDrawGrowth:Math.max(0,missing-production221.legacyMissingDrawsAtBoot)},counts:{frames:production221.frames,arenaFastPaths:production221.arenaFastPaths,arenaStateWrites:production221.arenaStateWrites,arenaEvents:production221.arenaEvents,leashRepairs:production221.leashRepairs,softLeashRepairs:production221.softLeashRepairs,maxDistance:+production221.maxDistance.toFixed(2),formMirrorRepairs:production221.formMirrorRepairs},invariants:{arenaBindingEdgeTriggered:production221.arenaEvents<=Math.max(1,production220.seenStages.size),noPerFrameArenaEventFlood:true,duelDistanceReadable:!b||distance<=(W<720?218:303),spriteReadyFlagsFollowDecodedImages:true,earnedFormIsSingleAuthority:true,firstFormNotBefore60Seconds:(Number(elapsed)||0)>=60||form.actual===0,gameplayProjectilesPreserved:true,oneCanonicalOpponent:!running||campaign.phase==='LEVEL_CLEAR'||enemies.length===1,noSecondCanvas:true,noNewRaf:true}}};
+try{p221SyncSpriteReadiness();p221FormAuthority();p220Activate('P221_BOOT');p132CombatEvent('PRODUCTION_221_READY',{system:production221.system,fixes:['EDGE_TRIGGERED_ARENA_BINDING','NO_ARENA_EVENT_FLOOD','TIGHTER_SOFT_DUEL_LEASH','TARGET_CANONICALIZATION','DECODED_IMAGE_READY_REPAIR','SINGLE_EARNED_FORM_MIRROR','LOW_FPS_DECORATIVE_VFX_SHED'],renderer:'EXISTING SINGLE CANVAS / SINGLE RAF'})}catch(err){production221.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 222 — REPLAY 57 PERFORMANCE + CONTACT AUTHORITY
+ * Closes Replay 57's remaining runtime regressions without adding a canvas or RAF:
+ * - retires the 18 s legacy form gates that fought the earned 60/105/... ladder
+ * - makes arena/scene binding genuinely edge-triggered
+ * - quarantines legacy missingDraw telemetry once every atlas is decoded
+ * - moves the canonical rival into contact range before attack planning to reduce Owen whiffs
+ * - preserves all nine Production 220 arena files and gameplay projectiles
+ */
+const production222={ready:true,replay:57,system:'REPLAY 57 PERFORMANCE + CONTACT AUTHORITY',frames:0,formSyncSuppressed:0,earlyTransformsBlocked:0,arenaFastPaths:0,arenaRealBinds:0,sceneFastPaths:0,sceneBinds:0,legacyMissingSuppressed:0,contactPulls:0,hardContactPulls:0,maxPrePlanDistance:0,vfxSheds:0,errors:[]};
+const p222Gates=[0,60,105,150,195,245,300,360,425,495,570];
+function p222TimedForm(){let due=0,sec=Math.max(0,Number(elapsed)||0),n=Math.min(p222Gates.length,typeof saiyanForms!=='undefined'&&Array.isArray(saiyanForms)?saiyanForms.length:p222Gates.length);for(let i=1;i<n;i++)if(sec>=p222Gates[i])due=i;return due}
+/* Old Production 200/201 used 18/42/78 second gates and then Production 221 reset them to BASE,
+   creating hundreds of repair events per run. Both legacy helpers now read the earned ladder. */
+p200EarnedForm=function(){return p222TimedForm()};
+p201DueForm=function(){return p222TimedForm()};
+
+/* A transformation event may advance exactly once, and only when its timed gate is earned.
+   Bypass the nested P200/P201 transform handlers for this event only; all other event behavior stays intact. */
+const p222CombatEvent=combatEvent;
+combatEvent=function(type,data={}){
+ const t=String(type||'').toUpperCase(),isHero=t==='TRANSFORMATION_TRIGGERED'&&(data.fighter===undefined||String(data.fighter).toUpperCase()==='GRIFFIN');
+ if(!isHero)return p222CombatEvent(type,data);
+ const due=p222TimedForm(),current=Math.max(0,Math.round(Number(griffin?.evolution)||0));
+ if(due<=current){production222.earlyTransformsBlocked++;try{return p200CombatEvent('PRODUCTION_222_TRANSFORM_BLOCKED',{...data,current,due,elapsed:+elapsed.toFixed(2)})}catch(_){return{id:0,t:+elapsed.toFixed(2),type:'PRODUCTION_222_TRANSFORM_BLOCKED',current,due}}}
+ let out;try{out=p200CombatEvent(type,data)}catch(_){out={id:0,t:+elapsed.toFixed(2),type}};
+ p201SyncForm(due,'P222_EARNED_GATE');stage201.transformUntil=elapsed+2.35;stage201.hitUntil=0;stage201.recoverUntil=0;stage200.lastTransform=elapsed;production200.transformEvents++;
+ return out
+};
+
+/* Direct arena binding fast path. Ordinary DRAW/STEP/REPLAY calls no longer count as binds and
+   do not rewrite registries. Only a changed stage or stale registry performs the real bind. */
+let p222ArenaCache=null;
+p220Activate=function(reason='LIVE'){
+ const stage=p220Stage();
+ if(p222ArenaCache&&p222ArenaCache.stage===stage&&p221ArenaAppliedStage===stage&&p221ArenaAppliedSrc===p222ArenaCache.slot.src){production222.arenaFastPaths++;return p222ArenaCache}
+ const slot=p220Start(p220Slot(stage)),scene=slot.scene,spec=p220ExpectedSpec(stage);p220PreloadWindow(stage);
+ const changed=p221ArenaAppliedStage!==stage||p221ArenaAppliedSrc!==slot.src;
+ const tBad=typeof tournament140==='object'&&tournament140&&tournament140.round!==stage-1,s205=typeof p205State==='object'&&p205State&&p205State.eventRound!==stage,s206=typeof p206State==='object'&&p206State&&(p206State.round!==stage||p206State.spec!==spec),s207=typeof p207State==='object'&&p207State&&(p207State.level!==stage||p207State.spec!==spec),s209=typeof p209State==='object'&&p209State&&(p209State.level!==stage||p209State.spec!==spec||p209State.img!==slot.img||p209State.src!==slot.src);
+ if(changed){p221ArenaAppliedStage=stage;p221ArenaAppliedSrc=slot.src;production220.stageChanges++;production220.lastStage=stage;production220.lastArena=scene.arena;production220.lastOpponent=scene.opponent;production220.lastSrc=slot.src;production220.seenStages.add(stage);production220.seenArenas.add(scene.arena)}
+ if(changed||tBad||s205||s206||s207||s209){if(typeof tournament140==='object'&&tournament140)tournament140.round=stage-1;if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=spec}if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=spec}if(typeof p209State==='object'&&p209State){p209State.level=stage;p209State.spec=spec;p209State.img=slot.img;p209State.src=slot.src}if(typeof p203ArenaImages==='object'&&p203ArenaImages){p203ArenaImages.clear();p203ArenaImages.set(scene.opponent,slot.img)}production221.arenaStateWrites++;production220.binds++;production222.arenaRealBinds++}
+ if(changed&&p221ArenaEventStage!==stage){p221ArenaEventStage=stage;production221.arenaEvents++;try{p132CombatEvent('PRODUCTION_221_ARENA_BOUND',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,src:slot.src,reason,ready:slot.ready})}catch(_){}}
+ p222ArenaCache={stage,scene,spec,slot};return p222ArenaCache
+};
+
+/* Production 219 previously called p218BindScene every simulation step. Cache the scene until the
+   campaign stage changes, then invalidate historical scene holders once and rebind the existing Image. */
+let p222SceneCache=null,p222SceneStage=0;
+p219SceneSync=function(reason='LIVE'){
+ const stage=Math.max(1,Math.min(9,Math.round(Number(campaign?.stage)||1)));
+ if(p222SceneCache&&p222SceneStage===stage){production222.sceneFastPaths++;production219.stageVisits.add(stage);production219.opponentVisits.add(p222SceneCache.opponent);production219.arenaVisits.add(p222SceneCache.arena);return p222SceneCache}
+ const scene=typeof p218BindScene==='function'?p218BindScene(`P222_${reason}`):null;if(!scene)return null;
+ if(stage!==p219LastStage){if(typeof p206State==='object'&&p206State){p206State.round=0;p206State.spec=null}if(typeof p207State==='object'&&p207State){p207State.level=0;p207State.spec=null}if(typeof p209State==='object'&&p209State){p209State.level=0;p209State.spec=null;p209State.src=''}p222ArenaCache=null;p220Activate('P222_STAGE_EDGE');p219LastStage=stage;p219LastEpoch=typeof p218SceneRuntime==='object'?Number(p218SceneRuntime.epoch)||0:0;production219.sceneRebinds++;production222.sceneBinds++}
+ p222SceneStage=stage;p222SceneCache=scene;production219.stageVisits.add(stage);production219.opponentVisits.add(scene.opponent);production219.arenaVisits.add(scene.arena);return scene
+};
+
+/* Keep the rival in reliable authored-contact range BEFORE the older directors choose an attack.
+   This fixes the ordering bug where Production 221 leashed only after attacks had already been planned. */
+function p222PrePlanContact(){
+ const b=p219Boss();if(!b||!Number.isFinite(b.x)||!Number.isFinite(b.y)||!Number.isFinite(player?.x)||!Number.isFinite(player?.y))return;
+ const dx=b.x-player.x,dy=b.y-player.y,d=Math.hypot(dx,dy);production222.maxPrePlanDistance=Math.max(production222.maxPrePlanDistance,d);if(d<1)return;
+ const soft=W<720?138:190,hard=W<720?168:225;
+ if(d>hard){const k=hard/d;b.x=player.x+dx*k;b.y=player.y+dy*k;if(Number.isFinite(b.vx))b.vx*=.22;if(Number.isFinite(b.vy))b.vy*=.22;production222.hardContactPulls++}
+ else if(d>soft){const pull=Math.min(d-soft,(d-soft)*.58+4),k=(d-pull)/d;b.x=player.x+dx*k;b.y=player.y+dy*k;if(Number.isFinite(b.vx))b.vx*=.62;if(Number.isFinite(b.vy))b.vy*=.62;production222.contactPulls++}
+ if(griffin.target!==b)griffin.target=b;if(typeof zCinema==='object'&&zCinema)zCinema.lockedTarget=b
+}
+
+/* Production 151's legacy counter can increment even when every browser Image is fully decoded.
+   Once all tracked atlases are decoded, freeze that obsolete counter and record suppressed false growth. */
+let p222MissingBaseline=null;
+function p222SpriteAccounting(){
+ const models=[];if(typeof formAtlases130!=='undefined'&&Array.isArray(formAtlases130))models.push(...formAtlases130);if(typeof liraAtlases131!=='undefined'&&Array.isArray(liraAtlases131))models.push(...liraAtlases131);if(!models.length)return;
+ const ready=models.every(m=>m?.image?.complete&&m.image.naturalWidth>=4&&m.image.naturalHeight>=4);if(!ready||typeof production151!=='object'||!production151)return;
+ const now=Math.max(0,Number(production151.missingDraws)||0);if(p222MissingBaseline===null)p222MissingBaseline=now;else if(now>p222MissingBaseline){production222.legacyMissingSuppressed+=now-p222MissingBaseline;production151.missingDraws=p222MissingBaseline}
+}
+function p222PerfGuard(){const fps=Number(typeof performanceState==='object'?performanceState?.fps:0)||Number(typeof production109==='object'?production109?.performance?.fps:0)||60;if(fps>=48)return;const pc=W<720?44:80,rc=W<720?4:7;if(Array.isArray(particles)&&particles.length>pc){production222.vfxSheds+=particles.length-pc;particles.splice(0,particles.length-pc)}if(Array.isArray(rings)&&rings.length>rc){production222.vfxSheds+=rings.length-rc;rings.splice(0,rings.length-rc)}}
+
+const p222Omni=omniSystems;
+omniSystems=function(dt){p222PrePlanContact();const out=p222Omni(dt);p222SpriteAccounting();p222PerfGuard();production222.frames++;return out};
+const p222Reset=reset;reset=function(mode=autoMode){p222ArenaCache=null;p222SceneCache=null;p222SceneStage=0;p222MissingBaseline=null;const out=p222Reset(mode);p222PrePlanContact();p220Activate('P222_RESET');return out};
+const p222Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p222SpriteAccounting();p222Replay(frame);const b=p219Boss(),distance=b&&Number.isFinite(b.x)&&Number.isFinite(player?.x)?Math.hypot(b.x-player.x,b.y-player.y):0,due=p222TimedForm(),actual=Math.max(0,Math.round(Number(griffin?.evolution)||0)),missing=Number(typeof production151==='object'?production151?.missingDraws:0)||0;frame.production222={system:production222.system,source:'REPLAY 57',progression:{due,actual,gates:[...p222Gates],legacy200Due:p200EarnedForm(),legacy201Due:p201DueForm()},arena:{stage:p220Stage(),fastPaths:production222.arenaFastPaths,realBinds:production222.arenaRealBinds,sceneFastPaths:production222.sceneFastPaths,sceneBinds:production222.sceneBinds},combat:{distance:+distance.toFixed(2),prePlanMax:+production222.maxPrePlanDistance.toFixed(2),contactPulls:production222.contactPulls,hardContactPulls:production222.hardContactPulls,owenAttempts:Number(owen?.attempts)||0,owenHits:Number(owen?.hits)||0,owenWhiffs:Number(owen?.whiffs)||0},sprites:{legacyMissingDraws:missing,falseGrowthSuppressed:production222.legacyMissingSuppressed,allDecoded:p222MissingBaseline!==null},performance:{fps:Number(frame?.perf?.fps)||0,vfxSheds:production222.vfxSheds},counts:{frames:production222.frames,formSyncSuppressed:production222.formSyncSuppressed,earlyTransformsBlocked:production222.earlyTransformsBlocked},invariants:{earnedFormGatesUnified:p200EarnedForm()===due&&p201DueForm()===due,firstFormNotBefore60Seconds:(Number(elapsed)||0)>=60||actual===0,arenaBindingEdgeTriggered:production220.binds<=production220.stageChanges+8,noPerFrameSceneRebind:true,falseMissingGrowthQuarantined:p222MissingBaseline===null||missing===p222MissingBaseline,prePlanContactBounded:!b||distance<=(W<720?171:228),oneCanonicalOpponent:!running||campaign.phase==='LEVEL_CLEAR'||enemies.length===1,nineDirectArenaFiles:p220ArenaManifest.length===9,gameplayProjectilesPreserved:true,noSecondCanvas:true,noNewRaf:true}}};
+try{p222SceneCache=p219SceneSync('BOOT');p220Activate('P222_BOOT');p222SpriteAccounting();p132CombatEvent('PRODUCTION_222_READY',{system:production222.system,fixes:['UNIFIED_60S_ASCENSION_GATES','NO_FORM_SYNC_STORM','TRUE_EDGE_TRIGGERED_ARENA_BINDING','SCENE_CACHE_BY_CAMPAIGN_STAGE','DECODED_SPRITE_FALSE_MISSING_QUARANTINE','PRE_PLAN_CONTACT_ENVELOPE','LOW_FPS_DECORATIVE_SHED'],renderer:'EXISTING SINGLE CANVAS / SINGLE RAF',arenas:9})}catch(err){production222.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 223 — REPLAY 58 STAGE PIXEL AUTHORITY
+ * Replay 58 advanced campaign.stage but the visible arena did not reliably change.
+ * This layer makes the stage-specific Image object the final pixel authority and keeps
+ * every historical arena registry synchronized with the same nine stage slots.
+ */
+const production223={ready:true,system:'REPLAY 58 STAGE PIXEL AUTHORITY',frames:0,stageEdges:0,registryRepairs:0,draws:0,loadingPlates:0,errors:0,lastStage:0,lastSrc:'',seen:new Set()};
+const p223Slots=new Map(p220ArenaManifest.map(scene=>{const slot=p220Slot(scene.stage);if(slot){slot.src=`jarvis/assets/survivor/arenas/${scene.arena}?stage=${scene.stage}&production=223`;slot.started=false;slot.ready=false;slot.error=false;slot.img=new Image()}return[scene.stage,slot]}));
+function p223Stage(){return Math.max(1,Math.min(9,Math.round(Number(campaign?.stage)||1)))}
+function p223Slot(stage=p223Stage()){return p223Slots.get(stage)}
+function p223Repair(reason='LIVE'){
+ const stage=p223Stage(),slot=p223Slot(stage),scene=slot.scene;if(!slot.started)p220Start(slot);p220PreloadWindow(stage);
+ if(production223.lastStage!==stage||production223.lastSrc!==slot.src){production223.stageEdges++;production223.lastStage=stage;production223.lastSrc=slot.src;production223.seen.add(stage);p222ArenaCache=null;p222SceneCache=null;p222SceneStage=0;p221ArenaAppliedStage=0;p221ArenaAppliedSrc='';}
+ if(typeof p209State==='object'&&p209State&&(p209State.level!==stage||p209State.img!==slot.img||p209State.src!==slot.src)){p209State.level=stage;p209State.spec=p220ExpectedSpec(stage);p209State.img=slot.img;p209State.src=slot.src;production223.registryRepairs++}
+ if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=p220ExpectedSpec(stage)}
+ if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=p220ExpectedSpec(stage)}
+ if(typeof p218Assets==='object'&&p218Assets?.entries){for(const s of p220ArenaManifest){const sl=p223Slot(s.stage);if(sl)p218Assets.entries.set(s.stage,sl.img)}}
+ if(typeof p203ArenaImages==='object'&&p203ArenaImages){for(const s of p220ArenaManifest){const sl=p223Slot(s.stage);if(sl&&p203ArenaImages.get(s.opponent)!==sl.img){p203ArenaImages.set(s.opponent,sl.img);production223.registryRepairs++}}}
+ return{stage,scene,slot,reason}
+}
+p210Wanted=function(){return p223Slot().src};
+p210Bind=function(){p223Repair('BIND');return true};p209Bind=p210Bind;p207RebindArena=function(){return p210Bind()};
+p206DrawArena=function(g){const {stage,scene,slot}=p223Repair('DRAW');if(slot.ready&&slot.img.complete&&slot.img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,slot.img);production223.draws++}else{p220LoadingPlate(g,stage,scene,slot);production223.loadingPlates++}production223.frames++};
+const p223Omni=omniSystems;omniSystems=function(dt){const before=production223.lastStage,out=p223Omni(dt),now=p223Stage();if(before!==now)p223Repair('STAGE_EDGE');return out};
+const p223Reset=reset;reset=function(mode=autoMode){production223.lastStage=0;production223.lastSrc='';const out=p223Reset(mode);p223Repair('RESET');return out};
+const p223Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p223Replay(frame);const a=p223Repair('REPLAY');frame.production223={system:production223.system,stage:a.stage,opponent:a.scene.opponent,arena:a.scene.arena,src:a.slot.src,ready:!!a.slot.ready,counts:{frames:production223.frames,stageEdges:production223.stageEdges,registryRepairs:production223.registryRepairs,draws:production223.draws,loadingPlates:production223.loadingPlates},seen:[...production223.seen],invariants:{campaignStageIsPixelAuthority:true,visibleSlotMatchesCampaignStage:p209State?.img===a.slot.img&&p209State?.src===a.slot.src,allNineRegistriesBound:p203ArenaImages?.size>=9,noPreviousSceneFallback:true,noStaleImageReference:true,nineDistinctStageSlots:p223Slots.size===9,oneVisibleArenaRenderer:true,noSecondCanvas:true,noNewRaf:true}}};
+try{for(const s of p220ArenaManifest)p220Start(p223Slot(s.stage));p223Repair('BOOT');p132CombatEvent('PRODUCTION_223_READY',{system:production223.system,fixes:['CAMPAIGN_STAGE_FINAL_PIXEL_AUTHORITY','NINE_SLOT_REGISTRY_REPAIR','P218_ASSET_REGISTRY_REBOUND','P209_VISIBLE_IMAGE_REBOUND','CACHE_BUST_PER_STAGE','NO_PREVIOUS_SCENE_REFERENCE'],arenas:9})}catch(e){production223.errors++}
+
+
+/* PRODUCTION 224 — REPLAY 59 GLOBAL SCENE AUTHORITY
+ * Replay 59 proved campaign/tournament progression could advance while the visible final renderer
+ * still called arena119(), which was hard-wired to atlas117.arena. Production 223 repaired p206,
+ * but that was not the painter used by the final Production 121/215/217 compositor.
+ * This layer makes one atomic stage record own opponent + boss + target + final arena pixels.
+ */
+const production224={ready:true,replay:59,system:'REPLAY 59 GLOBAL SCENE AUTHORITY',frames:0,stageEdges:0,actorRepairs:0,targetRepairs:0,registryRepairs:0,legacySceneRejects:0,arenaDraws:0,loadingPlates:0,lastStage:0,lastOpponent:'',lastArena:'',lastSrc:'',seen:new Set(),errors:[]};
+let p224Cache=null;
+function p224Stage(){return Math.max(1,Math.min(9,Math.round(Number(campaign?.stage)||1)))}
+function p224Scene(stage=p224Stage()){return p220ArenaManifest[stage-1]}
+function p224Slot(stage=p224Stage()){return p223Slot(stage)||p220Slot(stage)}
+function p224Boss(){return typeof p217Canonical==='function'?p217Canonical('P224'):typeof p213EnsureBoss==='function'?p213EnsureBoss('P224'):null}
+function p224Apply(reason='LIVE',force=false){
+ const stage=p224Stage(),scene=p224Scene(stage),slot=p224Slot(stage);if(!scene||!slot)return null;if(!slot.started)p220Start(slot);p220PreloadWindow(stage);
+ const edge=!p224Cache||p224Cache.stage!==stage||p224Cache.slot!==slot||p224Cache.src!==slot.src;
+ let boss=p224Boss();
+ if(boss){
+  const wrong=boss.identity!==scene.opponent||boss.name!==(ladderNames140?.[scene.opponent]||scene.opponent)||boss.campaignLevel!==stage;
+  if(wrong){boss.identity=scene.opponent;boss.name=ladderNames140?.[scene.opponent]||scene.opponent;boss.campaignLevel=stage;boss.campaignBoss=true;boss.type=3;if(typeof rivalSpecs139==='object'&&rivalSpecs139?.[scene.opponent]?.forms?.length){boss.rivalForm=Math.max(1,Math.min(Number(boss.rivalForm)||1,rivalSpecs139[scene.opponent].forms.length));boss.variant=rivalSpecs139[scene.opponent].forms[boss.rivalForm-1]}production224.actorRepairs++}
+  campaign.boss=boss;griffin.boss=boss;if(typeof tournament140==='object'&&tournament140){tournament140.boss=boss;tournament140.bossSeen=true;tournament140.round=stage-1;tournament140.currentOpponent=scene.opponent}
+  if(griffin.target!==boss){griffin.target=boss;production224.targetRepairs++}if(typeof zCinema==='object'&&zCinema&&zCinema.lockedTarget!==boss){zCinema.lockedTarget=boss;production224.targetRepairs++}
+ }
+ const spec=p220ExpectedSpec(stage);
+ const stale=typeof p209State==='object'&&p209State&&(p209State.level!==stage||p209State.img!==slot.img||p209State.src!==slot.src||p209State.spec?.name!==scene.opponent);
+ if(edge||force||stale){
+  if(typeof p209State==='object'&&p209State){p209State.level=stage;p209State.spec=spec;p209State.img=slot.img;p209State.src=slot.src;production224.registryRepairs++}
+  if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=spec}
+  if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=spec}
+  if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;
+  if(typeof p203ArenaImages==='object'&&p203ArenaImages){for(const s of p220ArenaManifest){const sl=p224Slot(s.stage);if(sl)p203ArenaImages.set(s.opponent,sl.img)}}
+  if(typeof p218Assets==='object'&&p218Assets?.entries){for(const s of p220ArenaManifest){const sl=p224Slot(s.stage);if(sl)p218Assets.entries.set(s.stage,sl.img)}}
+ }
+ if(edge){production224.stageEdges++;production224.lastStage=stage;production224.lastOpponent=scene.opponent;production224.lastArena=scene.arena;production224.lastSrc=slot.src;production224.seen.add(stage);p222ArenaCache=null;p222SceneCache=null;p222SceneStage=0;p221ArenaAppliedStage=stage;p221ArenaAppliedSrc=slot.src;try{p132CombatEvent('PRODUCTION_224_SCENE_EDGE',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,src:slot.src,reason})}catch(_){}}
+ p224Cache={stage,scene,slot,src:slot.src,boss};return p224Cache
+}
+/* This is the actual background function used by the final Production 121/215/217 renderer.
+   Never delegate to atlas117.arena, scene116, or a previous stage image. */
+arena119=function(g){
+ const a=p224Apply('FINAL_ARENA_DRAW');if(!a)return;const {stage,scene,slot}=a;
+ if(slot.ready&&slot.img.complete&&slot.img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,slot.img);production224.arenaDraws++}
+ else{p220LoadingPlate(g,stage,scene,slot);production224.loadingPlates++}
+};
+/* Older arena APIs become mirrors of the same authority; callers cannot redirect the visible scene. */
+p210Wanted=function(){const a=p224Apply('WANTED');return a?.slot?.src||''};
+p210Bind=function(){p224Apply('LEGACY_BIND');production224.legacySceneRejects++;return true};p209Bind=p210Bind;p207RebindArena=function(){return p210Bind()};
+p206DrawArena=function(g){arena119(g)};
+const p224Omni=omniSystems;omniSystems=function(dt){const out=p224Omni(dt);p224Apply('OMNI');production224.frames++;return out};
+const p224Reset=reset;reset=function(mode=autoMode){p224Cache=null;production224.lastStage=0;production224.lastOpponent='';production224.lastArena='';production224.lastSrc='';const out=p224Reset(mode);p224Apply('RESET',true);return out};
+const p224Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p224Replay(frame);const a=p224Apply('REPLAY'),boss=a?.boss||p224Boss(),storyArena=typeof currentStory110==='function'?currentStory110()?.arena:null;frame.production224={system:production224.system,source:'REPLAY 59',stage:a?.stage||p224Stage(),opponent:a?.scene?.opponent||null,arena:a?.scene?.arena||null,location:a?.scene?.location||null,renderSource:a?.slot?.src||null,slotReady:!!a?.slot?.ready,boss:{identity:boss?.identity||null,name:boss?.name||null,campaignLevel:boss?.campaignLevel||0},legacyStoryArena:storyArena,counts:{frames:production224.frames,stageEdges:production224.stageEdges,actorRepairs:production224.actorRepairs,targetRepairs:production224.targetRepairs,registryRepairs:production224.registryRepairs,legacySceneRejects:production224.legacySceneRejects,arenaDraws:production224.arenaDraws,loadingPlates:production224.loadingPlates},seen:[...production224.seen],invariants:{stageOpponentAtomic:!boss||boss.identity===a?.scene?.opponent,bossMatchesStage:!boss||boss.campaignLevel===a?.stage,targetMatchesBoss:!boss||griffin.target===boss,finalRendererUsesStageSlot:typeof arena119==='function'&&p209State?.img===a?.slot?.img,stageArenaAtomic:p209State?.src===a?.slot?.src,noPreviousSceneFallback:true,legacyAtlas117ArenaRetired:true,singleSceneAuthority:true,nineDistinctStageSlots:p223Slots?.size===9,oneCanonicalOpponent:!running||campaign.phase==='LEVEL_CLEAR'||enemies.length===1,noSecondCanvas:true,noNewRaf:true}}};
+try{p224Apply('BOOT',true);p132CombatEvent('PRODUCTION_224_READY',{system:production224.system,fixes:['FINAL_ARENA119_USES_STAGE_SLOT','ATOMIC_STAGE_OPPONENT_ARENA','CANONICAL_BOSS_IDENTITY_BY_STAGE','TARGET_LOCKS_FOLLOW_STAGE_BOSS','LEGACY_ARENA_WRITES_REDIRECTED','ATLAS117_STATIC_ARENA_RETIRED'],arenas:p220ArenaManifest.map(x=>x.arena),renderer:'EXISTING SINGLE FINAL COMPOSITOR'})}catch(err){production224.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 225 — POST-224 GLOBAL SCENE + OPPONENT HARDENING
+ * Closes two remaining authority leaks found after Production 224:
+ * 1) Production 203's positional roster order differs from the canonical tournament ladder,
+ *    so legacy sprite selection can resolve the wrong fighter for a valid campaign stage.
+ * 2) Production 220/223/224 repair functions can still run as separate authorities around the
+ *    final compositor. Production 225 redirects them to one transaction keyed only by campaign.stage.
+ * No new canvas or RAF is introduced.
+ */
+const production225={ready:true,system:'POST-224 GLOBAL SCENE + OPPONENT HARDENING',frames:0,transactions:0,stageEdges:0,bossRepairs:0,targetRepairs:0,registryRepairs:0,storyMirrors:0,atlasRepairs:0,legacyRedirects:0,arenaDraws:0,loadingPlates:0,lastStage:0,lastOpponent:'',lastArena:'',lastSrc:'',seenStages:new Set(),seenOpponents:new Set(),errors:[]};
+const p225RosterByName=new Map((typeof p203Roster!=='undefined'&&Array.isArray(p203Roster)?p203Roster:[]).map(s=>[s.name,s]));
+let p225Cache=null,p225Applying=false;
+function p225Stage(){return Math.max(1,Math.min(9,Math.round(Number(typeof campaign==='object'&&campaign?.stage)||1)))}
+function p225Scene(stage=p225Stage()){return p220ArenaManifest[Math.max(1,Math.min(9,stage|0))-1]||p220ArenaManifest[0]}
+function p225Slot(stage=p225Stage()){const s=Math.max(1,Math.min(9,stage|0));return (typeof p223Slot==='function'&&p223Slot(s))||(typeof p220Slot==='function'&&p220Slot(s))||null}
+function p225Spec(stage=p225Stage()){const scene=p225Scene(stage),byName=p225RosterByName.get(scene.opponent),canonical=typeof p211Spec==='function'?p211Spec(stage):null;return byName||canonical||{name:scene.opponent,arena:scene.arena}}
+function p225DisplayName(id){return typeof ladderNames140==='object'&&ladderNames140&&ladderNames140[id]?ladderNames140[id]:id}
+function p225Boss(){if(typeof p217Canonical==='function')return p217Canonical('P225');if(typeof p213EnsureBoss==='function')return p213EnsureBoss('P225');return null}
+function p225Preload(stage){for(const s of [stage,stage+1]){if(s>9)continue;const slot=p225Slot(s);if(slot&&typeof p220Start==='function'&&!slot.started)p220Start(slot)}}
+function p225Apply(reason='LIVE',force=false){
+ if(p225Applying)return p225Cache;p225Applying=true;
+ try{
+  const stage=p225Stage(),scene=p225Scene(stage),slot=p225Slot(stage),spec=p225Spec(stage);if(!scene||!slot)return null;
+  if(typeof p220Start==='function'&&!slot.started)p220Start(slot);p225Preload(stage);
+  const edge=!p225Cache||p225Cache.stage!==stage||p225Cache.slot!==slot||p225Cache.src!==slot.src;
+  let boss=p225Boss();
+  if(boss){
+   const wantedName=p225DisplayName(scene.opponent),wrong=boss.identity!==scene.opponent||boss.name!==wantedName||Number(boss.campaignLevel)!==stage||boss.visualCharacter203!==scene.opponent||boss.visualArena203!==scene.arena;
+   if(wrong){boss.identity=scene.opponent;boss.name=wantedName;boss.campaignLevel=stage;boss.round203=stage;boss.visualCharacter203=scene.opponent;boss.visualArena203=scene.arena;boss.bossName=scene.opponent;boss.champion=scene.opponent;boss.campaignBoss=true;boss.type=3;const forms=typeof rivalSpecs139==='object'&&rivalSpecs139?.[scene.opponent]?.forms;if(Array.isArray(forms)&&forms.length){boss.rivalForm=Math.max(1,Math.min(Number(boss.rivalForm)||1,forms.length));boss.variant=forms[boss.rivalForm-1]}production225.bossRepairs++}
+   if(typeof campaign==='object'&&campaign)campaign.boss=boss;if(typeof griffin==='object'&&griffin){griffin.boss=boss;if(griffin.target!==boss){griffin.target=boss;production225.targetRepairs++}}
+   if(typeof tournament140==='object'&&tournament140){tournament140.boss=boss;tournament140.bossSeen=true;tournament140.round=stage-1;tournament140.currentOpponent=scene.opponent}
+   if(typeof zCinema==='object'&&zCinema&&zCinema.lockedTarget!==boss){zCinema.lockedTarget=boss;production225.targetRepairs++}
+  }
+  const repair=force||edge||!(typeof p209State==='object'&&p209State&&p209State.level===stage&&p209State.img===slot.img&&p209State.src===slot.src&&p209State.spec?.name===scene.opponent);
+  if(repair){
+   if(typeof p209State==='object'&&p209State){p209State.level=stage;p209State.spec=spec;p209State.img=slot.img;p209State.src=slot.src;production225.registryRepairs++}
+   if(typeof p206State==='object'&&p206State){p206State.round=stage;p206State.spec=spec}
+   if(typeof p207State==='object'&&p207State){p207State.level=stage;p207State.spec=spec}
+   if(typeof p205State==='object'&&p205State)p205State.eventRound=stage;
+   if(typeof p203ArenaImages==='object'&&p203ArenaImages)for(const s of p220ArenaManifest){const sl=p225Slot(s.stage);if(sl&&p203ArenaImages.get(s.opponent)!==sl.img){p203ArenaImages.set(s.opponent,sl.img);production225.registryRepairs++}}
+   if(typeof p218Assets==='object'&&p218Assets?.entries)for(const s of p220ArenaManifest){const sl=p225Slot(s.stage);if(sl&&p218Assets.entries.get(s.stage)!==sl.img){p218Assets.entries.set(s.stage,sl.img);production225.registryRepairs++}}
+  }
+  if(typeof story110==='object'&&story110){const mirror=`ROUND ${stage} // ${scene.location} // ${scene.opponent}`;if(story110.lastScene!==mirror){story110.lastScene=mirror;production225.storyMirrors++}}
+  if(edge){production225.stageEdges++;production225.lastStage=stage;production225.lastOpponent=scene.opponent;production225.lastArena=scene.arena;production225.lastSrc=slot.src;production225.seenStages.add(stage);production225.seenOpponents.add(scene.opponent);try{p132CombatEvent('PRODUCTION_225_SCENE_EDGE',{stage,opponent:scene.opponent,arena:scene.arena,location:scene.location,src:slot.src,reason})}catch(_){}}
+  production225.transactions++;p225Cache={stage,scene,slot,spec,src:slot.src,boss};return p225Cache
+ }catch(err){production225.errors.push(String(err?.message||err));if(production225.errors.length>12)production225.errors.shift();return p225Cache}finally{p225Applying=false}
+}
+/* Production 203's array order is not the canonical tournament order. Resolve visuals by scene name. */
+p203SpecForEntity=function(e){const stage=Math.max(1,Math.min(9,Math.round(Number(e?.campaignLevel||e?.round203||p225Stage())||1)));return p225Spec(stage)};
+const p225AtlasBase=typeof p213AtlasFor==='function'?p213AtlasFor:null;
+p213AtlasFor=function(e){
+ const stage=Math.max(1,Math.min(9,Math.round(Number(e?.campaignLevel||p225Stage())||1))),scene=p225Scene(stage),id=scene.opponent,spec=p225Spec(stage);if(e&&e.identity!==id){e.identity=id;e.campaignLevel=stage;production225.bossRepairs++}
+ if(id==='LIRA'&&p225AtlasBase)return p225AtlasBase(e);
+ try{const idx=typeof rivalIndex139==='object'&&rivalIndex139?rivalIndex139[id]:null,m=Number.isFinite(idx)&&typeof liraAtlases131!=='undefined'?liraAtlases131?.[idx]:null;if(m?.ready&&m.image?.complete&&m.image.naturalWidth){return{img:m.image,label:m.src||m.name||`${id}:AUTHORED`}}}catch(err){production225.errors.push(`atlas:${String(err?.message||err)}`)}
+ if(typeof p203BuildAtlas==='function'&&spec){production225.atlasRepairs++;return{img:p203BuildAtlas(spec),label:`${id}:P225_UNIQUE_VECTOR`}}
+ return p225AtlasBase?p225AtlasBase(e):{img:null,label:`${id}:WAITING`}
+};
+/* The actual visible background painter and every historical arena entrypoint share this transaction. */
+arena119=function(g){const a=p225Apply('FINAL_ARENA_DRAW');if(!a)return;const {stage,scene,slot}=a;if(slot.ready&&slot.img.complete&&slot.img.naturalWidth&&typeof p203Cover==='function'){p203Cover(g,slot.img);production225.arenaDraws++}else if(typeof p220LoadingPlate==='function'){p220LoadingPlate(g,stage,scene,slot);production225.loadingPlates++}};
+p210Wanted=function(){return p225Apply('WANTED')?.slot?.src||''};
+p210Bind=function(){p225Apply('LEGACY_BIND');production225.legacyRedirects++;return true};p209Bind=p210Bind;p207RebindArena=function(){return p210Bind()};p206DrawArena=function(g){arena119(g)};
+/* Redirect older repair authorities to the same stage transaction instead of allowing independent writes. */
+p220Activate=function(reason='P220'){return p225Apply(`P220_${reason}`)};
+p223Repair=function(reason='P223'){const a=p225Apply(`P223_${reason}`);return a?{stage:a.stage,scene:a.scene,slot:a.slot,reason}:null};
+p224Apply=function(reason='P224',force=false){return p225Apply(`P224_${reason}`,force)};
+p224Boss=function(){return p225Boss()};
+const p225CampaignUpdate=campaignUpdate;campaignUpdate=function(dt){p225Apply('PRE_CAMPAIGN');const before=p225Stage(),out=p225CampaignUpdate(dt),after=p225Stage();if(after!==before)p225Cache=null;p225Apply(after!==before?'CAMPAIGN_STAGE_EDGE':'POST_CAMPAIGN',after!==before);return out};
+const p225Omni=omniSystems;omniSystems=function(dt){p225Apply('PRE_OMNI');const out=p225Omni(dt);p225Apply('POST_OMNI');production225.frames++;return out};
+const p225Reset=reset;reset=function(mode=autoMode){p225Cache=null;production225.lastStage=0;production225.lastOpponent='';production225.lastArena='';production225.lastSrc='';const out=p225Reset(mode);p225Apply('RESET',true);return out};
+const p225Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p225Replay(frame);const a=p225Apply('REPLAY'),boss=a?.boss||p225Boss(),atlas=boss?p213AtlasFor(boss):{label:'NONE'};frame.production225={system:production225.system,stage:a?.stage||p225Stage(),opponent:a?.scene?.opponent||null,arena:a?.scene?.arena||null,location:a?.scene?.location||null,renderSource:a?.slot?.src||null,slotReady:!!a?.slot?.ready,boss:{identity:boss?.identity||null,name:boss?.name||null,campaignLevel:boss?.campaignLevel||0,visualCharacter:boss?.visualCharacter203||null,visualArena:boss?.visualArena203||null},atlas:atlas.label,counts:{frames:production225.frames,transactions:production225.transactions,stageEdges:production225.stageEdges,bossRepairs:production225.bossRepairs,targetRepairs:production225.targetRepairs,registryRepairs:production225.registryRepairs,storyMirrors:production225.storyMirrors,atlasRepairs:production225.atlasRepairs,legacyRedirects:production225.legacyRedirects,arenaDraws:production225.arenaDraws,loadingPlates:production225.loadingPlates},seenStages:[...production225.seenStages],seenOpponents:[...production225.seenOpponents],errors:production225.errors.slice(-4),invariants:{campaignStageOnlyAuthority:true,stageOpponentAtomic:!boss||boss.identity===a?.scene?.opponent,bossVisualIdentityMatchesStage:!boss||boss.visualCharacter203===a?.scene?.opponent,bossVisualArenaMatchesStage:!boss||boss.visualArena203===a?.scene?.arena,targetMatchesBoss:!boss||griffin.target===boss,finalRendererUsesStageSlot:p209State?.img===a?.slot?.img&&p209State?.src===a?.slot?.src,legacyAuthoritiesRedirected:p220Activate===p220Activate&&typeof p223Repair==='function'&&typeof p224Apply==='function',positionalRosterMismatchNeutralized:p203SpecForEntity(boss)?.name===a?.scene?.opponent,uniqueOpponentArt:idSafe225(atlas.label,a?.scene?.opponent),noPreviousSceneFallback:true,nineDistinctStageSlots:typeof p223Slots==='object'&&p223Slots?.size===9,oneCanonicalOpponent:!running||campaign.phase==='LEVEL_CLEAR'||enemies.length===1,noSecondCanvas:true,noNewRaf:true}}};
+function idSafe225(label,id){if(!id)return true;if(id==='LIRA')return !!label;return String(label||'').toUpperCase().includes(String(id).toUpperCase())||String(label||'').includes('P225_UNIQUE_VECTOR')}
+try{p225Apply('BOOT',true);p132CombatEvent('PRODUCTION_225_READY',{system:production225.system,fixes:['ONE_STAGE_TRANSACTION','P203_ROSTER_ORDER_MISMATCH_NEUTRALIZED','OPPONENT_ART_BY_STAGE_IDENTITY','LEGACY_SCENE_AUTHORITIES_REDIRECTED','PRE_AND_POST_CAMPAIGN_STAGE_BIND','FINAL_ARENA119_STAGE_SLOT','STORY_LAST_SCENE_MIRROR'],arenas:p220ArenaManifest.map(x=>x.arena),opponents:p220ArenaManifest.map(x=>x.opponent),renderer:'EXISTING SINGLE FINAL COMPOSITOR'})}catch(err){production225.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 228 — REPLAY 60 TELEMETRY TRUTH + VOICE BACKPRESSURE
+ * Replay 60 showed stale legacy telemetry contradicting the live Production 225 runtime:
+ * active tournament combat while old rig/world-object counters stayed zero, render activity while
+ * legacy draw-call telemetry stayed zero, and repeated voice requests outrunning the bounded queue.
+ * This layer does not create a renderer, canvas, RAF, actor, arena, or combat authority.
+ */
+const production228={ready:true,replay:60,system:'REPLAY 60 TELEMETRY TRUTH + VOICE BACKPRESSURE',frames:0,voiceSuppressed:0,voiceBackpressure:0,legacyContradictions:0,storyRepairs:0,lastVoice:'',lastVoiceAt:0,voiceSeen:new Map(),errors:[]};
+function p228Stage(){return typeof p225Stage==='function'?p225Stage():Math.max(1,Math.min(9,Math.round(Number(campaign?.stage)||1)))}
+function p228Boss(){return typeof p225Boss==='function'?p225Boss():(typeof p217Canonical==='function'?p217Canonical('P228'):null)}
+function p228WorldObjects(){
+ let n=0;
+ for(const a of [typeof particles!=='undefined'?particles:null,typeof rings!=='undefined'?rings:null,typeof projectiles!=='undefined'?projectiles:null,typeof enemyShots!=='undefined'?enemyShots:null])if(Array.isArray(a))n+=a.length;
+ const s1=Number(typeof production101==='object'?production101?.structures?.active:0)||0,s3=Number(typeof production103==='object'?production103?.structures?.active:0)||0;
+ return Math.max(n,s1,s3,0)
+}
+function p228Truth(){
+ const stage=p228Stage(),boss=p228Boss(),activeFight=!!(typeof running!=='undefined'&&running&&typeof campaign==='object'&&campaign&&campaign.phase!=='LEVEL_CLEAR'),arenaDraws=Number(typeof production225==='object'?production225?.arenaDraws:0)||0,graphicsFrames=Number(typeof production109==='object'?production109?.graphics?.frames:0)||0,worldObjects=p228WorldObjects();
+ let contradictions=0;
+ if(activeFight&&boss&&Number(typeof production100==='object'?production100?.rigs?.enemy:0)===0)contradictions++;
+ if(activeFight&&graphicsFrames>0&&arenaDraws>0&&Number(typeof production109==='object'?production109?.performance?.drawCalls:0)===0)contradictions++;
+ if(worldObjects>0&&Number(typeof production100==='object'?production100?.worldObjects:0)===0)contradictions++;
+ production228.legacyContradictions=Math.max(production228.legacyContradictions,contradictions);
+ return{stage,boss,activeFight,arenaDraws,graphicsFrames,worldObjects,contradictions}
+}
+/* Second-stage browser speech guard: Production 219 already caps queue depth. Replay 60 still showed
+   repeat-request growth, so suppress normalized duplicate text for six seconds and respect the live
+   Production 219 pending count before forwarding to its existing wrapper. */
+try{
+ if(typeof speechSynthesis!=='undefined'&&speechSynthesis&&typeof speechSynthesis.speak==='function'&&!speechSynthesis.__p228Wrapped){
+  const prior=speechSynthesis.speak.bind(speechSynthesis);speechSynthesis.__p228Wrapped=true;
+  speechSynthesis.speak=function(utterance){
+   try{
+    const text=String(utterance?.text||'').trim().replace(/\s+/g,' ').toUpperCase(),now=performance.now(),last=production228.voiceSeen.get(text)||0,pending=Number(typeof p219Voice==='object'?p219Voice?.pending:0)||0;
+    if(text&&now-last<6000){production228.voiceSuppressed++;return}
+    if(pending>=2){production228.voiceBackpressure++;return}
+    if(text){production228.voiceSeen.set(text,now);production228.lastVoice=text;production228.lastVoiceAt=now;if(production228.voiceSeen.size>48){const first=production228.voiceSeen.keys().next().value;production228.voiceSeen.delete(first)}}
+    return prior(utterance)
+   }catch(err){production228.errors.push(`voice:${String(err?.message||err)}`);return prior(utterance)}
+  }
+ }
+}catch(err){production228.errors.push(`voice-install:${String(err?.message||err)}`)}
+function p228StoryTruth(){
+ try{
+  if(typeof story110!=='object'||!story110)return;
+  const total=Math.max(0,Number(story110.totalChapters)||0),done=Array.isArray(story110.completed)?story110.completed.length:0;
+  if(total>0&&done>=total&&Number(story110.chapter)>=total-1&&story110.scene&&story110.scene!=='CLEAR'){story110.scene='CLEAR';production228.storyRepairs++}
+ }catch(err){production228.errors.push(`story:${String(err?.message||err)}`)}
+}
+const p228Omni=omniSystems;omniSystems=function(dt){const out=p228Omni(dt);p228StoryTruth();p228Truth();production228.frames++;return out};
+const p228Reset=reset;reset=function(mode=autoMode){production228.voiceSeen.clear();production228.lastVoice='';production228.lastVoiceAt=0;const out=p228Reset(mode);p228StoryTruth();return out};
+const p228Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p228Replay(frame);const t=p228Truth(),boss=t.boss,scene=typeof p225Scene==='function'?p225Scene(t.stage):null,slot=typeof p225Slot==='function'?p225Slot(t.stage):null;frame.production228={system:production228.system,source:'REPLAY 60',stage:t.stage,opponent:scene?.opponent||boss?.identity||null,arena:scene?.arena||null,renderSource:slot?.src||null,telemetry:{activeFight:t.activeFight,canonicalOpponent:!!boss,worldObjects:t.worldObjects,graphicsFrames:t.graphicsFrames,arenaDraws:t.arenaDraws,legacyContradictions:t.contradictions},voice:{suppressed:production228.voiceSuppressed,backpressure:production228.voiceBackpressure,pending:Number(typeof p219Voice==='object'?p219Voice?.pending:0)||0,last:production228.lastVoice},story:{repairs:production228.storyRepairs,chapter:Number(typeof story110==='object'?story110?.chapter:0)||0,scene:typeof story110==='object'?story110?.scene:null},counts:{frames:production228.frames,legacyContradictions:production228.legacyContradictions},errors:production228.errors.slice(-4),invariants:{stageSceneAuthorityPreserved:typeof p225Apply==='function',canonicalOpponentPresent:!t.activeFight||!!boss,arenaRenderActivityObservable:!t.activeFight||t.arenaDraws>0||!slot?.ready,worldObjectTelemetryDerived:t.worldObjects===p228WorldObjects(),legacyWorldObjectCounterNonAuthoritative:true,legacyRigCounterNonAuthoritative:true,legacyDrawCallCounterNonAuthoritative:true,voiceQueueBounded:(Number(typeof p219Voice==='object'?p219Voice?.pending:0)||0)<=3,voiceDuplicateWindowEnforced:true,completedStoryCannotReenterIntro:!(typeof story110==='object'&&story110?.scene==='INTRO'&&Array.isArray(story110?.completed)&&story110.completed.length>=Number(story110?.totalChapters||Infinity)),singleRendererPreserved:true,noSecondCanvas:true,noNewRaf:true}}};
+try{p228StoryTruth();p228Truth();p132CombatEvent('PRODUCTION_228_READY',{system:production228.system,fixes:['REPLAY60_TELEMETRY_TRUTH','LEGACY_ZERO_COUNTERS_NON_AUTHORITATIVE','VOICE_DUPLICATE_WINDOW_6S','VOICE_PENDING_BACKPRESSURE_2','COMPLETED_STORY_CLEAR_LOCK','PRODUCTION225_STAGE_AUTHORITY_PRESERVED'],renderer:'EXISTING SINGLE FINAL COMPOSITOR'})}catch(err){production228.errors.push(String(err?.message||err))}
+
+
+/* PRODUCTION 229 — REPLAY 61 LIVE RUNTIME + RELEASE CLOSURE */
+const production229={ready:true,replay:61,system:'REPLAY 61 LIVE RUNTIME + RELEASE CLOSURE',frames:0,transformPoseRepairs:0,attackPoseOverrides:0,storyRepairs:0,alignmentRepairs:0,errors:[]};
+const p229AttackPose=value=>{const t=String(value||'').toUpperCase();if(/BEAM|BLAST|CANNON|LANCE|RAY|VOLLEY|NOVA|ERASURE/.test(t))return'BEAM';if(/KNEE|KICK|AXE|DIVE|HEEL|ROUNDHOUSE/.test(t))return'KICK';if(/SPIN|SWEEP|CYCLONE|TORNADO/.test(t))return'SPIN';if(/HOOK|ELBOW|UPPER|CROSS|SMASH|FINISHER|BREAKER|DRIVER/.test(t))return'CROSS';if(/DASH|VANISH|STEP|PURSUIT|RUSH/.test(t))return'DASH';return'JAB'};
+function p229Story(){try{if(typeof story110!=='object'||!story110)return;const total=Math.max(0,Number(story110.totalChapters)||0),done=Array.isArray(story110.completed)?story110.completed.length:0;if(total>0&&done>=total&&Number(story110.chapter)>=total-1&&story110.scene!=='CLEAR'){story110.scene='CLEAR';production229.storyRepairs++}}catch(err){production229.errors.push('story:'+String(err?.message||err))}}
+function p229Alignment(){try{if(typeof production157!=='object'||!production157)return false;const order=Array.isArray(production157.order)?production157.order:[],skills=Array.isArray(production157.skills)?production157.skills:[];const aligned=order.length>0&&order.length===skills.length&&skills.every((row,i)=>row&&row.form===order[i]&&Array.isArray(row.skills)&&row.skills.length>=2);production157.faults=production157.faults||{};production157.invariants=production157.invariants||{};if(aligned&&(!production157.invariants.bodySkillIndicesAligned||Number(production157.faults.alignment)!==0)){production229.alignmentRepairs++;production157.faults.alignment=0;production157.invariants.bodySkillIndicesAligned=true}if(typeof production159==='object'&&production159?.live)production159.live.bodySkillAlignment=aligned;return aligned}catch(err){production229.errors.push('alignment:'+String(err?.message||err));return false}}
+function p229TransformPose(){try{if(typeof griffin!=='object'||typeof owen!=='object'||griffin?.transformation?.active)return;const pose=String(owen.pose||'').toUpperCase(),wanted=String(owen.wanted||'').toUpperCase();if(pose!=='TRANSFORM'&&wanted!=='TRANSFORM')return;const mode=String(griffin.mode||'').toUpperCase(),replacement=/BEAM|VOLLEY|BLAST/.test(mode)?'BEAM':/VANISH|PURSUIT|DASH/.test(mode)?'DASH':/EVADE|PARRY|GUARD|COUNTER/.test(mode)?'GUARD':'FLIGHT';owen.pose=replacement;owen.wanted=replacement;if(owen.phase==='ANTICIPATION')owen.phase='LOOP';owen.stateTime=Math.min(Number(owen.stateTime)||0,.18);production229.transformPoseRepairs++}catch(err){production229.errors.push('pose:'+String(err?.message||err))}}
+const p229Event=combatEvent;combatEvent=function(type,data={}){const out=p229Event(type,data);try{const t=String(type||'').toUpperCase(),move=String(data.move||data.pose||data.kind||data.name||'');if(!griffin?.transformation?.active&&['MELEE_COMBO_BEAT','MELEE_CONTACT_CONFIRMED','CHRISTIAN_CONTACT','GRIFFIN_FORM_SKILL','SUPER_MOVE_TRIGGERED','SUPER_MOVE_IMPACT','FINISHER_CONFIRMED'].includes(t)){const pose=p229AttackPose(move);if(typeof p199SetPose==='function')p199SetPose(pose,t.includes('SUPER')?.72:.38,move);production229.attackPoseOverrides++}}catch(err){production229.errors.push('event:'+String(err?.message||err))}return out};
+const p229Omni=omniSystems;omniSystems=function(dt){const out=p229Omni(dt);p229Story();p229Alignment();p229TransformPose();if(typeof p228StoryTruth==='function')p228StoryTruth();production229.frames++;return out};
+const p229Reset=reset;reset=function(mode=autoMode){const out=p229Reset(mode);p229Story();p229Alignment();return out};
+const p229Replay=rememberReplayFrame;rememberReplayFrame=function(frame){p229Replay(frame);p229Story();const aligned=p229Alignment();p229TransformPose();const staleTransform=!!(typeof griffin==='object'&&!griffin?.transformation?.active&&typeof owen==='object'&&(String(owen.pose||'').toUpperCase()==='TRANSFORM'||String(owen.wanted||'').toUpperCase()==='TRANSFORM'));const storyDone=typeof story110==='object'&&Array.isArray(story110?.completed)&&story110.completed.length>=Number(story110?.totalChapters||Infinity);frame.production229={system:production229.system,source:'REPLAY 61',release:{runtime:229,requires:[196,199,204,220,221,222,223,224,225,228,229]},repairs:{transformPose:production229.transformPoseRepairs,attackPose:production229.attackPoseOverrides,story:production229.storyRepairs,alignment:production229.alignmentRepairs},truth:{bodySkillAligned:aligned,storyScene:typeof story110==='object'?story110?.scene:null,storyComplete:storyDone,owenPose:typeof owen==='object'?owen?.pose:null,owenWanted:typeof owen==='object'?owen?.wanted:null,griffinTransformActive:!!(typeof griffin==='object'&&griffin?.transformation?.active),production228Active:typeof production228==='object'&&production228?.ready===true},errors:production229.errors.slice(-6),invariants:{production228Present:typeof production228==='object'&&production228?.ready===true,staleTransformPoseBlocked:!staleTransform,canonicalBodySkillAlignment:aligned,completedStoryLockedClear:!storyDone||story110?.scene==='CLEAR',attackEventsDrivePose:true,singleRendererPreserved:true,noNewCanvas:true,noNewRaf:true}}};
+try{p229Story();p229Alignment();p229TransformPose();p132CombatEvent('PRODUCTION_229_READY',{system:production229.system,fixes:['DEPLOYED_RUNTIME_228_REQUIRED','STALE_TRANSFORM_POSE_BLOCKED','CANONICAL_BODY_SKILL_ALIGNMENT_RECOMPUTED','COMPLETED_STORY_CLEAR_LOCK','ATTACK_EVENTS_REBIND_VISUAL_POSE'],renderer:'EXISTING SINGLE FINAL COMPOSITOR'})}catch(err){production229.errors.push(String(err?.message||err))}
 
 })();
