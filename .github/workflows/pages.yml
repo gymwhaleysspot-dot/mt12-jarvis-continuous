@@ -59,7 +59,15 @@ jobs:
           )
           for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
           for f in "${required[@]}"; do case "$f" in *.js|*.mjs) node --check "$f";; esac; done
+          cp survivor.html /tmp/survivor-production235-source.html
+          node <<'NODE'
+          const fs=require('fs'),p='survivor.html';let h=fs.readFileSync(p,'utf8');
+          const rx=/jarvis\/core-survivor(?:-(?:221|230|231|234|235))?\.js(?:\?v=[^"'<>\s]*)?/g,refs=h.match(rx)||[];
+          if(refs.length!==1)throw Error(`Expected one canonical source loader before assembly, found ${refs.length}`);
+          h=h.replace(rx,'jarvis/core-survivor.js?v=production235-assembly-bootstrap');fs.writeFileSync(p,h);
+          NODE
           for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234 235; do node "tools/build-survivor-production${n}.mjs"; done
+          cp /tmp/survivor-production235-source.html survivor.html
           node --check jarvis/core-survivor-235.js
           node tools/test-survivor-production235-contract.mjs
           node <<'NODE'
