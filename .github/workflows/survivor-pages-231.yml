@@ -1,4 +1,4 @@
-name: Survivor Production 234 Canonical Verification
+name: Survivor Production 235 Full Rebuild Verification
 on:
   push:
     branches: [main]
@@ -6,7 +6,7 @@ on:
       - 'survivor.html'
       - 'jarvis/**'
       - 'tools/build-survivor-production*.mjs'
-      - 'tools/test-survivor-production234-contract.mjs'
+      - 'tools/test-survivor-production*.mjs'
       - '.github/workflows/survivor-pages-231.yml'
       - '.github/workflows/pages.yml'
   pull_request:
@@ -14,32 +14,33 @@ on:
       - 'survivor.html'
       - 'jarvis/**'
       - 'tools/build-survivor-production*.mjs'
-      - 'tools/test-survivor-production234-contract.mjs'
+      - 'tools/test-survivor-production*.mjs'
       - '.github/workflows/survivor-pages-231.yml'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: survivor-234-verify-${{ github.ref }}
+  group: survivor-235-verify-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Assemble and verify canonical Survivor Production 234
+      - name: Assemble and verify canonical Survivor Production 235
         run: |
           set -Eeuo pipefail
-          required=(survivor.html jarvis/core-survivor.js jarvis/production234-canonical-runtime-rewrite.inc.js tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs tools/test-survivor-production234-contract.mjs)
+          required=(survivor.html jarvis/core-survivor.js jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production231.mjs tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs)
           for f in "${required[@]}"; do test -f "$f" || { echo "Missing $f" >&2; exit 1; }; done
-          for f in jarvis/production234-canonical-runtime-rewrite.inc.js tools/build-survivor-production234.mjs tools/test-survivor-production234-contract.mjs; do node --check "$f"; done
-          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234; do node "tools/build-survivor-production${n}.mjs"; done
-          node --check jarvis/core-survivor-234.js
-          node tools/test-survivor-production234-contract.mjs
+          for f in jarvis/production234-canonical-runtime-rewrite.inc.js jarvis/production235-full-survivor-rebuild.inc.js tools/build-survivor-production234.mjs tools/build-survivor-production235.mjs tools/test-survivor-production235-contract.mjs; do node --check "$f"; done
+          for n in 204 205 206 207 209 210 211 212 213 215 217 218 219 220 222 224 225 227 229 230 231 234 235; do node "tools/build-survivor-production${n}.mjs"; done
+          node --check jarvis/core-survivor-235.js
+          node tools/test-survivor-production235-contract.mjs
           node <<'NODE'
-          const fs=require('fs'),core=fs.readFileSync('jarvis/core-survivor-234.js','utf8');
-          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231,234])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`missing PRODUCTION_${n}_READY`);
-          for(const m of ['ONE_CANONICAL_STAGE_MANIFEST','ATOMIC_OPPONENT_ACTOR_TARGET_ARENA_BIND','DIRECT_EVENT_IDENTITY_NORMALIZATION','FINAL_ENEMY_SPAWN_CANONICALIZATION','LIVE_FORM_ENGAGEMENT_TELEMETRY','SEPARATE_ARENA_BIND_DRAW_COUNTERS','REPLAY_RUNTIME_PROOF'])if(!core.includes(m))throw Error('missing Production 234 marker '+m);
-          if((core.match(/const production234=/g)||[]).length!==1)throw Error('Production 234 must exist exactly once');
+          const fs=require('fs'),core=fs.readFileSync('jarvis/core-survivor-235.js','utf8');
+          for(const n of [196,199,204,220,221,222,223,224,225,228,229,230,231,234,235])if(!core.includes(`PRODUCTION_${n}_READY`))throw Error(`missing PRODUCTION_${n}_READY`);
+          for(const m of ['FRESH_CANONICAL_BOSS_FACTORY','NO_LEGACY_LIRA_BOSS_REUSE','ATOMIC_STAGE_OPPONENT_TARGET_ARENA','DUAL_EVENT_ROUTE_NORMALIZATION','SPAWN_EVENT_SUPPRESSION_AND_REEMIT','AUTHORITATIVE_FORM_TRUTH','AUTHORITATIVE_HIT_TRUTH','GLOBAL_RUNTIME_PROOF','REPLAY_67_ACCEPTANCE'])if(!core.includes(m))throw Error('missing Production 235 marker '+m);
+          if((core.match(/const production235=/g)||[]).length!==1)throw Error('Production 235 must exist exactly once');
+          if(!core.includes('__JARVIS_SURVIVOR_RUNTIME__'))throw Error('global runtime proof missing');
           NODE
