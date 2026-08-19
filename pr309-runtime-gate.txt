@@ -1,71 +1,71 @@
 PR309 Survivor Production 235 executable runtime gate
-tested_head=fc0b21f7edca9236c349f5cec1cb02dce289dc92
+tested_head=f310a6a65ada9ba7a3a0e2a79a95faef4084090e
 production=235
-exit_code=1
+exit_code=0
 
 --- rebuild ---
 === canonical rebuild ===
 {
   production: 204,
   replay: 48,
-  bytes: 837290,
+  bytes: 837288,
   layers: 9,
   authority: 'BRIDGE_NOT_RENDERER'
 }
 {
   production: 205,
-  bytes: 844134,
+  bytes: 844132,
   authority: 'TOURNAMENT_ROUND_STAGE',
   renderer: 'EXISTING_SINGLE_2D'
 }
 {
   production: 206,
-  bytes: 851142,
+  bytes: 851140,
   scene: 'ROUND_TO_VISIBLE_ARENA',
   combat: 'EVENT_DRIVEN_HIGH_IMPACT',
   renderer: 'SINGLE_FINAL_ARENA'
 }
 {
   production: 207,
-  bytes: 858288,
+  bytes: 858286,
   scene: 'LEVEL_REBINDS_EXISTING_ARENA_IMAGE',
   combat: 'PRESSURE_AERIAL_ULTIMATE_BEATS',
   renderer: 'EXISTING_SINGLE'
 }
 {
   production: 209,
-  bytes: 862086,
+  bytes: 862084,
   scene: 'CANONICAL_ACTIVE_IMAGE_TO_EXISTING_FINAL_RENDERER',
   renderer: 'PRODUCTION_206_EXISTING'
 }
 {
   production: 210,
-  bytes: 867340,
+  bytes: 867338,
   scene: 'MAX_LIVE_STAGE_TO_EXISTING_ARENA_IMAGE',
   renderer: 'PRODUCTION_206_EXISTING'
 }
 {
   production: 211,
-  bytes: 872464,
+  bytes: 872462,
   scene: 'CAMPAIGN_STAGE_TO_LADDER_ARENA',
   renderer: 'PRODUCTION_206_EXISTING'
 }
 {
   production: 212,
-  bytes: 878157,
+  bytes: 878155,
   progression: 'BOSS_DEATH_TO_NEXT_ROUND',
   renderer: 'UNCHANGED_PRODUCTION_206_SINGLE'
 }
 {
   production: 214,
-  bytes: 892172,
+  bytes: 892170,
   opponent: 'VECTOR113_FINAL_BOSS_POSTPASS',
   opening: 'SYNCHRONOUS_DUEL_START',
   renderer: 'EXISTING_VECTOR113_ONLY'
 }
 {
   production: 216,
-  bytes: 898609,
+  bytes: 898607,
   renderer: 'ONE_MAIN_RAF_FINAL_COMPOSITOR',
   boss: 'ONE_DRAW_AUTHORITY',
   vfx: 'MOBILE_BOUNDED',
@@ -73,7 +73,7 @@ exit_code=1
 }
 {
   production: 217,
-  bytes: 904905,
+  bytes: 904903,
   actors: 'ONE_CANONICAL_TOURNAMENT_OPPONENT',
   target: 'CANONICAL_BOSS_ONLY',
   renderer: 'ONE_FINAL_COMPOSITOR',
@@ -81,7 +81,7 @@ exit_code=1
 }
 {
   production: 218,
-  bytes: 915114,
+  bytes: 915112,
   engine: 'CUSTOM_FIXED_STEP_CANVAS',
   simulationHz: 60,
   stages: 9,
@@ -90,7 +90,7 @@ exit_code=1
 }
 {
   production: 219,
-  bytes: 923034,
+  bytes: 923032,
   duel: 'BOUNDED',
   scene: 'LEVEL_BOUNDARY_REBIND',
   voice: 'DEDUPED_BOUNDED_QUEUE',
@@ -99,7 +99,7 @@ exit_code=1
 }
 {
   production: 222,
-  bytes: 952539,
+  bytes: 952537,
   arenas: 9,
   arenaBinding: 'TRUE_STAGE_EDGE',
   sceneBinding: 'CACHED_BY_CAMPAIGN_STAGE',
@@ -111,7 +111,7 @@ exit_code=1
 }
 {
   production: 223,
-  bytes: 956864,
+  bytes: 956862,
   formGates: '60_105_150_195_245_300_360_425_495_570',
   arenaBinding: 'FINAL_PIXEL_BY_CAMPAIGN_STAGE',
   arenaRegistry: 'ALL_NINE_BOUND',
@@ -122,7 +122,7 @@ exit_code=1
 }
 {
   production: 224,
-  bytes: 964056,
+  bytes: 964054,
   sceneAuthority: 'GLOBAL_ATOMIC_STAGE_OPPONENT_ARENA',
   finalArenaPainter: 'ARENA119_STAGE_SLOT',
   staticArena: 'RETIRED',
@@ -131,7 +131,7 @@ exit_code=1
 }
 {
   production: 225,
-  bytes: 975865,
+  bytes: 975863,
   scene: 'ONE_STAGE_TRANSACTION',
   opponent: 'STAGE_IDENTITY',
   arena: 'FINAL_ARENA119_STAGE_SLOT',
@@ -197,450 +197,8 @@ exit_code=1
   result: 'PASS'
 }
 
---- install tail ---
-Setting up libavfilter9:amd64 (7:6.1.1-3ubuntu5) ...
-Setting up gstreamer1.0-libav:amd64 (1.24.1-1build1) ...
-Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
-Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
-Processing triggers for man-db (2.12.0-4build2) ...
-Not building database; man-db/auto-update is not 'true'.
-Processing triggers for libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.8) ...
-Setting up libgtk-4-1:amd64 (4.14.5+ds-0ubuntu0.10) ...
-Setting up glib-networking:amd64 (2.80.0-1build1) ...
-Setting up libsoup-3.0-0:amd64 (3.4.4-5ubuntu0.7) ...
-Setting up libgssdp-1.6-0:amd64 (1.6.3-1build3) ...
-Setting up gstreamer1.0-plugins-good:amd64 (1.24.2-1ubuntu1.5) ...
-Setting up libgupnp-1.6-0:amd64 (1.6.6-1build3) ...
-Setting up libgupnp-igd-1.6-0:amd64 (1.6.0-3build3) ...
-Setting up libnice10:amd64 (0.1.21-2build3) ...
-Setting up libgstreamer-plugins-bad1.0-0:amd64 (1.24.2-1ubuntu4) ...
-Setting up gstreamer1.0-plugins-bad:amd64 (1.24.2-1ubuntu4) ...
-Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
-
-Running kernel seems to be up-to-date.
-
-No services need to be restarted.
-
-No containers need to be restarted.
-
-No user sessions are running outdated binaries.
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.
-Downloading Chromium 140.0.7339.16 (playwright build v1187) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-linux.zip
-|                                                                                |   0% of 173.7 MiB
-|■■■■■■■■                                                                        |  10% of 173.7 MiB
-|■■■■■■■■■■■■■■■■                                                                |  20% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 173.7 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 173.7 MiB
-Chromium 140.0.7339.16 (playwright build v1187) downloaded to /home/runner/.cache/ms-playwright/chromium-1187
-Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
-|                                                                                |   0% of 2.3 MiB
-|■■■■■■■■                                                                        |  10% of 2.3 MiB
-|■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
-FFMPEG playwright build v1011 downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
-Downloading Chromium Headless Shell 140.0.7339.16 (playwright build v1187) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1187/chromium-headless-shell-linux.zip
-|                                                                                |   0% of 104.3 MiB
-|■■■■■■■■                                                                        |  10% of 104.3 MiB
-|■■■■■■■■■■■■■■■■                                                                |  20% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 104.3 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 104.3 MiB
-Chromium Headless Shell 140.0.7339.16 (playwright build v1187) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1187
-Downloading Webkit 26.0 (playwright build v2203) from https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2203/webkit-ubuntu-24.04.zip
-|                                                                                |   0% of 94.2 MiB
-|■■■■■■■■                                                                        |  10% of 94.2 MiB
-|■■■■■■■■■■■■■■■■                                                                |  20% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 94.2 MiB
-|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 94.2 MiB
-Webkit 26.0 (playwright build v2203) downloaded to /home/runner/.cache/ms-playwright/webkit-2203
-
 --- chromium ---
-{
-  "engine": "chromium",
-  "url": "http://127.0.0.1:4173/survivor.html",
-  "expectedProduction": 235,
-  "expectedSha": "",
-  "state": {
-    "boot": null,
-    "runtime": null,
-    "capture": {
-      "errors": [
-        {
-          "message": "Uncaught TypeError: Assignment to constant variable.",
-          "filename": "http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235",
-          "line": 5300,
-          "column": 54,
-          "stack": "TypeError: Assignment to constant variable.\n    at http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235:5300:54\n    at http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235:5475:3"
-        }
-      ],
-      "rejections": [],
-      "startedAt": 1787123346918
-    },
-    "expected": 235,
-    "deploySha": "SOURCE",
-    "blockerText": "SURVIVOR RUNTIME BLOCKED\nBUILD\nMISMATCH\n\nThis page refuses to run a stale Survivor core. Expected Production 235. Reload after the canonical deployment completes.",
-    "htmlDataset": null
-  },
-  "consoleMessages": [],
-  "pageErrors": [
-    {
-      "name": "TypeError",
-      "message": "Assignment to constant variable.",
-      "stack": "TypeError: Assignment to constant variable.\n    at http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235:5300:54\n    at http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235:5475:3"
-    }
-  ],
-  "requestFailures": [],
-  "responses": [
-    {
-      "url": "http://127.0.0.1:4173/survivor.html",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/vendor/havok/HavokPhysics.js?v=1.3.14",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/core-survivor-235.js?v=production235",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arena-highland-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-rig-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-rig-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-forms-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-saiyan-spark-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-ascended-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-hyper-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-instinct-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-vanguard-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-rift-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-eclipse-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/lira-empress-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kraken-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/solenne-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/zephyra-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mordren-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kairox-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mireya-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/orun-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/sable-atlas-v2.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kraken-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/solenne-awakened-atlas-v4.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/zephyra-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mordren-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/sable-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kairox-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mireya-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/orun-awakened-atlas-v3.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-celestial-overdrive-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-omega-instinct-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/griffin-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/lira-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/solenne-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/kraken-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/zephyra-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/kairox-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/mordren-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/orun-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/mireya-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-speed-form-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/vfx/sable-energy-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-guardian-form-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-destroyer-form-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/griffin-instinct-form-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kraken-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/solenne-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/zephyra-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mordren-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/kairox-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/mireya-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/orun-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/rivals/sable-ultimate-atlas-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/lira-nexus-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/kraken-abyss-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/kairox-caldera-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/mireya-prism-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/zephyra-tempest-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/solenne-corona-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/sable-eclipse-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/orun-ion-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/mordren-singularity-v1.webp",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/lira-nexus-v1.webp?stage=1&production=211",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/kairox-caldera-v1.webp?stage=2&production=220",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/lira-nexus-v1.webp?stage=1&production=220",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/solenne-corona-v1.webp?stage=3&production=220",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/lira-nexus-v1.webp?stage=1&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/kairox-caldera-v1.webp?stage=2&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/solenne-corona-v1.webp?stage=3&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/mireya-prism-v1.webp?stage=4&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/zephyra-tempest-v1.webp?stage=5&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/orun-ion-v1.webp?stage=6&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/mordren-singularity-v1.webp?stage=7&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/sable-eclipse-v1.webp?stage=8&production=223",
-      "status": 200
-    },
-    {
-      "url": "http://127.0.0.1:4173/jarvis/assets/survivor/arenas/kraken-abyss-v1.webp?stage=9&production=223",
-      "status": 200
-    }
-  ]
-}
+{"engine":"chromium","runtime":235,"deploySha":"SOURCE","result":"PASS"}
 
 --- webkit ---
+{"engine":"webkit","runtime":235,"deploySha":"SOURCE","result":"PASS"}
