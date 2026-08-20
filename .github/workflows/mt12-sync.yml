@@ -60,7 +60,7 @@ jobs:
           p.write_text(json.dumps({
             'schema':1,'syncId':os.environ['SYNC_ID'],'state':'WAITING_FOR_HELPER',
             'stage':'connect-mt12','updatedAt':datetime.now(timezone.utc).isoformat(),
-            'message':'Connect the RadioMaster MT12 by USB to an online Jarvis helper.',
+            'message':'Connect the RadioMaster MT12 by USB to the Jarvis helper. The repo helper will auto-detect the mounted radio or use MT12_MOUNT.',
             'backupFirst':yes('BACKUP_FIRST'),'radioLogs':yes('INCLUDE_RADIO'),
             'blackbox':yes('INCLUDE_BLACKBOX'),'startLearning':yes('START_LEARNING')
           },indent=2)+'\n')
@@ -85,19 +85,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with: {fetch-depth: 0}
-      - name: Verify helper commands
+      - name: Verify repo helper
         shell: bash
         run: |
           set -Eeuo pipefail
-          for cmd in a17y-mt12-detect a17y-mt12-backup a17y-mt12-sync-logs; do
-            command -v "$cmd" >/dev/null || { echo "Missing required helper command: $cmd"; exit 1; }
-          done
+          command -v python3 >/dev/null
+          test -s scripts/mt12-sync-helper.py
+          python3 scripts/mt12-sync-helper.py --help >/dev/null
       - name: Detect exact MT12 target
         shell: bash
         run: |
           set -Eeuo pipefail
           mkdir -p .jarvis-sync
-          a17y-mt12-detect --require-model 'RadioMaster MT12' --json > .jarvis-sync/device.json
+          python3 scripts/mt12-sync-helper.py detect --json .jarvis-sync/device.json
           jq -e '.connected == true and (.model|ascii_downcase|contains("mt12"))' .jarvis-sync/device.json >/dev/null
       - name: Create rollback backup
         if: ${{ inputs.backup_first }}
@@ -105,17 +105,17 @@ jobs:
         run: |
           set -Eeuo pipefail
           mkdir -p "backups/$SYNC_ID"
-          a17y-mt12-backup --output "backups/$SYNC_ID" --include-radio --include-models --include-sd --manifest "backups/$SYNC_ID/BACKUP-MANIFEST.json"
+          python3 scripts/mt12-sync-helper.py backup --output "backups/$SYNC_ID" --manifest "backups/$SYNC_ID/BACKUP-MANIFEST.json"
           test -s "backups/$SYNC_ID/BACKUP-MANIFEST.json"
       - name: Copy only new logs with hashes
         shell: bash
         run: |
           set -Eeuo pipefail
           mkdir -p "logs/imported/$SYNC_ID"
-          args=(--destination "logs/imported/$SYNC_ID" --state-file factory/memory/mt12-sync-state.json --manifest "logs/imported/$SYNC_ID/SYNC-MANIFEST.json" --deduplicate-sha256 --preserve-paths)
+          args=(sync --destination "logs/imported/$SYNC_ID" --state-file factory/memory/mt12-sync-state.json --manifest "logs/imported/$SYNC_ID/SYNC-MANIFEST.json" --preserve-paths)
           [[ "$INCLUDE_RADIO" == 'true' ]] && args+=(--radio-csv)
           [[ "$INCLUDE_BLACKBOX" == 'true' ]] && args+=(--blackbox)
-          a17y-mt12-sync-logs "${args[@]}"
+          python3 scripts/mt12-sync-helper.py "${args[@]}"
           test -s "logs/imported/$SYNC_ID/SYNC-MANIFEST.json"
       - name: Publish imported evidence and sync result
         shell: bash
@@ -133,7 +133,7 @@ jobs:
             'newFiles':m.get('newFiles',m.get('files',[])),'newFileCount':m.get('newFileCount',len(m.get('files',[]))),
             'duplicatesSkipped':m.get('duplicatesSkipped',0),'backupCreated':os.environ['BACKUP_FIRST']=='true',
             'startLearning':os.environ['START_LEARNING']=='true',
-            'message':'New MT12 evidence imported. Attribution and learning have been queued.'
+            'message':'New MT12 evidence imported and persisted. Attribution and learning have been queued.'
           }
           p=Path('public/evidence-data/sync.json');p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(status,indent=2)+'\n')
           PY
