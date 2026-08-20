@@ -1,5 +1,5 @@
 import{state,refresh}from'./state.js';
-import{iPhoneSyncPanel,wireIPhoneSync}from'./iphone-sync.js';
+import{iPhoneSyncPanel,wireIPhoneSync}from'./iphone-sync.js?v=20260820iphone2';
 let wiring=false;
 function mount(){
  if(wiring||state.workspace!=='evidence')return;
