@@ -1,10 +1,10 @@
-name: Survivor Runtime 322 Verification
+name: Survivor Runtime 323 Verification
 on:
   push:
     branches: [main]
-    paths: ['survivor-runtime322.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime322-contract.mjs','tools/test-survivor-production242-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['survivor-runtime323.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   pull_request:
-    paths: ['survivor-runtime322.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime322-contract.mjs','tools/test-survivor-production242-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['survivor-runtime323.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,40 +16,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Verify Runtime 322 contract
+      - name: Verify Runtime 323 contract
         run: |
           set -Eeuo pipefail
           test -f survivor.html
-          test -f survivor-runtime322.html
-          node --check tools/test-survivor-runtime322-contract.mjs
-          node --check tools/test-survivor-production242-contract.mjs
+          test -f survivor-runtime323.html
+          node --check tools/test-survivor-runtime323-contract.mjs
+          node --check tools/test-survivor-production243-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
-          node --check tools/survivor-runtime322-lives-smoke.mjs
-          node tools/test-survivor-runtime322-contract.mjs
-          node tools/test-survivor-production242-contract.mjs
-          grep -F 'name="survivor-runtime" content="322"' survivor-runtime322.html
-          grep -F 'RUNTIME=322' survivor-runtime322.html
-          grep -F 'LEVEL_COUNT=45' survivor-runtime322.html
-          grep -F 'POSE_COUNT=42' survivor-runtime322.html
+          node --check tools/survivor-runtime323-lives-smoke.mjs
+          node --check tools/survivor-runtime323-combat-smoke.mjs
+          node tools/test-survivor-runtime323-contract.mjs
+          node tools/test-survivor-production243-contract.mjs
+          grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
+          grep -F 'RUNTIME=323' survivor-runtime323.html
+          grep -F 'LEVEL_COUNT=45' survivor-runtime323.html
+          grep -F 'POSE_COUNT=42' survivor-runtime323.html
       - name: Install Playwright browser engines
         run: |
           set -Eeuo pipefail
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium webkit
-      - name: Execute Runtime 322 in Chromium and WebKit
+      - name: Execute Runtime 323 in Chromium and WebKit
         run: |
           set -Eeuo pipefail
           mkdir -p artifacts
           python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/http.log 2>&1 &
           server=$!
           trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_EXPECTED_PRODUCTION=322 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime322.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=322 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime322.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime322.html SURVIVOR_LIVES_OUT=artifacts/lives node tools/survivor-runtime322-lives-smoke.mjs
+          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit
+          SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_LIVES_OUT=artifacts/lives node tools/survivor-runtime323-lives-smoke.mjs
+          SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_COMBAT_OUT=artifacts/combat node tools/survivor-runtime323-combat-smoke.mjs
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: survivor-runtime322-browser-${{ github.sha }}
+          name: survivor-runtime323-browser-${{ github.sha }}
           path: artifacts/
           retention-days: 30
