@@ -80,6 +80,7 @@ for(const path of ['.github/workflows/pages.yml','.github/workflows/survivor-pag
  ['modelRenderer:9','modelRenderer:10'],['choreography:14','choreography:15'],['MODEL_RENDERER_VERSION=9','MODEL_RENDERER_VERSION=10'],
  ['CINEMATIC_CEL_ATLAS_3D_V5','ANIME_DEPTH_ATLAS_3D_V6'],['jarvis-survivor-replay-v15','jarvis-survivor-replay-v16'],
  ['20260820runtime319graphics3dv14','20260820runtime320animedepth3dv15'],['RUNTIME 319 // CINEMATIC GRAPHICS V14','RUNTIME 320 // ANIME DEPTH GRAPHICS V15'],
+ ['20260820runtime320graphics3dv14','20260820runtime320animedepth3dv15'],
  ['runtime:319','runtime:320'],['runtime": 319','runtime": 320'],['CINEMATIC_GRAPHICS_3D_V14','ANIME_DEPTH_GRAPHICS_3D_V15']
 ]);
 for(const path of ['.github/workflows/pages.yml','.github/workflows/survivor-pages-231.yml'])replaceFile(path,[
