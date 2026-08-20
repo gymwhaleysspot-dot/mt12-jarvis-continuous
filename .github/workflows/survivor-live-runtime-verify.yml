@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Runtime 300 blockbuster combat reached Pages
+      - name: Verify Runtime 300 27-round animation director reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
@@ -23,17 +23,18 @@ jobs:
             if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="300"' && \
                printf '%s' "$html" | grep -q 'SPRITE_MANIFEST_VERSION=1' && \
                printf '%s' "$tab" | grep -q 'GRAPHICS_VERSION=4' && \
-               printf '%s' "$tab" | grep -q 'scratch300blockbuster1' && \
-               printf '%s' "$tab" | grep -q 'survivor-blockbuster-v1.js' && \
-               printf '%s' "$bb" | grep -q '__SURVIVOR_BLOCKBUSTER_V1__' && \
-               printf '%s' "$bb" | grep -q 'AudioContext' && \
-               printf '%s' "$bb" | grep -q 'speechSynthesis' && \
-               printf '%s' "$bb" | grep -q 'function explosion'; then
-              echo "Runtime 300 blockbuster combat verified live at $DEPLOY_SHA"
+               printf '%s' "$tab" | grep -q 'scratch300rounds27anim2' && \
+               printf '%s' "$tab" | grep -q '27-round blockbuster combat' && \
+               printf '%s' "$bb" | grep -q '__SURVIVOR_BLOCKBUSTER_V2__' && \
+               printf '%s' "$bb" | grep -q 'TOTAL_ROUNDS=ACTS\*ROUNDS_PER_ACT' && \
+               printf '%s' "$bb" | grep -q 'function nextAct' && \
+               printf '%s' "$bb" | grep -q 'function poseFlash' && \
+               printf '%s' "$bb" | grep -q 'data-anim-pose'; then
+              echo "Runtime 300 27-round animation director verified live at $DEPLOY_SHA"
               exit 0
             fi
             sleep 3
           done
-          echo 'Live Survivor deployment did not satisfy Runtime 300 blockbuster combat identity.' >&2
+          echo 'Live Survivor deployment did not satisfy Runtime 300 27-round animation director identity.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
