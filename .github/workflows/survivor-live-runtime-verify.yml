@@ -10,28 +10,28 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Runtime 308 articulated model / 45-level build reached Pages
+      - name: Verify Runtime 315 authored atlas-3D / 45-level build reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
         run: |
           set -Eeuo pipefail
           for attempt in $(seq 1 20); do
-            html="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/survivor.html?verify=$DEPLOY_SHA-$attempt" || true)"
+            html="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/survivor-runtime315.html?verify=$DEPLOY_SHA-$attempt" || true)"
             tab="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/jarvis/survivor-tab.js?verify=$DEPLOY_SHA-$attempt" || true)"
-            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="308"' && \
-               printf '%s' "$html" | grep -q 'MODEL_RENDERER_VERSION=2' && \
+            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="315"' && \
+               printf '%s' "$html" | grep -q 'MODEL_RENDERER_VERSION=5' && \
                printf '%s' "$html" | grep -q 'LEVEL_COUNT=45' && \
-               printf '%s' "$html" | grep -q 'ARTICULATED_CEL_MODEL_RUNTIME' && \
-               printf '%s' "$html" | grep -q 'jarvis-survivor-replay-v8' && \
-               printf '%s' "$tab" | grep -q '20260820runtime308models45' && \
-               printf '%s' "$tab" | grep -q 'ARTICULATED MODELS · 45 LEVELS' && \
+               printf '%s' "$html" | grep -q 'AUTHORED_ATLAS_EXTRUSION_3D_V1' && \
+               printf '%s' "$html" | grep -q 'jarvis-survivor-replay-v11' && \
+               printf '%s' "$tab" | grep -q '20260820runtime315atlas3dv10' && \
+               printf '%s' "$tab" | grep -q 'AUTHORED ATLAS-3D · 45 LEVELS' && \
                printf '%s' "$tab" | grep -q 'survivor-replay-overlay'; then
-              echo "Runtime 308 articulated model / 45-level build verified live at $DEPLOY_SHA"
+              echo "Runtime 315 authored atlas-3D / 45-level build verified live at $DEPLOY_SHA"
               exit 0
             fi
             sleep 5
           done
-          echo 'Live Survivor deployment did not expose Runtime 308 articulated models / 45 levels.' >&2
+          echo 'Live Survivor deployment did not expose Runtime 315 authored atlas-3D / 45 levels.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1

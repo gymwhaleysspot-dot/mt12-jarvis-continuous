@@ -1,51 +1,53 @@
-name: Survivor Runtime 314 Verification
+name: Survivor Runtime 315 Verification
 on:
   push:
     branches: [main]
-    paths: ['survivor-runtime314.html','survivor.html','jarvis/survivor-tab.js','tools/test-survivor-production235-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['survivor-runtime315.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime315-contract.mjs','tools/test-survivor-production235-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   pull_request:
-    paths: ['survivor-runtime314.html','survivor.html','jarvis/survivor-tab.js','tools/test-survivor-production235-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['survivor-runtime315.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime315-contract.mjs','tools/test-survivor-production235-contract.mjs','tools/survivor-runtime-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: survivor-314-verify-${{ github.ref }}
+  group: survivor-315-verify-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Verify Runtime 314 contract
+      - name: Verify Runtime 315 contract
         run: |
           set -Eeuo pipefail
           test -f survivor.html
-          test -f survivor-runtime314.html
+          test -f survivor-runtime315.html
+          node --check tools/test-survivor-runtime315-contract.mjs
           node --check tools/test-survivor-production235-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
+          node tools/test-survivor-runtime315-contract.mjs
           node tools/test-survivor-production235-contract.mjs
-          grep -F 'name="survivor-runtime" content="314"' survivor-runtime314.html
-          grep -F 'RUNTIME=314' survivor-runtime314.html
-          grep -F 'LEVEL_COUNT=45' survivor-runtime314.html
-          grep -F 'POSE_COUNT=42' survivor-runtime314.html
+          grep -F 'name="survivor-runtime" content="315"' survivor-runtime315.html
+          grep -F 'RUNTIME=315' survivor-runtime315.html
+          grep -F 'LEVEL_COUNT=45' survivor-runtime315.html
+          grep -F 'POSE_COUNT=42' survivor-runtime315.html
       - name: Install Playwright browser engines
         run: |
           set -Eeuo pipefail
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium webkit
-      - name: Execute Runtime 314 in Chromium and WebKit
+      - name: Execute Runtime 315 in Chromium and WebKit
         run: |
           set -Eeuo pipefail
           mkdir -p artifacts
           python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/http.log 2>&1 &
           server=$!
           trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_EXPECTED_PRODUCTION=314 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime314.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=314 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime314.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit
+          SURVIVOR_EXPECTED_PRODUCTION=315 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime315.html SURVIVOR_SMOKE_OUT=artifacts/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=315 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime315.html SURVIVOR_SMOKE_OUT=artifacts/webkit node tools/survivor-runtime-smoke.mjs webkit
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: survivor-runtime314-browser-${{ github.sha }}
+          name: survivor-runtime315-browser-${{ github.sha }}
           path: artifacts/
           retention-days: 30
