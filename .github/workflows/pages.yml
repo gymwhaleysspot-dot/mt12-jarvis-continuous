@@ -57,9 +57,14 @@ jobs:
           if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
           let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');
           h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);
-          h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
+          h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);
+          if(!h.includes(`name="survivor-build" content="${sha}"`))throw Error('Failed to stamp survivor-build meta');
+          if(!h.includes(`__SURVIVOR_DEPLOY_SHA__='${sha}'`))throw Error('Failed to stamp deploy SHA constant');
+          fs.writeFileSync(p,h);
           fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:300,deploySha:sha,artifact:'survivor.html',authority:'STANDALONE_SINGLE_RUNTIME',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
+          grep -F "name=\"survivor-build\" content=\"${SURVIVOR_DEPLOY_SHA}\"" survivor.html
+          grep -F "__SURVIVOR_DEPLOY_SHA__='${SURVIVOR_DEPLOY_SHA}'" survivor.html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
@@ -71,13 +76,33 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -Eeuo pipefail
-          base="${PAGE_URL%/}";ok=0
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            html="$(curl -fsSL -H 'Cache-Control: no-cache' "${base}/survivor.html?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="300"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq "__SURVIVOR_DEPLOY_SHA__='${GITHUB_SHA}'" <<<"$html";then ok=1;break;fi
+          base="${PAGE_URL%/}";ok=0;observed_build="missing";observed_runtime="missing";observed_manifest="missing"
+          for attempt in $(seq 1 36); do
+            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            html="$(curl -fsSL --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' "${base}/survivor.html?verify=${stamp}" || true)"
+            manifest="$(curl -fsSL --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
+            observed_build="$(grep -oE 'name="survivor-build" content="[0-9a-f]{40}"' <<<"$html" | head -1 | sed -E 's/.*content="([0-9a-f]{40})"/\1/' || true)"
+            observed_runtime="$(grep -oE 'name="survivor-runtime" content="[0-9]+"' <<<"$html" | head -1 | sed -E 's/.*content="([0-9]+)"/\1/' || true)"
+            observed_manifest="$(grep -oE '"deploySha"[[:space:]]*:[[:space:]]*"[0-9a-f]{40}"' <<<"$manifest" | head -1 | sed -E 's/.*"([0-9a-f]{40})"/\1/' || true)"
+            if grep -Fq 'name="survivor-runtime" content="300"' <<<"$html" && \
+               grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && \
+               grep -Fq "__SURVIVOR_DEPLOY_SHA__='${GITHUB_SHA}'" <<<"$html" && \
+               grep -Fq "\"deploySha\": \"${GITHUB_SHA}\"" <<<"$manifest"; then
+              echo "Runtime 300 deployment identity verified live on attempt ${attempt}: ${GITHUB_SHA}"
+              ok=1
+              break
+            fi
+            echo "Pages propagation attempt ${attempt}/36: runtime=${observed_runtime:-missing} htmlBuild=${observed_build:-missing} manifestBuild=${observed_manifest:-missing} expected=${GITHUB_SHA}"
             sleep 10
           done
-          test "$ok" -eq 1
+          if [ "$ok" -ne 1 ]; then
+            echo "Live Survivor deployment did not converge to the deployed artifact." >&2
+            echo "Expected SHA: ${GITHUB_SHA}" >&2
+            echo "Observed runtime: ${observed_runtime:-missing}" >&2
+            echo "Observed HTML build: ${observed_build:-missing}" >&2
+            echo "Observed manifest build: ${observed_manifest:-missing}" >&2
+            exit 1
+          fi
       - name: Browser-verify live runtime 300
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
