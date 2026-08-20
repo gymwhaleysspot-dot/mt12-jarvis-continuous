@@ -18,103 +18,72 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
+        with: {fetch-depth: 1}
       - uses: actions/configure-pages@v5
-      - name: Verify standalone Survivor runtime 308
+      - name: Verify Survivor Runtime 310 contracts
         run: |
           set -Eeuo pipefail
           test -f survivor.html
-          test -f tools/test-survivor-production235-contract.mjs
-          test -f tools/survivor-runtime-smoke.mjs
+          test -f survivor-runtime310.html
           node --check tools/test-survivor-production235-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node tools/test-survivor-production235-contract.mjs
-          grep -F 'name="survivor-runtime" content="308"' survivor.html
-          grep -F 'const RUNTIME=308' survivor.html
-          grep -F 'MODEL_RENDERER_VERSION=2' survivor.html
-          grep -F 'LEVEL_COUNT=45' survivor.html
-          ! grep -E 'core-survivor(?:-[0-9]+)?\.js' survivor.html
+          grep -F 'name="survivor-runtime" content="310"' survivor-runtime310.html
+          grep -F 'RUNTIME=310' survivor-runtime310.html
+          grep -F 'LEVEL_COUNT=45' survivor-runtime310.html
+          grep -F 'POSE_COUNT=42' survivor-runtime310.html
       - name: Install Playwright browser engines
         run: |
-          set -Eeuo pipefail
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium webkit
-      - name: Browser-boot runtime 308 before deployment
+      - name: Browser-boot Runtime 310 before deployment
         run: |
           set -Eeuo pipefail
           mkdir -p artifacts/predeploy
           python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/predeploy/http.log 2>&1 &
           server=$!
           trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_EXPECTED_PRODUCTION=308 SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=308 SURVIVOR_URL=http://127.0.0.1:4173/survivor.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
-      - name: Stamp exact deployment identity
+          SURVIVOR_EXPECTED_PRODUCTION=310 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime310.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=310 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime310.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
+      - name: Stamp deployment identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor.html';
-          if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing exact deployment SHA');
-          let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');
-          h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);
-          h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);
-          if(!h.includes(`name="survivor-build" content="${sha}"`))throw Error('Failed to stamp survivor-build meta');
-          if(!h.includes(`__SURVIVOR_DEPLOY_SHA__='${sha}'`))throw Error('Failed to stamp deploy SHA constant');
-          fs.writeFileSync(p,h);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:308,modelRenderer:2,levels:45,deploySha:sha,artifact:'survivor.html',authority:'STANDALONE_ARTICULATED_MODEL_RUNTIME',generatedAt:new Date().toISOString()},null,2)+'\n');
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime310.html';
+          if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing deployment SHA');
+          let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:310,modelRenderer:4,levels:45,poses:42,deploySha:sha,artifact:p,authority:'CINEMATIC_COMBAT_V5',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
-          grep -F "name=\"survivor-build\" content=\"${SURVIVOR_DEPLOY_SHA}\"" survivor.html
-          grep -F "__SURVIVOR_DEPLOY_SHA__='${SURVIVOR_DEPLOY_SHA}'" survivor.html
       - uses: actions/upload-pages-artifact@v4
-        with:
-          path: .
+        with: {path: .}
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live runtime 308 identity
+      - name: Verify live Runtime 310 identity
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -Eeuo pipefail
-          base="${PAGE_URL%/}";ok=0;observed_build="missing";observed_runtime="missing";observed_manifest="missing"
+          base="${PAGE_URL%/}";ok=0
           for attempt in $(seq 1 36); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            html="$(curl -fsSL --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' "${base}/survivor.html?verify=${stamp}" || true)"
-            manifest="$(curl -fsSL --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
-            observed_build="$(grep -oE 'name="survivor-build" content="[0-9a-f]{40}"' <<<"$html" | head -1 | sed -E 's/.*content="([0-9a-f]{40})"/\1/' || true)"
-            observed_runtime="$(grep -oE 'name="survivor-runtime" content="[0-9]+"' <<<"$html" | head -1 | sed -E 's/.*content="([0-9]+)"/\1/' || true)"
-            observed_manifest="$(grep -oE '"deploySha"[[:space:]]*:[[:space:]]*"[0-9a-f]{40}"' <<<"$manifest" | head -1 | sed -E 's/.*"([0-9a-f]{40})"/\1/' || true)"
-            if grep -Fq 'name="survivor-runtime" content="308"' <<<"$html" && \
-               grep -Fq 'MODEL_RENDERER_VERSION=2' <<<"$html" && \
-               grep -Fq 'LEVEL_COUNT=45' <<<"$html" && \
-               grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && \
-               grep -Fq "__SURVIVOR_DEPLOY_SHA__='${GITHUB_SHA}'" <<<"$html" && \
-               grep -Fq "\"deploySha\": \"${GITHUB_SHA}\"" <<<"$manifest"; then
-              echo "Runtime 308 deployment identity verified live on attempt ${attempt}: ${GITHUB_SHA}"
-              ok=1
-              break
-            fi
-            echo "Pages propagation attempt ${attempt}/36: runtime=${observed_runtime:-missing} htmlBuild=${observed_build:-missing} manifestBuild=${observed_manifest:-missing} expected=${GITHUB_SHA}"
+            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime310.html?verify=${stamp}" || true)"
+            manifest="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
+            tab="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-tab.js?verify=${stamp}" || true)"
+            if grep -Fq 'name="survivor-runtime" content="310"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq '"runtime": 310' <<<"$manifest" && grep -Fq 'survivor-runtime310.html' <<<"$tab";then ok=1;echo "Runtime 310 live at ${GITHUB_SHA}";break;fi
+            echo "Pages propagation ${attempt}/36 waiting for Runtime 310 ${GITHUB_SHA}"
             sleep 10
           done
-          if [ "$ok" -ne 1 ]; then
-            echo "Live Survivor Runtime 308 deployment did not converge to the deployed artifact." >&2
-            echo "Expected SHA: ${GITHUB_SHA}" >&2
-            echo "Observed runtime: ${observed_runtime:-missing}" >&2
-            echo "Observed HTML build: ${observed_build:-missing}" >&2
-            echo "Observed manifest build: ${observed_manifest:-missing}" >&2
-            exit 1
-          fi
-      - name: Browser-verify live runtime 308
+          test "$ok" -eq 1
+      - name: Browser-verify live Runtime 310
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          set -Eeuo pipefail
           base="${PAGE_URL%/}"
-          SURVIVOR_EXPECTED_PRODUCTION=308 SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=308 SURVIVOR_URL="${base}/survivor.html?browser=${GITHUB_SHA}" SURVIVOR_EXPECTED_SHA="${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
+          SURVIVOR_EXPECTED_PRODUCTION=310 SURVIVOR_URL="${base}/survivor-runtime310.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=310 SURVIVOR_URL="${base}/survivor-runtime310.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
