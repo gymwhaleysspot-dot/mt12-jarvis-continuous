@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Runtime 300 replay export reached Pages
+      - name: Verify Runtime 300 persistent replay control reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
@@ -22,16 +22,16 @@ jobs:
             bb="$(curl -fsSL -H 'Cache-Control: no-cache' "$LIVE_BASE/jarvis/survivor-blockbuster-v1.js?verify=$DEPLOY_SHA-$attempt" || true)"
             if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="300"' && \
                printf '%s' "$html" | grep -q 'window.exportSurvivorReplay' && \
-               printf '%s' "$tab" | grep -q 'scratch300rounds27anim2replay1' && \
-               printf '%s' "$tab" | grep -q 'function installReplay' && \
-               printf '%s' "$tab" | grep -q 'SURVIVOR_REPLAY_BUTTON' && \
-               printf '%s' "$tab" | grep -q 'application/json' && \
+               printf '%s' "$tab" | grep -q 'scratch300rounds27anim2replay2' && \
+               printf '%s' "$tab" | grep -q 'function installOuterReplay' && \
+               printf '%s' "$tab" | grep -q 'survivor-replay-overlay' && \
+               printf '%s' "$tab" | grep -q 'SURVIVOR_OUTER_REPLAY_BUTTON' && \
                printf '%s' "$bb" | grep -q '__SURVIVOR_BLOCKBUSTER_V2__'; then
-              echo "Runtime 300 replay export verified live at $DEPLOY_SHA"
+              echo "Runtime 300 persistent replay control verified live at $DEPLOY_SHA"
               exit 0
             fi
             sleep 3
           done
-          echo 'Live Survivor deployment did not expose the Runtime 300 replay export control.' >&2
+          echo 'Live Survivor deployment did not expose the persistent Runtime 300 replay control.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
