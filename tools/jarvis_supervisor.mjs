@@ -8,6 +8,7 @@ const twin=read('michael/digital-twin.json');
 const reconstruction=fs.existsSync('nickelle/reconstruction.json')?read('nickelle/reconstruction.json'):null;
 const runtime=fs.readFileSync('jarvis/mjx7303-racing-michael-v39.js','utf8');
 const graphics=fs.readFileSync('jarvis/michael-graphics-v40.js','utf8');
+const c3=fs.readFileSync('jarvis/michael-c3-v66.js','utf8');
 
 const checks={
   steeringSign:/lat=clamp\(\(p\?\.x\|\|0\)\*1\.55/.test(runtime),
@@ -16,7 +17,7 @@ const checks={
   truthProtected:truth?.rules?.generatedEvidenceMayOverwriteOwnerTruth===false,
   semanticTwin:Object.keys(twin.parts||{}).length>=16,
   reconstruction:!!reconstruction,
-  nativeWheelGuard:/wheelMat=m=>/.test(graphics)
+  nativeWheelGuard:/installMichaelC3V66/.test(graphics)&&/existingRunningGearPreserved:true/.test(c3)&&/adds NO body, window, lamp, wheel/.test(c3)
 };
 const failed=Object.entries(checks).filter(([,v])=>!v).map(([k])=>k);
 const now=new Date().toISOString();
