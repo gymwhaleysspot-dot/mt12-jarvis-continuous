@@ -14,19 +14,23 @@ let html=fs.readFileSync('survivor-runtime317.html','utf8')
   .replace("f.form=n;f.inv=.8;f.flash=.4;setPose(f,'TRANSFORM',.8);",
     "f.form=n;f.inv=.9;f.flash=.55;f.cd=Math.max(f.cd,.9);f.stun=Math.max(f.stun,.55);setPose(f,'TRANSFORM',.9);")
   .replace("function bind(i,carry=true){const l=LEVELS[i];asset(RIVAL_ATLASES[l.opponent]);asset(ARENA_ASSETS[l.opponent]);asset(HERO_ATLASES[cl(Math.floor(i/4),0,HERO_ATLASES.length-1)]);",
-    "function bind(i,carry=true){const l=LEVELS[i],gateForm=cl(Math.floor(i/4),0,10),battleForm=cl(1+Math.floor(i/4),0,10);asset(RIVAL_ATLASES[l.opponent]);asset(ARENA_ASSETS[l.opponent]);asset(HERO_ATLASES[gateForm]);asset(HERO_ATLASES[battleForm]);const next=LEVELS[i+1];if(next){asset(RIVAL_ATLASES[next.opponent]);asset(ARENA_ASSETS[next.opponent]);asset(HERO_ATLASES[cl(1+Math.floor((i+1)/4),0,10)])}")
+    "function bind(i,carry=true){const l=LEVELS[i],gateForm=cl(Math.floor(i/4),0,10),battleForm=cl(1+Math.floor(i/4),0,10);asset(RIVAL_ATLASES[l.opponent]);asset(ARENA_ASSETS[l.opponent]);asset(HERO_ATLASES[gateForm]);asset(HERO_ATLASES[battleForm]);")
   .replace("transform(st.hero,cl(Math.floor(i/4),0,10),'LEVEL_GATE');","transform(st.hero,Math.max(st.hero.form,gateForm),'LEVEL_GATE');")
   .replace("if(distance(a,b)>.215)","if(distance(a,b)>.205)")
   .replace("if(d>.31&&a.vanishCd<=0&&Math.random()<dt*1.8)","if(d>.2&&a.vanishCd<=0&&Math.random()<dt*2.4)")
   .replace("function startFinisher(a,b){", "function maybeTransform(){const h=st.hero,target=cl(1+Math.floor(st.level/4),0,10);if(h.form<target&&st.time-st.levelStart>=1.5&&!st.finisher&&h.stun<=0){asset(HERO_ATLASES[target]);if(assetReady(HERO_ATLASES[target])){transform(h,target,'BATTLE_ASCENSION');say('GRIFFIN',`Ascension: ${FORMS[target][0]}.`);emit('TRANSFORMATION_COMPLETE',{fighter:h.name,form:target,name:FORMS[target][0]})}}}\nfunction startFinisher(a,b){")
-  .replace("const h=st.hero,b=st.boss;ai(h,b,dt);", "const h=st.hero,b=st.boss;maybeTransform();ai(h,b,dt);")
+  .replace("const h=st.hero,b=st.boss;ai(h,b,dt);", "const h=st.hero,b=st.boss;maybeTransform();if(!st.nextPreloaded&&b.hp/b.maxHp<.72)preloadNextAssets();ai(h,b,dt);")
+  .replace("function startFinisher(a,b){", "function preloadNextAssets(){const next=LEVELS[st.level+1];if(!next)return;asset(RIVAL_ATLASES[next.opponent]);asset(ARENA_ASSETS[next.opponent]);asset(HERO_ATLASES[cl(1+Math.floor((st.level+1)/4),0,10)]);st.nextPreloaded=true;emit('NEXT_LEVEL_ASSETS_QUEUED',{level:st.level+2,opponent:next.opponent})}\nfunction startFinisher(a,b){")
+  .replace("st.level=i;st.destruction=0;", "st.level=i;st.destruction=0;st.nextPreloaded=false;")
+  .replace("function size(){D=Math.min(2,devicePixelRatio||1);", "function size(){D=Math.min(1.5,devicePixelRatio||1);")
+  .replace("fx.push({x,y:z,vx:Math.cos(q)*s,vy:Math.sin(q)*s,life:rnd(.15,.55),max:.55,color,size:rnd(1,5)})}}", "fx.push({x,y:z,vx:Math.cos(q)*s,vy:Math.sin(q)*s,life:rnd(.15,.55),max:.55,color,size:rnd(1,5)})}if(fx.length>360)fx.splice(0,fx.length-360)}")
   .replace("emit('KO',{fighter:f.b.name,by:f.a.name,method:'FINISHER'});", "emit('KO',{fighter:f.b.name,by:f.a.name,method:'FINISHER'});f.b.koEmitted=true;")
   .replace("if(b.hp<=0){snapshot('LEVEL_CLEAR');emit('LEVEL_CLEAR'", "if(b.hp<=0){if(!b.koEmitted){emit('KO',{fighter:b.name,by:h.name,method:'COMBAT'});b.koEmitted=true}snapshot('LEVEL_CLEAR');emit('LEVEL_CLEAR'")
   .replaceAll("schema:'jarvis-survivor-replay-v13'","schema:'jarvis-survivor-replay-v14'")
   .replaceAll('jarvis-survivor-replay-v13-','jarvis-survivor-replay-v14-')
   .replaceAll("replaySchema:'jarvis-survivor-replay-v13'","replaySchema:'jarvis-survivor-replay-v14'");
 
-for(const marker of ['RUNTIME=318','MODEL_RENDERER_VERSION=8','TRANSFORMING_CINEMATIC_ATLAS_3D_V4','maybeTransform','BATTLE_ASCENSION','TRANSFORMATION_COMPLETE','TELEMETRY_POSES','koEmitted=true',"schema:'jarvis-survivor-replay-v14'"])if(!html.includes(marker))throw Error(`Runtime 318 build missing ${marker}`);
+for(const marker of ['RUNTIME=318','MODEL_RENDERER_VERSION=8','TRANSFORMING_CINEMATIC_ATLAS_3D_V4','maybeTransform','BATTLE_ASCENSION','TRANSFORMATION_COMPLETE','TELEMETRY_POSES','koEmitted=true','preloadNextAssets','NEXT_LEVEL_ASSETS_QUEUED','Math.min(1.5','fx.length>360',"schema:'jarvis-survivor-replay-v14'"])if(!html.includes(marker))throw Error(`Runtime 318 build missing ${marker}`);
 fs.writeFileSync('survivor-runtime318.html',html);
 
 function replaceFile(path,pairs){let text=fs.readFileSync(path,'utf8');for(const[from,to]of pairs)text=text.replaceAll(from,to);fs.writeFileSync(path,text)}
