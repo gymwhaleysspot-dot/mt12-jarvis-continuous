@@ -20,50 +20,50 @@ jobs:
       - uses: actions/checkout@v5
         with: {fetch-depth: 1}
       - uses: actions/configure-pages@v5
-      - name: Verify Survivor Runtime 318 contracts
+      - name: Verify Survivor Runtime 319 contracts
         run: |
           set -Eeuo pipefail
           test -f survivor.html
-          test -f survivor-runtime318.html
-          node --check tools/test-survivor-runtime318-contract.mjs
-          node --check tools/test-survivor-production238-contract.mjs
+          test -f survivor-runtime319.html
+          node --check tools/test-survivor-runtime319-contract.mjs
+          node --check tools/test-survivor-production239-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
-          node tools/test-survivor-runtime318-contract.mjs
-          node tools/test-survivor-production238-contract.mjs
-          grep -F 'name="survivor-runtime" content="318"' survivor-runtime318.html
-          grep -F 'RUNTIME=318' survivor-runtime318.html
-          grep -F 'LEVEL_COUNT=45' survivor-runtime318.html
-          grep -F 'POSE_COUNT=42' survivor-runtime318.html
+          node tools/test-survivor-runtime319-contract.mjs
+          node tools/test-survivor-production239-contract.mjs
+          grep -F 'name="survivor-runtime" content="319"' survivor-runtime319.html
+          grep -F 'RUNTIME=319' survivor-runtime319.html
+          grep -F 'LEVEL_COUNT=45' survivor-runtime319.html
+          grep -F 'POSE_COUNT=42' survivor-runtime319.html
       - name: Install Playwright browser engines
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium webkit
-      - name: Browser-boot Runtime 318 before deployment
+      - name: Browser-boot Runtime 319 before deployment
         run: |
           set -Eeuo pipefail
           mkdir -p artifacts/predeploy
           python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/predeploy/http.log 2>&1 &
           server=$!
           trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_EXPECTED_PRODUCTION=318 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime318.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=318 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime318.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
+          SURVIVOR_EXPECTED_PRODUCTION=319 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime319.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=319 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime319.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
       - name: Stamp deployment identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime318.html';
+          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime319.html';
           if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing deployment SHA');
           let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:318,modelRenderer:8,levels:45,poses:42,deploySha:sha,artifact:p,authority:'TRANSFORMING_ATLAS_3D_V13',generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:319,modelRenderer:9,levels:45,poses:42,deploySha:sha,artifact:p,authority:'CINEMATIC_GRAPHICS_3D_V14',generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
       - uses: actions/upload-pages-artifact@v4
         with: {path: .}
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live Runtime 318 identity
+      - name: Verify live Runtime 319 identity
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -71,21 +71,21 @@ jobs:
           base="${PAGE_URL%/}";ok=0
           for attempt in $(seq 1 36); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime318.html?verify=${stamp}" || true)"
+            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime319.html?verify=${stamp}" || true)"
             manifest="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
             tab="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-tab.js?verify=${stamp}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="318"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq '"runtime": 318' <<<"$manifest" && grep -Fq 'survivor-runtime318.html' <<<"$tab";then ok=1;echo "Runtime 318 live at ${GITHUB_SHA}";break;fi
-            echo "Pages propagation ${attempt}/36 waiting for Runtime 318 ${GITHUB_SHA}"
+            if grep -Fq 'name="survivor-runtime" content="319"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq '"runtime": 319' <<<"$manifest" && grep -Fq 'survivor-runtime319.html' <<<"$tab";then ok=1;echo "Runtime 319 live at ${GITHUB_SHA}";break;fi
+            echo "Pages propagation ${attempt}/36 waiting for Runtime 319 ${GITHUB_SHA}"
             sleep 10
           done
           test "$ok" -eq 1
-      - name: Browser-verify live Runtime 318
+      - name: Browser-verify live Runtime 319
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           base="${PAGE_URL%/}"
-          SURVIVOR_EXPECTED_PRODUCTION=318 SURVIVOR_URL="${base}/survivor-runtime318.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=318 SURVIVOR_URL="${base}/survivor-runtime318.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
+          SURVIVOR_EXPECTED_PRODUCTION=319 SURVIVOR_URL="${base}/survivor-runtime319.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
+          SURVIVOR_EXPECTED_PRODUCTION=319 SURVIVOR_URL="${base}/survivor-runtime319.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
