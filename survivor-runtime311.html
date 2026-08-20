@@ -42,6 +42,6 @@ function loop(t){if(!st?.running)return;const dt=cl((t-last)/1000,0,.034);last=t
 function boot(){cancelAnimationFrame(raf);replay={version:RUNTIME,schema:'jarvis-survivor-replay-v11',events:[],frames:[]};fx=[];beams=[];slashes=[];st={running:true,paused:false,time:0,level:0,hero:fighter(true,.28,HERO_MAX_HP),boss:null,phase:'BOOT'};bind(0,false);U.start.hidden=true;U.over.hidden=true;last=performance.now();raf=requestAnimationFrame(loop);emit('RUNTIME_BOOT',{runtime:RUNTIME,renderer:'CEL_SHADED_ARTICULATED_V4'})}
 $('deploy').onclick=boot;$('retry').onclick=boot;$('reset').onclick=boot;$('pause').onclick=()=>{if(st){st.paused=!st.paused;$('pause').textContent=st.paused?'RESUME':'PAUSE'}};$('replay').onclick=()=>{const blob=new Blob([JSON.stringify(replay,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`jarvis-survivor-replay-v11-${Date.now()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
 globalThis.JarvisSurvivor={production:RUNTIME,levelCount:LEVEL_COUNT,poseCount:POSE_COUNT,modelRenderer:MODEL_RENDERER_VERSION,choreography:CHOREOGRAPHY_VERSION,getLevels:()=>LEVELS.map(x=>({...x})),getState:()=>st?{level:st.level+1,act:LEVELS[st.level].act,opponent:st.boss.name,arena:LEVELS[st.level].arena,renderer:'CEL_SHADED_ARTICULATED_V4',running:st.running}:null,getReplay:()=>structuredClone(replay),start:boot};
-arena();
+X.fillStyle='#02040d';X.fillRect(0,0,W,H);
 })();
 </script></body></html>
