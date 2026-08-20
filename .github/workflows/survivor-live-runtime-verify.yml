@@ -10,28 +10,28 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Runtime 321 cinematic atlas-3D / 45-level build reached Pages
+      - name: Verify Runtime 322 cinematic atlas-3D / 45-level build reached Pages
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
           LIVE_BASE: https://gymwhaleysspot-dot.github.io/mt12-jarvis-continuous
         run: |
           set -Eeuo pipefail
           for attempt in $(seq 1 20); do
-            html="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/survivor-runtime321.html?verify=$DEPLOY_SHA-$attempt" || true)"
+            html="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/survivor-runtime322.html?verify=$DEPLOY_SHA-$attempt" || true)"
             tab="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/jarvis/survivor-tab.js?verify=$DEPLOY_SHA-$attempt" || true)"
-            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="321"' && \
-               printf '%s' "$html" | grep -q 'MODEL_RENDERER_VERSION=11' && \
+            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="322"' && \
+               printf '%s' "$html" | grep -q 'MODEL_RENDERER_VERSION=12' && \
                printf '%s' "$html" | grep -q 'LEVEL_COUNT=45' && \
-               printf '%s' "$html" | grep -q 'REVIVAL_ANIME_DEPTH_3D_V7' && \
-               printf '%s' "$html" | grep -q 'jarvis-survivor-replay-v17' && \
-               printf '%s' "$tab" | grep -q '20260820runtime321animedepth3dv15' && \
-               printf '%s' "$tab" | grep -q 'RUNTIME 321 // THREE-LIFE REVIVAL V16' && \
+               printf '%s' "$html" | grep -q 'DYNAMIC_WORLD_ANIME_3D_V8' && \
+               printf '%s' "$html" | grep -q 'jarvis-survivor-replay-v18' && \
+               printf '%s' "$tab" | grep -q '20260820runtime322dynamicworld3dv17' && \
+               printf '%s' "$tab" | grep -q 'RUNTIME 322 // DYNAMIC WORLD V17' && \
                printf '%s' "$tab" | grep -q 'survivor-replay-overlay'; then
-              echo "Runtime 321 cinematic atlas-3D / 45-level build verified live at $DEPLOY_SHA"
+              echo "Runtime 322 cinematic atlas-3D / 45-level build verified live at $DEPLOY_SHA"
               exit 0
             fi
             sleep 5
           done
-          echo 'Live Survivor deployment did not expose Runtime 321 cinematic atlas-3D / 45 levels.' >&2
+          echo 'Live Survivor deployment did not expose Runtime 322 cinematic atlas-3D / 45 levels.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
