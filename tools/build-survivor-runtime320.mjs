@@ -21,7 +21,7 @@ let html=fs.readFileSync('survivor-runtime319.html','utf8')
   .replace("emit('LEVEL_BIND',{levelId:l.id,act:l.act,opponent:l.opponent,arena:l.arena});say('JARVIS'",
     "emit('LEVEL_BIND',{levelId:l.id,act:l.act,opponent:l.opponent,arena:l.arena});emit('ROUND_RECOVERY',{fighter:st.hero.name,hpBefore:+recoveryBefore.toFixed(1),hpAfter:+st.hero.hp.toFixed(1),amount:+(st.hero.hp-recoveryBefore).toFixed(1),policy:carry?'FIXED_280_CAP':'FULL_INITIALIZE'});say('JARVIS'")
   .replace("st.time-st.levelStart>=1.5&&!st.finisher&&h.stun<=0",
-    "(st.time-st.levelStart>=6||h.hp/h.maxHp<.68)&&!st.finisher&&h.stun<=0")
+    "(st.time-st.levelStart>=3||h.hp/h.maxHp<.68)&&!st.finisher&&h.stun<=0")
   .replace("beams.push({from:a,to:b,life:ultimate?.85:.46,max:ultimate?.85:.46,impact:ultimate?.32:.18,resolved:false,damage:(a.hero?54:46)*(ultimate?1.8:1),move:ultimate?'ULTIMATE':'BEAM',color:a.accent,w:ultimate?18:9});emit(ultimate?'ULTIMATE':'SUPER'",
     "beams.push({from:a,to:b,life:ultimate?.85:.46,max:ultimate?.85:.46,impact:ultimate?.32:.18,resolved:false,damage:(a.hero?54:46)*(ultimate?1.8:1),move:ultimate?'ULTIMATE':'BEAM',color:a.accent,w:ultimate?18:9});if(ultimate&&b.ki>=70&&b.hp>0&&b.cd<=.15){b.ki-=70;b.ult=0;b.cd=1.2;setPose(a,'BEAM_CLASH',.72);setPose(b,'BEAM_CLASH',.72);beams.push({from:b,to:a,life:.85,max:.85,resolved:true,color:b.accent,w:18});st.hitstop=.08;st.shake=.11;shockwave((a.x+b.x)/2,(a.z+b.z)/2,'#ffffff',1.8);impactBurst((a.x+b.x)/2,(a.z+b.z)/2,'#ffffff',1.6);emit('BEAM_CLASH',{fighter:a.name,against:b.name,trigger:'ULTIMATE_INTERCEPT'})}emit(ultimate?'ULTIMATE':'SUPER'" )
   .replace("for(const q of rings){q.life-=dt;q.r+=dt*230*q.power}rings=rings.filter(q=>q.life>0);",
