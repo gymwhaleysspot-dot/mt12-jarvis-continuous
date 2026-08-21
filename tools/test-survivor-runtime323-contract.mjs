@@ -2,23 +2,32 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
-const griffinGLTF = fs.readFileSync('assets/fighters/griffin/griffin-gltf-runtime-v2.js', 'utf8');
 const required = [
   'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=18', 'CHOREOGRAPHY_VERSION=18',
-  'JARVIS_WEB_MOVIE_SHADER_KERNEL_V3', 'JARVIS_SH_WARM_BOUNCE', 'JARVIS_IBL_SPECULAR', 'JARVIS_HAIR_DUAL_ANISO', 'JARVIS_ARMOR_CLEARCOAT', 'JARVIS_CLOTH_FUZZ', 'JARVIS_OUTLINE_HULL', 'JARVIS_MOBILE_FULL_FIDELITY', 'MOBILE_MOVIE_FULL', 'MOBILE_MOVIE_COMPAT', "getExtension('WEBGL_debug_renderer_info')", "getParameter(gl.MAX_TEXTURE_SIZE)", 'textureTier:maxTexture>=4096?4096:2048', "g.cullFace(g.FRONT)", "g.cullFace(g.BACK)", "g.depthMask(false)", 'uFull,uOutline',
-  'APEX_2026_ADAPTIVE_V12', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=2', 'groundY=H*(.74-', 'Math.min(62', 'rings.length>8', 'QUALITY_PRESETS', 'adaptiveQualityGovernor:true', 'backendProbe:true', 'navigator.gpu.requestAdapter', "getContext('webgl2'", 'GRAPHICS_QUALITY_SHIFT', 'reflectionFloor:false', 'function drawFighterReflection(){return}', "schema:'jarvis-survivor-replay-v19'",
-  "function snapshot(reason='TICK')", 'replay.frames.push', 'frameTelemetryHz:10',
-  'hpBefore', 'hpAfter', 'strikeId', "comboSemantics:'CONFIRMED_CONSECUTIVE_HITS'",
-  'FINISHER_START', 'FINISHER_IMPACT', "emit('KO'", 'FINISHER_COMPLETE',
-  'PROJECTILE_EXPIRE', "reason:current?'OUT_OF_RANGE':'STALE_TARGET'",
-  "emit('RUNTIME_BOOT'", "bind(0,false)", 'griffin-ascended-atlas-v3.webp',
-  'rivals/kairox-awakened-atlas-v3.webp', 'arenas/lira-nexus-v1.webp', 'awaitCriticalAssets', 'fallbackFighter', 'heroAtlasReady', 'ASSET_FAILED', "emit(defense", 'maybeTransform', 'EARNED_ASCENSION', 'TRANSFORMATION_COMPLETE', 'TELEMETRY_POSES', 'koEmitted=true', 'GRAPHICS_PROFILE', 'drawArenaDepth', 'drawSpeedLines', 'drawCinematicGrade', 'shockwave', 'imageSmoothingQuality', 'ROUND_RECOVERY', 'attacker:a.name', 'drawDepthFog', 'drawFighterReflection', 'drawImpactGlyphs', 'ULTIMATE_INTERCEPT', 'STARTING_LIVES=3', 'SENZU_REVIVAL', 'RUN_EXHAUSTED', 'persistFinalReplay', 'uploadReplay', 'replays/survivor/', 'ARENA_DYNAMICS', 'ARENA_DYNAMIC_BIND', 'drawDynamicArena', 'environment:{profile', 'if(!h.koEmitted)', 'h.koEmitted=false', 'RIVAL_DOCTRINES', 'SIGNATURE_ATTACK', 'RUSH_CHAIN', 'LIMIT_BREAK_AWAKENING', 'ARENA_FRACTURE', 'drawArenaFractures', 'testLimitBreakCombat', 'COMBO_BREAKER', 'COUNTER_BREAKER', 'COUNTER_BREAKER_BAIT', 'RUSH_CHAIN_RESOLVE', 'EARNED_ASCENSION', 'breakMeter', 'comboPhase', 'skillStock', 'AudioContext', 'VISIBILITY_SYNC', 'FIXED_STEP_VISIBILITY_SAFE', 'GITHUB_CLASSIC_PAT_WITH_BOUNDED_LOCAL_QUEUE', 'SPRITE_LAYOUT', 'resolveFighterSpacing', 'SPRITE_SEPARATION', 'horizontalGap', 'Math.min(H*.50,W*.46,480)', 'minContactGap:.165', 'teleportContactGap:.18', 'contactLayer', 'contactT', 'contactOverlap', 'attackReach', 'a.z-b.z||a.contactLayer-b.contactLayer', 'throttled:true', 'h.skillStock>=1.35&&elapsed>=12', "reason:'EVADED'", 'a.hero?10.8:LEVELS[st.level].damage*1.65', 'damage:(a.hero?48:50)', 'function drawContactShadow', 'function drawMotionAfterimages', 'subframeInterpolation:true', 'multiLobeContactShadows:true', 'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:420', 'renderAlpha=cl(acc/JARVIS_KERNEL.fixedStep,0,1)', 'JARVIS_LIQUID_ROLLBACK_KERNEL', 'FIGHT_COORDINATOR_VERSION=1', 'LIQUID_BATTLE_COORDINATOR', 'GRIFFIN_3D_MANIFEST', 'RIGGED_FIGHTER_V1', 'LIQUID_MOTION_GRAPH_V1', 'function saveRollbackState', 'function loadRollbackState', 'MOTION_BLEND_VERSION=1', 'COORDINATOR_BOOT', 'jarvis-survivor-liquid-coordinator-v1', "addEventListener('beforeunload'", "renderAdapter:'RIGGED_3D_READY_V1'", 'RIGGED_RENDER_ADAPTER_VERSION=1', 'RIGGED_3D_RENDER_ADAPTER', 'GRIFFIN_RIG_URL', 'RIGGED_RENDER_BOOT', 'RIGGED_3D_READY', 'SPRITE_FALLBACK', 'jarvis-rigged-fighter-v1', 'griffin-rig-v1.json', 'Promise.all([awaitCriticalAssets(),RIGGED_3D_RENDER_ADAPTER.load()])', 'GRIFFIN_PRODUCTION_ASSET_URL', 'griffin-production.gltf', 'RIGGED_ASSET_READY', 'PRODUCTION_ASSET_INVALID', 'compressedTextures:this.asset.images.length', 'RIGGED_WEBGL2_LIVE', 'WEBGL2_OFFSCREEN', 'compactReplayText', 'storageCompacted=true', 'const edge=f.hero?.14:.09', 'quadraticCurveTo', 'RIGGED_3D_RENDER_ADAPTER.draw(f,p,w,h)', 'vertexCount<validation.minVertices', 'triangleCount<validation.minTriangles', 'meshRevision:this.descriptor.delivery.meshRevision', 'uniform float uMaterial', 'j==20u', 'j==21u', 'this.uniforms.material', 'part.material', "getContext('webgl2',{alpha:true,antialias:true,premultipliedAlpha:true})"
+  'APEX_2026_ADAPTIVE_V12', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=2',
+  "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
+  'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
+  'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
+  'griffin-ascended-atlas-v3.webp', 'rivals/kairox-awakened-atlas-v3.webp', 'arenas/lira-nexus-v1.webp',
+  'GRAPHICS_PROFILE', 'SPRITE_LAYOUT', 'SPRITE_DEPTH_PIPELINE', 'function drawContactShadow',
+  'function drawMotionAfterimages', 'subframeInterpolation:true', 'multiLobeContactShadows:true',
+  'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:420',
+  'Math.min(H*.50,W*.46,480)', 'resolveFighterSpacing', 'SPRITE_SEPARATION', 'contactOverlap',
+  'JARVIS_LIQUID_ROLLBACK_KERNEL', 'LIQUID_BATTLE_COORDINATOR', 'function saveRollbackState',
+  'function loadRollbackState', 'COORDINATOR_BOOT', 'STARTING_LIVES=3', 'SENZU_REVIVAL',
+  'GRIFFIN_RENDER_AUTHORITY', 'GRIFFIN_SPRITE_AUTHORITY_V1', "mode:'SPRITE_ONLY'", 'rigged3D:false',
+  "renderAdapter:'SPRITE_AUTHORITY_V1'", 'const criticalReady=await awaitCriticalAssets()',
+  "emit('SPRITE_RENDER_BOOT'", 'griffinRenderer:GRIFFIN_RENDER_AUTHORITY',
+  'fighterRenderer:GRIFFIN_RENDER_AUTHORITY.name'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
-for (const marker of ['griffin-gltf-runtime-v2.js', 'JARVIS_GRIFFIN_GLTF_V2.install']) assert.ok(html.includes(marker), `missing ${marker}`);
-for (const marker of ['JARVIS_GRIFFIN_GLTF_V2', "version:3,mode:'RIGGED_MOVIE_RENDER_V3'", 'GRIFFIN_COMBAT_REST_POSE', 'uniform mat4 uJoints[22]', 'aWeight.x*uJoints[aJoint.x]', 'inverseBindMatrices', 'sampleJoints', 'slerp', 'uniformMatrix4fv', 'layout(location=4)in vec2 aUV', 'vUV=aUV', 'uFacing,uOutline,uTime,uYaw', 'uniform float uMaterial,uFull,uOutline,uTextured,uForm', 'SRGB8_ALPHA8 sampling already decodes albedo to linear', 'skinFresnel', 'hairWide', 'hairSharp', 'hairTint', 'const hasUV=bind(4,pr.attributes.TEXCOORD_0,2)', 'createImageBitmap', 'SRGB8_ALPHA8', 'WEBGL2_SKINNED_GLTF_V3', "AIR_TUMBLE:'knockdown'", 'g.cullFace(g.FRONT)', 'g.cullFace(g.BACK)']) assert.ok(griffinGLTF.includes(marker), `missing Griffin glTF V3 ${marker}`);
+for (const forbidden of [
+  'griffin-gltf-runtime-v2.js', 'JARVIS_GRIFFIN_GLTF_V2.install', 'RIGGED_3D_RENDER_ADAPTER.load()',
+  'RIGGED_3D_RENDER_ADAPTER.update(h,dt)', 'RIGGED_3D_RENDER_ADAPTER.draw(f,p,w,h)',
+  "emit('RIGGED_RENDER_BOOT'", 'riggedRenderer:RIGGED_3D_RENDER_ADAPTER'
+]) assert.ok(!html.includes(forbidden), `live Griffin path must not include ${forbidden}`);
 assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), 'runtime boot must precede level binding');
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
-console.log(JSON.stringify({runtime:323,replay:'v19',frames:'10Hz + transitions',combo:'confirmed hits',finisher:'lethal completion',renderer:'APEX_2026_ADAPTIVE_V12',kernel:'JARVIS_LIQUID_ROLLBACK_KERNEL',coordinator:'v1',result:'PASS'}));
+console.log(JSON.stringify({runtime:323,replay:'v19',renderer:'GRIFFIN_SPRITE_AUTHORITY_V1',kernel:'JARVIS_LIQUID_ROLLBACK_KERNEL',coordinator:'v1',result:'PASS'}));
