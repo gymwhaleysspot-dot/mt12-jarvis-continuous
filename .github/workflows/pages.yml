@@ -65,6 +65,7 @@ jobs:
       - name: Build bounded Pages artifact
         run: |
           set -Eeuo pipefail
+          node scripts/prepare-pages.mjs
           rm -rf _site
           mkdir -p _site
           rsync -a \
@@ -78,7 +79,6 @@ jobs:
             --exclude='scripts/' \
             --exclude='public/builds/' \
             ./ _site/
-          node scripts/prepare-pages.mjs
           if [ -f factory/evolution-controller.json ]; then
             node <<'NODE'
           const fs=require('fs'),path=require('path');
