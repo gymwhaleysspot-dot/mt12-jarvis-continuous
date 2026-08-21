@@ -23,10 +23,11 @@
       "minAnimations": 18,
       "minMaterials": 5,
       "minCompressedTextures": 5,
-      "minVertices": 5000,
-      "minTriangles": 9000
+      "minVertices": 25000,
+      "minTriangles": 50000,
+      "textureResolution": 4096
     },
-    "meshRevision": "GRIFFIN_ANATOMICAL_MESH_V2",
+    "meshRevision": "GRIFFIN_PS5_FIDELITY_LOD0_V1",
     "blockoutRejected": true
   },
   "skeleton": {
@@ -575,8 +576,10 @@
     {
       "level": 0,
       "maxDistance": 8,
-      "triangles": 85000,
-      "textures": 2048
+      "triangles": 51934,
+      "vertices": 27281,
+      "textures": 4096,
+      "target": "PS5_DESKTOP_ULTRA"
     },
     {
       "level": 1,
@@ -604,15 +607,20 @@
         "chain": [
           "hair.01"
         ],
+        "solver": "SPRING_INERTIAL",
         "stiffness": 0.82,
-        "damping": 0.18
+        "damping": 0.18,
+        "independent": true
       },
       {
         "chain": [
           "sash.01"
         ],
+        "solver": "CLOTH_RIBBON",
         "stiffness": 0.6,
-        "damping": 0.24
+        "damping": 0.24,
+        "independent": true,
+        "snapResponse": true
       }
     ],
     "footPlant": true
@@ -630,6 +638,18 @@
     },
     "canvas2d": {
       "fallback": "sprite-atlas"
+    },
+    "ultra": {
+      "geometry": "LOD0_51934_TRI",
+      "textures": 4096,
+      "sss": true,
+      "anisotropy": true,
+      "clearCoat": true,
+      "clothFuzz": true,
+      "normalBiasOutline": true,
+      "rimLight": true,
+      "bloom": true,
+      "auraChromatic": true
     }
   },
   "validation": {
@@ -658,5 +678,49 @@
       "lookAt"
     ],
     "minBones": 20
+  },
+  "materialProfiles": {
+    "skin": {
+      "shader": "SUBSURFACE_PROFILE",
+      "subsurfaceColor": [
+        0.8,
+        0.12,
+        0.06
+      ],
+      "microDetail": "PORES_WRINKLES_SWEAT",
+      "roughnessRange": [
+        0.34,
+        0.62
+      ]
+    },
+    "cloth": {
+      "shader": "CLOTH_FUZZ",
+      "weave": "TWILL",
+      "edgeWear": true,
+      "roughnessRange": [
+        0.58,
+        0.82
+      ]
+    },
+    "armor": {
+      "shader": "CLEAR_COAT",
+      "clearCoat": 0.72,
+      "clearCoatRoughness": 0.18,
+      "scratches": true
+    },
+    "hair": {
+      "shader": "DUAL_ANISOTROPIC",
+      "anisotropy": 0.82,
+      "secondaryHighlight": true,
+      "rootTipRoughness": [
+        0.54,
+        0.2
+      ]
+    },
+    "energy": {
+      "shader": "EMISSIVE_AURA",
+      "bloom": true,
+      "chromaticEdges": true
+    }
   }
 }
