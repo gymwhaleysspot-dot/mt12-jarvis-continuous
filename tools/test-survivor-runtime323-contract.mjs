@@ -16,7 +16,7 @@ const required = [
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const marker of ['griffin-gltf-runtime-v2.js', 'JARVIS_GRIFFIN_GLTF_V2.install']) assert.ok(html.includes(marker), `missing ${marker}`);
-for (const marker of ['JARVIS_GRIFFIN_GLTF_V2', 'GRIFFIN_COMBAT_REST_POSE', 'uniform mat4 uJoints[22]', 'aWeight.x*uJoints[aJoint.x]', 'inverseBindMatrices', 'sampleJoints', 'slerp', 'uniformMatrix4fv', 'vUV=vec2', 'createImageBitmap', 'SRGB8_ALPHA8', 'WEBGL2_SKINNED_GLTF_V2', "AIR_TUMBLE:'knockdown'", 'g.cullFace(g.FRONT)', 'g.cullFace(g.BACK)']) assert.ok(griffinGLTF.includes(marker), `missing Griffin glTF V2 ${marker}`);
+for (const marker of ['JARVIS_GRIFFIN_GLTF_V2', 'GRIFFIN_COMBAT_REST_POSE', 'uniform mat4 uJoints[22]', 'aWeight.x*uJoints[aJoint.x]', 'inverseBindMatrices', 'sampleJoints', 'slerp', 'uniformMatrix4fv', 'layout(location=4)in vec2 aUV', 'vUV=aUV', 'SRGB8_ALPHA8 sampling already decodes albedo to linear', 'skinFresnel', 'hairWide', 'hairSharp', 'const hasUV=bind(4,pr.attributes.TEXCOORD_0,2)', 'createImageBitmap', 'SRGB8_ALPHA8', 'WEBGL2_SKINNED_GLTF_V2', "AIR_TUMBLE:'knockdown'", 'g.cullFace(g.FRONT)', 'g.cullFace(g.BACK)']) assert.ok(griffinGLTF.includes(marker), `missing Griffin glTF V2 ${marker}`);
 assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), 'runtime boot must precede level binding');
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
