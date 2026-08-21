@@ -100,8 +100,13 @@ jobs:
           set -Eeuo pipefail
           debt="$(jq -r '.visualDebt.regions[0].debt // 0' /tmp/nickelle-autonomous-state.json)"
           awk "BEGIN{exit !($debt > 0.08)}" || exit 0
-          active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
-          [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main
+          wf='michael-visual-evolution.yml'
+          encoded="$(gh api "/repos/$REPO/contents/.github/workflows/$wf?ref=main" --jq .content 2>/dev/null || true)"
+          if [ -z "$encoded" ]; then echo "Visual tournament route skipped: $wf is absent on main"; exit 0; fi
+          source="$(printf '%s' "$encoded" | base64 -d 2>/dev/null || true)"
+          if ! grep -Eq '^[[:space:]]*workflow_dispatch:' <<<"$source"; then echo "Visual tournament route skipped: $wf has no workflow_dispatch trigger"; exit 0; fi
+          active="$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
+          [ "$active" -gt 0 ] || gh workflow run "$wf" --repo "$REPO" --ref main
       - name: Preserve autonomous evidence
         if: always()
         uses: actions/upload-artifact@v6
