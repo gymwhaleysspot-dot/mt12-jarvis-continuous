@@ -4,10 +4,13 @@ on:
     branches: [main]
     paths:
       - 'survivor-runtime323.html'
+      - 'survivor-ps2.html'
       - 'survivor.html'
       - 'jarvis/survivor-tab.js'
       - 'jarvis/assets/survivor/**'
       - 'tools/test-survivor-runtime323-contract.mjs'
+      - 'tools/test-survivor-ps2-contract.mjs'
+      - 'tools/survivor-ps2-smoke.mjs'
       - 'tools/test-survivor-production243-contract.mjs'
       - 'tools/survivor-runtime-smoke.mjs'
       - 'tools/survivor-runtime323-lives-smoke.mjs'
@@ -37,12 +40,16 @@ jobs:
           set -Eeuo pipefail
           test -f survivor.html
           test -f survivor-runtime323.html
+          test -f survivor-ps2.html
+          node --check tools/test-survivor-ps2-contract.mjs
+          node --check tools/survivor-ps2-smoke.mjs
           node --check tools/test-survivor-runtime323-contract.mjs
           node --check tools/test-survivor-production243-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node --check tools/survivor-runtime323-lives-smoke.mjs
           node --check tools/survivor-runtime323-combat-smoke.mjs
           node tools/test-survivor-runtime323-contract.mjs
+          node tools/test-survivor-ps2-contract.mjs
           node tools/test-survivor-production243-contract.mjs
           grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
           grep -F 'RUNTIME=323' survivor-runtime323.html
@@ -63,6 +70,8 @@ jobs:
           SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
           SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_LIVES_OUT=artifacts/predeploy/lives node tools/survivor-runtime323-lives-smoke.mjs
           SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_COMBAT_OUT=artifacts/predeploy/combat node tools/survivor-runtime323-combat-smoke.mjs
+          SURVIVOR_PS2_URL=http://127.0.0.1:4173/survivor-ps2.html SURVIVOR_PS2_OUT=artifacts/predeploy/ps2 node tools/survivor-ps2-smoke.mjs chromium
+          SURVIVOR_PS2_URL=http://127.0.0.1:4173/survivor-ps2.html SURVIVOR_PS2_OUT=artifacts/predeploy/ps2 node tools/survivor-ps2-smoke.mjs webkit
       - name: Stamp deployment identity
         env:
           SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
@@ -106,6 +115,7 @@ jobs:
           test "$bytes" -lt 900000000
           test -f _site/index.html
           test -f _site/survivor-runtime323.html
+          test -f _site/survivor-ps2.html
           test -f _site/jarvis/survivor-build.json
       - uses: actions/upload-pages-artifact@v4
         with: {path: _site}
@@ -137,6 +147,8 @@ jobs:
           SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
           SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_LIVES_OUT=artifacts/live/lives node tools/survivor-runtime323-lives-smoke.mjs
           SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_COMBAT_OUT=artifacts/live/combat node tools/survivor-runtime323-combat-smoke.mjs
+          SURVIVOR_PS2_URL="${base}/survivor-ps2.html?browser=${GITHUB_SHA}" SURVIVOR_PS2_OUT=artifacts/live/ps2 node tools/survivor-ps2-smoke.mjs chromium
+          SURVIVOR_PS2_URL="${base}/survivor-ps2.html?browser=${GITHUB_SHA}" SURVIVOR_PS2_OUT=artifacts/live/ps2 node tools/survivor-ps2-smoke.mjs webkit
       - name: Upload Survivor browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
