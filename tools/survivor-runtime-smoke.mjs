@@ -36,7 +36,7 @@ async function runAttempt(attempt){
       const start=document.querySelector('#start');
       const eventTypes=replay.events.map(e=>e.type);
       const source=[...document.scripts].map(script=>script.textContent||'').join('\n');
-      const earnedAscensionContract=source.includes("transform(h,target,'EARNED_ASCENSION')")&&source.includes('h.skillStock>=.72')&&source.includes('h.hp/h.maxHp<.52')&&source.includes('st.time-st.levelStart>18');
+      const earnedAscensionContract=source.includes("transform(h,target,'EARNED_ASCENSION')")&&source.includes('h.skillStock>=1.35&&elapsed>=12')&&source.includes('h.hp/h.maxHp<.42')&&source.includes('elapsed>24');
       return {
         runtime,levels:runtime?.levels||0,modelRenderer:runtime?.modelRenderer||0,choreography:runtime?.choreography||0,
         replaySchema:replay.schema,eventCount:replay.events.length,frameCount:replay.frames.length,
