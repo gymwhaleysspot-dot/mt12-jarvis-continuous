@@ -143,8 +143,10 @@ jobs:
             [ "$persisted" -eq 1 ] || { echo 'Nickelle ai-state persistence exhausted retries' >&2; exit 1; }
           )
           git fetch origin ai-state:refs/remotes/origin/ai-state
-          git show origin/ai-state:michael/reconstruction/advanced-state.json | grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions'
-          git show origin/ai-state:michael/reconstruction/autonomous-state.json | grep -q 'topologyQueue'
+          git show origin/ai-state:michael/reconstruction/advanced-state.json >/tmp/verify-nickelle-advanced-state.json
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >/tmp/verify-nickelle-autonomous-state.json
+          grep -q 'actual_render_finite_difference_owner_truth_with_pairwise_interactions' /tmp/verify-nickelle-advanced-state.json
+          grep -q 'topologyQueue' /tmp/verify-nickelle-autonomous-state.json
           echo 'Nickelle isolated advanced/autonomous state verified on remote ai-state'
       - name: Route repaired heavy topology work
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
@@ -154,7 +156,16 @@ jobs:
       - name: Route unresolved benchmark debt
         env: {GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}'}
         run: |
-          pass="$(jq -r '.benchmark.pass' /tmp/nickelle-advanced-state.json)"; if [ "$pass" != true ]; then active="$(gh api "/repos/$REPO/actions/workflows/michael-visual-evolution.yml/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"; [ "$active" -gt 0 ] || gh workflow run michael-visual-evolution.yml --repo "$REPO" --ref main; fi
+          set -Eeuo pipefail
+          pass="$(jq -r '.benchmark.pass' /tmp/nickelle-advanced-state.json)"
+          [ "$pass" != true ] || exit 0
+          wf='michael-visual-evolution.yml'
+          encoded="$(gh api "/repos/$REPO/contents/.github/workflows/$wf?ref=main" --jq .content 2>/dev/null || true)"
+          if [ -z "$encoded" ]; then echo "Visual evolution workflow missing on main; benchmark debt retained without dispatch"; exit 0; fi
+          source="$(printf '%s' "$encoded" | base64 -d 2>/dev/null || true)"
+          if ! grep -q 'workflow_dispatch' <<<"$source"; then echo "Visual evolution workflow is not dispatchable; benchmark debt retained without dispatch"; exit 0; fi
+          active="$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=20" --jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending")]|length')"
+          [ "$active" -gt 0 ] || gh workflow run "$wf" --repo "$REPO" --ref main
       - name: Preserve measured advanced evidence
         if: always()
         uses: actions/upload-artifact@v6
