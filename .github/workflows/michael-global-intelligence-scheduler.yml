@@ -30,7 +30,12 @@ jobs:
           encoded="$(gh api "/repos/$REPO/contents/michael/system/promotion-ledger.json?ref=ai-state" --jq .content 2>/dev/null || true)"
           if [ -n "$encoded" ]; then ledger="$(printf '%s' "$encoded" | base64 -d 2>/dev/null || echo '{"events":[]}')"; fi
           due() {
-            local wf="$1" base_age="$2" label="$3" kind="$4"; local json active last_sha last_time age completed avg_sec promos vpm factor min_age
+            local wf="$1" base_age="$2" label="$3" kind="$4"
+            local json active last_sha last_time age completed avg_sec promos vpm factor min_age source_encoded source
+            source_encoded="$(gh api "/repos/$REPO/contents/.github/workflows/$wf?ref=main" --jq .content 2>/dev/null || true)"
+            if [ -z "$source_encoded" ]; then echo "$label skipped; workflow missing on main: $wf"; return; fi
+            source="$(printf '%s' "$source_encoded" | base64 -d 2>/dev/null || true)"
+            if ! grep -Eq '^[[:space:]]*workflow_dispatch:' <<<"$source"; then echo "$label skipped; workflow has no workflow_dispatch trigger: $wf"; return; fi
             json="$(gh api "/repos/$REPO/actions/workflows/$wf/runs?per_page=20")"
             active="$(jq '[.workflow_runs[]|select(.status=="queued" or .status=="in_progress" or .status=="pending" or .status=="waiting")]|length' <<<"$json")"
             if [ "$active" -gt 0 ]; then echo "$label already active"; return; fi
