@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
   'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=18', 'CHOREOGRAPHY_VERSION=18',
-  'APEX_2026_ADAPTIVE_V12', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'QUALITY_PRESETS', 'adaptiveQualityGovernor:true', 'backendProbe:true', 'navigator.gpu.requestAdapter', "getContext('webgl2'", 'GRAPHICS_QUALITY_SHIFT', 'reflectionFloor:false', 'function drawFighterReflection(){return}', "schema:'jarvis-survivor-replay-v19'",
+  'APEX_2026_ADAPTIVE_V12', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=2', 'groundY=H*(.74-', 'Math.min(62', 'rings.length>8', 'QUALITY_PRESETS', 'adaptiveQualityGovernor:true', 'backendProbe:true', 'navigator.gpu.requestAdapter', "getContext('webgl2'", 'GRAPHICS_QUALITY_SHIFT', 'reflectionFloor:false', 'function drawFighterReflection(){return}', "schema:'jarvis-survivor-replay-v19'",
   "function snapshot(reason='TICK')", 'replay.frames.push', 'frameTelemetryHz:10',
   'hpBefore', 'hpAfter', 'strikeId', "comboSemantics:'CONFIRMED_CONSECUTIVE_HITS'",
   'FINISHER_START', 'FINISHER_IMPACT', "emit('KO'", 'FINISHER_COMPLETE',
