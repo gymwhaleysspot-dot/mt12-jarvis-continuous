@@ -1,0 +1,652 @@
+{
+  "schema": "jarvis-rigged-fighter-v1",
+  "version": 1,
+  "id": "griffin-rig-v1",
+  "fighter": "GRIFFIN",
+  "units": "meters",
+  "upAxis": "Y",
+  "frontAxis": "Z",
+  "delivery": {
+    "preferred": "griffin-production.glb",
+    "fallback": "sprite-atlas",
+    "formats": [
+      "glTF-2.0",
+      "GLB"
+    ],
+    "compression": [
+      "KHR_meshopt_compression",
+      "KHR_texture_basisu"
+    ],
+    "textureContainer": "KTX2"
+  },
+  "skeleton": {
+    "root": "root",
+    "nodes": [
+      {
+        "name": "root",
+        "parent": null,
+        "t": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "hips",
+        "parent": "root",
+        "t": [
+          0,
+          1.02,
+          0
+        ]
+      },
+      {
+        "name": "spine",
+        "parent": "hips",
+        "t": [
+          0,
+          0.22,
+          0
+        ]
+      },
+      {
+        "name": "chest",
+        "parent": "spine",
+        "t": [
+          0,
+          0.24,
+          0
+        ]
+      },
+      {
+        "name": "neck",
+        "parent": "chest",
+        "t": [
+          0,
+          0.24,
+          0
+        ]
+      },
+      {
+        "name": "head",
+        "parent": "neck",
+        "t": [
+          0,
+          0.13,
+          0
+        ]
+      },
+      {
+        "name": "shoulder.L",
+        "parent": "chest",
+        "t": [
+          -0.18,
+          0.17,
+          0
+        ]
+      },
+      {
+        "name": "upperArm.L",
+        "parent": "shoulder.L",
+        "t": [
+          -0.23,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "forearm.L",
+        "parent": "upperArm.L",
+        "t": [
+          -0.27,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "hand.L",
+        "parent": "forearm.L",
+        "t": [
+          -0.23,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "shoulder.R",
+        "parent": "chest",
+        "t": [
+          0.18,
+          0.17,
+          0
+        ]
+      },
+      {
+        "name": "upperArm.R",
+        "parent": "shoulder.R",
+        "t": [
+          0.23,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "forearm.R",
+        "parent": "upperArm.R",
+        "t": [
+          0.27,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "hand.R",
+        "parent": "forearm.R",
+        "t": [
+          0.23,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "thigh.L",
+        "parent": "hips",
+        "t": [
+          -0.11,
+          -0.08,
+          0
+        ]
+      },
+      {
+        "name": "shin.L",
+        "parent": "thigh.L",
+        "t": [
+          0,
+          -0.43,
+          0
+        ]
+      },
+      {
+        "name": "foot.L",
+        "parent": "shin.L",
+        "t": [
+          0,
+          -0.42,
+          0.1
+        ]
+      },
+      {
+        "name": "thigh.R",
+        "parent": "hips",
+        "t": [
+          0.11,
+          -0.08,
+          0
+        ]
+      },
+      {
+        "name": "shin.R",
+        "parent": "thigh.R",
+        "t": [
+          0,
+          -0.43,
+          0
+        ]
+      },
+      {
+        "name": "foot.R",
+        "parent": "shin.R",
+        "t": [
+          0,
+          -0.42,
+          0.1
+        ]
+      },
+      {
+        "name": "hair.01",
+        "parent": "head",
+        "t": [
+          0,
+          0.15,
+          -0.03
+        ]
+      },
+      {
+        "name": "sash.01",
+        "parent": "hips",
+        "t": [
+          0,
+          0,
+          -0.11
+        ]
+      }
+    ]
+  },
+  "bind": {
+    "height": 1.86,
+    "center": [
+      0,
+      0.93,
+      0
+    ],
+    "capsules": [
+      [
+        "head",
+        "neck",
+        0.13
+      ],
+      [
+        "neck",
+        "chest",
+        0.12
+      ],
+      [
+        "chest",
+        "hips",
+        0.2
+      ],
+      [
+        "upperArm.L",
+        "forearm.L",
+        0.09
+      ],
+      [
+        "forearm.L",
+        "hand.L",
+        0.075
+      ],
+      [
+        "upperArm.R",
+        "forearm.R",
+        0.09
+      ],
+      [
+        "forearm.R",
+        "hand.R",
+        0.075
+      ],
+      [
+        "thigh.L",
+        "shin.L",
+        0.13
+      ],
+      [
+        "shin.L",
+        "foot.L",
+        0.105
+      ],
+      [
+        "thigh.R",
+        "shin.R",
+        0.13
+      ],
+      [
+        "shin.R",
+        "foot.R",
+        0.105
+      ]
+    ]
+  },
+  "materials": {
+    "skin": {
+      "type": "PBR",
+      "baseColor": [
+        0.76,
+        0.38,
+        0.18,
+        1
+      ],
+      "roughness": 0.54,
+      "metallic": 0
+    },
+    "cloth": {
+      "type": "PBR",
+      "baseColor": [
+        0.02,
+        0.14,
+        0.48,
+        1
+      ],
+      "roughness": 0.72,
+      "metallic": 0.02
+    },
+    "armor": {
+      "type": "PBR",
+      "baseColor": [
+        0.92,
+        0.58,
+        0.08,
+        1
+      ],
+      "roughness": 0.26,
+      "metallic": 0.78,
+      "clearcoat": 0.45
+    },
+    "hair": {
+      "type": "PBR",
+      "baseColor": [
+        1,
+        0.54,
+        0.02,
+        1
+      ],
+      "roughness": 0.3,
+      "metallic": 0.12,
+      "emissive": [
+        0.22,
+        0.07,
+        0
+      ]
+    },
+    "energy": {
+      "type": "PBR_EMISSIVE",
+      "baseColor": [
+        0.1,
+        0.88,
+        1,
+        0.65
+      ],
+      "emissive": [
+        0.1,
+        1,
+        1
+      ],
+      "strength": 4.5,
+      "blend": "additive"
+    }
+  },
+  "sockets": {
+    "aura": {
+      "bone": "hips",
+      "offset": [
+        0,
+        0.55,
+        0
+      ]
+    },
+    "leftPalm": {
+      "bone": "hand.L",
+      "offset": [
+        -0.08,
+        0,
+        0
+      ]
+    },
+    "rightPalm": {
+      "bone": "hand.R",
+      "offset": [
+        0.08,
+        0,
+        0
+      ]
+    },
+    "chest": {
+      "bone": "chest",
+      "offset": [
+        0,
+        0.05,
+        0.08
+      ]
+    },
+    "camera": {
+      "bone": "chest",
+      "offset": [
+        0,
+        0.15,
+        0.15
+      ]
+    },
+    "lookAt": {
+      "bone": "head",
+      "offset": [
+        0,
+        0.08,
+        0.12
+      ]
+    }
+  },
+  "ik": {
+    "lookAt": {
+      "chain": [
+        "neck",
+        "head"
+      ],
+      "weight": 0.7
+    },
+    "leftHand": {
+      "chain": [
+        "upperArm.L",
+        "forearm.L",
+        "hand.L"
+      ],
+      "pole": [
+        0,
+        1,
+        -1
+      ]
+    },
+    "rightHand": {
+      "chain": [
+        "upperArm.R",
+        "forearm.R",
+        "hand.R"
+      ],
+      "pole": [
+        0,
+        1,
+        -1
+      ]
+    },
+    "leftFoot": {
+      "chain": [
+        "thigh.L",
+        "shin.L",
+        "foot.L"
+      ],
+      "ground": true
+    },
+    "rightFoot": {
+      "chain": [
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ],
+      "ground": true
+    }
+  },
+  "animationGraph": {
+    "blendSeconds": 0.125,
+    "inertialization": true,
+    "rootMotion": "simulation-authoritative",
+    "states": {
+      "IDLE": {
+        "clip": "idle",
+        "loop": true
+      },
+      "WALK": {
+        "clip": "walk",
+        "loop": true
+      },
+      "DRAGON_DASH": {
+        "clip": "dash",
+        "loop": false
+      },
+      "VANISH": {
+        "clip": "vanish",
+        "loop": false
+      },
+      "ASCEND": {
+        "clip": "jump",
+        "loop": false
+      },
+      "JAB": {
+        "clip": "jab",
+        "loop": false
+      },
+      "CROSS": {
+        "clip": "cross",
+        "loop": false
+      },
+      "KICK": {
+        "clip": "kick",
+        "loop": false
+      },
+      "ROUNDHOUSE": {
+        "clip": "roundhouse",
+        "loop": false
+      },
+      "UPPERCUT": {
+        "clip": "uppercut",
+        "loop": false
+      },
+      "GUARD": {
+        "clip": "guard",
+        "loop": true
+      },
+      "PARRY": {
+        "clip": "parry",
+        "loop": false
+      },
+      "HIT_LIGHT": {
+        "clip": "hit_light",
+        "loop": false
+      },
+      "HIT_HEAVY": {
+        "clip": "hit_heavy",
+        "loop": false
+      },
+      "KNOCKDOWN": {
+        "clip": "knockdown",
+        "loop": false
+      },
+      "TRANSFORM": {
+        "clip": "transform",
+        "loop": false
+      },
+      "ULTIMATE": {
+        "clip": "ultimate",
+        "loop": false
+      },
+      "FINISHER": {
+        "clip": "finisher",
+        "loop": false
+      }
+    },
+    "layers": [
+      {
+        "name": "base",
+        "mask": "fullBody"
+      },
+      {
+        "name": "upperCombat",
+        "mask": [
+          "spine",
+          "chest",
+          "neck",
+          "head",
+          "shoulder.L",
+          "upperArm.L",
+          "forearm.L",
+          "hand.L",
+          "shoulder.R",
+          "upperArm.R",
+          "forearm.R",
+          "hand.R"
+        ],
+        "additive": false
+      },
+      {
+        "name": "aura",
+        "procedural": true
+      }
+    ]
+  },
+  "lod": [
+    {
+      "level": 0,
+      "maxDistance": 8,
+      "triangles": 85000,
+      "textures": 2048
+    },
+    {
+      "level": 1,
+      "maxDistance": 15,
+      "triangles": 42000,
+      "textures": 1024
+    },
+    {
+      "level": 2,
+      "maxDistance": 30,
+      "triangles": 18000,
+      "textures": 512
+    },
+    {
+      "level": 3,
+      "maxDistance": null,
+      "triangles": 4500,
+      "textures": 256
+    }
+  ],
+  "physics": {
+    "fixedStep": 0.0166667,
+    "secondary": [
+      {
+        "chain": [
+          "hair.01"
+        ],
+        "stiffness": 0.82,
+        "damping": 0.18
+      },
+      {
+        "chain": [
+          "sash.01"
+        ],
+        "stiffness": 0.6,
+        "damping": 0.24
+      }
+    ],
+    "footPlant": true
+  },
+  "quality": {
+    "webgpu": {
+      "lodBias": 0,
+      "shadows": "pcf-soft",
+      "skinInfluences": 4
+    },
+    "webgl2": {
+      "lodBias": 1,
+      "shadows": "contact",
+      "skinInfluences": 4
+    },
+    "canvas2d": {
+      "fallback": "sprite-atlas"
+    }
+  },
+  "validation": {
+    "requiredClips": [
+      "idle",
+      "walk",
+      "dash",
+      "jump",
+      "jab",
+      "cross",
+      "kick",
+      "guard",
+      "hit_light",
+      "hit_heavy",
+      "knockdown",
+      "transform",
+      "ultimate",
+      "finisher"
+    ],
+    "requiredSockets": [
+      "aura",
+      "leftPalm",
+      "rightPalm",
+      "chest",
+      "camera",
+      "lookAt"
+    ],
+    "minBones": 20
+  }
+}
