@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=20', 'CHOREOGRAPHY_VERSION=21',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=5',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=20', 'CHOREOGRAPHY_VERSION=22',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=6',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
@@ -38,7 +38,9 @@ const required = [
   'FINISHER_CRITICAL_FRAME', 'RIVAL_FINISHERS', 'function rivalVictory', 'function updateTransformation',
   'duration=1.35,commitAt=.65', "griffinVictory(h,b,'COMBAT_KO')",
   'function attackBreak', 'function testAttackBreakCombat', "emit('ATTACK_BREAK'",
-  'comebackUsed:false', 'attackBreakRestored:true', 'rivalSpec=RIVAL_FINISHERS[a.name]'
+  'comebackUsed:false', 'attackBreakRestored:true', 'rivalVictory(a,b,"LETHAL_FINISHER")',
+  'function testFinisherTimeline', 'normalizedImpact:', 'timingError:', 'timelineId:',
+  'c.pendingLethal=true', 'if(c.pendingLethal&&!c.damageApplied)'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -50,6 +52,7 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
+assert.ok(!html.includes('st.finisher={a,b,time:.95'), 'detached 0.95-second finisher timer is prohibited');
 assert.equal((html.match(/finishers\/griffin-[a-z-]+-finisher-v1\.webp/g) || []).length, 11, 'all 11 Griffin forms require unique finisher sprites');
 const timingMatch=html.match(/const GRIFFIN_FORM_FINISHERS=(\[[^;]+\]);/);
 assert.ok(timingMatch, 'finisher timing table required');
