@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=18', 'CHOREOGRAPHY_VERSION=19',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=3',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=19', 'CHOREOGRAPHY_VERSION=20',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=4',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
@@ -34,7 +34,9 @@ const required = [
   'GRIFFIN_FORM_FINISHERS', 'function griffinVictory', 'FORM_FINISHER_BIND',
   'griffin-base-finisher-v1.webp', 'griffin-autonomous-finisher-v1.webp',
   'FINISHER_CHARGE_PEAK', 'FINISHER_TARGET_LOCK', 'FINISHER_AFTERSHOCK',
-  'FINISHER_VICTORY_HALO', 'FINISHER_STARTUP_CHARGE', 'FINISHER_STARTUP_LOCK'
+  'FINISHER_VICTORY_HALO', 'FINISHER_STARTUP_CHARGE', 'FINISHER_STARTUP_LOCK',
+  'FINISHER_CRITICAL_FRAME', 'RIVAL_FINISHERS', 'function rivalVictory', 'function updateTransformation',
+  'duration=1.35,commitAt=.65', "griffinVictory(h,b,'COMBAT_KO')"
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
