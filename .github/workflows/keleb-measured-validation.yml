@@ -36,7 +36,12 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');const d=require('./keleb/research/direct-evidence.json');const urls=[...new Set((d.images||[]).map(x=>x.imageUrl).filter(Boolean))].slice(0,12);fs.writeFileSync('/tmp/keleb-urls.txt',urls.join('\n')+'\n');
           NODE
-          n=0; while read -r u; do [ -n "$u" ] || continue; n=$((n+1)); curl -L --fail --max-time 20 -A 'Keleb-Truth/1.0' "$u" -o "/tmp/keleb-truth/ref-$n.jpg" || rm -f "/tmp/keleb-truth/ref-$n.jpg"; done </tmp/keleb-urls.txt
+          n=0; while read -r u; do
+            [ -n "$u" ] || continue
+            n=$((n+1))
+            out="/tmp/keleb-truth/ref-$n.img"
+            curl -L --fail --max-time 20 -A 'Keleb-Truth/1.0' "$u" -o "$out" || rm -f "$out"
+          done </tmp/keleb-urls.txt
           test "$(find /tmp/keleb-truth -type f | wc -l)" -ge 3
       - name: Install Blender runtime
         run: |
@@ -52,7 +57,7 @@ jobs:
           npm install --no-save --package-lock=false pngjs@7.0.0 jpeg-js@0.4.4
           node tools/keleb_measured_truth.mjs /tmp/keleb-render /tmp/keleb-truth /tmp/keleb-measured-state.json
           node - <<'NODE'
-          const x=require('/tmp/keleb-measured-state.json');if(!x.measured||x.truthImages<3||x.views.length!==5)throw Error('Keleb measured validation incomplete');console.log(`Keleb measured mean=${x.meanError} pass=${x.promotionGate.pass}`)
+          const x=require('/tmp/keleb-measured-state.json');if(!x.measured||x.truthImages<3||x.views.length!==5)throw Error(`Keleb measured validation incomplete: decodable=${x.truthImages} rejected=${x.rejectedTruthImages||0} views=${x.views.length}`);console.log(`Keleb measured mean=${x.meanError} pass=${x.promotionGate.pass} decodable=${x.truthImages} rejected=${x.rejectedTruthImages||0}`)
           NODE
       - name: Persist measured cockpit state only to ai-state
         run: |
