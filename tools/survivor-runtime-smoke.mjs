@@ -35,11 +35,15 @@ async function runAttempt(attempt){
       const clock=document.querySelector('#clock')?.textContent||'';
       const start=document.querySelector('#start');
       const eventTypes=replay.events.map(e=>e.type);
+      const source=[...document.scripts].map(script=>script.textContent||'').join('\n');
+      const earnedAscensionContract=source.includes("transform(h,target,'EARNED_ASCENSION')")&&source.includes('h.skillStock>=.72')&&source.includes('h.hp/h.maxHp<.52')&&source.includes('st.time-st.levelStart>18');
       return {
         runtime,levels:runtime?.levels||0,modelRenderer:runtime?.modelRenderer||0,choreography:runtime?.choreography||0,
         replaySchema:replay.schema,eventCount:replay.events.length,frameCount:replay.frames.length,
         bootFirst:eventTypes[0]==='RUNTIME_BOOT',levelBind:eventTypes.includes('LEVEL_BIND'),
         transformed:eventTypes.includes('TRANSFORMATION_COMPLETE')&&replay.frames.some(f=>f.hero?.form>=1),
+        earnedAscensionContract,
+        finiteProgression:replay.frames.every(f=>Number.isFinite(f.hero?.form)&&Number.isFinite(f.hero?.skillStock)),
         visibleFighters:replay.frames.every(f=>f.visibility?.heroAtlasReady&&f.visibility?.bossAtlasReady&&!f.visibility?.fallbackActive),
         finiteFrames:replay.frames.every(f=>Number.isFinite(f.hero?.x)&&Number.isFinite(f.boss?.x)&&Number.isFinite(f.hero?.hp)&&Number.isFinite(f.boss?.hp)),
         round,rival,clock,startHidden:!!start&&(start.hidden||getComputedStyle(start).display==='none'),
@@ -72,7 +76,7 @@ if(!result)throw lastError||new Error('Survivor smoke produced no result');
 
 const {clockA,state,pageErrors,consoleErrors}=result;
 fs.writeFileSync(path.join(out,'runtime.json'),JSON.stringify({engine:engineName,url,clockA,state,pageErrors,consoleErrors},null,2)+'\n');
-const failed=state.runtime?.production!==expectedProduction||state.canvasCount!==1||state.levels!==45||state.modelRenderer!==13||state.choreography!==18||state.replaySchema!=='jarvis-survivor-replay-v19'||state.frameCount<10||!state.bootFirst||!state.levelBind||!state.transformed||!state.visibleFighters||!state.finiteFrames||state.rival!=='LIRA'||!state.round.includes('LEVEL 1/45')||!state.round.includes('NEXUS CITADEL')||!state.startHidden||!state.replayButton||!clockA||!state.clock||clockA===state.clock||pageErrors.length||consoleErrors.length;
+const failed=state.runtime?.production!==expectedProduction||state.canvasCount!==1||state.levels!==45||state.modelRenderer!==13||state.choreography!==18||state.replaySchema!=='jarvis-survivor-replay-v19'||state.frameCount<10||!state.bootFirst||!state.levelBind||!state.earnedAscensionContract||!state.finiteProgression||!state.visibleFighters||!state.finiteFrames||state.rival!=='LIRA'||!state.round.includes('LEVEL 1/45')||!state.round.includes('NEXUS CITADEL')||!state.startHidden||!state.replayButton||!clockA||!state.clock||clockA===state.clock||pageErrors.length||consoleErrors.length;
 if(failed){
   console.error(JSON.stringify({clockA,state,pageErrors,consoleErrors},null,2));
   process.exitCode=1;
