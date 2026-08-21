@@ -30,6 +30,9 @@ const required = [
   'KERNEL_TICK_SHED', 'KERNEL_WATCHDOG_RECOVERY', 'KERNEL_PANIC_RECOVERY',
   "recoveryProfile(reason)", 'contextProbeReleased', 'p95Ms', "getExtension('WEBGL_lose_context')",
   'bios:JARVIS_SPRITE_BIOS', 'scheduler:JARVIS_KERNEL_SCHEDULER'
+  , 'GRIFFIN_FINISHER_SPRITE_VERSION=1', 'GRIFFIN_FINISHER_ATLASES',
+  'GRIFFIN_FORM_FINISHERS', 'function griffinVictory', 'FORM_FINISHER_BIND',
+  'griffin-base-finisher-v1.webp', 'griffin-autonomous-finisher-v1.webp'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -41,4 +44,10 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
+assert.equal((html.match(/finishers\/griffin-[a-z-]+-finisher-v1\.webp/g) || []).length, 11, 'all 11 Griffin forms require unique finisher sprites');
+for (const name of ['base','spark','ascended','radiant','velocity','guardian','destroyer','celestial','omega','instinct','autonomous']) {
+  const path = `jarvis/assets/survivor/finishers/griffin-${name}-finisher-v1.webp`;
+  assert.ok(fs.existsSync(path), `missing finisher sprite ${path}`);
+  assert.ok(fs.statSync(path).size > 100_000, `finisher sprite is empty or undersized ${path}`);
+}
 console.log(JSON.stringify({runtime:323,replay:'v19',renderer:'GRIFFIN_SPRITE_AUTHORITY_V1',kernel:'JARVIS_LIQUID_ROLLBACK_KERNEL',coordinator:'v1',result:'PASS'}));
