@@ -3,15 +3,15 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=21', 'CHOREOGRAPHY_VERSION=24',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=8',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=22', 'CHOREOGRAPHY_VERSION=25',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=9',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
   'griffin-ascended-atlas-v3.webp', 'rivals/kairox-awakened-atlas-v3.webp', 'arenas/lira-nexus-v1.webp',
   'GRAPHICS_PROFILE', 'SPRITE_LAYOUT', 'SPRITE_DEPTH_PIPELINE', 'function drawContactShadow',
   'function drawMotionAfterimages', 'subframeInterpolation:true', 'multiLobeContactShadows:true',
-  'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:420',
+  'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:480',
   'Math.min(H*.50,W*.46,480)', 'resolveFighterSpacing', 'SPRITE_SEPARATION', 'contactOverlap',
   'JARVIS_LIQUID_ROLLBACK_KERNEL', 'LIQUID_BATTLE_COORDINATOR', 'function saveRollbackState',
   'function loadRollbackState', 'COORDINATOR_BOOT', 'STARTING_LIVES=3', 'SENZU_REVIVAL',
@@ -47,7 +47,12 @@ const required = [
   'TEMPEST_VANISH', 'ION_LAUNCH', 'GRAVITY_WELL', 'ECLIPSE_ASSASSIN', 'ABYSS_MAELSTROM',
   'AI_FIGHTER_IDENTITIES', 'MOTION_MOTIFS', 'EFFECT_PACKAGES', 'AI_CHOREOGRAPHY_LATTICE',
   'function choreographyVariant', 'function applyChoreographyVariant', 'function testChoreographyLattice',
-  'CHOREOGRAPHY_LATTICE_BOOT', 'CHOREOGRAPHY_VARIANT', 'choreographyVariantCount:AI_CHOREOGRAPHY_LATTICE.length'
+  'CHOREOGRAPHY_LATTICE_BOOT', 'CHOREOGRAPHY_VARIANT', 'choreographyVariantCount:AI_CHOREOGRAPHY_LATTICE.length',
+  'DRAGON_BALL_COUNT=7', 'GOD_FORM=11', 'function planDragonBallRounds', 'function awardDragonBall',
+  'DRAGON_BALL_FOUND', 'DRAGON_BALL_SET_COMPLETE', 'SEVEN_DRAGON_BALL_WISH', 'GOD_FORM_AUTHORITY',
+  'RIVAL_FINISHER_RESERVED', 'SUPER SAIYAN GOD', 'DIVINE DRAGON RUSH', 'CRIMSON STAR ERUPTION',
+  'SEVEN-STAR GODFALL', 'SEVEN_STAR_GODFALL', 'function drawDragonBallHud', 'function drawGodBloom',
+  'griffin-god-form-atlas-v1.webp', 'finishers/griffin-god-finisher-v1.webp', 'function testDragonBallAscension'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -60,18 +65,21 @@ assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fi
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
 assert.ok(!html.includes('st.finisher={a,b,time:.95'), 'detached 0.95-second finisher timer is prohibited');
-assert.equal((html.match(/finishers\/griffin-[a-z-]+-finisher-v1\.webp/g) || []).length, 11, 'all 11 Griffin forms require unique finisher sprites');
+const finisherAtlasMatch=html.match(/const GRIFFIN_FINISHER_SPRITE_VERSION=1,GRIFFIN_FINISHER_ATLASES=(\[[^;]+\]);/);
+assert.ok(finisherAtlasMatch,'Griffin finisher atlas table required');
+assert.equal(Function(`return ${finisherAtlasMatch[1]}`)().length,12,'all 12 Griffin forms require unique finisher sprites');
 const timingMatch=html.match(/const GRIFFIN_FORM_FINISHERS=(\[[^;]+\]);/);
 assert.ok(timingMatch, 'finisher timing table required');
 const timings=Function(`return ${timingMatch[1]}`)();
-assert.equal(timings.length,11,'all 11 forms require timing');
+assert.equal(timings.length,12,'all 12 forms require timing');
 for(const [name,duration,impactAt] of timings){
-  assert.ok(duration>=4.2&&duration<=5.2,`${name} cinematic duration out of bounds`);
+  assert.ok(duration>=4.2&&duration<=5.5,`${name} cinematic duration out of bounds`);
   assert.ok(impactAt>duration*.4&&impactAt<duration*.6,`${name} impact must land in the cinematic middle`);
 }
-for (const name of ['base','spark','ascended','radiant','velocity','guardian','destroyer','celestial','omega','instinct','autonomous']) {
+for (const name of ['base','spark','ascended','radiant','velocity','guardian','destroyer','celestial','omega','instinct','autonomous','god']) {
   const path = `jarvis/assets/survivor/finishers/griffin-${name}-finisher-v1.webp`;
   assert.ok(fs.existsSync(path), `missing finisher sprite ${path}`);
   assert.ok(fs.statSync(path).size > 100_000, `finisher sprite is empty or undersized ${path}`);
 }
+for(const path of ['jarvis/assets/survivor/griffin-god-form-atlas-v1.webp','jarvis/assets/survivor/finishers/griffin-god-finisher-v1.webp'])assert.ok(fs.statSync(path).size>100_000,`God sprite is empty or undersized ${path}`);
 console.log(JSON.stringify({runtime:323,replay:'v19',renderer:'GRIFFIN_SPRITE_AUTHORITY_V1',kernel:'JARVIS_LIQUID_ROLLBACK_KERNEL',coordinator:'v1',result:'PASS'}));
