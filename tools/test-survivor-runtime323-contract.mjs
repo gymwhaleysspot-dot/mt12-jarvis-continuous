@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=20', 'CHOREOGRAPHY_VERSION=22',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=6',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=21', 'CHOREOGRAPHY_VERSION=23',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=7',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
@@ -40,7 +40,11 @@ const required = [
   'function attackBreak', 'function testAttackBreakCombat', "emit('ATTACK_BREAK'",
   'comebackUsed:false', 'attackBreakRestored:true', 'rivalVictory(a,b,"LETHAL_FINISHER")',
   'function testFinisherTimeline', 'normalizedImpact:', 'timingError:', 'timelineId:',
-  'c.pendingLethal=true', 'if(c.pendingLethal&&!c.damageApplied)'
+  'c.pendingLethal=true', 'if(c.pendingLethal&&!c.damageApplied)',
+  'RIVAL_FINISHER_SEQUENCES', 'function testRivalFinisherSequences',
+  'ADAPTIVE_360_CAP', 'finisherGrace=3.2', 'ladderAdapt=',
+  'NEXUS_SPEAR', 'CALDERA_HAMMER', 'CORONA_ORBIT', 'PRISM_MIRAGE',
+  'TEMPEST_VANISH', 'ION_LAUNCH', 'GRAVITY_WELL', 'ECLIPSE_ASSASSIN', 'ABYSS_MAELSTROM'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
