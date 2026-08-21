@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
   'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'BALANCE_VERSION=18', 'CHOREOGRAPHY_VERSION=18',
+  'JARVIS_WEB_PS5_SHADER_KERNEL_V2', 'JARVIS_SH_WARM_BOUNCE', 'JARVIS_IBL_SPECULAR', 'JARVIS_HAIR_DUAL_ANISO', 'JARVIS_ARMOR_CLEARCOAT', 'JARVIS_CLOTH_FUZZ', 'JARVIS_OUTLINE_HULL', 'DESKTOP_PS5_WEB', 'MOBILE_TOON_PLUS', "getExtension('WEBGL_debug_renderer_info')", "getParameter(gl.MAX_TEXTURE_SIZE)", 'textureTier:maxTexture>=4096', "g.cullFace(g.FRONT)", "g.cullFace(g.BACK)", "g.depthMask(false)", 'uFull,uOutline',
   'APEX_2026_ADAPTIVE_V12', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=2', 'groundY=H*(.74-', 'Math.min(62', 'rings.length>8', 'QUALITY_PRESETS', 'adaptiveQualityGovernor:true', 'backendProbe:true', 'navigator.gpu.requestAdapter', "getContext('webgl2'", 'GRAPHICS_QUALITY_SHIFT', 'reflectionFloor:false', 'function drawFighterReflection(){return}', "schema:'jarvis-survivor-replay-v19'",
   "function snapshot(reason='TICK')", 'replay.frames.push', 'frameTelemetryHz:10',
   'hpBefore', 'hpAfter', 'strikeId', "comboSemantics:'CONFIRMED_CONSECUTIVE_HITS'",
