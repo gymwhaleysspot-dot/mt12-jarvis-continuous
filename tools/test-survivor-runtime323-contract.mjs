@@ -70,7 +70,10 @@ const required = [
   'contactOverlap:distance(st.hero,st.boss)<SPRITE_LAYOUT.minContactGap', 'spacingViolation:',
   'AUDIO_ENGINE_VERSION=1', 'AUDIO_PROFILE', 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE', 'function testAudioEngine',
   'AUDIO_ENGINE_BOOT', 'AUDIO_CUE', 'maxVoices:18', 'dynamicCompression:true', 'spatialPan:true',
-  "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'"
+  "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'",
+  'REPLAY_ARCHIVE_VERSION=2', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
+  "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
+  'REPLAY_ARCHIVE_QUEUED', 'if(st.archiveStarted)return false'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
