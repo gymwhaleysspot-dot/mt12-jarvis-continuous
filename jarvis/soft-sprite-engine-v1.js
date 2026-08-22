@@ -14,7 +14,7 @@ const FIGHTER_PROFILES=Object.freeze({
   KRAKEN:{slices:7,rigidity:1.46,bend:.46,stretch:.62,impact:.52,secondary:.28,contactY:.6}
 });
 const engine={
-  name:'JARVIS_SOFTSPRITE_FUSION_ENGINE',version:2,ready:true,slices:9,impactWarp:true,contactOcclusion:true,energyEmbedding:true,perFighterProfiles:true,fallback:'GRIFFIN_SPRITE_AUTHORITY_V1',fighterProfiles:FIGHTER_PROFILES,
+  name:'JARVIS_SOFTSPRITE_FUSION_ENGINE',version:3,ready:true,slices:9,impactWarp:true,contactOcclusion:true,energyEmbedding:true,seamlessSlices:true,perFighterProfiles:true,fallback:'GRIFFIN_SPRITE_AUTHORITY_V1',fighterProfiles:FIGHTER_PROFILES,
   fighterProfile(name){return FIGHTER_PROFILES[name]||FIGHTER_PROFILES.GRIFFIN},
   profile(name,pose,impact=0,vx=0,time=0){
     const fighter=this.fighterProfile(name);
@@ -24,11 +24,14 @@ const engine={
   },
   draw(o){
     const{ctx,img,sx,sy,sw,sh,dx,dy,dw,dh,name='GRIFFIN',pose,impact=0,impactSide=1,vx=0,time=0,accent='#72ecff'}=o;if(!img?.complete||!img.naturalWidth)return false;
-    const p=this.profile(name,pose,impact,vx,time),n=p.slices,slice=sw/n;
-    ctx.save();ctx.translate(dx+dw/2,dy+dh);ctx.scale(p.stretch,p.squash);
+    const p=this.profile(name,pose,impact,vx,time),n=p.slices,slice=sw/n,destSlice=dw/n;
+    const warpAt=i=>{const u=(i+.5)/n,arch=Math.sin(u*Math.PI);return(p.bend*arch+p.twist*(u-.5))*dw-impact*impactSide*arch*(u>.36&&u<.78?dw*.065:0)};
+    ctx.save();ctx.imageSmoothingEnabled=true;ctx.translate(dx+dw/2,dy+dh);ctx.scale(p.stretch,p.squash);
     for(let i=0;i<n;i++){
-      const u=(i+.5)/n,arch=Math.sin(u*Math.PI),warp=(p.bend*arch+p.twist*(u-.5))*dw-impact*impactSide*arch*(u>.36&&u<.78?dw*.065:0),lift=impact*arch*(u>.42?dh*.026:0);
-      ctx.drawImage(img,sx+i*slice,sy,slice+.8,sh,-dw/2+i*dw/n+warp,-dh-lift,dw/n+1.25,dh);
+      const u=(i+.5)/n,arch=Math.sin(u*Math.PI),warp=warpAt(i),lift=impact*arch*(u>.42?dh*.026:0),prev=i?warpAt(i-1):warp,next=i<n-1?warpAt(i+1):warp;
+      const leftGuard=Math.max(1.5,Math.abs(warp-prev)+1),rightGuard=Math.max(1.5,Math.abs(next-warp)+1),sourceBleed=Math.min(1.5,slice*.08);
+      const sourceX=Math.max(sx,sx+i*slice-sourceBleed),sourceRight=Math.min(sx+sw,sx+(i+1)*slice+sourceBleed),destX=Math.floor((-dw/2+i*destSlice+warp-leftGuard)*2)/2,destRight=Math.ceil((-dw/2+(i+1)*destSlice+warp+rightGuard)*2)/2;
+      ctx.drawImage(img,sourceX,sy,sourceRight-sourceX,sh,destX,-dh-lift,destRight-destX,dh+.5);
     }
     if(impact>0){ctx.globalCompositeOperation='screen';ctx.globalAlpha=.12*impact;ctx.filter='blur(2px)';ctx.strokeStyle=accent;ctx.lineWidth=3+impact*4;ctx.beginPath();ctx.ellipse(impactSide*dw*.34,-dh*.52,dw*.13*(1-impact*.35),dh*.18,0,0,Math.PI*2);ctx.stroke()}
     ctx.restore();return true;
@@ -38,7 +41,7 @@ const engine={
     ctx.save();ctx.beginPath();ctx.ellipse(x-facing*w*.24,y-h*cy,w*.19,h*.3,0,0,Math.PI*2);ctx.clip();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=.92;ctx.filter='drop-shadow(0 0 5px '+accent+')';ctx.drawImage(img,sx,sy,sw,sh,-w/2,-h,w,h);ctx.globalCompositeOperation='screen';ctx.globalAlpha=.34*impact;ctx.fillStyle=accent;ctx.beginPath();ctx.arc(-facing*w*.24,-h*cy,8+impact*16,0,Math.PI*2);ctx.fill();ctx.restore();return true;
   },
   active(pose){return ACTIVE.test(pose)},
-  snapshot(){return{name:this.name,version:this.version,ready:this.ready,slices:this.slices,impactWarp:this.impactWarp,contactOcclusion:this.contactOcclusion,energyEmbedding:this.energyEmbedding,perFighterProfiles:this.perFighterProfiles,profileCount:Object.keys(this.fighterProfiles).length,profiles:Object.keys(this.fighterProfiles),fallback:this.fallback}}
+  snapshot(){return{name:this.name,version:this.version,ready:this.ready,slices:this.slices,impactWarp:this.impactWarp,contactOcclusion:this.contactOcclusion,energyEmbedding:this.energyEmbedding,seamlessSlices:this.seamlessSlices,perFighterProfiles:this.perFighterProfiles,profileCount:Object.keys(this.fighterProfiles).length,profiles:Object.keys(this.fighterProfiles),fallback:this.fallback}}
 };
 globalThis.JarvisSoftSpriteEngine=Object.freeze(engine);
 })();
