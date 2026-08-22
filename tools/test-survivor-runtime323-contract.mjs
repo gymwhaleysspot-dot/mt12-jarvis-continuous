@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=23', 'BALANCE_VERSION=24', 'CHOREOGRAPHY_VERSION=27',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=11',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=24', 'BALANCE_VERSION=25', 'CHOREOGRAPHY_VERSION=28',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=12',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
@@ -42,7 +42,7 @@ const required = [
   'function testFinisherTimeline', 'normalizedImpact:', 'timingError:', 'timelineId:',
   'c.pendingLethal=true', 'if(c.pendingLethal&&!c.damageApplied)',
   'RIVAL_FINISHER_SEQUENCES', 'function testRivalFinisherSequences',
-  'ADAPTIVE_360_CAP', 'finisherGrace=3.2', 'ladderAdapt=',
+  'DRAGON_BALL_SURVIVAL_CURVE', 'finisherGrace=3.2', 'ladderAdapt=',
   'NEXUS_SPEAR', 'CALDERA_HAMMER', 'CORONA_ORBIT', 'PRISM_MIRAGE',
   'TEMPEST_VANISH', 'ION_LAUNCH', 'GRAVITY_WELL', 'ECLIPSE_ASSASSIN', 'ABYSS_MAELSTROM',
   'AI_FIGHTER_IDENTITIES', 'MOTION_MOTIFS', 'EFFECT_PACKAGES', 'AI_CHOREOGRAPHY_LATTICE',
@@ -57,11 +57,17 @@ const required = [
   'function production252Update', 'function applyProduction252Update', 'function testProduction252Matrix',
   'PRODUCTION_252_MATRIX_BOOT', 'PRODUCTION_252_UPDATE', 'production252UpdateCount:PRODUCTION_252_UPDATE_MATRIX.length',
   'GOD_ASSETS_PRELOAD', 'GOD_AUTHORITY_RESTORE', "applyGodAuthority(st.hero,'LEVEL_BIND')",
-  'integerSpritePlacement:true', 'effectTypeBudget:true', 'motionQueryMatrix:true', "version:5,firmware:'",
+  'integerSpritePlacement:true', 'effectTypeBudget:true', 'motionQueryMatrix:true', "version:6,firmware:'",
   'SMOOTH_COMBAT_PROFILE', 'function smoothFacing', 'function smoothApproach', 'function updateCameraSmoothing',
   'function testCombatSmoothness', 'SMOOTH_COMBAT_BOOT', 'SMOOTH_TURN_COMMIT', 'smoothCamera:true',
   'turnHysteresis:true', 'velocityDamping:true', 'COMBAT_CINEMATIC_COMPLETE', "if(c.source==='LETHAL_FINISHER')",
-  '[[0,3],[4,7],[8,11],[12,15],[16,19],[20,24],[25,29]]'
+  '[[0,3],[4,7],[8,11],[12,15],[16,19],[20,24],[25,29]]',
+  'SURVIVAL_PROFILE', 'function testSurvivalBalance', 'function testSurvivalRecovery', 'SURVIVAL_ENGINE_BOOT', 'DRAGON_BALL_RESOLVE',
+  'roundRecoveryBase:420', 'minimumHealthRatio:.84', 'rivalFinisherRatio:.08', 'rivalFinisherUlt:82',
+  'EXPLOSION_PROFILE', 'function testExplosionEngine', 'function updateParticleSystems', 'EXPLOSION_ENGINE_BOOT',
+  'CINEMATIC_EXPLOSION_SPAWN', 'thermalLayers:4', 'shockwaveLayers:3', 'maxDebris:56', 'maxSmoke:12',
+  'layeredExplosions:true', 'ballisticDebris:true', 'thermalBloom:true', 'particleGravity:true',
+  'contactOverlap:distance(st.hero,st.boss)<SPRITE_LAYOUT.minContactGap', 'spacingViolation:'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
