@@ -71,9 +71,9 @@ const required = [
   'AUDIO_ENGINE_VERSION=1', 'AUDIO_PROFILE', 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE', 'function testAudioEngine',
   'AUDIO_ENGINE_BOOT', 'AUDIO_CUE', 'maxVoices:18', 'dynamicCompression:true', 'spatialPan:true',
   "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'",
-  'REPLAY_ARCHIVE_VERSION=2', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
+  'REPLAY_ARCHIVE_VERSION=3', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'nextEventSeq:0', 'function replayCoverage', 'eventsDropped:0', 'framesDropped:0', 'function compactAssetTelemetry', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
   "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
-  'REPLAY_ARCHIVE_QUEUED', 'if(st.archiveStarted)return false'
+  'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -85,6 +85,8 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
+assert.ok(!html.includes('if(replay.events.length>12000)'), 'complete replay must not discard early events');
+assert.ok(!html.includes('if(replay.frames.length>7200)'), 'complete replay must not discard early frames');
 assert.ok(!html.includes('st.finisher={a,b,time:.95'), 'detached 0.95-second finisher timer is prohibited');
 const finisherAtlasMatch=html.match(/const GRIFFIN_FINISHER_SPRITE_VERSION=1,GRIFFIN_FINISHER_ATLASES=(\[[^;]+\]);/);
 assert.ok(finisherAtlasMatch,'Griffin finisher atlas table required');
