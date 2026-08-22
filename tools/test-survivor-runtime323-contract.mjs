@@ -89,7 +89,7 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 for(const marker of ['JARVIS_CHARACTER_MESH_ENGINE','version:4',"fallback:'JARVIS_SOFTSPRITE_FUSION_ENGINE_V3'","legacyFallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'continuousSurface:true','sliceRenderer:false','impactWarp:true','contactOcclusion:true','energyEmbedding:true','perFighterProfiles:true','fighterProfile(name)','drawSliced(o)','ctx.transform(1,0,lean,1','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`character mesh engine missing ${marker}`);
 for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
-for(const marker of ['minContactGap:.205','teleportContactGap:.22','const trigger=.19,target=.205','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
+for(const marker of ['minContactGap:.245','teleportContactGap:.25','if(dz>.28)','target=cl(.245-dz*.3,.16,.245)','trigger=target-.015','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
 assert.ok(!softSprite.includes('ctx.globalAlpha=.82;ctx.translate(-impactSide'), 'continuous renderer must not repaint a duplicate impact body');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
