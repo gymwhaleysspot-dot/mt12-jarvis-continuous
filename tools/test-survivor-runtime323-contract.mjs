@@ -19,7 +19,7 @@ const required = [
   'GRIFFIN_RENDER_AUTHORITY', 'GRIFFIN_SPRITE_AUTHORITY_V1', "mode:'SPRITE_ONLY'", 'rigged3D:false',
   "renderAdapter:'SPRITE_AUTHORITY_V1'", 'const criticalReady=await awaitCriticalAssets()',
   "emit('SPRITE_RENDER_BOOT'", 'griffinRenderer:GRIFFIN_RENDER_AUTHORITY',
-  'fighterRenderer:GRIFFIN_RENDER_AUTHORITY.name', 'ARENA_WEATHER', "LIRA:['RAIN',.82]",
+  'fighterRenderer:globalThis.JarvisSoftSpriteEngine?.ready?globalThis.JarvisSoftSpriteEngine.name:GRIFFIN_RENDER_AUTHORITY.name', 'ARENA_WEATHER', "LIRA:['RAIN',.82]",
   "SOLENNE:['SNOW',.5]", "MORDREN:['VOID_SNOW',.64]", 'function drawWeatherLayer',
   'function spawnCinematicExplosion', 'function drawCinematicExplosions', 'function drawVictoryCutscene',
   'function updateVictoryCinematic', 'VICTORY_CUTSCENE_START', 'VICTORY_CUTSCENE_IMPACT',
@@ -76,7 +76,8 @@ const required = [
   "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
   'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false',
   'jarvis/soft-sprite-engine-v1.js', 'function drawFighterFallback', 'function drawSoftFighter',
-  'function drawSoftContactOcclusion', 'SOFTSPRITE_ENGINE_BOOT', 'softSpriteEngine:globalThis.JarvisSoftSpriteEngine'
+  'function drawSoftContactOcclusion', 'SOFTSPRITE_ENGINE_BOOT', 'softSpriteEngine:globalThis.JarvisSoftSpriteEngine',
+  'fallbackRenderer:GRIFFIN_RENDER_AUTHORITY.name', 'name:f.name,pose:f.pose', 'name:f.name,facing:f.facing'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -86,7 +87,8 @@ for (const forbidden of [
 ]) assert.ok(!html.includes(forbidden), `live Griffin path must not include ${forbidden}`);
 assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), 'runtime boot must precede level binding');
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
-for(const marker of ['JARVIS_SOFTSPRITE_FUSION_ENGINE',"fallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'slices:9','impactWarp:true','contactOcclusion:true','energyEmbedding:true','redrawContact(o)'])assert.ok(softSprite.includes(marker),`soft-sprite engine missing ${marker}`);
+for(const marker of ['JARVIS_SOFTSPRITE_FUSION_ENGINE','version:2',"fallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'slices:9','impactWarp:true','contactOcclusion:true','energyEmbedding:true','perFighterProfiles:true','fighterProfile(name)','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`soft-sprite engine missing ${marker}`);
+for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
 assert.ok(!html.includes('if(replay.events.length>12000)'), 'complete replay must not discard early events');
