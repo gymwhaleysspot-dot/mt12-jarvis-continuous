@@ -10,7 +10,7 @@ const required = [
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
   'griffin-ascended-atlas-v3.webp', 'rivals/kairox-awakened-atlas-v3.webp', 'arenas/lira-nexus-v1.webp',
-  'ATLAS_SANITIZER_VERSION=1', 'SANITIZED_ATLAS_PATHS', "'sanitized/'+r.path", "'ATLAS_SANITIZER_FALLBACK'", 'sanitizedAtlases:SANITIZED_ATLAS_PATHS.size',
+  'ATLAS_SANITIZER_VERSION=2', 'SANITIZED_ATLAS_PATHS', '...GRIFFIN_FINISHER_ATLASES', "'sanitized/'+r.path", "'ATLAS_SANITIZER_FALLBACK'", 'sanitizedAtlases:SANITIZED_ATLAS_PATHS.size', 'finisherSanitation:true',
   'GRAPHICS_PROFILE', 'SPRITE_LAYOUT', 'SPRITE_DEPTH_PIPELINE', 'function drawContactShadow',
   'function drawMotionAfterimages', 'subframeInterpolation:true', 'multiLobeContactShadows:true',
   'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:480',
@@ -92,7 +92,7 @@ for(const marker of ['JARVIS_CHARACTER_MESH_ENGINE','version:4',"fallback:'JARVI
 for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
 const sanitizedRoot='jarvis/assets/survivor/sanitized';
 const sanitizedAtlases=fs.readdirSync(sanitizedRoot,{recursive:true}).filter(path=>String(path).endsWith('.webp'));
-assert.equal(sanitizedAtlases.length,21,'all 12 Griffin and 9 rival atlases require sanitized builds');
+assert.equal(sanitizedAtlases.length,33,'all 12 Griffin, 12 finisher, and 9 rival atlases require sanitized builds');
 for(const path of sanitizedAtlases)assert.ok(fs.statSync(`${sanitizedRoot}/${path}`).size>100_000,`sanitized atlas is empty or undersized ${path}`);
 for(const marker of ['minContactGap:.245','teleportContactGap:.25','target=cl(.245-dz*.3,.16,.245)','trigger=target-.015','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
 assert.ok(!softSprite.includes('ctx.globalAlpha=.82;ctx.translate(-impactSide'), 'continuous renderer must not repaint a duplicate impact body');
