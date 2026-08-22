@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
+const softSprite = fs.readFileSync('jarvis/soft-sprite-engine-v1.js', 'utf8');
 const required = [
   'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=24', 'BALANCE_VERSION=25', 'CHOREOGRAPHY_VERSION=28',
   'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=12',
@@ -73,7 +74,9 @@ const required = [
   "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'",
   'REPLAY_ARCHIVE_VERSION=3', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'nextEventSeq:0', 'function replayCoverage', 'eventsDropped:0', 'framesDropped:0', 'function compactAssetTelemetry', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
   "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
-  'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false'
+  'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false',
+  'jarvis/soft-sprite-engine-v1.js', 'function drawFighterFallback', 'function drawSoftFighter',
+  'function drawSoftContactOcclusion', 'SOFTSPRITE_ENGINE_BOOT', 'softSpriteEngine:globalThis.JarvisSoftSpriteEngine'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
@@ -83,6 +86,7 @@ for (const forbidden of [
 ]) assert.ok(!html.includes(forbidden), `live Griffin path must not include ${forbidden}`);
 assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), 'runtime boot must precede level binding');
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
+for(const marker of ['JARVIS_SOFTSPRITE_FUSION_ENGINE',"fallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'slices:9','impactWarp:true','contactOcclusion:true','energyEmbedding:true','redrawContact(o)'])assert.ok(softSprite.includes(marker),`soft-sprite engine missing ${marker}`);
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
 assert.ok(!html.includes('if(replay.events.length>12000)'), 'complete replay must not discard early events');
