@@ -87,7 +87,7 @@ for (const forbidden of [
 ]) assert.ok(!html.includes(forbidden), `live Griffin path must not include ${forbidden}`);
 assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), 'runtime boot must precede level binding');
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
-for(const marker of ['JARVIS_SOFTSPRITE_FUSION_ENGINE','version:3',"fallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'slices:9','impactWarp:true','contactOcclusion:true','energyEmbedding:true','seamlessSlices:true','perFighterProfiles:true','fighterProfile(name)','leftGuard=Math.max(1.5','sourceBleed=Math.min(1.5','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`soft-sprite engine missing ${marker}`);
+for(const marker of ['JARVIS_CHARACTER_MESH_ENGINE','version:4',"fallback:'JARVIS_SOFTSPRITE_FUSION_ENGINE_V3'","legacyFallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'continuousSurface:true','sliceRenderer:false','impactWarp:true','contactOcclusion:true','energyEmbedding:true','perFighterProfiles:true','fighterProfile(name)','drawSliced(o)','ctx.transform(1,0,lean,1','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`character mesh engine missing ${marker}`);
 for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
