@@ -19,19 +19,24 @@ jobs:
           for attempt in $(seq 1 20); do
             html="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/survivor-runtime323.html?verify=$DEPLOY_SHA-$attempt" || true)"
             tab="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/jarvis/survivor-tab.js?verify=$DEPLOY_SHA-$attempt" || true)"
-            if printf '%s' "$html" | grep -q 'name="survivor-runtime" content="323"' && \
-               printf '%s' "$html" | grep -q 'MODEL_RENDERER_VERSION=15' && \
-               printf '%s' "$html" | grep -q 'LEVEL_COUNT=45' && \
-               printf '%s' "$html" | grep -q 'APEX_2026_ADAPTIVE_V13' && \
-               printf '%s' "$html" | grep -q 'jarvis-survivor-replay-v19' && \
-               printf '%s' "$tab" | grep -q '20260820runtime323limitbreak3dv18' && \
-               printf '%s' "$tab" | grep -q 'RUNTIME 323 // LIMIT-BREAK V18' && \
-               printf '%s' "$tab" | grep -q 'survivor-replay-overlay'; then
+            soft="$(curl -fsSL -H 'Cache-Control: no-cache, no-store' "$LIVE_BASE/jarvis/soft-sprite-engine-v1.js?verify=$DEPLOY_SHA-$attempt" || true)"
+            if [[ "$html" == *'name="survivor-runtime" content="323"'* ]] && \
+               [[ "$html" == *"name=\"survivor-build\" content=\"$DEPLOY_SHA\""* ]] && \
+               [[ "$html" == *'MODEL_RENDERER_VERSION=15'* ]] && \
+               [[ "$html" == *'LEVEL_COUNT=45'* ]] && \
+               [[ "$html" == *'APEX_2026_ADAPTIVE_V13'* ]] && \
+               [[ "$html" == *'jarvis-survivor-replay-v19'* ]] && \
+               [[ "$html" == *'jarvis/soft-sprite-engine-v1.js'* ]] && \
+               [[ "$soft" == *'JARVIS_SOFTSPRITE_FUSION_ENGINE'* ]] && \
+               [[ "$soft" == *"fallback:'GRIFFIN_SPRITE_AUTHORITY_V1'"* ]] && \
+               [[ "$tab" == *'20260820runtime323limitbreak3dv18'* ]] && \
+               [[ "$tab" == *'RUNTIME 323 // LIMIT-BREAK V18'* ]] && \
+               [[ "$tab" == *'survivor-replay-overlay'* ]]; then
               echo "Runtime 323 V12 adaptive-graphics / 45-level build verified live at $DEPLOY_SHA"
               exit 0
             fi
             sleep 5
           done
-          echo 'Live Survivor deployment did not expose Runtime 323 V12 adaptive-graphics graphics / 45 levels.' >&2
+          echo 'Live Survivor deployment did not expose Runtime 323 SoftSprite / 45 levels.' >&2
           echo "Expected SHA: $DEPLOY_SHA" >&2
           exit 1
