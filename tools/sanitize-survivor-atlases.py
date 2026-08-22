@@ -17,10 +17,12 @@ OUT = ASSETS / "sanitized"
 def active_atlases():
     text = RUNTIME.read_text()
     hero = re.search(r"const HERO_ATLASES=(\[[^;]+\]);", text)
+    finishers = re.search(r"GRIFFIN_FINISHER_ATLASES=(\[[^;]+\]);", text)
     rivals = re.search(r"const RIVAL_ATLASES=\{([^;]+)\};", text)
-    if not hero or not rivals:
+    if not hero or not finishers or not rivals:
         raise SystemExit("active atlas tables not found")
     paths = re.findall(r"'([^']+atlas[^']+\.webp)'", hero.group(1))
+    paths += re.findall(r"'([^']+finisher[^']+\.webp)'", finishers.group(1))
     paths += re.findall(r":'([^']+atlas[^']+\.webp)'", rivals.group(1))
     return list(dict.fromkeys(paths))
 
