@@ -67,7 +67,10 @@ const required = [
   'EXPLOSION_PROFILE', 'function testExplosionEngine', 'function updateParticleSystems', 'EXPLOSION_ENGINE_BOOT',
   'CINEMATIC_EXPLOSION_SPAWN', 'thermalLayers:4', 'shockwaveLayers:3', 'maxDebris:56', 'maxSmoke:12',
   'layeredExplosions:true', 'ballisticDebris:true', 'thermalBloom:true', 'particleGravity:true',
-  'contactOverlap:distance(st.hero,st.boss)<SPRITE_LAYOUT.minContactGap', 'spacingViolation:'
+  'contactOverlap:distance(st.hero,st.boss)<SPRITE_LAYOUT.minContactGap', 'spacingViolation:',
+  'AUDIO_ENGINE_VERSION=1', 'AUDIO_PROFILE', 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE', 'function testAudioEngine',
+  'AUDIO_ENGINE_BOOT', 'AUDIO_CUE', 'maxVoices:18', 'dynamicCompression:true', 'spatialPan:true',
+  "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'"
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
