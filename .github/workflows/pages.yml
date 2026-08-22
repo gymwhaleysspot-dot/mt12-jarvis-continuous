@@ -81,7 +81,7 @@ jobs:
           const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime323.html';
           if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing deployment SHA');
           let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:323,modelRenderer:15,effectGeometry:11,visualTuning:23,balance:24,choreography:27,levels:45,poses:42,deploySha:sha,artifact:p,authority:'APEX_2026_ADAPTIVE_V13',firmware:'JARVIS_SPRITE_FIRMWARE_BIOS',kernel:17,generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:323,modelRenderer:15,effectGeometry:12,visualTuning:24,balance:25,choreography:28,levels:45,poses:42,deploySha:sha,artifact:p,authority:'APEX_2026_ADAPTIVE_V13',firmware:'JARVIS_SPRITE_FIRMWARE_BIOS',kernel:17,generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
       - name: Build bounded Pages artifact
         run: |
@@ -133,7 +133,7 @@ jobs:
             html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime323.html?verify=${stamp}" || true)"
             manifest="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
             tab="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-tab.js?verify=${stamp}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="323"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq 'EFFECT_GEOMETRY_VERSION=11' <<<"$html" && grep -Fq 'APEX_2026_ADAPTIVE_V13' <<<"$html" && grep -Fq 'JARVIS_SPRITE_FIRMWARE_BIOS' <<<"$html" && grep -Fq '"runtime": 323' <<<"$manifest" && grep -Fq '"modelRenderer": 15' <<<"$manifest" && grep -Fq '"effectGeometry": 11' <<<"$manifest" && grep -Fq 'survivor-runtime323.html' <<<"$tab";then ok=1;echo "Runtime 323 live at ${GITHUB_SHA}";break;fi
+            if grep -Fq 'name="survivor-runtime" content="323"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq 'EFFECT_GEOMETRY_VERSION=12' <<<"$html" && grep -Fq 'APEX_2026_ADAPTIVE_V13' <<<"$html" && grep -Fq 'JARVIS_SPRITE_FIRMWARE_BIOS' <<<"$html" && grep -Fq '"runtime": 323' <<<"$manifest" && grep -Fq '"modelRenderer": 15' <<<"$manifest" && grep -Fq '"effectGeometry": 12' <<<"$manifest" && grep -Fq 'survivor-runtime323.html' <<<"$tab";then ok=1;echo "Runtime 323 live at ${GITHUB_SHA}";break;fi
             echo "Pages propagation ${attempt}/36 waiting for Runtime 323 ${GITHUB_SHA}"
             sleep 10
           done
