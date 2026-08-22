@@ -94,7 +94,31 @@ const sanitizedRoot='jarvis/assets/survivor/sanitized';
 const sanitizedAtlases=fs.readdirSync(sanitizedRoot,{recursive:true}).filter(path=>String(path).endsWith('.webp'));
 assert.equal(sanitizedAtlases.length,33,'all 12 Griffin, 12 finisher, and 9 rival atlases require sanitized builds');
 for(const path of sanitizedAtlases)assert.ok(fs.statSync(`${sanitizedRoot}/${path}`).size>100_000,`sanitized atlas is empty or undersized ${path}`);
-for(const marker of ['minContactGap:.245','teleportContactGap:.25','target=cl(.245-dz*.3,.16,.245)','trigger=target-.015','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
+for(const marker of ['minContactGap:.245','teleportContactGap:.25','target=cl(.245-dz*.3,.16,.245)','enter=target-.018','release=target+.026','correction=Math.min(Math.max(0,target-ad),.012)','velocityClamp:true','if(d>.27)','else smoothApproach(a,0,0,dt)','distance(a,b)>.285'])assert.ok(html.includes(marker),`stable combat spacing missing ${marker}`);
+{
+  const a={x:.28,vx:0},b={x:.72,vx:0},dt=1/60,target=.245;
+  let active=false,reversals=0,lastDelta=0,minSettledGap=1;
+  for(let frame=0;frame<720;frame++){
+    const gap=Math.abs(b.x-a.x),dir=Math.sign(b.x-a.x)||1;
+    const desired=gap>.27?.5:0;
+    a.vx+=(dir*desired-a.vx)*(1-Math.exp(-13*dt));
+    b.vx+=(-dir*desired-b.vx)*(1-Math.exp(-13*dt));
+    a.x+=a.vx*dt;b.x+=b.vx*dt;
+    const ad=Math.abs(b.x-a.x),enter=target-.018,release=target+.026;
+    if(active){if(ad>=release)active=false}else if(ad<enter)active=true;
+    if(active){
+      const correction=Math.min(Math.max(0,target-ad),.012);
+      a.x-=dir*correction*.5;b.x+=dir*correction*.5;
+      if(a.vx*dir>0)a.vx=0;if(b.vx*dir<0)b.vx=0;
+    }
+    const delta=Math.abs(b.x-a.x)-gap;
+    if(frame>120&&delta*lastDelta<0&&Math.abs(delta)>.0001)reversals++;
+    if(frame>120)minSettledGap=Math.min(minSettledGap,Math.abs(b.x-a.x));
+    lastDelta=delta;
+  }
+  assert.ok(minSettledGap>=.2269,`spacing solver penetrated hold band: ${minSettledGap}`);
+  assert.ok(reversals<=2,`spacing solver oscillated ${reversals} times`);
+}
 assert.ok(!softSprite.includes('ctx.globalAlpha=.82;ctx.translate(-impactSide'), 'continuous renderer must not repaint a duplicate impact body');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
