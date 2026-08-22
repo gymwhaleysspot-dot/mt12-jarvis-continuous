@@ -10,6 +10,7 @@ const required = [
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
   'griffin-ascended-atlas-v3.webp', 'rivals/kairox-awakened-atlas-v3.webp', 'arenas/lira-nexus-v1.webp',
+  'ATLAS_SANITIZER_VERSION=1', 'SANITIZED_ATLAS_PATHS', "'sanitized/'+r.path", "'ATLAS_SANITIZER_FALLBACK'", 'sanitizedAtlases:SANITIZED_ATLAS_PATHS.size',
   'GRAPHICS_PROFILE', 'SPRITE_LAYOUT', 'SPRITE_DEPTH_PIPELINE', 'function drawContactShadow',
   'function drawMotionAfterimages', 'subframeInterpolation:true', 'multiLobeContactShadows:true',
   'velocityAfterimages:true', 'dualRimPass:true', 'mobileDpr:1.75', 'particleCap:480',
@@ -89,6 +90,10 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 for(const marker of ['JARVIS_CHARACTER_MESH_ENGINE','version:4',"fallback:'JARVIS_SOFTSPRITE_FUSION_ENGINE_V3'","legacyFallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'continuousSurface:true','sliceRenderer:false','impactWarp:true','contactOcclusion:true','energyEmbedding:true','perFighterProfiles:true','fighterProfile(name)','drawSliced(o)','ctx.transform(1,0,lean,1','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`character mesh engine missing ${marker}`);
 for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
+const sanitizedRoot='jarvis/assets/survivor/sanitized';
+const sanitizedAtlases=fs.readdirSync(sanitizedRoot,{recursive:true}).filter(path=>String(path).endsWith('.webp'));
+assert.equal(sanitizedAtlases.length,21,'all 12 Griffin and 9 rival atlases require sanitized builds');
+for(const path of sanitizedAtlases)assert.ok(fs.statSync(`${sanitizedRoot}/${path}`).size>100_000,`sanitized atlas is empty or undersized ${path}`);
 for(const marker of ['minContactGap:.245','teleportContactGap:.25','target=cl(.245-dz*.3,.16,.245)','trigger=target-.015','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
 assert.ok(!softSprite.includes('ctx.globalAlpha=.82;ctx.translate(-impactSide'), 'continuous renderer must not repaint a duplicate impact body');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
