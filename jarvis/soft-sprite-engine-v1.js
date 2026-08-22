@@ -32,7 +32,6 @@ const engine={
     const p=this.profile(name,pose,impact,vx,time),lean=clamp(p.bend+p.twist,-.16,.16),hitShift=-impact*impactSide*dw*.035;
     ctx.save();ctx.imageSmoothingEnabled=true;ctx.translate(dx+dw/2+hitShift,dy+dh);ctx.scale(p.stretch,p.squash);ctx.transform(1,0,lean,1,-lean*dh*.48,0);
     ctx.drawImage(img,sx,sy,sw,sh,-dw/2,-dh,dw,dh);
-    if(impact>0){const contactX=impactSide*dw*.24,contactY=-dh*p.contactY;ctx.save();ctx.beginPath();ctx.ellipse(contactX,contactY,dw*.18,dh*.22,0,0,Math.PI*2);ctx.clip();ctx.globalAlpha=.82;ctx.translate(-impactSide*dw*.028*impact,dh*.012*impact);ctx.scale(1-impact*.035,1+impact*.025);ctx.drawImage(img,sx,sy,sw,sh,-dw/2,-dh,dw,dh);ctx.restore()}
     if(impact>0){ctx.globalCompositeOperation='screen';ctx.globalAlpha=.12*impact;ctx.filter='blur(2px)';ctx.strokeStyle=accent;ctx.lineWidth=3+impact*4;ctx.beginPath();ctx.ellipse(impactSide*dw*.34,-dh*.52,dw*.13*(1-impact*.35),dh*.18,0,0,Math.PI*2);ctx.stroke()}
     ctx.restore();return true;
   },
