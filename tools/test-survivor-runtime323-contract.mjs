@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=22', 'BALANCE_VERSION=23', 'CHOREOGRAPHY_VERSION=26',
-  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=10',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=23', 'BALANCE_VERSION=24', 'CHOREOGRAPHY_VERSION=27',
+  'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=11',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
   'PROJECTILE_EXPIRE', "emit('RUNTIME_BOOT'", "bind(0,false)", 'awaitCriticalAssets', 'heroAtlasReady',
@@ -48,7 +48,7 @@ const required = [
   'AI_FIGHTER_IDENTITIES', 'MOTION_MOTIFS', 'EFFECT_PACKAGES', 'AI_CHOREOGRAPHY_LATTICE',
   'function choreographyVariant', 'function applyChoreographyVariant', 'function testChoreographyLattice',
   'CHOREOGRAPHY_LATTICE_BOOT', 'CHOREOGRAPHY_VARIANT', 'choreographyVariantCount:AI_CHOREOGRAPHY_LATTICE.length',
-  'DRAGON_BALL_COUNT=7', 'GOD_FORM=11', 'function planDragonBallRounds', 'function awardDragonBall',
+  'DRAGON_BALL_COUNT=7', 'DRAGON_BALL_HORIZON=30', 'GOD_FORM=11', 'function planDragonBallRounds', 'function awardDragonBall',
   'DRAGON_BALL_FOUND', 'DRAGON_BALL_SET_COMPLETE', 'SEVEN_DRAGON_BALL_WISH', 'GOD_FORM_AUTHORITY',
   'RIVAL_FINISHER_RESERVED', 'SUPER SAIYAN GOD', 'DIVINE DRAGON RUSH', 'CRIMSON STAR ERUPTION',
   'SEVEN-STAR GODFALL', 'SEVEN_STAR_GODFALL', 'function drawDragonBallHud', 'function drawGodBloom',
@@ -57,7 +57,11 @@ const required = [
   'function production252Update', 'function applyProduction252Update', 'function testProduction252Matrix',
   'PRODUCTION_252_MATRIX_BOOT', 'PRODUCTION_252_UPDATE', 'production252UpdateCount:PRODUCTION_252_UPDATE_MATRIX.length',
   'GOD_ASSETS_PRELOAD', 'GOD_AUTHORITY_RESTORE', "applyGodAuthority(st.hero,'LEVEL_BIND')",
-  'integerSpritePlacement:true', 'effectTypeBudget:true', 'motionQueryMatrix:true', "version:4,firmware:'"
+  'integerSpritePlacement:true', 'effectTypeBudget:true', 'motionQueryMatrix:true', "version:5,firmware:'",
+  'SMOOTH_COMBAT_PROFILE', 'function smoothFacing', 'function smoothApproach', 'function updateCameraSmoothing',
+  'function testCombatSmoothness', 'SMOOTH_COMBAT_BOOT', 'SMOOTH_TURN_COMMIT', 'smoothCamera:true',
+  'turnHysteresis:true', 'velocityDamping:true', 'COMBAT_CINEMATIC_COMPLETE', "if(c.source==='LETHAL_FINISHER')",
+  '[[0,3],[4,7],[8,11],[12,15],[16,19],[20,24],[25,29]]'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
 for (const forbidden of [
