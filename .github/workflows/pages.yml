@@ -117,6 +117,23 @@ jobs:
           test -f _site/survivor-runtime323.html
           test -f _site/survivor-ps2.html
           test -f _site/jarvis/survivor-build.json
+      - name: Wait for legacy Pages build
+        env:
+          DEPLOY_SHA: ${{ github.sha }}
+          DEPLOY_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in {1..48}; do
+            runs="$(curl -fsSL --retry 2 "https://api.github.com/repos/${DEPLOY_REPOSITORY}/actions/runs?head_sha=${DEPLOY_SHA}&per_page=20" || true)"
+            if [ -n "$runs" ] && ! jq -e '.workflow_runs[] | select(.name == "pages build and deployment" and .status != "completed")' <<<"$runs" >/dev/null; then
+              echo "Legacy Pages build settled before verified deployment"
+              exit 0
+            fi
+            echo "Legacy Pages build still active (${attempt}/48)"
+            sleep 5
+          done
+          echo "Legacy Pages build did not settle in time" >&2
+          exit 1
       - uses: actions/upload-pages-artifact@v4
         with: {path: _site}
       - name: Deploy
