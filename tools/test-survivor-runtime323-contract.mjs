@@ -76,7 +76,7 @@ const required = [
   "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
   'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false',
   'jarvis/soft-sprite-engine-v1.js', 'function drawFighterFallback', 'function drawSoftFighter',
-  'function drawSoftContactOcclusion', 'SOFTSPRITE_ENGINE_BOOT', 'softSpriteEngine:globalThis.JarvisSoftSpriteEngine',
+  'function drawSoftContactOcclusion', 'if(!globalThis.JarvisSoftSpriteEngine?.continuousSurface)drawSoftContactOcclusion()', 'SOFTSPRITE_ENGINE_BOOT', 'softSpriteEngine:globalThis.JarvisSoftSpriteEngine',
   'fallbackRenderer:GRIFFIN_RENDER_AUTHORITY.name', 'name:f.name,pose:f.pose', 'name:f.name,facing:f.facing'
 ];
 for (const marker of required) assert.ok(html.includes(marker), `missing ${marker}`);
@@ -89,6 +89,8 @@ assert.ok(html.indexOf("emit('RUNTIME_BOOT'") < html.indexOf('bind(0,false)'), '
 assert.equal((html.match(/function drawFighter\(/g) || []).length, 1, 'single fighter renderer required');
 for(const marker of ['JARVIS_CHARACTER_MESH_ENGINE','version:4',"fallback:'JARVIS_SOFTSPRITE_FUSION_ENGINE_V3'","legacyFallback:'GRIFFIN_SPRITE_AUTHORITY_V1'",'continuousSurface:true','sliceRenderer:false','impactWarp:true','contactOcclusion:true','energyEmbedding:true','perFighterProfiles:true','fighterProfile(name)','drawSliced(o)','ctx.transform(1,0,lean,1','profileCount:Object.keys(this.fighterProfiles).length','redrawContact(o)'])assert.ok(softSprite.includes(marker),`character mesh engine missing ${marker}`);
 for(const fighter of ['GRIFFIN','LIRA','KAIROX','SOLENNE','MIREYA','ZEPHYRA','ORUN','MORDREN','SABLE','KRAKEN'])assert.ok(softSprite.includes(`${fighter}:{slices:`),`soft-sprite profile missing ${fighter}`);
+for(const marker of ['minContactGap:.205','teleportContactGap:.22','const trigger=.19,target=.205','push=(target-ad)*.5'])assert.ok(html.includes(marker),`body-safe spacing missing ${marker}`);
+assert.ok(!softSprite.includes('ctx.globalAlpha=.82;ctx.translate(-impactSide'), 'continuous renderer must not repaint a duplicate impact body');
 assert.equal((html.match(/<canvas/g) || []).length, 1, 'single canvas required');
 assert.equal((html.match(/schema:'jarvis-survivor-replay-v19'/g) || []).length, 1, 'single replay schema authority required');
 assert.ok(!html.includes('if(replay.events.length>12000)'), 'complete replay must not discard early events');
