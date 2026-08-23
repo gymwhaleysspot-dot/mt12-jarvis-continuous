@@ -2,9 +2,9 @@ name: Survivor Runtime 323 Verification
 on:
   push:
     branches: [main]
-    paths: ['survivor-runtime323.html','survivor-ps2.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-ps2-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','tools/survivor-ps2-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['jarvis/survivor-graphics-200-v1.js','tools/test-survivor-graphics-200-v1.mjs','survivor-runtime323.html','survivor-ps2.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-ps2-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','tools/survivor-ps2-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   pull_request:
-    paths: ['survivor-runtime323.html','survivor-ps2.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-ps2-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','tools/survivor-ps2-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
+    paths: ['jarvis/survivor-graphics-200-v1.js','tools/test-survivor-graphics-200-v1.mjs','survivor-runtime323.html','survivor-ps2.html','survivor.html','jarvis/survivor-tab.js','jarvis/assets/survivor/**','tools/test-survivor-runtime323-contract.mjs','tools/test-survivor-ps2-contract.mjs','tools/test-survivor-production243-contract.mjs','tools/survivor-runtime-smoke.mjs','tools/survivor-ps2-smoke.mjs','.github/workflows/survivor-pages-231.yml','.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,11 +25,13 @@ jobs:
           node --check tools/test-survivor-ps2-contract.mjs
           node --check tools/survivor-ps2-smoke.mjs
           node --check tools/test-survivor-runtime323-contract.mjs
+          node --check tools/test-survivor-graphics-200-v1.mjs
           node --check tools/test-survivor-production243-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node --check tools/survivor-runtime323-lives-smoke.mjs
           node --check tools/survivor-runtime323-combat-smoke.mjs
           node tools/test-survivor-runtime323-contract.mjs
+          node tools/test-survivor-graphics-200-v1.mjs
           node tools/test-survivor-ps2-contract.mjs
           node tools/test-survivor-production243-contract.mjs
           grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
