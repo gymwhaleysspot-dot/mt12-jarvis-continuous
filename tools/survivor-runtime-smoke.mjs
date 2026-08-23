@@ -76,7 +76,7 @@ if(!result)throw lastError||new Error('Survivor smoke produced no result');
 
 const {clockA,state,pageErrors,consoleErrors}=result;
 fs.writeFileSync(path.join(out,'runtime.json'),JSON.stringify({engine:engineName,url,clockA,state,pageErrors,consoleErrors},null,2)+'\n');
-const failed=state.runtime?.production!==expectedProduction||state.canvasCount!==1||state.levels!==45||state.modelRenderer!==15||state.choreography!==28||state.replaySchema!=='jarvis-survivor-replay-v19'||state.frameCount<10||!state.bootFirst||!state.levelBind||!state.earnedAscensionContract||!state.finiteProgression||!state.visibleFighters||!state.finiteFrames||state.rival!=='LIRA'||!state.round.includes('LEVEL 1/45')||!state.round.includes('NEXUS CITADEL')||!state.startHidden||!state.replayButton||!clockA||!state.clock||clockA===state.clock||pageErrors.length||consoleErrors.length;
+const failed=state.runtime?.production!==expectedProduction||state.canvasCount!==1||state.levels!==45||state.modelRenderer!==15||state.choreography!==29||state.replaySchema!=='jarvis-survivor-replay-v19'||state.frameCount<10||!state.bootFirst||!state.levelBind||!state.earnedAscensionContract||!state.finiteProgression||!state.visibleFighters||!state.finiteFrames||state.rival!=='LIRA'||!state.round.includes('LEVEL 1/45')||!state.round.includes('NEXUS CITADEL')||!state.startHidden||!state.replayButton||!clockA||!state.clock||clockA===state.clock||pageErrors.length||consoleErrors.length;
 if(failed){
   console.error(JSON.stringify({clockA,state,pageErrors,consoleErrors},null,2));
   process.exitCode=1;
