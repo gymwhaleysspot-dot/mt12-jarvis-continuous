@@ -8,9 +8,11 @@ on:
       - 'survivor.html'
       - 'jarvis/survivor-tab.js'
       - 'jarvis/survivor-underhood-v1.js'
+      - 'jarvis/survivor-graphics-200-v1.js'
       - 'jarvis/assets/survivor/**'
       - 'tools/test-survivor-runtime323-contract.mjs'
       - 'tools/test-survivor-underhood-v1.mjs'
+      - 'tools/test-survivor-graphics-200-v1.mjs'
       - 'tools/test-survivor-ps2-contract.mjs'
       - 'tools/survivor-ps2-smoke.mjs'
       - 'tools/test-survivor-production243-contract.mjs'
@@ -47,12 +49,14 @@ jobs:
           node --check tools/survivor-ps2-smoke.mjs
           node --check tools/test-survivor-runtime323-contract.mjs
           node --check tools/test-survivor-underhood-v1.mjs
+          node --check tools/test-survivor-graphics-200-v1.mjs
           node --check tools/test-survivor-production243-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node --check tools/survivor-runtime323-lives-smoke.mjs
           node --check tools/survivor-runtime323-combat-smoke.mjs
           node tools/test-survivor-runtime323-contract.mjs
           node tools/test-survivor-underhood-v1.mjs
+          node tools/test-survivor-graphics-200-v1.mjs
           node tools/test-survivor-ps2-contract.mjs
           node tools/test-survivor-production243-contract.mjs
           grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
@@ -85,7 +89,7 @@ jobs:
           const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime323.html';
           if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing deployment SHA');
           let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:323,modelRenderer:15,effectGeometry:12,visualTuning:25,balance:26,choreography:29,audioEngine:1,replayArchive:4,levels:45,poses:42,deploySha:sha,artifact:p,authority:'APEX_2026_ADAPTIVE_V13',firmware:'JARVIS_SPRITE_FIRMWARE_BIOS',kernel:17,generatedAt:new Date().toISOString()},null,2)+'\n');
+          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:323,modelRenderer:15,effectGeometry:12,visualTuning:25,balance:26,choreography:29,audioEngine:1,replayArchive:4,underhood:1,underhoodUpdates:200,graphics200:1,graphicsUpdates:200,levels:45,poses:42,deploySha:sha,artifact:p,authority:'APEX_2026_ADAPTIVE_V13',firmware:'JARVIS_SPRITE_FIRMWARE_BIOS',kernel:17,generatedAt:new Date().toISOString()},null,2)+'\n');
           NODE
       - name: Build bounded Pages artifact
         run: |
