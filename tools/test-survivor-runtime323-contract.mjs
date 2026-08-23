@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const html = fs.readFileSync('survivor-runtime323.html', 'utf8');
 const softSprite = fs.readFileSync('jarvis/soft-sprite-engine-v1.js', 'utf8');
 const required = [
-  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=24', 'BALANCE_VERSION=25', 'CHOREOGRAPHY_VERSION=28',
+  'RUNTIME=323', 'MODEL_RENDERER_VERSION=15', 'VISUAL_TUNING_VERSION=25', 'BALANCE_VERSION=26', 'CHOREOGRAPHY_VERSION=29',
   'APEX_2026_ADAPTIVE_V13', 'APEX_2026_ADAPTIVE_GRAPHICS_KERNEL', 'EFFECT_GEOMETRY_VERSION=12',
   "schema:'jarvis-survivor-replay-v19'", "function snapshot(reason='TICK')", 'replay.frames.push',
   'hpBefore', 'hpAfter', 'strikeId', 'FINISHER_START', 'FINISHER_IMPACT', 'FINISHER_COMPLETE',
@@ -42,7 +42,7 @@ const required = [
   'function attackBreak', 'function testAttackBreakCombat', "emit('ATTACK_BREAK'",
   'comebackUsed:false', 'attackBreakRestored:true', 'rivalVictory(a,b,"LETHAL_FINISHER")',
   'function testFinisherTimeline', 'normalizedImpact:', 'timingError:', 'timelineId:',
-  'c.pendingLethal=true', 'if(c.pendingLethal&&!c.damageApplied)',
+  'beginFinisherLifecycle(c,{pendingLethal:true})', 'if(c.pendingLethal&&!c.damageApplied)',
   'RIVAL_FINISHER_SEQUENCES', 'function testRivalFinisherSequences',
   'DRAGON_BALL_SURVIVAL_CURVE', 'finisherGrace=3.2', 'ladderAdapt=',
   'NEXUS_SPEAR', 'CALDERA_HAMMER', 'CORONA_ORBIT', 'PRISM_MIRAGE',
@@ -62,18 +62,18 @@ const required = [
   'integerSpritePlacement:true', 'effectTypeBudget:true', 'motionQueryMatrix:true', "version:6,firmware:'",
   'SMOOTH_COMBAT_PROFILE', 'function smoothFacing', 'function smoothApproach', 'function updateCameraSmoothing',
   'function testCombatSmoothness', 'SMOOTH_COMBAT_BOOT', 'SMOOTH_TURN_COMMIT', 'smoothCamera:true',
-  'turnHysteresis:true', 'velocityDamping:true', 'COMBAT_CINEMATIC_COMPLETE', "if(c.source==='LETHAL_FINISHER')",
+  'turnHysteresis:true', 'velocityDamping:true', 'COMBAT_CINEMATIC_COMPLETE', 'if(c.lifecycle)',
   '[[0,3],[4,7],[8,11],[12,15],[16,19],[20,24],[25,29]]',
   'SURVIVAL_PROFILE', 'function testSurvivalBalance', 'function testSurvivalRecovery', 'SURVIVAL_ENGINE_BOOT', 'DRAGON_BALL_RESOLVE',
   'roundRecoveryBase:420', 'minimumHealthRatio:.84', 'rivalFinisherRatio:.08', 'rivalFinisherUlt:82',
   'EXPLOSION_PROFILE', 'function testExplosionEngine', 'function updateParticleSystems', 'EXPLOSION_ENGINE_BOOT',
   'CINEMATIC_EXPLOSION_SPAWN', 'thermalLayers:4', 'shockwaveLayers:3', 'maxDebris:56', 'maxSmoke:12',
   'layeredExplosions:true', 'ballisticDebris:true', 'thermalBloom:true', 'particleGravity:true',
-  'contactOverlap:distance(st.hero,st.boss)<SPRITE_LAYOUT.minContactGap', 'spacingViolation:',
+  'contactState:contact.state', 'intentionalContact:contact.intentional', 'spacingViolation:!contact.intentional',
   'AUDIO_ENGINE_VERSION=1', 'AUDIO_PROFILE', 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE', 'function testAudioEngine',
   'AUDIO_ENGINE_BOOT', 'AUDIO_CUE', 'maxVoices:18', 'dynamicCompression:true', 'spatialPan:true',
   "sound('explosion'", "sound('transform'", "sound(heavy?'impactHeavy':'impact'",
-  'REPLAY_ARCHIVE_VERSION=3', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'nextEventSeq:0', 'function replayCoverage', 'eventsDropped:0', 'framesDropped:0', 'function compactAssetTelemetry', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
+  'REPLAY_ARCHIVE_VERSION=4', 'replayArchiveVersion:REPLAY_ARCHIVE_VERSION', 'nextEventSeq:0', 'function replayCoverage', 'eventsDropped:0', 'framesDropped:0', 'function compactAssetTelemetry', 'function finalReplayPayload', 'function testReplayArchiveOutcomes', 'function testTournamentReplayArchive', "persistFinalReplay('TOURNAMENT_CLEARED')",
   "outcome==='TOURNAMENT_CLEARED'", "emit('TOURNAMENT_CLEARED'", 'REPLAY_ARCHIVE_COMPLETE',
   'REPLAY_ARCHIVE_QUEUED', 'ARCHIVE_RECEIPT', 'verified:true', 'function testRivalFinisherTimeline', 'if(st.archiveStarted)return false',
   'jarvis/soft-sprite-engine-v1.js', 'function drawFighterFallback', 'function drawSoftFighter',
@@ -94,7 +94,9 @@ const sanitizedRoot='jarvis/assets/survivor/sanitized';
 const sanitizedAtlases=fs.readdirSync(sanitizedRoot,{recursive:true}).filter(path=>String(path).endsWith('.webp'));
 assert.equal(sanitizedAtlases.length,33,'all 12 Griffin, 12 finisher, and 9 rival atlases require sanitized builds');
 for(const path of sanitizedAtlases)assert.ok(fs.statSync(`${sanitizedRoot}/${path}`).size>100_000,`sanitized atlas is empty or undersized ${path}`);
-for(const marker of ['minContactGap:.245','teleportContactGap:.25','target=cl(.245-dz*.3,.16,.245)','enter=target-.018','release=target+.026','correction=Math.min(Math.max(0,target-ad),.012)','velocityClamp:true','if(d>.27)','else smoothApproach(a,0,0,dt)','distance(a,b)>.285'])assert.ok(html.includes(marker),`stable combat spacing missing ${marker}`);
+for(const marker of ['JARVIS_CONTACT_STATE_CONTROLLER','function fighterContactState','function contactGeometry',"impact?'IMPACT':transit?'TRANSIT':idle?'IDLE':'NEUTRAL'",'idleGap:.255','impactGap:.16','if(contact.intentional)','state:contact.state','velocityClamp:true','if(d>.27)','else smoothApproach(a,0,0,dt)','distance(a,b)>.285'])assert.ok(html.includes(marker),`contact-state controller missing ${marker}`);
+for(const marker of ['JARVIS_UNIFIED_FINISHER_LIFECYCLE','function beginFinisherLifecycle','lifecycleImpact=false',"source:c.source,postKo:true",'st.victoryCinematic=beginFinisherLifecycle',"emit('FINISHER_COMPLETE'"])assert.ok(html.includes(marker),`finisher lifecycle adapter missing ${marker}`);
+for(const marker of ['JARVIS_REPLAY_DELIVERY_VERIFIER','function verifyReplayUpload','function deliverReplayVerified','remote.sha===receipt.blobSha','attempts:3','UPLOAD_OR_VERIFY_FAILED','verified:false'])assert.ok(html.includes(marker),`replay delivery verifier missing ${marker}`);
 {
   const a={x:.28,vx:0},b={x:.72,vx:0},dt=1/60,target=.245;
   let active=false,reversals=0,lastDelta=0,minSettledGap=1;
