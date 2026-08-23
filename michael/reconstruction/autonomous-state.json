@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-08-23T20:18:34.715Z",
+  "generatedAt": "2026-08-23T20:15:32.331Z",
   "mode": "continuous_whole_vehicle_self_repair",
   "upgrades": {
     "topologyDSL": true,
@@ -613,14 +613,13 @@
   ],
   "specialists": [
     {
-      "worker": "nickelle-front_fascia",
-      "region": "front_fascia",
+      "worker": "nickelle-hood_roof",
+      "region": "hood_roof",
       "components": [
-        "headlights",
-        "drl",
-        "grille",
-        "splitter",
-        "bumper_openings"
+        "hood_crown",
+        "hood_vents",
+        "roof_scoop",
+        "greenhouse"
       ],
       "priority": 1,
       "debt": 0.5,
@@ -656,6 +655,20 @@
       "mode": "topology_and_parameter"
     },
     {
+      "worker": "nickelle-front_fascia",
+      "region": "front_fascia",
+      "components": [
+        "headlights",
+        "drl",
+        "grille",
+        "splitter",
+        "bumper_openings"
+      ],
+      "priority": 4,
+      "debt": 0.5,
+      "mode": "topology_and_parameter"
+    },
+    {
       "worker": "nickelle-front_arches",
       "region": "front_arches",
       "components": [
@@ -664,7 +677,7 @@
         "hood_vents",
         "stance"
       ],
-      "priority": 4,
+      "priority": 5,
       "debt": 0.5,
       "mode": "topology_and_parameter"
     },
@@ -677,19 +690,6 @@
         "door_recesses",
         "rear_quarter_aero",
         "livery_uv"
-      ],
-      "priority": 5,
-      "debt": 0.5,
-      "mode": "topology_and_parameter"
-    },
-    {
-      "worker": "nickelle-hood_roof",
-      "region": "hood_roof",
-      "components": [
-        "hood_crown",
-        "hood_vents",
-        "roof_scoop",
-        "greenhouse"
       ],
       "priority": 6,
       "debt": 0.5,
@@ -1230,8 +1230,27 @@
       "controller_logic"
     ]
   },
-  "focusRegion": "front_fascia",
+  "focusRegion": "hood_roof",
   "history": [
+    {
+      "at": "2026-08-23T05:51:13.756Z",
+      "focusRegion": "front_fascia",
+      "worstDebt": 0.5,
+      "topologyQueue": [
+        "projectorShape",
+        "grille",
+        "grilleSpan",
+        "frontSymmetry",
+        "wheelFill",
+        "sideSilhouette",
+        "threeSilhouette",
+        "sideDark",
+        "roofWhite",
+        "liveryYellow",
+        "edgeDetail",
+        "rearMass"
+      ]
+    },
     {
       "at": "2026-08-23T05:57:03.192Z",
       "focusRegion": "front_arches",
@@ -2715,27 +2734,8 @@
       ]
     },
     {
-      "at": "2026-08-23T20:15:14.687Z",
+      "at": "2026-08-23T20:15:32.331Z",
       "focusRegion": "hood_roof",
-      "worstDebt": 0.5,
-      "topologyQueue": [
-        "projectorShape",
-        "grille",
-        "grilleSpan",
-        "frontSymmetry",
-        "wheelFill",
-        "sideSilhouette",
-        "threeSilhouette",
-        "sideDark",
-        "roofWhite",
-        "liveryYellow",
-        "edgeDetail",
-        "rearMass"
-      ]
-    },
-    {
-      "at": "2026-08-23T20:18:34.715Z",
-      "focusRegion": "front_fascia",
       "worstDebt": 0.5,
       "topologyQueue": [
         "projectorShape",
