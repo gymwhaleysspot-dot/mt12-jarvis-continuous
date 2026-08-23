@@ -7,8 +7,10 @@ on:
       - 'survivor-ps2.html'
       - 'survivor.html'
       - 'jarvis/survivor-tab.js'
+      - 'jarvis/survivor-underhood-v1.js'
       - 'jarvis/assets/survivor/**'
       - 'tools/test-survivor-runtime323-contract.mjs'
+      - 'tools/test-survivor-underhood-v1.mjs'
       - 'tools/test-survivor-ps2-contract.mjs'
       - 'tools/survivor-ps2-smoke.mjs'
       - 'tools/test-survivor-production243-contract.mjs'
@@ -44,11 +46,13 @@ jobs:
           node --check tools/test-survivor-ps2-contract.mjs
           node --check tools/survivor-ps2-smoke.mjs
           node --check tools/test-survivor-runtime323-contract.mjs
+          node --check tools/test-survivor-underhood-v1.mjs
           node --check tools/test-survivor-production243-contract.mjs
           node --check tools/survivor-runtime-smoke.mjs
           node --check tools/survivor-runtime323-lives-smoke.mjs
           node --check tools/survivor-runtime323-combat-smoke.mjs
           node tools/test-survivor-runtime323-contract.mjs
+          node tools/test-survivor-underhood-v1.mjs
           node tools/test-survivor-ps2-contract.mjs
           node tools/test-survivor-production243-contract.mjs
           grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
