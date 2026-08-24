@@ -21,7 +21,7 @@ fs.mkdirSync(out,{recursive:true});
 let browser;const missing=[];
 try{
   log(`launch chromium size=${size} views=${views.join(',')} expect=${expectedVersion}/${expectedIdentity}`);
-  browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage','--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+  browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage','--use-gl=swiftshader','--enable-unsafe-swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
   const page=await browser.newPage({viewport:{width:size,height:size},deviceScaleFactor:1});
   page.setDefaultTimeout(opTimeout);
   page.on('console',m=>console.log(`[browser ${m.type()}] ${m.text()}`));
@@ -42,7 +42,8 @@ try{
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   for(const view of views){
     log(`view ${view}`);
-    await page.locator(`[data-view="${view}"]`).click({timeout:opTimeout});
+    await page.locator(`[data-view="${view}"]`).click({force:true,noWaitAfter:true,timeout:opTimeout});
+    await page.waitForFunction(view=>document.querySelector(`[data-view="${view}"]`)?.classList.contains('active'),view,{timeout:opTimeout});
     const data=await page.evaluate(async()=>{await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const c=document.querySelector('#raceCanvas');if(!c||c.width<16||c.height<16)throw new Error('invalid raceCanvas');return c.toDataURL('image/png')});
     const comma=data.indexOf(',');if(comma<0)throw new Error(`invalid canvas data URL for ${view}`);
     const png=Buffer.from(data.slice(comma+1),'base64');
