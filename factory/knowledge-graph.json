@@ -1,9 +1,9 @@
 {
   "champion": "j00003",
   "counts": {
-    "controller": 5,
+    "controller": 6,
     "digital_twin": 1,
-    "experiment": 1,
+    "experiment": 2,
     "log": 5,
     "mission": 3,
     "mutation": 10,
@@ -12,9 +12,9 @@
     "test": 7,
     "track": 2
   },
-  "currentExperiment": "EXP-20260826132926",
-  "generatedAt": "2026-08-26T13:42:24.335606+00:00",
-  "nodeCount": 187,
+  "currentExperiment": "EXP-20260826142310",
+  "generatedAt": "2026-08-26T14:23:50.987364+00:00",
+  "nodeCount": 189,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -1282,9 +1282,23 @@
       "id": "test:3a3ab60dbad64cfa",
       "kind": "test",
       "label": "bench and road evidence before canonical promotion"
+    },
+    {
+      "expectedInformationGain": 0.6727,
+      "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
+      "id": "experiment:af948c00620c645c",
+      "kind": "experiment",
+      "label": "Research-aware evolutionary five-hypothesis generation plus synthesis",
+      "measurement": "maximize information gained per generation while preserving defended behavior",
+      "status": "PLANNED"
+    },
+    {
+      "id": "controller:690d3c8e686df818",
+      "kind": "controller",
+      "label": "jrw4-1812"
     }
   ],
-  "relationshipCount": 180,
+  "relationshipCount": 198,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -2366,6 +2380,114 @@
       "id": "edge:634710eefb9f2ff1",
       "relation": "REQUIRES_TEST",
       "source": "experiment:b72448ab634a5cc5",
+      "target": "test:3a3ab60dbad64cfa"
+    },
+    {
+      "id": "edge:45a71d6c56f610e3",
+      "relation": "USES_PARENT",
+      "source": "experiment:af948c00620c645c",
+      "target": "controller:690d3c8e686df818"
+    },
+    {
+      "id": "edge:138c99c1fe9c742e",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:3fa263a6223e98fc"
+    },
+    {
+      "id": "edge:f745502a5f8faaba",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:5a7c6e240bcab7e6"
+    },
+    {
+      "id": "edge:a514ecbfa42e0174",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:6c110f9626d9d4ce"
+    },
+    {
+      "id": "edge:db1c7a818d7c99b1",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:6ec99fb4521921a0"
+    },
+    {
+      "id": "edge:60d197cc706e5837",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:815b1274c28658ed"
+    },
+    {
+      "id": "edge:dc5ff2a771c8f3de",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:45f7e0cb0e6c5f80"
+    },
+    {
+      "id": "edge:41280c2c42123961",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:3d53a3d9623490be"
+    },
+    {
+      "id": "edge:355d472202ed1ae3",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:280d7a2eb3f92442"
+    },
+    {
+      "id": "edge:cc367189b9351116",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:35fec75f0c96621e"
+    },
+    {
+      "id": "edge:703d21ea87eddcd5",
+      "relation": "PROPOSES_MUTATION",
+      "source": "experiment:af948c00620c645c",
+      "target": "mutation:18f553d0fc6d0c7e"
+    },
+    {
+      "id": "edge:6f7335613efcea8a",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:d0ceba208d208f3d"
+    },
+    {
+      "id": "edge:8099415d99003d7b",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:af354b232c193ef9"
+    },
+    {
+      "id": "edge:7cc4a069e684b40d",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:9e7a610f94776e69"
+    },
+    {
+      "id": "edge:ca9fd267839514fa",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:46a7939a0bb91296"
+    },
+    {
+      "id": "edge:f75b81c012725a9d",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:db5c2d09f1adc47a"
+    },
+    {
+      "id": "edge:6403c6049cbdb656",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
+      "target": "test:0dc8b008f43f14a0"
+    },
+    {
+      "id": "edge:04bdb79c61e99b7e",
+      "relation": "REQUIRES_TEST",
+      "source": "experiment:af948c00620c645c",
       "target": "test:3a3ab60dbad64cfa"
     }
   ],
