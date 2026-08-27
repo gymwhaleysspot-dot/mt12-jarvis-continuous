@@ -17,10 +17,10 @@ LABEL={"conservative":"JRW1","balanced":"JRW2","learning":"JRW3","observability"
 ARCH={
 "conservative":"local function jA1(a)local u=c1(V[119]);local c=c1(V[114]);X[67]=lerp(X[67]or c,c,.08);if u>.45 then X[68]=m_min(60,(X[68]or 0)+1)else X[68]=m_max(0,(X[68]or 0)-2)end;local r=c1((X[67]or 0)*(1-u));local cap=91+5*r;if(X[68]or 0)>8 then cap=cap-2 end;X[69]=lerp(X[69]or cap,cap,.18);return m_min(a,X[69])end",
 "balanced":"local function jA2(a)local q=c1(V[114]);local u=c1(V[119]);local e=c1((V[161]+V[164])/2);X[70]=lerp(X[70]or e,e,.14);local d=e-(X[70]or e);X[71]=lerp(X[71]or 0,m_abs(d),.2);local sev=c1(e*.55+(X[71]or 0)*1.8+u*.3);local rel=c1(q*(1-u));X[72]=lerp(X[72]or sev,sev,sev>.5 and .25 or .08);return m_min(a,96-5*(X[72]or 0)+2*rel)end",
-"learning":"local function jA3(a)local u=c1(V[119]);local air=V[543]>0 and 1 or 0;X[73]=clamp((X[73]or 0)+(air and(1-u)*.18 or -.12),0,1);local land=(not air and(X[73]or 0)>.35)and 1 or 0;X[74]=clamp((X[74]or 0)+(land*.22-.08),0,1);if land>0 then X[75]=(X[75]or 0)+1 else X[75]=m_max(0,(X[75]or 0)-1)end;local conf=c1((X[73]or 0)*(1-u));local cap=96-3*conf-((X[75]or 0)>3 and 2 or 0);return m_min(a,cap)end",
+"learning":"local function jA3(a)local u=c1(V[119]);local air=(V[620]>0 and V[620]~=3)and 1 or 0;X[73]=clamp((X[73]or 0)+(air*(1-u)*.18-.12),0,1);local land=(air==0 and(X[73]or 0)>.35)and 1 or 0;X[74]=clamp((X[74]or 0)+(land*.22-.08),0,1);if land>0 then X[75]=(X[75]or 0)+1 else X[75]=m_max(0,(X[75]or 0)-1)end;local conf=c1((X[73]or 0)*(1-u));local cap=96-3*conf-((X[75]or 0)>3 and 2 or 0);return m_min(a,cap)end",
 "observability":"local function jA4(a)local q=c1(V[114]);local u=c1(V[119]);local ca=c1((X[46]or 0)/200);local obs=c1(q*.45+(1-u)*.35+ca*.2);X[76]=lerp(X[76]or obs,obs,obs<(X[76]or obs)and .22 or .07);X[77]=lerp(X[77]or u,u,.12);local trust=c1((X[76]or 0)*(1-(X[77]or 0)*.35));local cap=92+5*trust;return m_min(a,cap)end",
 "combined":"local function jA5(a)local b=(V[161]>0 or V[164]>0 or V[543]>0)and 1 or 0;local q=c1(V[114]);local u=c1(V[119]);X[78]=clamp((X[78]or 0)+(b and .16 or -.09),0,1);local lock=c1((X[78]or 0)*(.7+.3*u));X[79]=lerp(X[79]or lock,lock,lock>.45 and .28 or .1);local rec=c1(q*(1-u));local cap=96-5*(X[79]or 0)+rec;return m_min(a,cap)end",
-"synthesis":"local function jA6(a)local q=c1(V[114]);local u=c1(V[119]);local ca=c1((X[46]or 0)/200);local tc=c1((V[161]+V[164])/2);local air=V[543]>0 and 1 or 0;X[55]=lerp(X[55]or q,q,.08);X[56]=lerp(X[56]or u,u,.12);X[57]=lerp(X[57]or tc,tc,.14);X[58]=clamp((X[58]or 0)+(air and(1-u)*.18 or -.12),0,1);local land=(not air and(X[58]or 0)>.35)and 1 or 0;X[59]=clamp((X[59]or 0)+(land*.22-.08),0,1);local brake=(V[161]>0 or V[164]>0)and 1 or 0;X[60]=clamp((X[60]or 0)+(brake and .15 or -.09),0,1);local obs=c1((X[55]or 0)*.35+(1-(X[56]or 0))*.3+ca*.2+(1-(X[57]or 0))*.15);X[61]=lerp(X[61]or obs,obs,obs<(X[61]or obs)and .2 or .06);local risk=c1((X[56]or 0)*.22+(X[57]or 0)*.25+(X[58]or 0)*.18+(X[60]or 0)*.25+(1-(X[61]or 0))*.1);local cap=97-7*risk;if land>0 then cap=cap-1 end;X[62]=lerp(X[62]or cap,cap,risk>.5 and .24 or .09);return m_min(a,X[62])end"
+"synthesis":"local function jA6(a)local q=c1(V[114]);local u=c1(V[119]);local ca=c1((X[46]or 0)/200);local tc=c1((V[161]+V[164])/2);local air=(V[620]>0 and V[620]~=3)and 1 or 0;X[55]=lerp(X[55]or q,q,.08);X[56]=lerp(X[56]or u,u,.12);X[57]=lerp(X[57]or tc,tc,.14);X[58]=clamp((X[58]or 0)+(air*(1-u)*.18-.12),0,1);local land=(air==0 and(X[58]or 0)>.35)and 1 or 0;X[59]=clamp((X[59]or 0)+(land*.22-.08),0,1);local brake=(V[161]>0 or V[164]>0)and 1 or 0;X[60]=clamp((X[60]or 0)+(brake and .15 or -.09),0,1);local obs=c1((X[55]or 0)*.35+(1-(X[56]or 0))*.3+ca*.2+(1-(X[57]or 0))*.15);X[61]=lerp(X[61]or obs,obs,obs<(X[61]or obs)and .2 or .06);local risk=c1((X[56]or 0)*.22+(X[57]or 0)*.25+(X[58]or 0)*.18+(X[60]or 0)*.25+(1-(X[61]or 0))*.1);local cap=97-7*risk;if land>0 then cap=cap-1 end;X[62]=lerp(X[62]or cap,cap,risk>.5 and .24 or .09);return m_min(a,X[62])end"
 }
 OWNERS={"jA6":set(range(55,63)),"jAS":set(range(63,67)),"jA1":set(range(67,70)),"jA2":set(range(70,73)),"jA3":set(range(73,76)),"jA4":set(range(76,78)),"jA5":set(range(78,80))}
 LERP="local function lerp(a,b,t)t=c1(t);return a+(b-a)*t end"
@@ -85,6 +85,9 @@ def _assert_authority(text:str,profile:str)->list[str]:
   if profile!="balanced" and text.count(f"ac={name}(ac);")!=1:e.append(f"authority-call-count:{name}:{text.count(f'ac={name}(ac);')}")
   if "ac=jAS(ac);" in text:e.append("authority-stale-call:jAS")
  if "X[55]=lerp(X[55]or e,e,.14)" in text or "X[56]=lerp(X[56]or 0,m_abs(d),.2)" in text:e.append("authority-legacy-jA2-slot-collision")
+ if "local air=V[543]>0 and 1 or 0" in text:e.append("authority-unsafe-flag-used-as-airborne")
+ if "(air and(1-u)*.18 or -.12)" in text or "local land=(not air and" in text:e.append("authority-numeric-boolean-air-logic")
+ if "for i=55,79 do X[i]=nil end" not in text:e.append("authority-state-reset-missing")
  lp=text.find(LERP)
  for name in required:
   p=text.find("local function "+name+"(a)")
@@ -158,6 +161,13 @@ def _install_authority(text:str,profile:str,stage_source:str)->str:
  clean=clean.replace(LERP,LERP+"\n"+"\n".join(helpers),1)
  if GATE not in clean:raise RuntimeError("authority gate anchor missing")
  clean=clean.replace(GATE,"".join(calls)+GATE,1)
+ safe_old="local function safe()setgv(0,0);setgv(1,0);setgv(3,100);setgv(7,1024)end"
+ safe_new="local function safe()setgv(0,0);setgv(1,0);setgv(3,100);setgv(7,1024);for i=55,79 do X[i]=nil end end"
+ if safe_old not in clean:raise RuntimeError("authority safe-reset anchor missing")
+ clean=clean.replace(safe_old,safe_new,1)
+ boot_old="for i=1,54 do X[i]=0 end;X[1]=99"
+ if boot_old not in clean:raise RuntimeError("authority boot-reset anchor missing")
+ clean=clean.replace(boot_old,"for i=1,54 do X[i]=0 end;for i=55,79 do X[i]=nil end;X[1]=99",1)
  errs=_assert_authority(clean,profile)
  if errs:raise RuntimeError("authority canonicalization failed: "+";".join(errs))
  return clean
