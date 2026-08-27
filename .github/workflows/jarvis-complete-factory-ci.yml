@@ -6,6 +6,8 @@ on:
       - tools/jarvis_factory.py
       - tools/factory_matrix_eval.py
       - tools/controller_tournament.py
+      - tools/controller_rewrite_factory.py
+      - tests/test_controller_rewrite_factory.py
       - toolchain/**
       - .github/workflows/jarvis-complete-factory*.yml
 permissions:
@@ -31,7 +33,8 @@ jobs:
         run: |
           python3 -m json.tool factory/config.json >/dev/null
           python3 -m json.tool factory/benchmarks.json >/dev/null
-          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py
+          python3 -m py_compile tools/jarvis_factory.py tools/factory_matrix_eval.py tools/controller_tournament.py tools/controller_rewrite_factory.py tests/test_controller_rewrite_factory.py
+          python3 -m unittest tests.test_controller_rewrite_factory -v
           python3 tools/jarvis_factory.py
           test -s dist-jarvis-factory/FACTORY-RESULT.json
           test -s dist-jarvis-factory/KPIS.json
