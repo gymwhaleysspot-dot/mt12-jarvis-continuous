@@ -20,6 +20,13 @@ PLAN_PATHS = [
 INDEX = ROOT / "public/builds/index.json"
 OUT = ROOT / "dist-controller-tournament"
 EVOLUTION_POINTER = ROOT / "factory/evolution-controller.json"
+PROFILE_PORTFOLIO_SLOT = {
+    "conservative": 0,
+    "balanced": 1,
+    "learning": 2,
+    "observability": 3,
+    "combined": 4,
+}
 
 
 def load_json(path: Path, default):
@@ -36,6 +43,20 @@ def active_experiment() -> dict:
         if isinstance(exp, dict) and exp.get("id"):
             return exp
     raise RuntimeError("No active Jarvis experiment contract exists")
+
+
+def experiment_for_profile(experiment: dict, profile: str) -> dict:
+    """Bind each independent candidate profile to its own portfolio hypothesis."""
+    slot = PROFILE_PORTFOLIO_SLOT.get(profile)
+    portfolio = experiment.get("portfolio", [])
+    if slot is None or not isinstance(portfolio, list) or slot >= len(portfolio):
+        return experiment
+    selected = dict(experiment)
+    selected.update(portfolio[slot])
+    selected["id"] = f"{experiment['id']}-P{slot + 1}"
+    selected["rootExperimentId"] = experiment["id"]
+    selected["portfolioSlot"] = slot + 1
+    return selected
 
 
 def replace_required(text: str, old: str, new: str, label: str) -> str:
@@ -129,6 +150,21 @@ def known_hashes() -> tuple[set[str], set[str]]:
     return source, luac
 
 
+def known_semantic_hashes() -> dict[str, list[str]]:
+    """Index every previously published rewrite behavior, not just the parent."""
+    known: dict[str, list[str]] = {}
+    for path in sorted((ROOT / "public/builds").glob("rewrite-*/BUILD-MANIFEST.json")):
+        doc = load_json(path, {})
+        mission = str(doc.get("mission") or path.parent.name)
+        for candidate in doc.get("candidates", []):
+            contract = candidate.get("rewriteContract", {})
+            digest = contract.get("semanticSha256")
+            if digest:
+                origin = f"{mission}/{candidate.get('candidate', 'unknown')}"
+                known.setdefault(str(digest), []).append(origin)
+    return known
+
+
 def semantic_source(text: str) -> str:
     """Remove deployment identity without erasing executable behavior.
 
@@ -152,10 +188,12 @@ def verify_novelty(experiment: dict, generation: str) -> None:
     tournament_path = OUT / "TOURNAMENT.json"
     tournament = load_json(tournament_path, {})
     source_seen, luac_seen = known_hashes()
+    semantic_seen = known_semantic_hashes()
     local_sources: set[str] = set()
     local_luacs: set[str] = set()
     failures: list[str] = []
     identity_only_rejections: list[str] = []
+    historical_semantic_rejections: list[str] = []
     parent_doc = load_json(EVOLUTION_POINTER, {})
     parent_path = ROOT / str(parent_doc.get("sourcePath", ""))
     if not parent_path.is_file():
@@ -177,26 +215,43 @@ def verify_novelty(experiment: dict, generation: str) -> None:
             failures.append(f"{name}: LUAC is not novel ({luac_hash})")
         source_path = OUT / str(name) / f"{name}.lua"
         semantic_hash = semantic_sha256(source_path.read_text()) if source_path.is_file() else ""
-        behavior_novel = bool(semantic_hash and semantic_hash != parent_semantic_hash)
-        if not behavior_novel:
+        semantic_novel_against_parent = bool(semantic_hash and semantic_hash != parent_semantic_hash)
+        historical_matches = semantic_seen.get(semantic_hash, [])
+        historical_semantic_novel = bool(semantic_hash and not historical_matches)
+        behavior_novel = semantic_novel_against_parent and historical_semantic_novel
+        if not semantic_novel_against_parent:
             reason = f"{name}: identity-only rewrite matches parent semantic fingerprint ({parent_semantic_hash})"
             identity_only_rejections.append(reason)
             candidate["status"] = "REJECTED"
             candidate.setdefault("errors", []).append(reason)
+        elif not historical_semantic_novel:
+            reason = (
+                f"{name}: historical semantic duplicate ({semantic_hash}) already published by "
+                + ", ".join(historical_matches[:4])
+            )
+            historical_semantic_rejections.append(reason)
+            candidate["status"] = "REJECTED"
+            candidate.setdefault("errors", []).append(reason)
         local_sources.add(source_hash)
         local_luacs.add(luac_hash)
+        candidate_experiment = experiment_for_profile(experiment, str(candidate.get("profile", "")))
         candidate["rewriteContract"] = {
-            "schema": "JARVIS-COMPLETE-REWRITE-1",
-            "experiment": experiment["id"],
+            "schema": "JARVIS-COMPLETE-REWRITE-2",
+            "experiment": candidate_experiment["id"],
+            "rootExperiment": experiment["id"],
+            "portfolioSlot": candidate_experiment.get("portfolioSlot"),
             "generation": generation,
             "sourceNovel": source_hash not in source_seen,
             "bytecodeNovel": luac_hash not in luac_seen,
             "behaviorNovel": behavior_novel,
+            "semanticNovelAgainstParent": semantic_novel_against_parent,
+            "historicalSemanticNovel": historical_semantic_novel,
+            "historicalMatches": historical_matches,
             "semanticSha256": semantic_hash,
             "parentSemanticSha256": parent_semantic_hash,
             "identityFieldsExcluded": ["rg1-rg4", "li1-li4", "dashboard release label", "semicolon padding"],
-            "ideaSignature": experiment.get("ideaSignature"),
-            "innovationEmitter": experiment.get("emitter"),
+            "ideaSignature": candidate_experiment.get("ideaSignature"),
+            "innovationEmitter": candidate_experiment.get("emitter"),
             "parentReuseAllowed": "behavioral reference only",
             "duplicatePolicy": "HARD_FAIL_AND_REPLAN",
         }
@@ -209,7 +264,7 @@ def verify_novelty(experiment: dict, generation: str) -> None:
             manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
     tournament["rewriteAuthority"] = {
-        "schema": "JARVIS-COMPLETE-REWRITE-1",
+        "schema": "JARVIS-COMPLETE-REWRITE-2",
         "experiment": experiment["id"],
         "generation": generation,
         "compiledCandidates": len(local_luacs),
@@ -217,7 +272,10 @@ def verify_novelty(experiment: dict, generation: str) -> None:
         "allLuacHashesUnique": len(local_luacs) > 0,
         "failures": failures,
         "identityOnlyRejections": identity_only_rejections,
+        "historicalSemanticRejections": historical_semantic_rejections,
         "semanticNoveltyRequired": True,
+        "historicalSemanticNoveltyRequired": True,
+        "historicalSemanticArchiveSize": len(semantic_seen),
     }
     tournament_path.write_text(json.dumps(tournament, indent=2) + "\n")
     (OUT / "REWRITE-CONTRACT.json").write_text(json.dumps(tournament["rewriteAuthority"], indent=2) + "\n")
@@ -241,13 +299,14 @@ def main() -> None:
         # Avoid recursion because experiment_rewrite invokes the original profile mutation.
         base_factory.make_candidate = original_make
         try:
-            return experiment_rewrite(base, profile, experiment, generation)
+            return experiment_rewrite(base, profile, experiment_for_profile(experiment, profile), generation)
         finally:
             base_factory.make_candidate = rewrite
 
     def identity(parent_source_sha: str, candidate: str, profile: str):
+        candidate_experiment = experiment_for_profile(experiment, profile)
         token = hashlib.sha256(
-            f"MT12-REWRITE-ID|{parent_source_sha}|{candidate}|{profile}|{generation}|{experiment['id']}".encode()
+            f"MT12-REWRITE-ID|{parent_source_sha}|{candidate}|{profile}|{generation}|{candidate_experiment['id']}".encode()
         ).hexdigest()[:16]
         return token, [int(token[i:i + 4], 16) for i in range(0, 16, 4)]
 
