@@ -62,6 +62,15 @@ class RewriteFactoryNoveltyTests(unittest.TestCase):
         self.assertEqual(factory.semantic_sha256(base), factory.semantic_sha256(identity_change))
         self.assertNotEqual(factory.semantic_sha256(base), factory.semantic_sha256(behavior_change))
 
+    def test_idea_parameters_are_bounded_and_signature_specific(self):
+        first = factory.idea_parameters({"ideaSignature": "alpha"})
+        second = factory.idea_parameters({"ideaSignature": "beta"})
+        self.assertNotEqual(first, second)
+        for evidence, uncertainty, authority in (first, second):
+            self.assertTrue(68 <= evidence <= 84)
+            self.assertTrue(42 <= uncertainty <= 54)
+            self.assertTrue(92 <= authority <= 94)
+
 
 if __name__ == "__main__":
     unittest.main()
