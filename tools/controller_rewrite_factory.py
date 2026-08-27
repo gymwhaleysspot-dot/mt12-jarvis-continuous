@@ -66,6 +66,16 @@ def replace_required(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
+def idea_parameters(experiment: dict) -> tuple[int, int, int]:
+    """Derive bounded, reproducible engineering parameters from an idea."""
+    signature = str(experiment.get("ideaSignature") or experiment.get("id") or "0")
+    seed = int(hashlib.sha256(signature.encode()).hexdigest()[:8], 16)
+    evidence_floor = 68 + seed % 17
+    uncertainty_gate = 42 + (seed // 17) % 13
+    authority_cap = 92 + (seed // 221) % 3
+    return evidence_floor, uncertainty_gate, authority_cap
+
+
 def experiment_rewrite(text: str, profile: str, experiment: dict, generation: str) -> str:
     """Regenerate the candidate around the active experiment.
 
@@ -77,19 +87,33 @@ def experiment_rewrite(text: str, profile: str, experiment: dict, generation: st
     """
     area = str(experiment.get("area", "controller-observability"))
     mutations = " | ".join(map(str, experiment.get("mutations", [])))
+    evidence_floor, uncertainty_gate, authority_cap = idea_parameters(experiment)
 
     # Apply the profile's existing protected mutation first.
     text = base_factory.make_candidate(text, profile)
 
     # Experiment-directed mutations use already-proven source anchors. Each branch
     # changes runtime behavior, not merely comments or whitespace.
-    if area == "sensor-dropout-recovery":
+    if area == "digital-twin-transfer":
+        marker = "V[720]=ac;setgv(3,m_min(V[35],ac));"
+        probe = (
+            f"if V[119]>.{uncertainty_gate} and X[46]<{evidence_floor} "
+            f"then ac=m_min(ac,{authority_cap})end;"
+        )
+        text = replace_required(text, marker, probe + marker, area)
+    elif area == "sensor-dropout-recovery":
         text = replace_required(
             text,
             "if X[46]<120 then ac=m_min(ac,96)end",
             "if X[46]<120 then local dc=m_max(0,m_min(1,X[46]/120));ac=m_min(ac,92+4*dc)end",
             area,
         )
+        marker = "V[720]=ac;setgv(3,m_min(V[35],ac));"
+        coast = (
+            f"if V[1]~=0 and X[46]<{evidence_floor} "
+            f"then ac=m_min(ac,{authority_cap})end;"
+        )
+        text = replace_required(text, marker, coast + marker, area + "-bounded-coast")
     elif area == "jump-landing-classification":
         text = replace_required(
             text,
@@ -110,12 +134,20 @@ def experiment_rewrite(text: str, profile: str, experiment: dict, generation: st
         )
     elif area == "runtime-memory":
         text = text.replace("local ", "local ", 1)  # behavior preserved; identity block below is still runtime-distinct
+    elif area == "controller-observability":
+        marker = "V[720]=ac;setgv(3,m_min(V[35],ac));"
+        trace = (
+            marker
+            + f"if X[29]>0 and X[46]<{evidence_floor} "
+            + "then bb_line(142,p2221(ac,X[46],V[166],V[167]),0)end;"
+        )
+        text = replace_required(text, marker, trace, area)
     else:
         marker = "V[720]=ac;setgv(3,m_min(V[35],ac));"
         text = replace_required(
             text,
             marker,
-            marker + "if X[29]>0 and X[46]<80 then bb_line(142,p2221(ac,X[46],V[166],V[167]),0)end;",
+            marker + f"if X[29]>0 and X[46]<{evidence_floor} then bb_line(142,p2221(ac,X[46],V[166],V[167]),0)end;",
             area,
         )
 
