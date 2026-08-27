@@ -161,13 +161,14 @@ def _install_authority(text:str,profile:str,stage_source:str)->str:
  clean=clean.replace(LERP,LERP+"\n"+"\n".join(helpers),1)
  if GATE not in clean:raise RuntimeError("authority gate anchor missing")
  clean=clean.replace(GATE,"".join(calls)+GATE,1)
- safe_old="local function safe()setgv(0,0);setgv(1,0);setgv(3,100);setgv(7,1024)end"
+ safe_pat=re.compile(r"local function safe\\(\\)setgv\\(0,0\\);setgv\\(1,0\\);setgv\\(3,100\\);setgv\\(7,1024\\)(?:;for i=55,\\d+ do X\\[i\\]=nil end)? end")
  safe_new="local function safe()setgv(0,0);setgv(1,0);setgv(3,100);setgv(7,1024);for i=55,79 do X[i]=nil end end"
- if safe_old not in clean:raise RuntimeError("authority safe-reset anchor missing")
- clean=clean.replace(safe_old,safe_new,1)
- boot_old="for i=1,54 do X[i]=0 end;X[1]=99"
- if boot_old not in clean:raise RuntimeError("authority boot-reset anchor missing")
- clean=clean.replace(boot_old,"for i=1,54 do X[i]=0 end;for i=55,79 do X[i]=nil end;X[1]=99",1)
+ clean,safe_n=safe_pat.subn(safe_new,clean)
+ if safe_n!=1:raise RuntimeError(f"authority safe-reset contract mismatch:{safe_n}")
+ boot_pat=re.compile(r"for i=1,54 do X\\[i\\]=0 end;(?:for i=55,\\d+ do X\\[i\\]=nil end;)?X\\[1\\]=99")
+ boot_new="for i=1,54 do X[i]=0 end;for i=55,79 do X[i]=nil end;X[1]=99"
+ clean,boot_n=boot_pat.subn(boot_new,clean)
+ if boot_n<1:raise RuntimeError("authority boot-reset anchor missing")
  errs=_assert_authority(clean,profile)
  if errs:raise RuntimeError("authority canonicalization failed: "+";".join(errs))
  return clean
