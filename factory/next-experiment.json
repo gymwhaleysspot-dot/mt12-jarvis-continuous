@@ -1,11 +1,11 @@
 {
   "buildState": {
     "duplicatesRejected": 152,
-    "unique": 3
+    "unique": 5
   },
   "canonicalFloor": "jr514f",
-  "champion": "jrw4-1823",
-  "evolutionParent": "jrw4-1823",
+  "champion": "jrw4-1837",
+  "evolutionParent": "jrw4-1837",
   "externalResearchState": {
     "acceptedBridgeFindings": 0,
     "policy": {
@@ -13,13 +13,20 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1787824744573",
+    "runId": "research-1787862944639",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-08-27T10:00:42.562470+00:00",
+  "generatedAt": "2026-08-27T20:37:20.699130+00:00",
   "graphState": {
     "nodes": 10,
     "relationships": 3
+  },
+  "innovationState": {
+    "archiveCoverage": 7,
+    "archivePopulation": 7827,
+    "candidateIdeas": 29,
+    "retiredIdeas": 0,
+    "selectionPolicy": "prediction-focused information gain + quality diversity + emitter cooldown"
   },
   "nextExperiment": {
     "acceptanceCriteria": {
@@ -27,17 +34,21 @@
       "byteNovel": true,
       "externalResearchMayDirectlyMutateController": false,
       "fiveIndependentHypotheses": true,
+      "identityOnlyRejected": true,
       "inheritedCapabilityBonus": false,
       "minimumConfidence": 0.85,
       "mustCompareAgainstChampion": true,
       "mustPreserveCanonicalFloor": true,
       "noRegression": true,
+      "qualityDiversityNicheRequired": true,
+      "semanticNovelAgainstParent": true,
       "sixthSynthesisRequired": true
     },
-    "area": "sensor-dropout-recovery",
+    "area": "digital-twin-transfer",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-08-27T10:00:42.562463+00:00",
-    "expectedInformationGain": 0.6727,
+    "createdAt": "2026-08-27T20:37:20.699122+00:00",
+    "emitter": "adversarial-domain-randomization",
+    "expectedInformationGain": 0.6668,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -45,139 +56,163 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1787824744573",
+      "runId": "research-1787862944639",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
-    "hypothesis": "Run five independent hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20260827100042",
-    "measurement": "maximize information gained per generation while preserving defended behavior",
+    "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
+    "id": "EXP-20260827203720",
+    "ideaSignature": "4f31e54d80002c34336f",
+    "innovationState": {
+      "archiveCoverage": 7,
+      "archivePopulation": 7827,
+      "candidateIdeas": 29,
+      "retiredIdeas": 0,
+      "selectionPolicy": "prediction-focused information gain + quality diversity + emitter cooldown"
+    },
+    "measurement": "maximize prediction-focused information gain and behavioral archive coverage while preserving defended behavior",
     "mutations": [
+      "vary lag, grip, sag and dropout jointly",
+      "score worst-decile behavior",
+      "deduplicate hot-path calculations",
+      "retain exact behavior while reclaiming bytecode",
+      "publish decision cause and supporting evidence",
+      "link authority caps to confidence",
       "graded fail-open sensor confidence",
-      "state-preserving dropout recovery",
-      "separate airborne and landing evidence",
-      "adaptive post-landing confirmation window",
-      "contextual slip severity blend",
-      "surface-conditioned intervention release",
-      "adaptive GPS/RPM lag estimator",
-      "confidence-weighted truth-speed handoff",
-      "adaptive lock target confidence",
-      "linear release/reapply timing"
+      "state-preserving dropout coast",
+      "independent takeoff, airborne, apex and landing evidence",
+      "ordered state-transition validation"
     ],
-    "name": "Research-aware evolutionary five-hypothesis generation plus synthesis",
-    "parent": "jrw4-1823",
+    "name": "Quality-diversity active innovation generation plus synthesis",
+    "parent": "jrw4-1837",
     "portfolio": [
       {
-        "area": "sensor-dropout-recovery",
-        "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1823 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
-        "expectedInformationGain": 0.6904,
+        "area": "digital-twin-transfer",
+        "baselineHypothesis": "A digital-twin-transfer candidate derived from jrw4-1837 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
+        "emitter": "adversarial-domain-randomization",
+        "expectedInformationGain": 0.6654,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1787824744573",
+          "runId": "research-1787862944639",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1823 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
-        "measurement": "reduce recovery frames and prevent channel/control discontinuities",
+        "hypothesis": "A digital-twin-transfer candidate derived from jrw4-1837 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
+        "ideaSignature": "4f31e54d80002c34336f",
+        "measurement": "increase replay-to-road transfer confidence",
         "mutations": [
-          "graded fail-open sensor confidence",
-          "state-preserving dropout recovery"
+          "vary lag, grip, sag and dropout jointly",
+          "score worst-decile behavior"
         ],
-        "name": "Improve sensor dropout recovery",
-        "priority": 0.5104,
+        "name": "Adversarial Domain Randomization for digital twin transfer",
+        "noveltyAcquisition": 0.7483,
+        "priority": 0.5954,
         "researchCanDirectlyMutateController": false,
         "slot": 1
       },
       {
-        "area": "jump-landing-classification",
-        "baselineHypothesis": "A jump-landing-classification candidate derived from jrw4-1823 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-        "expectedInformationGain": 0.6742,
+        "area": "runtime-memory",
+        "baselineHypothesis": "A runtime-memory candidate derived from jrw4-1837 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
+        "emitter": "hot-path-cse",
+        "expectedInformationGain": 0.6525,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1787824744573",
+          "runId": "research-1787862944639",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A jump-landing-classification candidate derived from jrw4-1823 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-        "measurement": "reduce jump false positives while preserving true jump recall",
+        "hypothesis": "A runtime-memory candidate derived from jrw4-1837 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
+        "ideaSignature": "42d2da672ff837c8ab56",
+        "measurement": "reduce peak runtime memory and LUAC size with zero behavioral regression",
         "mutations": [
-          "separate airborne and landing evidence",
-          "adaptive post-landing confirmation window"
+          "deduplicate hot-path calculations",
+          "retain exact behavior while reclaiming bytecode"
         ],
-        "name": "Improve jump landing classification",
-        "priority": 0.4942,
+        "name": "Hot Path Cse for runtime memory",
+        "noveltyAcquisition": 0.7392,
+        "priority": 0.5825,
         "researchCanDirectlyMutateController": false,
         "slot": 2
       },
       {
-        "area": "traction-control",
-        "baselineHypothesis": "A traction-control candidate derived from jrw4-1823 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-        "expectedInformationGain": 0.6718,
+        "area": "controller-observability",
+        "baselineHypothesis": "A controller-observability candidate derived from jrw4-1837 using the causal-decision-trace mechanism\u2014publish decision cause and supporting evidence, link authority caps to confidence\u2014will increase explained-event coverage without runtime instability.",
+        "emitter": "causal-decision-trace",
+        "expectedInformationGain": 0.6516,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1787824744573",
+          "runId": "research-1787862944639",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A traction-control candidate derived from jrw4-1823 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-        "measurement": "reduce excess slip and intervention harshness",
+        "hypothesis": "A controller-observability candidate derived from jrw4-1837 using the causal-decision-trace mechanism\u2014publish decision cause and supporting evidence, link authority caps to confidence\u2014will increase explained-event coverage without runtime instability.",
+        "ideaSignature": "5cc190baf97f715f323f",
+        "measurement": "increase explained-event coverage without runtime instability",
         "mutations": [
-          "contextual slip severity blend",
-          "surface-conditioned intervention release"
+          "publish decision cause and supporting evidence",
+          "link authority caps to confidence"
         ],
-        "name": "Improve traction control",
-        "priority": 0.4918,
+        "name": "Causal Decision Trace for controller observability",
+        "noveltyAcquisition": 0.7386,
+        "priority": 0.5816,
         "researchCanDirectlyMutateController": false,
         "slot": 3
       },
       {
-        "area": "truth-speed-fusion",
-        "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1823 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-        "expectedInformationGain": 0.6705,
+        "area": "sensor-dropout-recovery",
+        "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1837 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
+        "emitter": "confidence-coast",
+        "expectedInformationGain": 0.6904,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1787824744573",
+          "runId": "research-1787862944639",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1823 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-        "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+        "hypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1837 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
+        "ideaSignature": "23e8e20101c930f124bb",
+        "measurement": "reduce recovery frames and prevent channel/control discontinuities",
         "mutations": [
-          "adaptive GPS/RPM lag estimator",
-          "confidence-weighted truth-speed handoff"
+          "graded fail-open sensor confidence",
+          "state-preserving dropout coast"
         ],
-        "name": "Improve truth speed fusion",
-        "priority": 0.4905,
+        "name": "Confidence Coast for sensor dropout recovery",
+        "noveltyAcquisition": 0.6733,
+        "priority": 0.5104,
         "researchCanDirectlyMutateController": false,
         "slot": 4
       },
       {
-        "area": "abs-control",
-        "baselineHypothesis": "A abs-control candidate derived from jrw4-1823 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-        "expectedInformationGain": 0.6568,
+        "area": "jump-landing-classification",
+        "baselineHypothesis": "A jump-landing-classification candidate derived from jrw4-1837 using the temporal-evidence-lattice mechanism\u2014independent takeoff, airborne, apex and landing evidence, ordered state-transition validation\u2014will reduce jump false positives while preserving true jump recall.",
+        "emitter": "temporal-evidence-lattice",
+        "expectedInformationGain": 0.6742,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1787824744573",
+          "runId": "research-1787862944639",
           "sourceIds": [],
           "weight": 0
         },
-        "hypothesis": "A abs-control candidate derived from jrw4-1823 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-        "measurement": "reduce lock duration without increasing stopping distance proxy",
+        "hypothesis": "A jump-landing-classification candidate derived from jrw4-1837 using the temporal-evidence-lattice mechanism\u2014independent takeoff, airborne, apex and landing evidence, ordered state-transition validation\u2014will reduce jump false positives while preserving true jump recall.",
+        "ideaSignature": "9339694829b4819bcce4",
+        "measurement": "reduce jump false positives while preserving true jump recall",
         "mutations": [
-          "adaptive lock target confidence",
-          "linear release/reapply timing"
+          "independent takeoff, airborne, apex and landing evidence",
+          "ordered state-transition validation"
         ],
-        "name": "Improve abs control",
-        "priority": 0.4768,
+        "name": "Temporal Evidence Lattice for jump landing classification",
+        "noveltyAcquisition": 0.6619,
+        "priority": 0.4942,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
     ],
-    "reason": "Portfolio evolves cumulatively from the best static-validated synthesis while retaining a separate immutable safe canonical fallback.",
+    "reason": "Portfolio uses emitter cooldown and quality-diversity coverage to explore new engineering mechanisms while retaining a separate immutable safe canonical fallback.",
     "requiredTests": [
       "Lua 5.3 compile",
       "MT12 normalization",
       "static safety audit",
-      "historical novelty audit",
+      "semantic and historical novelty audit",
+      "quality-diversity descriptor audit",
       "canonical defended-lineage gate",
       "runtime memory/size check",
       "bench and road evidence before canonical promotion"
@@ -185,121 +220,136 @@
     "synthesis": {
       "area": "synthesis-all-five",
       "inputs": [
+        "digital-twin-transfer",
+        "runtime-memory",
+        "controller-observability",
         "sensor-dropout-recovery",
-        "jump-landing-classification",
-        "traction-control",
-        "truth-speed-fusion",
-        "abs-control"
+        "jump-landing-classification"
       ],
-      "measurement": "beat each constituent on aggregate benefit without new regressions",
+      "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
       "name": "Synthesize all five hypotheses",
-      "rule": "compose only compatible, genuinely new mutations on the active evolution parent; external research is advisory evidence only; reject on canonical-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
+      "rule": "compose only compatible mutations that occupy a new behavioral niche; reject identity-only, historical-semantic duplicate, canonical-floor regression, compile failure, or MT12 size violation",
       "slot": 6
     }
   },
   "portfolio": [
     {
-      "area": "sensor-dropout-recovery",
-      "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1823 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
-      "expectedInformationGain": 0.6904,
+      "area": "digital-twin-transfer",
+      "baselineHypothesis": "A digital-twin-transfer candidate derived from jrw4-1837 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
+      "emitter": "adversarial-domain-randomization",
+      "expectedInformationGain": 0.6654,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1787824744573",
+        "runId": "research-1787862944639",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1823 using graded fail-open sensor confidence, state-preserving dropout recovery will reduce recovery frames and prevent channel/control discontinuities.",
-      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
+      "hypothesis": "A digital-twin-transfer candidate derived from jrw4-1837 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
+      "ideaSignature": "4f31e54d80002c34336f",
+      "measurement": "increase replay-to-road transfer confidence",
       "mutations": [
-        "graded fail-open sensor confidence",
-        "state-preserving dropout recovery"
+        "vary lag, grip, sag and dropout jointly",
+        "score worst-decile behavior"
       ],
-      "name": "Improve sensor dropout recovery",
-      "priority": 0.5104,
+      "name": "Adversarial Domain Randomization for digital twin transfer",
+      "noveltyAcquisition": 0.7483,
+      "priority": 0.5954,
       "researchCanDirectlyMutateController": false,
       "slot": 1
     },
     {
-      "area": "jump-landing-classification",
-      "baselineHypothesis": "A jump-landing-classification candidate derived from jrw4-1823 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-      "expectedInformationGain": 0.6742,
+      "area": "runtime-memory",
+      "baselineHypothesis": "A runtime-memory candidate derived from jrw4-1837 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
+      "emitter": "hot-path-cse",
+      "expectedInformationGain": 0.6525,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1787824744573",
+        "runId": "research-1787862944639",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A jump-landing-classification candidate derived from jrw4-1823 using separate airborne and landing evidence, adaptive post-landing confirmation window will reduce jump false positives while preserving true jump recall.",
-      "measurement": "reduce jump false positives while preserving true jump recall",
+      "hypothesis": "A runtime-memory candidate derived from jrw4-1837 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
+      "ideaSignature": "42d2da672ff837c8ab56",
+      "measurement": "reduce peak runtime memory and LUAC size with zero behavioral regression",
       "mutations": [
-        "separate airborne and landing evidence",
-        "adaptive post-landing confirmation window"
+        "deduplicate hot-path calculations",
+        "retain exact behavior while reclaiming bytecode"
       ],
-      "name": "Improve jump landing classification",
-      "priority": 0.4942,
+      "name": "Hot Path Cse for runtime memory",
+      "noveltyAcquisition": 0.7392,
+      "priority": 0.5825,
       "researchCanDirectlyMutateController": false,
       "slot": 2
     },
     {
-      "area": "traction-control",
-      "baselineHypothesis": "A traction-control candidate derived from jrw4-1823 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-      "expectedInformationGain": 0.6718,
+      "area": "controller-observability",
+      "baselineHypothesis": "A controller-observability candidate derived from jrw4-1837 using the causal-decision-trace mechanism\u2014publish decision cause and supporting evidence, link authority caps to confidence\u2014will increase explained-event coverage without runtime instability.",
+      "emitter": "causal-decision-trace",
+      "expectedInformationGain": 0.6516,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1787824744573",
+        "runId": "research-1787862944639",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A traction-control candidate derived from jrw4-1823 using contextual slip severity blend, surface-conditioned intervention release will reduce excess slip and intervention harshness.",
-      "measurement": "reduce excess slip and intervention harshness",
+      "hypothesis": "A controller-observability candidate derived from jrw4-1837 using the causal-decision-trace mechanism\u2014publish decision cause and supporting evidence, link authority caps to confidence\u2014will increase explained-event coverage without runtime instability.",
+      "ideaSignature": "5cc190baf97f715f323f",
+      "measurement": "increase explained-event coverage without runtime instability",
       "mutations": [
-        "contextual slip severity blend",
-        "surface-conditioned intervention release"
+        "publish decision cause and supporting evidence",
+        "link authority caps to confidence"
       ],
-      "name": "Improve traction control",
-      "priority": 0.4918,
+      "name": "Causal Decision Trace for controller observability",
+      "noveltyAcquisition": 0.7386,
+      "priority": 0.5816,
       "researchCanDirectlyMutateController": false,
       "slot": 3
     },
     {
-      "area": "truth-speed-fusion",
-      "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1823 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "expectedInformationGain": 0.6705,
+      "area": "sensor-dropout-recovery",
+      "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1837 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
+      "emitter": "confidence-coast",
+      "expectedInformationGain": 0.6904,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1787824744573",
+        "runId": "research-1787862944639",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1823 using adaptive GPS/RPM lag estimator, confidence-weighted truth-speed handoff will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+      "hypothesis": "A sensor-dropout-recovery candidate derived from jrw4-1837 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
+      "ideaSignature": "23e8e20101c930f124bb",
+      "measurement": "reduce recovery frames and prevent channel/control discontinuities",
       "mutations": [
-        "adaptive GPS/RPM lag estimator",
-        "confidence-weighted truth-speed handoff"
+        "graded fail-open sensor confidence",
+        "state-preserving dropout coast"
       ],
-      "name": "Improve truth speed fusion",
-      "priority": 0.4905,
+      "name": "Confidence Coast for sensor dropout recovery",
+      "noveltyAcquisition": 0.6733,
+      "priority": 0.5104,
       "researchCanDirectlyMutateController": false,
       "slot": 4
     },
     {
-      "area": "abs-control",
-      "baselineHypothesis": "A abs-control candidate derived from jrw4-1823 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-      "expectedInformationGain": 0.6568,
+      "area": "jump-landing-classification",
+      "baselineHypothesis": "A jump-landing-classification candidate derived from jrw4-1837 using the temporal-evidence-lattice mechanism\u2014independent takeoff, airborne, apex and landing evidence, ordered state-transition validation\u2014will reduce jump false positives while preserving true jump recall.",
+      "emitter": "temporal-evidence-lattice",
+      "expectedInformationGain": 0.6742,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1787824744573",
+        "runId": "research-1787862944639",
         "sourceIds": [],
         "weight": 0
       },
-      "hypothesis": "A abs-control candidate derived from jrw4-1823 using adaptive lock target confidence, linear release/reapply timing will reduce lock duration without increasing stopping distance proxy.",
-      "measurement": "reduce lock duration without increasing stopping distance proxy",
+      "hypothesis": "A jump-landing-classification candidate derived from jrw4-1837 using the temporal-evidence-lattice mechanism\u2014independent takeoff, airborne, apex and landing evidence, ordered state-transition validation\u2014will reduce jump false positives while preserving true jump recall.",
+      "ideaSignature": "9339694829b4819bcce4",
+      "measurement": "reduce jump false positives while preserving true jump recall",
       "mutations": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
+        "independent takeoff, airborne, apex and landing evidence",
+        "ordered state-transition validation"
       ],
-      "name": "Improve abs control",
-      "priority": 0.4768,
+      "name": "Temporal Evidence Lattice for jump landing classification",
+      "noveltyAcquisition": 0.6619,
+      "priority": 0.4942,
       "researchCanDirectlyMutateController": false,
       "slot": 5
     }
@@ -308,7 +358,7 @@
     {
       "area": "digital-twin-transfer",
       "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6974,
+      "expectedInformationGain": 0.6654,
       "externalResearchFindings": 0,
       "externalResearchHypotheses": [],
       "externalResearchWeight": 0,
@@ -319,14 +369,14 @@
         "increase adversarial parameter coverage"
       ],
       "priorExperiments": 0,
-      "priority": 0.6974,
-      "recentSelections": 0,
+      "priority": 0.5954,
+      "recentSelections": 2,
       "uncertainty": 0.5
     },
     {
       "area": "runtime-memory",
       "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6845,
+      "expectedInformationGain": 0.6525,
       "externalResearchFindings": 0,
       "externalResearchHypotheses": [],
       "externalResearchWeight": 0,
@@ -337,14 +387,14 @@
         "deduplicate hot-path calculations"
       ],
       "priorExperiments": 0,
-      "priority": 0.6845,
-      "recentSelections": 0,
+      "priority": 0.5825,
+      "recentSelections": 2,
       "uncertainty": 0.45
     },
     {
       "area": "controller-observability",
       "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6836,
+      "expectedInformationGain": 0.6516,
       "externalResearchFindings": 0,
       "externalResearchHypotheses": [],
       "externalResearchWeight": 0,
@@ -355,8 +405,8 @@
         "link decisions to evidence and confidence"
       ],
       "priorExperiments": 0,
-      "priority": 0.6836,
-      "recentSelections": 0,
+      "priority": 0.5816,
+      "recentSelections": 2,
       "uncertainty": 0.5
     },
     {
@@ -410,7 +460,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4918,
-      "recentSelections": 60,
+      "recentSelections": 58,
       "uncertainty": 0.58
     },
     {
@@ -428,7 +478,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4905,
-      "recentSelections": 60,
+      "recentSelections": 58,
       "uncertainty": 0.55
     },
     {
@@ -446,23 +496,23 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4768,
-      "recentSelections": 60,
+      "recentSelections": 58,
       "uncertainty": 0.57
     }
   ],
-  "schema": "JARVIS-EXPERIMENT-PLAN-4",
+  "schema": "JARVIS-EXPERIMENT-PLAN-5",
   "synthesis": {
     "area": "synthesis-all-five",
     "inputs": [
+      "digital-twin-transfer",
+      "runtime-memory",
+      "controller-observability",
       "sensor-dropout-recovery",
-      "jump-landing-classification",
-      "traction-control",
-      "truth-speed-fusion",
-      "abs-control"
+      "jump-landing-classification"
     ],
-    "measurement": "beat each constituent on aggregate benefit without new regressions",
+    "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
     "name": "Synthesize all five hypotheses",
-    "rule": "compose only compatible, genuinely new mutations on the active evolution parent; external research is advisory evidence only; reject on canonical-floor regression, compile failure, duplicate bytecode, or MT12 size violation",
+    "rule": "compose only compatible mutations that occupy a new behavioral niche; reject identity-only, historical-semantic duplicate, canonical-floor regression, compile failure, or MT12 size violation",
     "slot": 6
   }
 }
