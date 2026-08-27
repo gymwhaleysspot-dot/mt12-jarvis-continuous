@@ -195,6 +195,8 @@ def verify_novelty(experiment: dict, generation: str) -> None:
             "semanticSha256": semantic_hash,
             "parentSemanticSha256": parent_semantic_hash,
             "identityFieldsExcluded": ["rg1-rg4", "li1-li4", "dashboard release label", "semicolon padding"],
+            "ideaSignature": experiment.get("ideaSignature"),
+            "innovationEmitter": experiment.get("emitter"),
             "parentReuseAllowed": "behavioral reference only",
             "duplicatePolicy": "HARD_FAIL_AND_REPLAN",
         }

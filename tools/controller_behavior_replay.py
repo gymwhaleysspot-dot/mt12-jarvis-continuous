@@ -53,7 +53,8 @@ def score(profile):
     recovery=(abs(avg("dropout_recovery")-96)+abs(avg("traction_recovery")-96)+abs(avg("final_recovery")-96))/3
     calm_pen=abs(avg("calm")-96)
     score=max(0,100-err*5-recovery*3-calm_pen*2-smooth*4)
-    return {"schema":"JRW-BEHAVIOR-REPLAY-1","profile":profile,"score":round(score,3),"meanTargetError":round(err,3),"recoveryError":round(recovery,3),"calmAuthorityError":round(calm_pen,3),"authoritySmoothness":round(smooth,4),"eventCaps":{k:round(avg(k),3) for k in target},"samples":len(caps),"authority":"SYNTHETIC_REPLAY_ONLY_ROAD_LOGS_REQUIRED"}
+    descriptor=[round(err/10,4),round(recovery/10,4),round(smooth,4),round(avg("dropout")/100,4),round(avg("traction")/100,4),round(avg("abs")/100,4)]
+    return {"schema":"JRW-BEHAVIOR-REPLAY-2","profile":profile,"score":round(score,3),"meanTargetError":round(err,3),"recoveryError":round(recovery,3),"calmAuthorityError":round(calm_pen,3),"authoritySmoothness":round(smooth,4),"eventCaps":{k:round(avg(k),3) for k in target},"behaviorDescriptor":descriptor,"descriptorAxes":["target-error","recovery-error","smoothness","dropout-cap","traction-cap","abs-cap"],"samples":len(caps),"authority":"SYNTHETIC_REPLAY_ONLY_ROAD_LOGS_REQUIRED"}
 
 def tournament_scores():
     rows={p:score(p) for p in PROFILES};baseline=rows["balanced"]["score"]
