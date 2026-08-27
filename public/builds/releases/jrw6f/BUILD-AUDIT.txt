@@ -1,0 +1,33 @@
+JRW6F BUILD AUDIT
+=================
+
+Release: jrw6f
+Status: COMPILED
+Authority: EXPERIMENTAL_BENCH_AND_ROAD_REQUIRED
+
+Corrected:
+- Airborne authority lifecycle now reads V[620], not unsafe-state V[543].
+- Authority air accumulation is numeric and bounded.
+- Landing is an explicit transition from accumulated airborne state.
+- Safe/session reset clears authority slots X[55] through X[72].
+- The Git generator implements the corrected logic and rejects regressions.
+
+Preserved:
+- Existing JRW6 observability and controller behavior outside this authority-state repair.
+- Immutable historical releases.
+- Canonical floor jr514f; this release is not an automatic canonical promotion.
+
+Validation:
+- Lua source parses successfully.
+- Compiled with Lua 5.3 using 32-bit EdgeTX-compatible scalar sizes.
+- LUAC header scalar widths: 04 04 04 04 04.
+- Source bytes: 85887.
+- LUAC bytes: 85879.
+- Source SHA256: 2fc08cae331df31fef919c9875e1d8d6ac0903b01bb397466f46b4c4eae2c41d
+- LUAC SHA256: 6d06d429dc6cefd3f5c49b933f7bb256f776fa45505cb711e6f6060679d825c5
+
+Hardware:
+- Not car-on tested. Bench and road validation remain required.
+
+Deploy:
+- Use jrw6f.luac.
