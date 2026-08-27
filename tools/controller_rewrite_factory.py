@@ -19,6 +19,7 @@ PLAN_PATHS = [
 ]
 INDEX = ROOT / "public/builds/index.json"
 OUT = ROOT / "dist-controller-tournament"
+EVOLUTION_POINTER = ROOT / "factory/evolution-controller.json"
 
 
 def load_json(path: Path, default):
@@ -128,6 +129,25 @@ def known_hashes() -> tuple[set[str], set[str]]:
     return source, luac
 
 
+def semantic_source(text: str) -> str:
+    """Remove deployment identity without erasing executable behavior.
+
+    Runtime telemetry fingerprints, dashboard release labels, and reclaim padding
+    intentionally change between builds. They prove which binary ran, but they do
+    not make a controller behaviorally novel and therefore cannot justify
+    advancing the evolution parent.
+    """
+    text = re.sub(r"local rg1,rg2,rg3,rg4=\d+,\d+,\d+,\d+", "local rg1,rg2,rg3,rg4=ID", text)
+    text = re.sub(r"local li=599;local li1,li2,li3,li4=\d+,\d+,\d+,\d+", "local li=599;local li1,li2,li3,li4=ID", text)
+    text = re.sub(r'T\(2,1,"[A-Za-z0-9]{3,8}",Z\+INVERS\)', 'T(2,1,"BUILD",Z+INVERS)', text)
+    text = re.sub(r";{2,}", ";", text)
+    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")).strip() + "\n"
+
+
+def semantic_sha256(text: str) -> str:
+    return hashlib.sha256(semantic_source(text).encode()).hexdigest()
+
+
 def verify_novelty(experiment: dict, generation: str) -> None:
     tournament_path = OUT / "TOURNAMENT.json"
     tournament = load_json(tournament_path, {})
@@ -135,6 +155,12 @@ def verify_novelty(experiment: dict, generation: str) -> None:
     local_sources: set[str] = set()
     local_luacs: set[str] = set()
     failures: list[str] = []
+    identity_only_rejections: list[str] = []
+    parent_doc = load_json(EVOLUTION_POINTER, {})
+    parent_path = ROOT / str(parent_doc.get("sourcePath", ""))
+    if not parent_path.is_file():
+        raise SystemExit(f"rewrite novelty authority cannot resolve evolution parent: {parent_path}")
+    parent_semantic_hash = semantic_sha256(parent_path.read_text())
 
     for candidate in tournament.get("candidates", []):
         if candidate.get("status") != "COMPILED":
@@ -149,6 +175,14 @@ def verify_novelty(experiment: dict, generation: str) -> None:
             failures.append(f"{name}: source is not a new rewrite ({source_hash})")
         if luac_hash in luac_seen or luac_hash in local_luacs:
             failures.append(f"{name}: LUAC is not novel ({luac_hash})")
+        source_path = OUT / str(name) / f"{name}.lua"
+        semantic_hash = semantic_sha256(source_path.read_text()) if source_path.is_file() else ""
+        behavior_novel = bool(semantic_hash and semantic_hash != parent_semantic_hash)
+        if not behavior_novel:
+            reason = f"{name}: identity-only rewrite matches parent semantic fingerprint ({parent_semantic_hash})"
+            identity_only_rejections.append(reason)
+            candidate["status"] = "REJECTED"
+            candidate.setdefault("errors", []).append(reason)
         local_sources.add(source_hash)
         local_luacs.add(luac_hash)
         candidate["rewriteContract"] = {
@@ -157,9 +191,20 @@ def verify_novelty(experiment: dict, generation: str) -> None:
             "generation": generation,
             "sourceNovel": source_hash not in source_seen,
             "bytecodeNovel": luac_hash not in luac_seen,
+            "behaviorNovel": behavior_novel,
+            "semanticSha256": semantic_hash,
+            "parentSemanticSha256": parent_semantic_hash,
+            "identityFieldsExcluded": ["rg1-rg4", "li1-li4", "dashboard release label", "semicolon padding"],
             "parentReuseAllowed": "behavioral reference only",
             "duplicatePolicy": "HARD_FAIL_AND_REPLAN",
         }
+        manifest_path = OUT / str(name) / "MANIFEST.json"
+        if manifest_path.is_file():
+            manifest = load_json(manifest_path, {})
+            manifest["status"] = candidate["status"]
+            manifest["errors"] = candidate.get("errors", [])
+            manifest["rewriteContract"] = candidate["rewriteContract"]
+            manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
     tournament["rewriteAuthority"] = {
         "schema": "JARVIS-COMPLETE-REWRITE-1",
@@ -169,13 +214,15 @@ def verify_novelty(experiment: dict, generation: str) -> None:
         "allSourceHashesUnique": len(local_sources) == len(local_luacs),
         "allLuacHashesUnique": len(local_luacs) > 0,
         "failures": failures,
+        "identityOnlyRejections": identity_only_rejections,
+        "semanticNoveltyRequired": True,
     }
     tournament_path.write_text(json.dumps(tournament, indent=2) + "\n")
     (OUT / "REWRITE-CONTRACT.json").write_text(json.dumps(tournament["rewriteAuthority"], indent=2) + "\n")
 
     if failures:
         raise SystemExit("rewrite novelty authority failed:\n" + "\n".join(failures))
-    if not local_luacs:
+    if not any(c.get("status") == "COMPILED" for c in tournament.get("candidates", [])):
         raise SystemExit("rewrite authority produced no compiled candidates")
 
 

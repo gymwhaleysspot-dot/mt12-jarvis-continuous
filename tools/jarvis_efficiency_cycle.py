@@ -47,10 +47,11 @@ def _postprocess()->None:
             'reclaimedCapacityRetained':retained if is_synth else None,'retainedCapacityBonus':round(retained_bonus,3),'synthesisBudgetPenalty':round(synth_penalty,3),
             'reclaimBonus':round(reclaim_bonus,3),'growthPenalty':round(growth_penalty,3),'budgetBonus':round(budget_bonus,3),'efficiencyAdjustment':round(efficiency_adjustment,3)}
         c['preEfficiencyScore']=round(base_score,3);c['score']=round(efficiency_score,3)
-        c['promotionEfficiencyEligible']=bool(justified and synth_within and intel>0 and size<=MAX_BYTES)
+        behavior_novel=bool((c.get('rewriteContract') or {}).get('behaviorNovel'))
+        c['promotionEfficiencyEligible']=bool(behavior_novel and justified and synth_within and intel>0 and size<=MAX_BYTES)
         cid=c['candidate'];manifest_path=OUT/cid/'MANIFEST.json'
         if manifest_path.is_file():
-            m=json.loads(manifest_path.read_text());m['resourceEfficiency']=c['resourceEfficiency'];m['preEfficiencyScore']=c['preEfficiencyScore'];m['score']=c['score'];m['promotionEfficiencyEligible']=c['promotionEfficiencyEligible'];manifest_path.write_text(json.dumps(m,indent=2)+'\n')
+            m=json.loads(manifest_path.read_text());m['resourceEfficiency']=c['resourceEfficiency'];m['preEfficiencyScore']=c['preEfficiencyScore'];m['score']=c['score'];m['promotionEfficiencyEligible']=c['promotionEfficiencyEligible'];m['behaviorNovel']=behavior_novel;manifest_path.write_text(json.dumps(m,indent=2)+'\n')
         if c['promotionEfficiencyEligible']:eligible.append(c)
     result['candidates'].sort(key=lambda x:x.get('score',-1e9),reverse=True);eligible.sort(key=lambda x:x.get('score',-1e9),reverse=True)
     result['winner']=eligible[0]['candidate'] if eligible else None;result['runnerUp']=eligible[1]['candidate'] if len(eligible)>1 else None
@@ -58,7 +59,7 @@ def _postprocess()->None:
         'parentNormalizedBytes':parent_bytes,'prebuildSeedNormalizedBytes':seed_bytes,'prebuildBytesReclaimed':pre_reclaimed,'prebuildChanges':reclaim.get('changes',[]),
         'hardCeilingBytes':MAX_BYTES,'minimumIntelligencePer100GrowthBytes':MIN_INTEL_PER_100_GROWTH_BYTES,'synthesisSpendFractionOfReclaim':SYNTH_RECLAIM_SPEND_FRACTION,
         'synthesisByteBudget':synth_budget,'synthesisBudgetBounds':[SYNTH_MIN_BUDGET,SYNTH_MAX_BUDGET],
-        'rule':'PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON','growthWithoutEnoughIntelligence':'NOT_PROMOTION_ELIGIBLE','synthesisOverByteBudget':'NOT_PROMOTION_ELIGIBLE'}
+        'rule':'PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON','growthWithoutEnoughIntelligence':'NOT_PROMOTION_ELIGIBLE','synthesisOverByteBudget':'NOT_PROMOTION_ELIGIBLE','identityOnlyRewrite':'REJECTED_NOT_PROMOTION_ELIGIBLE'}
     result['verdict']='IMPROVEMENT_FOUND' if eligible else 'NO_RESOURCE_JUSTIFIED_IMPROVEMENT';(OUT/'TOURNAMENT.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps({'resourcePolicy':result['resourcePolicy'],'winner':result['winner'],'runnerUp':result['runnerUp'],'ranking':[{'candidate':c.get('candidate'),'score':c.get('score'),'normalizedBytes':c.get('normalizedBytes'),'intelligenceDelta':c.get('intelligenceDelta'),'efficiency':c.get('resourceEfficiency'),'eligible':c.get('promotionEfficiencyEligible')} for c in result.get('candidates',[])]},indent=2))
 

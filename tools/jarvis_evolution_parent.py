@@ -51,7 +51,7 @@ def advance(mission:str,run_number:int|None=None)->dict:
  if manifest.get('status')!='COMPILED' or manifest.get('errors'):raise RuntimeError('tournament winner is not cleanly compiled')
  if candidate.get('promotionEfficiencyEligible') is False:raise RuntimeError('tournament winner failed promotion-efficiency gate')
  if int(manifest.get('normalizedBytes',10**9))>MAX_BYTES:raise RuntimeError('tournament winner exceeds MT12 size ceiling')
- if not contract.get('sourceNovel') or not contract.get('bytecodeNovel'):raise RuntimeError('tournament winner failed novelty contract')
+ if not contract.get('sourceNovel') or not contract.get('bytecodeNovel') or not contract.get('behaviorNovel'):raise RuntimeError('tournament winner failed source, bytecode, or behavioral novelty contract')
  source=base/winner/f'{winner}.lua';deploy=base/winner/f'{winner}.luac'
  if digest(source)!=manifest.get('sourceSha256') or digest(deploy)!=manifest.get('luacSha256'):raise RuntimeError('tournament winner hash does not match manifest')
  text=source.read_text();missing=[x for x in REQUIRED if x not in text];bad=[x for x in FORBIDDEN if x in text]
@@ -64,7 +64,7 @@ def advance(mission:str,run_number:int|None=None)->dict:
   'sourceSha256':digest(source),'luacSha256':digest(deploy),'normalizedBytes':deploy.stat().st_size,
   'authority':'STATIC_EVOLUTION_PARENT_ROAD_UNPROVEN','canonicalFloor':canonical_name(),
   'promotionPolicy':'TOURNAMENT_WINNER_AUTO_FOR_EXPERIMENTAL_EVOLUTION_ONLY; NEVER_AUTO_CANONICAL',
-  'requiredForAdvance':['tournament winner','Lua 5.3 compile','MT12 normalization','defended canonical floor preserved','source and bytecode novelty','zero candidate errors','promotion-efficiency eligible','normalized size <= 87000']
+  'requiredForAdvance':['tournament winner','Lua 5.3 compile','MT12 normalization','defended canonical floor preserved','source, bytecode, and behavioral novelty','zero candidate errors','promotion-efficiency eligible','normalized size <= 87000']
  }
  POINTER.write_text(json.dumps(doc,indent=2)+'\n')
  return doc
