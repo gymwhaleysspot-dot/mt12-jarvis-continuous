@@ -1,6 +1,6 @@
 # A17Y Engineering OS v3 Weekly Report
 
-Generated: 2026-08-27T20:49:59.441Z
+Generated: 2026-08-28T21:21:26.231Z
 
 ## System health
 
@@ -24,10 +24,10 @@ Generated: 2026-08-27T20:49:59.441Z
 
 ## Engineering memory
 
-- Generations: 25
-- Lessons: 25
+- Generations: 26
+- Lessons: 26
 - Rejected hypotheses: 0
-- Last decision: {"at":"2026-08-27T19:57:36.234Z","status":"LOG EVIDENCE REVIEWED","missionType":"general","score":100,"confidence":0.758}
+- Last decision: {"at":"2026-08-28T20:56:54.068Z","status":"LOG EVIDENCE REVIEWED","missionType":"general","score":100,"confidence":0.758}
 
 ## Authority
 
