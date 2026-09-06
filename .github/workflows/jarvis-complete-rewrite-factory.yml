@@ -29,6 +29,7 @@ jobs:
       - name: Validate canonical floor and evolution authority
         run: |
           python3 -m py_compile tools/controller_tournament.py tools/controller_rewrite_factory.py tools/controller_rewrite_hotfix.py tools/controller_rewrite_compact.py tools/jarvis_efficiency_cycle.py tools/jarvis_prebuild_reclaim.py tools/jarvis_canonical_parent.py tools/jarvis_evolution_parent.py tools/jarvis_intelligence_planner.py tools/jarvis_external_research_bridge.py tools/jarvis_evolution_gate.py tools/jarvis_champion_guard.py tools/jarvis_graph_intelligence.py
+          python3 -m unittest tests.test_jarvis_evolution_parent
           python3 - <<'PY'
           import json,sys
           from pathlib import Path
