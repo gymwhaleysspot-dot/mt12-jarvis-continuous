@@ -42,14 +42,26 @@ def advance(mission:str,run_number:int|None=None)->dict:
  base=ROOT/'public/builds'/mission
  tournament=json.loads((base/'TOURNAMENT.json').read_text())
  winner=tournament.get('winner')
- if not winner:raise RuntimeError('tournament has no winner')
+ if not winner:
+  candidates=tournament.get('candidates')
+  if not isinstance(candidates,list) or not candidates:raise RuntimeError('tournament has no candidates')
+  eligible=[c.get('candidate') for c in candidates if c.get('promotionEfficiencyEligible') is True]
+  if eligible:raise RuntimeError(f'tournament omitted winner despite eligible candidates: {eligible}')
+  parent=json.loads(POINTER.read_text())
+  return {
+   'schema':'JARVIS-EVOLUTION-ADVANCE-1','status':'NO_PROMOTION','reason':'NO_ELIGIBLE_CANDIDATES',
+   'mission':mission,'generationRun':int(run_number or 0) or None,'winner':None,
+   'candidateCount':len(candidates),'eligibleCandidateCount':0,
+   'evolutionParent':parent.get('release'),'pointerUnchanged':True,
+   'authority':'TOURNAMENT_RESULT_ONLY; BENCH_AND_ROAD_EVIDENCE_STILL_REQUIRED',
+  }
  manifest_path=base/winner/'MANIFEST.json'
  if not manifest_path.is_file():raise RuntimeError(f'winner manifest missing: {winner}')
  manifest=json.loads(manifest_path.read_text())
  candidate=next((c for c in tournament.get('candidates',[]) if c.get('candidate')==winner),{})
  contract=manifest.get('rewriteContract') or candidate.get('rewriteContract') or {}
  if manifest.get('status')!='COMPILED' or manifest.get('errors'):raise RuntimeError('tournament winner is not cleanly compiled')
- if candidate.get('promotionEfficiencyEligible') is False:raise RuntimeError('tournament winner failed promotion-efficiency gate')
+ if candidate.get('promotionEfficiencyEligible') is not True:raise RuntimeError('tournament winner failed promotion-efficiency gate')
  if int(manifest.get('normalizedBytes',10**9))>MAX_BYTES:raise RuntimeError('tournament winner exceeds MT12 size ceiling')
  if not contract.get('sourceNovel') or not contract.get('bytecodeNovel') or not contract.get('behaviorNovel'):raise RuntimeError('tournament winner failed source, bytecode, or behavioral novelty contract')
  source=base/winner/f'{winner}.lua';deploy=base/winner/f'{winner}.luac'
