@@ -13,10 +13,10 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1788649229385",
+    "runId": "research-1788656651759",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-09-05T23:02:12.560377+00:00",
+  "generatedAt": "2026-09-06T01:10:05.739113+00:00",
   "graphState": {
     "nodes": 10,
     "relationships": 3
@@ -46,9 +46,9 @@
     },
     "area": "digital-twin-transfer",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-09-05T23:02:12.560369+00:00",
+    "createdAt": "2026-09-06T01:10:05.739105+00:00",
     "emitter": "adversarial-domain-randomization",
-    "expectedInformationGain": 0.6416,
+    "expectedInformationGain": 0.642,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -56,11 +56,11 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1788649229385",
+      "runId": "research-1788656651759",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20260905230212",
+    "id": "EXP-20260906011005",
     "ideaSignature": "4f31e54d80002c34336f",
     "innovationState": {
       "archiveCoverage": 7,
@@ -73,14 +73,14 @@
     "mutations": [
       "vary lag, grip, sag and dropout jointly",
       "score worst-decile behavior",
+      "adaptive lock target confidence",
+      "linear release and reapply timing",
       "deduplicate hot-path calculations",
       "retain exact behavior while reclaiming bytecode",
       "publish decision cause and supporting evidence",
       "link authority caps to confidence",
       "surface-conditioned slip envelope",
-      "continuous intervention release",
-      "phase-correlated GPS/RPM lag tracking",
-      "bounded handoff hysteresis"
+      "continuous intervention release"
     ],
     "name": "Quality-diversity active innovation generation plus synthesis",
     "parent": "jrw4-1861",
@@ -92,7 +92,7 @@
         "expectedInformationGain": 0.6254,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788649229385",
+          "runId": "research-1788656651759",
           "sourceIds": [],
           "weight": 0
         },
@@ -110,13 +110,37 @@
         "slot": 1
       },
       {
+        "area": "abs-control",
+        "baselineHypothesis": "A abs-control candidate derived from jrw4-1861 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "emitter": "lock-confidence-ramp",
+        "expectedInformationGain": 0.6808,
+        "externalResearch": {
+          "findings": 0,
+          "runId": "research-1788656651759",
+          "sourceIds": [],
+          "weight": 0
+        },
+        "hypothesis": "A abs-control candidate derived from jrw4-1861 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "ideaSignature": "4ecef04248a990840b26",
+        "measurement": "reduce lock duration without increasing stopping distance proxy",
+        "mutations": [
+          "adaptive lock target confidence",
+          "linear release and reapply timing"
+        ],
+        "name": "Lock Confidence Ramp for abs control",
+        "noveltyAcquisition": 0.6853,
+        "priority": 0.5758,
+        "researchCanDirectlyMutateController": false,
+        "slot": 2
+      },
+      {
         "area": "runtime-memory",
         "baselineHypothesis": "A runtime-memory candidate derived from jrw4-1861 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
         "emitter": "hot-path-cse",
         "expectedInformationGain": 0.6125,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788649229385",
+          "runId": "research-1788656651759",
           "sourceIds": [],
           "weight": 0
         },
@@ -131,7 +155,7 @@
         "noveltyAcquisition": 0.6837,
         "priority": 0.4325,
         "researchCanDirectlyMutateController": false,
-        "slot": 2
+        "slot": 3
       },
       {
         "area": "controller-observability",
@@ -140,7 +164,7 @@
         "expectedInformationGain": 0.6116,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788649229385",
+          "runId": "research-1788656651759",
           "sourceIds": [],
           "weight": 0
         },
@@ -155,7 +179,7 @@
         "noveltyAcquisition": 0.6831,
         "priority": 0.4316,
         "researchCanDirectlyMutateController": false,
-        "slot": 3
+        "slot": 4
       },
       {
         "area": "traction-control",
@@ -164,7 +188,7 @@
         "expectedInformationGain": 0.6798,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788649229385",
+          "runId": "research-1788656651759",
           "sourceIds": [],
           "weight": 0
         },
@@ -178,30 +202,6 @@
         "name": "Surface Slip Envelope for traction control",
         "noveltyAcquisition": 0.6759,
         "priority": 0.5398,
-        "researchCanDirectlyMutateController": false,
-        "slot": 4
-      },
-      {
-        "area": "truth-speed-fusion",
-        "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-        "emitter": "lag-phase-estimator",
-        "expectedInformationGain": 0.6785,
-        "externalResearch": {
-          "findings": 0,
-          "runId": "research-1788649229385",
-          "sourceIds": [],
-          "weight": 0
-        },
-        "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-        "ideaSignature": "455f6982cae474e8dfaf",
-        "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
-        "mutations": [
-          "phase-correlated GPS/RPM lag tracking",
-          "bounded handoff hysteresis"
-        ],
-        "name": "Lag Phase Estimator for truth speed fusion",
-        "noveltyAcquisition": 0.675,
-        "priority": 0.5385,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
@@ -221,10 +221,10 @@
       "area": "synthesis-all-five",
       "inputs": [
         "digital-twin-transfer",
+        "abs-control",
         "runtime-memory",
         "controller-observability",
-        "traction-control",
-        "truth-speed-fusion"
+        "traction-control"
       ],
       "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
       "name": "Synthesize all five hypotheses",
@@ -240,7 +240,7 @@
       "expectedInformationGain": 0.6254,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788649229385",
+        "runId": "research-1788656651759",
         "sourceIds": [],
         "weight": 0
       },
@@ -258,13 +258,37 @@
       "slot": 1
     },
     {
+      "area": "abs-control",
+      "baselineHypothesis": "A abs-control candidate derived from jrw4-1861 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "emitter": "lock-confidence-ramp",
+      "expectedInformationGain": 0.6808,
+      "externalResearch": {
+        "findings": 0,
+        "runId": "research-1788656651759",
+        "sourceIds": [],
+        "weight": 0
+      },
+      "hypothesis": "A abs-control candidate derived from jrw4-1861 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "ideaSignature": "4ecef04248a990840b26",
+      "measurement": "reduce lock duration without increasing stopping distance proxy",
+      "mutations": [
+        "adaptive lock target confidence",
+        "linear release and reapply timing"
+      ],
+      "name": "Lock Confidence Ramp for abs control",
+      "noveltyAcquisition": 0.6853,
+      "priority": 0.5758,
+      "researchCanDirectlyMutateController": false,
+      "slot": 2
+    },
+    {
       "area": "runtime-memory",
       "baselineHypothesis": "A runtime-memory candidate derived from jrw4-1861 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
       "emitter": "hot-path-cse",
       "expectedInformationGain": 0.6125,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788649229385",
+        "runId": "research-1788656651759",
         "sourceIds": [],
         "weight": 0
       },
@@ -279,7 +303,7 @@
       "noveltyAcquisition": 0.6837,
       "priority": 0.4325,
       "researchCanDirectlyMutateController": false,
-      "slot": 2
+      "slot": 3
     },
     {
       "area": "controller-observability",
@@ -288,7 +312,7 @@
       "expectedInformationGain": 0.6116,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788649229385",
+        "runId": "research-1788656651759",
         "sourceIds": [],
         "weight": 0
       },
@@ -303,7 +327,7 @@
       "noveltyAcquisition": 0.6831,
       "priority": 0.4316,
       "researchCanDirectlyMutateController": false,
-      "slot": 3
+      "slot": 4
     },
     {
       "area": "traction-control",
@@ -312,7 +336,7 @@
       "expectedInformationGain": 0.6798,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788649229385",
+        "runId": "research-1788656651759",
         "sourceIds": [],
         "weight": 0
       },
@@ -327,34 +351,28 @@
       "noveltyAcquisition": 0.6759,
       "priority": 0.5398,
       "researchCanDirectlyMutateController": false,
-      "slot": 4
-    },
-    {
-      "area": "truth-speed-fusion",
-      "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "emitter": "lag-phase-estimator",
-      "expectedInformationGain": 0.6785,
-      "externalResearch": {
-        "findings": 0,
-        "runId": "research-1788649229385",
-        "sourceIds": [],
-        "weight": 0
-      },
-      "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
-      "ideaSignature": "455f6982cae474e8dfaf",
-      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
-      "mutations": [
-        "phase-correlated GPS/RPM lag tracking",
-        "bounded handoff hysteresis"
-      ],
-      "name": "Lag Phase Estimator for truth speed fusion",
-      "noveltyAcquisition": 0.675,
-      "priority": 0.5385,
-      "researchCanDirectlyMutateController": false,
       "slot": 5
     }
   ],
   "rankedUnknowns": [
+    {
+      "area": "abs-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.6808,
+      "externalResearchFindings": 0,
+      "externalResearchHypotheses": [],
+      "externalResearchWeight": 0,
+      "impact": 0.91,
+      "measure": "reduce lock duration without increasing stopping distance proxy",
+      "mutation": [
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.5758,
+      "recentSelections": 3,
+      "uncertainty": 0.57
+    },
     {
       "area": "traction-control",
       "evidenceCoverage": 0,
@@ -392,24 +410,6 @@
       "uncertainty": 0.55
     },
     {
-      "area": "abs-control",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6648,
-      "externalResearchFindings": 0,
-      "externalResearchHypotheses": [],
-      "externalResearchWeight": 0,
-      "impact": 0.91,
-      "measure": "reduce lock duration without increasing stopping distance proxy",
-      "mutation": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.5248,
-      "recentSelections": 4,
-      "uncertainty": 0.57
-    },
-    {
       "area": "sensor-dropout-recovery",
       "evidenceCoverage": 0,
       "expectedInformationGain": 0.6904,
@@ -424,7 +424,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.5104,
-      "recentSelections": 60,
+      "recentSelections": 59,
       "uncertainty": 0.62
     },
     {
@@ -442,7 +442,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4942,
-      "recentSelections": 60,
+      "recentSelections": 59,
       "uncertainty": 0.6
     },
     {
@@ -460,7 +460,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4454,
-      "recentSelections": 56,
+      "recentSelections": 57,
       "uncertainty": 0.5
     },
     {
@@ -478,7 +478,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4325,
-      "recentSelections": 56,
+      "recentSelections": 57,
       "uncertainty": 0.45
     },
     {
@@ -496,7 +496,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4316,
-      "recentSelections": 56,
+      "recentSelections": 57,
       "uncertainty": 0.5
     }
   ],
@@ -505,10 +505,10 @@
     "area": "synthesis-all-five",
     "inputs": [
       "digital-twin-transfer",
+      "abs-control",
       "runtime-memory",
       "controller-observability",
-      "traction-control",
-      "truth-speed-fusion"
+      "traction-control"
     ],
     "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
     "name": "Synthesize all five hypotheses",
