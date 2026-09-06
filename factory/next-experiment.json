@@ -13,17 +13,17 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1788656651759",
+    "runId": "research-1788674586634",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-09-06T01:10:05.739113+00:00",
+  "generatedAt": "2026-09-06T06:04:45.831074+00:00",
   "graphState": {
     "nodes": 10,
     "relationships": 3
   },
   "innovationState": {
     "archiveCoverage": 7,
-    "archivePopulation": 7971,
+    "archivePopulation": 7977,
     "candidateIdeas": 29,
     "retiredIdeas": 0,
     "selectionPolicy": "prediction-focused information gain + quality diversity + emitter cooldown"
@@ -44,11 +44,11 @@
       "semanticNovelAgainstParent": true,
       "sixthSynthesisRequired": true
     },
-    "area": "digital-twin-transfer",
+    "area": "truth-speed-fusion",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-09-06T01:10:05.739105+00:00",
-    "emitter": "adversarial-domain-randomization",
-    "expectedInformationGain": 0.642,
+    "createdAt": "2026-09-06T06:04:45.831065+00:00",
+    "emitter": "lag-phase-estimator",
+    "expectedInformationGain": 0.645,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -56,21 +56,23 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1788656651759",
+      "runId": "research-1788674586634",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20260906011005",
-    "ideaSignature": "4f31e54d80002c34336f",
+    "id": "EXP-20260906060445",
+    "ideaSignature": "455f6982cae474e8dfaf",
     "innovationState": {
       "archiveCoverage": 7,
-      "archivePopulation": 7971,
+      "archivePopulation": 7977,
       "candidateIdeas": 29,
       "retiredIdeas": 0,
       "selectionPolicy": "prediction-focused information gain + quality diversity + emitter cooldown"
     },
     "measurement": "maximize prediction-focused information gain and behavioral archive coverage while preserving defended behavior",
     "mutations": [
+      "phase-correlated GPS/RPM lag tracking",
+      "bounded handoff hysteresis",
       "vary lag, grip, sag and dropout jointly",
       "score worst-decile behavior",
       "adaptive lock target confidence",
@@ -78,13 +80,35 @@
       "deduplicate hot-path calculations",
       "retain exact behavior while reclaiming bytecode",
       "publish decision cause and supporting evidence",
-      "link authority caps to confidence",
-      "surface-conditioned slip envelope",
-      "continuous intervention release"
+      "link authority caps to confidence"
     ],
     "name": "Quality-diversity active innovation generation plus synthesis",
     "parent": "jrw4-1861",
     "portfolio": [
+      {
+        "area": "truth-speed-fusion",
+        "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+        "emitter": "lag-phase-estimator",
+        "expectedInformationGain": 0.6945,
+        "externalResearch": {
+          "findings": 0,
+          "runId": "research-1788674586634",
+          "sourceIds": [],
+          "weight": 0
+        },
+        "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+        "ideaSignature": "455f6982cae474e8dfaf",
+        "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+        "mutations": [
+          "phase-correlated GPS/RPM lag tracking",
+          "bounded handoff hysteresis"
+        ],
+        "name": "Lag Phase Estimator for truth speed fusion",
+        "noveltyAcquisition": 0.6949,
+        "priority": 0.5895,
+        "researchCanDirectlyMutateController": false,
+        "slot": 1
+      },
       {
         "area": "digital-twin-transfer",
         "baselineHypothesis": "A digital-twin-transfer candidate derived from jrw4-1861 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
@@ -92,7 +116,7 @@
         "expectedInformationGain": 0.6254,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788656651759",
+          "runId": "research-1788674586634",
           "sourceIds": [],
           "weight": 0
         },
@@ -107,7 +131,7 @@
         "noveltyAcquisition": 0.6928,
         "priority": 0.4454,
         "researchCanDirectlyMutateController": false,
-        "slot": 1
+        "slot": 2
       },
       {
         "area": "abs-control",
@@ -116,7 +140,7 @@
         "expectedInformationGain": 0.6808,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788656651759",
+          "runId": "research-1788674586634",
           "sourceIds": [],
           "weight": 0
         },
@@ -131,7 +155,7 @@
         "noveltyAcquisition": 0.6853,
         "priority": 0.5758,
         "researchCanDirectlyMutateController": false,
-        "slot": 2
+        "slot": 3
       },
       {
         "area": "runtime-memory",
@@ -140,7 +164,7 @@
         "expectedInformationGain": 0.6125,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788656651759",
+          "runId": "research-1788674586634",
           "sourceIds": [],
           "weight": 0
         },
@@ -155,7 +179,7 @@
         "noveltyAcquisition": 0.6837,
         "priority": 0.4325,
         "researchCanDirectlyMutateController": false,
-        "slot": 3
+        "slot": 4
       },
       {
         "area": "controller-observability",
@@ -164,7 +188,7 @@
         "expectedInformationGain": 0.6116,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1788656651759",
+          "runId": "research-1788674586634",
           "sourceIds": [],
           "weight": 0
         },
@@ -178,30 +202,6 @@
         "name": "Causal Decision Trace for controller observability",
         "noveltyAcquisition": 0.6831,
         "priority": 0.4316,
-        "researchCanDirectlyMutateController": false,
-        "slot": 4
-      },
-      {
-        "area": "traction-control",
-        "baselineHypothesis": "A traction-control candidate derived from jrw4-1861 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-        "emitter": "surface-slip-envelope",
-        "expectedInformationGain": 0.6798,
-        "externalResearch": {
-          "findings": 0,
-          "runId": "research-1788656651759",
-          "sourceIds": [],
-          "weight": 0
-        },
-        "hypothesis": "A traction-control candidate derived from jrw4-1861 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-        "ideaSignature": "b30dba80e823ca40c094",
-        "measurement": "reduce excess slip and intervention harshness",
-        "mutations": [
-          "surface-conditioned slip envelope",
-          "continuous intervention release"
-        ],
-        "name": "Surface Slip Envelope for traction control",
-        "noveltyAcquisition": 0.6759,
-        "priority": 0.5398,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
@@ -220,11 +220,11 @@
     "synthesis": {
       "area": "synthesis-all-five",
       "inputs": [
+        "truth-speed-fusion",
         "digital-twin-transfer",
         "abs-control",
         "runtime-memory",
-        "controller-observability",
-        "traction-control"
+        "controller-observability"
       ],
       "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
       "name": "Synthesize all five hypotheses",
@@ -234,13 +234,37 @@
   },
   "portfolio": [
     {
+      "area": "truth-speed-fusion",
+      "baselineHypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "emitter": "lag-phase-estimator",
+      "expectedInformationGain": 0.6945,
+      "externalResearch": {
+        "findings": 0,
+        "runId": "research-1788674586634",
+        "sourceIds": [],
+        "weight": 0
+      },
+      "hypothesis": "A truth-speed-fusion candidate derived from jrw4-1861 using the lag-phase-estimator mechanism\u2014phase-correlated GPS/RPM lag tracking, bounded handoff hysteresis\u2014will reduce truth-speed RMSE and TC timing error without added control oscillation.",
+      "ideaSignature": "455f6982cae474e8dfaf",
+      "measurement": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+      "mutations": [
+        "phase-correlated GPS/RPM lag tracking",
+        "bounded handoff hysteresis"
+      ],
+      "name": "Lag Phase Estimator for truth speed fusion",
+      "noveltyAcquisition": 0.6949,
+      "priority": 0.5895,
+      "researchCanDirectlyMutateController": false,
+      "slot": 1
+    },
+    {
       "area": "digital-twin-transfer",
       "baselineHypothesis": "A digital-twin-transfer candidate derived from jrw4-1861 using the adversarial-domain-randomization mechanism\u2014vary lag, grip, sag and dropout jointly, score worst-decile behavior\u2014will increase replay-to-road transfer confidence.",
       "emitter": "adversarial-domain-randomization",
       "expectedInformationGain": 0.6254,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788656651759",
+        "runId": "research-1788674586634",
         "sourceIds": [],
         "weight": 0
       },
@@ -255,7 +279,7 @@
       "noveltyAcquisition": 0.6928,
       "priority": 0.4454,
       "researchCanDirectlyMutateController": false,
-      "slot": 1
+      "slot": 2
     },
     {
       "area": "abs-control",
@@ -264,7 +288,7 @@
       "expectedInformationGain": 0.6808,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788656651759",
+        "runId": "research-1788674586634",
         "sourceIds": [],
         "weight": 0
       },
@@ -279,7 +303,7 @@
       "noveltyAcquisition": 0.6853,
       "priority": 0.5758,
       "researchCanDirectlyMutateController": false,
-      "slot": 2
+      "slot": 3
     },
     {
       "area": "runtime-memory",
@@ -288,7 +312,7 @@
       "expectedInformationGain": 0.6125,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788656651759",
+        "runId": "research-1788674586634",
         "sourceIds": [],
         "weight": 0
       },
@@ -303,7 +327,7 @@
       "noveltyAcquisition": 0.6837,
       "priority": 0.4325,
       "researchCanDirectlyMutateController": false,
-      "slot": 3
+      "slot": 4
     },
     {
       "area": "controller-observability",
@@ -312,7 +336,7 @@
       "expectedInformationGain": 0.6116,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1788656651759",
+        "runId": "research-1788674586634",
         "sourceIds": [],
         "weight": 0
       },
@@ -327,34 +351,28 @@
       "noveltyAcquisition": 0.6831,
       "priority": 0.4316,
       "researchCanDirectlyMutateController": false,
-      "slot": 4
-    },
-    {
-      "area": "traction-control",
-      "baselineHypothesis": "A traction-control candidate derived from jrw4-1861 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-      "emitter": "surface-slip-envelope",
-      "expectedInformationGain": 0.6798,
-      "externalResearch": {
-        "findings": 0,
-        "runId": "research-1788656651759",
-        "sourceIds": [],
-        "weight": 0
-      },
-      "hypothesis": "A traction-control candidate derived from jrw4-1861 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-      "ideaSignature": "b30dba80e823ca40c094",
-      "measurement": "reduce excess slip and intervention harshness",
-      "mutations": [
-        "surface-conditioned slip envelope",
-        "continuous intervention release"
-      ],
-      "name": "Surface Slip Envelope for traction control",
-      "noveltyAcquisition": 0.6759,
-      "priority": 0.5398,
-      "researchCanDirectlyMutateController": false,
       "slot": 5
     }
   ],
   "rankedUnknowns": [
+    {
+      "area": "truth-speed-fusion",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.6945,
+      "externalResearchFindings": 0,
+      "externalResearchHypotheses": [],
+      "externalResearchWeight": 0,
+      "impact": 1.0,
+      "measure": "reduce truth-speed RMSE and TC timing error without added control oscillation",
+      "mutation": [
+        "adaptive GPS/RPM lag estimator",
+        "confidence-weighted truth-speed handoff"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.5895,
+      "recentSelections": 3,
+      "uncertainty": 0.55
+    },
     {
       "area": "abs-control",
       "evidenceCoverage": 0,
@@ -392,24 +410,6 @@
       "uncertainty": 0.58
     },
     {
-      "area": "truth-speed-fusion",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6785,
-      "externalResearchFindings": 0,
-      "externalResearchHypotheses": [],
-      "externalResearchWeight": 0,
-      "impact": 1.0,
-      "measure": "reduce truth-speed RMSE and TC timing error without added control oscillation",
-      "mutation": [
-        "adaptive GPS/RPM lag estimator",
-        "confidence-weighted truth-speed handoff"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.5385,
-      "recentSelections": 4,
-      "uncertainty": 0.55
-    },
-    {
       "area": "sensor-dropout-recovery",
       "evidenceCoverage": 0,
       "expectedInformationGain": 0.6904,
@@ -424,7 +424,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.5104,
-      "recentSelections": 59,
+      "recentSelections": 58,
       "uncertainty": 0.62
     },
     {
@@ -442,7 +442,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4942,
-      "recentSelections": 59,
+      "recentSelections": 58,
       "uncertainty": 0.6
     },
     {
@@ -460,7 +460,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4454,
-      "recentSelections": 57,
+      "recentSelections": 58,
       "uncertainty": 0.5
     },
     {
@@ -478,7 +478,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4325,
-      "recentSelections": 57,
+      "recentSelections": 58,
       "uncertainty": 0.45
     },
     {
@@ -496,7 +496,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4316,
-      "recentSelections": 57,
+      "recentSelections": 58,
       "uncertainty": 0.5
     }
   ],
@@ -504,11 +504,11 @@
   "synthesis": {
     "area": "synthesis-all-five",
     "inputs": [
+      "truth-speed-fusion",
       "digital-twin-transfer",
       "abs-control",
       "runtime-memory",
-      "controller-observability",
-      "traction-control"
+      "controller-observability"
     ],
     "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
     "name": "Synthesize all five hypotheses",
