@@ -1,7 +1,21 @@
-name: Michael V66 Fast Contract CI
+name: Michael V67 Fast Contract CI
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/michael-v66-ci.yml'
+      - 'michael/release/current.json'
+      - 'tools/michael_module_contract.mjs'
+      - 'tools/michael_visual_capture.mjs'
+      - 'jarvis/michael-c3-v66.js'
+      - 'jarvis/michael-graphics-v40.js'
+      - 'jarvis/michael-graphics-v40-base.js'
+      - 'jarvis/michael-graphics-v39.js'
+      - 'jarvis/mjx7303-racing-michael-v66.js'
+      - 'racing-mjx7303-michael-v39.html'
+      - 'jarvis/racing-tab.js'
+      - 'index.html'
   push:
     branches: [main]
     paths:
@@ -17,20 +31,26 @@ on:
       - 'racing-mjx7303-michael-v39.html'
       - 'jarvis/racing-tab.js'
       - 'index.html'
+  workflow_run:
+    workflows: ['Jarvis Integrated Intelligence Proving Ground']
+    types: [completed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: michael-v66-fast-ci
+  group: michael-v67-fast-ci
   cancel-in-progress: true
 
 jobs:
   contract:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v5
         with: {node-version: '22', package-manager-cache: false}
       - name: Validate release and live graph
