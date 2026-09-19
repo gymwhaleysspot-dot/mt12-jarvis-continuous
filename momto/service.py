@@ -96,6 +96,9 @@ def backup_local(destination=None): return ops.backup_local(destination)
 def recovery_manifest(): return ops.recovery_manifest()
 def audit_tail(limit=20): return ops.audit_tail(limit)
 
+# MomTo v5 live/search intelligence wrappers
+def live_activity(limit=25): return ops.live_activity(limit)
+
 def search_ai_cycle(limit=20):
  from . import search_ai
  return search_ai.cycle(limit)
