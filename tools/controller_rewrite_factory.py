@@ -315,7 +315,13 @@ def verify_novelty(experiment: dict, generation: str) -> None:
     if failures:
         raise SystemExit("rewrite novelty authority failed:\n" + "\n".join(failures))
     if not any(c.get("status") == "COMPILED" for c in tournament.get("candidates", [])):
-        raise SystemExit("rewrite authority produced no compiled candidates")
+        candidates = tournament.get("candidates", [])
+        if isinstance(candidates, list) and candidates and all(c.get("status") != "COMPILED" for c in candidates):
+            tournament["rewriteAuthority"]["outcome"] = "NO_PROMOTION"
+            tournament["rewriteAuthority"]["reason"] = "ALL_GENERATED_CANDIDATES_REJECTED"
+            tournament_path.write_text(json.dumps(tournament, indent=2) + "\n")
+            return
+        raise SystemExit("rewrite authority produced no candidates")
 
 
 def main() -> None:
