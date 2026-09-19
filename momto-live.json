@@ -1,73 +1,62 @@
 {
+  "activity": [],
+  "advanced": {
+    "audit_events": 0,
+    "candidates": 0,
+    "contradictions": 0,
+    "coverage_reviewed": 0,
+    "coverage_total": 10,
+    "dna_clusters": 0,
+    "documents": 0,
+    "graph_edges": 0,
+    "graph_nodes": 0,
+    "source_reviews": 0,
+    "timeline_events": 0,
+    "workspace": {
+      "percent": 0,
+      "reviewed": 0,
+      "total": 10
+    }
+  },
+  "answers": [
+    {
+      "answer": "Verified 0/3 official Ohio source endpoints during this worker cycle.",
+      "priority": "high",
+      "type": "verified_source_check"
+    },
+    {
+      "answer": "Investigate the next uncovered Ohio search area and record the verified result.",
+      "priority": "high",
+      "type": "next_action"
+    },
+    {
+      "answer": "Start with the official Ohio records-access roadmap before broad public-record research.",
+      "priority": "high",
+      "type": "next_action"
+    },
+    {
+      "answer": "Build the initial dated timeline from verified records.",
+      "priority": "normal",
+      "type": "next_action"
+    },
+    {
+      "answer": "Create the next concrete research task from the strongest documented gap.",
+      "priority": "normal",
+      "type": "next_action"
+    }
+  ],
   "case": {
     "status": "active"
   },
-  "objectives": {
-    "birth_mother": {
-      "status": "SEARCHING"
-    },
-    "birth_father": {
-      "status": "SEARCHING"
-    }
+  "counts": {
+    "contacts": 0,
+    "evidence": 0,
+    "hypotheses": 0,
+    "leads": 0,
+    "open_tasks": 0,
+    "searches": 0
   },
-  "ohio": {
-    "state": "Ohio",
-    "roadmap": [
-      {
-        "key": "odh-file",
-        "title": "ODH adoption-file request",
-        "authority": "Ohio Department of Health",
-        "status": "not-started"
-      },
-      {
-        "key": "non-id",
-        "title": "Non-identifying history",
-        "authority": "Ohio adoption agency, attorney, or probate court",
-        "status": "not-started"
-      },
-      {
-        "key": "contact-pref",
-        "title": "Contact-preference check",
-        "authority": "Ohio Department of Health",
-        "status": "not-started"
-      },
-      {
-        "key": "registry",
-        "title": "Ohio registry / mutual-consent options",
-        "authority": "Ohio adoption services",
-        "status": "not-started"
-      },
-      {
-        "key": "court",
-        "title": "Probate-court records path",
-        "authority": "Applicable Ohio probate court",
-        "status": "not-started"
-      },
-      {
-        "key": "dna",
-        "title": "DNA matching",
-        "authority": "Lawful DNA databases",
-        "status": "not-started"
-      },
-      {
-        "key": "public-records",
-        "title": "Public-record research",
-        "authority": "Lawful public sources",
-        "status": "not-started"
-      },
-      {
-        "key": "professional",
-        "title": "Professional review",
-        "authority": "Ohio adoption professional / attorney",
-        "status": "not-started"
-      }
-    ],
-    "official_sources": [
-      "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
-      "https://codes.ohio.gov/ohio-revised-code/section-3107.66",
-      "https://codes.ohio.gov/ohio-revised-code/section-3705.12"
-    ]
-  },
+  "dashboard_version": "momto-live-v7",
   "dna": [
     {
       "provider": "AncestryDNA",
@@ -86,112 +75,498 @@
       "status": "not-started"
     }
   ],
-  "counts": {
-    "leads": 0,
-    "contacts": 0,
-    "searches": 0,
-    "evidence": 0,
-    "hypotheses": 0,
-    "open_tasks": 0
-  },
-  "advanced": {
-    "graph_nodes": 0,
-    "graph_edges": 0,
-    "dna_clusters": 0,
-    "candidates": 0,
-    "timeline_events": 0,
-    "source_reviews": 0,
-    "coverage_reviewed": 0,
-    "coverage_total": 10,
-    "documents": 0,
-    "audit_events": 0,
-    "contradictions": 0,
-    "workspace": {
-      "reviewed": 0,
-      "total": 10,
-      "percent": 0
+  "enhancement_wave": [
+    {
+      "action": "record the current state and preserve the source reference",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00001",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 01",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "compare the result with existing local evidence and flag differences",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00002",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 02",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "create a deterministic next-action candidate from the verified gap",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00003",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 03",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "validate the result against an independent lawful source",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00004",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 04",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "attach a provenance note and confidence state",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00005",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 05",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "detect duplicates before adding a new record",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00006",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 06",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "surface unresolved contradictions for human review",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00007",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 07",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "measure completion without exposing private record contents",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00008",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 08",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "retain an audit event for the state transition",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00009",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 09",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "verify the operation can be repeated without corrupting prior work",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00010",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 10",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "record the current state and preserve the source reference",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00011",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 11",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "compare the result with existing local evidence and flag differences",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00012",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 12",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "create a deterministic next-action candidate from the verified gap",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00013",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 13",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "validate the result against an independent lawful source",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00014",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 14",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "attach a provenance note and confidence state",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00015",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 15",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "detect duplicates before adding a new record",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00016",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 16",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "surface unresolved contradictions for human review",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00017",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 17",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "measure completion without exposing private record contents",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00018",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 18",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "retain an audit event for the state transition",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00019",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 19",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "verify the operation can be repeated without corrupting prior work",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00020",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 20",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "record the current state and preserve the source reference",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00021",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 21",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "compare the result with existing local evidence and flag differences",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00022",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 22",
+      "validation": "unit test + deterministic fixture"
+    },
+    {
+      "action": "create a deterministic next-action candidate from the verified gap",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "existing-local-state",
+      "human_review": true,
+      "id": "MOMTO-00023",
+      "priority": "normal",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 23",
+      "validation": "local-state validation + privacy contract"
+    },
+    {
+      "action": "validate the result against an independent lawful source",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "review-gate",
+      "human_review": true,
+      "id": "MOMTO-00024",
+      "priority": "low",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 24",
+      "validation": "audit assertion + regression test"
+    },
+    {
+      "action": "attach a provenance note and confidence state",
+      "capability": "official-records",
+      "category": "discovery",
+      "dependency": "none",
+      "human_review": true,
+      "id": "MOMTO-00025",
+      "priority": "high",
+      "public_safe": true,
+      "status": "planned",
+      "title": "Official Records improvement 25",
+      "validation": "unit test + deterministic fixture"
     }
+  ],
+  "enhancements": {
+    "active": 0,
+    "categories": {
+      "coverage": 500,
+      "discovery": 500,
+      "dna": 500,
+      "evidence": 500,
+      "observability": 500,
+      "recovery": 500,
+      "relationships": 500,
+      "sources": 500,
+      "tasks": 500,
+      "timeline": 500
+    },
+    "complete": 0,
+    "current_wave": "wave-01",
+    "human_review": true,
+    "next": "Implement the highest-value local, evidence-backed enhancements while preserving privacy and human review.",
+    "planned": 5000,
+    "program": "MomTo 5000 Enhancement Program",
+    "public_safe": true,
+    "total": 5000
+  },
+  "heartbeat": {
+    "at": "2026-09-19T20:21:08.917262+00:00",
+    "interval_seconds": 300,
+    "privacy_safe": true,
+    "status": "running",
+    "worker": "momto-always-on"
   },
   "next_actions": [
     {
-      "priority": "high",
-      "action": "Review the next uncovered search area from the local case."
+      "action": "Record lawful DNA cluster observations locally when available.",
+      "priority": "normal"
     },
     {
-      "priority": "normal",
-      "action": "Link documented evidence or entities in the local relationship graph."
+      "action": "Start a dated timeline from verified records.",
+      "priority": "normal"
     },
     {
-      "priority": "normal",
-      "action": "Create a dated timeline from verified records."
+      "action": "Create one concrete next-action task from the strongest documented gap.",
+      "priority": "normal"
     }
   ],
-  "activity": [],
+  "objectives": {
+    "birth_father": {
+      "status": "SEARCHING"
+    },
+    "birth_mother": {
+      "status": "SEARCHING"
+    }
+  },
+  "ohio": {
+    "official_sources": [
+      "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
+      "https://codes.ohio.gov/ohio-revised-code/section-3107.66",
+      "https://codes.ohio.gov/ohio-revised-code/section-3705.12"
+    ],
+    "roadmap": [
+      {
+        "authority": "Ohio Department of Health",
+        "key": "odh-file",
+        "status": "not-started",
+        "title": "ODH adoption-file request"
+      },
+      {
+        "authority": "Ohio adoption agency, attorney, or probate court",
+        "key": "non-id",
+        "status": "not-started",
+        "title": "Non-identifying history"
+      },
+      {
+        "authority": "Ohio Department of Health",
+        "key": "contact-pref",
+        "status": "not-started",
+        "title": "Contact-preference check"
+      },
+      {
+        "authority": "Ohio adoption services",
+        "key": "registry",
+        "status": "not-started",
+        "title": "Ohio registry / mutual-consent options"
+      },
+      {
+        "authority": "Applicable Ohio probate court",
+        "key": "court",
+        "status": "not-started",
+        "title": "Probate-court records path"
+      },
+      {
+        "authority": "Lawful DNA databases",
+        "key": "dna",
+        "status": "not-started",
+        "title": "DNA matching"
+      },
+      {
+        "authority": "Lawful public sources",
+        "key": "public-records",
+        "status": "not-started",
+        "title": "Public-record research"
+      },
+      {
+        "authority": "Ohio adoption professional / attorney",
+        "key": "professional",
+        "status": "not-started",
+        "title": "Professional review"
+      }
+    ],
+    "state": "Ohio"
+  },
+  "persistence": {
+    "cycle_count": 1,
+    "first_started_at": "2026-09-19T20:21:08.917262+00:00",
+    "last_cycle_at": "2026-09-19T20:21:08.917262+00:00",
+    "previous_answer_count": 0,
+    "private_case_data_persisted": false,
+    "state_source": "public-safe aggregate snapshot",
+    "status": "persistent"
+  },
+  "research": {
+    "note": "Public endpoint availability only; no adoption-record contents are collected or published.",
+    "official_sources": [
+      {
+        "checked_at": "2026-09-19T20:21:06.583164+00:00",
+        "error": "HTTPError",
+        "ok": false,
+        "status": null,
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.38"
+      },
+      {
+        "checked_at": "2026-09-19T20:21:07.133839+00:00",
+        "error": "HTTPError",
+        "ok": false,
+        "status": null,
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.66"
+      },
+      {
+        "checked_at": "2026-09-19T20:21:07.643007+00:00",
+        "error": "HTTPError",
+        "ok": false,
+        "status": null,
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-3705.12"
+      }
+    ],
+    "total": 3,
+    "verified": 0
+  },
   "search_ai": {
     "engine": "MomTo Search AI v1",
     "generated_at": "",
-    "mode": "evidence-driven",
-    "plan": [],
-    "learning": {
-      "search_events": 0,
-      "useful_events": 0,
-      "source_patterns": [],
-      "query_patterns": []
-    },
     "guardrails": {
       "human_review": true,
-      "no_private_data_publication": true,
-      "no_intrusive_contact": true,
       "no_access_control_bypass": true,
-      "no_identity_invention": true
-    }
-  },
-  "enhancements": {
-    "program": "MomTo 5000 Enhancement Program",
-    "total": 5000,
-    "planned": 5000,
-    "active": 0,
-    "complete": 0,
-    "public_safe": true,
-    "current_wave": "wave-01",
-    "categories": {
-      "discovery": 500,
-      "evidence": 500,
-      "timeline": 500,
-      "relationships": 500,
-      "dna": 500,
-      "sources": 500,
-      "coverage": 500,
-      "tasks": 500,
-      "recovery": 500,
-      "observability": 500
+      "no_identity_invention": true,
+      "no_intrusive_contact": true,
+      "no_private_data_publication": true
     },
-    "next": "Implement and validate enhancements against local evidence without publishing private records."
+    "learning": {
+      "query_patterns": [],
+      "search_events": 0,
+      "source_patterns": [],
+      "useful_events": 0
+    },
+    "mode": "evidence-driven",
+    "plan": []
   },
-  "enhancement_wave": [],
-  "heartbeat": {
-    "status": "running",
-    "at": "",
-    "worker": "momto-always-on",
-    "interval_seconds": 300,
-    "privacy_safe": true
-  },
-  "persistence": {
-    "status": "persistent",
-    "first_started_at": "",
-    "last_cycle_at": "",
-    "cycle_count": 0,
-    "previous_answer_count": 0,
-    "state_source": "public-safe aggregate snapshot",
-    "private_case_data_persisted": false
-  },
-  "answers": [],
-  "research": {
-    "official_sources": [],
-    "verified": 0,
-    "total": 3,
-    "note": "Public endpoint availability only; no adoption-record contents are collected or published."
-  },
-  "dashboard_version": "momto-live-v7",
   "snapshot_schema": "momto-public-v7"
 }
