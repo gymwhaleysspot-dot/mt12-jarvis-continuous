@@ -220,4 +220,14 @@ jobs:
             exit 0
           fi
           git commit -m "chore(momto): refresh live search heartbeat"
-          git push origin HEAD:main
+          # Other repository automation can update main while this cycle is
+          # running. Merge those changes before publishing; keep this cycle's
+          # generated public snapshot if that file conflicts.
+          if ! git push origin HEAD:main; then
+            git pull --no-rebase origin main || {
+              git checkout --ours momto-live.json
+              git add momto-live.json
+              git commit -m "chore(momto): resolve concurrent snapshot publish"
+            }
+            git push origin HEAD:main
+          fi
