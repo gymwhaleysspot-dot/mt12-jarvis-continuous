@@ -81,6 +81,66 @@ jobs:
           snapshot = momto_live()
           now = datetime.now(timezone.utc)
           source_checks = json.loads(Path("artifacts/source-checks.json").read_text(encoding="utf-8"))
+
+          # Perform actual public-source research each cycle instead of only
+          # reporting endpoint availability. Findings are limited to public,
+          # official Ohio adoption resources and contain no case/PII data.
+          from html.parser import HTMLParser
+          import re
+          import urllib.error
+
+          research_sources = [
+              ("Ohio Supreme Court — Probate Forms",
+               "https://www.supremecourt.ohio.gov/forms/all-forms/probate/5"),
+              ("Ohio Supreme Court — Probate Bench Cards",
+               "https://www.supremecourt.ohio.gov/courts/services-to-courts/children-families/probate-bench-cards/"),
+              ("Ohio Supreme Court — Domestic Relations Resource Guide",
+               "https://www.supremecourt.ohio.gov/courts/services-to-courts/domestic-relations-resource-guide/"),
+              ("Ohio Supreme Court — Adoption Records Guidance",
+               "https://www.supremecourt.ohio.gov/docs/JCS/courtSvcs/NJO/NJOPart1Probate.pdf"),
+          ]
+
+          class _Text(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.parts=[]
+                  self.skip=0
+              def handle_starttag(self, tag, attrs):
+                  if tag in {"script","style","noscript"}: self.skip += 1
+              def handle_endtag(self, tag):
+                  if tag in {"script","style","noscript"} and self.skip: self.skip -= 1
+              def handle_data(self, data):
+                  if not self.skip:
+                      s=re.sub(r"\\s+"," ",data).strip()
+                      if s: self.parts.append(s)
+
+          findings=[]
+          for title,url in research_sources:
+              row={"title":title,"url":url,"checked_at":now.isoformat(),"ok":False}
+              try:
+                  req=urllib.request.Request(url,headers={"User-Agent":"MomTo/1.0 public-research"})
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      raw=r.read(300000)
+                      row["status"]=r.status
+                      row["ok"]=True
+                      if "text/html" in (r.headers.get("Content-Type") or ""):
+                          p=_Text(); p.feed(raw.decode("utf-8","ignore"))
+                          text=" ".join(p.parts)
+                          # Keep only concise public-source research notes.
+                          terms=("adoption file","non-identifying","authorization","release","probate","registry","adoption")
+                          matches=[]
+                          for sentence in re.split(r"(?<=[.!?])\\s+",text):
+                              if any(t in sentence.lower() for t in terms) and 60 <= len(sentence) <= 420:
+                                  matches.append(sentence)
+                              if len(matches) >= 6: break
+                          row["findings"]=matches
+                      else:
+                          row["findings"]=["Official source fetched successfully; content type is not HTML."]
+              except Exception as e:
+                  row["error"]=type(e).__name__
+              findings.append(row)
+
+          research_findings=[x for x in findings if x.get("ok") and x.get("findings")]
           prior_state = previous.get("persistence", {})
           cycle_count = int(prior_state.get("cycle_count", 0)) + 1
           first_started_at = prior_state.get("first_started_at") or now.isoformat()
@@ -105,7 +165,22 @@ jobs:
           snapshot["counts"] = prior_counts
           snapshot["advanced"] = prior_advanced
           snapshot["search_ai"] = prior_search_ai
-          snapshot["research"] = {"official_sources": source_checks, "verified": verified, "total": len(source_checks), "note": "Public endpoint availability only; no adoption-record contents are collected or published."}
+          snapshot["research"] = {
+              "official_sources": source_checks,
+              "verified": verified,
+              "total": len(source_checks),
+              "findings": research_findings[:12],
+              "sources_researched": len(findings),
+              "note": "Actual public-source research is performed each cycle. No adoption-record contents, private matches, addresses, phone numbers, email addresses, or correspondence are collected or published.",
+          }
+          activity = list(snapshot.get("activity") or [])
+          activity.insert(0, {
+              "type": "research_cycle",
+              "at": now.isoformat(),
+              "summary": f"Researched {len(findings)} official Ohio adoption sources; {len(research_findings)} returned substantive public findings.",
+              "public_safe": True,
+          })
+          snapshot["activity"] = activity[:25]
           snapshot["dashboard_version"] = "momto-live-v7"
           snapshot["snapshot_schema"] = "momto-public-v7"
           snapshot["persistence"] = {
