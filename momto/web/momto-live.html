@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MomTo — Live Search</title>
+<style>
+body{font:15px system-ui;margin:0;background:#0b1020;color:#eef2ff}main{max-width:1200px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;gap:16px;align-items:center}.live{color:#62e6a7}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{background:#151c31;border:1px solid #293451;border-radius:14px;padding:18px}.muted{color:#9ca9c4}.status{font-size:12px;padding:5px 8px;border-radius:99px;background:#24304a;display:inline-block}
+.row{display:flex;justify-content:space-between;border-top:1px solid #27314a;padding:12px 0}.match{border-left:3px solid #62e6a7;padding-left:12px;margin:12px 0}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>MomTo</h1><div class="muted">Michael Whaley · birth name Michael Braggs · 1980</div></div><div class="live">● LIVE <span id="updated"></span></div></header>
+<p class="muted">Persistent lawful search dashboard — birth mother and birth father.</p>
+<section class="grid">
+<div class="card"><h2>Birth Mother</h2><span class="status" id="motherStatus">SEARCHING</span><div id="mother"></div></div>
+<div class="card"><h2>Birth Father</h2><span class="status" id="fatherStatus">SEARCHING</span><div id="father"></div></div>
+</section>
+<section class="card" style="margin-top:16px"><h2>Live Matches & Leads</h2><div id="matches"><div class="muted">Waiting for MomTo data…</div></div></section>
+<section class="card" style="margin-top:16px"><h2>Search Activity</h2><div id="activity"></div></section>
+</main>
+<script>
+const API='/api/momto/live';
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(d){
+ document.getElementById('motherStatus').textContent=(d.objectives?.birth_mother?.status||'SEARCHING').toUpperCase();
+ document.getElementById('fatherStatus').textContent=(d.objectives?.birth_father?.status||'SEARCHING').toUpperCase();
+ const box=(d.objectives||{}); document.getElementById('mother').innerHTML='<p class="muted">Last activity: '+esc(box.birth_mother?.last_activity||'No activity yet')+'</p><p>'+esc(box.birth_mother?.next_action||'Continue lawful search')+'</p>';
+ document.getElementById('father').innerHTML='<p class="muted">Last activity: '+esc(box.birth_father?.last_activity||'No activity yet')+'</p><p>'+esc(box.birth_father?.next_action||'Continue lawful search')+'</p>';
+ document.getElementById('matches').innerHTML=(d.matches?.length?d.matches.map(m=>'<div class="match"><b>'+esc(m.relationship||'Lead')+'</b> · '+esc(m.source||'Source')+'<br>'+esc(m.summary||'')+'<div class="muted">'+esc(m.updated_at||'')+'</div></div>').join(''):'<div class="muted">No new matches yet.</div>');
+ document.getElementById('activity').innerHTML=(d.activity?.length?d.activity.slice(0,20).map(a=>'<div class="row"><span>'+esc(a.event||'Update')+'</span><span class="muted">'+esc(a.updated_at||'')+'</span></div>').join(''):'<div class="muted">No activity yet.</div>');
+ document.getElementById('updated').textContent='updated '+new Date().toLocaleTimeString();
+}
+async function refresh(){try{const r=await fetch(API,{cache:'no-store'});if(r.ok)render(await r.json())}catch(e){document.getElementById('updated').textContent='offline'}}
+refresh();setInterval(refresh,5000);
+</script></body></html>
