@@ -103,6 +103,7 @@ jobs:
           grep -F 'Birth Father' momto-live.html
           grep -F 'Live Activity' momto-live.html
           grep -F 'Search AI' momto-live.html
+          grep -F '500-Enhancement Program' momto-live.html
           grep -F 'Refresh now' momto-live.html
           python - <<'PY'
           import json
@@ -110,6 +111,7 @@ jobs:
           assert d['case']['status']=='active'
           assert 'birth_name' not in d
           assert 'activity' in d and 'search_ai' in d
+          assert d['enhancements']['total']==500 and d['enhancements']['public_safe'] is True
           print('MomTo public artifact contract passed')
           PY
       - name: Build bounded Pages artifact
