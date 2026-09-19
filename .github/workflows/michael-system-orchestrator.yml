@@ -30,9 +30,19 @@ jobs:
           git fetch origin ai-state:refs/remotes/origin/ai-state || true
           mkdir -p /tmp/michael-system michael/reconstruction keleb
           git show origin/ai-state:michael/system/promotion-ledger.json >/tmp/prior-ledger.json 2>/dev/null || echo '{"schema":1,"events":[]}' >/tmp/prior-ledger.json
+          git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json 2>/dev/null || true
+          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
+          git show origin/ai-state:michael/reconstruction/current.json >michael/reconstruction/current.json 2>/dev/null || true
+          git show origin/ai-state:keleb/measured-state.json >keleb/measured-state.json 2>/dev/null || true
       - name: Build promotion ledger compatibility tournament and health dashboard data
         env: {SOURCE_SHA: '${{ github.sha }}'}
         run: node tools/michael_system_orchestrator.mjs run /tmp/michael-system /tmp/prior-ledger.json
+      - name: Verify integrated gates
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');for(const f of ['compatibility.json','promotion-ledger.json','health.json']){const p='/tmp/michael-system/'+f;if(!fs.existsSync(p))throw Error('missing '+f);JSON.parse(fs.readFileSync(p))}
+          const h=require('/tmp/michael-system/health.json');if(!h.deployment?.stateBranch)throw Error('state isolation missing');console.log(`Michael system=${h.overall} ledger=${h.promotionLedger.events} topologyDebt=${h.graphics.topologyDebt}`)
+          NODE
       - name: Persist memory-only orchestration state to ai-state branch
         run: |
           set -Eeuo pipefail
@@ -56,3 +66,9 @@ jobs:
           done
           echo 'Unable to update ai-state after 5 attempts' >&2
           exit 1
+      - name: Archive unified state
+        uses: actions/upload-artifact@v6
+        with:
+          name: michael-system-${{ github.run_number }}
+          path: /tmp/michael-system
+          retention-days: 90
