@@ -103,7 +103,7 @@ jobs:
           grep -F 'Birth Father' momto-live.html
           grep -F 'Live Activity' momto-live.html
           grep -F 'Search AI' momto-live.html
-          grep -F '500-Enhancement Program' momto-live.html
+          grep -F '5000-Enhancement Program' momto-live.html
           grep -F 'Refresh now' momto-live.html
           python - <<'PY'
           import json
@@ -112,6 +112,8 @@ jobs:
           assert 'birth_name' not in d
           assert 'activity' in d and 'search_ai' in d
           assert d['enhancements']['total']==5000 and d['enhancements']['public_safe'] is True
+          assert d.get('dashboard_version')=='momto-live-v7'
+          assert d.get('research',{}).get('total')==3
           print('MomTo public artifact contract passed')
           PY
       - name: Build bounded Pages artifact
@@ -195,7 +197,7 @@ jobs:
           for attempt in $(seq 1 18); do
             html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.html?verify=${GITHUB_SHA}-${attempt}" || true)"
             json="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.json?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'Birth Mother' <<<"$html" && grep -Fq 'Birth Father' <<<"$html" && grep -Fq 'Live Activity' <<<"$html" && grep -Fq 'Search AI' <<<"$html" && grep -Fq 'Refresh now' <<<"$html" && grep -Fq '"status": "active"' <<<"$json" && ! grep -Fq '"birth_name"' <<<"$json"; then
+            if grep -Fq 'Birth Mother' <<<"$html" && grep -Fq 'Birth Father' <<<"$html" && grep -Fq 'Live Activity' <<<"$html" && grep -Fq 'Search AI' <<<"$html" && grep -Fq 'Refresh now' <<<"$html" && grep -Fq '5000-Enhancement Program' <<<"$html" && grep -Fq 'Worker source checks' <<<"$html" && grep -Fq '"status": "active"' <<<"$json" && ! grep -Fq '"birth_name"' <<<"$json"; then
               echo "MomTo live dashboard verified";ok=1;break
             fi
             echo "MomTo Pages propagation ${attempt}/18 waiting";sleep 5
