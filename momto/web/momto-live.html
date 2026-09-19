@@ -7,7 +7,8 @@ header{display:flex;justify-content:space-between;gap:16px;align-items:center}.l
 .card{background:#151c31;border:1px solid #293451;border-radius:14px;padding:18px}.muted{color:#9ca9c4}.status{font-size:12px;padding:5px 8px;border-radius:99px;background:#24304a;display:inline-block}
 .row{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #27314a;padding:12px 0}.check{display:flex;gap:10px;align-items:flex-start}.done{opacity:.7}.bar{height:8px;background:#26324c;border-radius:8px;overflow:hidden}.fill{height:100%;background:#62e6a7}
 a{color:#9ecbff}small{color:#9ca9c4}@media(max-width:700px){.grid{grid-template-columns:1fr}}
-</style></head><body><main>
+</style></head><body>
+<section class="card" style="margin:16px"><h2>Live Activity</h2><p class="muted" id="liveClock">Waiting for live state…</p><div id="activity"></div><h2>Search AI</h2><div id="aiPlan"></div></section><main>
 <header><div><h1>MomTo</h1><div class="muted">Ohio adoption-search tracker · adult adoptee case</div></div><div class="live">● LIVE <span id="updated"></span></div></header>
 <p class="muted">Public dashboard shows workflow status only. Lead identities, DNA matches, addresses, phone numbers, emails, photographs, and correspondence stay in the local MomTo database.</p>
 <section class="grid">
@@ -39,3 +40,15 @@ function render(d){
 async function refresh(){try{const r=await fetch(API,{cache:'no-store'});if(r.ok)render(await r.json());else document.getElementById('updated').textContent='data unavailable'}catch(e){document.getElementById('updated').textContent='offline'}}
 refresh();setInterval(refresh,15000);
 </script></body></html>
+<script>
+async function refreshLive(){
+ try{
+  const r=await fetch('api/momto/live',{cache:'no-store'}); const d=await r.json();
+  const a=d.activity||{};
+  document.getElementById('liveClock').textContent='Live state generated: '+(a.generated_at||'unknown');
+  document.getElementById('activity').innerHTML=(a.events||[]).map(e=>'<div class="row"><span>'+esc(e.at)+'</span> <span>'+esc(e.source)+'</span> <span>'+esc(e.query)+'</span> <span>'+esc(e.usefulness)+'</span></div>').join('')||'<p class="muted">No search activity recorded yet.</p>';
+  document.getElementById('aiPlan').innerHTML=(d.search_ai_plan||[]).map(x=>'<div class="row"><b>'+esc(x.priority)+'</b> '+esc(x.action)+'</div>').join('');
+ }catch(e){}
+}
+setInterval(refreshLive,10000); refreshLive();
+</script>

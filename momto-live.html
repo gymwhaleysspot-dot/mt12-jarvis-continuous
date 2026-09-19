@@ -20,7 +20,7 @@ a{color:#9ecbff}small{color:#9ca9c4}@media(max-width:700px){.grid{grid-template-
 <div class="card"><h2>Workspace</h2><div id="counts"></div><p class="muted">Public-safe totals only. Sensitive case content remains local.</p></div>
 </section>
 <section class="card" style="margin-top:16px"><h2>Search Intelligence</h2><div id="advanced" class="grid"></div><h3>Next actions</h3><div id="nextActions"></div></section>
-<section class="card" style="margin-top:16px"><h2>Official Ohio Sources</h2><div id="sources"></div></section>
+<section class="card" style="margin-top:16px"><h2>Live Activity & Search AI</h2><div id="liveMeta" class="muted">Connecting…</div><h3>Recent activity</h3><div id="activity"></div><h3>AI research plan</h3><div id="aiPlan"></div></section><section class="card" style="margin-top:16px"><h2>Official Ohio Sources</h2><div id="sources"></div></section>
 </main>
 <script>
 const API='./momto-live.json';
@@ -36,6 +36,7 @@ function render(d){
  const a=d.advanced||{}; document.getElementById('advanced').innerHTML=Object.entries(a).filter(([k])=>k!=='next_actions').map(([k,v])=>'<div class="card"><span class="muted">'+esc(k.replace(/_/g,' '))+'</span><h3>'+esc(v)+'</h3></div>').join(''); document.getElementById('nextActions').innerHTML=(d.next_actions||[]).map(x=>'<div class="row"><span class="status">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('') || '<p class="muted">No next actions generated.</p>';\n document.getElementById('sources').innerHTML=(d.ohio?.official_sources||[]).map(u=>'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a></p>').join('');
  document.getElementById('updated').textContent='updated '+new Date().toLocaleTimeString();
 }
-async function refresh(){try{const r=await fetch(API,{cache:'no-store'});if(r.ok)render(await r.json());else document.getElementById('updated').textContent='data unavailable'}catch(e){document.getElementById('updated').textContent='offline'}}
-refresh();setInterval(refresh,15000);
+async function refresh(){try{const r=await fetch(API,{cache:'no-store'});if(r.ok){const d=await r.json();render(d);renderLive(d)}else document.getElementById('updated').textContent='data unavailable'}catch(e){document.getElementById('updated').textContent='offline'}}
+function renderLive(d){const a=d.activity||{};document.getElementById('liveMeta').textContent='Live state generated '+(a.generated_at||'unknown');document.getElementById('activity').innerHTML=(a.events||[]).map(e=>'<div class="row"><span>'+esc(e.at)+'</span><span>'+esc(e.source)+'</span><span>'+esc(e.query)+'</span><span class="status">'+esc(e.usefulness)+'</span></div>').join('')||'<p class="muted">No recorded search activity yet.</p>';document.getElementById('aiPlan').innerHTML=(d.search_ai_plan||[]).map(x=>'<div class="row"><span class="status">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('')||'<p class="muted">No evidence-backed actions yet.</p>'}
+refresh();setInterval(refresh,10000);
 </script></body></html>

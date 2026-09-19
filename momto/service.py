@@ -95,3 +95,6 @@ def validate_local_state(): return ops.validate_local_state()
 def backup_local(destination=None): return ops.backup_local(destination)
 def recovery_manifest(): return ops.recovery_manifest()
 def audit_tail(limit=20): return ops.audit_tail(limit)
+
+def live_activity(limit=25): return ops.live_activity(limit)
+def search_ai_plan(limit=12): return ops.search_ai_plan(limit)
