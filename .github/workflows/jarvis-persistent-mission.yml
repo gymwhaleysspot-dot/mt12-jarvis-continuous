@@ -12,8 +12,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: jarvis-persistent-mission
-  cancel-in-progress: true
+  # Serialize with the causal-memory writer; both workflows mutate durable JSON on main.\n  group: jarvis-durable-state-writer\n  cancel-in-progress: false
 
 jobs:
   advance:
