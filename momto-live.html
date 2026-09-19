@@ -35,11 +35,11 @@ function render(d){
  setConnection(true);$('caseStatus').textContent='CASE '+String(d.case?.status||'unknown').toUpperCase();
  const om=d.objectives?.birth_mother?.status||'SEARCHING',of=d.objectives?.birth_father?.status||'SEARCHING';
  $('motherStatus').textContent=om.toUpperCase();$('fatherStatus').textContent=of.toUpperCase();
- const c=d.counts||{}, a=d.advanced||{}, r=d.ohio?.roadmap||[],done=r.filter(x=>x.status==='complete').length,pct=r.length?Math.round(done*100/r.length):0;
+ const c=d.counts||{}, a=d.advanced||{}, r=d.ohio?.roadmap||[],done=r.filter(x=>x.status==='complete').length,active=r.filter(x=>x.status&&x.status!=='not-started').length,pct=r.length?Math.round(active*100/r.length):0;
  $('motherSearches').textContent=c.searches||0;$('fatherSearches').textContent=c.searches||0;
  $('motherSignals').textContent=a.candidates??0;$('fatherSignals').textContent=a.candidates??0;
  const signals=(a.dna_clusters||0)+(a.candidates||0);$('matchSignals').textContent=signals;
- $('progress').innerHTML='<p>'+done+' of '+r.length+' roadmap items complete · '+pct+'%</p><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>';
+ $('progress').innerHTML='<p>'+active+' of '+r.length+' roadmap lanes activated · '+done+' complete · '+pct+'% activated</p><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>';
  $('roadmap').innerHTML=r.map(x=>'<div class="row"><div><b>'+esc(x.status==='complete'?'✓ ':'○ ')+esc(x.title)+'</b><br><small>'+esc(x.authority)+'</small></div><span class="pill">'+esc(x.status)+'</span></div>').join('')||'<p class="muted">No roadmap data.</p>';
  $('dna').innerHTML=(d.dna||[]).map(x=>'<div class="row"><span>'+esc(x.provider)+'</span><span class="pill">'+esc(x.status)+'</span></div>').join('')||'<p class="muted">No DNA providers configured.</p>';
  $('counts').innerHTML=Object.entries(c).map(([k,v])=>'<div class="row"><span>'+esc(k.replace(/_/g,' '))+'</span><b>'+esc(v)+'</b></div>').join('');
