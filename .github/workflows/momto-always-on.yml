@@ -36,6 +36,7 @@ jobs:
           mkdir -p artifacts
           python - <<'PY'
           import json, urllib.request
+          from urllib.error import HTTPError
           from datetime import datetime, timezone
           sources = [
               "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
