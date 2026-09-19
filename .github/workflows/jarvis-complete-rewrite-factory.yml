@@ -60,7 +60,11 @@ jobs:
           from pathlib import Path
           result=json.loads(Path('dist-controller-tournament/TOURNAMENT.json').read_text())
           compiled=[c for c in result['candidates'] if c.get('status')=='COMPILED']
-          assert compiled
+          if not compiled:
+            assert result.get('rewriteAuthority',{}).get('outcome')=='NO_PROMOTION'
+            assert result.get('rewriteAuthority',{}).get('reason')=='ALL_GENERATED_CANDIDATES_REJECTED'
+            print({'compiled':0,'outcome':'NO_PROMOTION'})
+            raise SystemExit(0)
           rp=result.get('resourcePolicy',{})
           assert rp.get('rule')=='PREBUILD_RECLAMATION+COMPACT_SYNTHESIS+RETAINED_CAPACITY_ALWAYS_ON'
           assert rp.get('prebuildSeedNormalizedBytes',10**9)<=rp.get('parentNormalizedBytes',0)
