@@ -87,6 +87,9 @@ jobs:
           snapshot["answers"].insert(0, {"type":"verified_source_check","priority":"high" if verified < len(source_checks) else "normal","answer":f"Verified {verified}/{len(source_checks)} official Ohio source endpoints during this worker cycle."})
           snapshot["answers"] = snapshot["answers"][:8]
           snapshot["activity"] = prior_activity
+          if previous.get("objectives"): snapshot["objectives"] = previous["objectives"]
+          if previous.get("ohio"): snapshot["ohio"] = previous["ohio"]
+          if previous.get("dna"): snapshot["dna"] = previous["dna"]
           snapshot["counts"] = prior_counts
           snapshot["advanced"] = prior_advanced
           snapshot["search_ai"] = prior_search_ai
