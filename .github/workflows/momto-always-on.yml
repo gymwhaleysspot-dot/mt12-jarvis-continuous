@@ -1,6 +1,12 @@
 name: MomTo Always-On Search Worker
 
+# The push trigger bootstraps the first persistent snapshot immediately after workflow changes; the worker then continues on its 5-minute schedule.
+
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/momto-always-on.yml'
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
