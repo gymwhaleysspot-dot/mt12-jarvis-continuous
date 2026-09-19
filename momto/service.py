@@ -13,6 +13,15 @@ OHIO_ROADMAP=[
  ("public-records","Public-record research","Lawful public sources","Track obituaries, newspapers, directories, and other lawful public records without publishing personal addresses or contact data."),
  ("professional","Professional review","Ohio adoption professional / attorney","Escalate records-access or contact questions when the legal route is unclear.")
 ]
+def _roadmap_progress(items):
+ counts={}
+ for item in items: counts[item.status]=counts.get(item.status,0)+1
+ total=len(items)
+ complete=counts.get("complete",0)
+ activated=total-counts.get("not-started",0)
+ actionable=counts.get("ready",0)+counts.get("ready-for-human-review",0)+counts.get("awaiting-user-data",0)
+ return {"total":total,"complete":complete,"activated":activated,"actionable":actionable,"percent_complete":round(complete*100/total) if total else 0,"percent_activated":round(activated*100/total) if total else 0,"by_status":counts}
+
 def init_case():
  Base.metadata.create_all(engine)
  # Importing advanced registers the v3 workspace tables before create_all.
@@ -40,7 +49,8 @@ def case_summary():
   dna=db.query(DnaStatus).order_by(DnaStatus.id).all()
   return {"id":c.id,"current_name":c.current_name,"birth_name":c.birth_name,"birth_year":c.birth_year,"status":c.status,
    "objectives":[(o.relationship_type,o.status) for o in c.objectives],
-   "roadmap":[{"key":x.key,"title":x.title,"authority":x.authority,"status":x.status,"completed_at":x.completed_at.isoformat() if x.completed_at else None} for x in roadmap],
+   "roadmap":[{"key":x.key,"title":x.title,"authority":x.authority,"status":x.status,"notes":x.notes,"completed_at":x.completed_at.isoformat() if x.completed_at else None} for x in roadmap],
+   "roadmap_progress":_roadmap_progress(roadmap),
    "dna":[{"provider":x.provider,"status":x.status} for x in dna],
    "lead_count":len(leads),"contact_count":len(contacts),
    "search_count":db.query(SearchEvent).filter_by(case_id=c.id).count(),"evidence_count":db.query(Evidence).filter_by(case_id=c.id).count(),
