@@ -1,0 +1,31 @@
+name: MomTo Search AI Heartbeat
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  search-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install MomTo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install sqlalchemy typer
+      - name: Run adaptive research cycle
+        run: |
+          mkdir -p artifacts
+          PYTHONPATH=. python -m momto.cli search-ai cycle --limit 20 > artifacts/search-ai-cycle.json
+          python -m json.tool artifacts/search-ai-cycle.json > /dev/null
+      - name: Publish cycle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: momto-search-ai-cycle-${{ github.run_id }}
+          path: artifacts/search-ai-cycle.json
+          retention-days: 7
