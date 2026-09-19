@@ -76,6 +76,17 @@ class SearchEvent(Base):
  searched_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
  next_action:Mapped[str]=mapped_column(Text,default="")
  case=relationship("Case",back_populates="searches")
+class DocumentFact(Base):
+ __tablename__="document_facts"
+ id:Mapped[int]=mapped_column(Integer,primary_key=True)
+ case_id:Mapped[int]=mapped_column(ForeignKey("cases.id"),nullable=False)
+ document_id:Mapped[int]=mapped_column(Integer,nullable=False)
+ fact_type:Mapped[str]=mapped_column(String(60),nullable=False)
+ value:Mapped[str]=mapped_column(Text,nullable=False)
+ confidence:Mapped[str]=mapped_column(String(30),default="extracted",nullable=False)
+ source_span:Mapped[str]=mapped_column(Text,default="")
+ created_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
+
 class Evidence(Base):
  __tablename__="evidence"
  id:Mapped[int]=mapped_column(Integer,primary_key=True)
