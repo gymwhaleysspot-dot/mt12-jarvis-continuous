@@ -112,3 +112,25 @@ def audit_tail(limit: int = 20) -> list[dict]:
     with SessionLocal() as db:
         rows = db.query(AuditEvent).filter_by(case_id=case_id).order_by(AuditEvent.id.desc()).limit(max(1, limit)).all()
         return [{"id": x.id, "action": x.action, "object_type": x.object_type, "object_id": x.object_id, "created_at": x.created_at.isoformat()} for x in rows]
+def live_activity(limit: int = 25) -> list[dict]:
+    """Return a privacy-safe recent activity feed for the public/live UI."""
+    case_id = _case_id()
+    with SessionLocal() as db:
+        rows = (
+            db.query(SearchEvent)
+            .filter_by(case_id=case_id)
+            .order_by(SearchEvent.searched_at.desc(), SearchEvent.id.desc())
+            .limit(max(1, limit))
+            .all()
+        )
+        return [
+            {
+                "kind": "search",
+                "at": x.searched_at.isoformat() if x.searched_at else None,
+                "source": x.source or "local",
+                "query": x.query or "",
+                "usefulness": x.usefulness or "unknown",
+                "next_action": x.next_action or "",
+            }
+            for x in rows
+        ]
