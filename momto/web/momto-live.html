@@ -17,7 +17,7 @@ a{color:#9ecbff}small{color:#9ca9c4}@media(max-width:700px){.grid{grid-template-
 <section class="card" style="margin-top:16px"><h2>Ohio Roadmap</h2><div id="progress"></div><div id="roadmap"></div></section>
 <section class="grid" style="margin-top:16px">
 <div class="card"><h2>DNA</h2><div id="dna"></div></div>
-<div class="card"><h2>Local Case Counts</h2><div id="counts"></div><p class="muted">Counts are public-safe totals; case details remain local.</p></div>
+<div class="card"><h2>Workspace</h2><div id="counts"></div><p class="muted">Public-safe totals only. Sensitive case content remains local.</p></div>
 </section>
 <section class="card" style="margin-top:16px"><h2>Official Ohio Sources</h2><div id="sources"></div></section>
 </main>
@@ -31,7 +31,7 @@ function render(d){
  document.getElementById('progress').innerHTML='<p>'+done+' of '+r.length+' roadmap items complete</p><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>';
  document.getElementById('roadmap').innerHTML=r.map(x=>'<div class="row '+(x.status==='complete'?'done':'')+'"><div class="check"><span>'+(x.status==='complete'?'✓':'○')+'</span><div><b>'+esc(x.title)+'</b><br><small>'+esc(x.authority)+'</small></div></div><span class="status">'+esc(x.status)+'</span></div>').join('');
  document.getElementById('dna').innerHTML=(d.dna||[]).map(x=>'<div class="row"><span>'+esc(x.provider)+'</span><span class="status">'+esc(x.status)+'</span></div>').join('');
- document.getElementById('counts').innerHTML='<div class="row"><span>Leads</span><b>'+esc(d.leads?.count||0)+'</b></div><div class="row"><span>Contacts</span><b>'+esc(d.contacts?.count||0)+'</b></div>';
+ document.getElementById('counts').innerHTML=Object.entries(d.counts||{leads:d.leads?.count||0,contacts:d.contacts?.count||0}).map(([k,v])=>'<div class="row"><span>'+esc(k.replace(/_/g,' '))+'</span><b>'+esc(v)+'</b></div>').join('');
  document.getElementById('sources').innerHTML=(d.ohio?.official_sources||[]).map(u=>'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a></p>').join('');
  document.getElementById('updated').textContent='updated '+new Date().toLocaleTimeString();
 }

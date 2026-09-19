@@ -13,6 +13,10 @@ class Case(Base):
  objectives=relationship("Objective",back_populates="case",cascade="all, delete-orphan")
  contacts=relationship("Contact",back_populates="case",cascade="all, delete-orphan")
  leads=relationship("Lead",back_populates="case",cascade="all, delete-orphan")
+ searches=relationship("SearchEvent",back_populates="case",cascade="all, delete-orphan")
+ evidence=relationship("Evidence",back_populates="case",cascade="all, delete-orphan")
+ hypotheses=relationship("Hypothesis",back_populates="case",cascade="all, delete-orphan")
+ tasks=relationship("Task",back_populates="case",cascade="all, delete-orphan")
 class Objective(Base):
  __tablename__="objectives"
  id:Mapped[int]=mapped_column(Integer,primary_key=True)
@@ -60,3 +64,52 @@ class DnaStatus(Base):
  provider:Mapped[str]=mapped_column(String(80),nullable=False)
  status:Mapped[str]=mapped_column(String(80),default="not-started")
  notes:Mapped[str]=mapped_column(Text,default="")
+class SearchEvent(Base):
+ __tablename__="search_events"
+ id:Mapped[int]=mapped_column(Integer,primary_key=True)
+ case_id:Mapped[int]=mapped_column(ForeignKey("cases.id"),nullable=False)
+ source:Mapped[str]=mapped_column(String(200),nullable=False)
+ query:Mapped[str]=mapped_column(Text,default="")
+ result:Mapped[str]=mapped_column(Text,default="")
+ usefulness:Mapped[str]=mapped_column(String(30),default="unknown",nullable=False)
+ reference:Mapped[str]=mapped_column(Text,default="")
+ searched_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
+ next_action:Mapped[str]=mapped_column(Text,default="")
+ case=relationship("Case",back_populates="searches")
+class Evidence(Base):
+ __tablename__="evidence"
+ id:Mapped[int]=mapped_column(Integer,primary_key=True)
+ case_id:Mapped[int]=mapped_column(ForeignKey("cases.id"),nullable=False)
+ title:Mapped[str]=mapped_column(String(200),nullable=False)
+ evidence_type:Mapped[str]=mapped_column(String(50),default="record",nullable=False)
+ source:Mapped[str]=mapped_column(String(200),default="")
+ summary:Mapped[str]=mapped_column(Text,default="")
+ supports:Mapped[str]=mapped_column(Text,default="")
+ contradicts:Mapped[str]=mapped_column(Text,default="")
+ reference:Mapped[str]=mapped_column(Text,default="")
+ created_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
+ case=relationship("Case",back_populates="evidence")
+class Hypothesis(Base):
+ __tablename__="hypotheses"
+ id:Mapped[int]=mapped_column(Integer,primary_key=True)
+ case_id:Mapped[int]=mapped_column(ForeignKey("cases.id"),nullable=False)
+ title:Mapped[str]=mapped_column(String(200),nullable=False)
+ status:Mapped[str]=mapped_column(String(30),default="open",nullable=False)
+ confidence:Mapped[str]=mapped_column(String(30),default="unrated",nullable=False)
+ supporting_count:Mapped[int]=mapped_column(Integer,default=0,nullable=False)
+ contradicting_count:Mapped[int]=mapped_column(Integer,default=0,nullable=False)
+ unknowns:Mapped[str]=mapped_column(Text,default="")
+ next_evidence:Mapped[str]=mapped_column(Text,default="")
+ created_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
+ case=relationship("Case",back_populates="hypotheses")
+class Task(Base):
+ __tablename__="tasks"
+ id:Mapped[int]=mapped_column(Integer,primary_key=True)
+ case_id:Mapped[int]=mapped_column(ForeignKey("cases.id"),nullable=False)
+ title:Mapped[str]=mapped_column(String(200),nullable=False)
+ priority:Mapped[str]=mapped_column(String(20),default="normal",nullable=False)
+ status:Mapped[str]=mapped_column(String(30),default="open",nullable=False)
+ due_at:Mapped[datetime|None]=mapped_column(DateTime,nullable=True)
+ notes:Mapped[str]=mapped_column(Text,default="")
+ created_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow)
+ case=relationship("Case",back_populates="tasks")
