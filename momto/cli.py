@@ -8,9 +8,7 @@ app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
 def init(): init_case(); typer.echo("MomTo initialized; case remains active until explicitly closed.")
 @app.command()
-def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio
-Birth mother: SEARCHING
-Birth father: SEARCHING")
+def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\nBirth mother: SEARCHING\nBirth father: SEARCHING")
 case_app=typer.Typer(); app.add_typer(case_app,name="case")
 @case_app.command("show")
 def show():
@@ -141,7 +139,6 @@ def ai_plan(limit:int=20):
     for item in search_ai_cycle(limit)["plan"]:
         typer.echo(f"[{item['priority']}] {item['domain']}: {item['action']}")
 
-
 vault_app=typer.Typer(help="MomTo encrypted private case vault. Vault contents never belong in Git or public snapshots.")
 app.add_typer(vault_app,name="vault")
 
@@ -191,4 +188,4 @@ def vault_hypothesis(title:str,confidence:str="unrated",unknowns:str="",next_evi
 
 @vault_app.command("task")
 def vault_task(title:str,priority:str="normal",notes:str=""):
-    typer.echo(f"Private task #{_vault().add_task(title,priority,notes)} recorded.")
+    typer.echo(f"Private task #{_vault().add_task(title,priority,notes)} recorded." )
