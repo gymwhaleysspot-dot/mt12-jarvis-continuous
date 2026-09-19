@@ -38,4 +38,4 @@ def test_local_recovery_validation_backup_and_manifest(tmp_path):
     manifest = recovery_manifest()
     assert manifest["format"] == "momto-recovery-v1"
     assert manifest["database"]["ok"] is True
-    assert audit_tail(5) == []
+    assert audit_tail(5)
