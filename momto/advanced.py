@@ -182,8 +182,8 @@ def extract_document_facts(document_id):
         text=p.read_text(encoding="utf-8",errors="replace")
         import re
         patterns=[
-            ("date",r"\b(?:19|20)\\d{2}[-/]\\d{1,2}[-/]\\d{1,2}\b"),
-            ("birth_year",r"\b(?:born|birth)\\D{0,20}((?:19|20)\\d{2})\b"),
+            ("date",r"\b(?:19|20)\d{2}[-/]\d{1,2}[-/]\d{1,2}\b"),
+            ("birth_year",r"\b(?:born|birth)\D{0,20}((?:19|20)\d{2})\b"),
             ("adoption_event",r"\b(?:adopted|adoption|placement|relinquish(?:ed|ment))\b[^.\n]{0,180}"),
             ("relationship",r"\b(?:birth mother|birth father|biological mother|biological father|sibling|brother|sister)\b[^.\n]{0,120}"),
         ]
