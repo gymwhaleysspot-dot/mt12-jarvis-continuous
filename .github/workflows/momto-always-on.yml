@@ -24,7 +24,31 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install sqlalchemy fastapi typer
-      - name: Run MomTo live/search cycle
+      - name: Verify official-source availability
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts
+          python - <<'PY'
+          import json, urllib.request
+          from datetime import datetime, timezone
+          sources = [
+              "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
+              "https://codes.ohio.gov/ohio-revised-code/section-3107.66",
+              "https://codes.ohio.gov/ohio-revised-code/section-3705.12",
+          ]
+          checks=[]
+          for url in sources:
+              row={"url":url,"checked_at":datetime.now(timezone.utc).isoformat(),"ok":False,"status":None}
+              try:
+                  req=urllib.request.Request(url,headers={"User-Agent":"MomTo/1.0 public-source-check"})
+                  with urllib.request.urlopen(req,timeout=15) as r:
+                      row["status"]=r.status; row["ok"]=200 <= r.status < 400
+              except Exception as e:
+                  row["error"]=type(e).__name__
+              checks.append(row)
+          open("artifacts/source-checks.json","w").write(json.dumps(checks,indent=2)+"\n")
+          PY
+      - name: Run MomTo persistent live/search cycle
         env:
           PYTHONPATH: .
         run: |
@@ -45,15 +69,31 @@ jobs:
 
           snapshot = momto_live()
           now = datetime.now(timezone.utc)
+          source_checks = json.loads(Path("artifacts/source-checks.json").read_text(encoding="utf-8"))
           prior_state = previous.get("persistence", {})
           cycle_count = int(prior_state.get("cycle_count", 0)) + 1
           first_started_at = prior_state.get("first_started_at") or now.isoformat()
           prior_answers = previous.get("answers", [])
-          answers = snapshot.get("search_ai", {}).get("plan", [])
+          prior_search_ai = previous.get("search_ai") or snapshot.get("search_ai", {})
+          prior_activity = previous.get("activity") or snapshot.get("activity", [])
+          prior_counts = previous.get("counts") or snapshot.get("counts", {})
+          prior_advanced = previous.get("advanced") or snapshot.get("advanced", {})
+          answers = prior_search_ai.get("plan", []) or snapshot.get("search_ai", {}).get("plan", [])
+          verified = sum(1 for x in source_checks if x.get("ok"))
           snapshot["answers"] = [
               {"type": "next_action", "priority": x.get("priority", "normal"), "answer": x.get("action", "")}
               for x in answers
-          ][:8]
+          ][:6]
+          snapshot["answers"].insert(0, {"type":"verified_source_check","priority":"high" if verified < len(source_checks) else "normal","answer":f"Verified {verified}/{len(source_checks)} official Ohio source endpoints during this worker cycle."})
+          snapshot["answers"] = snapshot["answers"][:8]
+          snapshot["activity"] = prior_activity
+          if previous.get("objectives"): snapshot["objectives"] = previous["objectives"]
+          if previous.get("ohio"): snapshot["ohio"] = previous["ohio"]
+          if previous.get("dna"): snapshot["dna"] = previous["dna"]
+          snapshot["counts"] = prior_counts
+          snapshot["advanced"] = prior_advanced
+          snapshot["search_ai"] = prior_search_ai
+          snapshot["research"] = {"official_sources": source_checks, "verified": verified, "total": len(source_checks)}
           snapshot["persistence"] = {
               "status": "persistent",
               "first_started_at": first_started_at,
