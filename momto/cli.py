@@ -8,7 +8,7 @@ app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
 def init(): init_case(); typer.echo("MomTo initialized; case remains active until explicitly closed.")
 @app.command()
-def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\\nBirth mother: SEARCHING\\nBirth father: SEARCHING")
+def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\nBirth mother: SEARCHING\nBirth father: SEARCHING")
 case_app=typer.Typer(); app.add_typer(case_app,name="case")
 @case_app.command("show")
 def show():
