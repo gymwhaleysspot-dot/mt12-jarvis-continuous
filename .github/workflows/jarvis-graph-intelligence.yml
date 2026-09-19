@@ -17,8 +17,9 @@ on:
 permissions:
   contents: write
 concurrency:
-  # All durable Jarvis state writers share one lane so generated JSON commits cannot race.\
-  group: jarvis-durable-state-writer\n  cancel-in-progress: false
+  # All durable Jarvis state writers share one lane so generated JSON commits cannot race.
+  group: jarvis-durable-state-writer
+  cancel-in-progress: false
 jobs:
   enrich:
     runs-on: ubuntu-24.04
