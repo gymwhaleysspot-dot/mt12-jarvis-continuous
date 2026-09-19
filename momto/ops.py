@@ -112,3 +112,36 @@ def audit_tail(limit: int = 20) -> list[dict]:
     with SessionLocal() as db:
         rows = db.query(AuditEvent).filter_by(case_id=case_id).order_by(AuditEvent.id.desc()).limit(max(1, limit)).all()
         return [{"id": x.id, "action": x.action, "object_type": x.object_type, "object_id": x.object_id, "created_at": x.created_at.isoformat()} for x in rows]
+
+
+def live_activity(limit: int = 25) -> dict:
+    """Return a privacy-safe live activity feed for the local case."""
+    case_id = _case_id()
+    with SessionLocal() as db:
+        rows = db.query(SearchEvent).filter_by(case_id=case_id).order_by(SearchEvent.searched_at.desc()).limit(max(1, limit)).all()
+        tasks = db.query(Task).filter_by(case_id=case_id, status="open").order_by(Task.id.desc()).limit(10).all()
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "events": [
+                {"kind":"search","at":x.searched_at.isoformat(),"source":x.source,"query":x.query,"usefulness":x.usefulness,"next_action":x.next_action}
+                for x in rows
+            ],
+            "open_tasks": [{"id":x.id,"title":x.title,"priority":x.priority,"status":x.status} for x in tasks],
+        }
+
+def search_ai_plan(limit: int = 12) -> list[dict]:
+    """Evidence-driven planner. It proposes research work; it never invents identity data or contacts people."""
+    report = workspace_report()
+    actions = ranked_next_actions(limit * 2)
+    plan = []
+    for i, item in enumerate(actions[:limit], 1):
+        plan.append({
+            "step": i,
+            "priority": item["priority"],
+            "action": item["action"],
+            "reason": "Derived from recorded workspace state and coverage gaps.",
+            "requires_human_review": True,
+        })
+    if not plan:
+        plan.append({"step":1,"priority":"normal","action":"Review the Ohio roadmap and record the next verified source result.","reason":"No evidence-backed action is currently recorded.","requires_human_review":True})
+    return plan
