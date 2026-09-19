@@ -5,8 +5,11 @@ def test_5000_enhancement_catalog_is_complete_and_public_safe():
     assert len(items)==5000
     assert len({x["id"] for x in items})==5000
     assert all(x["public_safe"] for x in items)
-    assert summary()["total"]==5000
-    assert sum(summary()["categories"].values())==5000
+    s=summary()
+    assert s["total"]==5000
+    assert s["public_safe"] is True
+    assert sum(s["categories"].values())==5000
+    assert len(s["categories"])==10
 
 def test_enhancement_wave_is_bounded():
     assert len(wave(25))==25
