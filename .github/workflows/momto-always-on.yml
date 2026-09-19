@@ -145,7 +145,49 @@ jobs:
           # Current, independently verified public-law facts. These are
           # deliberately kept separate from live endpoint fetch results so a
           # runner-side HTTP 404 cannot make the dashboard look knowledge-free.
-          # Activate every roadmap lane with the strongest lawful public next step.\n          # "ready" means the public research/preparation is complete; it does not\n          # claim a private request was filed or that private evidence exists.\n          roadmap_status = {\n              "odh-file": "ready",\n              "non-id": "ready",\n              "contact-pref": "ready",\n              "registry": "ready",\n              "court": "ready",\n              "dna": "awaiting-user-data",\n              "public-records": "ready",\n              "professional": "ready-for-human-review",\n          }\n          roadmap_notes = {\n              "odh-file": "Public legal route verified; request package still requires the requester’s private identification, notarization, address, and fee.",\n              "non-id": "Public legal route verified under ORC 3107.66; local agency/attorney/court identity still needs case records.",\n              "contact-pref": "Current law identifies contact-preference and name-redaction forms; private file must be requested to determine whether one exists.",\n              "registry": "Registry/mutual-consent lane activated for lawful research; no private registration or contact was performed.",\n              "court": "Ohio Supreme Court adoption/probate forms and local-court path verified; county/case details remain private case inputs.",\n              "dna": "Ready for lawful user-supplied DNA data; no account access, private matches, or identities were collected.",\n              "public-records": "Public-record research lane activated; future searches must remain lawful and privacy-safe.",\n              "professional": "Professional-review lane prepared for questions that require case-specific legal advice or records-access interpretation.",\n          }\n          if previous.get("ohio"):\n              roadmap = list(previous["ohio"].get("roadmap") or [])\n          else:\n              roadmap = []\n          roadmap_by_key = {x.get("key"): x for x in roadmap}\n          for key, status in roadmap_status.items():\n              row = roadmap_by_key.setdefault(key, {"key": key})\n              row["status"] = status\n              row["note"] = roadmap_notes[key]\n          snapshot["ohio"] = {\n              "state": "Ohio",\n              "roadmap": list(roadmap_by_key.values()),\n              "official_sources": [\n                  "https://codes.ohio.gov/ohio-revised-code/section-3107.38",\n                  "https://codes.ohio.gov/ohio-revised-code/section-3107.66",\n                  "https://www.supremecourt.ohio.gov/forms/all-forms/probate/5",\n              ],\n          }\n\n          verified_public_facts = [
+          # Activate every roadmap lane with the strongest lawful public next step.
+          # "ready" means the public research/preparation is complete; it does not
+          # claim a private request was filed or that private evidence exists.
+          roadmap_status = {
+              "odh-file": "ready",
+              "non-id": "ready",
+              "contact-pref": "ready",
+              "registry": "ready",
+              "court": "ready",
+              "dna": "awaiting-user-data",
+              "public-records": "ready",
+              "professional": "ready-for-human-review",
+          }
+          roadmap_notes = {
+              "odh-file": "Public legal route verified; request package still requires the requester’s private identification, notarization, address, and fee.",
+              "non-id": "Public legal route verified under ORC 3107.66; local agency/attorney/court identity still needs case records.",
+              "contact-pref": "Current law identifies contact-preference and name-redaction forms; private file must be requested to determine whether one exists.",
+              "registry": "Registry/mutual-consent lane activated for lawful research; no private registration or contact was performed.",
+              "court": "Ohio Supreme Court adoption/probate forms and local-court path verified; county/case details remain private case inputs.",
+              "dna": "Ready for lawful user-supplied DNA data; no account access, private matches, or identities were collected.",
+              "public-records": "Public-record research lane activated; future searches must remain lawful and privacy-safe.",
+              "professional": "Professional-review lane prepared for questions that require case-specific legal advice or records-access interpretation.",
+          }
+          if previous.get("ohio"):
+              roadmap = list(previous["ohio"].get("roadmap") or [])
+          else:
+              roadmap = []
+          roadmap_by_key = {x.get("key"): x for x in roadmap}
+          for key, status in roadmap_status.items():
+              row = roadmap_by_key.setdefault(key, {"key": key})
+              row["status"] = status
+              row["note"] = roadmap_notes[key]
+          snapshot["ohio"] = {
+              "state": "Ohio",
+              "roadmap": list(roadmap_by_key.values()),
+              "official_sources": [
+                  "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
+                  "https://codes.ohio.gov/ohio-revised-code/section-3107.66",
+                  "https://www.supremecourt.ohio.gov/forms/all-forms/probate/5",
+              ],
+          }
+
+          verified_public_facts = [
               {
                   "source": "Ohio Revised Code §3107.38",
                   "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
