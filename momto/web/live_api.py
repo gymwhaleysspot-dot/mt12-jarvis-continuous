@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .service import case_summary
+from ..service import case_summary
 
 router=APIRouter()
 @router.get("/api/momto/live")
