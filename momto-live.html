@@ -20,6 +20,10 @@ a{color:#9ecbff}small{color:#9ca9c4}@media(max-width:700px){.grid{grid-template-
 <div class="card"><h2>Workspace</h2><div id="counts"></div><p class="muted">Public-safe totals only. Sensitive case content remains local.</p></div>
 </section>
 <section class="card" style="margin-top:16px"><h2>Search Intelligence</h2><div id="advanced" class="grid"></div><h3>Next actions</h3><div id="nextActions"></div></section>
+<section class="grid" style="margin-top:16px">
+<div class="card"><h2>Live Activity</h2><div id="activity"></div></div>
+<div class="card"><h2>Search AI</h2><div id="searchAi"></div></div>
+</section>
 <section class="card" style="margin-top:16px"><h2>Official Ohio Sources</h2><div id="sources"></div></section>
 </main>
 <script>
@@ -33,7 +37,9 @@ function render(d){
  document.getElementById('roadmap').innerHTML=r.map(x=>'<div class="row '+(x.status==='complete'?'done':'')+'"><div class="check"><span>'+(x.status==='complete'?'✓':'○')+'</span><div><b>'+esc(x.title)+'</b><br><small>'+esc(x.authority)+'</small></div></div><span class="status">'+esc(x.status)+'</span></div>').join('');
  document.getElementById('dna').innerHTML=(d.dna||[]).map(x=>'<div class="row"><span>'+esc(x.provider)+'</span><span class="status">'+esc(x.status)+'</span></div>').join('');
  document.getElementById('counts').innerHTML=Object.entries(d.counts||{leads:d.leads?.count||0,contacts:d.contacts?.count||0}).map(([k,v])=>'<div class="row"><span>'+esc(k.replace(/_/g,' '))+'</span><b>'+esc(v)+'</b></div>').join('');
- const a=d.advanced||{}; document.getElementById('advanced').innerHTML=Object.entries(a).filter(([k])=>k!=='next_actions').map(([k,v])=>'<div class="card"><span class="muted">'+esc(k.replace(/_/g,' '))+'</span><h3>'+esc(v)+'</h3></div>').join(''); document.getElementById('nextActions').innerHTML=(d.next_actions||[]).map(x=>'<div class="row"><span class="status">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('') || '<p class="muted">No next actions generated.</p>';\n document.getElementById('sources').innerHTML=(d.ohio?.official_sources||[]).map(u=>'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a></p>').join('');
+ const a=d.advanced||{};
+ const activity=d.activity||[]; document.getElementById('activity').innerHTML=activity.map(x=>'<div class="row"><div><b>'+esc(x.kind||'event')+'</b><br><small>'+esc(x.source||'local')+' · '+esc(x.query||'')+'</small></div><span class="status">'+esc(x.usefulness||'unknown')+'</span></div>').join('')||'<p class="muted">Waiting for the next local search event.</p>';
+ const ai=d.search_ai||{}; const plan=ai.plan||[]; document.getElementById('searchAi').innerHTML='<p><b>'+esc(ai.engine||'Search AI')+'</b></p><p class="muted">Cycle: '+esc(ai.generated_at||'not yet reported')+'</p>'+plan.slice(0,5).map(x=>'<div class="row"><span class="status">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('')||'<p class="muted">Search AI is waiting for workspace evidence.</p>'; document.getElementById('advanced').innerHTML=Object.entries(a).filter(([k])=>k!=='next_actions').map(([k,v])=>'<div class="card"><span class="muted">'+esc(k.replace(/_/g,' '))+'</span><h3>'+esc(v)+'</h3></div>').join(''); document.getElementById('nextActions').innerHTML=(d.next_actions||[]).map(x=>'<div class="row"><span class="status">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('') || '<p class="muted">No next actions generated.</p>';\n document.getElementById('sources').innerHTML=(d.ohio?.official_sources||[]).map(u=>'<p><a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a></p>').join('');
  document.getElementById('updated').textContent='updated '+new Date().toLocaleTimeString();
 }
 async function refresh(){try{const r=await fetch(API,{cache:'no-store'});if(r.ok)render(await r.json());else document.getElementById('updated').textContent='data unavailable'}catch(e){document.getElementById('updated').textContent='offline'}}
