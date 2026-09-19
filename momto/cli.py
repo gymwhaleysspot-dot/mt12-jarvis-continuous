@@ -1,13 +1,16 @@
 import typer
 import json
 from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail,search_ai_cycle
-from .db import SessionLocal\nfrom .case_vault import CaseVault, VaultError, generate_key
+from .db import SessionLocal
+from .case_vault import CaseVault, VaultError, generate_key
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
 def init(): init_case(); typer.echo("MomTo initialized; case remains active until explicitly closed.")
 @app.command()
-def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\nBirth mother: SEARCHING\nBirth father: SEARCHING")
+def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio
+Birth mother: SEARCHING
+Birth father: SEARCHING")
 case_app=typer.Typer(); app.add_typer(case_app,name="case")
 @case_app.command("show")
 def show():
