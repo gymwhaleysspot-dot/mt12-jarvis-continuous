@@ -2,16 +2,13 @@ import typer
 import json
 from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail,search_ai_cycle
 from .db import SessionLocal
-from .vault import init_vault, ingest as vault_ingest, list_documents as vault_documents, validate as vault_validate
 from .case_vault import CaseVault, VaultError, generate_key
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
 def init(): init_case(); typer.echo("MomTo initialized; case remains active until explicitly closed.")
 @app.command()
-def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio
-Birth mother: SEARCHING
-Birth father: SEARCHING")
+def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\\nBirth mother: SEARCHING\\nBirth father: SEARCHING")
 case_app=typer.Typer(); app.add_typer(case_app,name="case")
 @case_app.command("show")
 def show():
@@ -194,18 +191,3 @@ def vault_hypothesis(title:str,confidence:str="unrated",unknowns:str="",next_evi
 def vault_task(title:str,priority:str="normal",notes:str=""):
     typer.echo(f"Private task #{_vault().add_task(title,priority,notes)} recorded.")
 
-
-vault=typer.Typer(help="MomTo private case vault. Nothing in this vault is published.")
-app.add_typer(vault,name="vault")
-@vault.command("init")
-def vault_init(): typer.echo(json.dumps(init_vault(),indent=2,sort_keys=True))
-@vault.command("ingest")
-def vault_ingest_cmd(path:str,label:str=""): typer.echo(json.dumps(vault_ingest(path,label),indent=2,sort_keys=True))
-@vault.command("documents")
-def vault_docs(): typer.echo(json.dumps(vault_documents(),indent=2,sort_keys=True))
-@vault.command("validate")
-def vault_check(): typer.echo(json.dumps(vault_validate(),indent=2,sort_keys=True))
-@v3.command("extract-facts")
-def v3_extract_facts(document_id:int):
-    from .advanced import extract_document_facts
-    typer.echo(json.dumps(extract_document_facts(document_id),indent=2,sort_keys=True))
