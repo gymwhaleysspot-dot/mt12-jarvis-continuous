@@ -181,8 +181,8 @@ def detect_contradictions():
                     sa=(a.supports or "").lower(); ca=(a.contradicts or "").lower()
                     sb=(b.supports or "").lower(); cb=(b.contradicts or "").lower()
                     if (sa and sa in cb) or (sb and sb in ca):
-                        pairs.append({"a":a.id,"b":b.id,"type":"explicit"}); audit(db,c.id,"detect","contradiction",f"{a.id}:{b.id}","explicit")
-        db.commit(); return pairs
+                        pairs.append({"a":a.id,"b":b.id,"type":"explicit"})
+        return pairs
 
 def suggest_next_actions():
     c=_case()

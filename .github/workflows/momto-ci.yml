@@ -1,0 +1,65 @@
+name: MomTo CI and Recovery Guard
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'momto/**'
+      - 'momto-live.html'
+      - 'momto-live.json'
+      - '.github/workflows/momto-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'momto/**'
+      - 'momto-live.html'
+      - 'momto-live.json'
+      - '.github/workflows/momto-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  momto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      - name: Install MomTo test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest sqlalchemy fastapi typer
+      - name: Compile MomTo
+        run: python -m compileall -q momto
+      - name: Run MomTo tests
+        run: python -m pytest momto/tests -q
+      - name: Validate public dashboard contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("momto-live.json").read_text())
+          assert d["case"]["status"] == "active"
+          assert set(d["objectives"]) == {"birth_mother","birth_father"}
+          assert len(d["ohio"]["roadmap"]) == 8
+          assert len(d["dna"]) == 4
+          assert "birth_name" not in d
+          assert "advanced" in d and "next_actions" in d
+          print("public MomTo snapshot is aggregate-only")
+          PY
+      - name: Collect failure diagnostics
+        if: failure()
+        run: |
+          mkdir -p artifacts
+          python -m pytest momto/tests -q --tb=short > artifacts/momto-test-failure.txt 2>&1 || true
+          python -m compileall momto > artifacts/momto-compile.txt 2>&1 || true
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: momto-ci-diagnostics-${{ github.sha }}
+          path: artifacts/
+          retention-days: 14

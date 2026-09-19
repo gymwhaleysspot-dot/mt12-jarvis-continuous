@@ -1,5 +1,5 @@
-import typer
-from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions
+import typer\nimport json
+from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail
 from .db import SessionLocal
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
@@ -100,3 +100,26 @@ def v3_contradictions(): typer.echo(str(contradictions()))
 @v3.command("next-actions")
 def v3_next_actions():
     for item in next_actions(): typer.echo("- "+item)
+
+
+ops=typer.Typer(help="MomTo v4 operational intelligence and local recovery.")
+app.add_typer(ops,name="ops")
+
+@ops.command("report")
+def ops_report(): typer.echo(json.dumps(workspace_report(),indent=2,sort_keys=True))
+
+@ops.command("next")
+def ops_next(limit:int=8):
+    for item in ranked_next_actions(limit): typer.echo(f"[{item['priority']}] {item['action']}")
+
+@ops.command("validate")
+def ops_validate(): typer.echo(json.dumps(validate_local_state(),indent=2,sort_keys=True))
+
+@ops.command("backup")
+def ops_backup(destination:str=""): typer.echo(json.dumps(backup_local(destination or None),indent=2,sort_keys=True))
+
+@ops.command("manifest")
+def ops_manifest(): typer.echo(json.dumps(recovery_manifest(),indent=2,sort_keys=True))
+
+@ops.command("audit")
+def ops_audit(limit:int=20): typer.echo(json.dumps(audit_tail(limit),indent=2,sort_keys=True))
