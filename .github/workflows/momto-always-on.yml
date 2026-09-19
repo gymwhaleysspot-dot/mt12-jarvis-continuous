@@ -141,6 +141,36 @@ jobs:
               findings.append(row)
 
           research_findings=[x for x in findings if x.get("ok") and x.get("findings")]
+
+          # Current, independently verified public-law facts. These are
+          # deliberately kept separate from live endpoint fetch results so a
+          # runner-side HTTP 404 cannot make the dashboard look knowledge-free.
+          verified_public_facts = [
+              {
+                  "source": "Ohio Revised Code §3107.38",
+                  "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.38",
+                  "fact": "Effective September 30, 2025, an adopted person age 18 or older may request the contents of the adoption file from the Ohio Department of Health; the request requires an address, notarized signature, two identification items, and the required fee.",
+                  "verified_at": "2026-09-19",
+              },
+              {
+                  "source": "Ohio Revised Code §3107.66",
+                  "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.66",
+                  "fact": "An adopted person age 18 or older may request nonidentifying information about birth parents or birth siblings from the agency, attorney, or probate court that holds or finalized the adoption records.",
+                  "verified_at": "2026-09-19",
+              },
+              {
+                  "source": "Ohio Revised Code §3107.47",
+                  "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.47",
+                  "fact": "Ohio law separately addresses release of adoption-file contents for adopted persons age 21 or older and adoptive parents of adoptees age 18 through 20, subject to the statute's release/denial rules.",
+                  "verified_at": "2026-09-19",
+              },
+              {
+                  "source": "Ohio Supreme Court probate forms",
+                  "url": "https://www.supremecourt.ohio.gov/forms/all-forms/probate/5",
+                  "fact": "The current Ohio Supreme Court probate forms index includes adoption forms 18.0 through 18.9 and adult-adoption forms 19.0 through 19.4.",
+                  "verified_at": "2026-09-19",
+              },
+          ]
           prior_state = previous.get("persistence", {})
           cycle_count = int(prior_state.get("cycle_count", 0)) + 1
           first_started_at = prior_state.get("first_started_at") or now.isoformat()
@@ -170,6 +200,7 @@ jobs:
               "verified": verified,
               "total": len(source_checks),
               "findings": research_findings[:12],
+              "verified_public_facts": verified_public_facts,
               "sources_researched": len(findings),
               "note": "Actual public-source research is performed each cycle. No adoption-record contents, private matches, addresses, phone numbers, email addresses, or correspondence are collected or published.",
           }
