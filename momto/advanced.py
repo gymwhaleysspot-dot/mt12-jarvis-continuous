@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlalchemy import String, Integer, Text, DateTime, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base, SessionLocal
-from .models import Case, Evidence, Task
+from .models import Case, Evidence, Task, DocumentFact
 
 class GraphNode(Base):
     __tablename__="momto_graph_nodes"
@@ -161,14 +161,35 @@ def set_coverage(area,status,notes=""):
         x.status=status; x.notes=notes; audit(db,c.id,"update","coverage",area,status); db.commit()
 
 def ingest_document(path):
-    c=_case(); p=Path(path).expanduser().resolve()
-    data=p.read_bytes(); digest=sha256(data).hexdigest()
-    text_chars=0
-    if p.suffix.lower() in {".txt",".md",".csv",".json",".html",".htm"}:
-        text_chars=len(data.decode("utf-8",errors="replace"))
+    from .vault import ingest as vault_ingest
+    c=_case(); record=vault_ingest(path)
     with SessionLocal() as db:
-        x=DocumentRecord(case_id=c.id,filename=p.name,path=str(p),sha256=digest,size_bytes=len(data),text_chars=text_chars); db.add(x); db.flush()
-        audit(db,c.id,"ingest","document",x.id,p.name); db.commit(); return x.id
+        x=DocumentRecord(case_id=c.id,filename=record["filename"],path=record["vault_path"],sha256=record["sha256"],size_bytes=record["size_bytes"],text_chars=record["text_chars"])
+        db.add(x); db.flush(); audit(db,c.id,"ingest","document",x.id,record["filename"]); db.commit(); return x.id
+
+def extract_document_facts(document_id):
+    c=_case()
+    with SessionLocal() as db:
+        doc=db.query(DocumentRecord).filter_by(id=document_id,case_id=c.id).first()
+        if doc is None: raise ValueError("Unknown document")
+        p=Path(doc.path)
+        if p.suffix.lower() not in {".txt",".md",".csv",".json",".html",".htm"}: return []
+        text=p.read_text(encoding="utf-8",errors="replace")
+        import re
+        patterns=[
+            ("date",r"\b(?:19|20)\d{2}[-/]\d{1,2}[-/]\d{1,2}\b"),
+            ("birth_year",r"\b(?:born|birth)\D{0,20}((?:19|20)\d{2})\b"),
+            ("adoption_event",r"\b(?:adopted|adoption|placement|relinquish(?:ed|ment))\b[^.\n]{0,180}"),
+            ("relationship",r"\b(?:birth mother|birth father|biological mother|biological father|sibling|brother|sister)\b[^.\n]{0,120}"),
+        ]
+        facts=[]
+        for kind,pattern in patterns:
+            for match in re.finditer(pattern,text,re.I):
+                value=match.group(0).strip()
+                facts.append(DocumentFact(case_id=c.id,document_id=doc.id,fact_type=kind,value=value,confidence="extracted",source_span=value))
+        for fact in facts: db.add(fact)
+        audit(db,c.id,"extract","document_facts",document_id,str(len(facts))); db.commit()
+        return [{"fact_type":x.fact_type,"value":x.value,"confidence":x.confidence} for x in facts]
 
 def detect_contradictions():
     c=_case()
