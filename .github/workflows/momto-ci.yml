@@ -48,7 +48,20 @@ jobs:
           assert len(d["dna"]) == 4
           assert "birth_name" not in d
           assert "advanced" in d and "next_actions" in d
+          assert "activity" in d and "search_ai" in d
           print("public MomTo snapshot is aggregate-only")
+          PY
+      - name: Validate MomTo live dashboard contracts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          required=("Birth Mother","Birth Father","Live Activity","Search AI","Refresh now","momto-live.json")
+          for name in ("momto-live.html","momto/web/momto-live.html"):
+              text=Path(name).read_text()
+              assert all(x in text for x in required), name
+              assert "\\n document.getElementById" not in text, name
+              assert "setInterval(refresh,15000)" in text, name
+          print("both MomTo dashboards passed live UI contract")
           PY
       - name: Collect failure diagnostics
         if: failure()
