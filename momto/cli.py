@@ -2,12 +2,15 @@ import typer
 import json
 from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail,search_ai_cycle
 from .db import SessionLocal
+from .case_vault import CaseVault, VaultError, generate_key
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
 def init(): init_case(); typer.echo("MomTo initialized; case remains active until explicitly closed.")
 @app.command()
-def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio\nBirth mother: SEARCHING\nBirth father: SEARCHING")
+def search(): init_case(); typer.echo("ACTIVE SEARCH — Ohio
+Birth mother: SEARCHING
+Birth father: SEARCHING")
 case_app=typer.Typer(); app.add_typer(case_app,name="case")
 @case_app.command("show")
 def show():
@@ -137,3 +140,55 @@ def ai_cycle(limit:int=20):
 def ai_plan(limit:int=20):
     for item in search_ai_cycle(limit)["plan"]:
         typer.echo(f"[{item['priority']}] {item['domain']}: {item['action']}")
+
+
+vault_app=typer.Typer(help="MomTo encrypted private case vault. Vault contents never belong in Git or public snapshots.")
+app.add_typer(vault_app,name="vault")
+
+@vault_app.command("key")
+def vault_key():
+    typer.echo(generate_key())
+    typer.echo("Store this key outside the repository as MOMTO_VAULT_KEY.", err=True)
+
+def _vault() -> CaseVault:
+    try:
+        return CaseVault()
+    except VaultError as exc:
+        raise typer.BadParameter(str(exc))
+
+@vault_app.command("init")
+def vault_init():
+    key=generate_key()
+    path=CaseVault(key=key).root
+    typer.echo(f"Vault initialized at {path}")
+    typer.echo(f"MOMTO_VAULT_KEY={key}")
+    typer.echo("Keep the key outside Git; do not paste private records into issues, commits, or public snapshots.")
+
+@vault_app.command("ingest")
+def vault_ingest(path:str):
+    typer.echo(json.dumps(_vault().ingest_document(path),indent=2))
+
+@vault_app.command("summary")
+def vault_summary():
+    typer.echo(json.dumps(_vault().summary(),indent=2,sort_keys=True))
+
+@vault_app.command("list")
+def vault_list(kind:str=""):
+    for row in _vault().list_records(kind or None):
+        typer.echo(f"{row['id']} {row['kind']} {row['digest']}")
+
+@vault_app.command("evidence")
+def vault_evidence(title:str,summary:str="",source:str="",evidence_type:str="record",supports:str="",contradicts:str="",reference:str=""):
+    typer.echo(f"Private evidence #{_vault().add_evidence(title,summary,source,evidence_type,supports,contradicts,reference)} recorded.")
+
+@vault_app.command("search")
+def vault_search(source:str,query:str,result:str="",usefulness:str="unknown",reference:str="",next_action:str=""):
+    typer.echo(f"Private search #{_vault().add_search(source,query,result,usefulness,reference,next_action)} recorded.")
+
+@vault_app.command("hypothesis")
+def vault_hypothesis(title:str,confidence:str="unrated",unknowns:str="",next_evidence:str=""):
+    typer.echo(f"Private hypothesis #{_vault().add_hypothesis(title,confidence,unknowns,next_evidence)} recorded.")
+
+@vault_app.command("task")
+def vault_task(title:str,priority:str="normal",notes:str=""):
+    typer.echo(f"Private task #{_vault().add_task(title,priority,notes)} recorded.")
