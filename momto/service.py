@@ -1,7 +1,7 @@
 from datetime import datetime
 from .db import Base,engine,SessionLocal
 from .models import Case,Objective,DnaStatus,RoadmapItem,Lead,Contact,SearchEvent,Evidence,Hypothesis,Task
-from . import advanced
+from . import advanced,ops
 DNA_PROVIDERS=["AncestryDNA","23andMe","GEDmatch","FamilyTreeDNA"]
 OHIO_ROADMAP=[
  ("odh-file","ODH adoption-file request","Ohio Department of Health","Request the contents of the adoption file available under current Ohio law; keep the request and returned records local."),
@@ -87,3 +87,11 @@ def coverage(area,status,notes=""): return advanced.set_coverage(area,status,not
 def ingest_document(path): return advanced.ingest_document(path)
 def contradictions(): return advanced.detect_contradictions()
 def next_actions(): return advanced.suggest_next_actions()
+
+# MomTo v4 operational intelligence, recovery, and audit tooling
+def workspace_report(): return ops.workspace_report()
+def ranked_next_actions(limit=8): return ops.ranked_next_actions(limit)
+def validate_local_state(): return ops.validate_local_state()
+def backup_local(destination=None): return ops.backup_local(destination)
+def recovery_manifest(): return ops.recovery_manifest()
+def audit_tail(limit=20): return ops.audit_tail(limit)
