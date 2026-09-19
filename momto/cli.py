@@ -1,5 +1,5 @@
 import typer\nimport json
-from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail
+from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail,search_ai_cycle
 from .db import SessionLocal
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
@@ -123,3 +123,16 @@ def ops_manifest(): typer.echo(json.dumps(recovery_manifest(),indent=2,sort_keys
 
 @ops.command("audit")
 def ops_audit(limit:int=20): typer.echo(json.dumps(audit_tail(limit),indent=2,sort_keys=True))
+
+
+ai=typer.Typer(help="MomTo Search AI — adaptive, evidence-driven research planning.")
+app.add_typer(ai,name="search-ai")
+
+@ai.command("cycle")
+def ai_cycle(limit:int=20):
+    typer.echo(json.dumps(search_ai_cycle(limit),indent=2,sort_keys=True))
+
+@ai.command("plan")
+def ai_plan(limit:int=20):
+    for item in search_ai_cycle(limit)["plan"]:
+        typer.echo(f"[{item['priority']}] {item['domain']}: {item['action']}")
