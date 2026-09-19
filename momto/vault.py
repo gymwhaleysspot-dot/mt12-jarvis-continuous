@@ -1,8 +1,9 @@
 from __future__ import annotations
-import json,shutil
-from datetime import datetime,timezone
+import json, shutil
+from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
+from typing import Any
 VAULT_DIR=Path("momto-vault"); DOCS_DIR=VAULT_DIR/"documents"; MANIFEST=VAULT_DIR/"manifest.json"
 FORBIDDEN_PARTS={".git",".github","node_modules","momto-vault"}; PRIVATE_SUFFIXES={".sqlite",".sqlite3",".db"}
 def _utc(): return datetime.now(timezone.utc).isoformat()
@@ -27,7 +28,8 @@ def ingest(source,label=""):
     suffix=src.suffix.lower() or ".bin"; dst=DOCS_DIR/f"{digest}{suffix}"; shutil.copy2(src,dst)
     chars=len(data.decode("utf-8",errors="replace")) if suffix in {".txt",".md",".csv",".json",".html",".htm"} else 0
     row={"id":len(m["documents"])+1,"filename":src.name,"label":label or src.stem,"sha256":digest,"size_bytes":len(data),"text_chars":chars,"vault_path":str(dst),"ingested_at":_utc()}
-    m["documents"].append(row); MANIFEST.write_text(json.dumps(m,indent=2,sort_keys=True)+"\n",encoding="utf-8"); return {"status":"ingested",**row,"private":True}
+    m["documents"].append(row); MANIFEST.write_text(json.dumps(m,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    return {"status":"ingested",**row,"private":True}
 def list_documents(): return _manifest()["documents"]
 def validate():
     m=_manifest(); missing=[x["vault_path"] for x in m["documents"] if not Path(x["vault_path"]).exists()]
