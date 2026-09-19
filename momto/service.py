@@ -1,6 +1,7 @@
 from datetime import datetime
 from .db import Base,engine,SessionLocal
 from .models import Case,Objective,DnaStatus,RoadmapItem,Lead,Contact,SearchEvent,Evidence,Hypothesis,Task
+from . import advanced
 DNA_PROVIDERS=["AncestryDNA","23andMe","GEDmatch","FamilyTreeDNA"]
 OHIO_ROADMAP=[
  ("odh-file","ODH adoption-file request","Ohio Department of Health","Request the contents of the adoption file available under current Ohio law; keep the request and returned records local."),
@@ -14,6 +15,7 @@ OHIO_ROADMAP=[
 ]
 def init_case():
  Base.metadata.create_all(engine)
+ # Importing advanced registers the v3 workspace tables before create_all.
  with SessionLocal() as db:
   case=db.query(Case).first()
   if case is None:
@@ -42,7 +44,8 @@ def case_summary():
    "dna":[{"provider":x.provider,"status":x.status} for x in dna],
    "lead_count":len(leads),"contact_count":len(contacts),
    "search_count":db.query(SearchEvent).filter_by(case_id=c.id).count(),"evidence_count":db.query(Evidence).filter_by(case_id=c.id).count(),
-   "hypothesis_count":db.query(Hypothesis).filter_by(case_id=c.id).count(),"open_task_count":db.query(Task).filter_by(case_id=c.id,status="open").count()}
+   "hypothesis_count":db.query(Hypothesis).filter_by(case_id=c.id).count(),"open_task_count":db.query(Task).filter_by(case_id=c.id,status="open").count(),
+   "advanced":advanced.advanced_summary()}
 def complete_roadmap(key,notes=""):
  init_case()
  with SessionLocal() as db:
@@ -70,3 +73,17 @@ def add_hypothesis(title,confidence="unrated",supporting_count=0,contradicting_c
 def add_task(title,priority="normal",notes=""):
  c=init_case()
  with SessionLocal() as db: db.add(Task(case_id=c.id,title=title,priority=priority,notes=notes)); db.commit()
+
+
+# MomTo v3: ten advanced capabilities
+def graph_node(node_type,label,status="active"): return advanced.add_graph_node(node_type,label,status)
+def graph_edge(from_node,to_node,relation,source="",confidence="unrated",evidence_ref=""): return advanced.add_graph_edge(from_node,to_node,relation,source,confidence,evidence_ref)
+def dna_cluster(name,provider="",match_count=0,ancestor_hypothesis="",confidence="unrated",notes=""): return advanced.add_dna_cluster(name,provider,match_count,ancestor_hypothesis,confidence,notes)
+def candidate(role,label,notes=""): return advanced.add_candidate(role,label,notes)
+def candidate_factor(candidate_id,factor,value="",evidence_ref=""): return advanced.add_candidate_factor(candidate_id,factor,value,evidence_ref)
+def timeline(event_date,title,source="",certainty="unknown",notes=""): return advanced.add_timeline(event_date,title,source,certainty,notes)
+def source_reliability(source,reliability,rationale=""): return advanced.set_source_reliability(source,reliability,rationale)
+def coverage(area,status,notes=""): return advanced.set_coverage(area,status,notes)
+def ingest_document(path): return advanced.ingest_document(path)
+def contradictions(): return advanced.detect_contradictions()
+def next_actions(): return advanced.suggest_next_actions()
