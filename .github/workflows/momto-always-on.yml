@@ -49,6 +49,10 @@ jobs:
                   req=urllib.request.Request(url,headers={"User-Agent":"MomTo/1.0 public-source-check"})
                   with urllib.request.urlopen(req,timeout=15) as r:
                       row["status"]=r.status; row["ok"]=200 <= r.status < 400
+              except HTTPError as e:
+                  row["status"]=e.code
+                  row["error"]="HTTPError"
+                  row["ok"]=False
               except Exception as e:
                   row["error"]=type(e).__name__
               checks.append(row)
