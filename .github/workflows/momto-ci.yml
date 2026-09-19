@@ -52,6 +52,8 @@ jobs:
           assert "persistence" in d and d["persistence"]["private_case_data_persisted"] is False
           assert "answers" in d and isinstance(d["answers"], list)
           assert "activity" in d and "search_ai" in d
+          assert d.get("dashboard_version") == "momto-live-v7"
+          assert d.get("research", {}).get("total") == 3
           assert d["enhancements"]["total"] == 5000 and d["enhancements"]["public_safe"] is True
           print("public MomTo snapshot is aggregate-only")
           PY
@@ -59,7 +61,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          required=("Birth Mother","Birth Father","Live Activity","Search AI","500-Enhancement Program","Refresh now","momto-live.json")
+          required=("Birth Mother","Birth Father","Live Activity","Search AI","5000-Enhancement Program","Refresh now","momto-live.json")
           for name in ("momto-live.html","momto/web/momto-live.html"):
               text=Path(name).read_text()
               assert all(x in text for x in required), name
