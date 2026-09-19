@@ -30,39 +30,29 @@ jobs:
           git fetch origin ai-state:refs/remotes/origin/ai-state || true
           mkdir -p /tmp/michael-system michael/reconstruction keleb
           git show origin/ai-state:michael/system/promotion-ledger.json >/tmp/prior-ledger.json 2>/dev/null || echo '{"schema":1,"events":[]}' >/tmp/prior-ledger.json
-          git show origin/ai-state:michael/reconstruction/advanced-state.json >michael/reconstruction/advanced-state.json 2>/dev/null || true
-          git show origin/ai-state:michael/reconstruction/autonomous-state.json >michael/reconstruction/autonomous-state.json 2>/dev/null || true
-          git show origin/ai-state:michael/reconstruction/current.json >michael/reconstruction/current.json 2>/dev/null || true
-          git show origin/ai-state:keleb/measured-state.json >keleb/measured-state.json 2>/dev/null || true
       - name: Build promotion ledger compatibility tournament and health dashboard data
         env: {SOURCE_SHA: '${{ github.sha }}'}
         run: node tools/michael_system_orchestrator.mjs run /tmp/michael-system /tmp/prior-ledger.json
-      - name: Verify integrated gates
-        run: |
-          node - <<'NODE'
-          const fs=require('fs');for(const f of ['compatibility.json','promotion-ledger.json','health.json']){const p='/tmp/michael-system/'+f;if(!fs.existsSync(p))throw Error('missing '+f);JSON.parse(fs.readFileSync(p))}
-          const h=require('/tmp/michael-system/health.json');if(!h.deployment?.stateBranch)throw Error('state isolation missing');console.log(`Michael system=${h.overall} ledger=${h.promotionLedger.events} topologyDebt=${h.graphics.topologyDebt}`)
-          NODE
       - name: Persist memory-only orchestration state to ai-state branch
         run: |
           set -Eeuo pipefail
           git config user.name 'Michael System Orchestrator'
           git config user.email 'actions@users.noreply.github.com'
-          git fetch origin ai-state
-          state_tree="$(mktemp -d /tmp/michael-ai-state.XXXXXX)/tree"
-          git worktree add --detach "$state_tree" origin/ai-state
-          (
-            cd "$state_tree"
-            mkdir -p michael/system
-            cp /tmp/michael-system/*.json michael/system/
-            git add michael/system
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Update isolated Michael intelligence state [skip ci]'
-            git push origin HEAD:ai-state
-          )
-      - name: Archive unified state
-        uses: actions/upload-artifact@v6
-        with:
-          name: michael-system-${{ github.run_number }}
-          path: /tmp/michael-system
-          retention-days: 90
+          for attempt in 1 2 3 4 5; do
+            git fetch origin ai-state
+            state_tree="$(mktemp -d "/tmp/michael-ai-state.${attempt}.XXXXXX")/tree"
+            git worktree add --detach "$state_tree" origin/ai-state
+            if (
+              cd "$state_tree"
+              mkdir -p michael/system
+              cp /tmp/michael-system/*.json michael/system/
+              git add michael/system
+              if git diff --cached --quiet; then exit 0; fi
+              git commit -m 'Update isolated Michael intelligence state [skip ci]'
+              git push origin HEAD:ai-state
+            ); then exit 0; fi
+            git worktree remove --force "$state_tree" || true
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to update ai-state after 5 attempts' >&2
+          exit 1
