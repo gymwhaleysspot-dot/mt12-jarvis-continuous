@@ -192,7 +192,6 @@ def suggest_next_actions():
         gaps=db.query(CoverageItem).filter_by(case_id=c.id,status="unreviewed").all()
         if gaps: actions.append("Review uncovered search areas: "+", ".join(x.area for x in gaps[:3]))
         if db.query(GraphEdge).filter_by(case_id=c.id).count()==0: actions.append("Build the first evidence-graph relationship.")
-        if db.queryTimelineEvent if False else False: pass
         if db.query(DnaCluster).filter_by(case_id=c.id).count()==0: actions.append("Record DNA cluster/triangulation observations locally.")
         if db.query(Candidate).filter_by(case_id=c.id).count()==0: actions.append("Create a candidate comparison record only when documented evidence exists.")
         if open_tasks==0: actions.append("Create a concrete next-action task from the highest-value evidence gap.")
