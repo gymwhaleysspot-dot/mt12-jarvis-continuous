@@ -1,5 +1,5 @@
 import typer
-from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task
+from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions
 from .db import SessionLocal
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
@@ -63,3 +63,40 @@ def task_show():
  init_case()
  with SessionLocal() as db:
   for x in db.query(Task).filter_by(status="open").order_by(Task.priority,Task.created_at).all(): typer.echo(f"[{x.priority}] {x.title}")
+
+v3=typer.Typer(help="MomTo v3 advanced workspace — all ten capabilities remain local/private.")
+app.add_typer(v3,name="v3")
+
+@v3.command("graph-node")
+def v3_graph_node(node_type:str,label:str,status:str="active"): typer.echo(f"Graph node #{graph_node(node_type,label,status)} created locally.")
+
+@v3.command("graph-edge")
+def v3_graph_edge(from_node:int,to_node:int,relation:str,source:str="",confidence:str="unrated",evidence_ref:str=""): typer.echo(f"Graph edge #{graph_edge(from_node,to_node,relation,source,confidence,evidence_ref)} created locally.")
+
+@v3.command("dna-cluster")
+def v3_dna_cluster(name:str,provider:str="",match_count:int=0,ancestor_hypothesis:str="",confidence:str="unrated",notes:str=""): dna_cluster(name,provider,match_count,ancestor_hypothesis,confidence,notes); typer.echo("DNA triangulation cluster logged locally.")
+
+@v3.command("candidate")
+def v3_candidate(role:str,label:str,notes:str=""): typer.echo(f"Candidate #{candidate(role,label,notes)} created locally.")
+
+@v3.command("candidate-factor")
+def v3_candidate_factor(candidate_id:int,factor:str,value:str="",evidence_ref:str=""): candidate_factor(candidate_id,factor,value,evidence_ref); typer.echo("Candidate comparison factor logged locally.")
+
+@v3.command("timeline")
+def v3_timeline(event_date:str,title:str,source:str="",certainty:str="unknown",notes:str=""): timeline(event_date,title,source,certainty,notes); typer.echo("Timeline event logged locally.")
+
+@v3.command("source-review")
+def v3_source_review(source:str,reliability:float,rationale:str=""): source_reliability(source,reliability,rationale); typer.echo("Source reliability reviewed locally.")
+
+@v3.command("coverage")
+def v3_coverage(area:str,status:str,notes:str=""): coverage(area,status,notes); typer.echo("Search coverage updated locally.")
+
+@v3.command("document")
+def v3_document(path:str): typer.echo(f"Document #{ingest_document(path)} indexed locally; contents are not published.")
+
+@v3.command("contradictions")
+def v3_contradictions(): typer.echo(str(contradictions()))
+
+@v3.command("next-actions")
+def v3_next_actions():
+    for item in next_actions(): typer.echo("- "+item)
