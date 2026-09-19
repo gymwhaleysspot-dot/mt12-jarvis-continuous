@@ -1,6 +1,6 @@
 from datetime import datetime
 from .db import Base,engine,SessionLocal
-from .models import Case,Objective,DnaStatus,RoadmapItem,Lead,Contact
+from .models import Case,Objective,DnaStatus,RoadmapItem,Lead,Contact,SearchEvent,Evidence,Hypothesis,Task
 DNA_PROVIDERS=["AncestryDNA","23andMe","GEDmatch","FamilyTreeDNA"]
 OHIO_ROADMAP=[
  ("odh-file","ODH adoption-file request","Ohio Department of Health","Request the contents of the adoption file available under current Ohio law; keep the request and returned records local."),
@@ -33,16 +33,16 @@ def case_summary():
  with SessionLocal() as db:
   c=db.query(Case).first()
   roadmap=db.query(RoadmapItem).filter_by(case_id=c.id).order_by(RoadmapItem.id).all()
-  leads=db.query(Lead).filter_by(case_id=c.id).order_by(Lead.created_at.desc()).all()
-  contacts=db.query(Contact).filter_by(case_id=c.id).order_by(Contact.contacted_at.desc()).all()
+  leads=db.query(Lead).filter_by(case_id=c.id).all()
+  contacts=db.query(Contact).filter_by(case_id=c.id).all()
   dna=db.query(DnaStatus).order_by(DnaStatus.id).all()
-  return {
-   "id":c.id,"current_name":c.current_name,"birth_name":c.birth_name,"birth_year":c.birth_year,"status":c.status,
+  return {"id":c.id,"current_name":c.current_name,"birth_name":c.birth_name,"birth_year":c.birth_year,"status":c.status,
    "objectives":[(o.relationship_type,o.status) for o in c.objectives],
    "roadmap":[{"key":x.key,"title":x.title,"authority":x.authority,"status":x.status,"completed_at":x.completed_at.isoformat() if x.completed_at else None} for x in roadmap],
    "dna":[{"provider":x.provider,"status":x.status} for x in dna],
-   "lead_count":len(leads),"contact_count":len(contacts)
-  }
+   "lead_count":len(leads),"contact_count":len(contacts),
+   "search_count":db.query(SearchEvent).filter_by(case_id=c.id).count(),"evidence_count":db.query(Evidence).filter_by(case_id=c.id).count(),
+   "hypothesis_count":db.query(Hypothesis).filter_by(case_id=c.id).count(),"open_task_count":db.query(Task).filter_by(case_id=c.id,status="open").count()}
 def complete_roadmap(key,notes=""):
  init_case()
  with SessionLocal() as db:
@@ -51,11 +51,22 @@ def complete_roadmap(key,notes=""):
   item.status="complete"; item.notes=notes; item.completed_at=datetime.utcnow(); db.commit()
 def add_lead(relationship_type,source,summary="",status="new",confidence="unrated",reference="",next_action=""):
  c=init_case()
- with SessionLocal() as db:
-  db.add(Lead(case_id=c.id,relationship_type=relationship_type,source=source,summary=summary,status=status,confidence=confidence,reference=reference,next_action=next_action)); db.commit()
+ with SessionLocal() as db: db.add(Lead(case_id=c.id,relationship_type=relationship_type,source=source,summary=summary,status=status,confidence=confidence,reference=reference,next_action=next_action)); db.commit()
 def update_dna(provider,status,notes=""):
  init_case()
  with SessionLocal() as db:
   item=db.query(DnaStatus).filter_by(provider=provider).first()
   if item is None: raise ValueError(f"Unknown DNA provider: {provider}")
   item.status=status; item.notes=notes; db.commit()
+def add_search(source,query="",result="",usefulness="unknown",reference="",next_action=""):
+ c=init_case()
+ with SessionLocal() as db: db.add(SearchEvent(case_id=c.id,source=source,query=query,result=result,usefulness=usefulness,reference=reference,next_action=next_action)); db.commit()
+def add_evidence(title,evidence_type="record",source="",summary="",supports="",contradicts="",reference=""):
+ c=init_case()
+ with SessionLocal() as db: db.add(Evidence(case_id=c.id,title=title,evidence_type=evidence_type,source=source,summary=summary,supports=supports,contradicts=contradicts,reference=reference)); db.commit()
+def add_hypothesis(title,confidence="unrated",supporting_count=0,contradicting_count=0,unknowns="",next_evidence=""):
+ c=init_case()
+ with SessionLocal() as db: db.add(Hypothesis(case_id=c.id,title=title,confidence=confidence,supporting_count=supporting_count,contradicting_count=contradicting_count,unknowns=unknowns,next_evidence=next_evidence)); db.commit()
+def add_task(title,priority="normal",notes=""):
+ c=init_case()
+ with SessionLocal() as db: db.add(Task(case_id=c.id,title=title,priority=priority,notes=notes)); db.commit()
