@@ -18,7 +18,7 @@ header{display:flex;justify-content:space-between;gap:16px;align-items:center}.l
 <section class="card" style="margin-top:16px"><h2>Search Activity</h2><div id="activity"></div></section>
 </main>
 <script>
-const API='/api/momto/live';
+const API='../../momto-live.json';
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function render(d){
  document.getElementById('motherStatus').textContent=(d.objectives?.birth_mother?.status||'SEARCHING').toUpperCase();
