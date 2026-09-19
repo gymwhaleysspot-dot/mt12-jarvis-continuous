@@ -48,18 +48,24 @@ jobs:
           set -Eeuo pipefail
           git config user.name 'Michael System Orchestrator'
           git config user.email 'actions@users.noreply.github.com'
-          git fetch origin ai-state
-          state_tree="$(mktemp -d /tmp/michael-ai-state.XXXXXX)/tree"
-          git worktree add --detach "$state_tree" origin/ai-state
-          (
-            cd "$state_tree"
-            mkdir -p michael/system
-            cp /tmp/michael-system/*.json michael/system/
-            git add michael/system
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Update isolated Michael intelligence state [skip ci]'
-            git push origin HEAD:ai-state
-          )
+          for attempt in 1 2 3 4 5; do
+            git fetch origin ai-state
+            state_tree="$(mktemp -d "/tmp/michael-ai-state.${attempt}.XXXXXX")/tree"
+            git worktree add --detach "$state_tree" origin/ai-state
+            if (
+              cd "$state_tree"
+              mkdir -p michael/system
+              cp /tmp/michael-system/*.json michael/system/
+              git add michael/system
+              if git diff --cached --quiet; then exit 0; fi
+              git commit -m 'Update isolated Michael intelligence state [skip ci]'
+              git push origin HEAD:ai-state
+            ); then exit 0; fi
+            git worktree remove --force "$state_tree" || true
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to update ai-state after 5 attempts' >&2
+          exit 1
       - name: Archive unified state
         uses: actions/upload-artifact@v6
         with:
