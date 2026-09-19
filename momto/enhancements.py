@@ -16,10 +16,10 @@ class Enhancement:
 
 def catalog() -> list[dict]:
     items=[]
-    for n in range(1,501):
+    for n in range(1,5001):
         category=CATEGORIES[(n-1)%len(CATEGORIES)]
         items.append(asdict(Enhancement(
-            id=f"MOMTO-{n:04d}",
+            id=f"MOMTO-{n:05d}",
             category=category,
             title=f"{category.replace('-', ' ').title()} enhancement {n:04d}",
             status="planned",
@@ -30,7 +30,7 @@ def summary() -> dict:
     items=catalog()
     by_category={c:sum(x["category"]==c for x in items) for c in CATEGORIES}
     return {
-        "program":"MomTo 500 Enhancement Wave",
+        "program":"MomTo 5000 Enhancement Program",
         "total":len(items),
         "planned":sum(x["status"]=="planned" for x in items),
         "active":sum(x["status"]=="active" for x in items),
@@ -42,4 +42,4 @@ def summary() -> dict:
     }
 
 def wave(limit: int=25) -> list[dict]:
-    return catalog()[:max(1,min(limit,500))]
+    return catalog()[:max(1,min(limit,5000))]
