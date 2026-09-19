@@ -48,6 +48,9 @@ jobs:
           assert len(d["dna"]) == 4
           assert "birth_name" not in d
           assert "advanced" in d and "next_actions" in d
+          assert "heartbeat" in d and d["heartbeat"]["privacy_safe"] is True
+          assert "persistence" in d and d["persistence"]["private_case_data_persisted"] is False
+          assert "answers" in d and isinstance(d["answers"], list)
           assert "activity" in d and "search_ai" in d
           assert d["enhancements"]["total"] == 5000 and d["enhancements"]["public_safe"] is True
           print("public MomTo snapshot is aggregate-only")

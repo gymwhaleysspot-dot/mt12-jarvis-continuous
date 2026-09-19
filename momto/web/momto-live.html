@@ -11,7 +11,7 @@ h1,h2,h3{margin-top:0}.muted,small{color:var(--muted)}.live{color:var(--good);fo
 <header><div><h1>MomTo</h1><div class="muted">Live Ohio adoption-search intelligence · public-safe operations view</div></div>
 <div id="connection" class="live">● CONNECTING <span id="updated"></span></div></header>
 <section class="card" style="margin:14px 0"><div class="toolbar">
-<span class="pill" id="caseStatus">CASE ACTIVE</span><span class="pill" id="refreshState">15s refresh</span><span class="pill" id="age">data age: —</span><button id="pause" type="button">Pause</button><button id="refresh" type="button">Refresh now</button>
+<span class="pill" id="caseStatus">CASE ACTIVE</span><span class="pill" id="refreshState">15s refresh</span><span class="pill" id="age">worker data age: —</span><span class="pill" id="workerState">worker: —</span><span class="pill" id="cycles">cycles: —</span><button id="pause" type="button">Pause</button><button id="refresh" type="button">Refresh now</button>
 </div><p class="muted" style="margin-bottom:0">The public view contains workflow state and aggregate signals only. Names, DNA match identities, addresses, phone numbers, emails, photographs, correspondence, and document contents remain local.</p></section>
 <section class="grid">
 <div class="card"><h2>Birth Mother</h2><span class="pill" id="motherStatus">SEARCHING</span><div class="grid3" style="margin-top:12px"><div><small>search objective</small><div class="metric" id="motherSearches">0</div></div><div><small>shared match signals</small><div class="metric" id="motherSignals">—</div></div><div><small>status</small><div class="metric" id="motherState">OPEN</div></div></div></div>
@@ -21,7 +21,7 @@ h1,h2,h3{margin-top:0}.muted,small{color:var(--muted)}.live{color:var(--good);fo
 <section class="grid" style="margin-top:14px"><div class="card"><h2>DNA / Match Signals</h2><div id="dna"></div><div class="notice" style="margin-top:10px"><b id="matchSignals">0</b> aggregate match/candidate signals. No match identities are published.</div></div>
 <div class="card"><h2>Workspace Pulse</h2><div id="counts"></div></div></section>
 <section class="card" style="margin-top:14px"><h2>500-Enhancement Program</h2><div id="enhancements" class="grid3"></div><div id="enhancementWave"></div></section><section class="card" style="margin-top:14px"><h2>Search Intelligence</h2><div id="advanced" class="grid3"></div><h3 style="margin-top:18px">Next actions</h3><div id="nextActions"></div></section>
-<section class="grid" style="margin-top:14px"><div class="card"><h2>Live Activity</h2><div class="toolbar"><span class="muted" id="activitySummary">0 events</span></div><div id="activity" class="timeline"></div></div>
+<section class="card" style="margin-top:14px"><h2>Verified Answers / Current Work</h2><div id="answers"></div><p class="muted">Answers shown here are persisted worker output or verified next actions; absence of a match is not treated as evidence of absence.</p></section>\n<section class="grid" style="margin-top:14px"><div class="card"><h2>Live Activity</h2><div class="toolbar"><span class="muted" id="activitySummary">0 events</span></div><div id="activity" class="timeline"></div></div>
 <div class="card"><h2>Search AI</h2><div id="searchAi"></div></div></section>
 <section class="card" style="margin-top:14px"><h2>Official Ohio Sources</h2><div id="sources"></div></section>
 </main>
@@ -31,7 +31,7 @@ const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setConnection(ok){$('connection').className=ok?'live':'offline';$('connection').firstChild.textContent=ok?'● LIVE ':'● OFFLINE '}
 function render(d){
- lastDataAt=new Date();setConnection(true);$('caseStatus').textContent='CASE '+String(d.case?.status||'unknown').toUpperCase();
+ setConnection(true);$('caseStatus').textContent='CASE '+String(d.case?.status||'unknown').toUpperCase();
  const om=d.objectives?.birth_mother?.status||'SEARCHING',of=d.objectives?.birth_father?.status||'SEARCHING';
  $('motherStatus').textContent=om.toUpperCase();$('fatherStatus').textContent=of.toUpperCase();
  const c=d.counts||{}, a=d.advanced||{}, r=d.ohio?.roadmap||[],done=r.filter(x=>x.status==='complete').length,pct=r.length?Math.round(done*100/r.length):0;
@@ -47,12 +47,12 @@ function render(d){
  $('nextActions').innerHTML=(d.next_actions||[]).map(x=>'<div class="row"><span class="pill">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('')||'<p class="muted">No next actions.</p>';
  const act=d.activity||[];$('activitySummary').textContent=act.length+' events';
  $('activity').innerHTML=act.map(x=>'<div class="row"><div><b>'+esc(x.kind||'event')+'</b><br><small>'+esc(x.source||'local')+' · '+esc(x.query||'')+'</small><br><small>'+esc(x.next_action||'')+'</small></div><span class="pill">'+esc(x.usefulness||'unknown')+'</span></div>').join('')||'<p class="muted">Waiting for local search events.</p>';
- const ai=d.search_ai||{},plan=ai.plan||[],learning=ai.learning||{};
+ const ai=d.search_ai||{},plan=ai.plan||[],learning=ai.learning||{}; const answers=d.answers||[]; $('answers').innerHTML=answers.map(x=>'<div class="row"><span class="pill">'+esc(x.priority||'normal')+'</span><span>'+esc(x.answer||'')+'</span></div>').join('')||'<p class="muted">No verified worker answers yet. The search worker is running and will retain its operational state across cycles.</p>;
  $('searchAi').innerHTML='<p><b>'+esc(ai.engine||'MomTo Search AI')+'</b> · '+esc(ai.mode||'evidence-driven')+'</p><p class="muted">Cycle: '+esc(ai.generated_at||'not yet reported')+'</p><div class="grid3"><div><small>searches learned</small><div class="metric">'+esc(learning.searches??learning.search_events??0)+'</div></div><div><small>sources learned</small><div class="metric">'+esc((learning.top_sources||learning.source_patterns||[]).length)+'</div></div><div><small>planned actions</small><div class="metric">'+esc(plan.length)+'</div></div></div>'+plan.slice(0,8).map(x=>'<div class="row"><span class="pill">'+esc(x.priority)+'</span><span>'+esc(x.action)+'</span></div>').join('');
  const e=d.enhancements||{};$('enhancements').innerHTML='<div class="card"><small>total enhancements</small><div class="metric">'+esc(e.total??500)+'</div></div><div class="card"><small>planned</small><div class="metric">'+esc(e.planned??0)+'</div></div><div class="card"><small>complete</small><div class="metric">'+esc(e.complete??0)+'</div></div>';$('enhancementWave').innerHTML='<div class="notice" style="margin-top:12px"><b>'+esc(e.current_wave||'wave-01')+'</b> · '+esc(e.next||'Implement and validate the next safe enhancement.')+'</div>'; $('sources').innerHTML=(d.ohio?.official_sources||[]).map(u=>'<p><a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(u)+'</a></p>').join('')||'<p class="muted">No sources published.</p>';
- $('updated').textContent='updated '+lastDataAt.toLocaleTimeString();updateAge();
+ const hb=d.heartbeat||{}, ps=d.persistence||{}; lastDataAt=hb.at?new Date(hb.at):null; $('updated').textContent=lastDataAt?'worker '+lastDataAt.toLocaleTimeString():'worker time unavailable'; $('workerState').textContent='worker: '+String(hb.status||'unknown'); $('cycles').textContent='cycles: '+String(ps.cycle_count??0); updateAge();
 }
-function updateAge(){if(lastDataAt)$('age').textContent='data age: '+Math.max(0,Math.floor((Date.now()-lastDataAt)/1000))+'s'}
+function updateAge(){if(lastDataAt)$('age').textContent='worker data age: '+Math.max(0,Math.floor((Date.now()-lastDataAt)/1000))+'s';else $('age').textContent='worker data age: —'}
 async function refresh(){if(paused)return;try{const r=await fetch(API+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);render(await r.json())}catch(e){setConnection(false);$('updated').textContent='data unavailable'}}
 $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'Resume':'Pause';$('refreshState').textContent=paused?'paused':'15s refresh';if(!paused)refresh()};
 $('refresh').onclick=refresh;refresh();timer=setInterval(refresh,15000);setInterval(updateAge,1000);

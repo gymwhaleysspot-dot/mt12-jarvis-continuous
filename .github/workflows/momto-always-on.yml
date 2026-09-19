@@ -35,15 +35,42 @@ jobs:
           from pathlib import Path
           from momto.web.live_api import momto_live
 
+          state_path = Path("momto-live.json")
+          previous = {}
+          if state_path.exists():
+              try:
+                  previous = json.loads(state_path.read_text(encoding="utf-8"))
+              except (OSError, ValueError):
+                  previous = {}
+
           snapshot = momto_live()
+          now = datetime.now(timezone.utc)
+          prior_state = previous.get("persistence", {})
+          cycle_count = int(prior_state.get("cycle_count", 0)) + 1
+          first_started_at = prior_state.get("first_started_at") or now.isoformat()
+          prior_answers = previous.get("answers", [])
+          answers = snapshot.get("search_ai", {}).get("plan", [])
+          snapshot["answers"] = [
+              {"type": "next_action", "priority": x.get("priority", "normal"), "answer": x.get("action", "")}
+              for x in answers
+          ][:8]
+          snapshot["persistence"] = {
+              "status": "persistent",
+              "first_started_at": first_started_at,
+              "last_cycle_at": now.isoformat(),
+              "cycle_count": cycle_count,
+              "previous_answer_count": len(prior_answers),
+              "state_source": "public-safe aggregate snapshot",
+              "private_case_data_persisted": False,
+          }
           snapshot["heartbeat"] = {
               "status": "running",
-              "at": datetime.now(timezone.utc).isoformat(),
+              "at": now.isoformat(),
               "worker": "momto-always-on",
               "interval_seconds": 300,
               "privacy_safe": True,
           }
-          Path("momto-live.json").write_text(
+          state_path.write_text(
               json.dumps(snapshot, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
