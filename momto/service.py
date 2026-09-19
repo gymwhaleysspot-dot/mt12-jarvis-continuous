@@ -102,3 +102,11 @@ def live_activity(limit=25): return ops.live_activity(limit)
 def search_ai_cycle(limit=20):
  from . import search_ai
  return search_ai.cycle(limit)
+
+def enhancement_summary():
+ from . import enhancements
+ return enhancements.summary()
+
+def enhancement_wave(limit=25):
+ from . import enhancements
+ return enhancements.wave(limit)
