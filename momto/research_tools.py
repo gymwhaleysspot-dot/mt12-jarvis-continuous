@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from html.parser import HTMLParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 @dataclass
@@ -110,6 +111,37 @@ class PageFetchTool:
             return {"ok": False, "error": type(exc).__name__, "text": ""}
 
 
+SOURCE_PROFILES = {
+    "web": {"domains": None, "weight": 1.0},
+    "familysearch": {"domains": ["familysearch.org"], "weight": 1.25},
+    "wikitree": {"domains": ["wikitree.com"], "weight": 1.10},
+    "ohio": {"domains": ["ohiohistory.org", "ohiomemory.org", "codes.ohio.gov", "supremecourt.ohio.gov"], "weight": 1.35},
+}
+
+def _canonical_url(url: str) -> str:
+    try:
+        p = urllib.parse.urlsplit(url)
+        host = (p.hostname or "").lower()
+        path = re.sub(r"/+$", "", p.path or "/")
+        return urllib.parse.urlunsplit(("https", host, path, "", ""))
+    except Exception:
+        return url.strip()
+
+def _dedupe_hits(hits: list[dict], limit: int) -> list[dict]:
+    seen = set()
+    out = []
+    for hit in hits:
+        key = _canonical_url(hit.get("url", ""))
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        hit["url"] = key
+        out.append(hit)
+        if len(out) >= limit:
+            break
+    return out
+
+
 class GenealogySearchTools:
     """MCP-style, provider-neutral tools that MomTo can call from its research loop.
 
@@ -125,14 +157,46 @@ class GenealogySearchTools:
         self.fetcher = PageFetchTool()
 
     def search(self, query: str, provider: str = "web", limit: int = 8) -> list[dict]:
-        domains = None
-        if provider == "familysearch":
-            domains = ["familysearch.org"]
-        elif provider == "wikitree":
-            domains = ["wikitree.com"]
-        elif provider == "ohio":
-            domains = ["ohiohistory.org", "ohiomemory.org", "codes.ohio.gov", "supremecourt.ohio.gov"]
-        return [h.__dict__ for h in self.web.search(query, domains=domains, limit=limit)]
+        profile = SOURCE_PROFILES.get(provider, SOURCE_PROFILES["web"])
+        hits = [h.__dict__ for h in self.web.search(query, domains=profile["domains"], limit=limit)]
+        for hit in hits:
+            hit["provider"] = provider
+        return _dedupe_hits(hits, limit)
+
+    def parallel_search(self, planned: list[dict], per_query: int = 6, workers: int = 6) -> list[dict]:
+        """Run independent provider searches concurrently, then deduplicate deterministically."""
+        jobs = []
+        for item in planned:
+            q = str(item.get("query") or "").strip()
+            lane = item.get("lane")
+            if not q or lane not in {"birth-mother", "birth-father"}:
+                continue
+            provider = item.get("provider", "web")
+            jobs.append((lane, provider, q, item.get("purpose", "")))
+        results = []
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(jobs) or 1))) as pool:
+            futures = {
+                pool.submit(self.search, q, provider, per_query): (lane, provider, q, purpose)
+                for lane, provider, q, purpose in jobs
+            }
+            for future in as_completed(futures):
+                lane, provider, q, purpose = futures[future]
+                try:
+                    hits = future.result()
+                except Exception:
+                    hits = []
+                for hit in hits:
+                    hit["lane"] = lane
+                    hit["query_purpose"] = purpose
+                results.append({
+                    "lane": lane,
+                    "provider": provider,
+                    "query": q,
+                    "purpose": purpose,
+                    "hits": hits,
+                })
+        return sorted(results, key=lambda x: (x["lane"], x["provider"], x["query"]))
+
 
     def fetch(self, url: str) -> dict:
         return self.fetcher.fetch(url)

@@ -35,9 +35,11 @@ def generate_plan(limit=20):
     r = research_run(min(limit, 20))
     return [
         {
-            "priority": "high" if i == 0 else "normal",
-            "domain": "research-ai",
-            "action": x.get("why") or x.get("query", ""),
+            "priority": "high" if i < 2 else "normal",
+            "domain": x.get("lane", "research-ai"),
+            "provider": x.get("provider", "web"),
+            "action": x.get("purpose") or x.get("query", ""),
+            "query": x.get("query", ""),
         }
         for i, x in enumerate(r.get("planned_searches", []))
     ][:limit]

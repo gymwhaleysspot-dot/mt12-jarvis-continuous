@@ -187,19 +187,18 @@ Keep queries focused enough to discriminate between hypotheses.""",
             "Model plan contained no usable lane-tagged searches; deterministic genealogy search plan is active."
         ]
 
+    # Execute independent searches concurrently. This is the main v4 speedup:
+    # provider calls overlap while persistence remains sequential and deterministic.
+    batches = tools.parallel_search(planned, per_query=6, workers=min(8, max(1, len(planned))))
     results = []
-    for item in planned:
-        lane = item["lane"]
-        provider = item.get("provider", "web")
-        hits = tools.search(item["query"], provider=provider, limit=8)
-        for hit in hits:
-            hit["lane"] = lane
-            hit["query_purpose"] = item.get("purpose", "")
-        _save_search(case.id, lane, item["query"], hits)
+    for batch in batches:
+        lane = batch["lane"]
+        hits = batch["hits"]
+        _save_search(case.id, lane, batch["query"], hits)
         _save_leads(case.id, lane, hits)
         results.append({
             "lane": lane,
-            "provider": provider,
+            "provider": batch["provider"],
             "query_executed": True,
             "hit_count": len(hits),
             "hits": hits,
@@ -252,10 +251,11 @@ Return JSON: {"candidates":[...], "next_searches":[...], "cautions":[...]}.""",
     # names, queries, snippets, URLs tied to candidates, and DNA identities stay
     # in the local database.
     return {
-        "engine": "momto-research-agent-v3",
-        "mode": "genealogy-tool-loop",
+        "engine": "momto-research-agent-v4",
+        "mode": "parallel-multi-provider-genealogy-loop",
         "generated_at": _now(),
         "research_question": "Autonomous public-source research for both birth-parent lanes.",
+        "planned_searches": planned,
         "summary": {
             "searches_executed": len(results),
             "hits_found": sum(r["hit_count"] for r in results),
@@ -269,6 +269,8 @@ Return JSON: {"candidates":[...], "next_searches":[...], "cautions":[...]}.""",
             "page_fetch": True,
             "local_ancestry_graph": True,
             "provider_routing": ["web", "familysearch", "wikitree", "ohio"],
+            "parallel_search_workers": min(8, max(1, len(planned))),
+            "deduplication": True,
             "evidence_reconciliation": bool(synthesis),
         },
         "guardrails": {
