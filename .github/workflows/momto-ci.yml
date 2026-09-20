@@ -61,12 +61,13 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          required=("Birth Mother","Birth Father","Live Activity","Search AI","5000-Enhancement Program","Refresh now","momto-live.json")
+          required=("Birth Mother","Birth Father","Live Activity","Search AI","5000-Enhancement Program","Refresh now","momto-live.json","Private Ancestry family-tree import","ancestryFile","Import privately","/api/momto/ancestry/import")
           for name in ("momto-live.html","momto/web/momto-live.html"):
               text=Path(name).read_text()
               assert all(x in text for x in required), name
               assert "\\n document.getElementById" not in text, name
               assert "setInterval(refresh,15000)" in text, name
+              assert "Private Ancestry family-tree import" in text and "ancestryFile" in text and "Import privately" in text, name
           print("both MomTo dashboards passed live UI contract")
           PY
       - name: Collect failure diagnostics
