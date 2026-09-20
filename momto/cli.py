@@ -4,6 +4,7 @@ from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_le
 from .db import SessionLocal
 from .case_vault import CaseVault, VaultError, generate_key
 from .dna import import_matches, public_summary
+from .ancestry import import_gedcom, record_observation, public_summary as ancestry_summary
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
@@ -40,7 +41,7 @@ def dna_import(path:str,provider:str=""):
  r=import_matches(path,provider or None); typer.echo(json.dumps(r,sort_keys=True))
 @dna_app.command("summary")
 def dna_summary(): typer.echo(json.dumps(public_summary(),sort_keys=True))
-contact_app=typer.Typer(); app.add_typer(contact_app,name="contact")
+ancestry_app=typer.Typer(help="MomTo Ancestry tree intake — private/local only.")\napp.add_typer(ancestry_app,name="ancestry")\n@ancestry_app.command("import")\ndef ancestry_import(path:str): typer.echo(json.dumps(import_gedcom(path),sort_keys=True))\n@ancestry_app.command("observe")\ndef ancestry_observe(key:str,value:str,source:str="Ancestry screenshot",certainty:str="observed"): typer.echo(json.dumps(record_observation(key,value,source,certainty),sort_keys=True))\n@ancestry_app.command("summary")\ndef ancestry_summary_cmd(): typer.echo(json.dumps(ancestry_summary(),sort_keys=True))\ncontact_app=typer.Typer(); app.add_typer(contact_app,name="contact")
 @contact_app.command("add")
 def contact(subject:str,response:str="",next_action:str=""):
  c=init_case()

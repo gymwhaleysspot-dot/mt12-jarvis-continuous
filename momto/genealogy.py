@@ -7,7 +7,7 @@ import re
 # MomTo's genealogy engine deliberately separates public-source discovery from
 # the private case identity. Public workers may research source availability and
 # record systems; person-specific queries are generated only from the local case.
-SOURCE_CATALOG = (
+SOURCE_CATALOG = (\n    {"id":"ancestry-tree","lane":"family-tree","title":"Ancestry — User family tree / GEDCOM","url":"https://www.ancestry.com/","record_types":["family-tree","parents","siblings","residence","hints","dna"],"weight":6},
     {"id":"fs-oh-probate","lane":"probate","title":"FamilySearch — Ohio Probate Records, 1789-1996","url":"https://www.familysearch.org/en/search/collection/1992421","record_types":["wills","estates","guardianships","heirs"],"weight":5},
     {"id":"fs-oh-marriages","lane":"marriage","title":"FamilySearch — Ohio County Marriages, 1789-2016","url":"https://www.familysearch.org/en/search/collection/1614804","record_types":["marriage","spouse","parents","residence"],"weight":5},
     {"id":"fs-oh-births","lane":"birth","title":"FamilySearch — Ohio Births and Christenings, 1821-1962","url":"https://www.familysearch.org/en/search/collection/1680845","record_types":["birth","baptism","parents"],"weight":5},

@@ -70,6 +70,7 @@ jobs:
           from pathlib import Path
           from momto.web.live_api import momto_live
           from momto.genealogy import SOURCE_CATALOG, public_research_catalog
+          from momto.ancestry import public_summary as ancestry_public_summary
 
           state_path = Path("momto-live.json")
           previous = {}
@@ -81,6 +82,7 @@ jobs:
 
           snapshot = momto_live()
           dna_signals = snapshot.get("dna_signals") or {"providers":[],"match_count":0,"signal_count":0,"strong_signal_count":0,"clusters":0}
+          ancestry_signals = snapshot.get("ancestry") or ancestry_public_summary()
           now = datetime.now(timezone.utc)
           source_checks = json.loads(Path("artifacts/source-checks.json").read_text(encoding="utf-8"))
 
@@ -240,6 +242,7 @@ jobs:
           if previous.get("objectives"): snapshot["objectives"] = previous["objectives"]
           snapshot["dna"] = dna_signals.get("providers", [])
           snapshot["dna_match_signals"] = {k:dna_signals.get(k,0) for k in ("match_count","signal_count","strong_signal_count","clusters")}
+          snapshot["ancestry"] = ancestry_signals
           snapshot["counts"] = prior_counts
           snapshot["advanced"] = prior_advanced
           snapshot["search_ai"] = prior_search_ai
@@ -262,8 +265,8 @@ jobs:
               "public_safe": True,
           })
           snapshot["activity"] = activity[:25]
-          snapshot["dashboard_version"] = "momto-live-v9"
-          snapshot["snapshot_schema"] = "momto-public-v9"
+          snapshot["dashboard_version"] = "momto-live-v10"
+          snapshot["snapshot_schema"] = "momto-public-v10"
           snapshot["persistence"] = {
               "status": "persistent",
               "first_started_at": first_started_at,
