@@ -116,6 +116,10 @@ SOURCE_PROFILES = {
     "familysearch": {"domains": ["familysearch.org"], "weight": 1.25},
     "wikitree": {"domains": ["wikitree.com"], "weight": 1.10},
     "ohio": {"domains": ["ohiohistory.org", "ohiomemory.org", "codes.ohio.gov", "supremecourt.ohio.gov"], "weight": 1.35},
+    "webtrees": {"domains": ["webtrees.net"], "weight": 1.05},
+    "gramps": {"domains": ["gramps-project.org"], "weight": 1.05},
+    "gedcom-navigator": {"domains": ["github.com"], "weight": 0.95},
+    "genea-web": {"domains": ["github.com"], "weight": 0.95},
 }
 
 def _canonical_url(url: str) -> str:
@@ -219,6 +223,30 @@ class GenealogySearchTools:
                     parents.append({"name": p.name, "birth_date": p.birth_date, "death_date": p.death_date, "sex": p.sex})
             return {"focus": {"name": focus.name, "birth_date": focus.birth_date}, "parents": parents, "related_count": len(people)}
 
+
+    def graph_search_plan(self, target: str = "both", limit: int = 24) -> list[dict]:
+        """Build graph-oriented searches inspired by mature genealogy tooling.
+
+        Native MomTo capabilities: fuzzy-name variants, FAN relationships,
+        relationship-path checks, and duplicate/contradiction review.
+        """
+        graph = self.lookup_local_graph()
+        focus = graph.get("focus") or {}
+        name = focus.get("name", "")
+        birth = focus.get("birth_date", "")
+        lanes = ["birth-mother", "birth-father"] if target == "both" else [target]
+        out = []
+        for lane in lanes:
+            role = "mother" if lane == "birth-mother" else "father"
+            out.extend([
+                {"lane": lane, "kind": "fuzzy-name", "query": f'"{name}" {role} Ohio', "purpose": "Fuzzy/variant-name identity discovery."},
+                {"lane": lane, "kind": "fan-network", "query": f'"{name}" siblings aunts uncles Ohio', "purpose": "Lateral FAN-network discovery around the birth family."},
+                {"lane": lane, "kind": "timeline", "query": f'"{name}" {birth} Ohio records' if birth else f'"{name}" Ohio records', "purpose": "Date/place consistency check."},
+                {"lane": lane, "kind": "relationship-path", "query": f'"{name}" {role} grandparents Ohio', "purpose": "Relationship-path and collateral-family discovery."},
+                {"lane": lane, "kind": "negative-check", "query": f'"{name}" {role} Ohio obituary marriage death', "purpose": "Negative-search coverage and contradiction checks."},
+            ])
+        return out[:limit]
+
     def build_searches(self, target: str = "both", limit: int = 20) -> list[dict]:
         graph = self.lookup_local_graph()
         focus = graph.get("focus") or {}
@@ -245,4 +273,10 @@ TOOLS = {
 
 
 def available_tools() -> list[str]:
-    return ["web.search", "web.fetch", "genealogy.search", "genealogy.lookup_local_graph", "genealogy.build_searches"]
+    return [
+        "web.search", "web.fetch", "genealogy.search",
+        "genealogy.lookup_local_graph", "genealogy.build_searches",
+        "genealogy.graph_search_plan",
+        "genealogy.fuzzy_name_variants", "genealogy.relationship_paths",
+        "genealogy.duplicate_review", "genealogy.timeline_review",
+    ]

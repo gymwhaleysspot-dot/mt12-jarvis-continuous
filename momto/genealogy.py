@@ -7,6 +7,22 @@ import re
 # MomTo's genealogy engine deliberately separates public-source discovery from
 # the private case identity. Public workers may research source availability and
 # record systems; person-specific queries are generated only from the local case.
+
+OPEN_GENEALOGY_TOOLKITS = (
+    {"id":"familysearch-gedcom","title":"FamilySearch GEDCOM","url":"https://github.com/FamilySearch/GEDCOM","capabilities":["GEDCOM standard","GEDCOM 7 validation","interchange"]},
+    {"id":"gramps-web","title":"Gramps Web","url":"https://github.com/gramps-project/gramps-web","capabilities":["web genealogy","tree browsing","structured genealogy data"]},
+    {"id":"gramps-web-api","title":"Gramps Web API","url":"https://github.com/gramps-project/gramps-web-api","capabilities":["genealogy API","structured graph access"]},
+    {"id":"webtrees","title":"webtrees","url":"https://github.com/fisharebest/webtrees","capabilities":["GEDCOM genealogy","relationship traversal","search","citations"]},
+    {"id":"gedcom-navigator","title":"GEDCOM Navigator","url":"https://github.com/ajkessel/gedcom-navigator","capabilities":["fuzzy names","relationship paths","FAN research","GEDCOM search"]},
+    {"id":"genea-web","title":"Genea Web","url":"https://github.com/satvikgosai/genea-web","capabilities":["local GEDCOM","privacy-first genealogy","SQLite"]},
+    {"id":"gramps-mcp","title":"Gramps MCP","url":"https://github.com/cabout-me/gramps-mcp","capabilities":["genealogy tools","structured queries","agent integration"]},
+    {"id":"genealogy-mcp","title":"genealogy-mcp","url":"https://github.com/noahkiss/genealogy-mcp","capabilities":["genealogy search","provider-neutral tools","relationship lookup"]},
+    {"id":"open-genealogy","title":"Open-Genealogy / GRA","url":"https://github.com/DigitalArchivst/Open-Genealogy","capabilities":["agent workflow","GEDCOM","research automation"]},
+    {"id":"ancestry-mcp","title":"ancestry-mcp","url":"https://github.com/reeeeemo/ancestry-mcp","capabilities":["Ancestry/GEDCOM parsing","genealogy search"]},
+    {"id":"gedcommcp","title":"GedcomMCP","url":"https://github.com/airy10/GedcomMCP","capabilities":["GEDCOM query","relationship analysis"]},
+    {"id":"gedcom-mcp","title":"gedcom-mcp","url":"https://github.com/sjmatta/gedcom-mcp","capabilities":["structured GEDCOM queries","semantic search"]},
+)
+
 SOURCE_CATALOG = (
     {"id":"ancestry-tree","lane":"family-tree","title":"Ancestry — User family tree / GEDCOM","url":"https://www.ancestry.com/","record_types":["family-tree","parents","siblings","residence","hints","dna"],"weight":6},
     {"id":"fs-oh-probate","lane":"probate","title":"FamilySearch — Ohio Probate Records, 1789-1996","url":"https://www.familysearch.org/en/search/collection/1992421","record_types":["wills","estates","guardianships","heirs"],"weight":5},
@@ -90,6 +106,7 @@ def public_research_catalog() -> dict:
     return {
         "engine":"momto-genealogy-v1",
         "method":"source-first, evidence-led genealogy",
+        "open_source_toolkits": list(OPEN_GENEALOGY_TOOLKITS),
         "lanes":[{"id":k,"purpose":v} for k,v in LANES.items()],
         "sources":[{k:v for k,v in s.items() if k != "weight"} for s in SOURCE_CATALOG],
         "rules":[

@@ -24,3 +24,11 @@ def test_parallel_search_ignores_unusable_items():
         {"lane": "birth-mother", "provider": "web", "query": ""},
     ])
     assert rows == []
+
+
+def test_open_genealogy_toolkits_are_registered():
+    from momto.genealogy import OPEN_GENEALOGY_TOOLKITS, public_research_catalog
+    ids = {x["id"] for x in OPEN_GENEALOGY_TOOLKITS}
+    assert {"familysearch-gedcom", "gramps-web", "gramps-web-api", "webtrees", "gedcom-navigator", "genea-web", "gramps-mcp", "genealogy-mcp", "open-genealogy", "ancestry-mcp", "gedcommcp", "gedcom-mcp"} <= ids
+    catalog = public_research_catalog()
+    assert len(catalog["open_source_toolkits"]) >= 12
