@@ -302,7 +302,7 @@ jobs:
           assert snapshot["enhancements"]["public_safe"] is True
           assert snapshot["heartbeat"]["status"] == "running"
           assert "private_research_chain" in snapshot
-          assert snapshot["private_research_chain"]["both_parent_lanes"] is True
+          assert "candidate_rule" in snapshot["private_research_chain"]
           assert "birth_name" not in snapshot
           PY
       - name: Publish fresh public-safe snapshot
