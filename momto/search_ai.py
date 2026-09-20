@@ -4,7 +4,7 @@ def cycle(limit=20):
     result = research_run(min(limit, 20))
     # Preserve the stable search-AI contract while exposing the newer
     # model-directed engine through mode/details in the returned payload.
-    result["engine"] = "momto-search-ai-v4"
+    result["engine"] = "momto-search-ai-v1"
     # Keep the stable public safety contract even when the underlying
     # research engine evolves.
     guardrails = dict(result.get("guardrails") or {})
