@@ -155,6 +155,19 @@ def record_observation(observation_key: str, value: str, source: str = "Ancestry
         return {"id": row.id, "created": True}
 
 
+def import_observation_bundle(path: str | Path) -> dict:
+    import json
+    p = Path(path)
+    data = json.loads(p.read_text(encoding="utf-8"))
+    rows = data.get("observations") or []
+    results = [record_observation(
+        str(row["key"]), str(row["value"]),
+        str(row.get("source", "Ancestry screenshot")),
+        str(row.get("certainty", "observed")),
+    ) for row in rows if "key" in row and "value" in row]
+    return {"source": "Ancestry observation bundle", "observations": len(results), "created": sum(1 for x in results if x.get("created"))}
+
+
 def scan_import_dir(directory: str | Path) -> list[dict]:
     root = Path(directory)
     if not root.exists():

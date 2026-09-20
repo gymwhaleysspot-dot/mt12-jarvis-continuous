@@ -4,7 +4,7 @@ from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_le
 from .db import SessionLocal
 from .case_vault import CaseVault, VaultError, generate_key
 from .dna import import_matches, public_summary
-from .ancestry import import_gedcom, record_observation, public_summary as ancestry_summary
+from .ancestry import import_gedcom, record_observation, import_observation_bundle, public_summary as ancestry_summary
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
