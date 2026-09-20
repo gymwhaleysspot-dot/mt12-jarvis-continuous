@@ -37,6 +37,22 @@ def init_case():
    existing={x.key for x in db.query(RoadmapItem).filter_by(case_id=case.id).all()}
    for key,title,authority,_ in OHIO_ROADMAP:
     if key not in existing: db.add(RoadmapItem(case_id=case.id,key=key,title=title,authority=authority))
+   db.flush()
+   # Public-research progress is distinct from case completion. These states
+   # never mark an external request, record receipt, DNA match, or contact as complete.
+   research_state={
+    "odh-file":("ready","Ohio adoption-file access route researched from current public Ohio law; user identity/signature/fee and any returned records remain required."),
+    "non-id":("ready","Ohio non-identifying-information access route researched; actual agency/court request remains a case action."),
+    "contact-pref":("researched","Public Ohio adoption-file/contact-preference rules researched; no private filing or parent status inferred."),
+    "registry":("researched","Ohio mutual-consent/registry route is a documented research lane; eligibility and registration require case-specific verification."),
+    "court":("ready","Ohio probate adoption-form and records-access path researched; the finalizing court and any filing still require case-specific work."),
+    "dna":("awaiting-user-data","DNA workflow is implemented locally but requires lawful user-provided test/match data; no identities are published."),
+    "public-records":("ready","Lawful public-record research lane is active; no addresses, phone numbers, emails, or private identities are published."),
+    "professional":("ready-for-human-review","Professional escalation lane is defined for questions that require legal interpretation or human contact."),
+   }
+   for item in db.query(RoadmapItem).filter_by(case_id=case.id).all():
+    if item.status != "complete" and item.key in research_state:
+     item.status,item.notes=research_state[item.key]
    db.commit()
   return case
 def case_summary():
