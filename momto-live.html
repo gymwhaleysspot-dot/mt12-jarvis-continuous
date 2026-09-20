@@ -4,7 +4,9 @@ async function localImport(file){
  let content="";
  if(/\.zip$/i.test(file.name)){
   status.textContent="Opening Ancestry ZIP locally…";
-  const JSZip=await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm");
+  const mod=await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm");
+  const JSZip=mod.default||mod;
+  if(typeof JSZip.loadAsync!=="function")throw new Error("JSZip module did not expose loadAsync.");
   const zip=await JSZip.loadAsync(await file.arrayBuffer());
   const names=Object.keys(zip.files).filter(n=>/\.(ged|gedcom)$/i.test(n)&&!zip.files[n].dir);
   if(!names.length)throw new Error("No GEDCOM file was found inside the ZIP.");
