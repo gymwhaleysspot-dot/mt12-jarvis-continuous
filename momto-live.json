@@ -1,6 +1,12 @@
 {
   "activity": [
     {
+      "at": "2026-09-20T00:28:24.489389+00:00",
+      "public_safe": true,
+      "summary": "Researched 11 official Ohio adoption sources; 0 returned substantive public findings.",
+      "type": "research_cycle"
+    },
+    {
       "at": "2026-09-19T23:18:19.937579+00:00",
       "public_safe": true,
       "summary": "Researched 4 official Ohio adoption sources; 0 returned substantive public findings.",
@@ -75,7 +81,7 @@
     "open_tasks": 0,
     "searches": 0
   },
-  "dashboard_version": "momto-live-v7",
+  "dashboard_version": "momto-live-v9",
   "dna": [
     {
       "provider": "AncestryDNA",
@@ -444,8 +450,61 @@
     "public_safe": true,
     "total": 5000
   },
+  "genealogy": {
+    "engine": "momto-genealogy-v1",
+    "finding_count": 0,
+    "lanes": [
+      {
+        "id": "identity",
+        "purpose": "Establish the identity bridge: adopted name \u2194 birth name, exact birth date/place, and all known aliases."
+      },
+      {
+        "id": "adoption",
+        "purpose": "Reconstruct the adoption event: agency/attorney, county, finalization date, court, and record-access path."
+      },
+      {
+        "id": "birth-family",
+        "purpose": "Build the birth-family tree outward from parents, siblings, grandparents, aunts/uncles, and residences."
+      },
+      {
+        "id": "vital",
+        "purpose": "Cross-check birth, marriage, death, burial, and census-era records; prefer original images when available."
+      },
+      {
+        "id": "residence",
+        "purpose": "Track household and residence changes through dated records rather than assuming continuity."
+      },
+      {
+        "id": "newspaper",
+        "purpose": "Search births, adoption notices, marriage announcements, obituaries, legal notices, and community items."
+      },
+      {
+        "id": "probate",
+        "purpose": "Use wills, estates, guardianships, heir lists, and court files to connect generations."
+      },
+      {
+        "id": "church",
+        "purpose": "Use baptism, marriage, funeral, cemetery, and parish records where civil coverage is incomplete."
+      },
+      {
+        "id": "dna",
+        "purpose": "Use only lawful user-supplied DNA matches; cluster matches and test hypotheses locally."
+      },
+      {
+        "id": "negative-search",
+        "purpose": "Record meaningful negative searches so repeated dead ends are not mistaken for new evidence."
+      }
+    ],
+    "method": "source-first, evidence-led genealogy",
+    "next_phase": "Fill private local identity facts, then execute lane-specific queries against the catalog and attach evidence locally.",
+    "person_specific_queries": "local-only; generated from private case data and never published",
+    "public_only": true,
+    "sources_cataloged": 11,
+    "sources_checked": 11,
+    "sources_successful": 0
+  },
   "heartbeat": {
-    "at": "2026-09-19T23:18:19.937579+00:00",
+    "at": "2026-09-20T00:28:24.489389+00:00",
     "interval_seconds": 300,
     "privacy_safe": true,
     "status": "running",
@@ -540,9 +599,9 @@
     "state": "Ohio"
   },
   "persistence": {
-    "cycle_count": 6,
+    "cycle_count": 7,
     "first_started_at": "2026-09-19T20:21:08.917262+00:00",
-    "last_cycle_at": "2026-09-19T23:18:19.937579+00:00",
+    "last_cycle_at": "2026-09-20T00:28:24.489389+00:00",
     "previous_answer_count": 5,
     "private_case_data_persisted": false,
     "state_source": "public-safe aggregate snapshot",
@@ -553,28 +612,39 @@
     "note": "Actual public-source research is performed each cycle. No adoption-record contents, private matches, addresses, phone numbers, email addresses, or correspondence are collected or published.",
     "official_sources": [
       {
-        "checked_at": "2026-09-19T23:18:18.529359+00:00",
+        "checked_at": "2026-09-20T00:28:23.129854+00:00",
         "error": "HTTPError",
         "ok": false,
         "status": 404,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.38"
       },
       {
-        "checked_at": "2026-09-19T23:18:18.879748+00:00",
+        "checked_at": "2026-09-20T00:28:23.383506+00:00",
         "error": "HTTPError",
         "ok": false,
         "status": 404,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.66"
       },
       {
-        "checked_at": "2026-09-19T23:18:19.101409+00:00",
+        "checked_at": "2026-09-20T00:28:23.533740+00:00",
         "error": "HTTPError",
         "ok": false,
         "status": 404,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3705.12"
       }
     ],
-    "sources_researched": 4,
+    "research_lanes": [
+      "adoption",
+      "birth",
+      "court",
+      "death",
+      "discovery",
+      "marriage",
+      "newspaper",
+      "probate",
+      "repository"
+    ],
+    "sources_researched": 11,
     "total": 3,
     "verified": 0,
     "verified_public_facts": [
@@ -623,5 +693,5 @@
     "mode": "evidence-driven",
     "plan": []
   },
-  "snapshot_schema": "momto-public-v7"
+  "snapshot_schema": "momto-public-v9"
 }
