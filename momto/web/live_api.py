@@ -12,6 +12,7 @@ from ..service import case_summary,workspace_report,ranked_next_actions,live_act
 from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom, AncestryRelationship
 from ..db import SessionLocal
 from ..case_vault import CaseVault, VaultError
+from ..parent_search import verify_research_chain
 router=APIRouter()
 
 @router.get("/api/momto/live")
@@ -60,4 +61,5 @@ def ancestry_import(payload: dict, request: Request):
  return {"ok":True,"source":"Ancestry","filename":filename,"people":imported["people"],"families":imported["families"],
          "relationships":_ancestry_relationship_count(),
          "encrypted":bool(vault_record.get("encrypted")),"private":True,
+         "research_chain":verify_research_chain(init_case().id),
          "note":"Original upload is encrypted in CaseVault; parsed family-tree contents are local/private and excluded from public snapshots."}
