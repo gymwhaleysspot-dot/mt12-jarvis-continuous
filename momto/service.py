@@ -1,7 +1,7 @@
 from datetime import datetime
 from .db import Base,engine,SessionLocal
 from .models import Case,Objective,DnaStatus,RoadmapItem,Lead,Contact,SearchEvent,Evidence,Hypothesis,Task
-from . import advanced,ops
+from . import advanced,ops,ancestry
 DNA_PROVIDERS=["AncestryDNA","23andMe","GEDmatch","FamilyTreeDNA"]
 OHIO_ROADMAP=[
  ("odh-file","ODH adoption-file request","Ohio Department of Health","Request the contents of the adoption file available under current Ohio law; keep the request and returned records local."),
@@ -74,6 +74,7 @@ def case_summary():
    "roadmap_progress":_roadmap_progress(roadmap),
    "dna":[{"provider":x.provider,"status":x.status} for x in dna],
    "dna_signals":__import__("momto.dna",fromlist=["public_summary"]).public_summary(),
+   "ancestry":ancestry.public_summary(),
    "lead_count":len(leads),"contact_count":len(contacts),
    "search_count":db.query(SearchEvent).filter_by(case_id=c.id).count(),"evidence_count":db.query(Evidence).filter_by(case_id=c.id).count(),
    "hypothesis_count":db.query(Hypothesis).filter_by(case_id=c.id).count(),"open_task_count":db.query(Task).filter_by(case_id=c.id,status="open").count(),
