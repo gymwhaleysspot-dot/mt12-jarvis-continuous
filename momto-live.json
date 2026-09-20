@@ -1,6 +1,12 @@
 {
   "activity": [
     {
+      "at": "2026-09-20T06:10:55.249629+00:00",
+      "public_safe": true,
+      "summary": "Researched 12 official Ohio adoption sources; 0 returned substantive public findings.",
+      "type": "research_cycle"
+    },
+    {
       "at": "2026-09-20T01:50:42.875169+00:00",
       "public_safe": true,
       "summary": "Researched 12 official Ohio adoption sources; 0 returned substantive public findings.",
@@ -566,7 +572,7 @@
     "sources_successful": 0
   },
   "heartbeat": {
-    "at": "2026-09-20T01:50:42.875169+00:00",
+    "at": "2026-09-20T06:10:55.249629+00:00",
     "interval_seconds": 300,
     "privacy_safe": true,
     "status": "running",
@@ -661,10 +667,10 @@
     "state": "Ohio"
   },
   "persistence": {
-    "cycle_count": 10,
+    "cycle_count": 11,
     "first_started_at": "2026-09-19T20:21:08.917262+00:00",
-    "last_cycle_at": "2026-09-20T01:50:42.875169+00:00",
-    "previous_answer_count": 5,
+    "last_cycle_at": "2026-09-20T06:10:55.249629+00:00",
+    "previous_answer_count": 1,
     "private_case_data_persisted": false,
     "state_source": "public-safe aggregate snapshot",
     "status": "persistent"
@@ -674,19 +680,19 @@
     "note": "Actual public-source research is performed each cycle. No adoption-record contents, private matches, addresses, phone numbers, email addresses, or correspondence are collected or published.",
     "official_sources": [
       {
-        "checked_at": "2026-09-20T01:50:39.513402+00:00",
+        "checked_at": "2026-09-20T06:10:52.489331+00:00",
         "ok": true,
         "status": 200,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.38"
       },
       {
-        "checked_at": "2026-09-20T01:50:40.282344+00:00",
+        "checked_at": "2026-09-20T06:10:53.047916+00:00",
         "ok": true,
         "status": 200,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3107.66"
       },
       {
-        "checked_at": "2026-09-20T01:50:41.071627+00:00",
+        "checked_at": "2026-09-20T06:10:53.542620+00:00",
         "ok": true,
         "status": 200,
         "url": "https://codes.ohio.gov/ohio-revised-code/section-3705.12"
@@ -736,92 +742,83 @@
   },
   "research_ai": {
     "cautions": [
-      "No model credentials configured; deterministic source research is active."
+      "Model unavailable; deterministic genealogy search plan is active."
     ],
-    "engine": "momto-research-agent-v2",
-    "generated_at": "2026-09-20T01:50:42.869113+00:00",
+    "engine": "momto-research-agent-v4",
+    "generated_at": "2026-09-20T06:10:55.243732+00:00",
     "guardrails": {
+      "candidate_is_not_parent_conclusion": true,
       "human_review_for_contact": true,
       "no_identity_invention": true,
-      "private_case_data_publication": false,
-      "public_only": true
+      "private_case_data_publication": false
     },
-    "hypotheses": [],
-    "mode": "evidence-driven-fallback",
+    "mode": "parallel-multi-provider-genealogy-loop",
     "planned_searches": [
       {
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "ancestry-tree",
-        "why": "Coverage"
+        "lane": "birth-mother",
+        "purpose": "Find public evidence relevant to mother identity.",
+        "query": "\"\" adoption Ohio mother"
       },
       {
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-probate",
-        "why": "Coverage"
+        "lane": "birth-mother",
+        "purpose": "Find public evidence relevant to mother identity.",
+        "query": "\"\" birth mother Ohio"
       },
       {
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-marriages",
-        "why": "Coverage"
+        "lane": "birth-mother",
+        "purpose": "Find public evidence relevant to mother identity.",
+        "query": "\"\" Ohio adoption records"
       },
       {
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-births",
-        "why": "Coverage"
+        "lane": "birth-mother",
+        "purpose": "Find public evidence relevant to mother identity.",
+        "query": "\"\" Ohio parents siblings"
+      },
+      {
+        "lane": "birth-father",
+        "purpose": "Find public evidence relevant to father identity.",
+        "query": "\"\" adoption Ohio father"
+      },
+      {
+        "lane": "birth-father",
+        "purpose": "Find public evidence relevant to father identity.",
+        "query": "\"\" birth father Ohio"
+      },
+      {
+        "lane": "birth-father",
+        "purpose": "Find public evidence relevant to father identity.",
+        "query": "\"\" Ohio adoption records"
+      },
+      {
+        "lane": "birth-father",
+        "purpose": "Find public evidence relevant to father identity.",
+        "query": "\"\" Ohio parents siblings"
       }
     ],
-    "research_question": "Which unresolved evidence gap should be tested next?",
-    "results": [
-      {
-        "checked_at": "2026-09-20T01:50:42.766122+00:00",
-        "error": "HTTPError",
-        "lane": "family-tree",
-        "ok": false,
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "ancestry-tree",
-        "title": "Ancestry \u2014 User family tree / GEDCOM",
-        "url": "https://www.ancestry.com/",
-        "why": "Coverage"
-      },
-      {
-        "checked_at": "2026-09-20T01:50:42.808550+00:00",
-        "error": "HTTPError",
-        "lane": "probate",
-        "ok": false,
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-probate",
-        "title": "FamilySearch \u2014 Ohio Probate Records, 1789-1996",
-        "url": "https://www.familysearch.org/en/search/collection/1992421",
-        "why": "Coverage"
-      },
-      {
-        "checked_at": "2026-09-20T01:50:42.826862+00:00",
-        "error": "HTTPError",
-        "lane": "marriage",
-        "ok": false,
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-marriages",
-        "title": "FamilySearch \u2014 Ohio County Marriages, 1789-2016",
-        "url": "https://www.familysearch.org/en/search/collection/1614804",
-        "why": "Coverage"
-      },
-      {
-        "checked_at": "2026-09-20T01:50:42.842143+00:00",
-        "error": "HTTPError",
-        "lane": "birth",
-        "ok": false,
-        "query": "Review this official source for the strongest unresolved evidence gap.",
-        "source_id": "fs-oh-births",
-        "title": "FamilySearch \u2014 Ohio Births and Christenings, 1821-1962",
-        "url": "https://www.familysearch.org/en/search/collection/1680845",
-        "why": "Coverage"
-      }
-    ],
+    "research_question": "Autonomous public-source research for both birth-parent lanes.",
     "summary": {
-      "coverage_percent": 0,
-      "finding_count": 0,
-      "sources_checked": 4,
-      "sources_successful": 0
+      "birth_father_hits": 0,
+      "birth_mother_hits": 0,
+      "candidate_leads": 0,
+      "hits_found": 0,
+      "local_ancestry_people_available": 0,
+      "private_graph_edges_loaded": 0,
+      "private_graph_people_loaded": 0,
+      "searches_executed": 8
+    },
+    "tooling": {
+      "deduplication": true,
+      "evidence_reconciliation": false,
+      "local_ancestry_graph": true,
+      "page_fetch": true,
+      "parallel_search_workers": 8,
+      "provider_routing": [
+        "web",
+        "familysearch",
+        "wikitree",
+        "ohio"
+      ],
+      "web_search": true
     }
   },
   "search_ai": {
