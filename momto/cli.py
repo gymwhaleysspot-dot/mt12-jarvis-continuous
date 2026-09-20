@@ -3,6 +3,7 @@ import json
 from .service import init_case,case_summary,OHIO_ROADMAP,complete_roadmap,add_lead,update_dna,add_search,add_evidence,add_hypothesis,add_task,graph_node,graph_edge,dna_cluster,candidate,candidate_factor,timeline,source_reliability,coverage,ingest_document,contradictions,next_actions,workspace_report,ranked_next_actions,validate_local_state,backup_local,recovery_manifest,audit_tail,search_ai_cycle
 from .db import SessionLocal
 from .case_vault import CaseVault, VaultError, generate_key
+from .dna import import_matches, public_summary
 from .models import Contact,DnaStatus,SearchEvent,Evidence,Hypothesis,Task
 app=typer.Typer(help="MomTo — persistent Ohio adoption-search tracker.")
 @app.command()
@@ -34,6 +35,11 @@ def dna():
   for x in db.query(DnaStatus).all(): typer.echo(f"{x.provider}: {x.status}")
 @dna_app.command("set")
 def dna_set(provider:str,status:str,notes:str=""): update_dna(provider,status,notes); typer.echo(f"DNA status updated: {provider}")
+@dna_app.command("import")
+def dna_import(path:str,provider:str=""):
+ r=import_matches(path,provider or None); typer.echo(json.dumps(r,sort_keys=True))
+@dna_app.command("summary")
+def dna_summary(): typer.echo(json.dumps(public_summary(),sort_keys=True))
 contact_app=typer.Typer(); app.add_typer(contact_app,name="contact")
 @contact_app.command("add")
 def contact(subject:str,response:str="",next_action:str=""):
