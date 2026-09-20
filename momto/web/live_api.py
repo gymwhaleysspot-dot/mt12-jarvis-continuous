@@ -28,15 +28,8 @@ def _ancestry_relationship_count() -> int:
 
 @router.post("/api/momto/ancestry/import")
 def ancestry_import(payload: dict, request: Request):
- supplied=request.headers.get("authorization","").strip()
- if not supplied.lower().startswith("bearer "): raise HTTPException(status_code=401,detail="Jarvis classic Git token required.")
- git_token=supplied[7:].strip()
- if not __import__("re").fullmatch(r"ghp_[A-Za-z0-9_]{20,}",git_token): raise HTTPException(status_code=401,detail="A classic ghp_ Git token is required.")
- try:
-  req=urllib.request.Request("https://api.github.com/repos/gymwhaleysspot-dot/mt12-jarvis-continuous",headers={"Authorization":"Bearer "+git_token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"MomTo-private-import"})
-  with urllib.request.urlopen(req,timeout=10) as response:
-   if response.status != 200: raise ValueError("Git token could not access the Jarvis repository.")
- except Exception as exc: raise HTTPException(status_code=401,detail="Jarvis classic Git token could not be verified.") from exc
+ # MomTo runs this endpoint inside the private workspace. The browser never
+ # collects or transmits a GitHub credential; CaseVault keeps the upload private.
  filename=str(payload.get("filename") or "ancestry-upload.zip")
  if Path(filename).suffix.lower() not in {".zip",".ged",".gedcom"}:
   raise HTTPException(status_code=400,detail="Only .zip, .ged, or .gedcom files are accepted.")
