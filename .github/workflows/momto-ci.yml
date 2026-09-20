@@ -52,7 +52,7 @@ jobs:
           assert "persistence" in d and d["persistence"]["private_case_data_persisted"] is False
           assert "answers" in d and isinstance(d["answers"], list)
           assert "activity" in d and "search_ai" in d
-          assert d.get("dashboard_version") == "momto-live-v7"
+          assert d.get("dashboard_version") == "momto-live-v10"
           assert d.get("research", {}).get("total") == 3
           assert d["enhancements"]["total"] == 5000 and d["enhancements"]["public_safe"] is True
           print("public MomTo snapshot is aggregate-only")
