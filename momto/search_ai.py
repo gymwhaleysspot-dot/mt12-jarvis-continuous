@@ -5,6 +5,15 @@ def cycle(limit=20):
     # Preserve the stable search-AI contract while exposing the newer
     # model-directed engine through mode/details in the returned payload.
     result["engine"] = "momto-search-ai-v1"
+    # Keep the stable public safety contract even when the underlying
+    # research engine evolves.
+    guardrails = dict(result.get("guardrails") or {})
+    guardrails.setdefault("human_review", True)
+    guardrails.setdefault("no_identity_invention", True)
+    guardrails.setdefault("candidate_is_not_parent_conclusion", True)
+    guardrails.setdefault("human_review_for_contact", True)
+    guardrails.setdefault("private_case_data_publication", False)
+    result["guardrails"] = guardrails
     return result
 
 def learn():
