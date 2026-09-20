@@ -158,6 +158,7 @@ Keep queries focused enough to discriminate between hypotheses.""",
         {
             "context": context,
             "local_ancestry_graph": local_graph,
+            "graph_search_plan": tools.graph_search_plan("both", min(24, max(limit * 2, 12))),
             "available_sources": [
                 {k: s[k] for k in ("id", "title", "url", "lane", "record_types")}
                 for s in SOURCE_CATALOG
@@ -181,7 +182,11 @@ Keep queries focused enough to discriminate between hypotheses.""",
     # A model response can be valid JSON but still omit usable lane-tagged searches.
     # Fall back to the deterministic genealogy plan so callers never receive an empty plan.
     if not planned:
-        fallback = tools.build_searches("both", max(limit, 8))
+        fallback = tools.graph_search_plan("both", max(limit, 8))
+        if not fallback:
+            fallback = tools.graph_search_plan("both", max(limit, 8))
+        if not fallback:
+            fallback = tools.build_searches("both", max(limit, 8))
         planned = fallback[:limit]
         plan["cautions"] = list(plan.get("cautions") or []) + [
             "Model plan contained no usable lane-tagged searches; deterministic genealogy search plan is active."
@@ -263,6 +268,8 @@ Return JSON: {"candidates":[...], "next_searches":[...], "cautions":[...]}.""",
             "birth_father_hits": lane_counts["birth-father"],
             "candidate_leads": candidate_count,
             "local_ancestry_people_available": local_graph.get("related_count", 0),
+            "private_graph_people_loaded": len(local_graph.get("graph_people") or []),
+            "private_graph_edges_loaded": len(local_graph.get("graph_edges") or []),
         },
         "tooling": {
             "web_search": True,
