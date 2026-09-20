@@ -81,6 +81,11 @@ jobs:
                   previous = {}
 
           snapshot = momto_live()
+          # Run the real research agent each cycle. If an OpenAI key is configured,
+          # it reasons over private local evidence and selects the next searches.
+          # Only its public-safe research plan/results are published.
+          from momto.research_agent import run as research_agent_run
+          snapshot["research_ai"] = research_agent_run(12)
           dna_signals = snapshot.get("dna_signals") or {"providers":[],"match_count":0,"signal_count":0,"strong_signal_count":0,"clusters":0}
           ancestry_signals = snapshot.get("ancestry") or ancestry_public_summary()
           now = datetime.now(timezone.utc)
