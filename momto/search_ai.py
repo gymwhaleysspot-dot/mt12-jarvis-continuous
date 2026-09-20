@@ -61,6 +61,9 @@ def cycle(limit: int = 20) -> dict:
     case = init_case()
     plan = generate_plan(limit)
     genealogy = case_research_plan(case, limit=limit)
+    from . import dna
+    dna_state = dna.autonomous_cycle()
+    dna_public = dna.public_summary()
     now = datetime.now(timezone.utc).isoformat()
     return {
         "engine":"momto-search-ai-v1",
@@ -71,6 +74,7 @@ def cycle(limit: int = 20) -> dict:
         "workspace":workspace_report(),
         "genealogy": genealogy,
         "public_research_catalog": public_research_catalog(),
+        "dna": dna_public,
         "guardrails":{
             "human_review":True,
             "no_private_data_publication":True,

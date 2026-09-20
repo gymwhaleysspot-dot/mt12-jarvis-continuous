@@ -23,6 +23,7 @@ def _roadmap_progress(items):
  return {"total":total,"complete":complete,"activated":activated,"actionable":actionable,"percent_complete":round(complete*100/total) if total else 0,"percent_activated":round(activated*100/total) if total else 0,"by_status":counts}
 
 def init_case():
+ from . import dna
  Base.metadata.create_all(engine)
  # Importing advanced registers the v3 workspace tables before create_all.
  with SessionLocal() as db:
@@ -37,6 +38,10 @@ def init_case():
    existing={x.key for x in db.query(RoadmapItem).filter_by(case_id=case.id).all()}
    for key,title,authority,_ in OHIO_ROADMAP:
     if key not in existing: db.add(RoadmapItem(case_id=case.id,key=key,title=title,authority=authority))
+   for dna_row in db.query(DnaStatus).all():
+    if dna_row.status == "not-started":
+     dna_row.status="ready-for-import"
+     dna_row.notes="DNA signal engine is active; lawful local match exports can be normalized and analyzed without publishing identities."
    db.flush()
    # Public-research progress is distinct from case completion. These states
    # never mark an external request, record receipt, DNA match, or contact as complete.
@@ -68,6 +73,7 @@ def case_summary():
    "roadmap":[{"key":x.key,"title":x.title,"authority":x.authority,"status":x.status,"notes":x.notes,"completed_at":x.completed_at.isoformat() if x.completed_at else None} for x in roadmap],
    "roadmap_progress":_roadmap_progress(roadmap),
    "dna":[{"provider":x.provider,"status":x.status} for x in dna],
+   "dna_signals":__import__("momto.dna",fromlist=["public_summary"]).public_summary(),
    "lead_count":len(leads),"contact_count":len(contacts),
    "search_count":db.query(SearchEvent).filter_by(case_id=c.id).count(),"evidence_count":db.query(Evidence).filter_by(case_id=c.id).count(),
    "hypothesis_count":db.query(Hypothesis).filter_by(case_id=c.id).count(),"open_task_count":db.query(Task).filter_by(case_id=c.id,status="open").count(),
