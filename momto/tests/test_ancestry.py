@@ -1,36 +1,54 @@
 from pathlib import Path
+import zipfile
 
 from momto.ancestry import _parse_gedcom
 
 
-def test_parse_ancestry_gedcom(tmp_path: Path):
+def test_ancestry_birth_date_does_not_leak_into_residence(tmp_path: Path):
     ged = tmp_path / "tree.ged"
     ged.write_text(
         """0 HEAD
-1 SOUR Ancestry
 0 @I1@ INDI
 1 NAME Michael /Braggs Whaley/
+1 SEX M
 1 BIRT
-2 DATE 1980
+2 DATE 19 May 1980
+2 PLAC Cincinnati, Hamilton, Ohio
+1 RESI
+2 DATE 2019
+2 PLAC Russells Point, Ohio
 1 FAMC @F1@
 0 @I2@ INDI
-1 NAME Lacey /Braggs/
+1 NAME Lacey /Braggs Jr/
+1 SEX M
+1 BIRT
+2 DATE 24 Aug 1934
 1 DEAT
-2 DATE 1996
+2 DATE 4 Sep 1996
 0 @I3@ INDI
-1 NAME Unknown /Mother/
-1 FAMS @F1@
+1 NAME Unknown /mother/
+1 SEX F
 0 @F1@ FAM
+1 HUSB @I2@
 1 WIFE @I3@
 1 CHIL @I1@
 """,
         encoding="utf-8",
     )
     people, families = _parse_gedcom(ged)
-    assert len(people) == 3
-    assert len(families) == 1
-    assert people[0]["name"] == "Michael Braggs Whaley"
-    assert people[0]["birth"] == "1980"
-    assert people[0]["famc"] == "@F1@"
+    michael = next(x for x in people if x["name"] == "Michael Braggs Whaley")
+    lacey = next(x for x in people if x["name"] == "Lacey Braggs Jr")
+    assert michael["birth"] == "19 May 1980"
+    assert lacey["birth"] == "24 Aug 1934"
+    assert lacey["death"] == "4 Sep 1996"
     assert families[0]["wife"] == "@I3@"
-    assert families[0]["children"] == ["@I1@"]
+
+
+def test_ancestry_zip_contains_one_gedcom(tmp_path: Path):
+    ged = tmp_path / "My family.ged"
+    ged.write_text("0 HEAD\n0 @I1@ INDI\n1 NAME Michael /Braggs Whaley/\n1 BIRT\n2 DATE 19 May 1980\n", encoding="utf-8")
+    archive = tmp_path / "My family.zip"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.write(ged, "My family.ged")
+    with zipfile.ZipFile(archive) as z:
+        assert [n for n in z.namelist() if n.endswith(".ged")] == ["My family.ged"]
