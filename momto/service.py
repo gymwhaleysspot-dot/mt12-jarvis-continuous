@@ -38,6 +38,10 @@ def init_case():
    existing={x.key for x in db.query(RoadmapItem).filter_by(case_id=case.id).all()}
    for key,title,authority,_ in OHIO_ROADMAP:
     if key not in existing: db.add(RoadmapItem(case_id=case.id,key=key,title=title,authority=authority))
+   for dna_row in db.query(DnaStatus).all():
+    if dna_row.status == "not-started":
+     dna_row.status="ready-for-import"
+     dna_row.notes="DNA signal engine is active; lawful local match exports can be normalized and analyzed without publishing identities."
    db.flush()
    # Public-research progress is distinct from case completion. These states
    # never mark an external request, record receipt, DNA match, or contact as complete.
