@@ -220,8 +220,47 @@ class GenealogySearchTools:
             for pid in parent_ids:
                 p = by_id.get(pid)
                 if p:
-                    parents.append({"name": p.name, "birth_date": p.birth_date, "death_date": p.death_date, "sex": p.sex})
-            return {"focus": {"name": focus.name, "birth_date": focus.birth_date}, "parents": parents, "related_count": len(people)}
+                    parents.append({"id": p.external_id, "name": p.name, "birth_date": p.birth_date, "death_date": p.death_date, "sex": p.sex})
+            # Build a compact private graph around the focus person. The AI gets
+            # enough structure to reason over the imported tree without exposing
+            # the complete tree through the public dashboard.
+            adjacency = {}
+            for rel in rels:
+                adjacency.setdefault(rel.person_id, []).append(rel.related_person_id)
+            frontier = [focus.external_id]
+            seen = {focus.external_id}
+            for _depth in range(3):
+                nxt = []
+                for pid in frontier:
+                    for rid in adjacency.get(pid, []):
+                        if rid in by_id and rid not in seen:
+                            seen.add(rid)
+                            nxt.append(rid)
+                frontier = nxt
+                if not frontier:
+                    break
+            neighborhood = []
+            for pid in seen:
+                p = by_id.get(pid)
+                if not p:
+                    continue
+                neighborhood.append({
+                    "id": p.external_id, "name": p.name, "birth_date": p.birth_date,
+                    "death_date": p.death_date, "sex": p.sex,
+                    "family_id": p.family_id, "spouse_family_id": p.spouse_family_id,
+                })
+            edges = [
+                {"from": rel.person_id, "to": rel.related_person_id, "type": rel.relationship}
+                for rel in rels if rel.person_id in seen and rel.related_person_id in seen
+            ]
+            return {
+                "focus": {"id": focus.external_id, "name": focus.name, "birth_date": focus.birth_date},
+                "parents": parents,
+                "related_count": len(people),
+                "graph_people": neighborhood,
+                "graph_edges": edges,
+                "graph_depth": 3,
+            }
 
 
     def graph_search_plan(self, target: str = "both", limit: int = 24) -> list[dict]:
