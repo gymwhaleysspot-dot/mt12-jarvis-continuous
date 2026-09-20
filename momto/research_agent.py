@@ -9,6 +9,7 @@ from .db import SessionLocal
 from .models import Evidence, Hypothesis, SearchEvent, Task, Lead
 from .genealogy import SOURCE_CATALOG
 from .research_tools import GenealogySearchTools
+from .parent_search import build_parent_search_context, build_discriminating_searches, verify_research_chain
 
 
 def _now():
@@ -141,6 +142,8 @@ def run(limit=12):
     context = _private_context(case)
     tools = GenealogySearchTools(case.id)
     local_graph = tools.lookup_local_graph()
+    parent_context = build_parent_search_context(case.id)
+    chain = verify_research_chain(case.id)
 
     plan = _model(
         """You are MomTo, an autonomous adoption/genealogy research AI.
@@ -159,6 +162,8 @@ Keep queries focused enough to discriminate between hypotheses.""",
             "context": context,
             "local_ancestry_graph": local_graph,
             "graph_search_plan": tools.graph_search_plan("both", min(24, max(limit * 2, 12))),
+            "parent_search_context": parent_context,
+            "graph_derived_searches": build_discriminating_searches(parent_context, min(24, max(limit * 2, 12))),
             "available_sources": [
                 {k: s[k] for k in ("id", "title", "url", "lane", "record_types")}
                 for s in SOURCE_CATALOG
@@ -167,7 +172,7 @@ Keep queries focused enough to discriminate between hypotheses.""",
     )
 
     if not plan:
-        searches = tools.build_searches("both", max(limit, 8))
+        searches = build_discriminating_searches(parent_context, max(limit, 8)) or tools.build_searches("both", max(limit, 8))
         plan = {
             "research_question": "Find corroborating public evidence for the birth-mother and birth-father hypotheses.",
             "searches": searches,
@@ -182,7 +187,7 @@ Keep queries focused enough to discriminate between hypotheses.""",
     # A model response can be valid JSON but still omit usable lane-tagged searches.
     # Fall back to the deterministic genealogy plan so callers never receive an empty plan.
     if not planned:
-        fallback = tools.graph_search_plan("both", max(limit, 8))
+        fallback = build_discriminating_searches(parent_context, max(limit, 8)) or tools.graph_search_plan("both", max(limit, 8))
         if not fallback:
             fallback = tools.graph_search_plan("both", max(limit, 8))
         if not fallback:
@@ -270,6 +275,9 @@ Return JSON: {"candidates":[...], "next_searches":[...], "cautions":[...]}.""",
             "local_ancestry_people_available": local_graph.get("related_count", 0),
             "private_graph_people_loaded": len(local_graph.get("graph_people") or []),
             "private_graph_edges_loaded": len(local_graph.get("graph_edges") or []),
+            "research_chain_verified": chain.get("graph_verified", False),
+            "parent_lanes_active": chain.get("both_parent_lanes", False),
+            "graph_derived_searches_available": chain.get("discriminating_searches", 0),
         },
         "tooling": {
             "web_search": True,
@@ -279,6 +287,7 @@ Return JSON: {"candidates":[...], "next_searches":[...], "cautions":[...]}.""",
             "parallel_search_workers": min(8, max(1, len(planned))),
             "deduplication": True,
             "evidence_reconciliation": bool(synthesis),
+            "nine_step_chain": chain,
         },
         "guardrails": {
             "no_identity_invention": True,
