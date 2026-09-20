@@ -178,6 +178,15 @@ Keep queries focused enough to discriminate between hypotheses.""",
         if x.get("query") and x.get("lane") in {"birth-mother", "birth-father"}
     ][:limit]
 
+    # A model response can be valid JSON but still omit usable lane-tagged searches.
+    # Fall back to the deterministic genealogy plan so callers never receive an empty plan.
+    if not planned:
+        fallback = tools.build_searches("both", max(limit, 8))
+        planned = fallback[:limit]
+        plan["cautions"] = list(plan.get("cautions") or []) + [
+            "Model plan contained no usable lane-tagged searches; deterministic genealogy search plan is active."
+        ]
+
     results = []
     for item in planned:
         lane = item["lane"]
