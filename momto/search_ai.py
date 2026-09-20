@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from .db import SessionLocal
 from .models import SearchEvent, Evidence, Hypothesis, Task
 from .ops import workspace_report
+from .genealogy import public_research_catalog, case_research_plan
 
 SEARCH_DOMAINS = (
     "odh-file","non-id","contact-pref","registry","court","dna",
@@ -56,7 +57,10 @@ def generate_plan(limit: int = 20) -> list[dict]:
     return plan[:max(1,limit)]
 
 def cycle(limit: int = 20) -> dict:
+    from .service import init_case
+    case = init_case()
     plan = generate_plan(limit)
+    genealogy = case_research_plan(case, limit=limit)
     now = datetime.now(timezone.utc).isoformat()
     return {
         "engine":"momto-search-ai-v1",
@@ -65,6 +69,8 @@ def cycle(limit: int = 20) -> dict:
         "plan":plan,
         "learning":learn(),
         "workspace":workspace_report(),
+        "genealogy": genealogy,
+        "public_research_catalog": public_research_catalog(),
         "guardrails":{
             "human_review":True,
             "no_private_data_publication":True,
