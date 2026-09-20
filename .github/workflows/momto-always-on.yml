@@ -80,6 +80,7 @@ jobs:
                   previous = {}
 
           snapshot = momto_live()
+          dna_signals = snapshot.get("dna_signals") or {"providers":[],"match_count":0,"signal_count":0,"strong_signal_count":0,"clusters":0}
           now = datetime.now(timezone.utc)
           source_checks = json.loads(Path("artifacts/source-checks.json").read_text(encoding="utf-8"))
 
@@ -159,7 +160,7 @@ jobs:
               "contact-pref": "ready",
               "registry": "ready",
               "court": "ready",
-              "dna": "awaiting-user-data",
+              "dna": "ready-for-import",
               "public-records": "ready",
               "professional": "ready-for-human-review",
           }
@@ -169,7 +170,7 @@ jobs:
               "contact-pref": "Current law identifies contact-preference and name-redaction forms; private file must be requested to determine whether one exists.",
               "registry": "Registry/mutual-consent lane activated for lawful research; no private registration or contact was performed.",
               "court": "Ohio Supreme Court adoption/probate forms and local-court path verified; county/case details remain private case inputs.",
-              "dna": "Ready for lawful user-supplied DNA data; no account access, private matches, or identities were collected.",
+              "dna": "DNA analysis engine is active; imported lawful match files are processed locally and aggregate signals are published without identities.",
               "public-records": "Public-record research lane activated; future searches must remain lawful and privacy-safe.",
               "professional": "Professional-review lane prepared for questions that require case-specific legal advice or records-access interpretation.",
           }
@@ -237,7 +238,8 @@ jobs:
           snapshot["activity"] = prior_activity
           if previous.get("case"): snapshot["case"] = previous["case"]
           if previous.get("objectives"): snapshot["objectives"] = previous["objectives"]
-          if previous.get("dna"): snapshot["dna"] = previous["dna"]
+          snapshot["dna"] = dna_signals.get("providers", [])
+          snapshot["dna_match_signals"] = {k:dna_signals.get(k,0) for k in ("match_count","signal_count","strong_signal_count","clusters")}
           snapshot["counts"] = prior_counts
           snapshot["advanced"] = prior_advanced
           snapshot["search_ai"] = prior_search_ai
