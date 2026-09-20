@@ -10,6 +10,13 @@ MomTo uses these public genealogy/agent projects as **reference inputs**, not as
 | GedcomMCP | https://github.com/airy10/GedcomMCP | GEDCOM creation/edit/query and relationship analysis | Relationship graph and future GEDCOM validation/export work |
 | gedcom-mcp | https://github.com/sjmatta/gedcom-mcp | Structured GEDCOM queries and semantic-search patterns | Fast local graph lookup plus source search |
 | gramps-mcp | https://github.com/cabout-me/gramps-mcp | Rich genealogy database tool surface | Provider-neutral tool contracts and extensible source routing |
+| FamilySearch GEDCOM | https://github.com/FamilySearch/GEDCOM | GEDCOM standard and validation | Import normalization and future GEDCOM 7 validation |
+| Gramps Web | https://github.com/gramps-project/gramps-web | Web genealogy/tree model | Private graph browsing and evidence navigation |
+| Gramps Web API | https://github.com/gramps-project/gramps-web-api | Structured genealogy API | Future private graph API adapter |
+| webtrees | https://github.com/fisharebest/webtrees | Relationship traversal, search, citations | Relationship-path and citation-aware research |
+| GEDCOM Navigator | https://github.com/ajkessel/gedcom-navigator | Fuzzy names, FAN research, relationship paths | Fuzzy identity variants and lateral-family searches |
+| Genea Web | https://github.com/satvikgosai/genea-web | Local/privacy-first GEDCOM | Private local graph design |
+
 
 ## MomTo v4 design
 
@@ -26,3 +33,24 @@ MomTo uses these public genealogy/agent projects as **reference inputs**, not as
 ## Git provenance
 
 Reference repositories were checked on 2026-09-19. The registry records repository identity and intended capability only; MomTo does not claim that any reference project's code is part of MomTo.
+
+
+## Added in the all-toolkit integration
+
+MomTo now registers all identified open-source genealogy toolkits as capability references and
+implements the useful ideas natively rather than copying third-party runtime code:
+
+- **GEDCOM correctness:** preserve the imported graph as the authoritative private source and
+  prepare it for stricter GEDCOM validation.
+- **Fuzzy identity:** generate alternate spellings/orderings and discriminate by dates/places.
+- **Relationship paths:** inspect parent, spouse, sibling, grandparent and collateral paths
+  before treating a candidate as meaningful.
+- **FAN research:** search friends/associates/neighbors/extended-family signals around each
+  birth-parent lane.
+- **Timeline consistency:** compare dates and residences instead of relying on name matches alone.
+- **Duplicate/contradiction review:** keep possible duplicate people and conflicting facts as
+  review items rather than silently merging them.
+- **Privacy-first graph:** private tree contents remain local; public output remains aggregate-only.
+
+These are MomTo-native implementations inspired by the referenced projects. Their source code is
+not copied into MomTo.
