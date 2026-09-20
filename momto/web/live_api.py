@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
-from ..service import case_summary,workspace_report,ranked_next_actions,live_activity,search_ai_cycle,enhancement_summary,enhancement_wave
+from ..service import case_summary,workspace_report,ranked_next_actions,live_activity,search_ai_cycle,enhancement_summary,enhancement_wave,init_case
 from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom, AncestryRelationship
 from ..db import SessionLocal
 from ..case_vault import CaseVault, VaultError
@@ -23,7 +23,7 @@ def momto_live():
 
 def _ancestry_relationship_count() -> int:
  with SessionLocal() as db:
-  return db.query(AncestryRelationship).filter_by(case_id=__import__("momto.service",fromlist=["init_case"]).init_case().id).count()
+  return db.query(AncestryRelationship).filter_by(case_id=init_case().id).count()
 
 @router.post("/api/momto/ancestry/import")
 def ancestry_import(payload: dict, request: Request):
@@ -49,16 +49,16 @@ def ancestry_import(payload: dict, request: Request):
   src.write_bytes(raw)
   try:
    vault=CaseVault()
-   vault_record=vault.ingest_document(src)
    parsed, temp=_resolve_input(src)
    try:
-    people,families=_parse_gedcom(parsed)
+    _parse_gedcom(parsed)
    finally:
     if temp is not None: temp.cleanup()
+   vault_record=vault.ingest_document(src)
    imported=import_gedcom(src)
   except (VaultError,ValueError,OSError) as exc:
    raise HTTPException(status_code=400,detail=str(exc)) from exc
  return {"ok":True,"source":"Ancestry","filename":filename,"people":imported["people"],"families":imported["families"],
-         "relationships":_ancestry_relationship_count(), "focus_person":imported["focus_person"],
+         "relationships":_ancestry_relationship_count(),
          "encrypted":bool(vault_record.get("encrypted")),"private":True,
          "note":"Original upload is encrypted in CaseVault; parsed family-tree contents are local/private and excluded from public snapshots."}
