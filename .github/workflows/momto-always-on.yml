@@ -71,6 +71,7 @@ jobs:
           from momto.web.live_api import momto_live
           from momto.genealogy import SOURCE_CATALOG, public_research_catalog
           from momto.ancestry import public_summary as ancestry_public_summary
+          from momto.parent_search import verify_research_chain
 
           state_path = Path("momto-live.json")
           previous = {}
@@ -86,6 +87,9 @@ jobs:
           # Only its public-safe research plan/results are published.
           from momto.research_agent import run as research_agent_run
           snapshot["research_ai"] = research_agent_run(12)
+          # Verify the private ancestry -> graph -> two-lane research chain on every cycle.
+          from momto.service import init_case
+          snapshot["private_research_chain"] = verify_research_chain(init_case().id)
           dna_signals = snapshot.get("dna_signals") or {"providers":[],"match_count":0,"signal_count":0,"strong_signal_count":0,"clusters":0}
           ancestry_signals = snapshot.get("ancestry") or ancestry_public_summary()
           now = datetime.now(timezone.utc)
@@ -279,7 +283,8 @@ jobs:
               "cycle_count": cycle_count,
               "previous_answer_count": len(prior_answers),
               "state_source": "public-safe aggregate snapshot",
-              "private_case_data_persisted": False,
+              "private_case_data_persisted": bool(snapshot.get("private_research_chain", {}).get("people", 0)),
+              "private_worker_scope": "same-runtime-private-db" if snapshot.get("private_research_chain", {}).get("people", 0) else "no-private-tree-loaded",
           }
           snapshot["heartbeat"] = {
               "status": "running",
@@ -296,6 +301,8 @@ jobs:
           assert snapshot["enhancements"]["total"] == 5000
           assert snapshot["enhancements"]["public_safe"] is True
           assert snapshot["heartbeat"]["status"] == "running"
+          assert "private_research_chain" in snapshot
+          assert "candidate_rule" in snapshot["private_research_chain"]
           assert "birth_name" not in snapshot
           PY
       - name: Publish fresh public-safe snapshot
