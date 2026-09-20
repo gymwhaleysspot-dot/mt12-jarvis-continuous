@@ -8,7 +8,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 from ..service import case_summary,workspace_report,ranked_next_actions,live_activity,search_ai_cycle,enhancement_summary,enhancement_wave
-from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom
+from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom, AncestryRelationship
+from ..db import SessionLocal
 from ..case_vault import CaseVault, VaultError
 router=APIRouter()
 
@@ -19,6 +20,10 @@ def momto_live():
   "ohio":{"state":"Ohio","roadmap":s["roadmap"],"roadmap_progress":s["roadmap_progress"],"official_sources":["https://codes.ohio.gov/ohio-revised-code/section-3107.38","https://codes.ohio.gov/ohio-revised-code/section-3107.66","https://codes.ohio.gov/ohio-revised-code/section-3705.12"]},
   "dna":s["dna"],"dna_signals":s["dna_signals"],"counts":{"leads":s["lead_count"],"contacts":s["contact_count"],"searches":s["search_count"],"evidence":s["evidence_count"],"hypotheses":s["hypothesis_count"],"open_tasks":s["open_task_count"]},
   "advanced":{**s["advanced"],"workspace":workspace_report()["coverage"]},"next_actions":ranked_next_actions(),"activity":live_activity(25),"search_ai":search_ai_cycle(20),"enhancements":enhancement_summary(),"enhancement_wave":enhancement_wave(25)}
+
+def _ancestry_relationship_count() -> int:
+ with SessionLocal() as db:
+  return db.query(AncestryRelationship).filter_by(case_id=__import__("momto.service",fromlist=["init_case"]).init_case().id).count()
 
 @router.post("/api/momto/ancestry/import")
 def ancestry_import(payload: dict, request: Request):
@@ -54,6 +59,6 @@ def ancestry_import(payload: dict, request: Request):
   except (VaultError,ValueError,OSError) as exc:
    raise HTTPException(status_code=400,detail=str(exc)) from exc
  return {"ok":True,"source":"Ancestry","filename":filename,"people":imported["people"],"families":imported["families"],
-         "relationships":imported["people"] and (imported["people"]*0), "focus_person":imported["focus_person"],
+         "relationships":_ancestry_relationship_count(), "focus_person":imported["focus_person"],
          "encrypted":bool(vault_record.get("encrypted")),"private":True,
          "note":"Original upload is encrypted in CaseVault; parsed family-tree contents are local/private and excluded from public snapshots."}
