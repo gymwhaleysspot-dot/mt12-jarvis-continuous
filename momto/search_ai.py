@@ -64,6 +64,8 @@ def cycle(limit: int = 20) -> dict:
     from . import dna
     dna_state = dna.autonomous_cycle()
     dna_public = dna.public_summary()
+    from . import ancestry
+    ancestry_state = ancestry.autonomous_cycle(__import__("os").environ.get("MOMTO_ANCESTRY_IMPORT_DIR"))
     now = datetime.now(timezone.utc).isoformat()
     return {
         "engine":"momto-search-ai-v1",
@@ -75,6 +77,7 @@ def cycle(limit: int = 20) -> dict:
         "genealogy": genealogy,
         "public_research_catalog": public_research_catalog(),
         "dna": dna_public,
+        "ancestry": ancestry_state,
         "guardrails":{
             "human_review":True,
             "no_private_data_publication":True,
