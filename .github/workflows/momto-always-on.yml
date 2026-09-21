@@ -63,6 +63,20 @@ jobs:
               checks.append(row)
           open("artifacts/source-checks.json","w").write(json.dumps(checks,indent=2)+"\n")
           PY
+      - name: Run persistent private backend research cycle
+        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}
+        env:
+          MOMTO_PRIVATE_API_URL: ${{ secrets.MOMTO_PRIVATE_API_URL }}
+          MOMTO_API_TOKEN: ${{ secrets.MOMTO_API_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+          base="${MOMTO_PRIVATE_API_URL%/}"
+          auth=(-H "Authorization: Bearer ${MOMTO_API_TOKEN}")
+          curl --fail-with-body --silent --show-error "${auth[@]}" "${base}/api/momto/private/status" > artifacts/private-status.json
+          curl --fail-with-body --silent --show-error -X POST "${auth[@]}" "${base}/api/momto/private/research/enqueue" > artifacts/private-job-enqueue.json
+          curl --fail-with-body --silent --show-error -X POST "${auth[@]}" "${base}/api/momto/private/research/run" > artifacts/private-research-run.json
+          curl --fail-with-body --silent --show-error "${auth[@]}" "${base}/api/momto/private/research/status" > artifacts/private-research-status.json
+
       - name: Run MomTo persistent live/search cycle
         env:
           PYTHONPATH: .
@@ -309,7 +323,7 @@ jobs:
           assert "candidate_rule" in snapshot["private_research_chain"]
           assert "birth_name" not in snapshot
           PY
-      - name: Publish fresh public-safe snapshot
+      - name: Project private backend state into public-safe snapshot\n        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}\n        run: |\n          set -Eeuo pipefail\n          python - <<'PY'\n          import json\n          from pathlib import Path\n          snap=Path("momto-live.json")\n          status=Path("artifacts/private-status.json")\n          if snap.exists() and status.exists():\n              public=json.loads(snap.read_text())\n              private=json.loads(status.read_text())\n              chain=private.get("research_chain") or {}\n              public["private_research_chain"]=chain\n              public.setdefault("persistence",{})["private_worker_scope"]="persistent-private-backend"\n              public["persistence"]["private_case_data_persisted"]=bool(chain.get("people"))\n              snap.write_text(json.dumps(public,indent=2,sort_keys=True)+"\\n")\n          PY\n      - name: Publish fresh public-safe snapshot
         run: |
           set -Eeuo pipefail
           git config user.name "MomTo Always-On Worker"
