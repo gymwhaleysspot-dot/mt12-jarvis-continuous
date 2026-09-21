@@ -228,6 +228,23 @@ def build_discriminating_searches(context: dict, limit: int = 24) -> list[dict]:
             (f'"{focus}" siblings grandparents Ohio', "FAN collateral network"),
             (f'"{focus}" obituary marriage death Ohio', "timeline/negative check"),
         ]
+        # Expand unresolved-parent searches through every known parent and
+        # nearby family anchor. This is especially important when the unknown
+        # mother's name is absent from indexed records for the adoptee.
+        known_parents = context.get("known_parents") or []
+        for parent in known_parents[:4]:
+            pname = parent.get("name") or ""
+            if pname:
+                variants.extend([
+                    (f'"{focus}" "{pname}" {role}', "known-parent relationship anchor"),
+                    (f'"{pname}" spouse children family Ohio', "known-parent household"),
+                    (f'"{pname}" marriage obituary children Ohio', "known-parent life-event record"),
+                ])
+        for anchor in terms[1:9]:
+            variants.extend([
+                (f'"{anchor}" "{focus}" {role} Ohio', "collateral-anchor cross-check"),
+                (f'"{anchor}" "{focus}" children family Ohio', "parent-child collateral check"),
+            ])
         for anchor in terms[1:5]:
             variants.append(
                 (f'"{anchor}" "{focus}" {role} Ohio', "collateral-anchor cross-check")
