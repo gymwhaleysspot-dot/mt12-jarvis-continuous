@@ -136,8 +136,23 @@ def build_parent_search_context(case_id: int) -> dict:
             anchors.append(p.birth_date)
     anchors = tuple(dict.fromkeys(anchors))[:32]
 
+    # Resolve imported parent relationships before creating research lanes.
+    # A parent already present in the private tree is displayed as known and is
+    # never sent back through the "find parent" search lane.
+    def _sex(p: AncestryPerson) -> str:
+        return _norm(getattr(p, "sex", ""))[:1]
+
+    known_father = next((p for p in known_parents if _sex(p) == "m"), None)
+    known_mother = next((p for p in known_parents if _sex(p) == "f"), None)
+
     lanes = []
-    for lane, role in (("birth-mother", "mother"), ("birth-father", "father")):
+    unresolved = []
+    for lane, role, known in (
+        ("birth-mother", "mother", known_mother),
+        ("birth-father", "father", known_father),
+    ):
+        if known is not None:
+            continue
         terms = [focus.name]
         if focus.birth_date:
             terms.append(focus.birth_date)
@@ -152,6 +167,7 @@ def build_parent_search_context(case_id: int) -> dict:
                 search_terms=tuple(dict.fromkeys(terms)),
             )
         )
+        unresolved.append(role)
 
     return {
         "loaded": True,
@@ -165,6 +181,25 @@ def build_parent_search_context(case_id: int) -> dict:
         "people": len(people),
         "relationships": len(rels),
         "known_parent_count": len(known_parents),
+        "known_parents": [
+            {
+                "id": p.external_id,
+                "name": p.name,
+                "sex": getattr(p, "sex", ""),
+                "birth_date": p.birth_date,
+                "death_date": p.death_date,
+            }
+            for p in known_parents
+        ],
+        "known_father": (
+            {"id": known_father.external_id, "name": known_father.name}
+            if known_father else None
+        ),
+        "known_mother": (
+            {"id": known_mother.external_id, "name": known_mother.name}
+            if known_mother else None
+        ),
+        "unresolved_parent_roles": unresolved,
         "collateral_count": len(collateral),
         "lanes": [
             {
@@ -216,7 +251,7 @@ def verify_research_chain(case_id: int) -> dict:
         "graph_verified": context.get("graph_verified", False),
         "people": context.get("people", 0),
         "relationships": context.get("relationships", 0),
-        "both_parent_lanes": len(context.get("lanes", [])) == 2,
+        "unresolved_parent_lanes": len(context.get("lanes", [])),
         "discriminating_searches": len(build_discriminating_searches(context)),
         "candidate_rule": "No candidate becomes a parent conclusion without independent corroboration.",
     }
