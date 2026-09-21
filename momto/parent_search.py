@@ -45,14 +45,62 @@ def build_parent_search_context(case_id: int) -> dict:
         focus = next((p for p in people if "michael" in _norm(p.name)), None)
 
     if focus is None:
+        # The public/always-on worker may not have the user's private GEDCOM.
+        # Never fall back to an empty-name query. Seed the two research lanes
+        # from the persistent case identity, while clearly marking that the
+        # Ancestry graph itself is not loaded.
+        from .models import Case
+        with SessionLocal() as db:
+            case = db.query(Case).filter_by(id=case_id).first()
+        if case is None:
+            return {
+                "loaded": bool(people),
+                "focus_found": False,
+                "people": len(people),
+                "relationships": len(rels),
+                "lanes": [],
+                "graph_verified": False,
+                "reason": "No case identity is available.",
+            }
+        focus_name = case.birth_name or case.current_name or "Michael Whaley"
+        focus_birth = str(case.birth_year or "")
+        lanes = []
+        for lane, role in (("birth-mother", "mother"), ("birth-father", "father")):
+            lanes.append(
+                ParentLane(
+                    lane=lane,
+                    role=role,
+                    known_parent_count=0,
+                    collateral_count=0,
+                    search_terms=tuple(x for x in (focus_name, focus_birth) if x),
+                )
+            )
         return {
-            "loaded": bool(people),
-            "focus_found": False,
+            "loaded": False,
+            "focus_found": True,
+            "focus": {
+                "id": "case-identity",
+                "name": focus_name,
+                "birth_date": focus_birth,
+                "death_date": "",
+            },
             "people": len(people),
             "relationships": len(rels),
-            "lanes": [],
+            "known_parent_count": 0,
+            "collateral_count": 0,
+            "lanes": [
+                {
+                    "lane": x.lane,
+                    "role": x.role,
+                    "known_parent_count": x.known_parent_count,
+                    "collateral_count": x.collateral_count,
+                    "search_terms": list(x.search_terms),
+                }
+                for x in lanes
+            ],
             "graph_verified": False,
-            "reason": "No Michael focus person was found in the imported tree.",
+            "guardrail": "Case identity is a search seed only; imported-tree relationships are research anchors, not biological-parent conclusions.",
+            "reason": "Private Ancestry graph is not loaded; using persistent case identity as fallback search seed.",
         }
 
     parent_edges = [
