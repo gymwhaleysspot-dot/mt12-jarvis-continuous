@@ -1,0 +1,18 @@
+app = "momto-private"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[mounts]
+  source = "momto_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+
+[[vm]]
+  memory = "512mb"
