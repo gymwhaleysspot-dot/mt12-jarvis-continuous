@@ -52,3 +52,29 @@ def test_ancestry_zip_contains_one_gedcom(tmp_path: Path):
         z.write(ged, "My family.ged")
     with zipfile.ZipFile(archive) as z:
         assert [n for n in z.namelist() if n.endswith(".ged")] == ["My family.ged"]
+
+
+def test_ancestry_multiple_families_preserve_each_pedigree(tmp_path: Path):
+    ged = tmp_path / "multiple-families.ged"
+    ged.write_text(
+        """0 HEAD
+0 @I1@ INDI
+1 NAME Michael /Braggs/
+1 FAMC @F1@
+2 PEDI birth
+1 FAMC @F2@
+2 PEDI adopted
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+0 @F2@ FAM
+1 HUSB @I4@
+1 WIFE @I5@
+1 CHIL @I1@
+""",
+        encoding="utf-8",
+    )
+    people, _ = _parse_gedcom(ged)
+    michael = next(x for x in people if x["name"] == "Michael Braggs")
+    assert michael["famc_pedi_by_family"] == {"@F1@": "birth", "@F2@": "adopted"}
