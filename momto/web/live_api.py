@@ -13,7 +13,7 @@ from ..service import (
     case_summary, workspace_report, ranked_next_actions, live_activity,
     search_ai_cycle, enhancement_summary, enhancement_wave, init_case,
 )
-from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom, AncestryPerson, AncestryRelationship
+from ..ancestry import import_gedcom, import_local_tree_bundle, _resolve_input, _parse_gedcom, AncestryPerson, AncestryRelationship
 from ..db import SessionLocal
 from ..case_vault import CaseVault, VaultError
 from ..parent_search import verify_research_chain, build_parent_search_context
@@ -96,6 +96,29 @@ async def ancestry_import(request: Request):
             "relationships":_ancestry_relationship_count(),"encrypted":bool(vault_record.get("encrypted")),"private":True,
             "research_chain":verify_research_chain(init_case().id),
             "note":"Original upload is encrypted in CaseVault; parsed family-tree contents are private and excluded from public snapshots."}
+
+
+@router.post("/api/momto/ancestry/recover-local")
+async def ancestry_recover_local(request: Request):
+    """Recover the already-imported browser tree into the private backend."""
+    _require_private_auth(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Expected JSON private tree bundle.") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Invalid private tree bundle.")
+    try:
+        result = import_local_tree_bundle(payload)
+        return {
+            "ok": True,
+            **result,
+            "private": True,
+            "research_chain": verify_research_chain(init_case().id),
+            "note": "Recovered from the existing browser-private tree; nothing was published.",
+        }
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/api/momto/private/graph")
