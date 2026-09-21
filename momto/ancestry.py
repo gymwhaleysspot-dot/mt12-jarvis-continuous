@@ -72,6 +72,7 @@ def _parse_gedcom(path: Path) -> tuple[list[dict], list[dict]]:
     current = None
     current_type = None
     event = None
+    famc_context = None
     with path.open("r", encoding="utf-8-sig", errors="replace") as fh:
         for raw in fh:
             line = raw.rstrip("\r\n")
@@ -84,8 +85,9 @@ def _parse_gedcom(path: Path) -> tuple[list[dict], list[dict]]:
             if level == 0:
                 current = None
                 event = None
+                famc_context = None
                 if ident and tag == "INDI":
-                    current = {"id": ident, "name": "", "birth": "", "death": "", "sex": "", "famc": "", "fams": []}
+                    current = {"id": ident, "name": "", "birth": "", "death": "", "sex": "", "famc": "", "famc_pedi": "", "famc_pedi_by_family": {}, "fams": []}
                     people.append(current); current_type = "INDI"
                 elif ident and tag == "FAM":
                     current = {"id": ident, "husb": "", "wife": "", "children": []}
@@ -100,6 +102,11 @@ def _parse_gedcom(path: Path) -> tuple[list[dict], list[dict]]:
                     current["sex"] = _clean(value)
                 elif level == 1 and tag == "FAMC":
                     current["famc"] = _clean(value)
+                    famc_context = current["famc"]
+                elif level == 2 and tag == "PEDI" and famc_context:
+                    pedigree = _clean(value).lower()
+                    current["famc_pedi"] = pedigree
+                    current["famc_pedi_by_family"][famc_context] = pedigree
                 elif level == 1 and tag == "FAMS":
                     current["fams"].append(_clean(value))
                 elif level == 1:
@@ -163,9 +170,12 @@ def import_gedcom(path: str | Path) -> dict:
         for family in families:
             parents = [x for x in (family.get("husb"), family.get("wife")) if x]
             for child in family.get("children", []):
+                child_row = next((x for x in people if x["id"] == child), None)
+                pedigree = (child_row or {}).get("famc_pedi_by_family", {}).get(family["id"], "").lower()
+                relationship = "adoptive_parent" if pedigree == "adopted" else "parent"
                 for parent in parents:
                     if parent in ids and child in ids:
-                        db.add(AncestryRelationship(case_id=cid, person_id=child, related_person_id=parent, relationship="parent"))
+                        db.add(AncestryRelationship(case_id=cid, person_id=child, related_person_id=parent, relationship=relationship))
             if len(parents) == 2:
                 db.add(AncestryRelationship(case_id=cid, person_id=parents[0], related_person_id=parents[1], relationship="spouse"))
                 db.add(AncestryRelationship(case_id=cid, person_id=parents[1], related_person_id=parents[0], relationship="spouse"))
