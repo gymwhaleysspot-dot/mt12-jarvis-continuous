@@ -191,6 +191,81 @@ def import_gedcom(path: str | Path) -> dict:
     return {"source": "Ancestry", "people": len(people), "families": len(families), "focus_person": focus_name}
 
 
+def import_local_tree_bundle(bundle: dict) -> dict:
+    """Import the browser's previously parsed private tree without requiring the original ZIP again."""
+    people = bundle.get("people") or []
+    families = bundle.get("families") or []
+    relationships = bundle.get("relationships") or []
+    if not isinstance(people, list) or not isinstance(families, list) or not isinstance(relationships, list):
+        raise ValueError("Invalid private tree bundle.")
+    if len(people) > 100000 or len(families) > 50000 or len(relationships) > 250000:
+        raise ValueError("Private tree bundle exceeds safety limits.")
+    cid = _case_id()
+    from .advanced import audit
+    from .models import Evidence
+    from .db import engine
+    Base.metadata.create_all(engine)
+    with SessionLocal() as db:
+        db.query(AncestryPerson).filter_by(case_id=cid).delete()
+        db.query(AncestryTree).filter_by(case_id=cid).delete()
+        db.query(AncestryRelationship).filter_by(case_id=cid).delete()
+        ids = set()
+        for row in people:
+            pid = _clean(str(row.get("id") or ""))
+            if not pid or pid in ids:
+                continue
+            ids.add(pid)
+            db.add(AncestryPerson(
+                case_id=cid, external_id=pid, name=_clean(str(row.get("name") or "")),
+                birth_date=_clean(str(row.get("birth") or row.get("birth_date") or "")),
+                death_date=_clean(str(row.get("death") or row.get("death_date") or "")),
+                sex=_clean(str(row.get("sex") or "")),
+                family_id=_clean(str(row.get("famc") or row.get("family_id") or "")),
+                spouse_family_id=_clean(str(row.get("fams") or row.get("spouse_family_id") or "")),
+                living=not bool(row.get("death") or row.get("death_date")),
+            ))
+        focus = next((p for p in people if re.search(r"michael", str(p.get("name") or ""), re.I)
+                      and re.search(r"(braggs|whaley)", str(p.get("name") or ""), re.I)), None)
+        focus_name = _clean(str((focus or {}).get("name") or ""))
+        db.add(AncestryTree(
+            case_id=cid,
+            source_file=_clean(str(bundle.get("filename") or "browser-private-tree")),
+            person_count=len(ids),
+            family_count=len(families),
+            focus_person=focus_name,
+        ))
+        for rel in relationships:
+            if not isinstance(rel, dict):
+                continue
+            left = _clean(str(rel.get("from") or rel.get("person_id") or ""))
+            right = _clean(str(rel.get("to") or rel.get("related_person_id") or ""))
+            typ = _clean(str(rel.get("type") or rel.get("relationship") or "parent"))
+            if left in ids and right in ids and typ in {"parent", "adoptive_parent", "spouse"}:
+                db.add(AncestryRelationship(
+                    case_id=cid, person_id=left, related_person_id=right, relationship=typ
+                ))
+        db.add(Evidence(
+            case_id=cid, title="Recovered private Ancestry tree",
+            evidence_type="genealogy-tree", source="Browser private Ancestry cache",
+            summary=f"Recovered {len(ids)} people and {len(families)} family records from the user's existing local private tree.",
+            supports="Restores the private relationship graph without requiring a second Ancestry ZIP upload.",
+            reference=_clean(str(bundle.get("filename") or "browser-private-tree")),
+        ))
+        audit(db, cid, "recover", "ancestry_tree", focus_name or "browser-private-tree",
+              f"people={len(ids)} families={len(families)} relationships={len(relationships)}")
+        db.commit()
+    return {
+        "source": "Ancestry",
+        "people": len(ids),
+        "families": len(families),
+        "relationships": len([r for r in relationships if isinstance(r, dict)
+                              and str(r.get("from") or r.get("person_id") or "") in ids
+                              and str(r.get("to") or r.get("related_person_id") or "") in ids]),
+        "focus_person": focus_name,
+        "recovered": True,
+    }
+
+
 def record_observation(observation_key: str, value: str, source: str = "Ancestry screenshot", certainty: str = "observed") -> dict:
     cid = _case_id()
     from .advanced import audit
