@@ -1,0 +1,86 @@
+name: MomTo Private Service Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'momto/**'
+      - 'render.yaml'
+      - 'fly.toml'
+      - '.github/workflows/momto-private-service-build.yml'
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'momto/**'
+      - 'render.yaml'
+      - 'fly.toml'
+      - '.github/workflows/momto-private-service-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install MomTo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ./momto
+          python -m pip install pytest
+
+      - name: Run private-service tests
+        env:
+          MOMTO_API_TOKEN: test-token
+          MOMTO_VAULT_KEY: ${{ secrets.MOMTO_VAULT_KEY }}
+        run: |
+          set -Eeuo pipefail
+          pytest -q momto/tests/test_private_api.py momto/tests/test_job_queue.py
+
+      - name: Build container
+        run: docker build --pull -t momto-private:${{ github.sha }} .
+
+      - name: Smoke-test container
+        run: |
+          set -Eeuo pipefail
+          key="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+          docker run -d --rm --name momto-private-smoke \
+            -e MOMTO_API_TOKEN=test-token \
+            -e MOMTO_VAULT_KEY="$key" \
+            -p 18000:8000 \
+            momto-private:${{ github.sha }}
+          trap 'docker logs momto-private-smoke || true; docker stop momto-private-smoke || true' EXIT
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18000/healthz > /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Publish image to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          REGISTRY: ghcr.io
+          IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/momto-private
+        run: |
+          set -Eeuo pipefail
+          echo "${{ github.token }}" | docker login "$REGISTRY" -u "${{ github.actor }}" --password-stdin
+          docker tag momto-private:${{ github.sha }} "${IMAGE_NAME}:latest"
+          docker tag momto-private:${{ github.sha }} "${IMAGE_NAME}:${{ github.sha }}"
+          docker push "${IMAGE_NAME}:latest"
+          docker push "${IMAGE_NAME}:${{ github.sha }}"
