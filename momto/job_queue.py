@@ -61,5 +61,5 @@ def fail(job_id:int,lease_token:str,error:str,retry:bool=True)->dict:
 def serialize(row:ResearchJob)->dict:
     return {"id":row.id,"case_id":row.case_id,"status":row.status,"attempts":row.attempts,
             "payload":json.loads(row.payload_json or "{}"),"result":json.loads(row.result_json or "{}"),
-            "error":row.error,"created_at":row.created_at.isoformat() if row.created_at else None,
+            "error":row.error,"lease_token":row.lease_token,"created_at":row.created_at.isoformat() if row.created_at else None,
             "updated_at":row.updated_at.isoformat() if row.updated_at else None}
