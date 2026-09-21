@@ -20,6 +20,21 @@ class ParentSearchTests(unittest.TestCase):
         self.assertTrue(all(x["graph_derived"] for x in searches))
         self.assertTrue(all(x["provider"] == "web" for x in searches))
 
+    def test_known_parent_drives_relationship_searches(self):
+        context = {
+            "focus": {"name": "Michael Braggs", "birth_date": "1980"},
+            "known_parents": [{"name": "Lacey Braggs", "sex": "M"}],
+            "lanes": [
+                {"lane": "birth-mother", "role": "mother",
+                 "search_terms": ["Michael Braggs", "Lacey Braggs", "Shirley Example"]},
+            ],
+        }
+        searches = build_discriminating_searches(context, 24)
+        queries = [x["query"] for x in searches]
+        self.assertTrue(any('"Lacey Braggs" spouse children family Ohio' == q for q in queries))
+        self.assertTrue(any('"Lacey Braggs" marriage obituary children Ohio' == q for q in queries))
+        self.assertTrue(any('"Lacey Braggs" "Michael Braggs" children family Ohio' == q for q in queries))
+
     def test_searches_are_capped(self):
         context = {
             "lanes": [
