@@ -17,6 +17,7 @@ from ..ancestry import import_gedcom, _resolve_input, _parse_gedcom, AncestryPer
 from ..db import SessionLocal
 from ..case_vault import CaseVault, VaultError
 from ..parent_search import verify_research_chain, build_parent_search_context
+from ..job_queue import enqueue, claim, finish, fail
 
 router=APIRouter()
 MAX_UPLOAD_BYTES=25*1024*1024
@@ -119,3 +120,37 @@ def private_status(request: Request):
     _require_private_auth(request)
     chain=verify_research_chain(init_case().id)
     return {"private":True,"ancestry_loaded":bool(chain.get("people")),"people":chain.get("people",0),"relationships":chain.get("relationships",0),"research_chain":chain}
+
+
+@router.post("/api/momto/private/research/enqueue")
+def research_enqueue(request: Request):
+    _require_private_auth(request)
+    cid=init_case().id
+    return {"ok":True,"job":enqueue(cid,{"source":"private-api","requested_at":"now"})}
+
+@router.post("/api/momto/private/research/run")
+def research_run(request: Request):
+    _require_private_auth(request)
+    cid=init_case().id
+    job=claim(cid)
+    if job is None:
+        return {"ok":True,"status":"idle","message":"No queued research job."}
+    try:
+        from ..research_agent import run as research_agent_run
+        result=research_agent_run(int(job["payload"].get("limit",12)))
+        chain=verify_research_chain(cid)
+        result={"research":result,"private_research_chain":chain}
+        return {"ok":True,"status":"running","job":finish(job["id"],job["lease_token"],result)}
+    except Exception as exc:
+        failed=fail(job["id"],job["lease_token"],f"{type(exc).__name__}: {exc}",retry=True)
+        raise HTTPException(status_code=500,detail={"message":"Research cycle failed","job":failed}) from exc
+
+@router.get("/api/momto/private/research/status")
+def research_status(request: Request):
+    _require_private_auth(request)
+    cid=init_case().id
+    from ..db import SessionLocal
+    from ..job_queue import ResearchJob, serialize
+    with SessionLocal() as db:
+        rows=db.query(ResearchJob).filter_by(case_id=cid).order_by(ResearchJob.id.desc()).limit(20).all()
+        return {"private":True,"jobs":[serialize(row) for row in rows]}
