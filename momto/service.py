@@ -22,6 +22,25 @@ def _roadmap_progress(items):
  actionable=counts.get("ready",0)+counts.get("ready-for-human-review",0)+counts.get("awaiting-user-data",0)
  return {"total":total,"complete":complete,"activated":activated,"actionable":actionable,"percent_complete":round(complete*100/total) if total else 0,"percent_activated":round(activated*100/total) if total else 0,"by_status":counts}
 
+def _seed_bragg_maternal_research(db, case):
+ """Seed the private Braggs maternal-search evidence and unresolved household lead."""
+ existing={x.title for x in db.query(Evidence).filter_by(case_id=case.id).all()}
+ refs=[
+  ("1938 Cincinnati directory — Lacey (Mary) Braggs household","directory","Cincinnati Public Library","Lacey (Mary) is listed at 666 Linn with Hattie Braggs, widow of Frank. This establishes an early Cincinnati Lacey/Mary household record but does not independently prove the full maternal chain.","Supports the working Lacey/Mary family anchor.","https://apps.cincinnatilibrary.org/citydirectory/WilliamsCincinnatiDirectory_1938_Pt01.pdf"),
+  ("1947 Cincinnati directory — Lacey Braggs","directory","Cincinnati Public Library","Lacey Braggs is listed at 3583 Vine Ave.","Supports continued Cincinnati residence of a Lacey Braggs.","https://apps.cincinnatilibrary.org/citydirectory/WilliamsCincinnatiCityDirectory91771780025qW722c1947_Part5.pdf"),
+  ("1955 Cincinnati directory — Lacey Jr. (Shirley) at 3624 Dawson","directory","Cincinnati Public Library","The directory lists Lacey (Mary L.) at 3624 Dawson Ave. and Lacey Jr. (Shirley), USAF, at the same address.","Supports a documented 1955 association between Lacey Jr. and a person identified only as Shirley, and the Lacey/Mary household address.","https://apps.cincinnatilibrary.org/citydirectory/WilliamsCintiCityDirectory_917717800525qW722c1955_Part1.pdf"),
+  ("1964 Hamilton County deed index — Lacey Braggs","property-record","Hamilton County Recorder","A Lacey Braggs transaction appears in the 1964 deed index.","Supports a later public-record trail for the Braggs surname; relationship details remain unresolved.","https://recordersoffice.hamilton-co.org/deed_indexes/di1942trter.pdf"),
+ ]
+ for title,etype,source,summary,supports,ref in refs:
+  if title not in existing: db.add(Evidence(case_id=case.id,title=title,evidence_type=etype,source=source,summary=summary,supports=supports,reference=ref))
+ if "Lacey Jr. maternal household bridge (1955–1980)" not in {x.title for x in db.query(Lead).filter_by(case_id=case.id).all()}:
+  db.add(Lead(case_id=case.id,relationship_type="birth_mother",source="Cincinnati historical directory household reconstruction",summary="Primary unresolved bridge: identify the Shirley associated with Lacey Jr. in 1955, reconstruct Lacey Jr.'s household through 1978–1980, and test any resulting woman against Michael Braggs, born May 19, 1980 in Cincinnati.",status="active",confidence="unrated",reference="1955 Cincinnati directory: https://apps.cincinnatilibrary.org/citydirectory/WilliamsCintiCityDirectory_917717800525qW722c1955_Part1.pdf",next_action="Search 1960s–1981 Cincinnati directories, marriage/death/newspaper records, and the private Ancestry graph for Lacey Jr., Shirley, and the 1978–1980 household."))
+ if "Michael Braggs birth-mother identity remains unproven" not in {x.title for x in db.query(Hypothesis).filter_by(case_id=case.id).all()}:
+  db.add(Hypothesis(case_id=case.id,title="Michael Braggs birth-mother identity remains unproven",status="open",confidence="unrated",supporting_count=0,contradicting_count=0,unknowns="Identity of the 1955 Shirley; Lacey Jr.'s 1978–1980 address and household; independent parentage record for Michael Braggs.",next_evidence="1978–1981 Cincinnati city directories, marriage records, newspapers/birth announcements, and private Ancestry relationship evidence."))
+ if "Reconstruct Lacey Jr. household 1955–1980" not in {x.title for x in db.query(Task).filter_by(case_id=case.id).all()}:
+  db.add(Task(case_id=case.id,title="Reconstruct Lacey Jr. household 1955–1980",priority="high",notes="Keep Shirley unresolved until surname/relationship is independently established. Exclude Shirley Price unless a Cincinnati/Lacey Jr. connection is documented. Exclude Frankie Braggs from maternal inference because the case record identifies Frankie as paternal aunt."))
+ db.flush()
+
 def init_case():
  from . import dna
  Base.metadata.create_all(engine)
