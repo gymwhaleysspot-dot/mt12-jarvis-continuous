@@ -1,4 +1,4 @@
-import{state,subscribe,refresh,setWorkspace,runMission,syncMT12,metrics,health,latestGeneration,selectedGeneration,selectGeneration,producerState,planner,evidence,intelligence,hypothesisMap}from'./state.js?v=20260919producer3';
+import{state,subscribe,refresh,setWorkspace,runMission,syncMT12,metrics,health,latestGeneration,selectedGeneration,selectGeneration,producerState,planner,evidence,intelligence,hypothesisMap}from'./state.js?v=20260925producer4';
 import{GitHubAPI as api}from'./api.js';
 import'./survivor-tab.js?v=20260814production104';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
