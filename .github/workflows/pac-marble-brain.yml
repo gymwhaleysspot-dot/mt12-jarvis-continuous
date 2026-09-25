@@ -60,13 +60,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3 4 5; do
+            # The training artifacts are working-tree changes. Rebase/reset cannot
+            # operate with those changes present, so preserve them outside Git,
+            # synchronize to the newest main, then restore and publish them.
+            tmp_dir="$(mktemp -d)"
+            cp brain.json "$tmp_dir/brain.json"
+            cp maze-brain.json "$tmp_dir/maze-brain.json"
             git fetch origin main
-            git rebase origin/main || {
-              git rebase --abort || true
-              echo "rebase conflict; retrying"
-              sleep 3
-              continue
-            }
+            git reset --hard origin/main
+            cp "$tmp_dir/brain.json" brain.json
+            cp "$tmp_dir/maze-brain.json" maze-brain.json
+            rm -rf "$tmp_dir"
+
             git add brain.json maze-brain.json
             if git diff --cached --quiet; then
               echo "brains already published"
@@ -77,7 +82,11 @@ jobs:
               echo "published both brains on attempt $attempt"
               exit 0
             fi
+
+            # Another writer won the race. Keep the generated artifacts, discard
+            # the failed local commit, and retry from the new main.
             git reset --soft HEAD~1
+            git reset -- brain.json maze-brain.json
             echo "publish raced another main update; retrying"
             sleep 3
           done
