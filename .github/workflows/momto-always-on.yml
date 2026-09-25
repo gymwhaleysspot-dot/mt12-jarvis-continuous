@@ -342,8 +342,7 @@ jobs:
               public["private_research_chain"]=chain
               public.setdefault("persistence",{})["private_worker_scope"]="persistent-private-backend"
               public["persistence"]["private_case_data_persisted"]=bool(chain.get("people"))
-              snap.write_text(json.dumps(public,indent=2,sort_keys=True)+"\
-")
+              snap.write_text(json.dumps(public,indent=2,sort_keys=True)+"\\n")
           PY
       - name: Publish fresh public-safe snapshot
         run: |
