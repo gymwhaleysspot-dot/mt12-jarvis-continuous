@@ -1,0 +1,19 @@
+name: Pac-Marble Brain Evolution
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17,47 * * * *"
+permissions:
+  contents: write
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/pac_marble_brain.py
+      - name: Save brain
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "Evolve Pac-Marble persistent AI brain"
+          file_pattern: brain.json
