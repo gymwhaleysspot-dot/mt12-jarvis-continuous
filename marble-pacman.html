@@ -44,6 +44,7 @@ canvas{border:2px solid #5e75ff;border-radius:13px;box-shadow:0 0 16px #2f62ff,i
 <style>
 <!-- TRUE 3D MAZE UPGRADE 2026-09-25 -->
 <!-- PERSISTENT AI BRAIN 2026-09-25 -->
+<!-- PERSISTENT AI MAZE BUILDER 2026-09-25 -->
 body{perspective:1200px}
 .frame{transform:perspective(1100px) rotateX(2deg);transform-style:preserve-3d}
 #game{transform:translateZ(12px);transform-style:preserve-3d}
@@ -58,7 +59,7 @@ body{perspective:1200px}
 </main>
 <script>
 const C=document.getElementById('game'),X=C.getContext('2d'),T=28,S=C.width/T,TAU=Math.PI*2;
-const rows=[
+const FALLBACK_ROWS=[
 "############################",
 "#............##............#",
 "#.####.#####.##.#####.####.#",
@@ -86,7 +87,7 @@ const rows=[
 "######.#####.##.#####.######",
 "#............##............#",
 "#..........................#",
-"############################"].map(r=>[...r].map(c=>c==="#"?1:0));
+"############################"].map(r=>[...r].map(c=>c==="#"?1:0));\nlet rows=FALLBACK_ROWS;\nlet mazeBrain={version:1,generation:0,levels_built:0,levels:[]};\nlet mazeBrainReady=false;\nasync function loadMazeBrain(){\n  try{\n    const r=await fetch("maze-brain.json?v="+Date.now(),{cache:"no-store"});\n    if(r.ok){const b=await r.json(); if(Array.isArray(b.levels)&&b.levels.length){mazeBrain=b; mazeBrainReady=true; const n=Math.min(level,b.levels.length)-1; const m=b.levels[n]; if(Array.isArray(m)&&m.length===T) rows=m.map(r=>[...r].map(c=>c==="#"?1:0));}}\n  }catch(e){}\n  const el=document.getElementById("aiStats"); if(el) el.textContent="AI: persistent player brain • persistent maze builder • "+(mazeBrainReady?("MAZE GEN "+Number(mazeBrain.generation||0).toLocaleString()+" • LEVELS "+mazeBrain.levels.length):"MAZE BUILDER FALLBACK");\n}
 const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
 
 // PERSISTENT BRAIN: learned policy is stored in brain.json and loaded when the game opens.
@@ -185,5 +186,5 @@ function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loo
 addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
 document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}hud()});
 document.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("pointerdown",()=>{let m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};next=m[b.dataset.d]}));
-hud();reset();loadBrain();requestAnimationFrame(loop);
+loadMazeBrain().then(()=>{hud();reset();loadBrain();requestAnimationFrame(loop)});
 </script></body></html>
