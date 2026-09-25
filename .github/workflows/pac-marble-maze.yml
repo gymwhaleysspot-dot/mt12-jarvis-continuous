@@ -1,0 +1,25 @@
+name: Pac-Marble Maze AI Evolution
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/pac_marble_maze.py"
+      - ".github/workflows/pac-marble-maze.yml"
+      - "marble-pacman.html"
+  schedule:
+    - cron: "07,37 * * * *"
+permissions:
+  contents: write
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and evolve AI mazes
+        run: python3 tools/pac_marble_maze.py
+      - name: Save maze brain
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "Evolve Pac-Marble persistent AI maze brain"
+          file_pattern: maze-brain.json
