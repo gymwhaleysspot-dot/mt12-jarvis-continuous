@@ -120,7 +120,7 @@ let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},las
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
 function hide(){document.getElementById('panel').classList.remove('show')}
 function hud(){document.getElementById("score").textContent=String(score).padStart(6,"0");document.getElementById("level").textContent=level;document.getElementById("lives").textContent="●".repeat(lives)+"○".repeat(3-lives);document.getElementById("mode").textContent=ai?"AI":"HUMAN"}
-function reset(){
+function selectMazeForLevel(){\n  if(!mazeBrainReady||!Array.isArray(mazeBrain.levels)||!mazeBrain.levels.length)return;\n  const m=mazeBrain.levels[(level-1)%mazeBrain.levels.length];\n  if(Array.isArray(m)&&m.length===T)rows=m.map(r=>[...r].map(c=>c==="#"?1:0));\n}\nfunction reset(){
  p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};powered=0;pellets.clear();powers.clear();
  for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(open(x,y)&&!(x==14&&y>=24))pellets.add(id(x,y));
  [[1,1],[26,1],[1,26],[26,26]].forEach(([x,y])=>powers.add(id(x,y)));
