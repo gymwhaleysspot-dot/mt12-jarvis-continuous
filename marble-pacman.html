@@ -87,7 +87,17 @@ const FALLBACK_ROWS=[
 "######.#####.##.#####.######",
 "#............##............#",
 "#..........................#",
-"############################"].map(r=>[...r].map(c=>c==="#"?1:0));\nlet rows=FALLBACK_ROWS;\nlet mazeBrain={version:1,generation:0,levels_built:0,levels:[]};\nlet mazeBrainReady=false;\nasync function loadMazeBrain(){\n  try{\n    const r=await fetch("maze-brain.json?v="+Date.now(),{cache:"no-store"});\n    if(r.ok){const b=await r.json(); if(Array.isArray(b.levels)&&b.levels.length){mazeBrain=b; mazeBrainReady=true; const n=Math.min(level,b.levels.length)-1; const m=b.levels[n]; if(Array.isArray(m)&&m.length===T) rows=m.map(r=>[...r].map(c=>c==="#"?1:0));}}\n  }catch(e){}\n  const el=document.getElementById("aiStats"); if(el) el.textContent="AI: persistent player brain • persistent maze builder • "+(mazeBrainReady?("MAZE GEN "+Number(mazeBrain.generation||0).toLocaleString()+" • LEVELS "+mazeBrain.levels.length):"MAZE BUILDER FALLBACK");\n}
+"############################"].map(r=>[...r].map(c=>c==="#"?1:0));
+let rows=FALLBACK_ROWS;
+let mazeBrain={version:1,generation:0,levels_built:0,levels:[]};
+let mazeBrainReady=false;
+async function loadMazeBrain(){
+  try{
+    const r=await fetch("maze-brain.json?v="+Date.now(),{cache:"no-store"});
+    if(r.ok){const b=await r.json(); if(Array.isArray(b.levels)&&b.levels.length){mazeBrain=b; mazeBrainReady=true; const n=Math.min(level,b.levels.length)-1; const m=b.levels[n]; if(Array.isArray(m)&&m.length===T) rows=m.map(r=>[...r].map(c=>c==="#"?1:0));}}
+  }catch(e){}
+  const el=document.getElementById("aiStats"); if(el) el.textContent="AI: persistent player brain • persistent maze builder • "+(mazeBrainReady?("MAZE GEN "+Number(mazeBrain.generation||0).toLocaleString()+" • LEVELS "+mazeBrain.levels.length):"MAZE BUILDER FALLBACK");
+}
 const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
 
 // PERSISTENT BRAIN: learned policy is stored in brain.json and loaded when the game opens.
@@ -120,7 +130,12 @@ let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},las
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
 function hide(){document.getElementById('panel').classList.remove('show')}
 function hud(){document.getElementById("score").textContent=String(score).padStart(6,"0");document.getElementById("level").textContent=level;document.getElementById("lives").textContent="●".repeat(lives)+"○".repeat(3-lives);document.getElementById("mode").textContent=ai?"AI":"HUMAN"}
-function selectMazeForLevel(){\n  if(!mazeBrainReady||!Array.isArray(mazeBrain.levels)||!mazeBrain.levels.length)return;\n  const m=mazeBrain.levels[(level-1)%mazeBrain.levels.length];\n  if(Array.isArray(m)&&m.length===T)rows=m.map(r=>[...r].map(c=>c==="#"?1:0));\n}\nfunction reset(){
+function selectMazeForLevel(){
+  if(!mazeBrainReady||!Array.isArray(mazeBrain.levels)||!mazeBrain.levels.length)return;
+  const m=mazeBrain.levels[(level-1)%mazeBrain.levels.length];
+  if(Array.isArray(m)&&m.length===T)rows=m.map(r=>[...r].map(c=>c==="#"?1:0));
+}
+function reset(){
  p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};powered=0;pellets.clear();powers.clear();
  for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(open(x,y)&&!(x==14&&y>=24))pellets.add(id(x,y));
  [[1,1],[26,1],[1,26],[26,26]].forEach(([x,y])=>powers.add(id(x,y)));
