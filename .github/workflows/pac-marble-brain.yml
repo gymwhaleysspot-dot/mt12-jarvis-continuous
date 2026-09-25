@@ -1,6 +1,11 @@
 name: Pac-Marble Brain Evolution
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "tools/pac_marble_brain.py"
+      - ".github/workflows/pac-marble-brain.yml"
+      - "marble-pacman.html"
   schedule:
     - cron: "17,47 * * * *"
 permissions:
