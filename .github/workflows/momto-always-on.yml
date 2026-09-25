@@ -26,6 +26,9 @@ jobs:
   live:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      MOMTO_PRIVATE_API_URL: ${{ secrets.MOMTO_PRIVATE_API_URL }}
+      MOMTO_API_TOKEN: ${{ secrets.MOMTO_API_TOKEN }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -64,7 +67,7 @@ jobs:
           open("artifacts/source-checks.json","w").write(json.dumps(checks,indent=2)+"\n")
           PY
       - name: Run persistent private backend research cycle
-        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}
+        if: ${{ env.MOMTO_PRIVATE_API_URL != '' && env.MOMTO_API_TOKEN != '' }}
         env:
           MOMTO_PRIVATE_API_URL: ${{ secrets.MOMTO_PRIVATE_API_URL }}
           MOMTO_API_TOKEN: ${{ secrets.MOMTO_API_TOKEN }}
@@ -324,7 +327,7 @@ jobs:
           assert "birth_name" not in snapshot
           PY
       - name: Project private backend state into public-safe snapshot
-        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}
+        if: ${{ env.MOMTO_PRIVATE_API_URL != '' && env.MOMTO_API_TOKEN != '' }}
         run: |
           set -Eeuo pipefail
           python - <<'PY'
