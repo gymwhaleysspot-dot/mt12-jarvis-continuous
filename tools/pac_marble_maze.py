@@ -17,6 +17,37 @@ W = H = 28
 START = (14, 26)
 GHOST_CELLS = {(13, 12), (14, 12), (15, 12)}
 CRITICAL = GHOST_CELLS | {(14, 24), (14, 25), START}
+
+STARTER_ROWS = [
+    "############################",
+    "#..........................#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.####..######.#####..####.#",
+    "#..........................#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.#..#######..########..##.#",
+    "#..........................#",
+    "#.....#......#......#......#",
+    "#.....#.............#......#",
+    "#.....#......#......#......#",
+    "#.####..######.#####..####.#",
+    "#..........................#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.#..#######..########..##.#",
+    "#..........................#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#.####..######.#####..####.#",
+    "#.....#......#......#......#",
+    "#.....#......#......#......#",
+    "#..........................#",
+    "############################",
+]
 DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
 
@@ -174,13 +205,25 @@ def build_level(rng, candidates, existing):
     return max(pool,key=score)
 
 
+def starter_maze():
+    g = [[1 if c == "#" else 0 for c in row] for row in STARTER_ROWS]
+    if not valid_maze(g):
+        raise RuntimeError("starter maze failed validation")
+    return g
+
+
 def main():
     rng = random.Random(int(time.time_ns() ^ os.getpid()))
     candidates = max(40,int(os.environ.get("PAC_MAZE_CANDIDATES","120")))
     count = max(1,int(os.environ.get("PAC_MAZE_LEVELS","12")))
     previous = load_previous()
     levels, best_score = [], 0.0
-    for i in range(count):
+    # Level 1 is deliberately fixed: an open, symmetric, multi-route
+    # Pac-Man-style starter so the player can always complete the first maze.
+    first = starter_maze()
+    levels.append(level_strings(first))
+    best_score = score(first)
+    for i in range(1, count):
         best = build_level(rng,candidates,previous[i:i+1])
         levels.append(level_strings(best))
         best_score = max(best_score,score(best))
