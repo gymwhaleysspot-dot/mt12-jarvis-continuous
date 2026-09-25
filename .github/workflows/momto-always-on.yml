@@ -323,7 +323,26 @@ jobs:
           assert "candidate_rule" in snapshot["private_research_chain"]
           assert "birth_name" not in snapshot
           PY
-      - name: Project private backend state into public-safe snapshot\n        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}\n        run: |\n          set -Eeuo pipefail\n          python - <<'PY'\n          import json\n          from pathlib import Path\n          snap=Path("momto-live.json")\n          status=Path("artifacts/private-status.json")\n          if snap.exists() and status.exists():\n              public=json.loads(snap.read_text())\n              private=json.loads(status.read_text())\n              chain=private.get("research_chain") or {}\n              public["private_research_chain"]=chain\n              public.setdefault("persistence",{})["private_worker_scope"]="persistent-private-backend"\n              public["persistence"]["private_case_data_persisted"]=bool(chain.get("people"))\n              snap.write_text(json.dumps(public,indent=2,sort_keys=True)+"\\n")\n          PY\n      - name: Publish fresh public-safe snapshot
+      - name: Project private backend state into public-safe snapshot
+        if: ${{ secrets.MOMTO_PRIVATE_API_URL != '' && secrets.MOMTO_API_TOKEN != '' }}
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          snap=Path("momto-live.json")
+          status=Path("artifacts/private-status.json")
+          if snap.exists() and status.exists():
+              public=json.loads(snap.read_text())
+              private=json.loads(status.read_text())
+              chain=private.get("research_chain") or {}
+              public["private_research_chain"]=chain
+              public.setdefault("persistence",{})["private_worker_scope"]="persistent-private-backend"
+              public["persistence"]["private_case_data_persisted"]=bool(chain.get("people"))
+              snap.write_text(json.dumps(public,indent=2,sort_keys=True)+"\
+")
+          PY
+      - name: Publish fresh public-safe snapshot
         run: |
           set -Eeuo pipefail
           git config user.name "MomTo Always-On Worker"
