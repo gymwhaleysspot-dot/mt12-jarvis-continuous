@@ -21,15 +21,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: python3 tools/pac_marble_brain.py
-      - name: Rebase latest main before saving brain
+      - name: Rebase latest main before training
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git rebase origin/main
-      - name: Save brain
+      - run: python3 tools/pac_marble_brain.py
+      - name: Validate and save brain
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Evolve Pac-Marble persistent AI brain"
           file_pattern: brain.json
+      - name: Verify saved brain
+        run: python3 -c 'import json; d=json.load(open("brain.json")); assert isinstance(d.get("q"),dict); assert d.get("version")==2'
