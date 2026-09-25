@@ -20,11 +20,31 @@ canvas{width:100%;height:auto;display:block;border-radius:10px;background:#000}
 /* AI PLAYER */
 #aiToggle{margin-top:10px;width:min(420px,100%);height:46px;border:2px solid #ffd400;border-radius:14px;background:#101331;color:#ffe84a;font-weight:900;letter-spacing:.06em}
 #aiStats{font-size:11px;opacity:.7;margin-top:6px}
+
+/* EPIC ARCADE BOARD */
+body{background:#000;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1}
+body:before{background:radial-gradient(circle at 50% 35%,#171c68 0,transparent 34%),radial-gradient(circle at 15% 80%,#55135b 0,transparent 28%),radial-gradient(circle at 85% 70%,#0b5470 0,transparent 30%)}
+.wrap{filter:drop-shadow(0 18px 45px #000)}
+h1{font-size:clamp(28px,8vw,54px);text-shadow:0 0 8px #fff200,0 0 22px #ff9d00,0 0 48px #ff3c00;animation:titlePulse 1.8s infinite alternate}
+@keyframes titlePulse{to{filter:brightness(1.25);letter-spacing:.14em}}
+.hud{background:linear-gradient(90deg,#090b2b,#15113b,#090b2b);border:1px solid #343da5;border-radius:12px;padding:8px 12px;box-shadow:inset 0 0 18px #111b66,0 0 18px #111a55}
+.frame{padding:10px;border:3px solid #455cff;border-radius:22px;background:linear-gradient(135deg,#090a22,#020208);box-shadow:0 0 0 2px #11164d,0 0 24px #294cff,0 0 70px #7c24ff55,inset 0 0 35px #18268f}
+canvas{border:2px solid #5e75ff;border-radius:13px;box-shadow:0 0 16px #2f62ff,inset 0 0 25px #000;image-rendering:auto}
+.controls button,#aiToggle{box-shadow:0 0 12px #2639a8,inset 0 0 15px #161b5c;transition:.15s}
+.controls button:hover,#aiToggle:hover{transform:translateY(-2px);box-shadow:0 0 20px #536cff}
+#aiToggle{font-size:13px}
+#aiStats{color:#93b9ff}
+.panel{border-color:#ffe84a;box-shadow:0 0 12px #fff000,0 0 45px #ff6a0055}
+</style>
+<style>
+/* EPIC BOARD EFFECTS */
+#game{background:radial-gradient(circle,#090b2a,#000)}
 </style>
 </head>
 <body><main class="wrap">
 <h1>PAC-MARBLE</h1>
-<div class="hud"><span>SCORE <b id="score">000000</b></span><span>LEVEL <b id="level">1</b></span><span>MARBLES <b id="lives">●●●</b></span></div>
+<div class="hud"><span>🏆 SCORE <b id="score">000000</b></span><span>⚡ LEVEL <b id="level">1</b></span><span>❤️ <b id="lives">●●●</b></span><span>🤖 <b id="mode">HUMAN</b></span></div>
 <div class="frame"><canvas id="game" width="560" height="560"></canvas><div class="overlay"><div id="panel" class="panel"><strong id="message">READY!</strong><div style="margin-top:7px">Choose a direction</div></div></div></div>
 <div class="controls"><button class="blank">.</button><button data-d="up">▲</button><button class="blank">.</button><button data-d="left">◀</button><button data-d="down">▼</button><button data-d="right">▶</button></div>
 <button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI: BFS maze pathfinding • pellet targeting • power-marble strategy • hunter avoidance</div><div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
@@ -65,7 +85,7 @@ let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0,ai=fals
 let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},last=0;
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
 function hide(){document.getElementById('panel').classList.remove('show')}
-function hud(){document.getElementById('score').textContent=String(score).padStart(6,"0");document.getElementById('level').textContent=level;document.getElementById('lives').textContent="●".repeat(lives)+"○".repeat(3-lives)}
+function hud(){document.getElementById("score").textContent=String(score).padStart(6,"0");document.getElementById("level").textContent=level;document.getElementById("lives").textContent="●".repeat(lives)+"○".repeat(3-lives);document.getElementById("mode").textContent=ai?"AI":"HUMAN"}
 function reset(){
  p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};powered=0;pellets.clear();powers.clear();
  for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(open(x,y)&&!(x==14&&y>=24))pellets.add(id(x,y));
@@ -119,16 +139,16 @@ function update(){
 }
 function resetPos(){p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};ghosts.forEach((g,i)=>{g.x=13+i;g.y=12;g.dx=i? -1:1;g.dy=0;g.f=0})}
 function draw(){
- X.clearRect(0,0,C.width,C.height);X.fillStyle="#010107";X.fillRect(0,0,C.width,C.height);
- for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(rows[y][x]){X.fillStyle="#101d82";X.fillRect(x*S,y*S,S,S);X.strokeStyle="#2e78ff";X.lineWidth=1;X.strokeRect(x*S+1,y*S+1,S-2,S-2)}
- X.shadowBlur=0;X.fillStyle="#ffe98a";pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T);X.beginPath();X.arc((x+.5)*S,(y+.5)*S,1.7,0,TAU);X.fill()});
+ X.clearRect(0,0,C.width,C.height);let bg=X.createRadialGradient(C.width/2,C.height/2,30,C.width/2,C.height/2,C.width*.72);bg.addColorStop(0,"#10134a");bg.addColorStop(.55,"#03041a");bg.addColorStop(1,"#000006");X.fillStyle=bg;X.fillRect(0,0,C.width,C.height);
+ for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(rows[y][x]){X.fillStyle="#0b135c";X.fillRect(x*S,y*S,S,S);X.strokeStyle="#294dff";X.lineWidth=1.2;X.strokeRect(x*S+1,y*S+1,S-2,S-2);X.strokeStyle="#1728a0";X.strokeRect(x*S+4,y*S+4,S-8,S-8)}
+ X.globalAlpha=.22;X.strokeStyle="#405cff";X.lineWidth=1;for(let i=0;i<18;i++){X.beginPath();X.moveTo(0,i*S*2);X.lineTo(C.width,i*S*2);X.stroke()}X.globalAlpha=1;X.shadowBlur=0;X.fillStyle="#ffe98a";pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T);X.beginPath();X.arc((x+.5)*S,(y+.5)*S,1.7,0,TAU);X.fill()});
  powers.forEach(k=>{let x=k%T,y=Math.floor(k/T),r=4+Math.sin(Date.now()/120)*1.3;X.fillStyle="#fff35a";X.shadowBlur=13;X.shadowColor="#ffe000";X.beginPath();X.arc((x+.5)*S,(y+.5)*S,r,0,TAU);X.fill();X.shadowBlur=0});
  let px=(p.x+.5)*S,py=(p.y+.5)*S,r=S*.37,g=X.createRadialGradient(px-r*.35,py-r*.4,2,px,py,r);g.addColorStop(0,"#fffbd1");g.addColorStop(.3,"#ffe43d");g.addColorStop(.75,"#ff9700");g.addColorStop(1,"#b92f00");X.fillStyle=g;X.beginPath();X.arc(px,py,r,0,TAU);X.fill();
  ghosts.forEach(q=>{let x=(q.x+.5)*S,y=(q.y+.5)*S,r=S*.34;X.fillStyle=q.f?"#6976ff":q.c;X.shadowBlur=10;X.shadowColor=X.fillStyle;X.beginPath();X.arc(x,y,r,0,TAU);X.fill();X.shadowBlur=0;X.fillStyle="#fff";X.beginPath();X.arc(x-r*.28,y-r*.1,r*.18,0,TAU);X.arc(x+r*.28,y-r*.1,r*.18,0,TAU);X.fill();X.fillStyle="#111";X.beginPath();X.arc(x-r*.23,y-r*.08,r*.08,0,TAU);X.arc(x+r*.33,y-r*.08,r*.08,0,TAU);X.fill()})
 }
 function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loop)}
 addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
-document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}});
+document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}hud()});
 document.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("pointerdown",()=>{let m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};next=m[b.dataset.d]}));
 hud();reset();requestAnimationFrame(loop);
 </script></body></html>
