@@ -43,6 +43,7 @@ canvas{border:2px solid #5e75ff;border-radius:13px;box-shadow:0 0 16px #2f62ff,i
 </style>
 <style>
 <!-- TRUE 3D MAZE UPGRADE 2026-09-25 -->
+<!-- PERSISTENT AI BRAIN 2026-09-25 -->
 body{perspective:1200px}
 .frame{transform:perspective(1100px) rotateX(2deg);transform-style:preserve-3d}
 #game{transform:translateZ(12px);transform-style:preserve-3d}
@@ -87,6 +88,32 @@ const rows=[
 "#..........................#",
 "############################"].map(r=>[...r].map(c=>c==="#"?1:0));
 const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
+
+// PERSISTENT BRAIN: learned policy is stored in brain.json and loaded when the game opens.
+// The brain itself evolves independently through the scheduled headless self-play trainer.
+let brain={version:1,episodes:0,epsilon:.18,q:{}},brainReady=false,brainStatus="LOCAL POLICY";
+async function loadBrain(){
+  try{
+    const r=await fetch("brain.json?v="+Date.now(),{cache:"no-store"});
+    if(r.ok){brain=await r.json();brainReady=true;brainStatus="PERSISTENT BRAIN • "+Number(brain.episodes||0).toLocaleString()+" EPISODES";}
+  }catch(e){brainStatus="LOCAL FALLBACK";}
+  const el=document.getElementById("aiStats"); if(el)el.textContent="AI: persistent Q-brain • self-play evolution • maze pathfinding • danger prediction • "+brainStatus;
+}
+function brainState(){
+  const gs=ghosts.map(g=>Math.min(9,Math.abs(p.x-g.x)+Math.abs(p.y-g.y))).sort((a,b)=>a-b);
+  let pd=9,fd=9;
+  powers.forEach(k=>{const x=k%T,y=Math.floor(k/T);pd=Math.min(pd,Math.abs(x-p.x)+Math.abs(y-p.y))});
+  pellets.forEach(k=>{const x=k%T,y=Math.floor(k/T);fd=Math.min(fd,Math.abs(x-p.x)+Math.abs(y-p.y))});
+  return p.x+","+p.y+","+dir.x+","+dir.y+","+gs.join("|")+","+Math.min(9,pd)+","+Math.min(9,fd)+","+(powered?1:0);
+}
+function brainAction(){
+  const q=brain.q?.[brainState()]; if(!q)return null;
+  const ds=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}], candidates=ds.map((d,i)=>({d,i})).filter(o=>can(p,o.d));
+  if(!candidates.length)return null;
+  candidates.sort((a,b)=>(q[b.i]??0)-(q[a.i]??0));
+  return candidates[0].d;
+}
+
 let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0,ai=false,aiMoves=0,aiTarget=null,aiThink=0;
 let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},last=0;
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
@@ -126,7 +153,7 @@ function aiPlan(){
 }
 function update(){
  if(paused||ready||over)return;
- if(ai){if(++aiThink%3===0||!aiTarget)aiPlan();aiChoose()}
+ if(ai){if(++aiThink%3===0||!aiTarget)aiPlan(); const learned=brainAction(); if(learned)next=learned; else aiChoose()}
  if(can(p,next))dir=next;
  if(!can(p,dir))dir={x:0,y:0};
  p.x+=dir.x;p.y+=dir.y;
@@ -158,5 +185,5 @@ function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loo
 addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
 document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}hud()});
 document.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("pointerdown",()=>{let m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};next=m[b.dataset.d]}));
-hud();reset();requestAnimationFrame(loop);
+hud();reset();loadBrain();requestAnimationFrame(loop);
 </script></body></html>
