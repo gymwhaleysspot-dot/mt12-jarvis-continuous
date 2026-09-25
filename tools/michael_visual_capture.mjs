@@ -42,7 +42,9 @@ try{
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   for(const view of views){
     log(`view ${view}`);
-    await page.locator(`[data-view="${view}"]`).click({force:true,noWaitAfter:true,timeout:opTimeout});
+    const viewButton=page.locator(`[data-view="${view}"]`);
+    await viewButton.scrollIntoViewIfNeeded({timeout:opTimeout});
+    await viewButton.click({force:true,noWaitAfter:true,timeout:opTimeout});
     await page.waitForFunction(view=>document.querySelector(`[data-view="${view}"]`)?.classList.contains('active'),view,{timeout:opTimeout});
     const data=await page.evaluate(async()=>{await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const c=document.querySelector('#raceCanvas');if(!c||c.width<16||c.height<16)throw new Error('invalid raceCanvas');return c.toDataURL('image/png')});
     const comma=data.indexOf(',');if(comma<0)throw new Error(`invalid canvas data URL for ${view}`);
