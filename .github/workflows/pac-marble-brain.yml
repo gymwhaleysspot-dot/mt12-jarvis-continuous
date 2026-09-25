@@ -53,8 +53,33 @@ jobs:
           print("player brain:", brain["states"], "states,", brain["episodes"], "episodes")
           print("maze brain:", len(levels), "validated levels, generation", maze.get("generation"))
           PY
-      - name: Save both brains atomically
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: "Evolve Pac-Marble player and maze brains"
-          file_pattern: "brain.json maze-brain.json"
+      - name: Publish both brains with retry
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || {
+              git rebase --abort || true
+              echo "rebase conflict; retrying"
+              sleep 3
+              continue
+            }
+            git add brain.json maze-brain.json
+            if git diff --cached --quiet; then
+              echo "brains already published"
+              exit 0
+            fi
+            git commit -m "Evolve Pac-Marble player and maze brains"
+            if git push origin HEAD:main; then
+              echo "published both brains on attempt $attempt"
+              exit 0
+            fi
+            git reset --soft HEAD~1
+            echo "publish raced another main update; retrying"
+            sleep 3
+          done
+          echo "failed to publish brain artifacts after retries"
+          exit 1
