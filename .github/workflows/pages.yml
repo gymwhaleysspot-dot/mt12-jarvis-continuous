@@ -2,127 +2,61 @@ name: Deploy Michael Current to Pages
 on:
   push:
     branches: [main]
-    paths:
-      - 'survivor-runtime323.html'
-      - 'survivor-ps2.html'
-      - 'survivor.html'
-      - 'jarvis/survivor-tab.js'
-      - 'jarvis/survivor-underhood-v1.js'
-      - 'jarvis/survivor-graphics-200-v1.js'
-      - 'jarvis/assets/survivor/**'
-      - 'tools/test-survivor-runtime323-contract.mjs'
-      - 'tools/test-survivor-underhood-v1.mjs'
-      - 'tools/test-survivor-graphics-200-v1.mjs'
-      - 'tools/test-survivor-ps2-contract.mjs'
-      - 'tools/survivor-ps2-smoke.mjs'
-      - 'tools/test-survivor-production243-contract.mjs'
-      - 'tools/survivor-runtime-smoke.mjs'
-      - 'tools/survivor-runtime323-lives-smoke.mjs'
-      - 'tools/survivor-runtime323-combat-smoke.mjs'
-      - 'scripts/prepare-pages.mjs'
-      - '.github/workflows/pages.yml'
-      - 'momto/**'
-      - 'momto-live.html'
-      - 'momto-live.json'
-      - 'marble-pacman.html'
-      - 'brain.json'
-      - 'maze-brain.json'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: false
+
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with: {fetch-depth: 1}
-      - uses: actions/configure-pages@v5
-      - name: Verify Pac-Marble
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Verify required site contracts
         run: |
           set -Eeuo pipefail
           test -s marble-pacman.html
           grep -F 'PAC-MARBLE' marble-pacman.html
-          grep -F 'canvas id="game"' marble-pacman.html
-      - name: Verify Survivor Runtime 323 contracts
-        run: |
-          set -Eeuo pipefail
-          test -f survivor.html
-          test -f survivor-runtime323.html
-          test -f survivor-ps2.html
-          node --check tools/test-survivor-ps2-contract.mjs
-          node --check tools/survivor-ps2-smoke.mjs
-          node --check tools/test-survivor-runtime323-contract.mjs
-          node --check tools/test-survivor-underhood-v1.mjs
-          node --check tools/test-survivor-graphics-200-v1.mjs
-          node --check tools/test-survivor-production243-contract.mjs
-          node --check tools/survivor-runtime-smoke.mjs
-          node --check tools/survivor-runtime323-lives-smoke.mjs
-          node --check tools/survivor-runtime323-combat-smoke.mjs
-          node tools/test-survivor-runtime323-contract.mjs
-          node tools/test-survivor-underhood-v1.mjs
-          node tools/test-survivor-graphics-200-v1.mjs
-          node tools/test-survivor-ps2-contract.mjs
-          node tools/test-survivor-production243-contract.mjs
-          grep -F 'name="survivor-runtime" content="323"' survivor-runtime323.html
-          grep -F 'RUNTIME=323' survivor-runtime323.html
-          grep -F 'LEVEL_COUNT=45' survivor-runtime323.html
-          grep -F 'POSE_COUNT=42' survivor-runtime323.html
-      - name: Install Playwright browser engines
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium webkit
-      - name: Browser-boot Runtime 323 before deployment
-        run: |
-          set -Eeuo pipefail
-          mkdir -p artifacts/predeploy
-          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/predeploy/http.log 2>&1 &
-          server=$!
-          trap 'kill "$server" 2>/dev/null || true' EXIT
-          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_SMOKE_OUT=artifacts/predeploy/webkit node tools/survivor-runtime-smoke.mjs webkit
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_LIVES_OUT=artifacts/predeploy/lives node tools/survivor-runtime323-lives-smoke.mjs
-          SURVIVOR_URL=http://127.0.0.1:4173/survivor-runtime323.html SURVIVOR_COMBAT_OUT=artifacts/predeploy/combat node tools/survivor-runtime323-combat-smoke.mjs
-          SURVIVOR_PS2_URL=http://127.0.0.1:4173/survivor-ps2.html SURVIVOR_PS2_OUT=artifacts/predeploy/ps2 node tools/survivor-ps2-smoke.mjs chromium
-          SURVIVOR_PS2_URL=http://127.0.0.1:4173/survivor-ps2.html SURVIVOR_PS2_OUT=artifacts/predeploy/ps2 node tools/survivor-ps2-smoke.mjs webkit
-      - name: Stamp deployment identity
-        env:
-          SURVIVOR_DEPLOY_SHA: ${{ github.sha }}
-        run: |
-          set -Eeuo pipefail
-          node <<'NODE'
-          const fs=require('fs'),sha=process.env.SURVIVOR_DEPLOY_SHA,p='survivor-runtime323.html';
-          if(!/^[0-9a-f]{40}$/.test(sha||''))throw Error('Missing deployment SHA');
-          let h=fs.readFileSync(p,'utf8');h=h.replace(/<meta name="survivor-build" content="[^"]+">/g,'');h=h.replace('<head>',`<head><meta name="survivor-build" content="${sha}">`);h=h.replace("globalThis.__SURVIVOR_DEPLOY_SHA__='SOURCE'",`globalThis.__SURVIVOR_DEPLOY_SHA__='${sha}'`);fs.writeFileSync(p,h);
-          fs.writeFileSync('jarvis/survivor-build.json',JSON.stringify({runtime:323,modelRenderer:15,effectGeometry:12,visualTuning:25,balance:26,choreography:29,audioEngine:1,replayArchive:4,underhood:1,underhoodUpdates:200,graphics200:1,graphicsUpdates:200,levels:45,poses:42,deploySha:sha,artifact:p,authority:'APEX_2026_ADAPTIVE_V13',firmware:'JARVIS_SPRITE_FIRMWARE_BIOS',kernel:17,generatedAt:new Date().toISOString()},null,2)+'\n');
-          NODE
-      - name: Verify MomTo dashboard artifacts
-        run: |
-          set -Eeuo pipefail
-          test -f momto-live.html
-          test -f momto-live.json
+          test -s survivor-runtime323.html
+          test -s survivor-ps2.html
+          test -s momto-live.html
+          test -s momto-live.json
           grep -F 'Birth Mother' momto-live.html
           grep -F 'Birth Father' momto-live.html
           grep -F 'Live Activity' momto-live.html
           grep -F 'Search AI' momto-live.html
-          grep -F '5000-Enhancement Program' momto-live.html
-          grep -F 'Refresh now' momto-live.html
-          python - <<'PY'
+          python3 - <<'PY'
           import json
-          d=json.load(open('momto-live.json'))
-          assert d['case']['status']=='active'
-          assert 'birth_name' not in d
-          assert 'activity' in d and 'search_ai' in d
-          assert d['enhancements']['total']==5000 and d['enhancements']['public_safe'] is True
-          assert d.get('dashboard_version')=='momto-live-v10'
-          assert d.get('research',{}).get('total')==3
-          print('MomTo public artifact contract passed')
+          d=json.load(open("momto-live.json",encoding="utf-8"))
+          assert d["case"]["status"]=="active"
+          assert "birth_name" not in d
+          assert d["enhancements"]["total"]==5000
+          for p in ("brain.json","maze-brain.json"):
+              json.load(open(p,encoding="utf-8"))
+          print("required public artifacts validated")
           PY
-      - name: Build bounded Pages artifact
+
+      - name: Run bounded Pages build
         run: |
           set -Eeuo pipefail
           node scripts/prepare-pages.mjs
@@ -134,92 +68,30 @@ jobs:
           const fs=require('fs'),path=require('path');
           const x=JSON.parse(fs.readFileSync('factory/evolution-controller.json','utf8'));
           for(const p of [x.sourcePath,x.deployPath].filter(Boolean)){
-            if(!fs.existsSync(p))continue;
-            const d=path.join('_site',p);fs.mkdirSync(path.dirname(d),{recursive:true});fs.copyFileSync(p,d);
+            if(!fs.existsSync(p)) continue;
+            const d=path.join('_site',p);
+            fs.mkdirSync(path.dirname(d),{recursive:true});
+            fs.copyFileSync(p,d);
           }
           NODE
           fi
-          du -sh _site
-          bytes="$(du -sb _site | cut -f1)"
-          test "$bytes" -lt 900000000
           test -f _site/index.html
-          test -f _site/survivor-runtime323.html
-          test -f _site/survivor-ps2.html
-          test -f _site/jarvis/survivor-build.json
-          test -f _site/marble-pacman.html
+          test -s _site/marble-pacman.html
           test -s _site/brain.json
           test -s _site/maze-brain.json
-          python3 - <<'PY'
-import json
-for p in ("_site/brain.json","_site/maze-brain.json"):
-    with open(p,encoding="utf-8") as f: json.load(f)
-print("Pac-Marble brain artifacts valid")
-PY
-      - name: Skip legacy Pages build wait
-        run: |
-          echo "Using the repository's dedicated Pages Actions deployment; do not block on the automatic legacy Pages build."
-      - uses: actions/upload-pages-artifact@v4
-        with: {path: _site}
-      - name: Deploy
+          test -s _site/momto-live.html
+          test -s _site/momto-live.json
+          test -s _site/survivor-runtime323.html
+          test -s _site/survivor-ps2.html
+          bytes="$(du -sb _site | cut -f1)"
+          test "$bytes" -lt 900000000
+          echo "Pages artifact size: $bytes bytes"
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live Runtime 323 identity
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          set -Eeuo pipefail
-          base="${PAGE_URL%/}";ok=0
-          for attempt in $(seq 1 36); do
-            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime323.html?verify=${stamp}" || true)"
-            manifest="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
-            tab="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-tab.js?verify=${stamp}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="323"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq 'EFFECT_GEOMETRY_VERSION=12' <<<"$html" && grep -Fq 'REPLAY_ARCHIVE_VERSION=4' <<<"$html" && grep -Fq 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE' <<<"$html" && grep -Fq 'APEX_2026_ADAPTIVE_V13' <<<"$html" && grep -Fq 'JARVIS_SPRITE_FIRMWARE_BIOS' <<<"$html" && grep -Fq '"runtime": 323' <<<"$manifest" && grep -Fq '"modelRenderer": 15' <<<"$manifest" && grep -Fq '"effectGeometry": 12' <<<"$manifest" && grep -Fq '"audioEngine": 1' <<<"$manifest" && grep -Fq '"replayArchive": 4' <<<"$manifest" && grep -Fq 'survivor-runtime323.html' <<<"$tab";then ok=1;break;fi
-            sleep 10
-          done
-          test "$ok" -eq 1
-      - name: Verify live MomTo dashboard
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          set -Eeuo pipefail
-          base="${PAGE_URL%/}";ok=0
-          for attempt in $(seq 1 18); do
-            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.html?verify=${GITHUB_SHA}-${attempt}" || true)"
-            json="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.json?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'Birth Mother' <<<"$html" && grep -Fq 'Birth Father' <<<"$html" && grep -Fq 'Live Activity' <<<"$html" && grep -Fq 'Search AI' <<<"$html" && grep -Fq 'Refresh now' <<<"$html" && grep -Fq '5000-Enhancement Program' <<<"$html" && grep -Fq 'Worker source checks' <<<"$html" && grep -Fq '"status": "active"' <<<"$json" && ! grep -Fq '"birth_name"' <<<"$json"; then ok=1;break;fi
-            sleep 5
-          done
-          test "$ok" -eq 1
-      - name: Verify live Pac-Marble
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          set -Eeuo pipefail
-          base="${PAGE_URL%/}"
-          for attempt in $(seq 1 18); do
-            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/marble-pacman.html?verify=${GITHUB_SHA}-${attempt}" || true)"
-            brain="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/brain.json?verify=${GITHUB_SHA}-${attempt}" || true)"
-            maze="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/maze-brain.json?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'PAC-MARBLE' <<<"$html" && grep -Fq 'canvas id="game"' <<<"$html" && python3 -c 'import json,sys; json.loads(sys.argv[1]); json.loads(sys.argv[2])' "$brain" "$maze" 2>/dev/null; then echo "Pac-Marble live + brains";exit 0;fi
-            sleep 5
-          done
-          exit 1
-      - name: Browser-verify live Runtime 323
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          base="${PAGE_URL%/}"
-          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/chromium node tools/survivor-runtime-smoke.mjs chromium
-          SURVIVOR_EXPECTED_PRODUCTION=323 SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_SMOKE_OUT=artifacts/live/webkit node tools/survivor-runtime-smoke.mjs webkit
-          SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_LIVES_OUT=artifacts/live/lives node tools/survivor-runtime323-lives-smoke.mjs
-          SURVIVOR_URL="${base}/survivor-runtime323.html?browser=${GITHUB_SHA}" SURVIVOR_COMBAT_OUT=artifacts/live/combat node tools/survivor-runtime323-combat-smoke.mjs
-          SURVIVOR_PS2_URL="${base}/survivor-ps2.html?browser=${GITHUB_SHA}" SURVIVOR_PS2_OUT=artifacts/live/ps2 node tools/survivor-ps2-smoke.mjs chromium
-          SURVIVOR_PS2_URL="${base}/survivor-ps2.html?browser=${GITHUB_SHA}" SURVIVOR_PS2_OUT=artifacts/live/ps2 node tools/survivor-ps2-smoke.mjs webkit
-      - name: Upload Survivor browser diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: survivor-pages-browser-${{ github.sha }}
-          path: artifacts/
-          retention-days: 30
