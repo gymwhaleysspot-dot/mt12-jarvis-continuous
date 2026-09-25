@@ -33,39 +33,19 @@ def load_maze_levels():
             return valid
     except Exception:
         pass
-    # A compact deterministic fallback guarantees training can proceed even
-    # when the maze artifact is temporarily absent.
-    rows = [
-        "############################",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#.#..#.#...#....#...#.#..#.#",
-        "#.####.#####.##.#####.####.#",
-        "#..........................#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.#####.##.#####.######",
-        "     #.#....    ....#.#     ",
-        "######.#.### ## ###.#.######",
-        "#..........#    #..........#",
-        "#.####.###.# ## #.###.####.#",
-        "#......#...#    #...#......#",
-        "######.#.########.#.######",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#.#..#.#...#....#...#.#..#.#",
-        "#.####.#####.##.#####.####.#",
-        "#..........................#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.#####.##.#####.######",
-        "#............##............#",
-        "#..........................#",
-        "############################",
-    ]
-    # Normalize the fallback to exactly 28 rows.
-    rows = (rows + ["#" * 28] * 28)[:28]
-    return [[[c == "#" for c in row] for row in rows]]
+    # A deterministic open-field fallback guarantees training can proceed even
+    # when the maze artifact is temporarily absent. It preserves a wall border
+    # and leaves every interior cell reachable.
+    g = [[False] * 28 for _ in range(28)]
+    for i in range(28):
+        g[0][i] = g[27][i] = True
+        g[i][0] = g[i][27] = True
+    for y in range(2, 26, 4):
+        for x in range(2, 26):
+            if y != 24:
+                g[y][x] = True
+        g[y][14] = False
+    return [g]
 
 
 def open_cell(g, x, y):
