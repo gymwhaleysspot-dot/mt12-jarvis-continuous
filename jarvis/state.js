@@ -3,10 +3,10 @@ const fixedPaths=[
  'factory/canonical-controller.json','public/builds/index.json','public/jarvis-data/active-mission.json',
  'public/jarvis-data/knowledge-graph.json','public/jarvis-data/summary.json','public/jarvis-data/experiment-plan.json',
  'public/evidence-data/sync.json','factory/memory/historical-log-index.json','factory/memory/episodes.json',
- 'factory/memory/planner-history.json','public/device-data/releases.json','research/current.json','research/questions.json'
+ 'factory/memory/planner-history.json','public/device-data/releases.json','factory/evolution-controller.json','research/current.json','research/questions.json'
 ];
 const listeners=new Set();
-export const state={capabilities:null,data:{},runs:[],rewriteRuns:[],workflows:[],releases:[],connected:false,user:null,rate:null,loading:false,error:null,updatedAt:null,workspace:'command',generations:[],canonical:null,selectedGeneration:null};
+export const state={capabilities:null,data:{},runs:[],rewriteRuns:[],workflows:[],releases:[],connected:false,user:null,rate:null,loading:false,error:null,updatedAt:null,workspace:'command',generations:[],canonical:null,selectedGeneration:null,apiHealth:'UNKNOWN'};
 export function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
 function emit(){for(const fn of listeners)fn(state)}
 export function setWorkspace(id){state.workspace=id;location.hash=id;emit()}
@@ -36,7 +36,7 @@ export async function refresh(){
   state.capabilities=await fetch('jarvis/capabilities.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(`Capabilities ${r.status}`);return r.json()});
   const calls=[api.runs(100),api.workflowRuns('jarvis-complete-rewrite-factory.yml',30),api.workflows(),api.releases(),api.user(),api.rate(),...fixedPaths.map(p=>api.optionalFile(p))];
   const s=await Promise.allSettled(calls),[runs,rewriteRuns,workflows,releases,user,rate,...files]=s;
-  state.runs=runs.value?.workflow_runs||[];state.rewriteRuns=rewriteRuns.value?.workflow_runs||[];state.workflows=workflows.value?.workflows||[];state.releases=releases.value||[];
+  state.runs=runs.value?.workflow_runs||[];state.rewriteRuns=rewriteRuns.value?.workflow_runs||[];state.workflows=workflows.value?.workflows||[];state.releases=releases.value||[];state.apiHealth=(runs.status==='fulfilled'&&rewriteRuns.status==='fulfilled')?'OK':'DEGRADED';
   state.user=user.status==='fulfilled'?user.value:null;state.rate=rate.status==='fulfilled'?rate.value:null;state.connected=!!state.user;
   fixedPaths.forEach((p,i)=>state.data[p]=files[i]?.status==='fulfilled'?files[i].value:null);
   state.generations=await discoverGenerations(state.rewriteRuns);state.canonical=await loadCanonical();
@@ -46,7 +46,7 @@ export async function refresh(){
 }
 export function latestGeneration(){return state.generations[0]||null}
 export function selectedGeneration(){return state.generations.find(g=>g.mission===state.selectedGeneration)||latestGeneration()}
-export function producerState(){const live=['queued','in_progress','waiting','pending'];const byTime=(a,b)=>new Date(b?.created_at||0)-new Date(a?.created_at||0);const dedicated=Array.isArray(state.rewriteRuns)?state.rewriteRuns:[];const fallback=(Array.isArray(state.runs)?state.runs:[]).filter(r=>r?.name==='Jarvis Complete Rewrite LUAC Factory');const runs=[...new Map([...dedicated,...fallback].map(r=>[r.id||`${r.name}:${r.created_at}`,r])).values()].sort(byTime);const active=runs.find(r=>live.includes(r.status));const latest=runs.find(r=>r.status==='completed')||runs[0];const success=runs.find(r=>r.status==='completed'&&r.conclusion==='success');return active?{state:'RUNNING',run:active}:success?{state:'READY',run:success}:{state:'ATTENTION',run:latest||null}}
+export function producerState(){const live=['queued','in_progress','waiting','pending'];const byTime=(a,b)=>new Date(b?.created_at||0)-new Date(a?.created_at||0);const dedicated=Array.isArray(state.rewriteRuns)?state.rewriteRuns:[];const fallback=(Array.isArray(state.runs)?state.runs:[]).filter(r=>r?.name==='Jarvis Complete Rewrite LUAC Factory');const runs=[...new Map([...dedicated,...fallback].map(r=>[r.id||`${r.name}:${r.created_at}`,r])).values()].sort(byTime);const active=runs.find(r=>live.includes(r.status));const success=runs.find(r=>r.status==='completed'&&r.conclusion==='success');const latest=runs.find(r=>r.status==='completed')||runs[0];const published=state.data['factory/evolution-controller.json'];const publishedReady=!!(published?.mission&&published?.sourcePath&&published?.deployPath&&published?.release);return active?{state:'RUNNING',run:active}:success?{state:'READY',run:success}:publishedReady?{state:'READY',evidence:'PUBLISHED_GENERATION',run:{name:'Published evolution generation',status:'completed',conclusion:'success',run_number:published.generationRun,created_at:null,html_url:null}}:{state:'ATTENTION',run:latest||null}}
 export function planner(){return state.data['public/jarvis-data/experiment-plan.json']||{}}
 export function evidence(){return{sync:state.data['public/evidence-data/sync.json']||{},logs:state.data['factory/memory/historical-log-index.json']||{},episodes:state.data['factory/memory/episodes.json']||{}}}
 export function intelligence(){return{graph:state.data['public/jarvis-data/knowledge-graph.json']||{},summary:state.data['public/jarvis-data/summary.json']||{},plan:planner(),history:state.data['factory/memory/planner-history.json']||{}}}
