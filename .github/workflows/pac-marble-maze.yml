@@ -14,6 +14,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Sync latest main
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
       - name: Build and validate AI mazes
         run: |
           python3 tools/pac_marble_maze.py
@@ -21,8 +29,10 @@ jobs:
           import json
           d=json.load(open("maze-brain.json"))
           assert d.get("version")==3
-          assert len(d.get("levels",[]))==12
-          assert all(len(z)==28 and all(len(r)==28 for r in z) for z in d["levels"])
+          levels=d.get("levels",[])
+          assert len(levels)==12
+          assert all(len(z)==28 and all(len(r)==28 for r in z) for z in levels)
+          assert all(all(c in "#." for r in z for c in r) for z in levels)
           print("validated maze brain generation", d.get("generation"))
           PY
       - name: Save maze brain
