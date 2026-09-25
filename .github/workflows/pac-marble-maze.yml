@@ -8,6 +8,9 @@ on:
       - "marble-pacman.html"
   schedule:
     - cron: "07,37 * * * *"
+concurrency:
+  group: pac-marble-evolution
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
@@ -16,8 +19,16 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build and evolve AI mazes
         run: python3 tools/pac_marble_maze.py
+      - name: Rebase latest main before saving maze brain
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
       - name: Save maze brain
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
