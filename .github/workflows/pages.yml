@@ -24,6 +24,7 @@ on:
       - 'momto/**'
       - 'momto-live.html'
       - 'momto-live.json'
+      - 'marble-pacman.html'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +43,12 @@ jobs:
       - uses: actions/checkout@v5
         with: {fetch-depth: 1}
       - uses: actions/configure-pages@v5
+      - name: Verify Pac-Marble
+        run: |
+          set -Eeuo pipefail
+          test -s marble-pacman.html
+          grep -F 'PAC-MARBLE' marble-pacman.html
+          grep -F 'canvas id="game"' marble-pacman.html
       - name: Verify Survivor Runtime 323 contracts
         run: |
           set -Eeuo pipefail
@@ -122,17 +129,7 @@ jobs:
           node scripts/prepare-pages.mjs
           rm -rf _site
           mkdir -p _site
-          rsync -a \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='node_modules/' \
-            --exclude='artifacts/' \
-            --exclude='factory/' \
-            --exclude='logs/' \
-            --exclude='tools/' \
-            --exclude='scripts/' \
-            --exclude='public/builds/' \
-            ./ _site/
+          rsync -a --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='artifacts/' --exclude='factory/' --exclude='logs/' --exclude='tools/' --exclude='scripts/' --exclude='public/builds/' ./ _site/
           if [ -f factory/evolution-controller.json ]; then
             node <<'NODE'
           const fs=require('fs'),path=require('path');
@@ -150,6 +147,7 @@ jobs:
           test -f _site/survivor-runtime323.html
           test -f _site/survivor-ps2.html
           test -f _site/jarvis/survivor-build.json
+          test -f _site/marble-pacman.html
       - name: Wait for legacy Pages build
         env:
           DEPLOY_SHA: ${{ github.sha }}
@@ -162,7 +160,6 @@ jobs:
               echo "Legacy Pages build settled before verified deployment"
               exit 0
             fi
-            echo "Legacy Pages build still active (${attempt}/48)"
             sleep 5
           done
           echo "Legacy Pages build did not settle in time" >&2
@@ -183,8 +180,7 @@ jobs:
             html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/survivor-runtime323.html?verify=${stamp}" || true)"
             manifest="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-build.json?verify=${stamp}" || true)"
             tab="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/jarvis/survivor-tab.js?verify=${stamp}" || true)"
-            if grep -Fq 'name="survivor-runtime" content="323"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq 'EFFECT_GEOMETRY_VERSION=12' <<<"$html" && grep -Fq 'REPLAY_ARCHIVE_VERSION=4' <<<"$html" && grep -Fq 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE' <<<"$html" && grep -Fq 'APEX_2026_ADAPTIVE_V13' <<<"$html" && grep -Fq 'JARVIS_SPRITE_FIRMWARE_BIOS' <<<"$html" && grep -Fq '"runtime": 323' <<<"$manifest" && grep -Fq '"modelRenderer": 15' <<<"$manifest" && grep -Fq '"effectGeometry": 12' <<<"$manifest" && grep -Fq '"audioEngine": 1' <<<"$manifest" && grep -Fq '"replayArchive": 4' <<<"$manifest" && grep -Fq 'survivor-runtime323.html' <<<"$tab";then ok=1;echo "Runtime 323 live at ${GITHUB_SHA}";break;fi
-            echo "Pages propagation ${attempt}/36 waiting for Runtime 323 ${GITHUB_SHA}"
+            if grep -Fq 'name="survivor-runtime" content="323"' <<<"$html" && grep -Fq "name=\"survivor-build\" content=\"${GITHUB_SHA}\"" <<<"$html" && grep -Fq 'EFFECT_GEOMETRY_VERSION=12' <<<"$html" && grep -Fq 'REPLAY_ARCHIVE_VERSION=4' <<<"$html" && grep -Fq 'JARVIS_SPATIAL_COMBAT_AUDIO_ENGINE' <<<"$html" && grep -Fq 'APEX_2026_ADAPTIVE_V13' <<<"$html" && grep -Fq 'JARVIS_SPRITE_FIRMWARE_BIOS' <<<"$html" && grep -Fq '"runtime": 323' <<<"$manifest" && grep -Fq '"modelRenderer": 15' <<<"$manifest" && grep -Fq '"effectGeometry": 12' <<<"$manifest" && grep -Fq '"audioEngine": 1' <<<"$manifest" && grep -Fq '"replayArchive": 4' <<<"$manifest" && grep -Fq 'survivor-runtime323.html' <<<"$tab";then ok=1;break;fi
             sleep 10
           done
           test "$ok" -eq 1
@@ -197,12 +193,22 @@ jobs:
           for attempt in $(seq 1 18); do
             html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.html?verify=${GITHUB_SHA}-${attempt}" || true)"
             json="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/momto-live.json?verify=${GITHUB_SHA}-${attempt}" || true)"
-            if grep -Fq 'Birth Mother' <<<"$html" && grep -Fq 'Birth Father' <<<"$html" && grep -Fq 'Live Activity' <<<"$html" && grep -Fq 'Search AI' <<<"$html" && grep -Fq 'Refresh now' <<<"$html" && grep -Fq '5000-Enhancement Program' <<<"$html" && grep -Fq 'Worker source checks' <<<"$html" && grep -Fq '"status": "active"' <<<"$json" && ! grep -Fq '"birth_name"' <<<"$json"; then
-              echo "MomTo live dashboard verified";ok=1;break
-            fi
-            echo "MomTo Pages propagation ${attempt}/18 waiting";sleep 5
+            if grep -Fq 'Birth Mother' <<<"$html" && grep -Fq 'Birth Father' <<<"$html" && grep -Fq 'Live Activity' <<<"$html" && grep -Fq 'Search AI' <<<"$html" && grep -Fq 'Refresh now' <<<"$html" && grep -Fq '5000-Enhancement Program' <<<"$html" && grep -Fq 'Worker source checks' <<<"$html" && grep -Fq '"status": "active"' <<<"$json" && ! grep -Fq '"birth_name"' <<<"$json"; then ok=1;break;fi
+            sleep 5
           done
           test "$ok" -eq 1
+      - name: Verify live Pac-Marble
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -Eeuo pipefail
+          base="${PAGE_URL%/}"
+          for attempt in $(seq 1 18); do
+            html="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache, no-store' "${base}/marble-pacman.html?verify=${GITHUB_SHA}-${attempt}" || true)"
+            if grep -Fq 'PAC-MARBLE' <<<"$html" && grep -Fq 'canvas id="game"' <<<"$html"; then echo "Pac-Marble live";exit 0;fi
+            sleep 5
+          done
+          exit 1
       - name: Browser-verify live Runtime 323
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
