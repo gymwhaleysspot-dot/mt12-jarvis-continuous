@@ -8,6 +8,9 @@ on:
       - "marble-pacman.html"
   schedule:
     - cron: "17,47 * * * *"
+concurrency:
+  group: pac-marble-evolution
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
@@ -16,7 +19,15 @@ jobs:
     timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: python3 tools/pac_marble_brain.py
+      - name: Rebase latest main before saving brain
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
       - name: Save brain
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
