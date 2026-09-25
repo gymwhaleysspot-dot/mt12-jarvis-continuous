@@ -26,7 +26,20 @@ def grid_from_level(level):
     if not isinstance(level,list) or len(level)!=H: return None
     if not all(isinstance(row,str) and len(row)==W for row in level): return None
     if any(c not in "#." for row in level for c in row): return None
-    return [[1 if c=="#" else 0 for c in row] for row in level]
+    g=[[1 if c=="#" else 0 for c in row] for row in level]
+    # Defense-in-depth: never train on a maze whose pellets are not all
+    # reachable from the canonical player start.
+    critical=((14,26),(14,25),(14,24),(13,12),(14,12),(15,12))
+    if any(not open_cell(g,x,y) for x,y in critical): return None
+    seen={(14,26)}
+    queue=[(14,26)]
+    for x,y in queue:
+        for dx,dy in DIRS:
+            nx,ny=x+dx,y+dy
+            if 0<=nx<W and 0<=ny<H and g[ny][nx]==0 and (nx,ny) not in seen:
+                seen.add((nx,ny)); queue.append((nx,ny))
+    opens=sum(cell==0 for row in g for cell in row)
+    return g if len(seen)==opens else None
 
 
 def load_levels(fallback):
@@ -136,6 +149,9 @@ def main():
     rng=random.Random(int(time.time_ns() ^ os.getpid()))
     episodes=max(1,int(os.environ.get("PAC_EPISODES","900")))
     fallback=parse_fallback()
+    fallback_rows=["".join("#" if cell else "." for cell in row) for row in fallback]
+    if grid_from_level(fallback_rows) is None:
+        raise RuntimeError("fallback maze is not fully reachable from player start")
     levels=load_levels(fallback)
     brain=load_brain(); q=brain["q"]
     alpha,gamma,epsilon=brain["alpha"],brain["gamma"],brain["epsilon"]
@@ -154,7 +170,7 @@ def main():
     brain["maze_levels_used"]=len(levels)
     brain["updated"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
     save_brain(brain)
-    print(f"trained {episodes} episodes; states={len(q)} total_episodes={brain['episodes']} epsilon={brain['epsilon']} wins={wins} maze_levels={len(levels)}")
+    print(f"trained {episodes} episodes; states={len(q)} total_episodes={brain['episodes']} epsilon={brain['epsilon']} wins={wins} win_rate={brain['win_rate']} maze_levels={len(levels)}")
 
 
 if __name__=="__main__":
