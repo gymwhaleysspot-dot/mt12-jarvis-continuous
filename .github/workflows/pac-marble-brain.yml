@@ -50,6 +50,21 @@ jobs:
           assert len(levels)==12
           assert all(len(z)==28 and all(len(r)==28 for r in z) for z in levels)
           assert all(all(c in "#." for r in z for c in r) for z in levels)
+          # Every published level must be completable from the canonical start.
+          from collections import deque
+          for i,z in enumerate(levels,1):
+              assert z[26][14]=="." and z[25][14]=="." and z[24][14]==".", f"level {i}: blocked player start"
+              assert z[12][13]=="." and z[12][14]=="." and z[12][15]==".", f"level {i}: blocked ghost start"
+              open_cells={(x,y) for y,row in enumerate(z) for x,ch in enumerate(row) if ch=="."}
+              seen={(14,26)}
+              q=deque([(14,26)])
+              while q:
+                  x,y=q.popleft()
+                  for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+                      p=(x+dx,y+dy)
+                      if p in open_cells and p not in seen:
+                          seen.add(p); q.append(p)
+              assert seen==open_cells, f"level {i}: unreachable cells"
           print("player brain:", brain["states"], "states,", brain["episodes"], "episodes")
           print("maze brain:", len(levels), "validated levels, generation", maze.get("generation"))
           PY
