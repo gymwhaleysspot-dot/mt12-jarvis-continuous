@@ -41,13 +41,19 @@ canvas{border:2px solid #5e75ff;border-radius:13px;box-shadow:0 0 16px #2f62ff,i
 /* EPIC BOARD EFFECTS */
 #game{background:radial-gradient(circle,#090b2a,#000)}
 </style>
+<style>
+<!-- TRUE 3D MAZE UPGRADE 2026-09-25 -->
+body{perspective:1200px}
+.frame{transform:perspective(1100px) rotateX(2deg);transform-style:preserve-3d}
+#game{transform:translateZ(12px);transform-style:preserve-3d}
+</style>
 </head>
 <body><main class="wrap">
 <h1>PAC-MARBLE</h1>
 <div class="hud"><span>🏆 SCORE <b id="score">000000</b></span><span>⚡ LEVEL <b id="level">1</b></span><span>❤️ <b id="lives">●●●</b></span><span>🤖 <b id="mode">HUMAN</b></span></div>
 <div class="frame"><canvas id="game" width="560" height="560"></canvas><div class="overlay"><div id="panel" class="panel"><strong id="message">READY!</strong><div style="margin-top:7px">Choose a direction</div></div></div></div>
 <div class="controls"><button class="blank">.</button><button data-d="up">▲</button><button class="blank">.</button><button data-d="left">◀</button><button data-d="down">▼</button><button data-d="right">▶</button></div>
-<button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI: BFS maze pathfinding • pellet targeting • power-marble strategy • hunter avoidance</div><div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
+<button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI: BFS maze pathfinding • pellet targeting • power-marble strategy • hunter avoidance</div><div class="help">TRUE 3D DEPTH MAZE • Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
 </main>
 <script>
 const C=document.getElementById('game'),X=C.getContext('2d'),T=28,S=C.width/T,TAU=Math.PI*2;
@@ -139,12 +145,14 @@ function update(){
 }
 function resetPos(){p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};ghosts.forEach((g,i)=>{g.x=13+i;g.y=12;g.dx=i? -1:1;g.dy=0;g.f=0})}
 function draw(){
- X.clearRect(0,0,C.width,C.height);let bg=X.createRadialGradient(C.width/2,C.height/2,30,C.width/2,C.height/2,C.width*.72);bg.addColorStop(0,"#10134a");bg.addColorStop(.55,"#03041a");bg.addColorStop(1,"#000006");X.fillStyle=bg;X.fillRect(0,0,C.width,C.height);
- for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(rows[y][x]){X.fillStyle="#0b135c";X.fillRect(x*S,y*S,S,S);X.strokeStyle="#294dff";X.lineWidth=1.2;X.strokeRect(x*S+1,y*S+1,S-2,S-2);X.strokeStyle="#1728a0";X.strokeRect(x*S+4,y*S+4,S-8,S-8)}
+ X.clearRect(0,0,C.width,C.height);
+ // TRUE 3D DEPTH: every maze cell is rendered as a beveled block with floor, top edge and side depth.
+ let bg=X.createRadialGradient(C.width/2,C.height/2,30,C.width/2,C.height/2,C.width*.72);bg.addColorStop(0,"#10134a");bg.addColorStop(.55,"#03041a");bg.addColorStop(1,"#000006");X.fillStyle=bg;X.fillRect(0,0,C.width,C.height);
+ for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(rows[y][x]){const z=7; X.shadowBlur=9; X.shadowColor="#152cff"; X.fillStyle="#07104b"; X.fillRect(x*S,y*S+z,S,S); X.shadowBlur=0; X.fillStyle="#101d75"; X.fillRect(x*S,y*S,S,S-z); X.fillStyle="#294dff"; X.fillRect(x*S+1,y*S+1,S-2,3); X.fillStyle="#05082c"; X.fillRect(x*S+2,y*S+S-5,S-4,4); X.strokeStyle="#5870ff"; X.lineWidth=1.2; X.strokeRect(x*S+1,y*S+1,S-2,S-2); X.strokeStyle="#1728a0"; X.strokeRect(x*S+4,y*S+4,S-8,S-8)}
  X.globalAlpha=.22;X.strokeStyle="#405cff";X.lineWidth=1;for(let i=0;i<18;i++){X.beginPath();X.moveTo(0,i*S*2);X.lineTo(C.width,i*S*2);X.stroke()}X.globalAlpha=1;X.shadowBlur=0;X.fillStyle="#ffe98a";pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T);X.beginPath();X.arc((x+.5)*S,(y+.5)*S,1.7,0,TAU);X.fill()});
  powers.forEach(k=>{let x=k%T,y=Math.floor(k/T),r=4+Math.sin(Date.now()/120)*1.3;X.fillStyle="#fff35a";X.shadowBlur=13;X.shadowColor="#ffe000";X.beginPath();X.arc((x+.5)*S,(y+.5)*S,r,0,TAU);X.fill();X.shadowBlur=0});
- let px=(p.x+.5)*S,py=(p.y+.5)*S,r=S*.37,g=X.createRadialGradient(px-r*.35,py-r*.4,2,px,py,r);g.addColorStop(0,"#fffbd1");g.addColorStop(.3,"#ffe43d");g.addColorStop(.75,"#ff9700");g.addColorStop(1,"#b92f00");X.fillStyle=g;X.beginPath();X.arc(px,py,r,0,TAU);X.fill();
- ghosts.forEach(q=>{let x=(q.x+.5)*S,y=(q.y+.5)*S,r=S*.34;X.fillStyle=q.f?"#6976ff":q.c;X.shadowBlur=10;X.shadowColor=X.fillStyle;X.beginPath();X.arc(x,y,r,0,TAU);X.fill();X.shadowBlur=0;X.fillStyle="#fff";X.beginPath();X.arc(x-r*.28,y-r*.1,r*.18,0,TAU);X.arc(x+r*.28,y-r*.1,r*.18,0,TAU);X.fill();X.fillStyle="#111";X.beginPath();X.arc(x-r*.23,y-r*.08,r*.08,0,TAU);X.arc(x+r*.33,y-r*.08,r*.08,0,TAU);X.fill()})
+ let px=(p.x+.5)*S,py=(p.y+.5)*S,r=S*.37,g=X.createRadialGradient(px-r*.35,py-r*.4,2,px,py,r);g.addColorStop(0,"#fffbd1");g.addColorStop(.3,"#ffe43d");g.addColorStop(.75,"#ff9700");g.addColorStop(1,"#b92f00");X.fillStyle=g;X.shadowBlur=18;X.shadowColor="#ffd400";X.beginPath();X.arc(px,py-5,r,0,TAU);X.fill();X.shadowBlur=0;X.fillStyle="#ff8b00";X.globalAlpha=.35;X.beginPath();X.ellipse(px,py+r*.65,r*.9,r*.28,0,0,TAU);X.fill();X.globalAlpha=1;
+ ghosts.forEach(q=>{let x=(q.x+.5)*S,y=(q.y+.5)*S,r=S*.34;X.fillStyle=q.f?"#6976ff":q.c;X.shadowBlur=16;X.shadowColor=X.fillStyle;X.beginPath();X.arc(x,y-5,r,0,TAU);X.fill();X.shadowBlur=0;X.fillStyle="#111";X.globalAlpha=.35;X.beginPath();X.ellipse(x,y+r*.62,r*.85,r*.24,0,0,TAU);X.fill();X.globalAlpha=1;X.shadowBlur=0;X.fillStyle="#fff";X.beginPath();X.arc(x-r*.28,y-r*.1,r*.18,0,TAU);X.arc(x+r*.28,y-r*.1,r*.18,0,TAU);X.fill();X.fillStyle="#111";X.beginPath();X.arc(x-r*.23,y-r*.08,r*.08,0,TAU);X.arc(x+r*.33,y-r*.08,r*.08,0,TAU);X.fill()})
 }
 function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loop)}
 addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
