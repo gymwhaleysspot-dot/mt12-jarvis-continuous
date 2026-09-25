@@ -87,15 +87,46 @@ def train(brain):
     brain["episodes"]=int(brain.get("episodes",0))+EPISODES
     brain["games"]=int(brain.get("games",0))+EPISODES
     brain["wins"]=int(brain.get("wins",0))+wins
+    brain["win_rate"]=round(wins/max(1,EPISODES),6)
     brain["updated"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
     brain["states"]=len(q)
 
-def main():
-    with open(BRAIN,encoding="utf-8") as f: brain=json.load(f)
-    train(brain)
+def load_brain():
+    try:
+        with open(BRAIN,encoding="utf-8") as f:
+            brain=json.load(f)
+        if not isinstance(brain,dict):
+            raise ValueError("brain root must be an object")
+    except (FileNotFoundError,json.JSONDecodeError,ValueError):
+        brain={"version":2,"algorithm":"q-learning-self-play","alpha":0.16,"gamma":0.94,"epsilon":0.22,"episodes":0,"games":0,"wins":0,"q":{}}
+    q=brain.get("q")
+    if not isinstance(q,dict): q={}
+    clean={}
+    for k,v in q.items():
+        if isinstance(k,str) and isinstance(v,list) and len(v)==4:
+            try: clean[k]=[float(x) for x in v]
+            except (TypeError,ValueError): pass
+    brain["q"]=clean
+    brain["version"]=2
+    brain["algorithm"]="q-learning-self-play"
+    return brain
+
+def save_brain(brain):
     tmp=BRAIN+".tmp"
-    with open(tmp,"w",encoding="utf-8") as f: json.dump(brain,f,separators=(",",":"),sort_keys=True)
+    with open(tmp,"w",encoding="utf-8") as f:
+        json.dump(brain,f,separators=(",",":"),sort_keys=True,allow_nan=False)
+        f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    with open(tmp,encoding="utf-8") as f: check=json.load(f)
+    if not isinstance(check,dict) or not isinstance(check.get("q"),dict):
+        raise RuntimeError("brain validation failed after serialization")
     os.replace(tmp,BRAIN)
+
+def main():
+    brain=load_brain()
+    train(brain)
+    save_brain(brain)
     print(f"trained {EPISODES} episodes; states={brain['states']} total_episodes={brain['episodes']} epsilon={brain['epsilon']} wins_this_run={brain['wins']}")
 
 if __name__=="__main__": main()
