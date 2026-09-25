@@ -28,6 +28,11 @@ on:
       - 'brain.json'
       - 'maze-brain.json'
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Pac-Marble Brain Evolution"
+      - "Pac-Marble Maze AI Evolution"
+    types: [completed]
 permissions:
   contents: read
   pages: write
@@ -37,6 +42,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
