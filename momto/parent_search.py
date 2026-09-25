@@ -218,7 +218,8 @@ def build_parent_search_context(case_id: int) -> dict:
 
 def build_discriminating_searches(context: dict, limit: int = 24) -> list[dict]:
     searches = []
-    # Relationship-aware lineage search expansion is applied below.\n    for lane in context.get("lanes", []):
+    # Relationship-aware lineage search expansion is applied below.
+    for lane in context.get("lanes", []):
         role = lane["role"]
         terms = lane.get("search_terms") or []
         focus = terms[0] if terms else ""
