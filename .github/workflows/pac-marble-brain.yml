@@ -31,25 +31,25 @@ jobs:
           git fetch origin main
           git checkout main
           git reset --hard origin/main
+      - name: Evolve maze brain first
+        run: python3 tools/pac_marble_maze.py
       - name: Evolve player brain
         run: python3 tools/pac_marble_brain.py
-      - name: Evolve maze brain
-        run: python3 tools/pac_marble_maze.py
       - name: Validate both persistent brains
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
           brain=json.loads(Path("brain.json").read_text())
-          assert brain.get("version")==2
+          assert brain.get("version")==3
           assert isinstance(brain.get("q"),dict)
           assert isinstance(brain.get("states"),int)
           maze=json.loads(Path("maze-brain.json").read_text())
-          assert maze.get("version")==2
+          assert maze.get("version")==3
           levels=maze.get("levels",[])
           assert len(levels)==12
           assert all(len(z)==28 and all(len(r)==28 for r in z) for z in levels)
-          assert all(any(c=="." for r in z for c in r) for z in levels)
+          assert all(all(c in "#." for r in z for c in r) for z in levels)
           print("player brain:", brain["states"], "states,", brain["episodes"], "episodes")
           print("maze brain:", len(levels), "validated levels, generation", maze.get("generation"))
           PY

@@ -1,166 +1,203 @@
 #!/usr/bin/env python3
-"""Persistent AI maze builder for Pac-Marble.
-Generates, evaluates, mutates and persists distinct playable mazes.
-Runs headlessly in CI; it does not need the HTML page to be open.
+"""Persistent Pac-Marble maze builder.
+
+Builds only rectangular, connected 28x28 mazes and persists 12 playable
+levels. Invalid legacy maze-brain data is ignored rather than poisoning the
+next generation.
 """
-import json, os, random, re, time
+import json
+import os
+import random
+import time
 from collections import deque
 
-ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-HTML=os.path.join(ROOT,"marble-pacman.html")
-BRAIN=os.path.join(ROOT,"maze-brain.json")
-W=H=28
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BRAIN = os.path.join(ROOT, "maze-brain.json")
+W = H = 28
+START = (14, 26)
+GHOST_CELLS = {(13, 12), (14, 12), (15, 12)}
+CRITICAL = GHOST_CELLS | {(14, 24), (14, 25), START}
+DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
+
+def carve_to(g, a, b):
+    x, y = a
+    tx, ty = b
+    while (x, y) != (tx, ty):
+        if x < tx: x += 1
+        elif x > tx: x -= 1
+        elif y < ty: y += 1
+        else: y -= 1
+        g[y][x] = 0
+
+
+def connected(g):
+    if len(g) != H or any(len(row) != W for row in g):
+        return False
+    opens = {(x, y) for y in range(H) for x in range(W) if g[y][x] == 0}
+    if START not in opens:
+        return False
+    seen = {START}
+    q = deque([START])
+    while q:
+        x, y = q.popleft()
+        for dx, dy in DIRS:
+            p = (x + dx, y + dy)
+            if p in opens and p not in seen:
+                seen.add(p); q.append(p)
+    return seen == opens
+
+
+def valid_maze(g):
+    if len(g) != H or any(len(row) != W for row in g):
+        return False
+    if any(g[0][x] == 0 or g[H-1][x] == 0 for x in range(W)):
+        return False
+    if any(g[y][0] == 0 or g[y][W-1] == 0 for y in range(H)):
+        return False
+    if any(g[y][x] not in (0, 1) for y in range(H) for x in range(W)):
+        return False
+    if any(g[y][x] != 0 for x, y in CRITICAL):
+        return False
+    ratio = sum(cell == 0 for row in g for cell in row) / (W * H)
+    return 0.35 <= ratio <= 0.70 and connected(g)
+
 
 def make_maze(rng, loop_rate=0.16):
-    g=[[1]*W for _ in range(H)]
-    # Keep a solid border and carve an odd-cell maze, then open selected loops.
-    stack=[(1,1)]; g[1][1]=0
+    g = [[1] * W for _ in range(H)]
+    stack = [(1, 1)]
+    g[1][1] = 0
     while stack:
-        x,y=stack[-1]
-        choices=[]
-        for dx,dy in ((2,0),(-2,0),(0,2),(0,-2)):
-            nx,ny=x+dx,y+dy
-            if 1<=nx<W-2 and 1<=ny<H-2 and g[ny][nx]:
-                choices.append((nx,ny,dx,dy))
+        x, y = stack[-1]
+        choices = []
+        for dx, dy in ((2,0),(-2,0),(0,2),(0,-2)):
+            nx, ny = x + dx, y + dy
+            if 1 <= nx < W-1 and 1 <= ny < H-1 and g[ny][nx]:
+                choices.append((nx, ny, dx, dy))
         if not choices:
             stack.pop(); continue
-        nx,ny,dx,dy=rng.choice(choices)
-        g[y+dy//2][x+dx//2]=0
-        g[ny][nx]=0
-        stack.append((nx,ny))
-    # Add loops around the maze to make it Pac-Man-like rather than a pure tree.
-    for _ in range(int(W*H*loop_rate)):
-        x=rng.randrange(1,W-1); y=rng.randrange(1,H-1)
-        if g[y][x] and ((not g[y][x-1] and not g[y][x+1]) or (not g[y-1][x] and not g[y+1][x])):
-            g[y][x]=0
-    # Ensure the player start and ghost chamber are open.
-    for x,y in ((14,26),(13,12),(14,12),(15,12),(14,25),(14,24)):
-        g[y][x]=0
-    # Ensure a route from player start to center and all carved cells are connected.
-    carve_to(g,(14,26),(14,12))
+        nx, ny, dx, dy = rng.choice(choices)
+        g[y + dy//2][x + dx//2] = 0
+        g[ny][nx] = 0
+        stack.append((nx, ny))
+    for _ in range(int(W * H * loop_rate)):
+        x, y = rng.randrange(1, W-1), rng.randrange(1, H-1)
+        if g[y][x] and ((not g[y][x-1] and not g[y][x+1]) or
+                        (not g[y-1][x] and not g[y+1][x])):
+            g[y][x] = 0
+    for x, y in CRITICAL:
+        g[y][x] = 0
+    carve_to(g, START, (14, 12))
     return g
 
-def carve_to(g,a,b):
-    x,y=a; tx,ty=b
-    while (x,y)!=(tx,ty):
-        if x<tx: x+=1
-        elif x>tx: x-=1
-        elif y<ty: y+=1
-        else: y-=1
-        g[y][x]=0
 
 def stats(g):
-    opens=[(x,y) for y in range(H) for x in range(W) if not g[y][x]]
-    open_ratio=len(opens)/(W*H)
-    deg=[]
-    for x,y in opens:
-        deg.append(sum(0<=x+dx<W and 0<=y+dy<H and not g[y+dy][x+dx] for dx,dy in ((1,0),(-1,0),(0,1),(0,-1))))
-    junction=sum(d>=3 for d in deg)/max(1,len(deg))
-    dead=sum(d==1 for d in deg)/max(1,len(deg))
-    start=(14,26); q=deque([start]); seen={start}; far=0
+    opens = [(x,y) for y in range(H) for x in range(W) if g[y][x] == 0]
+    degrees = [sum(0 <= x+dx < W and 0 <= y+dy < H and g[y+dy][x+dx] == 0
+                   for dx,dy in DIRS) for x,y in opens]
+    junction = sum(d >= 3 for d in degrees) / max(1, len(degrees))
+    dead = sum(d == 1 for d in degrees) / max(1, len(degrees))
+    q, seen, far = deque([START]), {START}, 0
     while q:
-        x,y=q.popleft()
-        far=max(far,abs(x-14)+abs(y-12))
-        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
-            p=(x+dx,y+dy)
-            if 0<=p[0]<W and 0<=p[1]<H and not g[p[1]][p[0]] and p not in seen:
+        x,y = q.popleft(); far = max(far, abs(x-14)+abs(y-12))
+        for dx,dy in DIRS:
+            p = (x+dx,y+dy)
+            if 0 <= p[0] < W and 0 <= p[1] < H and g[p[1]][p[0]] == 0 and p not in seen:
                 seen.add(p); q.append(p)
-    reachable=len(seen)/max(1,len(opens))
-    return open_ratio,junction,dead,far,reachable
+    return len(opens)/(W*H), junction, dead, far, len(seen)/max(1,len(opens))
 
-def connected(g):
-    opens={(x,y) for y in range(H) for x in range(W) if not g[y][x]}
-    if not opens or (14,26) not in opens: return False
-    q=deque([(14,26)]); seen={(14,26)}
-    while q:
-        x,y=q.popleft()
-        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
-            p=(x+dx,y+dy)
-            if p in opens and p not in seen:
-                seen.add(p); q.append(p)
-    return seen==opens
-
-def valid_maze(g):
-    return len(g)==H and all(len(r)==W for r in g) and connected(g)
-
-def connected(g):
-    opens={(x,y) for y in range(H) for x in range(W) if not g[y][x]}
-    if not opens or (14,26) not in opens: return False
-    q=deque([(14,26)]); seen={(14,26)}
-    while q:
-        x,y=q.popleft()
-        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
-            p=(x+dx,y+dy)
-            if p in opens and p not in seen:
-                seen.add(p); q.append(p)
-    return seen==opens
-
-def valid_maze(g):
-    return len(g)==H and all(len(r)==W for r in g) and connected(g)
 
 def score(g):
-    o,j,d,f,r=stats(g)
-    return 100*(r-.52*abs(o-.52)+.45*j+.25*(1-abs(d-.18)*2)+min(f,40)/80)
+    o,j,d,f,r = stats(g)
+    return 100 * (r - .52*abs(o-.52) + .45*j +
+                  .25*(1-abs(d-.18)*2) + min(f,40)/80)
 
-def mutate(g,rng):
-    n=[row[:] for row in g]
+
+def mutate(g, rng):
+    n = [row[:] for row in g]
     for _ in range(rng.randint(3,14)):
-        x=rng.randrange(1,W-1); y=rng.randrange(1,H-1)
-        if (x,y) in {(14,26),(14,25),(14,24),(13,12),(14,12),(15,12)}: continue
-        n[y][x]=0 if rng.random()<.62 else 1
-    # Repair the critical route after mutations.
-    carve_to(n,(14,26),(14,12))
+        x,y = rng.randrange(1,W-1), rng.randrange(1,H-1)
+        if (x,y) in CRITICAL: continue
+        n[y][x] = 0 if rng.random() < .62 else 1
+    for x,y in CRITICAL: n[y][x] = 0
+    carve_to(n, START, (14,12))
     return n
 
-def main():
-    with open(HTML,encoding="utf-8") as f: html=f.read()
-    m=re.search(r'const FALLBACK_ROWS=([\s\S]*?);',html)
-    # The builder is intentionally independent of the browser's current state.
+
+def level_strings(g):
+    return ["".join("#" if c else "." for c in row) for row in g]
+
+
+def parse_level(value):
+    if not isinstance(value,list) or len(value) != H: return None
+    if not all(isinstance(row,str) and len(row) == W for row in value): return None
+    if any(c not in "#." for row in value for c in row): return None
+    g = [[1 if c == "#" else 0 for c in row] for row in value]
+    return g if valid_maze(g) else None
+
+
+def load_previous():
     try:
-        with open(BRAIN,encoding="utf-8") as f: brain=json.load(f)
-    except Exception:
-        brain={"version":2,"algorithm":"evolutionary-maze-builder","generation":0,"levels_built":0,"best_score":0,"params":{"open_target":.52,"loop_rate":.16,"dead_end_target":.18},"levels":[]}
-    rng=random.Random()
-    seed=int(time.time_ns() ^ os.getpid())
-    rng.seed(seed)
-    episodes=int(os.environ.get("PAC_MAZE_CANDIDATES","120"))
-    levels=int(os.environ.get("PAC_MAZE_LEVELS","12"))
-    existing=brain.get("levels",[])
-    new_levels=[]
-    total_best=float(brain.get("best_score",0))
-    for level in range(1,levels+1):
-        pool=[make_maze(rng,brain.get("params",{}).get("loop_rate",.16)) for _ in range(max(8,episodes//12))]
-        for _ in range(episodes):
-            parent=max(pool,key=score)
-            pool.append(mutate(parent,rng))
-            if len(pool)>24:
-                pool.sort(key=score,reverse=True); pool=pool[:24]
-        ranked=sorted((g for g in pool if valid_maze(g)),key=score,reverse=True)
-        if not ranked:
-            raise RuntimeError("no playable maze survived evolution")
-        best=ranked[0]; s=score(best)
-        total_best=max(total_best,s)
-        new_levels.append(["".join("#" if c else "." for c in row) for row in best])
-    brain["version"]=2
-    brain["generation"]=int(brain.get("generation",0))+1
-    brain["levels_built"]=len(new_levels)
-    brain["best_score"]=round(total_best,3)
-    brain["levels"]=new_levels
-    brain["seed"]=seed
-    brain["updated"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
-    if len(new_levels)!=levels or not all(valid_maze([[1 if c=="#" else 0 for c in row] for row in level]) for level in new_levels):
-        raise RuntimeError("maze brain validation failed")
-    tmp=BRAIN+".tmp"
+        data = json.loads(open(BRAIN,encoding="utf-8").read())
+        out = []
+        for level in data.get("levels",[]):
+            parsed = parse_level(level)
+            if parsed is not None: out.append(parsed)
+        return out
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return []
+
+
+def save(brain):
+    tmp = BRAIN + ".tmp"
     with open(tmp,"w",encoding="utf-8") as f:
-        json.dump(brain,f,separators=(",",":"),allow_nan=False)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-    with open(tmp,encoding="utf-8") as f: check=json.load(f)
-    if not isinstance(check,dict) or len(check.get("levels",[]))!=levels:
+        json.dump(brain,f,separators=(",",":"),allow_nan=False,sort_keys=True)
+        f.write("\n"); f.flush(); os.fsync(f.fileno())
+    check = json.loads(open(tmp,encoding="utf-8").read())
+    levels = check.get("levels",[])
+    if check.get("version") != 3 or len(levels) != 12 or not all(parse_level(x) for x in levels):
         raise RuntimeError("maze brain serialization validation failed")
     os.replace(tmp,BRAIN)
-    print(f"maze generation {brain['generation']}: built {levels} distinct playable levels; best={total_best:.2f}")
 
-if __name__=="__main__":
+
+def build_level(rng, candidates, existing):
+    pool = [make_maze(rng) for _ in range(max(10,candidates//12))]
+    pool.extend(existing[:4])
+    pool = [g for g in pool if valid_maze(g)]
+    if not pool: raise RuntimeError("maze generator produced no valid seed")
+    for _ in range(candidates):
+        parent = max(pool,key=score)
+        child = mutate(parent,rng)
+        if valid_maze(child): pool.append(child)
+        if len(pool) > 24:
+            pool.sort(key=score,reverse=True); pool = pool[:24]
+    return max(pool,key=score)
+
+
+def main():
+    rng = random.Random(int(time.time_ns() ^ os.getpid()))
+    candidates = max(40,int(os.environ.get("PAC_MAZE_CANDIDATES","120")))
+    count = max(1,int(os.environ.get("PAC_MAZE_LEVELS","12")))
+    previous = load_previous()
+    levels, best_score = [], 0.0
+    for i in range(count):
+        best = build_level(rng,candidates,previous[i:i+1])
+        levels.append(level_strings(best))
+        best_score = max(best_score,score(best))
+    brain = {
+        "version":3,
+        "algorithm":"validated-evolutionary-maze-builder",
+        "generation":int(time.time()),
+        "levels_built":len(levels),
+        "best_score":round(best_score,3),
+        "dimensions":[W,H],
+        "seed":rng.getstate()[1][0],
+        "updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+        "levels":levels,
+    }
+    save(brain)
+    print(f"maze generation {brain['generation']}: built {len(levels)} valid levels; best={best_score:.2f}")
+
+
+if __name__ == "__main__":
     main()

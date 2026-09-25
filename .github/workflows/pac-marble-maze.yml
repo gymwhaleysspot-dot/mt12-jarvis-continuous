@@ -28,9 +28,11 @@ jobs:
           python3 - <<'PY'
           import json
           d=json.load(open("maze-brain.json"))
-          assert d.get("version")==2
-          assert len(d.get("levels",[]))==12
-          assert all(len(z)==28 and all(len(r)==28 for r in z) for z in d["levels"])
+          assert d.get("version")==3
+          levels=d.get("levels",[])
+          assert len(levels)==12
+          assert all(len(z)==28 and all(len(r)==28 for r in z) for z in levels)
+          assert all(all(c in "#." for r in z for c in r) for z in levels)
           print("validated maze brain generation", d.get("generation"))
           PY
       - name: Save maze brain

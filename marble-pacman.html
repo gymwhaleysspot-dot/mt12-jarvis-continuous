@@ -90,26 +90,64 @@ const FALLBACK_ROWS=[
 "#..........................#",
 "############################"].map(r=>[...r].map(c=>c==="#"?1:0));
 let rows=FALLBACK_ROWS;
-let mazeBrain={version:1,generation:0,levels_built:0,levels:[]};
-let mazeBrainReady=false;
+let mazeBrain={version:0,generation:0,levels_built:0,levels:[]};
+let mazeBrainReady=false,mazeStatus="FALLBACK MAZE";
+function validMazeRows(m){
+  return Array.isArray(m)&&m.length===T&&m.every(r=>typeof r==="string"&&r.length===T&&/^[#.]+$/.test(r))
+    &&m[26][14]==="."&&m[12][14]===".";
+}
+function applyMaze(m){
+  if(!validMazeRows(m)) return false;
+  const next=m.map(r=>[...r].map(c=>c==="#"?1:0));
+  const seen=new Set(["14,26"]),q=[[14,26]];
+  while(q.length){
+    const [x,y]=q.shift();
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=x+dx,ny=y+dy,k=nx+","+ny;
+      if(nx>=0&&nx<T&&ny>=0&&ny<T&&!next[ny][nx]&&!seen.has(k)){seen.add(k);q.push([nx,ny])}
+    }
+  }
+  const openCount=next.flat().filter(v=>!v).length;
+  if(seen.size!==openCount) return false;
+  rows=next;
+  return true;
+}
+function renderAIStats(){
+  const el=document.getElementById("aiStats");
+  if(el)el.textContent="AI: Q-brain "+(brainReady?"ONLINE":"FALLBACK")+" • MAZE "+(mazeBrainReady?"EVOLVED GEN "+Number(mazeBrain.generation||0).toLocaleString():"SAFE FALLBACK")+" • "+(brainStatus||"LOCAL POLICY");
+}
 async function loadMazeBrain(){
   try{
     const r=await fetch("maze-brain.json?v="+Date.now(),{cache:"no-store"});
-    if(r.ok){const b=await r.json(); if(Array.isArray(b.levels)&&b.levels.length){mazeBrain=b; mazeBrainReady=true; const n=Math.min(level,b.levels.length)-1; const m=b.levels[n]; if(Array.isArray(m)&&m.length===T) rows=m.map(r=>[...r].map(c=>c==="#"?1:0));}}
-  }catch(e){}
-  const el=document.getElementById("aiStats"); if(el) el.textContent="AI: persistent player brain • persistent maze builder • "+(mazeBrainReady?("MAZE GEN "+Number(mazeBrain.generation||0).toLocaleString()+" • LEVELS "+mazeBrain.levels.length):"MAZE BUILDER FALLBACK");
+    if(!r.ok) throw new Error("maze brain HTTP "+r.status);
+    const b=await r.json();
+    const levels=Array.isArray(b.levels)?b.levels:[];
+    const idx=(Math.max(1,level)-1)%Math.max(1,levels.length);
+    if(b.version>=3&&levels.length&&applyMaze(levels[idx])){
+      mazeBrain=b;mazeBrainReady=true;
+      mazeStatus="MAZE GEN "+Number(b.generation||0).toLocaleString()+" • "+levels.length+" LEVELS";
+    }else throw new Error("invalid maze brain");
+  }catch(e){
+    mazeBrainReady=false;mazeStatus="SAFE FALLBACK";
+    rows=FALLBACK_ROWS;
+  }
+  renderAIStats();
 }
-const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
+const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&Array.isArray(rows[y])&&!rows[y][x],id=(x,y)=>y*T+x;
 
 // PERSISTENT BRAIN: learned policy is stored in brain.json and loaded when the game opens.
-// The brain itself evolves independently through the scheduled headless self-play trainer.
-let brain={version:1,episodes:0,epsilon:.18,q:{}},brainReady=false,brainStatus="LOCAL POLICY";
+let brain={version:3,episodes:0,epsilon:.18,q:{}},brainReady=false,brainStatus="LOCAL POLICY";
 async function loadBrain(){
   try{
     const r=await fetch("brain.json?v="+Date.now(),{cache:"no-store"});
-    if(r.ok){brain=await r.json();brainReady=true;brainStatus="PERSISTENT BRAIN • "+Number(brain.episodes||0).toLocaleString()+" EPISODES";}
-  }catch(e){brainStatus="LOCAL FALLBACK";}
-  const el=document.getElementById("aiStats"); if(el)el.textContent="AI: persistent Q-brain • self-play evolution • maze pathfinding • danger prediction • "+brainStatus;
+    if(!r.ok) throw new Error("brain HTTP "+r.status);
+    const b=await r.json();
+    if(b.version>=3&&b.q&&typeof b.q==="object"){
+      brain=b;brainReady=true;
+      brainStatus="PERSISTENT • "+Number(b.episodes||0).toLocaleString()+" EPISODES • "+Number(b.states||Object.keys(b.q).length).toLocaleString()+" STATES";
+    }else throw new Error("invalid player brain");
+  }catch(e){brainReady=false;brainStatus="LOCAL FALLBACK";}
+  renderAIStats();
 }
 function brainState(){
   const gs=ghosts.map(g=>Math.min(9,Math.abs(p.x-g.x)+Math.abs(p.y-g.y))).sort((a,b)=>a-b);
@@ -119,10 +157,12 @@ function brainState(){
   return p.x+","+p.y+","+dir.x+","+dir.y+","+gs.join("|")+","+Math.min(9,pd)+","+Math.min(9,fd)+","+(powered?1:0);
 }
 function brainAction(){
-  const q=brain.q?.[brainState()]; if(!q)return null;
-  const ds=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}], candidates=ds.map((d,i)=>({d,i})).filter(o=>can(p,o.d));
+  if(!brainReady)return null;
+  const q=brain.q?.[brainState()];if(!Array.isArray(q)||q.length<4)return null;
+  const ds=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+  const candidates=ds.map((d,i)=>({d,i,v:Number(q[i])})).filter(o=>can(p,o.d)&&Number.isFinite(o.v));
   if(!candidates.length)return null;
-  candidates.sort((a,b)=>(q[b.i]??0)-(q[a.i]??0));
+  candidates.sort((a,b)=>b.v-a.v);
   return candidates[0].d;
 }
 
@@ -139,7 +179,7 @@ function selectMazeForLevel(){
 function reset(){
  p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};powered=0;pellets.clear();powers.clear();
  for(let y=0;y<T;y++)for(let x=0;x<T;x++)if(open(x,y)&&!(x==14&&y>=24))pellets.add(id(x,y));
- [[1,1],[26,1],[1,26],[26,26]].forEach(([x,y])=>powers.add(id(x,y)));
+ [[1,1],[26,1],[1,26],[26,26]].forEach(([x,y])=>{if(open(x,y))powers.add(id(x,y))});
  ghosts=[{x:13,y:12,dx:1,dy:0,c:"#ff4b5c",f:0},{x:14,y:12,dx:-1,dy:0,c:"#38d9ff",f:0},{x:15,y:12,dx:0,dy:-1,c:"#ff54d8",f:0}];
  ready=true;show("READY!");setTimeout(()=>{if(!over){ready=false;hide()}},750);
 }
@@ -184,7 +224,7 @@ function update(){
   g.f=Math.max(0,g.f-1);
  });
  powered=Math.max(0,powered-1);
- if(!pellets.size){score+=1000;level++;hud();reset()}
+ if(!pellets.size){score+=1000;level++;selectMazeForLevel();hud();reset()}
  hud();
 }
 function resetPos(){p={x:14,y:26};dir={x:0,y:0};next={x:0,y:0};ghosts.forEach((g,i)=>{g.x=13+i;g.y=12;g.dx=i? -1:1;g.dy=0;g.f=0})}
@@ -202,5 +242,5 @@ function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loo
 addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
 document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}hud()});
 document.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("pointerdown",()=>{let m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};next=m[b.dataset.d]}));
-loadMazeBrain().then(()=>{hud();reset();loadBrain();requestAnimationFrame(loop)});
+loadMazeBrain().then(()=>{hud();reset();return loadBrain()}).then(()=>{renderAIStats();requestAnimationFrame(loop)});
 </script></body></html>
