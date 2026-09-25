@@ -54,6 +54,7 @@ jobs:
           print("maze brain:", len(levels), "validated levels, generation", maze.get("generation"))
           PY
       - name: Save both brains atomically
+        if: github.ref == 'refs/heads/main'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Evolve Pac-Marble player and maze brains"
