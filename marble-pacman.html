@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Marble Maze: PAC-MARBLE</title>
 <!-- Pages deployment repair: 2026-09-25 -->
+<!-- AI player upgrade: maze-aware pellet targeting + hunter avoidance -->
 <style>
 :root{--bg:#03030a;--yellow:#ffe84a;--blue:#244cff;--cyan:#38d9ff;--pink:#ff54d8;--red:#ff4b5c}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle,#17153a 0,#060612 55%,#010104 100%);color:#fff;font-family:system-ui,-apple-system,sans-serif;display:grid;place-items:center;padding:12px}
@@ -15,13 +16,18 @@ canvas{width:100%;height:auto;display:block;border-radius:10px;background:#000}
 .overlay{position:absolute;inset:7px;display:grid;place-items:center;pointer-events:none}.panel{display:none;background:#05050fee;border:2px solid var(--yellow);border-radius:18px;padding:20px 25px;box-shadow:0 0 28px #ffd40055}.panel.show{display:block}.panel strong{font-size:28px;color:var(--yellow)}
 .controls{display:grid;grid-template-columns:repeat(3,64px);gap:7px;justify-content:center;margin-top:10px}.controls button{height:55px;border:2px solid #41489d;border-radius:14px;background:#101331;color:white;font-size:23px;font-weight:900;touch-action:manipulation}.controls button:active{transform:scale(.93);background:#292f78}.blank{visibility:hidden}.help{font-size:11px;opacity:.65;margin-top:8px}
 </style>
+<style>
+/* AI PLAYER */
+#aiToggle{margin-top:10px;width:min(420px,100%);height:46px;border:2px solid #ffd400;border-radius:14px;background:#101331;color:#ffe84a;font-weight:900;letter-spacing:.06em}
+#aiStats{font-size:11px;opacity:.7;margin-top:6px}
+</style>
 </head>
 <body><main class="wrap">
 <h1>PAC-MARBLE</h1>
 <div class="hud"><span>SCORE <b id="score">000000</b></span><span>LEVEL <b id="level">1</b></span><span>MARBLES <b id="lives">●●●</b></span></div>
 <div class="frame"><canvas id="game" width="560" height="560"></canvas><div class="overlay"><div id="panel" class="panel"><strong id="message">READY!</strong><div style="margin-top:7px">Choose a direction</div></div></div></div>
 <div class="controls"><button class="blank">.</button><button data-d="up">▲</button><button class="blank">.</button><button data-d="left">◀</button><button data-d="down">▼</button><button data-d="right">▶</button></div>
-<div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
+<button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI learns the maze, targets pellets/power marbles, and avoids hunters.</div><div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
 </main>
 <script>
 const C=document.getElementById('game'),X=C.getContext('2d'),T=28,S=C.width/T,TAU=Math.PI*2;
@@ -55,7 +61,7 @@ const rows=[
 "#..........................#",
 "############################"].map(r=>[...r].map(c=>c==="#"?1:0));
 const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
-let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0;
+let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0,ai=false,aiMoves=0,aiTarget=null;
 let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},last=0;
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
 function hide(){document.getElementById('panel').classList.remove('show')}
@@ -74,8 +80,33 @@ function choose(g){
  a.sort((u,v)=>{let du=(g.x+u.x-p.x)**2+(g.y+u.y-p.y)**2,dv=(g.x+v.x-p.x)**2+(g.y+v.y-p.y)**2;return g.f?dv-du:du-dv});
  g.dx=a[0].x;g.dy=a[0].y;
 }
+function aiChoose(){
+ const moves=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(p,d));
+ if(!moves.length)return;
+ const reverse={x:-dir.x,y:-dir.y};
+ const safe=moves.filter(d=>!(d.x===reverse.x&&d.y===reverse.y));
+ const pool=safe.length?safe:moves;
+ let best=null,bestCost=1e9;
+ for(const d of pool){
+  const nx=p.x+d.x,ny=p.y+d.y;
+  let danger=0;
+  ghosts.forEach(g=>{const dist=Math.abs(nx-g.x)+Math.abs(ny-g.y);if(!g.f&&dist<4)danger+=(5-dist)*80;});
+  const key=id(nx,ny),reward=pellets.has(key)?120:(powers.has(key)?500:0);
+  const targetDist=aiTarget?Math.abs(nx-aiTarget.x)+Math.abs(ny-aiTarget.y):0;
+  const cost=targetDist*2+danger-reward;
+  if(cost<bestCost){bestCost=cost;best=d;}
+ }
+ if(best){next=best;aiMoves++}
+}
+function aiPlan(){
+ let best=null,bd=1e9;
+ powers.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=Math.abs(x-p.x)+Math.abs(y-p.y);if(powered===0&&d<bd){bd=d;best={x,y}}});
+ if(!best)pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=Math.abs(x-p.x)+Math.abs(y-p.y);if(d<bd){bd=d;best={x,y}}});
+ aiTarget=best;
+}
 function update(){
  if(paused||ready||over)return;
+ if(ai){if(!aiTarget||Math.random()<.08)aiPlan();aiChoose()}
  if(can(p,next))dir=next;
  if(!can(p,dir))dir={x:0,y:0};
  p.x+=dir.x;p.y+=dir.y;
@@ -102,7 +133,8 @@ function draw(){
  ghosts.forEach(q=>{let x=(q.x+.5)*S,y=(q.y+.5)*S,r=S*.34;X.fillStyle=q.f?"#6976ff":q.c;X.shadowBlur=10;X.shadowColor=X.fillStyle;X.beginPath();X.arc(x,y,r,0,TAU);X.fill();X.shadowBlur=0;X.fillStyle="#fff";X.beginPath();X.arc(x-r*.28,y-r*.1,r*.18,0,TAU);X.arc(x+r*.28,y-r*.1,r*.18,0,TAU);X.fill();X.fillStyle="#111";X.beginPath();X.arc(x-r*.23,y-r*.08,r*.08,0,TAU);X.arc(x+r*.33,y-r*.08,r*.08,0,TAU);X.fill()})
 }
 function loop(t){if(t-last>110){update();last=t}draw();requestAnimationFrame(loop)}
-addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;reset();hud()}});
+addEventListener("keydown",e=>{let k=e.key.toLowerCase(),d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d)next=d;if(k=="p"){paused=!paused;if(paused)show("PAUSED");else hide()}if(k=="r"){score=0;level=1;lives=3;over=false;aiMoves=0;reset();hud()}});
+document.getElementById("aiToggle").addEventListener("click",()=>{ai=!ai;document.getElementById("aiToggle").textContent=ai?"🤖 AI PLAYER: ON":"🤖 AI PLAYER: OFF";if(ai){paused=false;ready=false;hide();aiPlan()}});
 document.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("pointerdown",()=>{let m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};next=m[b.dataset.d]}));
 hud();reset();requestAnimationFrame(loop);
 </script></body></html>
