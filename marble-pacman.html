@@ -27,7 +27,7 @@ canvas{width:100%;height:auto;display:block;border-radius:10px;background:#000}
 <div class="hud"><span>SCORE <b id="score">000000</b></span><span>LEVEL <b id="level">1</b></span><span>MARBLES <b id="lives">●●●</b></span></div>
 <div class="frame"><canvas id="game" width="560" height="560"></canvas><div class="overlay"><div id="panel" class="panel"><strong id="message">READY!</strong><div style="margin-top:7px">Choose a direction</div></div></div></div>
 <div class="controls"><button class="blank">.</button><button data-d="up">▲</button><button class="blank">.</button><button data-d="left">◀</button><button data-d="down">▼</button><button data-d="right">▶</button></div>
-<button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI learns the maze, targets pellets/power marbles, and avoids hunters.</div><div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
+<button id="aiToggle">🤖 AI PLAYER: OFF</button><div id="aiStats">AI: BFS maze pathfinding • pellet targeting • power-marble strategy • hunter avoidance</div><div class="help">Arrow keys / WASD • P pause • R restart • Eat glowing power marbles to turn hunters blue</div>
 </main>
 <script>
 const C=document.getElementById('game'),X=C.getContext('2d'),T=28,S=C.width/T,TAU=Math.PI*2;
@@ -61,7 +61,7 @@ const rows=[
 "#..........................#",
 "############################"].map(r=>[...r].map(c=>c==="#"?1:0));
 const open=(x,y)=>x>=0&&x<T&&y>=0&&y<T&&!rows[y][x],id=(x,y)=>y*T+x;
-let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0,ai=false,aiMoves=0,aiTarget=null;
+let score=0,level=1,lives=3,paused=false,ready=true,over=false,powered=0,ai=false,aiMoves=0,aiTarget=null,aiThink=0;
 let p,ghosts,pellets=new Set(),powers=new Set(),dir={x:0,y:0},next={x:0,y:0},last=0;
 function show(m){document.getElementById('message').textContent=m;document.getElementById('panel').classList.add('show')}
 function hide(){document.getElementById('panel').classList.remove('show')}
@@ -80,22 +80,16 @@ function choose(g){
  a.sort((u,v)=>{let du=(g.x+u.x-p.x)**2+(g.y+u.y-p.y)**2,dv=(g.x+v.x-p.x)**2+(g.y+v.y-p.y)**2;return g.f?dv-du:du-dv});
  g.dx=a[0].x;g.dy=a[0].y;
 }
+function bfsPath(sx,sy,tx,ty){
+ const q=[[sx,sy]],prev=new Map([[id(sx,sy),null]]),ds=[[1,0],[-1,0],[0,1],[0,-1]];
+ while(q.length){const [x,y]=q.shift();if(x===tx&&y===ty)break;for(const [dx,dy] of ds){let nx=x+dx,ny=y+dy;if(nx<0)nx=T-1;if(nx>=T)nx=0;if(!open(nx,ny))continue;let k=id(nx,ny);if(!prev.has(k)){prev.set(k,[x,y]);q.push([nx,ny])}}}
+ const end=id(tx,ty);if(!prev.has(end))return null;let cur=[tx,ty];while(prev.get(id(cur[0],cur[1]))!==null){let pr=prev.get(id(cur[0],cur[1]));if(pr[0]===sx&&pr[1]===sy)return {x:cur[0]-sx||((cur[0]===T-1&&sx===0)?-1:((cur[0]===0&&sx===T-1)?1:0)),y:cur[1]-sy};cur=pr}return null;
+}
+function aiDanger(x,y){let n=0;ghosts.forEach(g=>{if(g.f)return;let d=Math.abs(x-g.x)+Math.abs(y-g.y);if(d<=5)n+=(6-d)*(powered?8:55)});return n}
 function aiChoose(){
- const moves=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(p,d));
- if(!moves.length)return;
- const reverse={x:-dir.x,y:-dir.y};
- const safe=moves.filter(d=>!(d.x===reverse.x&&d.y===reverse.y));
- const pool=safe.length?safe:moves;
+ const moves=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(p,d));if(!moves.length)return;
  let best=null,bestCost=1e9;
- for(const d of pool){
-  const nx=p.x+d.x,ny=p.y+d.y;
-  let danger=0;
-  ghosts.forEach(g=>{const dist=Math.abs(nx-g.x)+Math.abs(ny-g.y);if(!g.f&&dist<4)danger+=(5-dist)*80;});
-  const key=id(nx,ny),reward=pellets.has(key)?120:(powers.has(key)?500:0);
-  const targetDist=aiTarget?Math.abs(nx-aiTarget.x)+Math.abs(ny-aiTarget.y):0;
-  const cost=targetDist*2+danger-reward;
-  if(cost<bestCost){bestCost=cost;best=d;}
- }
+ for(const d of moves){const nx=(p.x+d.x+T)%T,ny=p.y+d.y;if(!open(nx,ny))continue;let cost=aiDanger(nx,ny);if(aiTarget){const step=bfsPath(nx,ny,aiTarget.x,aiTarget.y);if(step)cost+=(Math.abs(nx-aiTarget.x)+Math.abs(ny-aiTarget.y))*2;}if(pellets.has(id(nx,ny)))cost-=35;if(powers.has(id(nx,ny)))cost-=powered?5:140;if(d.x===-dir.x&&d.y===-dir.y)cost+=8;if(cost<bestCost){bestCost=cost;best=d}}
  if(best){next=best;aiMoves++}
 }
 function aiPlan(){
@@ -106,7 +100,7 @@ function aiPlan(){
 }
 function update(){
  if(paused||ready||over)return;
- if(ai){if(!aiTarget||Math.random()<.08)aiPlan();aiChoose()}
+ if(ai){if(++aiThink%3===0||!aiTarget)aiPlan();aiChoose()}
  if(can(p,next))dir=next;
  if(!can(p,dir))dir={x:0,y:0};
  p.x+=dir.x;p.y+=dir.y;
