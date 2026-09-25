@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - "tools/pac_marble_brain.py"
+      - "tools/pac_marble_maze.py"
       - ".github/workflows/pac-marble-brain.yml"
+      - ".github/workflows/pac-marble-maze.yml"
       - "marble-pacman.html"
   schedule:
     - cron: "17,47 * * * *"
@@ -16,22 +18,43 @@ permissions:
 jobs:
   evolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Rebase latest main before training
         run: |
+          set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git rebase origin/main
-      - run: python3 tools/pac_marble_brain.py
-      - name: Validate and save brain
+          git checkout main
+          git reset --hard origin/main
+      - name: Evolve player brain
+        run: python3 tools/pac_marble_brain.py
+      - name: Evolve maze brain
+        run: python3 tools/pac_marble_maze.py
+      - name: Validate both persistent brains
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          brain=json.loads(Path("brain.json").read_text())
+          assert brain.get("version")==2
+          assert isinstance(brain.get("q"),dict)
+          assert isinstance(brain.get("states"),int)
+          maze=json.loads(Path("maze-brain.json").read_text())
+          assert maze.get("version")==2
+          levels=maze.get("levels",[])
+          assert len(levels)==12
+          assert all(len(z)==28 and all(len(r)==28 for r in z) for z in levels)
+          assert all(any(c=="." for r in z for c in r) for z in levels)
+          print("player brain:", brain["states"], "states,", brain["episodes"], "episodes")
+          print("maze brain:", len(levels), "validated levels, generation", maze.get("generation"))
+          PY
+      - name: Save both brains atomically
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "Evolve Pac-Marble persistent AI brain"
-          file_pattern: brain.json
-      - name: Verify saved brain
-        run: python3 -c 'import json; d=json.load(open("brain.json")); assert isinstance(d.get("q"),dict); assert d.get("version")==2'
+          commit_message: "Evolve Pac-Marble player and maze brains"
+          file_pattern: "brain.json maze-brain.json"
