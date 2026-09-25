@@ -16,7 +16,7 @@ def parse_fallback():
     text=HTML.read_text(encoding="utf-8")
     m=re.search(r"const FALLBACK_ROWS=\[(.*?)\]\.map",text,re.S)
     if not m: raise RuntimeError("maze definition not found")
-    rows=re.findall(r'"([# .]+)"',m.group(1))
+    rows=re.findall(r'"([#. ]+)"',m.group(1))
     if len(rows)!=H or any(len(row)!=W for row in rows):
         raise RuntimeError("fallback maze must be exactly 28x28")
     return [[1 if c=="#" else 0 for c in row] for row in rows]
