@@ -119,7 +119,7 @@ def main():
     try:
         with open(BRAIN,encoding="utf-8") as f: brain=json.load(f)
     except Exception:
-        brain={"version":1,"algorithm":"evolutionary-maze-builder","generation":0,"levels_built":0,"best_score":0,"params":{"open_target":.52,"loop_rate":.16,"dead_end_target":.18},"levels":[]}
+        brain={"version":2,"algorithm":"evolutionary-maze-builder","generation":0,"levels_built":0,"best_score":0,"params":{"open_target":.52,"loop_rate":.16,"dead_end_target":.18},"levels":[]}
     rng=random.Random()
     seed=int(time.time_ns() ^ os.getpid())
     rng.seed(seed)
@@ -141,6 +141,7 @@ def main():
         best=ranked[0]; s=score(best)
         total_best=max(total_best,s)
         new_levels.append(["".join("#" if c else "." for c in row) for row in best])
+    brain["version"]=2
     brain["generation"]=int(brain.get("generation",0))+1
     brain["levels_built"]=len(new_levels)
     brain["best_score"]=round(total_best,3)
