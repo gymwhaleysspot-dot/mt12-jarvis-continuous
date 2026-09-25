@@ -68,6 +68,36 @@ def stats(g):
     reachable=len(seen)/max(1,len(opens))
     return open_ratio,junction,dead,far,reachable
 
+def connected(g):
+    opens={(x,y) for y in range(H) for x in range(W) if not g[y][x]}
+    if not opens or (14,26) not in opens: return False
+    q=deque([(14,26)]); seen={(14,26)}
+    while q:
+        x,y=q.popleft()
+        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+            p=(x+dx,y+dy)
+            if p in opens and p not in seen:
+                seen.add(p); q.append(p)
+    return seen==opens
+
+def valid_maze(g):
+    return len(g)==H and all(len(r)==W for r in g) and connected(g)
+
+def connected(g):
+    opens={(x,y) for y in range(H) for x in range(W) if not g[y][x]}
+    if not opens or (14,26) not in opens: return False
+    q=deque([(14,26)]); seen={(14,26)}
+    while q:
+        x,y=q.popleft()
+        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+            p=(x+dx,y+dy)
+            if p in opens and p not in seen:
+                seen.add(p); q.append(p)
+    return seen==opens
+
+def valid_maze(g):
+    return len(g)==H and all(len(r)==W for r in g) and connected(g)
+
 def score(g):
     o,j,d,f,r=stats(g)
     return 100*(r-.52*abs(o-.52)+.45*j+.25*(1-abs(d-.18)*2)+min(f,40)/80)
@@ -105,7 +135,10 @@ def main():
             pool.append(mutate(parent,rng))
             if len(pool)>24:
                 pool.sort(key=score,reverse=True); pool=pool[:24]
-        best=max(pool,key=score); s=score(best)
+        ranked=sorted((g for g in pool if valid_maze(g)),key=score,reverse=True)
+        if not ranked:
+            raise RuntimeError("no playable maze survived evolution")
+        best=ranked[0]; s=score(best)
         total_best=max(total_best,s)
         new_levels.append(["".join("#" if c else "." for c in row) for row in best])
     brain["generation"]=int(brain.get("generation",0))+1
@@ -114,10 +147,19 @@ def main():
     brain["levels"]=new_levels
     brain["seed"]=seed
     brain["updated"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
-    with open(BRAIN,"w",encoding="utf-8") as f:
-        json.dump(brain,f,separators=(",",":"))
+    if len(new_levels)!=levels or not all(valid_maze([[1 if c=="#" else 0 for c in row] for row in level]) for level in new_levels):
+        raise RuntimeError("maze brain validation failed")
+    tmp=BRAIN+".tmp"
+    with open(tmp,"w",encoding="utf-8") as f:
+        json.dump(brain,f,separators=(",",":"),allow_nan=False)
         f.write("\n")
-    print(f"maze generation {brain['generation']}: built {levels} distinct levels; best={total_best:.2f}")
+        f.flush()
+        os.fsync(f.fileno())
+    with open(tmp,encoding="utf-8") as f: check=json.load(f)
+    if not isinstance(check,dict) or len(check.get("levels",[]))!=levels:
+        raise RuntimeError("maze brain serialization validation failed")
+    os.replace(tmp,BRAIN)
+    print(f"maze generation {brain['generation']}: built {levels} distinct playable levels; best={total_best:.2f}")
 
 if __name__=="__main__":
     main()
