@@ -13,8 +13,8 @@ EPISODES=int(os.environ.get("PAC_EPISODES","900"))
 random.seed()
 
 html=open(HTML,encoding="utf-8").read()
-m=re.search(r'const rows=\[(.*?)\]\.map',html,re.S)
-if not m: raise SystemExit("maze definition not found")
+m=re.search(r'const FALLBACK_ROWS=\[(.*?)\]\.map',html,re.S)
+if not m: raise SystemExit("maze definition not found: expected FALLBACK_ROWS in marble-pacman.html")
 rows=re.findall(r'"([# .]+)"',m.group(1))
 T=len(rows); W=len(rows[0])
 walls={(x,y) for y,row in enumerate(rows) for x,c in enumerate(row) if c=="#"}
