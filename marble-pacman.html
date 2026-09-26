@@ -6,7 +6,7 @@
 <title>Marble Maze: PAC-MARBLE</title>
 <!-- Pages deployment repair: 2026-09-25 -->
 <!-- Pac-Marble brain/maze deployment gate: 2026-09-25 -->
-<!-- AI player upgrade: maze-aware pellet targeting + hunter avoidance -->
+<!-- AI v2: strategic player planning + predictive enemy personalities -->
 <style>
 :root{--bg:#03030a;--yellow:#ffe84a;--blue:#244cff;--cyan:#38d9ff;--pink:#ff54d8;--red:#ff4b5c}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle,#17153a 0,#060612 55%,#010104 100%);color:#fff;font-family:system-ui,-apple-system,sans-serif;display:grid;place-items:center;padding:12px}
@@ -184,33 +184,88 @@ function reset(){
  ready=true;show("READY!");setTimeout(()=>{if(!over){ready=false;hide()}},750);
 }
 function can(e,d){return open(e.x+d.x,e.y+d.y)}
-function choose(g){
- let a=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(g,d));
- if(!a.length)return;
- a.sort((u,v)=>{let du=(g.x+u.x-p.x)**2+(g.y+u.y-p.y)**2,dv=(g.x+v.x-p.x)**2+(g.y+v.y-p.y)**2;return g.f?dv-du:du-dv});
- g.dx=a[0].x;g.dy=a[0].y;
+function mazeDist(sx,sy,tx,ty,limit=900){
+ const q=[[sx,sy,0]],seen=new Set([id(sx,sy)]);
+ while(q.length){const [x,y,d]=q.shift();if(x===tx&&y===ty)return d;if(d>=limit)continue;
+  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let nx=x+dx,ny=y+dy;if(nx<0)nx=T-1;if(nx>=T)nx=0;if(ny<0||ny>=T||!open(nx,ny))continue;let k=id(nx,ny);if(!seen.has(k)){seen.add(k);q.push([nx,ny,d+1])}}
+ } return 999;
 }
-function bfsPath(sx,sy,tx,ty){
- const q=[[sx,sy]],prev=new Map([[id(sx,sy),null]]),ds=[[1,0],[-1,0],[0,1],[0,-1]];
- while(q.length){const [x,y]=q.shift();if(x===tx&&y===ty)break;for(const [dx,dy] of ds){let nx=x+dx,ny=y+dy;if(nx<0)nx=T-1;if(nx>=T)nx=0;if(!open(nx,ny))continue;let k=id(nx,ny);if(!prev.has(k)){prev.set(k,[x,y]);q.push([nx,ny])}}}
- const end=id(tx,ty);if(!prev.has(end))return null;let cur=[tx,ty];while(prev.get(id(cur[0],cur[1]))!==null){let pr=prev.get(id(cur[0],cur[1]));if(pr[0]===sx&&pr[1]===sy)return {x:cur[0]-sx||((cur[0]===T-1&&sx===0)?-1:((cur[0]===0&&sx===T-1)?1:0)),y:cur[1]-sy};cur=pr}return null;
+function nextStep(sx,sy,tx,ty){
+ const q=[[sx,sy]],prev=new Map([[id(sx,sy),null]]);
+ while(q.length){const [x,y]=q.shift();if(x===tx&&y===ty)break;
+  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let nx=x+dx,ny=y+dy;if(nx<0)nx=T-1;if(nx>=T)nx=0;if(ny<0||ny>=T||!open(nx,ny))continue;let k=id(nx,ny);if(!prev.has(k)){prev.set(k,[x,y]);q.push([nx,ny])}}
+ }
+ const end=id(tx,ty);if(!prev.has(end))return null;let cur=[tx,ty];
+ while(true){const pr=prev.get(id(cur[0],cur[1]));if(!pr)return null;if(pr[0]===sx&&pr[1]===sy)return {x:cur[0]-sx||((cur[0]===T-1&&sx===0)?-1:((cur[0]===0&&sx===T-1)?1:0)),y:cur[1]-sy};cur=pr}
 }
-function aiDanger(x,y){let n=0;ghosts.forEach(g=>{if(g.f)return;let d=Math.abs(x-g.x)+Math.abs(y-g.y);if(d<=5)n+=(6-d)*(powered?8:55)});return n}
+function choose(g,index){
+ const moves=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(g,d));
+ if(!moves.length)return;
+ const personality=[{mode:"chase",bias:.95},{mode:"ambush",bias:.82},{mode:"patrol",bias:.65}][index%3];
+ let best=null,bestScore=-Infinity;
+ for(const d of moves){
+  const nx=(g.x+d.x+T)%T,ny=g.y+d.y;
+  let dist=mazeDist(nx,ny,p.x,p.y,120),score=0;
+  if(g.f) score=-dist*1.2;
+  else if(personality.mode==="chase") score=100-dist*7;
+  else if(personality.mode==="ambush"){
+   const look=Math.min(5,dist), tx=p.x+dir.x*look,ty=p.y+dir.y*look;
+   const targetX=((tx%T)+T)%T;
+   if(open(targetX,Math.max(0,Math.min(T-1,ty)))) score=100-mazeDist(nx,ny,targetX,Math.max(0,Math.min(T-1,ty)),120)*6;
+   score+=Math.random()*4;
+  }else{
+   const patrolTargets=[[2,2],[25,2],[25,25],[2,25]];
+   const t=patrolTargets[(Math.floor((Date.now()/3000)+index))%patrolTargets.length];
+   score=70-mazeDist(nx,ny,t[0],t[1],120)*2;
+   if(dist<8)score+=25;
+  }
+  if(d.x===-g.dx&&d.y===-g.dy&&moves.length>1)score-=18;
+  score+=Math.random()*1.5;
+  if(score>bestScore){bestScore=score;best=d}
+ }
+ if(best){g.dx=best.x;g.dy=best.y}
+}
+function aiDanger(x,y,depth=0){
+ let n=0;
+ ghosts.forEach((g,i)=>{
+  if(g.f)return;
+  const d=mazeDist(x,y,g.x,g.y,80);
+  n+=d<=3?(4-d)*180:d<=7?(8-d)*28:0;
+  if(depth&&d<10){
+   const gx=(g.x+g.dx*depth+T*4)%T,gy=g.y+g.dy*depth;
+   if(open(gx,gy)&&mazeDist(x,y,gx,gy,60)<=2)n+=90;
+  }
+ });
+ return n;
+}
 function aiChoose(){
  const moves=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>can(p,d));if(!moves.length)return;
- let best=null,bestCost=1e9;
- for(const d of moves){const nx=(p.x+d.x+T)%T,ny=p.y+d.y;if(!open(nx,ny))continue;let cost=aiDanger(nx,ny);if(aiTarget){const step=bfsPath(nx,ny,aiTarget.x,aiTarget.y);if(step)cost+=(Math.abs(nx-aiTarget.x)+Math.abs(ny-aiTarget.y))*2;}if(pellets.has(id(nx,ny)))cost-=35;if(powers.has(id(nx,ny)))cost-=powered?5:140;if(d.x===-dir.x&&d.y===-dir.y)cost+=8;if(cost<bestCost){bestCost=cost;best=d}}
+ let best=null,bestCost=Infinity;
+ for(const d of moves){
+  const nx=(p.x+d.x+T)%T,ny=p.y+d.y;
+  if(!open(nx,ny))continue;
+  let cost=aiDanger(nx,ny,1)* (powered?0.18:1);
+  if(aiTarget){
+   const dist=mazeDist(nx,ny,aiTarget.x,aiTarget.y,180);
+   cost+=dist*2.2;
+  }
+  if(pellets.has(id(nx,ny)))cost-=42;
+  if(powers.has(id(nx,ny)))cost-=powered?8:170;
+  if(d.x===-dir.x&&d.y===-dir.y&&moves.length>1)cost+=5;
+  if(!dir.x&&!dir.y)cost-=4;
+  if(cost<bestCost){bestCost=cost;best=d}
+ }
  if(best){next=best;aiMoves++}
 }
 function aiPlan(){
- let best=null,bd=1e9;
- powers.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=Math.abs(x-p.x)+Math.abs(y-p.y);if(powered===0&&d<bd){bd=d;best={x,y}}});
- if(!best)pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=Math.abs(x-p.x)+Math.abs(y-p.y);if(d<bd){bd=d;best={x,y}}});
+ let best=null,bd=Infinity;
+ powers.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=mazeDist(p.x,p.y,x,y,500);if(!powered&&d<bd){bd=d;best={x,y}}});
+ if(!best)pellets.forEach(k=>{let x=k%T,y=Math.floor(k/T),d=mazeDist(p.x,p.y,x,y,500);if(d<bd){bd=d;best={x,y}}});
  aiTarget=best;
 }
 function update(){
  if(paused||ready||over)return;
- if(ai){if(++aiThink%3===0||!aiTarget)aiPlan(); const learned=brainAction(); if(learned)next=learned; else aiChoose()}
+ if(ai){if(++aiThink%3===0||!aiTarget)aiPlan(); const learned=brainAction(); if(learned){const lx=(p.x+learned.x+T)%T,ly=p.y+learned.y; if(aiDanger(lx,ly,2)<80||powered)next=learned; else aiChoose()} else aiChoose()}
  if(can(p,next))dir=next;
  if(!can(p,dir))dir={x:0,y:0};
  p.x+=dir.x;p.y+=dir.y;
@@ -218,7 +273,7 @@ function update(){
  if(pellets.delete(k))score+=10;
  if(powers.delete(k)){score+=50;powered=80;ghosts.forEach(g=>g.f=80)}
  ghosts.forEach(g=>{
-  if(Math.random()<.35||!can(g,{x:g.dx,y:g.dy}))choose(g);
+  if(Math.random()<.22||!can(g,{x:g.dx,y:g.dy}))choose(g,ghosts.indexOf(g));
   g.x+=g.dx;g.y+=g.dy;if(g.x<0)g.x=T-1;if(g.x>=T)g.x=0;
   if(g.x==p.x&&g.y==p.y){if(g.f){score+=200;g.x=14;g.y=12;g.f=0}else{lives--;hud();if(lives<=0){over=true;show("GAME OVER — PRESS R")}else{resetPos();ready=true;show("OUCH!");setTimeout(()=>{ready=false;hide()},700)}}}
   g.f=Math.max(0,g.f-1);
