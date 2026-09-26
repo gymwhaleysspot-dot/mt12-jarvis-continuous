@@ -13,10 +13,10 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1790378893996",
+    "runId": "research-1790384569332",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-09-25T23:29:51.805287+00:00",
+  "generatedAt": "2026-09-26T01:04:28.941498+00:00",
   "graphState": {
     "nodes": 10,
     "relationships": 3
@@ -46,9 +46,9 @@
     },
     "area": "digital-twin-transfer",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-09-25T23:29:51.805280+00:00",
+    "createdAt": "2026-09-26T01:04:28.941489+00:00",
     "emitter": "adversarial-domain-randomization",
-    "expectedInformationGain": 0.6441,
+    "expectedInformationGain": 0.6409,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -56,11 +56,11 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1790378893996",
+      "runId": "research-1790384569332",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20260925232951",
+    "id": "EXP-20260926010428",
     "ideaSignature": "4f31e54d80002c34336f",
     "innovationState": {
       "archiveCoverage": 7,
@@ -73,14 +73,14 @@
     "mutations": [
       "vary lag, grip, sag and dropout jointly",
       "score worst-decile behavior",
-      "adaptive lock target confidence",
-      "linear release and reapply timing",
       "deduplicate hot-path calculations",
       "retain exact behavior while reclaiming bytecode",
       "publish decision cause and supporting evidence",
       "link authority caps to confidence",
       "graded fail-open sensor confidence",
-      "state-preserving dropout coast"
+      "state-preserving dropout coast",
+      "adaptive lock target confidence",
+      "linear release and reapply timing"
     ],
     "name": "Quality-diversity active innovation generation plus synthesis",
     "parent": "jrw5-1961",
@@ -92,7 +92,7 @@
         "expectedInformationGain": 0.6254,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1790378893996",
+          "runId": "research-1790384569332",
           "sourceIds": [],
           "weight": 0
         },
@@ -110,37 +110,13 @@
         "slot": 1
       },
       {
-        "area": "abs-control",
-        "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
-        "emitter": "lock-confidence-ramp",
-        "expectedInformationGain": 0.6808,
-        "externalResearch": {
-          "findings": 0,
-          "runId": "research-1790378893996",
-          "sourceIds": [],
-          "weight": 0
-        },
-        "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
-        "ideaSignature": "4ecef04248a990840b26",
-        "measurement": "reduce lock duration without increasing stopping distance proxy",
-        "mutations": [
-          "adaptive lock target confidence",
-          "linear release and reapply timing"
-        ],
-        "name": "Lock Confidence Ramp for abs control",
-        "noveltyAcquisition": 0.6853,
-        "priority": 0.5758,
-        "researchCanDirectlyMutateController": false,
-        "slot": 2
-      },
-      {
         "area": "runtime-memory",
         "baselineHypothesis": "A runtime-memory candidate derived from jrw5-1961 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
         "emitter": "hot-path-cse",
         "expectedInformationGain": 0.6125,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1790378893996",
+          "runId": "research-1790384569332",
           "sourceIds": [],
           "weight": 0
         },
@@ -155,7 +131,7 @@
         "noveltyAcquisition": 0.6837,
         "priority": 0.4325,
         "researchCanDirectlyMutateController": false,
-        "slot": 3
+        "slot": 2
       },
       {
         "area": "controller-observability",
@@ -164,7 +140,7 @@
         "expectedInformationGain": 0.6116,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1790378893996",
+          "runId": "research-1790384569332",
           "sourceIds": [],
           "weight": 0
         },
@@ -179,7 +155,7 @@
         "noveltyAcquisition": 0.6831,
         "priority": 0.4316,
         "researchCanDirectlyMutateController": false,
-        "slot": 4
+        "slot": 3
       },
       {
         "area": "sensor-dropout-recovery",
@@ -188,7 +164,7 @@
         "expectedInformationGain": 0.6904,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1790378893996",
+          "runId": "research-1790384569332",
           "sourceIds": [],
           "weight": 0
         },
@@ -202,6 +178,30 @@
         "name": "Confidence Coast for sensor dropout recovery",
         "noveltyAcquisition": 0.6733,
         "priority": 0.5104,
+        "researchCanDirectlyMutateController": false,
+        "slot": 4
+      },
+      {
+        "area": "abs-control",
+        "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "emitter": "lock-confidence-ramp",
+        "expectedInformationGain": 0.6648,
+        "externalResearch": {
+          "findings": 0,
+          "runId": "research-1790384569332",
+          "sourceIds": [],
+          "weight": 0
+        },
+        "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "ideaSignature": "4ecef04248a990840b26",
+        "measurement": "reduce lock duration without increasing stopping distance proxy",
+        "mutations": [
+          "adaptive lock target confidence",
+          "linear release and reapply timing"
+        ],
+        "name": "Lock Confidence Ramp for abs control",
+        "noveltyAcquisition": 0.6654,
+        "priority": 0.5248,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
@@ -221,10 +221,10 @@
       "area": "synthesis-all-five",
       "inputs": [
         "digital-twin-transfer",
-        "abs-control",
         "runtime-memory",
         "controller-observability",
-        "sensor-dropout-recovery"
+        "sensor-dropout-recovery",
+        "abs-control"
       ],
       "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
       "name": "Synthesize all five hypotheses",
@@ -240,7 +240,7 @@
       "expectedInformationGain": 0.6254,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1790378893996",
+        "runId": "research-1790384569332",
         "sourceIds": [],
         "weight": 0
       },
@@ -258,37 +258,13 @@
       "slot": 1
     },
     {
-      "area": "abs-control",
-      "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
-      "emitter": "lock-confidence-ramp",
-      "expectedInformationGain": 0.6808,
-      "externalResearch": {
-        "findings": 0,
-        "runId": "research-1790378893996",
-        "sourceIds": [],
-        "weight": 0
-      },
-      "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
-      "ideaSignature": "4ecef04248a990840b26",
-      "measurement": "reduce lock duration without increasing stopping distance proxy",
-      "mutations": [
-        "adaptive lock target confidence",
-        "linear release and reapply timing"
-      ],
-      "name": "Lock Confidence Ramp for abs control",
-      "noveltyAcquisition": 0.6853,
-      "priority": 0.5758,
-      "researchCanDirectlyMutateController": false,
-      "slot": 2
-    },
-    {
       "area": "runtime-memory",
       "baselineHypothesis": "A runtime-memory candidate derived from jrw5-1961 using the hot-path-cse mechanism\u2014deduplicate hot-path calculations, retain exact behavior while reclaiming bytecode\u2014will reduce peak runtime memory and LUAC size with zero behavioral regression.",
       "emitter": "hot-path-cse",
       "expectedInformationGain": 0.6125,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1790378893996",
+        "runId": "research-1790384569332",
         "sourceIds": [],
         "weight": 0
       },
@@ -303,7 +279,7 @@
       "noveltyAcquisition": 0.6837,
       "priority": 0.4325,
       "researchCanDirectlyMutateController": false,
-      "slot": 3
+      "slot": 2
     },
     {
       "area": "controller-observability",
@@ -312,7 +288,7 @@
       "expectedInformationGain": 0.6116,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1790378893996",
+        "runId": "research-1790384569332",
         "sourceIds": [],
         "weight": 0
       },
@@ -327,7 +303,7 @@
       "noveltyAcquisition": 0.6831,
       "priority": 0.4316,
       "researchCanDirectlyMutateController": false,
-      "slot": 4
+      "slot": 3
     },
     {
       "area": "sensor-dropout-recovery",
@@ -336,7 +312,7 @@
       "expectedInformationGain": 0.6904,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1790378893996",
+        "runId": "research-1790384569332",
         "sourceIds": [],
         "weight": 0
       },
@@ -351,6 +327,30 @@
       "noveltyAcquisition": 0.6733,
       "priority": 0.5104,
       "researchCanDirectlyMutateController": false,
+      "slot": 4
+    },
+    {
+      "area": "abs-control",
+      "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "emitter": "lock-confidence-ramp",
+      "expectedInformationGain": 0.6648,
+      "externalResearch": {
+        "findings": 0,
+        "runId": "research-1790384569332",
+        "sourceIds": [],
+        "weight": 0
+      },
+      "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "ideaSignature": "4ecef04248a990840b26",
+      "measurement": "reduce lock duration without increasing stopping distance proxy",
+      "mutations": [
+        "adaptive lock target confidence",
+        "linear release and reapply timing"
+      ],
+      "name": "Lock Confidence Ramp for abs control",
+      "noveltyAcquisition": 0.6654,
+      "priority": 0.5248,
+      "researchCanDirectlyMutateController": false,
       "slot": 5
     }
   ],
@@ -358,7 +358,7 @@
     {
       "area": "abs-control",
       "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6808,
+      "expectedInformationGain": 0.6648,
       "externalResearchFindings": 0,
       "externalResearchHypotheses": [],
       "externalResearchWeight": 0,
@@ -369,8 +369,8 @@
         "linear release/reapply timing"
       ],
       "priorExperiments": 0,
-      "priority": 0.5758,
-      "recentSelections": 3,
+      "priority": 0.5248,
+      "recentSelections": 4,
       "uncertainty": 0.57
     },
     {
@@ -442,7 +442,7 @@
       ],
       "priorExperiments": 0,
       "priority": 0.4942,
-      "recentSelections": 51,
+      "recentSelections": 50,
       "uncertainty": 0.6
     },
     {
@@ -505,10 +505,10 @@
     "area": "synthesis-all-five",
     "inputs": [
       "digital-twin-transfer",
-      "abs-control",
       "runtime-memory",
       "controller-observability",
-      "sensor-dropout-recovery"
+      "sensor-dropout-recovery",
+      "abs-control"
     ],
     "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
     "name": "Synthesize all five hypotheses",
