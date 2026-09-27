@@ -3,7 +3,7 @@
   "counts": {
     "controller": 7,
     "digital_twin": 1,
-    "experiment": 2,
+    "experiment": 1,
     "log": 5,
     "mission": 5,
     "mutation": 10,
@@ -13,8 +13,8 @@
     "track": 2
   },
   "currentExperiment": "EXP-20260927054621",
-  "generatedAt": "2026-09-27T05:47:41.300009+00:00",
-  "nodeCount": 193,
+  "generatedAt": "2026-09-27T05:51:32.103500+00:00",
+  "nodeCount": 192,
   "nodes": [
     {
       "id": "track:1e276dd9f4348b97",
@@ -68,7 +68,7 @@
       "label": "Adaptive MT12 Vehicle Twin"
     },
     {
-      "expectedInformationGain": 0.6437,
+      "expectedInformationGain": 0.6416,
       "id": "next_experiment:00e98a682e5e9e2c",
       "kind": "next_experiment",
       "label": "Quality-diversity active innovation generation plus synthesis",
@@ -81,7 +81,7 @@
       "kind": "controller",
       "label": "j00005",
       "luacSha": "3d66562adb666386230b68779cedc5ea38b78d25469803dbea0335a245c85703",
-      "recommended": false,
+      "recommended": true,
       "role": "champion",
       "sourceSha": "efb931ab94484e7c553ef173fe677de8d5831d87f21c641373fa9efd38548a79"
     },
@@ -1217,7 +1217,7 @@
     {
       "expectedInformationGain": 0.6416,
       "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-      "id": "experiment:5da7a351d7986a1b",
+      "id": "experiment:edd2a59685cb4d78",
       "kind": "experiment",
       "label": "Quality-diversity active innovation generation plus synthesis",
       "measurement": "maximize prediction-focused information gain and behavioral archive coverage while preserving defended behavior",
@@ -1317,18 +1317,9 @@
       "id": "test:3a3ab60dbad64cfa",
       "kind": "test",
       "label": "bench and road evidence before canonical promotion"
-    },
-    {
-      "expectedInformationGain": 0.6416,
-      "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-      "id": "experiment:edd2a59685cb4d78",
-      "kind": "experiment",
-      "label": "Quality-diversity active innovation generation plus synthesis",
-      "measurement": "maximize prediction-focused information gain and behavioral archive coverage while preserving defended behavior",
-      "status": "PLANNED"
     }
   ],
-  "relationshipCount": 206,
+  "relationshipCount": 187,
   "relationships": [
     {
       "id": "edge:ca187dd498684da2",
@@ -2341,120 +2332,6 @@
       "relation": "DUPLICATES",
       "source": "rejection:e747f1c11700a70c",
       "target": "controller:a0206f4b0721cac1"
-    },
-    {
-      "id": "edge:4d2bdf485167f457",
-      "relation": "USES_PARENT",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "controller:c4361d87f108a167"
-    },
-    {
-      "id": "edge:0c8e52075669f498",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:ebaeb1d049bd3e00"
-    },
-    {
-      "id": "edge:8a8cf2bd0bb8f091",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:888b899e2c569dac"
-    },
-    {
-      "id": "edge:a71fe7aba72b2af8",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:a2b6fe25e9d94bdb"
-    },
-    {
-      "id": "edge:6f7519722baa2ccb",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:f772424e7c4c684d"
-    },
-    {
-      "id": "edge:0ac32d1c5448b4bf",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:7fc315185590f1ce"
-    },
-    {
-      "id": "edge:2fd9f479fea2d431",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:3751fb5c0773e17c"
-    },
-    {
-      "id": "edge:20419c2e6675362c",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:71b27d27c52f35da"
-    },
-    {
-      "id": "edge:3c69ac6ee5fa4e70",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:64e4c30deb14c2ce"
-    },
-    {
-      "id": "edge:a3e47dd513ec21c2",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:1ecf9961f7122380"
-    },
-    {
-      "id": "edge:c2616d87c803bfe6",
-      "relation": "PROPOSES_MUTATION",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "mutation:a503ef05b7f1545f"
-    },
-    {
-      "id": "edge:beb609c93deda6b2",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:d0ceba208d208f3d"
-    },
-    {
-      "id": "edge:c7d3fe50c6c4286e",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:af354b232c193ef9"
-    },
-    {
-      "id": "edge:08b4b7200168d82c",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:9e7a610f94776e69"
-    },
-    {
-      "id": "edge:e301bd012e5d21aa",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:0a8d964b5a58673f"
-    },
-    {
-      "id": "edge:1d04007f1109d522",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:7c0f3e4fb35413c8"
-    },
-    {
-      "id": "edge:3fd21fe7030dda94",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:db5c2d09f1adc47a"
-    },
-    {
-      "id": "edge:e81951264ca8bdea",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:0dc8b008f43f14a0"
-    },
-    {
-      "id": "edge:47009ed791f57dd9",
-      "relation": "REQUIRES_TEST",
-      "source": "experiment:5da7a351d7986a1b",
-      "target": "test:3a3ab60dbad64cfa"
     },
     {
       "id": "edge:9cbce52e15d715c4",
