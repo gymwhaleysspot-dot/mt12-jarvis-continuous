@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "generatedAt": "2026-09-29T15:00:48.356Z",
+  "generatedAt": "2026-09-29T15:02:48.821Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -103,38 +103,6 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
-      "component": "stance",
-      "evidence": {
-        "confidence": 1,
-        "references": 32,
-        "uniqueDirectReferences": 8,
-        "ownerPhotoReferences": [
-          "owner-side-right"
-        ],
-        "ownerBinaryFiles": [
-          "IMG_4328.jpeg",
-          "IMG_4329.jpeg",
-          "IMG_4330.jpeg",
-          "IMG_4331.jpeg",
-          "IMG_4332.jpeg",
-          "IMG_4333.jpeg",
-          "IMG_4334.jpeg",
-          "IMG_4335.jpeg"
-        ],
-        "ownerPrimary": true
-      },
-      "uncertainty": 0,
-      "parameters": [
-        "wheel_radius",
-        "wheel_track_x",
-        "wheel_width",
-        "wheel_y"
-      ],
-      "priority": 0.8,
-      "authority": "OWNER_JPEG_BINARIES",
-      "strategy": "owner_binary_photo_reconstruction"
-    },
-    {
       "component": "roof_scoop",
       "evidence": {
         "confidence": 1,
@@ -168,15 +136,12 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
-      "component": "arches",
+      "component": "stance",
       "evidence": {
         "confidence": 1,
-        "references": 16,
-        "uniqueDirectReferences": 8,
+        "references": 12,
+        "uniqueDirectReferences": 3,
         "ownerPhotoReferences": [
-          "owner-front-three-left",
-          "owner-front-straight",
-          "owner-front-three-right",
           "owner-side-right"
         ],
         "ownerBinaryFiles": [
@@ -193,12 +158,12 @@
       },
       "uncertainty": 0,
       "parameters": [
-        "arch_x",
         "wheel_radius",
         "wheel_track_x",
+        "wheel_width",
         "wheel_y"
       ],
-      "priority": 0.71,
+      "priority": 0.67,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -233,6 +198,41 @@
         "diffuser_half_top"
       ],
       "priority": 0.64,
+      "authority": "OWNER_JPEG_BINARIES",
+      "strategy": "owner_binary_photo_reconstruction"
+    },
+    {
+      "component": "arches",
+      "evidence": {
+        "confidence": 1,
+        "references": 6,
+        "uniqueDirectReferences": 3,
+        "ownerPhotoReferences": [
+          "owner-front-three-left",
+          "owner-front-straight",
+          "owner-front-three-right",
+          "owner-side-right"
+        ],
+        "ownerBinaryFiles": [
+          "IMG_4328.jpeg",
+          "IMG_4329.jpeg",
+          "IMG_4330.jpeg",
+          "IMG_4331.jpeg",
+          "IMG_4332.jpeg",
+          "IMG_4333.jpeg",
+          "IMG_4334.jpeg",
+          "IMG_4335.jpeg"
+        ],
+        "ownerPrimary": true
+      },
+      "uncertainty": 0,
+      "parameters": [
+        "arch_x",
+        "wheel_radius",
+        "wheel_track_x",
+        "wheel_y"
+      ],
+      "priority": 0.61,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -428,13 +428,6 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
-    "stance": {
-      "winsRequired": 4,
-      "minimumIndependentViews": 3,
-      "minimumReferenceClasses": 2,
-      "locked": false,
-      "mutationScaleWhenStable": 0.25
-    },
     "roof_scoop": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
@@ -442,7 +435,7 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
-    "arches": {
+    "stance": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -450,6 +443,13 @@
       "mutationScaleWhenStable": 0.25
     },
     "rear_aero": {
+      "winsRequired": 4,
+      "minimumIndependentViews": 3,
+      "minimumReferenceClasses": 2,
+      "locked": false,
+      "mutationScaleWhenStable": 0.25
+    },
+    "arches": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
