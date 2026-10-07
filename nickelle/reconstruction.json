@@ -1,14 +1,14 @@
 {
   "schema": 2,
   "engine": "NICKELLE_RECONSTRUCTION_V2_RESEARCH_FUSED",
-  "generatedAt": "2026-10-07T10:43:52.301Z",
+  "generatedAt": "2026-10-07T10:48:08.961Z",
   "truthAuthority": "truth/truth.json",
   "researchAuthority": "nickelle/research/constraints.json",
-  "confidence": 0.8030666666666668,
+  "confidence": 0.8033333333333335,
   "cameraRegistration": {
     "mode": "multiview_bbox_plus_depth_plus_research",
     "referenceViews": 2,
-    "confidence": 0.5415333333333333
+    "confidence": 0.5416666666666666
   },
   "geometryBeliefs": {
     "front_grille": {
@@ -20,7 +20,23 @@
       "research": {
         "component": "front_grille",
         "recognized": true,
-        "constraints": [],
+        "constraints": [
+          {
+            "type": "deterministic_lead",
+            "claim": "Source 'Electroplated thermoplastic automotive grille' contains automotive evidence directly mentioning front_grille; use only as a research lead until checked against owner Truth.",
+            "value": null,
+            "range": null,
+            "unit": null,
+            "sourceIds": [
+              "5c2cb6bc77e2ea667799"
+            ],
+            "confidence": 0.46,
+            "evidenceType": "deterministic_source_relevance",
+            "applicability": "research prioritization and hypothesis generation only",
+            "testableVisualHypothesis": "Verify the cited source against owner photographs/measurements before applying geometry or material changes.",
+            "truthEligible": false
+          }
+        ],
         "directVisualReferences": [
           {
             "evidenceId": "9532e2bb59e873ab792ec015",
@@ -133,17 +149,6 @@
             "truthEligible": false
           },
           {
-            "evidenceId": "5bf838fb63446ce3132f01ef",
-            "imageUrl": "https://www.wrcwings.tech/wp-content/uploads/2019/11/rear-diffuser-comparative.jpg",
-            "sourcePage": "https://www.wrcwings.tech/2019/11/25/aero-development-of-the-citroen-c3-wrc-2017-2019/",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "dd9e654acf819eb40eaa3fb8635e834e08b82c887390e909df71fd59bcfea37d",
-            "truthEligible": false
-          },
-          {
             "evidenceId": "c96e2e577324d7d1e41073aa",
             "imageUrl": "http://www.seriousrc.co.uk/cdn/shop/collections/14303_01.png?v=1750106396",
             "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
@@ -153,12 +158,56 @@
             "downloaded": true,
             "sha256": "98f55c2cbcc61df1e88dadaeab96f09aeb8861b3d986b964075265935210e0db",
             "truthEligible": false
+          },
+          {
+            "evidenceId": "6afbd040ac9c18dee75dd7a7",
+            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/PNG_White_175x@2x.png?v=1652921185",
+            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "front",
+            "downloaded": true,
+            "sha256": "a52b84bcb5e0430afbdb37b7f86b254c7d9a6e552a18212e7fb5b526baf6425c",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "360f713deebf7878bfdb5128",
+            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/collections/14303_01_%7Bwidth%7Dx.png?v=1750106396",
+            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "front",
+            "downloaded": false,
+            "sha256": null,
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "34c9bccd2de3a2671901b3f3",
+            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/P7330A_%7Bwidth%7Dx.png?v=1749998455",
+            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "front",
+            "downloaded": false,
+            "sha256": null,
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "e803dae87568a3381ee4cf06",
+            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/P7330A_600x.png?v=1749998455",
+            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "front",
+            "downloaded": true,
+            "sha256": "3aef8e2b95911b531e5a1c94805a3b55e73bdf9cfd0ba3b3cd12f8a617e9ca76",
+            "truthEligible": false
           }
         ],
-        "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1791369826608"
+        "confidence": 0.46,
+        "sourceRunId": "nickelle-research-1791370083659"
       },
-      "confidence": 1.0136,
+      "confidence": 1.0168,
       "authority": "owner_truth_over_research"
     },
     "projector_left": {
@@ -370,10 +419,21 @@
             "downloaded": true,
             "sha256": "74b4bb8e0c60feae2475bdbacd5d7556bcef8c5a944484bd4e12ce36740f32ec",
             "truthEligible": false
+          },
+          {
+            "evidenceId": "66c5573302fb36484b72bd32",
+            "imageUrl": "https://wrcwings.files.wordpress.com/2016/12/citroen.jpg",
+            "sourcePage": "https://www.wrcwings.tech/2016/12/24/citroen-c3-wrc-2017-aero-revolution/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "side",
+            "downloaded": true,
+            "sha256": "6285c589a39b7d47ad61800aa9bdb5fa380533a38fdcdac6c8b8e2053f29e655",
+            "truthEligible": false
           }
         ],
         "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1791369826608"
+        "sourceRunId": "nickelle-research-1791370083659"
       },
       "confidence": 1.0036,
       "authority": "owner_truth_over_research"
@@ -431,17 +491,6 @@
             "viewpoint": "front",
             "downloaded": true,
             "sha256": "8bfbf990bd2cabd7c7083536dbf5cb2217273b14f6191d0f2ed841ba0f8c7d52",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "5bf838fb63446ce3132f01ef",
-            "imageUrl": "https://www.wrcwings.tech/wp-content/uploads/2019/11/rear-diffuser-comparative.jpg",
-            "sourcePage": "https://www.wrcwings.tech/2019/11/25/aero-development-of-the-citroen-c3-wrc-2017-2019/",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "dd9e654acf819eb40eaa3fb8635e834e08b82c887390e909df71fd59bcfea37d",
             "truthEligible": false
           },
           {
@@ -522,30 +571,19 @@
             "truthEligible": false
           },
           {
-            "evidenceId": "36abe409dc8d243f8bd65b4f",
-            "imageUrl": "https://citroenvie.com/wp-content/uploads/2020/06/Want-a-Citroen-C3-WRC-Car-Rear-Wing.jpg",
-            "sourcePage": "https://citroenvie.com/want-a-citroen-c3-wrc-car-rear-wing/",
+            "evidenceId": "66c5573302fb36484b72bd32",
+            "imageUrl": "https://wrcwings.files.wordpress.com/2016/12/citroen.jpg",
+            "sourcePage": "https://www.wrcwings.tech/2016/12/24/citroen-c3-wrc-2017-aero-revolution/",
             "authority": "community_reference",
             "authorityConfidence": 0.42,
-            "viewpoint": "rear",
+            "viewpoint": "side",
             "downloaded": true,
-            "sha256": "26546e0066019ad99e969072f97743f4583c1c37f0c2912688815df46f278341",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "b1d494115f66688dafeec37f",
-            "imageUrl": "https://citroenvie.com/wp-content/uploads/2020/06/Citroe%CC%88n-C3-WRC-Test-Car-Rear-Wing-RM-Sothebys-Auction-ss.jpg",
-            "sourcePage": "https://citroenvie.com/want-a-citroen-c3-wrc-car-rear-wing/",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "c3d1ab9006ab2604d7738fb4547a7521bd7df91e1dd43c83b818f93f59d255ea",
+            "sha256": "6285c589a39b7d47ad61800aa9bdb5fa380533a38fdcdac6c8b8e2053f29e655",
             "truthEligible": false
           }
         ],
         "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1791369826608"
+        "sourceRunId": "nickelle-research-1791370083659"
       },
       "confidence": 0.9735999999999999,
       "authority": "owner_truth_over_research"
@@ -622,11 +660,11 @@
     "confidence": 0
   },
   "researchPerception": {
-    "sourceRunId": "nickelle-research-1791369826608",
+    "sourceRunId": "nickelle-research-1791370083659",
     "sourceCount": 60,
     "acceptedFindingCount": 0,
     "components": 15,
-    "confidence": 0.6306666666666667
+    "confidence": 0.6333333333333333
   },
   "protectedOwnerFacts": [
     {
