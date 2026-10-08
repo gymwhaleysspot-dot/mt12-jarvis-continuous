@@ -13,10 +13,10 @@
       "minimumFindingConfidence": 0.65,
       "use": "planner evidence only; all controller changes remain experimental and gated"
     },
-    "runId": "research-1791495169596",
+    "runId": "research-1791498808894",
     "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
   },
-  "generatedAt": "2026-10-08T21:34:23.019617+00:00",
+  "generatedAt": "2026-10-08T22:35:05.641181+00:00",
   "graphState": {
     "nodes": 10,
     "relationships": 3
@@ -46,9 +46,9 @@
     },
     "area": "digital-twin-transfer",
     "canonicalFloor": "jr514f",
-    "createdAt": "2026-10-08T21:34:23.019610+00:00",
+    "createdAt": "2026-10-08T22:35:05.641173+00:00",
     "emitter": "adversarial-domain-randomization",
-    "expectedInformationGain": 0.6439,
+    "expectedInformationGain": 0.6409,
     "externalResearch": {
       "acceptedBridgeFindings": 0,
       "policy": {
@@ -56,11 +56,11 @@
         "minimumFindingConfidence": 0.65,
         "use": "planner evidence only; all controller changes remain experimental and gated"
       },
-      "runId": "research-1791495169596",
+      "runId": "research-1791498808894",
       "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     "hypothesis": "Run five independent archive-selected hypotheses on the active evolution parent, then build a sixth synthesis while continuously checking the immutable canonical floor.",
-    "id": "EXP-20261008213423",
+    "id": "EXP-20261008223505",
     "ideaSignature": "4f31e54d80002c34336f",
     "innovationState": {
       "archiveCoverage": 7,
@@ -77,10 +77,10 @@
       "retain exact behavior while reclaiming bytecode",
       "publish decision cause and supporting evidence",
       "link authority caps to confidence",
-      "surface-conditioned slip envelope",
-      "continuous intervention release",
       "graded fail-open sensor confidence",
-      "state-preserving dropout coast"
+      "state-preserving dropout coast",
+      "adaptive lock target confidence",
+      "linear release and reapply timing"
     ],
     "name": "Quality-diversity active innovation generation plus synthesis",
     "parent": "jrw5-1961",
@@ -92,7 +92,7 @@
         "expectedInformationGain": 0.6254,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1791495169596",
+          "runId": "research-1791498808894",
           "sourceIds": [],
           "weight": 0
         },
@@ -116,7 +116,7 @@
         "expectedInformationGain": 0.6125,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1791495169596",
+          "runId": "research-1791498808894",
           "sourceIds": [],
           "weight": 0
         },
@@ -140,7 +140,7 @@
         "expectedInformationGain": 0.6116,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1791495169596",
+          "runId": "research-1791498808894",
           "sourceIds": [],
           "weight": 0
         },
@@ -158,37 +158,13 @@
         "slot": 3
       },
       {
-        "area": "traction-control",
-        "baselineHypothesis": "A traction-control candidate derived from jrw5-1961 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-        "emitter": "surface-slip-envelope",
-        "expectedInformationGain": 0.6798,
-        "externalResearch": {
-          "findings": 0,
-          "runId": "research-1791495169596",
-          "sourceIds": [],
-          "weight": 0
-        },
-        "hypothesis": "A traction-control candidate derived from jrw5-1961 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-        "ideaSignature": "b30dba80e823ca40c094",
-        "measurement": "reduce excess slip and intervention harshness",
-        "mutations": [
-          "surface-conditioned slip envelope",
-          "continuous intervention release"
-        ],
-        "name": "Surface Slip Envelope for traction control",
-        "noveltyAcquisition": 0.6759,
-        "priority": 0.5398,
-        "researchCanDirectlyMutateController": false,
-        "slot": 4
-      },
-      {
         "area": "sensor-dropout-recovery",
         "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw5-1961 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
         "emitter": "confidence-coast",
         "expectedInformationGain": 0.6904,
         "externalResearch": {
           "findings": 0,
-          "runId": "research-1791495169596",
+          "runId": "research-1791498808894",
           "sourceIds": [],
           "weight": 0
         },
@@ -202,6 +178,30 @@
         "name": "Confidence Coast for sensor dropout recovery",
         "noveltyAcquisition": 0.6733,
         "priority": 0.5104,
+        "researchCanDirectlyMutateController": false,
+        "slot": 4
+      },
+      {
+        "area": "abs-control",
+        "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "emitter": "lock-confidence-ramp",
+        "expectedInformationGain": 0.6648,
+        "externalResearch": {
+          "findings": 0,
+          "runId": "research-1791498808894",
+          "sourceIds": [],
+          "weight": 0
+        },
+        "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+        "ideaSignature": "4ecef04248a990840b26",
+        "measurement": "reduce lock duration without increasing stopping distance proxy",
+        "mutations": [
+          "adaptive lock target confidence",
+          "linear release and reapply timing"
+        ],
+        "name": "Lock Confidence Ramp for abs control",
+        "noveltyAcquisition": 0.6654,
+        "priority": 0.5248,
         "researchCanDirectlyMutateController": false,
         "slot": 5
       }
@@ -223,8 +223,8 @@
         "digital-twin-transfer",
         "runtime-memory",
         "controller-observability",
-        "traction-control",
-        "sensor-dropout-recovery"
+        "sensor-dropout-recovery",
+        "abs-control"
       ],
       "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
       "name": "Synthesize all five hypotheses",
@@ -240,7 +240,7 @@
       "expectedInformationGain": 0.6254,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1791495169596",
+        "runId": "research-1791498808894",
         "sourceIds": [],
         "weight": 0
       },
@@ -264,7 +264,7 @@
       "expectedInformationGain": 0.6125,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1791495169596",
+        "runId": "research-1791498808894",
         "sourceIds": [],
         "weight": 0
       },
@@ -288,7 +288,7 @@
       "expectedInformationGain": 0.6116,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1791495169596",
+        "runId": "research-1791498808894",
         "sourceIds": [],
         "weight": 0
       },
@@ -306,37 +306,13 @@
       "slot": 3
     },
     {
-      "area": "traction-control",
-      "baselineHypothesis": "A traction-control candidate derived from jrw5-1961 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-      "emitter": "surface-slip-envelope",
-      "expectedInformationGain": 0.6798,
-      "externalResearch": {
-        "findings": 0,
-        "runId": "research-1791495169596",
-        "sourceIds": [],
-        "weight": 0
-      },
-      "hypothesis": "A traction-control candidate derived from jrw5-1961 using the surface-slip-envelope mechanism\u2014surface-conditioned slip envelope, continuous intervention release\u2014will reduce excess slip and intervention harshness.",
-      "ideaSignature": "b30dba80e823ca40c094",
-      "measurement": "reduce excess slip and intervention harshness",
-      "mutations": [
-        "surface-conditioned slip envelope",
-        "continuous intervention release"
-      ],
-      "name": "Surface Slip Envelope for traction control",
-      "noveltyAcquisition": 0.6759,
-      "priority": 0.5398,
-      "researchCanDirectlyMutateController": false,
-      "slot": 4
-    },
-    {
       "area": "sensor-dropout-recovery",
       "baselineHypothesis": "A sensor-dropout-recovery candidate derived from jrw5-1961 using the confidence-coast mechanism\u2014graded fail-open sensor confidence, state-preserving dropout coast\u2014will reduce recovery frames and prevent channel/control discontinuities.",
       "emitter": "confidence-coast",
       "expectedInformationGain": 0.6904,
       "externalResearch": {
         "findings": 0,
-        "runId": "research-1791495169596",
+        "runId": "research-1791498808894",
         "sourceIds": [],
         "weight": 0
       },
@@ -351,27 +327,51 @@
       "noveltyAcquisition": 0.6733,
       "priority": 0.5104,
       "researchCanDirectlyMutateController": false,
+      "slot": 4
+    },
+    {
+      "area": "abs-control",
+      "baselineHypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "emitter": "lock-confidence-ramp",
+      "expectedInformationGain": 0.6648,
+      "externalResearch": {
+        "findings": 0,
+        "runId": "research-1791498808894",
+        "sourceIds": [],
+        "weight": 0
+      },
+      "hypothesis": "A abs-control candidate derived from jrw5-1961 using the lock-confidence-ramp mechanism\u2014adaptive lock target confidence, linear release and reapply timing\u2014will reduce lock duration without increasing stopping distance proxy.",
+      "ideaSignature": "4ecef04248a990840b26",
+      "measurement": "reduce lock duration without increasing stopping distance proxy",
+      "mutations": [
+        "adaptive lock target confidence",
+        "linear release and reapply timing"
+      ],
+      "name": "Lock Confidence Ramp for abs control",
+      "noveltyAcquisition": 0.6654,
+      "priority": 0.5248,
+      "researchCanDirectlyMutateController": false,
       "slot": 5
     }
   ],
   "rankedUnknowns": [
     {
-      "area": "traction-control",
+      "area": "abs-control",
       "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6798,
+      "expectedInformationGain": 0.6648,
       "externalResearchFindings": 0,
       "externalResearchHypotheses": [],
       "externalResearchWeight": 0,
-      "impact": 0.96,
-      "measure": "reduce excess slip and intervention harshness",
+      "impact": 0.91,
+      "measure": "reduce lock duration without increasing stopping distance proxy",
       "mutation": [
-        "contextual slip severity blend",
-        "surface-conditioned intervention release"
+        "adaptive lock target confidence",
+        "linear release/reapply timing"
       ],
       "priorExperiments": 0,
-      "priority": 0.5398,
+      "priority": 0.5248,
       "recentSelections": 4,
-      "uncertainty": 0.58
+      "uncertainty": 0.57
     },
     {
       "area": "sensor-dropout-recovery",
@@ -390,6 +390,24 @@
       "priority": 0.5104,
       "recentSelections": 58,
       "uncertainty": 0.62
+    },
+    {
+      "area": "traction-control",
+      "evidenceCoverage": 0,
+      "expectedInformationGain": 0.6718,
+      "externalResearchFindings": 0,
+      "externalResearchHypotheses": [],
+      "externalResearchWeight": 0,
+      "impact": 0.96,
+      "measure": "reduce excess slip and intervention harshness",
+      "mutation": [
+        "contextual slip severity blend",
+        "surface-conditioned intervention release"
+      ],
+      "priorExperiments": 0,
+      "priority": 0.4968,
+      "recentSelections": 5,
+      "uncertainty": 0.58
     },
     {
       "area": "truth-speed-fusion",
@@ -426,24 +444,6 @@
       "priority": 0.4942,
       "recentSelections": 48,
       "uncertainty": 0.6
-    },
-    {
-      "area": "abs-control",
-      "evidenceCoverage": 0,
-      "expectedInformationGain": 0.6568,
-      "externalResearchFindings": 0,
-      "externalResearchHypotheses": [],
-      "externalResearchWeight": 0,
-      "impact": 0.91,
-      "measure": "reduce lock duration without increasing stopping distance proxy",
-      "mutation": [
-        "adaptive lock target confidence",
-        "linear release/reapply timing"
-      ],
-      "priorExperiments": 0,
-      "priority": 0.4818,
-      "recentSelections": 5,
-      "uncertainty": 0.57
     },
     {
       "area": "digital-twin-transfer",
@@ -507,8 +507,8 @@
       "digital-twin-transfer",
       "runtime-memory",
       "controller-observability",
-      "traction-control",
-      "sensor-dropout-recovery"
+      "sensor-dropout-recovery",
+      "abs-control"
     ],
     "measurement": "beat each constituent on aggregate benefit while increasing quality-diversity archive coverage",
     "name": "Synthesize all five hypotheses",
