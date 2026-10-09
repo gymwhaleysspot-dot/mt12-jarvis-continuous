@@ -1,14 +1,14 @@
 {
   "schema": 2,
   "engine": "NICKELLE_RECONSTRUCTION_V2_RESEARCH_FUSED",
-  "generatedAt": "2026-10-09T07:57:11.290Z",
+  "generatedAt": "2026-10-09T08:02:59.968Z",
   "truthAuthority": "truth/truth.json",
   "researchAuthority": "nickelle/research/constraints.json",
-  "confidence": 0.8051250000000001,
+  "confidence": 0.8070000000000002,
   "cameraRegistration": {
     "mode": "multiview_bbox_plus_depth_plus_research",
     "referenceViews": 2,
-    "confidence": 0.5425625000000001
+    "confidence": 0.5435
   },
   "geometryBeliefs": {
     "front_grille": {
@@ -20,23 +20,7 @@
       "research": {
         "component": "front_grille",
         "recognized": true,
-        "constraints": [
-          {
-            "type": "deterministic_lead",
-            "claim": "Source 'Electroplated thermoplastic automotive grille' contains automotive evidence directly mentioning front_grille; use only as a research lead until checked against owner Truth.",
-            "value": null,
-            "range": null,
-            "unit": null,
-            "sourceIds": [
-              "5c2cb6bc77e2ea667799"
-            ],
-            "confidence": 0.46,
-            "evidenceType": "deterministic_source_relevance",
-            "applicability": "research prioritization and hypothesis generation only",
-            "testableVisualHypothesis": "Verify the cited source against owner photographs/measurements before applying geometry or material changes.",
-            "truthEligible": false
-          }
-        ],
+        "constraints": [],
         "directVisualReferences": [
           {
             "evidenceId": "9532e2bb59e873ab792ec015",
@@ -149,10 +133,10 @@
             "truthEligible": false
           }
         ],
-        "confidence": 0.46,
-        "sourceRunId": "nickelle-research-1791532627241"
+        "confidence": 0.42,
+        "sourceRunId": "nickelle-research-1791532976844"
       },
-      "confidence": 1.0168,
+      "confidence": 1.0136,
       "authority": "owner_truth_over_research"
     },
     "projector_left": {
@@ -532,7 +516,7 @@
           }
         ],
         "confidence": 0.92,
-        "sourceRunId": "nickelle-research-1791532627241"
+        "sourceRunId": "nickelle-research-1791532976844"
       },
       "confidence": 1.0436,
       "authority": "owner_truth_over_research"
@@ -671,7 +655,7 @@
           }
         ],
         "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1791532627241"
+        "sourceRunId": "nickelle-research-1791532976844"
       },
       "confidence": 0.9735999999999999,
       "authority": "owner_truth_over_research"
@@ -748,11 +732,11 @@
     "confidence": 0
   },
   "researchPerception": {
-    "sourceRunId": "nickelle-research-1791532627241",
-    "sourceCount": 60,
+    "sourceRunId": "nickelle-research-1791532976844",
+    "sourceCount": 56,
     "acceptedFindingCount": 0,
-    "components": 16,
-    "confidence": 0.65125
+    "components": 14,
+    "confidence": 0.67
   },
   "protectedOwnerFacts": [
     {
@@ -814,6 +798,14 @@
     {
       "type": "research_gap",
       "detail": {
+        "type": "evidence_gap",
+        "request": "Find directly automotive, component-specific evidence for: Map research component projector_left to Michael semantic scene graph before allowing geometry mutation.",
+        "priority": 0.9
+      }
+    },
+    {
+      "type": "research_gap",
+      "detail": {
         "type": "semantic_mapping",
         "component": "front_left_lamp_housing",
         "request": "Map research component front_left_lamp_housing to Michael semantic scene graph before allowing geometry mutation.",
@@ -853,6 +845,24 @@
         "type": "synthesis_unavailable",
         "request": "Revisit Map research component projector_left to Michael semantic scene graph before allowing geometry mutation. with visual synthesis when model service is available; deterministic leads are research-priority evidence only.",
         "priority": 0.72
+      }
+    },
+    {
+      "type": "research_gap",
+      "detail": {
+        "type": "direct_visual_evidence",
+        "component": "front_arch_left",
+        "request": "Find direct MJX 7303 or Citroen C3 WRC photographic evidence clearly showing front_arch_left.",
+        "priority": 0.78
+      }
+    },
+    {
+      "type": "research_gap",
+      "detail": {
+        "type": "direct_visual_evidence",
+        "component": "front_arch_right",
+        "request": "Find direct MJX 7303 or Citroen C3 WRC photographic evidence clearly showing front_arch_right.",
+        "priority": 0.78
       }
     }
   ]
