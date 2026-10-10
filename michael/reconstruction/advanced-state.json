@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-10T22:15:57.884Z",
+  "generatedAt": "2026-10-10T22:30:39.511Z",
   "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
   "upgrades": {
     "differentiableStyleOptimizer": true,
@@ -27,16 +27,41 @@
   "optimizer": {
     "method": "actual_render_finite_difference_owner_truth_with_pairwise_interactions",
     "baselineError": 0.253627,
-    "targets": [],
+    "targets": [
+      {
+        "parameter": "grille_corner_radius",
+        "proposed": 0.11028,
+        "measuredGain": 0.000249,
+        "gradient": 0.125052,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "grille_half_bottom",
+        "proposed": 0.767,
+        "measuredGain": 0.000219,
+        "gradient": 0.374922,
+        "direction": "decrease"
+      }
+    ],
     "allGradients": [
+      {
+        "parameter": "grille_corner_radius",
+        "baselineError": 0.253627,
+        "minusError": 0.253378,
+        "plusError": 0.253686,
+        "gradient": 0.125052,
+        "bestValue": 0.11028,
+        "measuredGain": 0.000249,
+        "direction": "decrease"
+      },
       {
         "parameter": "grille_half_bottom",
         "baselineError": 0.253627,
-        "minusError": 0.253686,
+        "minusError": 0.253409,
         "plusError": 0.256558,
-        "gradient": 0.341932,
+        "gradient": 0.374922,
         "bestValue": 0.767,
-        "measuredGain": 0,
+        "measuredGain": 0.000219,
         "direction": "decrease"
       },
       {
@@ -50,21 +75,11 @@
         "direction": "decrease"
       },
       {
-        "parameter": "grille_corner_radius",
+        "parameter": "grille_frame_thickness",
         "baselineError": 0.253627,
         "minusError": 0.253686,
         "plusError": 0.253686,
         "gradient": 0,
-        "bestValue": 0.11028,
-        "measuredGain": 0,
-        "direction": "decrease"
-      },
-      {
-        "parameter": "grille_frame_thickness",
-        "baselineError": 0.253627,
-        "minusError": 0.253686,
-        "plusError": 0.256558,
-        "gradient": 4.10319,
         "bestValue": 0.02605,
         "measuredGain": 0,
         "direction": "decrease"
@@ -84,7 +99,7 @@
           "grille_half_top": 0.6858
         },
         "measuredGain": 0,
-        "synergy": 0
+        "synergy": 0.000219
       }
     ],
     "bestInteraction": {
@@ -100,7 +115,7 @@
         "grille_half_top": 0.6858
       },
       "measuredGain": 0,
-      "synergy": 0
+      "synergy": 0.000219
     }
   },
   "implicitSurface": {
@@ -156,9 +171,9 @@
           "weight": 1.26,
           "latentIndex": 0,
           "measuredGradientSupport": [
+            "grille_corner_radius",
             "grille_half_bottom",
             "grille_half_top",
-            "grille_corner_radius",
             "grille_frame_thickness"
           ]
         },
@@ -1508,13 +1523,13 @@
       "pass": false,
       "geometryIndependent": true
     },
-    "combined": 0.5198,
+    "combined": 0.5513,
     "semanticOwnerTruth": {
-      "score": 0.3377,
+      "score": 0.4277,
       "signals": {
         "ownerSemanticCoverage": 0.7381,
         "cameraConfidence": 0,
-        "measuredGradientSupport": 0,
+        "measuredGradientSupport": 0.5,
         "pairwiseInteractionSupport": 0,
         "photoCoverage": 31
       },
@@ -1634,11 +1649,13 @@
     }
   },
   "dependencies": {
-    "focusRegion": "hood_roof",
+    "focusRegion": "front_fascia",
     "assembly": [
-      "front_fascia",
-      "roof_scoop",
-      "greenhouse"
+      "headlights",
+      "grille",
+      "front_arches",
+      "splitter",
+      "hood_vents"
     ],
     "mode": "constrained_assembly"
   },
@@ -1803,27 +1820,27 @@
   "diversity": {
     "lineages": {
       "owner_accuracy": {
-        "generation": 3110,
+        "generation": 3111,
         "score": 0,
-        "lastFocus": "hood_roof",
+        "lastFocus": "front_fascia",
         "objective": "owner_accuracy"
       },
       "mobile_efficiency": {
-        "generation": 3110,
+        "generation": 3111,
         "score": 0,
-        "lastFocus": "hood_roof",
+        "lastFocus": "front_fascia",
         "objective": "mobile_efficiency"
       },
       "photorealism": {
-        "generation": 3110,
+        "generation": 3111,
         "score": 0,
-        "lastFocus": "hood_roof",
+        "lastFocus": "front_fascia",
         "objective": "photorealism"
       },
       "topology_exploration": {
-        "generation": 3110,
+        "generation": 3111,
         "score": 0,
-        "lastFocus": "hood_roof",
+        "lastFocus": "front_fascia",
         "objective": "topology_exploration"
       }
     },
@@ -1870,7 +1887,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4329.jpeg": {
       "matchedView": "front",
@@ -1879,7 +1896,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4330.jpeg": {
       "matchedView": "front",
@@ -1888,7 +1905,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4331.jpeg": {
       "matchedView": "front",
@@ -1897,7 +1914,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4332.jpeg": {
       "matchedView": "front",
@@ -1906,7 +1923,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4333.jpeg": {
       "matchedView": "front",
@@ -1915,7 +1932,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4334.jpeg": {
       "matchedView": "front",
@@ -1924,7 +1941,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     },
     "IMG_4335.jpeg": {
       "matchedView": "front",
@@ -1933,7 +1950,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-10T22:15:57.887Z"
+      "updatedAt": "2026-10-10T22:30:39.514Z"
     }
   },
   "introspection": {
@@ -2809,7 +2826,7 @@
     },
     "hash": "0b2b6e7bfb6224a3da2acf90e6774c5574c1e95a841e8b4c0c6c59e8f4f4c90c"
   },
-  "parentAutonomyGeneratedAt": "2026-10-10T22:07:26.915Z",
+  "parentAutonomyGeneratedAt": "2026-10-10T22:22:01.379Z",
   "qualityRepair": {
     "schema": 2,
     "allEightWeaknessesAddressed": true,
