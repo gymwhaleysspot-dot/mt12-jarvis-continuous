@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "generatedAt": "2026-10-11T03:31:23.106Z",
+  "generatedAt": "2026-10-11T03:32:53.629Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -68,8 +68,8 @@
       "component": "headlights",
       "evidence": {
         "confidence": 1,
-        "references": 212,
-        "uniqueDirectReferences": 39,
+        "references": 318,
+        "uniqueDirectReferences": 53,
         "ownerPhotoReferences": [
           "owner-front-three-left",
           "owner-front-straight",
@@ -103,14 +103,12 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
-      "component": "roof_scoop",
+      "component": "stance",
       "evidence": {
         "confidence": 1,
-        "references": 31,
-        "uniqueDirectReferences": 31,
+        "references": 44,
+        "uniqueDirectReferences": 11,
         "ownerPhotoReferences": [
-          "owner-front-three-left",
-          "owner-front-three-right",
           "owner-side-right"
         ],
         "ownerBinaryFiles": [
@@ -127,9 +125,10 @@
       },
       "uncertainty": 0,
       "parameters": [
-        "scoop_width",
-        "scoop_height",
-        "scoop_length"
+        "wheel_radius",
+        "wheel_track_x",
+        "wheel_width",
+        "wheel_y"
       ],
       "priority": 0.8,
       "authority": "OWNER_JPEG_BINARIES",
@@ -171,15 +170,15 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
-      "component": "grille",
+      "component": "roof_scoop",
       "evidence": {
         "confidence": 1,
-        "references": 11,
-        "uniqueDirectReferences": 11,
+        "references": 18,
+        "uniqueDirectReferences": 18,
         "ownerPhotoReferences": [
           "owner-front-three-left",
-          "owner-front-straight",
-          "owner-front-three-right"
+          "owner-front-three-right",
+          "owner-side-right"
         ],
         "ownerBinaryFiles": [
           "IMG_4328.jpeg",
@@ -195,12 +194,11 @@
       },
       "uncertainty": 0,
       "parameters": [
-        "grille_half_bottom",
-        "grille_half_top",
-        "grille_bottom_y",
-        "grille_top_y"
+        "scoop_width",
+        "scoop_height",
+        "scoop_length"
       ],
-      "priority": 0.66,
+      "priority": 0.73,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -239,13 +237,15 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
-      "component": "stance",
+      "component": "grille",
       "evidence": {
         "confidence": 1,
-        "references": 1,
+        "references": 3,
         "uniqueDirectReferences": 0,
         "ownerPhotoReferences": [
-          "owner-side-right"
+          "owner-front-three-left",
+          "owner-front-straight",
+          "owner-front-three-right"
         ],
         "ownerBinaryFiles": [
           "IMG_4328.jpeg",
@@ -261,12 +261,12 @@
       },
       "uncertainty": 0,
       "parameters": [
-        "wheel_radius",
-        "wheel_track_x",
-        "wheel_width",
-        "wheel_y"
+        "grille_half_bottom",
+        "grille_half_top",
+        "grille_bottom_y",
+        "grille_top_y"
       ],
-      "priority": 0.56,
+      "priority": 0.58,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     }
@@ -428,7 +428,7 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
-    "roof_scoop": {
+    "stance": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -442,7 +442,7 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
-    "grille": {
+    "roof_scoop": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -456,7 +456,7 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
-    "stance": {
+    "grille": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
