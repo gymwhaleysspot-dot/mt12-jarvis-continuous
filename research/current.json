@@ -1,9 +1,9 @@
 {
   "schema": 2,
-  "runId": "research-1792463954121",
+  "runId": "research-1792467457732",
   "topic": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
-  "startedAt": "2026-10-20T02:39:14.121Z",
-  "completedAt": "2026-10-20T02:40:49.429Z",
+  "startedAt": "2026-10-20T03:37:37.732Z",
+  "completedAt": "2026-10-20T03:40:58.687Z",
   "queries": [
     "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
     "EdgeTX Lua memory optimization embedded controller",
@@ -13,60 +13,120 @@
   ],
   "sources": [
     {
-      "id": "2bcf0879c25a4b8c30e1",
-      "retrievedAt": "2026-10-20T02:39:15.167Z",
+      "id": "ea00209c15e67487946f",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
       "kind": "paper",
-      "provider": "arXiv",
-      "title": "Model predictive traction control system based on the Koopman operator",
-      "url": "http://arxiv.org/abs/2608.25753v1",
-      "summary": "Due to their importance, traction control and anti-lock braking systems have become standard equipment in modern vehicles. However, accurate models of tire dynamics are often difficult to obtain and usually include nonlinearities, making their use in control systems challenging. This paper describes a traction control system based on model predictive control and Koopman operator theory, which aims to approximate nonlinear systems with linear ones through a state space transformation. A linear model predictive controller based on the Koopman predictor is compared to a standard nonlinear model predictive controller. Experiments in a high-fidelity vehicle dynamics simulation environment show a comparable reference tracking performance of the two controllers, with a reduced execution time for the proposed Koopman operator-based algorithm, both on a standard PC and embedded hardware.",
-      "published": "2026-08-26T13:03:01Z",
+      "provider": "Crossref",
+      "title": "Delay-Compensated Lane-Coordinate Vehicle State Estimation Using Low-Cost Sensors",
+      "url": "https://doi.org/10.3390/s25196251",
+      "summary": "Accurate vehicle state estimation in a lane coordinate system is essential for safe and reliable operation of Advanced Driver Assistance Systems (ADASs) and autonomous driving. However, achieving robust lane-based state estimation using only low-cost sensors, such as a camera, an IMU, and a steering angle sensor, remains challenging due to the complexity of vehicle dynamics and the inherent signal delays in vision systems. This paper presents a lane-coordinate-based vehicle state estimator that addresses these challenges by combining a vehicle dynamics-based bicycle model with an Extended Kalman Filter (EKF) and a signal delay compensation algorithm. The estimator performs real-time estimation of lateral position, lateral velocity, and heading angle, including the unmeasurable lateral velocity about the lane, by predicting the vehicle’s state evolution during camera processing delays. A computationally efficient camera processing pipeline, incorporating lane segmentation via a pre-trained network and lane-based state extraction, is implemented to support practical applications. Validation using real vehicle driving data on straight and curved roads demonstrates that the proposed estimator provides continuous, high-accuracy, and delay-compensated lane-coordinate-based vehicle states. Compared to conventional camera-only methods and estimators without delay compensation, the proposed approach significantly reduces estimation errors and phase lag, enabling the reliable and real-time acquisition of vehicle-state information critical for ADAS and autonomous driving applications.",
+      "published": "2025-10-9",
       "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 170,
-      "relevanceReason": "domainHits=8; queryHits=3"
+      "doi": "10.3390/s25196251",
+      "relevanceScore": 150,
+      "relevanceReason": "domainHits=7; queryHits=3"
     },
     {
-      "id": "6f03ea07ceb86e9ef0d5",
-      "retrievedAt": "2026-10-20T02:39:15.168Z",
+      "id": "33c0ca597491fa63a4c2",
+      "retrievedAt": "2026-10-20T03:38:10.206Z",
       "kind": "paper",
-      "provider": "arXiv",
-      "title": "Nonlinear Model Predictive Control for Preview-Based Traction Control",
-      "url": "http://arxiv.org/abs/2406.02206v1",
-      "summary": "This study presents a nonlinear model predictive control (NMPC) formulation for preview-based traction control, which uses the information on the expected tire-road friction coefficient ahead to enhance the wheel slip control performance, in the context of connected vehicles with V2X features. Proof-of-concept experiments on an electric vehicle prototype highlight the real-time capability of the controller, and the wheel slip control performance improvement brought by the tire-road friction coefficient preview. Finally, an experimentally validated simulation model is used in sensitivity analyses, to evaluate the performance benefit of the preview-based controller for different dynamic characteristics (e.g., time constant and pure time delays) of the electric powertrains.",
-      "published": "2024-06-04T11:02:39Z",
+      "provider": "Crossref",
+      "title": "Performance Improvement of Pure Pursuit Algorithm via Online Slip Estimation for Off-Road Tracked Vehicle",
+      "url": "https://doi.org/10.3390/s25144242",
+      "summary": "The motion control of a tracked mobile robot remains an important capability for autonomous navigation. Kinematic path-tracking algorithms are commonly used in mobile robotics due to their ease of implementation and real-time computational cost advantage. This paper integrates an extended Kalman filter (EKF) into a common kinematic controller for path-tracking performance improvement. The extended Kalman filter estimates the instantaneous center of rotation (ICR) of tracks using the sensor readings of GPS and IMU. These ICR estimations are then given as input to the motion control algorithm to generate the track velocity demands. The platform to be controlled is a heavyweight off-road tracked vehicle, which necessitates the investigation of slip values. A high-fidelity simulation model, which is verified with field tests, is used as the plant in the path-tracking simulations. The performance of the filter and the algorithm is also demonstrated in field tests on a stabilized road. The field results show that the proposed estimation increases the path-tracking accuracy significantly (about 44%) compared to the classical pure pursuit.",
+      "published": "2025-7-8",
       "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 162,
-      "relevanceReason": "domainHits=7; queryHits=4"
-    },
-    {
-      "id": "7ee8725c4204a85fc55d",
-      "retrievedAt": "2026-10-20T02:39:15.168Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Traction and Stability Control using Fuzzy-based Controller Integration for Electric Vehicles",
-      "url": "http://arxiv.org/abs/2306.04782v2",
-      "summary": "Adverse road conditions can cause vehicle yaw instability and loss of traction. To compensate for the instability under such conditions, corrective actions must be taken. In comparison to a mechanical differential, an electronic differential can independently control the two drive wheels and provide means of generating more effective corrective actions. As a solution for traction and stability issues in automobiles, this study has developed a controller for a vehicle electronic differential consisting of two program-controlled rear motors. The control algorithm adjusts to changing road conditions. Traction was controlled using a motor reaction torque observer-based slip ratio estimation, and yaw stability was achieved by tracking a reference yaw rate calculated using estimated tyre cornering stiffnesses. A recursive least squares algorithm was used to estimate cornering stiffness. The yaw rate of the vehicle, as well as its longitudinal and lateral accelerations, were measured, and the body slip angle was estimated using an observer. A fuzzy inference system was used to integrate the independently developed traction control and yaw control schemes. The fuzzy inference system modifies the commanded voltage generated by the driver's input to account for the traction and yaw stability controller outputs. A vehicle simulator was used to numerically simulate the integrated controller. For the racetrack simulation, the root-mean-square slip ratio error reduced by 96.14% and the RMS yaw rate error reduced by 88.17%. For the double lane change test at 40 km/h and 100 km/h, the RMS yaw rate error reduced by 86.96% and 92.34%, respectively.",
-      "published": "2023-06-07T21:02:48Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 140,
-      "relevanceReason": "domainHits=5; queryHits=5"
-    },
-    {
-      "id": "64af55945fbe8d018743",
-      "retrievedAt": "2026-10-20T02:39:15.168Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Automatic traction control for articulated off-road vehicles",
-      "url": "http://arxiv.org/abs/2104.11289v1",
-      "summary": "Construction equipment is designed to maintain good traction, even when operating in difficult off-road conditions. To curb wheel slip, the vehicles are equipped with differential locks. A driver may engage/disengage the locks to switch between two distinct operating modes: the closed mode is characterized by greater off-road passability while the open mode allows better manoeuvrability. However, many drivers lack the education and experience required to correctly judge the terrain ahead of the vehicle and therefore engage/disengage the locks in a suboptimal fashion. An automatic traction control solution for locking and opening the differentials is hence desirable. This paper compares three on/off differential lock control algorithms, all derived from the same kinematic vehicle model but each relying on the availability of output signals from different sensors. The validity of the kinematic model and the algorithms' sensitivity to the values assumed by a couple of unobservable states, the wheel slip angles, is investigated by comparison to a realistic articulated hauler model in the multibody physics simulator MSC ADAMS.",
-      "published": "2021-04-22T19:17:42Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.3390/s25144242",
       "relevanceScore": 120,
+      "relevanceReason": "domainHits=6; queryHits=5"
+    },
+    {
+      "id": "c38209be845574f45c20",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Wheel Slip Control in Traction Control System for Vehicle Stability",
+      "url": "https://doi.org/10.1076/vesd.31.4.263.4232",
+      "summary": "Vehicle System Dynamics",
+      "published": "1999-4-1",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1076/vesd.31.4.263.4232",
+      "relevanceScore": 110,
       "relevanceReason": "domainHits=4; queryHits=4"
     },
     {
+      "id": "20f74e2b2442b8723a64",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "The Increase of Cornering Force and Traction by a Wheel Slip Control System",
+      "url": "https://doi.org/10.1080/00423118508968824",
+      "summary": "Vehicle System Dynamics",
+      "published": "1985-6",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1080/00423118508968824",
+      "relevanceScore": 110,
+      "relevanceReason": "domainHits=4; queryHits=4"
+    },
+    {
+      "id": "ae5e2e965f9107b82558",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Comparison of Estimation Techniques for Railway Traction Vehicle Wheel Slip Control",
+      "url": "https://doi.org/10.1109/piers59004.2023.10221240",
+      "summary": "2023 Photonics Electromagnetics Research Symposium (PIERS)",
+      "published": "2023-7-3",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/piers59004.2023.10221240",
+      "relevanceScore": 102,
+      "relevanceReason": "domainHits=3; queryHits=5"
+    },
+    {
+      "id": "80334f915a6fec6f938d",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Slip Ratio Estimation for Traction Control of Electric Vehicles",
+      "url": "https://doi.org/10.1109/vppc.2018.8604980",
+      "summary": "2018 IEEE Vehicle Power and Propulsion Conference (VPPC)",
+      "published": "2018-8",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/vppc.2018.8604980",
+      "relevanceScore": 102,
+      "relevanceReason": "domainHits=3; queryHits=5"
+    },
+    {
+      "id": "80f20bfb88c2c474ba77",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Wheel Slip Suppression Control Method Using Traction Motor Current Information of EMUs Driven by Multiple Traction Motors without Speed Sensors",
+      "url": "https://doi.org/10.1109/vppc.2018.8604976",
+      "summary": "2018 IEEE Vehicle Power and Propulsion Conference (VPPC)",
+      "published": "2018-8",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/vppc.2018.8604976",
+      "relevanceScore": 102,
+      "relevanceReason": "domainHits=3; queryHits=5"
+    },
+    {
+      "id": "72e296544a6f212ecc4a",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Traction Control based on Slip Ratio Estimation Without Detecting Vehicle Speed for Electric Vehicle",
+      "url": "https://doi.org/10.1109/pccon.2007.373040",
+      "summary": "2007 Power Conversion Conference - Nagoya",
+      "published": "2007-4",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/pccon.2007.373040",
+      "relevanceScore": 102,
+      "relevanceReason": "domainHits=3; queryHits=5"
+    },
+    {
       "id": "d0ed78214bc94e6c1d8d",
-      "retrievedAt": "2026-10-20T02:39:15.958Z",
+      "retrievedAt": "2026-10-20T03:39:27.951Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "EdgeTX/edgetx Nightly Build",
@@ -79,7 +139,7 @@
     },
     {
       "id": "6f0b682499fdde5e38ab",
-      "retrievedAt": "2026-10-20T02:39:15.958Z",
+      "retrievedAt": "2026-10-20T03:39:27.951Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "EdgeTX/edgetx EdgeTX \"Queen Anne's Revenge\" v2.12.5",
@@ -92,7 +152,7 @@
     },
     {
       "id": "6a77df7c55e22d5354cc",
-      "retrievedAt": "2026-10-20T02:39:15.958Z",
+      "retrievedAt": "2026-10-20T03:39:27.951Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "EdgeTX/edgetx EdgeTX \"Jolly Mon\" v2.11.8",
@@ -105,7 +165,7 @@
     },
     {
       "id": "dd87691388fc9e4184fd",
-      "retrievedAt": "2026-10-20T02:39:15.958Z",
+      "retrievedAt": "2026-10-20T03:39:27.951Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "EdgeTX/edgetx EdgeTX \"Queen Anne's Revenge\" v2.12.4",
@@ -118,7 +178,7 @@
     },
     {
       "id": "538335abf4dcd2230b3a",
-      "retrievedAt": "2026-10-20T02:39:15.958Z",
+      "retrievedAt": "2026-10-20T03:39:27.951Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "EdgeTX/edgetx EdgeTX \"Queen Anne's Revenge\" v2.12.3",
@@ -131,7 +191,7 @@
     },
     {
       "id": "965e28c620894629a006",
-      "retrievedAt": "2026-10-20T02:39:16.396Z",
+      "retrievedAt": "2026-10-20T03:39:28.193Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "lua/lua Lua 5.5.1",
@@ -144,7 +204,7 @@
     },
     {
       "id": "2b71dd03d05bd71eb590",
-      "retrievedAt": "2026-10-20T02:39:16.396Z",
+      "retrievedAt": "2026-10-20T03:39:28.193Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "lua/lua Lua 5.5.0",
@@ -157,7 +217,7 @@
     },
     {
       "id": "efaeb9af7026085b3ed9",
-      "retrievedAt": "2026-10-20T02:39:16.396Z",
+      "retrievedAt": "2026-10-20T03:39:28.193Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "lua/lua Lua 5.4.8",
@@ -169,21 +229,8 @@
       "relevanceReason": "official engineering source"
     },
     {
-      "id": "40a540511c86f32216bb",
-      "retrievedAt": "2026-10-20T02:39:15.331Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Composite Reward Design in PPO-Driven Adaptive Filtering",
-      "url": "http://arxiv.org/abs/2506.06323v2",
-      "summary": "Model-free and reinforcement learning-based adaptive filtering methods are gaining traction for denoising in dynamic, non-stationary environments such as wireless signal channels, biomedical monitoring, and sensor networks. Traditional filters such as LMS, RLS, Wiener, and Kalman are often limited by assumptions of stationarity, the need for exact noise statistics, or fragile parameter tuning. This paper proposes an adaptive filtering framework using Proximal Policy Optimization (PPO), guided by a composite reward that balances SNR improvement, MSE reduction, and residual smoothness. We frame adaptive filtering as a Markov decision process and train a PPO agent to adjust filter coefficients directly in response to changing noise. Experiments on synthetic nonstationary signals with diverse noise types show that the PPO agent generalizes beyond its training distribution. Moreover, real-world analysis is made and evaluated on ECG recordings from the MIT-BIH Noise Stress Test Database corrupted by baseline wander, electrode motion, and muscle artifacts. The learned PPO policy achieves real-time inference and slightly outperforms strong classical baselines on ECG denoising. These results demonstrate the viability of policy-gradient reinforcement learning as a computationally efficient and flexible tool for adaptive filtering in nonlinear, time-varying dynamical systems.",
-      "published": "2025-05-29T23:11:48Z",
-      "query": "RPM sensor delay adaptive filtering",
-      "relevanceScore": 100,
-      "relevanceReason": "domainHits=5; queryHits=3"
-    },
-    {
       "id": "0fba3f2acb004f7327fc",
-      "retrievedAt": "2026-10-20T02:39:16.396Z",
+      "retrievedAt": "2026-10-20T03:39:28.193Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "lua/lua Lua 5.4.7",
@@ -196,7 +243,7 @@
     },
     {
       "id": "3be2c2214c5c47da92ab",
-      "retrievedAt": "2026-10-20T02:39:16.396Z",
+      "retrievedAt": "2026-10-20T03:39:28.193Z",
       "kind": "release",
       "provider": "GitHub",
       "title": "lua/lua Lua 5.4.6",
@@ -208,34 +255,36 @@
       "relevanceReason": "official engineering source"
     },
     {
-      "id": "19a749657f4c557ac8ff",
-      "retrievedAt": "2026-10-20T02:39:15.332Z",
+      "id": "85f36014eeaa0261c273",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
       "kind": "paper",
-      "provider": "arXiv",
-      "title": "Constructing numerically stable Kalman filter-based algorithms for gradient-based adaptive filtering",
-      "url": "http://arxiv.org/abs/1303.4622v3",
-      "summary": "This paper addresses the numerical aspects of adaptive filtering (AF) techniques for simultaneous state and parameters estimation arising in the design of dynamic positioning systems in many areas of research. The AF schemes consist of a recursive optimization procedure to identify the uncertain system parameters by minimizing an appropriate defined performance index and the application of the Kalman filter (KF) for dynamic positioning purpose. The use of gradient-based optimization methods in the AF computational schemes yields to a set of the filter sensitivity equations and a set of matrix Riccati-type sensitivity equations. The filter sensitivities evaluation is usually done by the conventional KF, which is known to be numerically unstable, and its derivatives with respect to unknown system parameters. Recently, a novel square-root approach for the gradient-based AF by the method of the maximum likelihood has been proposed. In this paper, we show that various square-root AF schemes can be derived from only two main theoretical results. This elegant and simple computational technique replaces the standard methodology based on direct differentiation of the conventional KF equations (with their inherent numerical instability) by advanced square-root filters (and its derivatives as well). As a result, it improves the robustness of the computations against roundoff errors and leads to accurate variants of the gradient-based AFs. Additionally, such methods are ideal for simultaneous state estimation and parameter identification since all values are computed in parallel. The numerical experiments are given.",
-      "published": "2013-03-19T14:39:20Z",
-      "query": "RPM sensor delay adaptive filtering",
-      "relevanceScore": 94,
-      "relevanceReason": "domainHits=5; queryHits=2"
+      "provider": "Crossref",
+      "title": "Vehicle traction control based on optimal slip using sliding mode controller",
+      "url": "https://doi.org/10.1109/chicc.2014.6896630",
+      "summary": "Proceedings of the 33rd Chinese Control Conference",
+      "published": "2014-7",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/chicc.2014.6896630",
+      "relevanceScore": 96,
+      "relevanceReason": "domainHits=3; queryHits=4"
     },
     {
-      "id": "668837cb9417608bd472",
-      "retrievedAt": "2026-10-20T02:39:15.230Z",
+      "id": "97f1441f74a3ae85424a",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
       "kind": "paper",
-      "provider": "arXiv",
-      "title": "GPS-IDS: An Anomaly-based GPS Spoofing Attack Detection Framework for Autonomous Vehicles",
-      "url": "http://arxiv.org/abs/2405.08359v2",
-      "summary": "Autonomous Vehicles (AVs) heavily rely on sensors and communication networks like Global Positioning System (GPS) to navigate autonomously. Prior research has indicated that networks like GPS are vulnerable to cyber-attacks such as spoofing and jamming, thus posing serious risks like navigation errors and system failures. These threats are expected to intensify with the widespread deployment of AVs, making it crucial to detect and mitigate such attacks. This paper proposes GPS Intrusion Detection System, or GPS-IDS, an Anomaly-based intrusion detection framework to detect GPS spoofing attacks on AVs. The framework uses a novel physics-based vehicle behavior model where a GPS navigation model is integrated into the conventional dynamic bicycle model for accurate AV behavior representation. Temporal features derived from this behavior model are analyzed using machine learning to detect normal and abnormal navigation behaviors. The performance of the GPS-IDS framework is evaluated on the AV-GPS-Dataset -- a GPS security dataset for AVs comprising real-world data collected using an AV testbed, and simulated data representing urban traffic environments. To the best of our knowledge, this dataset is the first of its kind and has been publicly released for the global research community to address such security challenges.",
-      "published": "2024-05-14T06:55:16Z",
-      "query": "GPS latency compensation vehicle speed estimation",
-      "relevanceScore": 80,
-      "relevanceReason": "domainHits=4; queryHits=2"
+      "provider": "Crossref",
+      "title": "EPE and Speed Adaptive Extended Kalman Filter for Vehicle Position and Attitude Estimation with Low Cost GNSS and IMU Sensors",
+      "url": "https://doi.org/10.5220/0005023706490656",
+      "summary": "Proceedings of the 11th International Conference on Informatics in Control, Automation and Robotics",
+      "published": "2014",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.5220/0005023706490656",
+      "relevanceScore": 88,
+      "relevanceReason": "domainHits=4; queryHits=6"
     },
     {
       "id": "1c08125d6da8e14d6765",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Inter-Vehicle Position Estimation For NLOS Condition In The Persistence Of GPS Outages",
@@ -249,7 +298,7 @@
     },
     {
       "id": "a3736eb226f242ced426",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Inter-Vehicle Position Estimation For NLOS Condition In The Persistence Of GPS Outages",
@@ -262,21 +311,8 @@
       "relevanceReason": "domainHits=4; queryHits=3"
     },
     {
-      "id": "566a90978b76735d12a4",
-      "retrievedAt": "2026-10-20T02:39:15.169Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Online Learning Algorithm for Time Series Forecasting Suitable for Low Cost Wireless Sensor Networks Nodes",
-      "url": "http://arxiv.org/abs/1504.05517v1",
-      "summary": "Time series forecasting is an important predictive methodology which can be applied to a wide range of problems. Particularly, forecasting the indoor temperature permits an improved utilization of the HVAC (Heating, Ventilating and Air Conditioning) systems in a home and thus a better energy efficiency. With such purpose the paper describes how to implement an Artificial Neural Network (ANN) algorithm in a low cost system-on-chip to develop an autonomous intelligent wireless sensor network. The present paper uses a Wireless Sensor Networks (WSN) to monitor and forecast the indoor temperature in a smart home, based on low resources and cost microcontroller technology as the 8051MCU. An on-line learning approach, based on Back-Propagation (BP) algorithm for ANNs, has been developed for real-time time series learning. It performs the model training with every new data that arrive to the system, without saving enormous quantities of data to create a historical database as usual, i.e., without previous knowledge. Consequently to validate the approach a simulation study through a Bayesian baseline model have been tested in order to compare with a database of a real application aiming to see the performance and accuracy. The core of the paper is a new algorithm, based on the BP one, which has been described in detail, and the challenge was how to implement a computational demanding algorithm in a simple architecture with very few hardware resources.",
-      "published": "2015-04-21T17:31:41Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 80,
-      "relevanceReason": "domainHits=4; queryHits=2"
-    },
-    {
       "id": "c393b611debd90e0534f",
-      "retrievedAt": "2026-10-20T02:39:15.163Z",
+      "retrievedAt": "2026-10-20T03:38:09.765Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Implementation of DMC algorithm in embedded controller - resources, memory and numerical modifications",
@@ -289,8 +325,22 @@
       "relevanceReason": "domainHits=2; queryHits=3"
     },
     {
+      "id": "178489d6414ef0c3750b",
+      "retrievedAt": "2026-10-20T03:38:10.206Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Estimation of Unmanned Aerial Vehicle Dynamics",
+      "url": "https://doi.org/10.1007/978-3-319-16417-5_4",
+      "summary": "State Estimation and Control for Low-cost Unmanned Aerial Vehicles",
+      "published": "2015",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1007/978-3-319-16417-5_4",
+      "relevanceScore": 76,
+      "relevanceReason": "domainHits=2; queryHits=3"
+    },
+    {
       "id": "686559183b6e6ee02c5f",
-      "retrievedAt": "2026-10-20T02:39:15.163Z",
+      "retrievedAt": "2026-10-20T03:38:09.765Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Memory Technologies and Interfacing",
@@ -304,7 +354,7 @@
     },
     {
       "id": "d5bfc8d66c7031b20233",
-      "retrievedAt": "2026-10-20T02:39:15.163Z",
+      "retrievedAt": "2026-10-20T03:38:09.764Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Power optimization of embedded controller",
@@ -317,34 +367,8 @@
       "relevanceReason": "domainHits=2; queryHits=3"
     },
     {
-      "id": "45d65debd6debabc2507",
-      "retrievedAt": "2026-10-20T02:39:15.230Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "A Data Driven Method of Optimizing Feedforward Compensator for Autonomous Vehicle",
-      "url": "http://arxiv.org/abs/1901.11212v2",
-      "summary": "A reliable controller is critical and essential for the execution of safe and smooth maneuvers of an autonomous vehicle.The controller must be robust to external disturbances, such as road surface, weather, and wind conditions, and so on.It also needs to deal with the internal parametric variations of vehicle sub-systems, including power-train efficiency, measurement errors, time delay,so on.Moreover, as in most production vehicles, the low-control commands for the engine, brake, and steering systems are delivered through separate electronic control units.These aforementioned factors introduce opaque and ineffectiveness issues in controller performance.In this paper, we design a feed-forward compensate process via a data-driven method to model and further optimize the controller performance.We apply the principal component analysis to the extraction of most influential features.Subsequently,we adopt a time delay neural network and include the accuracy of the predicted error in a future time horizon.Utilizing the predicted error,we then design a feed-forward compensate process to improve the control performance.Finally,we demonstrate the effectiveness of the proposed feed-forward compensate process in simulation scenarios.",
-      "published": "2019-01-31T05:06:01Z",
-      "query": "GPS latency compensation vehicle speed estimation",
-      "relevanceScore": 74,
-      "relevanceReason": "domainHits=4; queryHits=1"
-    },
-    {
-      "id": "69dd1a5670a5789b717f",
-      "retrievedAt": "2026-10-20T02:39:15.168Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Joint vehicle state and parameters estimation via Twin-in-the-Loop observers",
-      "url": "http://arxiv.org/abs/2309.01461v1",
-      "summary": "Vehicular control systems are required to be both extremely reliable and robust to different environmental conditions, e.g. load or tire-road friction. In this paper, we extend a new paradigm for state estimation, called Twin-in-the-Loop filtering (TiL-F), to the estimation of the unknown parameters describing the vehicle operating conditions. In such an approach, a digital-twin of the vehicle (usually already available to the car manufacturer) is employed on-board as a plant replica within a closed-loop scheme, and the observer gains are tuned purely from experimental data. The proposed approach is validated against experimental data, showing to significantly outperform the state-of-the-art solutions.",
-      "published": "2023-09-04T09:14:25Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 72,
-      "relevanceReason": "domainHits=3; queryHits=3"
-    },
-    {
       "id": "d08478ae44a221864890",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Joint Wheel-Slip and Vehicle-Motion Estimation Based on Inertial, GPS, and Wheel-Speed Sensors",
@@ -357,8 +381,22 @@
       "relevanceReason": "domainHits=4; queryHits=2"
     },
     {
+      "id": "030a70d116bdb1ff12cd",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Multi-rate vehicle side slip angle estimation using low-cost GPS/IMU",
+      "url": "https://doi.org/10.23919/iccas.2017.8204419",
+      "summary": "2017 17th International Conference on Control, Automation and Systems (ICCAS)",
+      "published": "2017-10",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.23919/iccas.2017.8204419",
+      "relevanceScore": 68,
+      "relevanceReason": "domainHits=3; queryHits=4"
+    },
+    {
       "id": "36e4e0d2ffe5b0dfc92b",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.745Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Vehicle Speed Estimation Using GPS/RISS (Reduced Inertial Sensor System)",
@@ -371,21 +409,8 @@
       "relevanceReason": "domainHits=3; queryHits=4"
     },
     {
-      "id": "ab9e881e4e0835cc98dd",
-      "retrievedAt": "2026-10-20T02:39:15.169Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Distributed Nonlinear Model Predictive Control and Metric Learning for Heterogeneous Vehicle Platooning with Cut-in/Cut-out Maneuvers",
-      "url": "http://arxiv.org/abs/2004.00417v2",
-      "summary": "Vehicle platooning has been shown to be quite fruitful in the transportation industry to enhance fuel economy, road throughput, and driving comfort. Model Predictive Control (MPC) is widely used in literature for platoon control to achieve certain objectives, such as safely reducing the distance among consecutive vehicles while following the leader vehicle. In this paper, we propose a Distributed Nonlinear MPC (DNMPC), based upon an existing approach, to control a heterogeneous dynamic platoon with unidirectional topologies, handling possible cut-in/cut-out maneuvers. The introduced method addresses a collision-free driving experience while tracking the desired speed profile and maintaining a safe desired gap among the vehicles. The time of convergence in the dynamic platooning is derived based on the time of cut-in and/or cut-out maneuvers. In addition, we analyze the improvement level of driving comfort, fuel economy, and absolute and relative convergence of the method by using distributed metric learning and distributed optimization with Alternating Direction Method of Multipliers (ADMM). Simulation results on a dynamic platoon with cut-in and cut-out maneuvers and with different unidirectional topologies show the effectiveness of the introduced method.",
-      "published": "2020-04-01T13:11:08Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 66,
-      "relevanceReason": "domainHits=3; queryHits=2"
-    },
-    {
       "id": "28e7782b0331616e0699",
-      "retrievedAt": "2026-10-20T02:39:14.945Z",
+      "retrievedAt": "2026-10-20T03:37:53.881Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "True 3D Seismic Imaging: Which Acquisition and Processing Approaches are Best?",
@@ -399,7 +424,7 @@
     },
     {
       "id": "2ec375229b0f75eaa804",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Frequency Control Using Electric Vehicles with Adaptive Latency Compensation and Variable Speed Wind Turbines Using Modifed Virtual Inertia Controller",
@@ -413,7 +438,7 @@
     },
     {
       "id": "02cf3390d3bde4e7e2b6",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Vehicle Detection and Speed Estimation Using Semantic Segmentation with Low Latency",
@@ -426,21 +451,8 @@
       "relevanceReason": "domainHits=2; queryHits=4"
     },
     {
-      "id": "4db3a00abd9f1714d2aa",
-      "retrievedAt": "2026-10-20T02:39:14.390Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Distinguishing Propagation vs. Launch Physics of Astrophysical Jets and the Role of Experiments",
-      "url": "http://arxiv.org/abs/astro-ph/0606677v1",
-      "summary": "The absence of other viable momentum sources for collimated flows leads to the likelihood that magnetic fields play a fundamental role in jet launch and/or collimation in astrophysical jets. To best understand the physics of jets, it is useful to distinguish between the launch region where the jet is accelerated and the larger scales where the jet propagates as a collimated structure. Observations presently resolve jet propagation, but not the launch region. Simulations typically probe the launch and propagation regions separately, but not both together. Here, I identify some of the physics of jet launch vs. propagation and what laboratory jet experiments to date have probed. Reproducing an astrophysical jet in the lab is unrealistic, so maximizing the benefit of the experiments requires clarifying the astrophysical connection.",
-      "published": "2006-06-28T06:41:43Z",
-      "query": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
-      "relevanceScore": 58,
-      "relevanceReason": "domainHits=2; queryHits=3"
-    },
-    {
       "id": "416c17b6d439a43a58b8",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.745Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "An Approach of Vehicle Speed Estimation Based on Didi GPS Data",
@@ -453,8 +465,22 @@
       "relevanceReason": "domainHits=2; queryHits=4"
     },
     {
+      "id": "89b9d721d8a68839756f",
+      "retrievedAt": "2026-10-20T03:38:10.205Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Traction and Yaw-rate Control of Electric Vehicle with Slip-ratio and Cornering Stiffness Estimation",
+      "url": "https://doi.org/10.1109/acc.2007.4282864",
+      "summary": "2007 American Control Conference",
+      "published": "2007-7",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "doi": "10.1109/acc.2007.4282864",
+      "relevanceScore": 54,
+      "relevanceReason": "domainHits=2; queryHits=4"
+    },
+    {
       "id": "255632d074f0efa281f0",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.746Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Vehicle Speed Estimation Using Faster RCNN",
@@ -468,7 +494,7 @@
     },
     {
       "id": "9859fbb15ee4f1d33df1",
-      "retrievedAt": "2026-10-20T02:39:15.326Z",
+      "retrievedAt": "2026-10-20T03:39:11.747Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Compensation of ERP Latency Jitter Using Fast Variational 1D Displacement Estimation",
@@ -481,47 +507,8 @@
       "relevanceReason": "domainHits=2; queryHits=3"
     },
     {
-      "id": "5c7c8a8563a77a240dbd",
-      "retrievedAt": "2026-10-20T02:39:15.169Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Control Barrier Functions for Shared Control and Vehicle Safety",
-      "url": "http://arxiv.org/abs/2503.19994v1",
-      "summary": "This manuscript presents a control barrier function based approach to shared control for preventing a vehicle from entering the part of the state space where it is unrecoverable. The maximal phase recoverable ellipse is presented as a safe set in the sideslip angle--yaw rate phase plane where the vehicle's state can be maintained. An exponential control barrier function is then defined on the maximal phase recoverable ellipse to promote safety. Simulations demonstrate that this approach enables safe drifting, that is, driving at the handling limit without spinning out. Results are then validated for shared control drifting with an experimental vehicle in a closed course. The results show the ability of this shared control formulation to maintain the vehicle's state within a safe domain in a computationally efficient manner, even in extreme drifting maneuvers.",
-      "published": "2025-03-25T18:23:56Z",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "relevanceScore": 52,
-      "relevanceReason": "domainHits=2; queryHits=2"
-    },
-    {
-      "id": "ce40664c5525436ff4c2",
-      "retrievedAt": "2026-10-20T02:39:14.389Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Accurate Link Lifetime Computation in Autonomous Airborne UAV Networks",
-      "url": "http://arxiv.org/abs/2202.00056v1",
-      "summary": "An autonomous airborne network (AN) consists of multiple unmanned aerial vehicles (UAVs), which can self-configure to provide seamless, low-cost and secure connectivity. AN is preferred for applications in civilian and military sectors because it can improve the network reliability and fault tolerance, reduce mission completion time through collaboration, and adapt to dynamic mission requirements. However, facilitating seamless communication in such ANs is a challenging task due to their fast node mobility, which results in frequent link disruptions. Many existing AN-specific mobility-aware schemes restrictively assume that UAVs fly in straight lines, to reduce the high uncertainty in the mobility pattern and simplify the calculation of link lifetime (LLT). Here, LLT represents the duration after which the link between a node pair terminates. However, the application of such schemes is severely limited, which makes them unsuitable for practical autonomous ANs. In this report, a mathematical framework is described to accurately compute the \\textit{LLT} value for a UAV node pair, where each node flies independently in a randomly selected smooth trajectory. In addition, the impact of random trajectory changes on LLT accuracy is also discussed.",
-      "published": "2022-01-31T19:38:29Z",
-      "query": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
-      "relevanceScore": 52,
-      "relevanceReason": "domainHits=2; queryHits=2"
-    },
-    {
-      "id": "4898387c6c213883af09",
-      "retrievedAt": "2026-10-20T02:39:15.332Z",
-      "kind": "paper",
-      "provider": "arXiv",
-      "title": "Adaptive Neuro-Fuzzy Extended Kalman Filtering for Robot Localization",
-      "url": "http://arxiv.org/abs/1004.3267v1",
-      "summary": "Extended Kalman Filter (EKF) has been a popular approach to localization a mobile robot. However, the performance of the EKF and the quality of the estimation depends on the correct a priori knowledge of process and measurement noise covariance matrices (Qk and Rk, respectively). Imprecise knowledge of these statistics can cause significant degradation in performance. This paper proposed the development of an Adaptive Neuro- Fuzzy Extended Kalman Filtering (ANFEKF) for localization of robot. The Adaptive Neuro-Fuzzy attempts to estimate the elements of Qk and Rk matrices of the EKF algorithm, at each sampling instant when measurement update step is carried out. The ANFIS supervises the performance of the EKF with the aim of reducing the mismatch between the theoretical and actual covariance of the innovation sequences. The free parameters of ANFIS are trained using the steepest gradient descent (SD) to minimize the differences of the actual value of the covariance of the residual with its theoretical value as much possible. The simulation results show the effectiveness of the proposed algorithm.",
-      "published": "2010-04-19T18:07:26Z",
-      "query": "RPM sensor delay adaptive filtering",
-      "relevanceScore": 52,
-      "relevanceReason": "domainHits=2; queryHits=2"
-    },
-    {
       "id": "7b59d58f2e6e6b6933f4",
-      "retrievedAt": "2026-10-20T02:39:15.163Z",
+      "retrievedAt": "2026-10-20T03:38:09.765Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Design and optimization of low-power embedded resistive memory (RRAM)",
@@ -535,7 +522,7 @@
     },
     {
       "id": "6f1153bc21a52aee88b6",
-      "retrievedAt": "2026-10-20T02:39:14.945Z",
+      "retrievedAt": "2026-10-20T03:37:53.882Z",
       "kind": "paper",
       "provider": "Crossref",
       "title": "Removing residual airborne sensor motion for measuring seismic signals from a drone",
@@ -546,21 +533,40 @@
       "doi": "10.1139/juvs-2020-0017",
       "relevanceScore": 50,
       "relevanceReason": "domainHits=1; queryHits=5"
+    },
+    {
+      "id": "4f82f58b453fb3690113",
+      "retrievedAt": "2026-10-20T03:39:11.747Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Watching vehicle speed using GPS by using data mining approach",
+      "url": "https://doi.org/10.52113/3/eng/mjet/2021-09-02/09-16",
+      "summary": "Muthanna Journal of Engineering and Technology",
+      "published": "2021-12-30",
+      "query": "GPS latency compensation vehicle speed estimation",
+      "doi": "10.52113/3/eng/mjet/2021-09-02/09-16",
+      "relevanceScore": 48,
+      "relevanceReason": "domainHits=2; queryHits=3"
+    },
+    {
+      "id": "a7dca37a7301054a21a7",
+      "retrievedAt": "2026-10-20T03:38:09.765Z",
+      "kind": "paper",
+      "provider": "Crossref",
+      "title": "Insights on memory controller scaling in multi-core embedded systems",
+      "url": "https://doi.org/10.1504/ijes.2014.065000",
+      "summary": "International Journal of Embedded Systems",
+      "published": "2014",
+      "query": "EdgeTX Lua memory optimization embedded controller",
+      "doi": "10.1504/ijes.2014.065000",
+      "relevanceScore": 48,
+      "relevanceReason": "domainHits=2; queryHits=3"
     }
   ],
   "sourceFiltering": {
     "accepted": 40,
-    "rejected": 18,
+    "rejected": 16,
     "rejectedExamples": [
-      {
-        "id": "9b18f7386620a08cbe2e",
-        "title": "Increasing Launch Efficiency with the PEGASUS Launcher",
-        "url": "http://arxiv.org/abs/1612.03614v1",
-        "provider": "arXiv",
-        "query": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
-        "score": 18,
-        "reason": "domainHits=0; queryHits=1"
-      },
       {
         "id": "dcd7dff3686bd617df79",
         "title": "Table 3: AIC inferences compared to traditional hypothesis testing which uses an F -test to distinguish between two best models of similar fit.",
@@ -616,103 +622,94 @@
         "reason": "domainHits=0; queryHits=3"
       },
       {
-        "id": "8641269cbcce337a0c9d",
-        "title": "Comparing Electrodes for Use as Cortical Control Signals: Tiny Tines, Tiny Wires, or Tiny Cones on Wires: Which Is Best?",
-        "url": "https://doi.org/10.1201/9780849381850-20",
+        "id": "53c0495b04cc8a7bd428",
+        "title": "Jurors Can Distinguish True from False Confessions",
+        "url": "https://doi.org/10.1093/acprof:oso/9780190201340.003.0006",
         "provider": "Crossref",
         "query": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
         "score": 20,
         "reason": "domainHits=0; queryHits=3"
       },
       {
-        "id": "7bfe58de8ff6fac4ef09",
-        "title": "L1 penalization of volumetric dose objectives in optimal control of PDEs",
-        "url": "http://arxiv.org/abs/1607.01655v3",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": 12,
-        "reason": "domainHits=0; queryHits=0"
-      },
-      {
-        "id": "5e469e3a6dc6fe578ae0",
-        "title": "On the solution existence and stability of polynomial optimization problems",
-        "url": "http://arxiv.org/abs/1808.06100v6",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": 18,
-        "reason": "domainHits=0; queryHits=1"
-      },
-      {
-        "id": "3ed7eacb34a930bc2f1a",
-        "title": "Optimal control for a nonlinear stochastic PDE model of cancer growth",
-        "url": "http://arxiv.org/abs/2307.09574v1",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": -80,
-        "reason": "irrelevant domain: cancer, drug"
-      },
-      {
-        "id": "57f3e016627daf230dd7",
-        "title": "Optimal control of a heroin epidemic mathematical model",
-        "url": "http://arxiv.org/abs/2111.05906v1",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": -80,
-        "reason": "irrelevant domain: drug"
-      },
-      {
-        "id": "a62e9056018c90dec7cc",
-        "title": "Two-Scale Optimization of Graded Lattice Structures respecting Buckling on Micro- and Macroscale",
-        "url": "http://arxiv.org/abs/2303.08710v1",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": 18,
-        "reason": "domainHits=0; queryHits=1"
-      },
-      {
-        "id": "faae16dd0652423e11d0",
-        "title": "An efficient and easy-to-extend Matlab code of the Moving Morphable Component (MMC) method for three-dimensional topology optimization",
-        "url": "http://arxiv.org/abs/2201.02491v3",
-        "provider": "arXiv",
-        "query": "EdgeTX Lua memory optimization embedded controller",
-        "score": 18,
-        "reason": "domainHits=0; queryHits=1"
-      },
-      {
-        "id": "f1f534b76ccf8b2f4c95",
-        "title": "Sampling Trade-Offs in Duty-Cycled Systems for Air Quality Low-Cost Sensors",
-        "url": "http://arxiv.org/abs/2112.09072v2",
-        "provider": "arXiv",
-        "query": "vehicle traction control slip estimation low cost sensors",
-        "score": -80,
-        "reason": "irrelevant domain: air pollution"
-      },
-      {
-        "id": "0d5a8c98963ac15f8a73",
-        "title": "Insights into the multiplicity-induced-dominancy for scalar delay-differential equations with two delays",
-        "url": "http://arxiv.org/abs/2107.11348v2",
-        "provider": "arXiv",
+        "id": "032d1deede10dfd8455b",
+        "title": "Adaptive Reliable Filtering against Sensor Faults",
+        "url": "https://doi.org/10.1201/ebk1439835227-c5",
+        "provider": "Crossref",
         "query": "RPM sensor delay adaptive filtering",
-        "score": 18,
+        "score": 20,
+        "reason": "domainHits=0; queryHits=3"
+      },
+      {
+        "id": "9121e6e8cb9269608337",
+        "title": "Distributed adaptive Bernoulli filtering for multi-sensor target tracking under uncertainty_supp1-3422406.pdf",
+        "url": "https://doi.org/10.1109/tsp.2024.3422406/mm1",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 14,
+        "reason": "domainHits=0; queryHits=2"
+      },
+      {
+        "id": "1f02823dd18e4ac19947",
+        "title": "Snowflake: An Adaptive Energy and Delay Efficient Scheme for Source Location Privacy in Wireless Sensor Networks",
+        "url": "https://doi.org/10.5220/0011014400003118",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 20,
+        "reason": "domainHits=0; queryHits=3"
+      },
+      {
+        "id": "a23e2fcc49fd3e568a2f",
+        "title": "Adaptive Reliable Control for Time-Delay Systems",
+        "url": "https://doi.org/10.1201/ebk1439835227-c6",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 8,
         "reason": "domainHits=0; queryHits=1"
       },
       {
-        "id": "64738d157a37bf22d45d",
-        "title": "OPC UA for IO-Link Wireless in a Cyber Physical Finite Element Sensor Network for Shape Measurement",
-        "url": "http://arxiv.org/abs/2504.03704v1",
-        "provider": "arXiv",
+        "id": "96c66ba2eaf2ffa15da9",
+        "title": "Adaptive Reliable Control for Nonlinear Time-Delay Systems",
+        "url": "https://doi.org/10.1201/ebk1439835227-c10",
+        "provider": "Crossref",
         "query": "RPM sensor delay adaptive filtering",
-        "score": 18,
+        "score": 8,
         "reason": "domainHits=0; queryHits=1"
       },
       {
-        "id": "d315ae350e9e0bfe158a",
-        "title": "Sensor Selection Scheme in Temperature Wireless Sensor Network",
-        "url": "http://arxiv.org/abs/1506.07651v1",
-        "provider": "arXiv",
+        "id": "0eb712c7bd7a530e6c2a",
+        "title": "A Distributed Adaptive Algorithm for Non-Smooth Spatial Filtering Problems in Wireless Sensor Networks_supp1-3474168.pdf",
+        "url": "https://doi.org/10.1109/tsp.2024.3474168/mm1",
+        "provider": "Crossref",
         "query": "RPM sensor delay adaptive filtering",
-        "score": 18,
-        "reason": "domainHits=0; queryHits=1"
+        "score": 20,
+        "reason": "domainHits=0; queryHits=3"
+      },
+      {
+        "id": "ec8e92d2914b6c3653ba",
+        "title": "Distributed Filtering With Random Sampling And Delay",
+        "url": "https://doi.org/10.1117/12.946663",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 14,
+        "reason": "domainHits=0; queryHits=2"
+      },
+      {
+        "id": "06a6c0198bf401d763e8",
+        "title": "Robust filtering under randomly varying sensor delay with variance constraints",
+        "url": "https://doi.org/10.23919/ecc.2003.7086533",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 20,
+        "reason": "domainHits=0; queryHits=3"
+      },
+      {
+        "id": "68c7a9ee439cb5d02b34",
+        "title": "Adaptive Wavelet Filtering for Data Enhancement in Wireless Sensor Networks",
+        "url": "https://doi.org/10.4236/jst.2012.22012",
+        "provider": "Crossref",
+        "query": "RPM sensor delay adaptive filtering",
+        "score": 20,
+        "reason": "domainHits=0; queryHits=3"
       }
     ],
     "minimumScore": 24
@@ -726,87 +723,108 @@
   "model": null,
   "activity": [
     {
-      "at": "2026-10-20T02:39:14.121Z",
+      "at": "2026-10-20T03:37:37.732Z",
       "phase": "SEARCH",
       "message": "Searching arXiv: Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     {
-      "at": "2026-10-20T02:39:14.390Z",
+      "at": "2026-10-20T03:37:53.254Z",
+      "phase": "WARNING",
+      "message": "arXiv query failed",
+      "query": "Which recorded signals best distinguish launch wheelspin from true airborne motion?",
+      "error": "429 https://export.arxiv.org/api/query?search_query=all:Which%20recorded%20signals%20best%20distinguish%20launch%20wheelspin%20from%20true%20airborne%20motion%3F&start=0&max_results=10&sortBy=relevance&sortOrder=descending"
+    },
+    {
+      "at": "2026-10-20T03:37:53.254Z",
       "phase": "SEARCH",
       "message": "Searching Crossref: Which recorded signals best distinguish launch wheelspin from true airborne motion?"
     },
     {
-      "at": "2026-10-20T02:39:14.946Z",
+      "at": "2026-10-20T03:37:53.883Z",
       "phase": "SEARCH",
       "message": "Searching arXiv: EdgeTX Lua memory optimization embedded controller"
     },
     {
-      "at": "2026-10-20T02:39:14.952Z",
+      "at": "2026-10-20T03:38:09.561Z",
+      "phase": "WARNING",
+      "message": "arXiv query failed",
+      "query": "EdgeTX Lua memory optimization embedded controller",
+      "error": "429 https://export.arxiv.org/api/query?search_query=all:EdgeTX%20Lua%20memory%20optimization%20embedded%20controller&start=0&max_results=10&sortBy=relevance&sortOrder=descending"
+    },
+    {
+      "at": "2026-10-20T03:38:09.561Z",
       "phase": "SEARCH",
       "message": "Searching Crossref: EdgeTX Lua memory optimization embedded controller"
     },
     {
-      "at": "2026-10-20T02:39:15.163Z",
+      "at": "2026-10-20T03:38:09.765Z",
       "phase": "SEARCH",
       "message": "Searching arXiv: vehicle traction control slip estimation low cost sensors"
     },
     {
-      "at": "2026-10-20T02:39:15.169Z",
+      "at": "2026-10-20T03:38:09.853Z",
+      "phase": "WARNING",
+      "message": "arXiv query failed",
+      "query": "vehicle traction control slip estimation low cost sensors",
+      "error": "429 https://export.arxiv.org/api/query?search_query=all:vehicle%20traction%20control%20slip%20estimation%20low%20cost%20sensors&start=0&max_results=10&sortBy=relevance&sortOrder=descending"
+    },
+    {
+      "at": "2026-10-20T03:38:09.853Z",
       "phase": "SEARCH",
       "message": "Searching Crossref: vehicle traction control slip estimation low cost sensors"
     },
     {
-      "at": "2026-10-20T02:39:15.226Z",
-      "phase": "WARNING",
-      "message": "Crossref query failed",
-      "query": "vehicle traction control slip estimation low cost sensors",
-      "error": "429 https://api.crossref.org/works?rows=20&select=DOI,title,URL,abstract,container-title,published&query.bibliographic=vehicle%20traction%20control%20slip%20estimation%20low%20cost%20sensors"
-    },
-    {
-      "at": "2026-10-20T02:39:15.226Z",
+      "at": "2026-10-20T03:38:10.206Z",
       "phase": "SEARCH",
       "message": "Searching arXiv: GPS latency compensation vehicle speed estimation"
     },
     {
-      "at": "2026-10-20T02:39:15.231Z",
+      "at": "2026-10-20T03:39:11.305Z",
+      "phase": "WARNING",
+      "message": "arXiv query failed",
+      "query": "GPS latency compensation vehicle speed estimation",
+      "error": "503 https://export.arxiv.org/api/query?search_query=all:GPS%20latency%20compensation%20vehicle%20speed%20estimation&start=0&max_results=10&sortBy=relevance&sortOrder=descending"
+    },
+    {
+      "at": "2026-10-20T03:39:11.305Z",
       "phase": "SEARCH",
       "message": "Searching Crossref: GPS latency compensation vehicle speed estimation"
     },
     {
-      "at": "2026-10-20T02:39:15.326Z",
+      "at": "2026-10-20T03:39:11.747Z",
       "phase": "SEARCH",
       "message": "Searching arXiv: RPM sensor delay adaptive filtering"
     },
     {
-      "at": "2026-10-20T02:39:15.332Z",
+      "at": "2026-10-20T03:39:27.351Z",
+      "phase": "WARNING",
+      "message": "arXiv query failed",
+      "query": "RPM sensor delay adaptive filtering",
+      "error": "429 https://export.arxiv.org/api/query?search_query=all:RPM%20sensor%20delay%20adaptive%20filtering&start=0&max_results=10&sortBy=relevance&sortOrder=descending"
+    },
+    {
+      "at": "2026-10-20T03:39:27.351Z",
       "phase": "SEARCH",
       "message": "Searching Crossref: RPM sensor delay adaptive filtering"
     },
     {
-      "at": "2026-10-20T02:39:15.389Z",
-      "phase": "WARNING",
-      "message": "Crossref query failed",
-      "query": "RPM sensor delay adaptive filtering",
-      "error": "429 https://api.crossref.org/works?rows=20&select=DOI,title,URL,abstract,container-title,published&query.bibliographic=RPM%20sensor%20delay%20adaptive%20filtering"
-    },
-    {
-      "at": "2026-10-20T02:39:15.390Z",
+      "at": "2026-10-20T03:39:27.486Z",
       "phase": "SEARCH",
       "message": "Checking official EdgeTX and Lua releases"
     },
     {
-      "at": "2026-10-20T02:39:16.524Z",
+      "at": "2026-10-20T03:39:28.212Z",
       "phase": "FILTER",
-      "message": "Accepted 40; rejected 18 irrelevant or implausible sources",
+      "message": "Accepted 40; rejected 16 irrelevant or implausible sources",
       "minimumRelevance": 24
     },
     {
-      "at": "2026-10-20T02:39:16.524Z",
+      "at": "2026-10-20T03:39:28.212Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1, attempt 1"
     },
     {
-      "at": "2026-10-20T02:39:16.835Z",
+      "at": "2026-10-20T03:39:28.248Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1",
@@ -814,12 +832,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:39:21.837Z",
+      "at": "2026-10-20T03:39:33.249Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1, attempt 2"
     },
     {
-      "at": "2026-10-20T02:39:22.118Z",
+      "at": "2026-10-20T03:39:33.271Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1",
@@ -827,12 +845,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:39:32.118Z",
+      "at": "2026-10-20T03:39:43.281Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1, attempt 3"
     },
     {
-      "at": "2026-10-20T02:39:32.399Z",
+      "at": "2026-10-20T03:39:43.298Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1",
@@ -840,12 +858,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:39:47.399Z",
+      "at": "2026-10-20T03:39:58.313Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1-mini, attempt 1"
     },
     {
-      "at": "2026-10-20T02:39:47.943Z",
+      "at": "2026-10-20T03:39:58.335Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1-mini",
@@ -853,12 +871,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:39:52.944Z",
+      "at": "2026-10-20T03:40:03.339Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1-mini, attempt 2"
     },
     {
-      "at": "2026-10-20T02:39:53.237Z",
+      "at": "2026-10-20T03:40:03.364Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1-mini",
@@ -866,12 +884,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:40:03.245Z",
+      "at": "2026-10-20T03:40:13.374Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4.1-mini, attempt 3"
     },
     {
-      "at": "2026-10-20T02:40:03.525Z",
+      "at": "2026-10-20T03:40:13.393Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4.1-mini",
@@ -879,12 +897,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:40:18.532Z",
+      "at": "2026-10-20T03:40:28.407Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4o, attempt 1"
     },
     {
-      "at": "2026-10-20T02:40:18.821Z",
+      "at": "2026-10-20T03:40:28.620Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4o",
@@ -892,12 +910,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:40:23.825Z",
+      "at": "2026-10-20T03:40:33.625Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4o, attempt 2"
     },
     {
-      "at": "2026-10-20T02:40:24.109Z",
+      "at": "2026-10-20T03:40:33.645Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4o",
@@ -905,12 +923,12 @@
       "error": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
     },
     {
-      "at": "2026-10-20T02:40:34.115Z",
+      "at": "2026-10-20T03:40:43.653Z",
       "phase": "SYNTHESIS",
       "message": "Model openai/gpt-4o, attempt 3"
     },
     {
-      "at": "2026-10-20T02:40:34.424Z",
+      "at": "2026-10-20T03:40:43.673Z",
       "phase": "WARNING",
       "message": "Synthesis attempt failed",
       "model": "openai/gpt-4o",
