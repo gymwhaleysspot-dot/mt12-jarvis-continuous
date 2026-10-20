@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-20T21:44:24.000Z",
+  "generatedAt": "2026-10-20T21:59:18.958Z",
   "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
   "upgrades": {
     "differentiableStyleOptimizer": true,
@@ -27,65 +27,43 @@
   "optimizer": {
     "method": "actual_render_finite_difference_owner_truth_with_pairwise_interactions",
     "baselineError": 0.253627,
-    "targets": [
-      {
-        "parameter": "grille_half_bottom",
-        "proposed": 0.7754,
-        "measuredGain": 0.000448,
-        "gradient": -0.402269,
-        "direction": "increase"
-      },
-      {
-        "parameter": "grille_corner_radius",
-        "proposed": 0.11274,
-        "measuredGain": 0.000448,
-        "gradient": -0.066474,
-        "direction": "increase"
-      },
-      {
-        "parameter": "grille_half_top",
-        "proposed": 0.6858,
-        "measuredGain": 0.000013,
-        "gradient": 0.350386,
-        "direction": "decrease"
-      }
-    ],
+    "targets": [],
     "allGradients": [
       {
         "parameter": "grille_half_bottom",
         "baselineError": 0.253627,
         "minusError": 0.256558,
-        "plusError": 0.253179,
-        "gradient": -0.402269,
+        "plusError": 0.253686,
+        "gradient": -0.341932,
         "bestValue": 0.7754,
-        "measuredGain": 0.000448,
-        "direction": "increase"
-      },
-      {
-        "parameter": "grille_corner_radius",
-        "baselineError": 0.253627,
-        "minusError": 0.253342,
-        "plusError": 0.253179,
-        "gradient": -0.066474,
-        "bestValue": 0.11274,
-        "measuredGain": 0.000448,
+        "measuredGain": 0,
         "direction": "increase"
       },
       {
         "parameter": "grille_half_top",
         "baselineError": 0.253627,
-        "minusError": 0.253615,
-        "plusError": 0.256558,
-        "gradient": 0.350386,
+        "minusError": 0.253686,
+        "plusError": 0.253686,
+        "gradient": 0,
         "bestValue": 0.6858,
-        "measuredGain": 0.000013,
+        "measuredGain": 0,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "grille_corner_radius",
+        "baselineError": 0.253627,
+        "minusError": 0.253686,
+        "plusError": 0.253686,
+        "gradient": 0,
+        "bestValue": 0.11028,
+        "measuredGain": 0,
         "direction": "decrease"
       },
       {
         "parameter": "grille_frame_thickness",
         "baselineError": 0.253627,
-        "minusError": 0.256558,
-        "plusError": 0.256558,
+        "minusError": 0.253686,
+        "plusError": 0.253686,
         "gradient": 0,
         "bestValue": 0.02605,
         "measuredGain": 0,
@@ -98,15 +76,15 @@
           "grille_half_bottom",
           "grille_half_top"
         ],
-        "mixedPartial": -90.267723,
+        "mixedPartial": 0,
         "baselineError": 0.253627,
-        "bestError": 0.253373,
+        "bestError": 0.253686,
         "bestValues": {
           "grille_half_bottom": 0.767,
           "grille_half_top": 0.6858
         },
-        "measuredGain": 0.000254,
-        "synergy": 0.000448
+        "measuredGain": 0,
+        "synergy": 0
       }
     ],
     "bestInteraction": {
@@ -114,15 +92,15 @@
         "grille_half_bottom",
         "grille_half_top"
       ],
-      "mixedPartial": -90.267723,
+      "mixedPartial": 0,
       "baselineError": 0.253627,
-      "bestError": 0.253373,
+      "bestError": 0.253686,
       "bestValues": {
         "grille_half_bottom": 0.767,
         "grille_half_top": 0.6858
       },
-      "measuredGain": 0.000254,
-      "synergy": 0.000448
+      "measuredGain": 0,
+      "synergy": 0
     }
   },
   "implicitSurface": {
@@ -179,8 +157,8 @@
           "latentIndex": 0,
           "measuredGradientSupport": [
             "grille_half_bottom",
-            "grille_corner_radius",
             "grille_half_top",
+            "grille_corner_radius",
             "grille_frame_thickness"
           ]
         },
@@ -1530,14 +1508,14 @@
       "pass": false,
       "geometryIndependent": true
     },
-    "combined": 0.6094,
+    "combined": 0.5202,
     "semanticOwnerTruth": {
-      "score": 0.5927,
+      "score": 0.3377,
       "signals": {
         "ownerSemanticCoverage": 0.7381,
         "cameraConfidence": 0,
-        "measuredGradientSupport": 0.75,
-        "pairwiseInteractionSupport": 1,
+        "measuredGradientSupport": 0,
+        "pairwiseInteractionSupport": 0,
         "photoCoverage": 31
       },
       "requiredForPromotion": true
@@ -1656,12 +1634,13 @@
     }
   },
   "dependencies": {
-    "focusRegion": "side_body",
+    "focusRegion": "front_fascia",
     "assembly": [
+      "headlights",
+      "grille",
       "front_arches",
-      "rear_body",
-      "livery",
-      "roof"
+      "splitter",
+      "hood_vents"
     ],
     "mode": "constrained_assembly"
   },
@@ -1826,31 +1805,31 @@
   "diversity": {
     "lineages": {
       "owner_accuracy": {
-        "generation": 4160,
+        "generation": 4161,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "owner_accuracy"
       },
       "mobile_efficiency": {
-        "generation": 4160,
+        "generation": 4161,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "mobile_efficiency"
       },
       "photorealism": {
-        "generation": 4160,
+        "generation": 4161,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "photorealism"
       },
       "topology_exploration": {
-        "generation": 4160,
+        "generation": 4161,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_fascia",
         "objective": "topology_exploration"
       }
     },
-    "synthesize": true,
+    "synthesize": false,
     "minimumDistinct": 3
   },
   "replayNegatives": [
@@ -1893,7 +1872,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.002Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4329.jpeg": {
       "matchedView": "front",
@@ -1902,7 +1881,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.002Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4330.jpeg": {
       "matchedView": "front",
@@ -1911,7 +1890,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4331.jpeg": {
       "matchedView": "front",
@@ -1920,7 +1899,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4332.jpeg": {
       "matchedView": "front",
@@ -1929,7 +1908,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4333.jpeg": {
       "matchedView": "front",
@@ -1938,7 +1917,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4334.jpeg": {
       "matchedView": "front",
@@ -1947,7 +1926,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     },
     "IMG_4335.jpeg": {
       "matchedView": "front",
@@ -1956,7 +1935,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-10-20T21:44:24.003Z"
+      "updatedAt": "2026-10-20T21:59:18.961Z"
     }
   },
   "introspection": {
@@ -2832,7 +2811,7 @@
     },
     "hash": "22e0ee027066db1c02f7d7b76691d5e42b763852370a51984a751cce3c5d7342"
   },
-  "parentAutonomyGeneratedAt": "2026-10-20T21:38:54.606Z",
+  "parentAutonomyGeneratedAt": "2026-10-20T21:50:51.919Z",
   "qualityRepair": {
     "schema": 2,
     "allEightWeaknessesAddressed": true,
