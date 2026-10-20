@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "generatedAt": "2026-10-20T07:06:49.477Z",
+  "generatedAt": "2026-10-20T07:09:00.355Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -64,39 +64,6 @@
   },
   "landmarkGraph": "michael/reconstruction/landmarks.json",
   "componentPlan": [
-    {
-      "component": "roof_scoop",
-      "evidence": {
-        "confidence": 1,
-        "references": 23,
-        "uniqueDirectReferences": 23,
-        "ownerPhotoReferences": [
-          "owner-front-three-left",
-          "owner-front-three-right",
-          "owner-side-right"
-        ],
-        "ownerBinaryFiles": [
-          "IMG_4328.jpeg",
-          "IMG_4329.jpeg",
-          "IMG_4330.jpeg",
-          "IMG_4331.jpeg",
-          "IMG_4332.jpeg",
-          "IMG_4333.jpeg",
-          "IMG_4334.jpeg",
-          "IMG_4335.jpeg"
-        ],
-        "ownerPrimary": true
-      },
-      "uncertainty": 0,
-      "parameters": [
-        "scoop_width",
-        "scoop_height",
-        "scoop_length"
-      ],
-      "priority": 0.78,
-      "authority": "OWNER_JPEG_BINARIES",
-      "strategy": "owner_binary_photo_reconstruction"
-    },
     {
       "component": "arches",
       "evidence": {
@@ -233,6 +200,39 @@
         "grille_half_top",
         "grille_bottom_y",
         "grille_top_y"
+      ],
+      "priority": 0.58,
+      "authority": "OWNER_JPEG_BINARIES",
+      "strategy": "owner_binary_photo_reconstruction"
+    },
+    {
+      "component": "roof_scoop",
+      "evidence": {
+        "confidence": 1,
+        "references": 3,
+        "uniqueDirectReferences": 0,
+        "ownerPhotoReferences": [
+          "owner-front-three-left",
+          "owner-front-three-right",
+          "owner-side-right"
+        ],
+        "ownerBinaryFiles": [
+          "IMG_4328.jpeg",
+          "IMG_4329.jpeg",
+          "IMG_4330.jpeg",
+          "IMG_4331.jpeg",
+          "IMG_4332.jpeg",
+          "IMG_4333.jpeg",
+          "IMG_4334.jpeg",
+          "IMG_4335.jpeg"
+        ],
+        "ownerPrimary": true
+      },
+      "uncertainty": 0,
+      "parameters": [
+        "scoop_width",
+        "scoop_height",
+        "scoop_length"
       ],
       "priority": 0.58,
       "authority": "OWNER_JPEG_BINARIES",
@@ -421,13 +421,6 @@
     "focusFraction": 0.05
   },
   "componentLocks": {
-    "roof_scoop": {
-      "winsRequired": 4,
-      "minimumIndependentViews": 3,
-      "minimumReferenceClasses": 2,
-      "locked": false,
-      "mutationScaleWhenStable": 0.25
-    },
     "arches": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
@@ -450,6 +443,13 @@
       "mutationScaleWhenStable": 0.25
     },
     "grille": {
+      "winsRequired": 4,
+      "minimumIndependentViews": 3,
+      "minimumReferenceClasses": 2,
+      "locked": false,
+      "mutationScaleWhenStable": 0.25
+    },
+    "roof_scoop": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
@@ -493,5 +493,5 @@
     "requireMobilePerformancePass": true,
     "componentFirst": true
   },
-  "nextComponent": "roof_scoop"
+  "nextComponent": "arches"
 }
