@@ -1,14 +1,14 @@
 {
   "schema": 2,
   "engine": "NICKELLE_RECONSTRUCTION_V2_RESEARCH_FUSED",
-  "generatedAt": "2026-11-09T02:40:07.363Z",
+  "generatedAt": "2026-11-09T02:51:25.185Z",
   "truthAuthority": "truth/truth.json",
   "researchAuthority": "nickelle/research/constraints.json",
-  "confidence": 0.8244615384615386,
+  "confidence": 0.8217142857142858,
   "cameraRegistration": {
     "mode": "multiview_bbox_plus_depth_plus_research",
     "referenceViews": 2,
-    "confidence": 0.5522307692307693
+    "confidence": 0.5508571428571428
   },
   "geometryBeliefs": {
     "front_grille": {
@@ -17,8 +17,31 @@
         "authority": "owner_photo",
         "confidence": 0.98
       },
-      "research": null,
-      "confidence": 0.98,
+      "research": {
+        "component": "front_grille",
+        "recognized": true,
+        "constraints": [
+          {
+            "type": "deterministic_lead",
+            "claim": "Source 'Electroplated thermoplastic automotive grille' contains automotive evidence directly mentioning front_grille; use only as a research lead until checked against owner Truth.",
+            "value": null,
+            "range": null,
+            "unit": null,
+            "sourceIds": [
+              "5c2cb6bc77e2ea667799"
+            ],
+            "confidence": 0.46,
+            "evidenceType": "deterministic_source_relevance",
+            "applicability": "research prioritization and hypothesis generation only",
+            "testableVisualHypothesis": "Verify the cited source against owner photographs/measurements before applying geometry or material changes.",
+            "truthEligible": false
+          }
+        ],
+        "directVisualReferences": [],
+        "confidence": 0.46,
+        "sourceRunId": "nickelle-research-1794192682158"
+      },
+      "confidence": 1.0168,
       "authority": "owner_truth_over_research"
     },
     "projector_left": {
@@ -343,7 +366,7 @@
           }
         ],
         "confidence": 0.84,
-        "sourceRunId": "nickelle-research-1794192003994"
+        "sourceRunId": "nickelle-research-1794192682158"
       },
       "confidence": 1.0372,
       "authority": "owner_truth_over_research"
@@ -460,7 +483,7 @@
           }
         ],
         "confidence": 0.84,
-        "sourceRunId": "nickelle-research-1794192003994"
+        "sourceRunId": "nickelle-research-1794192682158"
       },
       "confidence": 1.0071999999999999,
       "authority": "owner_truth_over_research"
@@ -537,11 +560,11 @@
     "confidence": 0
   },
   "researchPerception": {
-    "sourceRunId": "nickelle-research-1794192003994",
+    "sourceRunId": "nickelle-research-1794192682158",
     "sourceCount": 60,
     "acceptedFindingCount": 0,
-    "components": 13,
-    "confidence": 0.8446153846153847
+    "components": 14,
+    "confidence": 0.8171428571428571
   },
   "protectedOwnerFacts": [
     {
@@ -600,14 +623,6 @@
     }
   ],
   "unresolved": [
-    {
-      "type": "research_gap",
-      "detail": {
-        "type": "evidence_gap",
-        "request": "Find directly automotive, component-specific evidence for: Map research component projector_left to Michael semantic scene graph before allowing geometry mutation.",
-        "priority": 0.9
-      }
-    },
     {
       "type": "research_gap",
       "detail": {
