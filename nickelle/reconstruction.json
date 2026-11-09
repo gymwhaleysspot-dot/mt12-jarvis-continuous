@@ -1,14 +1,14 @@
 {
   "schema": 2,
   "engine": "NICKELLE_RECONSTRUCTION_V2_RESEARCH_FUSED",
-  "generatedAt": "2026-11-09T23:13:14.863Z",
+  "generatedAt": "2026-11-09T23:16:35.696Z",
   "truthAuthority": "truth/truth.json",
   "researchAuthority": "nickelle/research/constraints.json",
-  "confidence": 0.8176666666666668,
+  "confidence": 0.8180000000000001,
   "cameraRegistration": {
     "mode": "multiview_bbox_plus_depth_plus_research",
     "referenceViews": 2,
-    "confidence": 0.5488333333333334
+    "confidence": 0.549
   },
   "geometryBeliefs": {
     "front_grille": {
@@ -20,7 +20,23 @@
       "research": {
         "component": "front_grille",
         "recognized": true,
-        "constraints": [],
+        "constraints": [
+          {
+            "type": "deterministic_lead",
+            "claim": "Source 'Electroplated thermoplastic automotive grille' contains automotive evidence directly mentioning front_grille; use only as a research lead until checked against owner Truth.",
+            "value": null,
+            "range": null,
+            "unit": null,
+            "sourceIds": [
+              "5c2cb6bc77e2ea667799"
+            ],
+            "confidence": 0.46,
+            "evidenceType": "deterministic_source_relevance",
+            "applicability": "research prioritization and hypothesis generation only",
+            "testableVisualHypothesis": "Verify the cited source against owner photographs/measurements before applying geometry or material changes.",
+            "truthEligible": false
+          }
+        ],
         "directVisualReferences": [
           {
             "evidenceId": "02e7fff19a10ea78680c9944",
@@ -111,21 +127,21 @@
             "truthEligible": false
           },
           {
-            "evidenceId": "d19d4e283a947b8d05fd10c8",
-            "imageUrl": "http://ultimatehobbies.com.au/cdn/shop/files/MJXS-P73100.jpg?v=1788437930",
-            "sourcePage": "https://ultimatehobbies.com.au/products/mjx-front-bumper-assembly-7303",
+            "evidenceId": "def8b9dd23e4f86e3c0e1082",
+            "imageUrl": "https://img.thesitebase.net/img/flags/usa.png?width=3840&amp;height=0&amp;min_height=0",
+            "sourcePage": "https://www.youkedou.com/products/mjx-hyper-go-7303-parts-front-bumper-assembly-p73100",
             "authority": "community_reference",
             "authorityConfidence": 0.42,
             "viewpoint": "front",
-            "downloaded": true,
-            "sha256": "ba2a6eba626c2d6d28737893cbce2ac59e08f7e0536f8056505785c0a3b7d971",
+            "downloaded": false,
+            "sha256": null,
             "truthEligible": false
           }
         ],
-        "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1794265990794"
+        "confidence": 0.46,
+        "sourceRunId": "nickelle-research-1794266181052"
       },
-      "confidence": 1.0136,
+      "confidence": 1.0168,
       "authority": "owner_truth_over_research"
     },
     "projector_left": {
@@ -835,7 +851,7 @@
           }
         ],
         "confidence": 0.92,
-        "sourceRunId": "nickelle-research-1794265990794"
+        "sourceRunId": "nickelle-research-1794266181052"
       },
       "confidence": 1.0436,
       "authority": "owner_truth_over_research"
@@ -930,7 +946,7 @@
           }
         ],
         "confidence": 0.84,
-        "sourceRunId": "nickelle-research-1794265990794"
+        "sourceRunId": "nickelle-research-1794266181052"
       },
       "confidence": 1.0071999999999999,
       "authority": "owner_truth_over_research"
@@ -1007,11 +1023,11 @@
     "confidence": 0
   },
   "researchPerception": {
-    "sourceRunId": "nickelle-research-1794265990794",
+    "sourceRunId": "nickelle-research-1794266181052",
     "sourceCount": 60,
     "acceptedFindingCount": 0,
     "components": 12,
-    "confidence": 0.7766666666666667
+    "confidence": 0.7799999999999999
   },
   "protectedOwnerFacts": [
     {
@@ -1070,14 +1086,6 @@
     }
   ],
   "unresolved": [
-    {
-      "type": "research_gap",
-      "detail": {
-        "type": "evidence_gap",
-        "request": "Find directly automotive, component-specific evidence for: Map research component projector_left to Michael semantic scene graph before allowing geometry mutation.",
-        "priority": 0.9
-      }
-    },
     {
       "type": "research_gap",
       "detail": {
