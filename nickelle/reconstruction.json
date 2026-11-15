@@ -1,14 +1,14 @@
 {
   "schema": 2,
   "engine": "NICKELLE_RECONSTRUCTION_V2_RESEARCH_FUSED",
-  "generatedAt": "2026-11-15T14:32:11.661Z",
+  "generatedAt": "2026-11-15T14:35:40.511Z",
   "truthAuthority": "truth/truth.json",
   "researchAuthority": "nickelle/research/constraints.json",
-  "confidence": 0.7834545454545454,
+  "confidence": 0.7832000000000001,
   "cameraRegistration": {
     "mode": "multiview_bbox_plus_depth_plus_research",
     "referenceViews": 2,
-    "confidence": 0.5317272727272727
+    "confidence": 0.5316
   },
   "geometryBeliefs": {
     "front_grille": {
@@ -20,7 +20,23 @@
       "research": {
         "component": "front_grille",
         "recognized": true,
-        "constraints": [],
+        "constraints": [
+          {
+            "type": "deterministic_lead",
+            "claim": "Source 'Electroplated thermoplastic automotive grille' contains automotive evidence directly mentioning front_grille; use only as a research lead until checked against owner Truth.",
+            "value": null,
+            "range": null,
+            "unit": null,
+            "sourceIds": [
+              "5c2cb6bc77e2ea667799"
+            ],
+            "confidence": 0.46,
+            "evidenceType": "deterministic_source_relevance",
+            "applicability": "research prioritization and hypothesis generation only",
+            "testableVisualHypothesis": "Verify the cited source against owner photographs/measurements before applying geometry or material changes.",
+            "truthEligible": false
+          }
+        ],
         "directVisualReferences": [
           {
             "evidenceId": "02e7fff19a10ea78680c9944",
@@ -89,21 +105,21 @@
             "truthEligible": false
           },
           {
-            "evidenceId": "c291635e2a4590110da55aec",
-            "imageUrl": "http://www.yikongrc.net/cdn/shop/files/MJX_Hyper_Go_7303_Original_Parts_Front_Bumper_Assembly_P73100.jpg?v=1767153015",
-            "sourcePage": "https://www.yikongrc.net/products/mjx-hyper-go-7303-original-parts-front-bumper-assembly-p73100",
+            "evidenceId": "d19d4e283a947b8d05fd10c8",
+            "imageUrl": "http://ultimatehobbies.com.au/cdn/shop/files/MJXS-P73100.jpg?v=1788437930",
+            "sourcePage": "https://ultimatehobbies.com.au/products/mjx-front-bumper-assembly-7303",
             "authority": "community_reference",
             "authorityConfidence": 0.42,
             "viewpoint": "front",
             "downloaded": true,
-            "sha256": "41e5a71590b280a0fda35d39ed3bf8b06aecdc1c623ccdcdf2c8d51994b99631",
+            "sha256": "ba2a6eba626c2d6d28737893cbce2ac59e08f7e0536f8056505785c0a3b7d971",
             "truthEligible": false
           }
         ],
-        "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1794753129913"
+        "confidence": 0.46,
+        "sourceRunId": "nickelle-research-1794753339866"
       },
-      "confidence": 1.0136,
+      "confidence": 1.0168,
       "authority": "owner_truth_over_research"
     },
     "projector_left": {
@@ -317,6 +333,17 @@
             "truthEligible": false
           },
           {
+            "evidenceId": "1fa09011f16d0e74b5841a03",
+            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/EZRUNMAX8G2S_%7Bwidth%7Dx.jpg?v=1759426850",
+            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "unknown",
+            "downloaded": false,
+            "sha256": null,
+            "truthEligible": false
+          },
+          {
             "evidenceId": "9532e2bb59e873ab792ec015",
             "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/rn-image_picker_lib_temp_85c83957-713d-4218-ace2-75323cff3334_%7Bwidth%7Dx.png?v=1770502480",
             "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
@@ -391,17 +418,6 @@
             "viewpoint": "unknown",
             "downloaded": true,
             "sha256": "603aa2f4b154114b0d061e6ea6b8f905d63569e5cce68a1f21dcc0d13b987da2",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "1fa09011f16d0e74b5841a03",
-            "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/EZRUNMAX8G2S_%7Bwidth%7Dx.jpg?v=1759426850",
-            "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "unknown",
-            "downloaded": false,
-            "sha256": null,
             "truthEligible": false
           },
           {
@@ -722,10 +738,98 @@
             "downloaded": true,
             "sha256": "c67818cf09a3dd67d91b18d72f4b186765519ee213f98ef81fd0b7dc7ff5c7bb",
             "truthEligible": false
+          },
+          {
+            "evidenceId": "dbddb1c07d4a40219b3ae87e",
+            "imageUrl": "https://i.pinimg.com/236x/5b/af/7d/5baf7dbca839f7f2e0047d8dc93a4347.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "0d49e390e23145b72bd762e7c09c455d9b0fcef7c3ef851e45d8bdb7cdc3658f",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "2086a965bcefbada0652febc",
+            "imageUrl": "https://i.pinimg.com/236x/c3/a2/05/c3a205385189c89ba3fc1570aa5bfac2.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "68ea93da8f37087047f2b0a38c55a3485cfe38b8584099a8155865f8e8dfe732",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "33618dac72a6da2220b72064",
+            "imageUrl": "https://i.pinimg.com/236x/24/db/d6/24dbd654e50fc228392eb0f4b2d7f4a8.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": false,
+            "sha256": null,
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "63105440d995815f3c80d66b",
+            "imageUrl": "https://i.pinimg.com/236x/1c/d0/d0/1cd0d0a62325d4b97e3e022259003811.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "3c763d5a9f241bfb217df734f1a4f83d2380d3c7bc718f3cfa4b8680d8cd2d27",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "6da4e37705a15731e3b0d2a1",
+            "imageUrl": "https://i.pinimg.com/236x/86/0e/49/860e49ea7810592f074a981aa28b7783.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "6b16e510283c753ed1ae01810ee3fbf047c9f51606bf642b3d3b20ad7b9ffcfd",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "16df9fc94eecb1ea890f08ad",
+            "imageUrl": "https://i.pinimg.com/236x/7c/c1/2a/7cc12a1047e850da9193493df2bb893d.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "7af1a29192383707758212d3e3ed7df34927cf16fc2f604b41f6170f50f82916",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "6a3168edee03fb547818f64d",
+            "imageUrl": "https://i.pinimg.com/236x/20/58/75/2058752ccacf8b39f42a9a6e44201497.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "b628ae15064e6cd9dfe820a46d6286092e6da028c392c63cefdf7acaea8bd99b",
+            "truthEligible": false
+          },
+          {
+            "evidenceId": "2d04f4612a4b08eff8e43e85",
+            "imageUrl": "https://i.pinimg.com/236x/2b/3e/51/2b3e5137dce663ec884e501fac7975fa.jpg",
+            "sourcePage": "https://www.pinterest.com/ideas/citroen-c3-wrc-photos/913164413040/",
+            "authority": "community_reference",
+            "authorityConfidence": 0.42,
+            "viewpoint": "top",
+            "downloaded": true,
+            "sha256": "97c03253ad2f2a011b86412a36e76f9a32950195d139d51f9e99c2607366bb14",
+            "truthEligible": false
           }
         ],
         "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1794753129913"
+        "sourceRunId": "nickelle-research-1794753339866"
       },
       "confidence": 1.0036,
       "authority": "owner_truth_over_research"
@@ -750,17 +854,6 @@
             "viewpoint": "unknown",
             "downloaded": true,
             "sha256": "3042a92ee8a04146cf57d81b75f23a0494fb3a32b5cf725a8d1792fea464729e",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "b4a4001ee197d23f4010a781",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-X-Pression-Side-Skirts_thumb_12357__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "a60ee403db4e60130b87e6e20d564c099c62804cc41ce943e56de4b4f5da5c2b",
             "truthEligible": false
           },
           {
@@ -841,72 +934,6 @@
             "truthEligible": false
           },
           {
-            "evidenceId": "24555b091a63e059cd357728",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-WRC-Look-Rear-Wing_picture_16396.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "3981762e022d69a8473d5fc3d1fb882c1d87f76d410fcff4af210b7a7b8c19eb",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "ef177132e468c79678078d29",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-Wasp-Body-Kit_thumb_25937__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "5c6233871542455a293a0ad3239dcd2b236561d4ee8f5e799f729f4a32ff238e",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "bdf7b6a4667c60feb3655009",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-Straight-Rear-Bumper_thumb_2709__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "1714cb7f8715d97000dd05e44ed1beb18612344e49d7b61af5c163ae18d7e85c",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "02efedd85fe56fa932aac98d",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-Polar-Rear-Bumper_thumb_12356__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "7102e7a3c34fbf110ad08f6de0f091f40f758822881e45a6c37ece13309b5d6f",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "7ad90cc6e1445b0388c5ba4c",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-Facelift-Verus-X-Front-Bumper-Extension_thumb_60146__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "de771ec055e619543e1d84fa4b7e357bcb8b472277c3b48ab57d689d8f90eef5",
-            "truthEligible": false
-          },
-          {
-            "evidenceId": "9a6c87d4e0f050436c8728bd",
-            "imageUrl": "https://www.magnatuning.com/images/Citroen-C3-MK1-RX-Rear-Wing_thumb_60151__270_208.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "b50e2148e68d1ffc95b6cfcf5acef754be7c235ab5fa4960507aa97046b99c29",
-            "truthEligible": false
-          },
-          {
             "evidenceId": "1fa09011f16d0e74b5841a03",
             "imageUrl": "https://www.seriousrc.co.uk/cdn/shop/files/EZRUNMAX8G2S_%7Bwidth%7Dx.jpg?v=1759426850",
             "sourcePage": "https://www.seriousrc.co.uk/collections/mjx-hyper-go-7303-rally-car-spare-parts-and-upgrades",
@@ -927,21 +954,10 @@
             "downloaded": true,
             "sha256": "8bfbf990bd2cabd7c7083536dbf5cb2217273b14f6191d0f2ed841ba0f8c7d52",
             "truthEligible": false
-          },
-          {
-            "evidenceId": "72d1f10f09a4076ddf22d068",
-            "imageUrl": "https://www.magnatuning.com/images/siteimg/mag-square-small.jpg",
-            "sourcePage": "https://www.magnatuning.com/en/product/8275/Citroen-C3-WRC-Look-Rear-Wing",
-            "authority": "community_reference",
-            "authorityConfidence": 0.42,
-            "viewpoint": "rear",
-            "downloaded": true,
-            "sha256": "c643a17352e703692dc0e0d7589f882fe77f9db9c6f1d5a504756940df7cefce",
-            "truthEligible": false
           }
         ],
         "confidence": 0.42,
-        "sourceRunId": "nickelle-research-1794753129913"
+        "sourceRunId": "nickelle-research-1794753339866"
       },
       "confidence": 0.9735999999999999,
       "authority": "owner_truth_over_research"
@@ -1018,11 +1034,11 @@
     "confidence": 0
   },
   "researchPerception": {
-    "sourceRunId": "nickelle-research-1794753129913",
+    "sourceRunId": "nickelle-research-1794753339866",
     "sourceCount": 60,
     "acceptedFindingCount": 0,
-    "components": 11,
-    "confidence": 0.43454545454545457
+    "components": 10,
+    "confidence": 0.43200000000000005
   },
   "protectedOwnerFacts": [
     {
@@ -1122,6 +1138,15 @@
         "type": "direct_visual_evidence",
         "component": "front_arch_right",
         "request": "Find direct MJX 7303 or Citroen C3 WRC photographic evidence clearly showing front_arch_right.",
+        "priority": 0.78
+      }
+    },
+    {
+      "type": "research_gap",
+      "detail": {
+        "type": "direct_visual_evidence",
+        "component": "rear_diffuser",
+        "request": "Find direct MJX 7303 or Citroen C3 WRC photographic evidence clearly showing rear_diffuser.",
         "priority": 0.78
       }
     }
