@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "generatedAt": "2026-11-18T08:23:31.997Z",
+  "generatedAt": "2026-11-18T08:26:10.316Z",
   "director": "Vehicle Reconstruction Director",
   "authority": {
     "ownerTruth": 1,
@@ -68,8 +68,8 @@
       "component": "roof_scoop",
       "evidence": {
         "confidence": 1,
-        "references": 49,
-        "uniqueDirectReferences": 49,
+        "references": 53,
+        "uniqueDirectReferences": 53,
         "ownerPhotoReferences": [
           "owner-front-three-left",
           "owner-front-three-right",
@@ -98,11 +98,43 @@
       "strategy": "owner_binary_photo_reconstruction"
     },
     {
+      "component": "stance",
+      "evidence": {
+        "confidence": 1,
+        "references": 12,
+        "uniqueDirectReferences": 3,
+        "ownerPhotoReferences": [
+          "owner-side-right"
+        ],
+        "ownerBinaryFiles": [
+          "IMG_4328.jpeg",
+          "IMG_4329.jpeg",
+          "IMG_4330.jpeg",
+          "IMG_4331.jpeg",
+          "IMG_4332.jpeg",
+          "IMG_4333.jpeg",
+          "IMG_4334.jpeg",
+          "IMG_4335.jpeg"
+        ],
+        "ownerPrimary": true
+      },
+      "uncertainty": 0,
+      "parameters": [
+        "wheel_radius",
+        "wheel_track_x",
+        "wheel_width",
+        "wheel_y"
+      ],
+      "priority": 0.67,
+      "authority": "OWNER_JPEG_BINARIES",
+      "strategy": "owner_binary_photo_reconstruction"
+    },
+    {
       "component": "rear_aero",
       "evidence": {
         "confidence": 1,
-        "references": 19,
-        "uniqueDirectReferences": 13,
+        "references": 9,
+        "uniqueDirectReferences": 8,
         "ownerPhotoReferences": [
           "owner-rear-three-left",
           "owner-side-right",
@@ -127,7 +159,7 @@
         "diffuser_half_bottom",
         "diffuser_half_top"
       ],
-      "priority": 0.74,
+      "priority": 0.64,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -135,8 +167,8 @@
       "component": "grille",
       "evidence": {
         "confidence": 1,
-        "references": 7,
-        "uniqueDirectReferences": 7,
+        "references": 6,
+        "uniqueDirectReferences": 6,
         "ownerPhotoReferences": [
           "owner-front-three-left",
           "owner-front-straight",
@@ -161,7 +193,7 @@
         "grille_bottom_y",
         "grille_top_y"
       ],
-      "priority": 0.62,
+      "priority": 0.61,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -169,8 +201,8 @@
       "component": "arches",
       "evidence": {
         "confidence": 1,
-        "references": 4,
-        "uniqueDirectReferences": 1,
+        "references": 6,
+        "uniqueDirectReferences": 3,
         "ownerPhotoReferences": [
           "owner-front-three-left",
           "owner-front-straight",
@@ -196,39 +228,7 @@
         "wheel_track_x",
         "wheel_y"
       ],
-      "priority": 0.59,
-      "authority": "OWNER_JPEG_BINARIES",
-      "strategy": "owner_binary_photo_reconstruction"
-    },
-    {
-      "component": "stance",
-      "evidence": {
-        "confidence": 1,
-        "references": 4,
-        "uniqueDirectReferences": 1,
-        "ownerPhotoReferences": [
-          "owner-side-right"
-        ],
-        "ownerBinaryFiles": [
-          "IMG_4328.jpeg",
-          "IMG_4329.jpeg",
-          "IMG_4330.jpeg",
-          "IMG_4331.jpeg",
-          "IMG_4332.jpeg",
-          "IMG_4333.jpeg",
-          "IMG_4334.jpeg",
-          "IMG_4335.jpeg"
-        ],
-        "ownerPrimary": true
-      },
-      "uncertainty": 0,
-      "parameters": [
-        "wheel_radius",
-        "wheel_track_x",
-        "wheel_width",
-        "wheel_y"
-      ],
-      "priority": 0.59,
+      "priority": 0.61,
       "authority": "OWNER_JPEG_BINARIES",
       "strategy": "owner_binary_photo_reconstruction"
     },
@@ -428,6 +428,13 @@
       "locked": false,
       "mutationScaleWhenStable": 0.25
     },
+    "stance": {
+      "winsRequired": 4,
+      "minimumIndependentViews": 3,
+      "minimumReferenceClasses": 2,
+      "locked": false,
+      "mutationScaleWhenStable": 0.25
+    },
     "rear_aero": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
@@ -443,13 +450,6 @@
       "mutationScaleWhenStable": 0.25
     },
     "arches": {
-      "winsRequired": 4,
-      "minimumIndependentViews": 3,
-      "minimumReferenceClasses": 2,
-      "locked": false,
-      "mutationScaleWhenStable": 0.25
-    },
-    "stance": {
       "winsRequired": 4,
       "minimumIndependentViews": 3,
       "minimumReferenceClasses": 2,
