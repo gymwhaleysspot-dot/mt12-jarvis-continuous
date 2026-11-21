@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-11-21T11:17:25.922Z",
+  "generatedAt": "2026-11-21T11:27:42.698Z",
   "engine": "NICKELLE_ADVANCED_GRAPHICS_INTELLIGENCE",
   "upgrades": {
     "differentiableStyleOptimizer": true,
@@ -26,30 +26,12 @@
   },
   "optimizer": {
     "method": "actual_render_finite_difference_owner_truth_with_pairwise_interactions",
-    "baselineError": 0.253627,
-    "targets": [
-      {
-        "parameter": "grille_frame_thickness",
-        "proposed": 0.02605,
-        "measuredGain": 0.000448,
-        "gradient": 4.827224,
-        "direction": "decrease"
-      }
-    ],
+    "baselineError": 0.253256,
+    "targets": [],
     "allGradients": [
       {
-        "parameter": "grille_frame_thickness",
-        "baselineError": 0.253627,
-        "minusError": 0.253179,
-        "plusError": 0.256558,
-        "gradient": 4.827224,
-        "bestValue": 0.02605,
-        "measuredGain": 0.000448,
-        "direction": "decrease"
-      },
-      {
         "parameter": "grille_half_bottom",
-        "baselineError": 0.253627,
+        "baselineError": 0.253256,
         "minusError": 0.256558,
         "plusError": 0.256558,
         "gradient": 0,
@@ -59,7 +41,7 @@
       },
       {
         "parameter": "grille_half_top",
-        "baselineError": 0.253627,
+        "baselineError": 0.253256,
         "minusError": 0.256558,
         "plusError": 0.256558,
         "gradient": 0,
@@ -69,11 +51,21 @@
       },
       {
         "parameter": "grille_corner_radius",
-        "baselineError": 0.253627,
+        "baselineError": 0.253256,
         "minusError": 0.256558,
         "plusError": 0.256558,
         "gradient": 0,
         "bestValue": 0.11028,
+        "measuredGain": 0,
+        "direction": "decrease"
+      },
+      {
+        "parameter": "grille_frame_thickness",
+        "baselineError": 0.253256,
+        "minusError": 0.256558,
+        "plusError": 0.256558,
+        "gradient": 0,
+        "bestValue": 0.02605,
         "measuredGain": 0,
         "direction": "decrease"
       }
@@ -85,13 +77,13 @@
           "grille_half_top"
         ],
         "mixedPartial": 47.889127,
-        "baselineError": 0.253627,
+        "baselineError": 0.253256,
         "bestError": 0.253179,
         "bestValues": {
-          "grille_half_bottom": 0.767,
-          "grille_half_top": 0.6942
+          "grille_half_bottom": 0.7754,
+          "grille_half_top": 0.6858
         },
-        "measuredGain": 0.000448,
+        "measuredGain": 0.000077,
         "synergy": 0
       }
     ],
@@ -101,51 +93,51 @@
         "grille_half_top"
       ],
       "mixedPartial": 47.889127,
-      "baselineError": 0.253627,
+      "baselineError": 0.253256,
       "bestError": 0.253179,
       "bestValues": {
-        "grille_half_bottom": 0.767,
-        "grille_half_top": 0.6942
+        "grille_half_bottom": 0.7754,
+        "grille_half_top": 0.6858
       },
-      "measuredGain": 0.000448,
+      "measuredGain": 0.000077,
       "synergy": 0
     }
   },
   "implicitSurface": {
     "representation": "multiview_feature_conditioned_sdf_proxy",
     "latent": [
-      -0.02006,
-      0.05205,
-      0.01594,
-      -0.00692,
-      -0.02259,
-      0.02283,
-      0.00987,
-      -0.01335,
-      -0.05843,
-      0.01815,
-      0.00174,
-      -0.01697,
-      0.07107,
-      0.00866,
-      -0.01401,
-      -0.01567,
-      0.02833,
-      0.00521,
-      -0.01807,
-      -0.02641,
-      0.02212,
-      -0.01304,
-      -0.02461,
-      0.03449,
-      0.01531,
-      -0.00764,
-      -0.0314,
-      0.01803,
-      0.00683,
-      -0.01039,
-      -0.08011,
-      0.01538
+      -0.02003,
+      0.0521,
+      0.01605,
+      -0.00691,
+      -0.02255,
+      0.02278,
+      0.0098,
+      -0.01351,
+      -0.0585,
+      0.01809,
+      0.00172,
+      -0.01695,
+      0.07114,
+      0.00876,
+      -0.01399,
+      -0.01559,
+      0.02828,
+      0.00517,
+      -0.01818,
+      -0.02646,
+      0.02206,
+      -0.01305,
+      -0.02452,
+      0.03458,
+      0.01541,
+      -0.00758,
+      -0.0313,
+      0.01801,
+      0.00681,
+      -0.01049,
+      -0.08016,
+      0.0153
     ],
     "gridResolution": [
       24,
@@ -164,10 +156,10 @@
           "weight": 1.26,
           "latentIndex": 0,
           "measuredGradientSupport": [
-            "grille_frame_thickness",
             "grille_half_bottom",
             "grille_half_top",
-            "grille_corner_radius"
+            "grille_corner_radius",
+            "grille_frame_thickness"
           ]
         },
         {
@@ -1502,7 +1494,7 @@
   ],
   "critics": {
     "adversarial": {
-      "score": 0.687,
+      "score": 0.6868,
       "pass": true,
       "attacks": [
         "toy_like_proportions",
@@ -1512,17 +1504,17 @@
       ]
     },
     "photorealism": {
-      "score": 0.5345,
+      "score": 0.5342,
       "pass": false,
       "geometryIndependent": true
     },
-    "combined": 0.5779,
+    "combined": 0.562,
     "semanticOwnerTruth": {
-      "score": 0.5027,
+      "score": 0.4577,
       "signals": {
         "ownerSemanticCoverage": 0.7381,
         "cameraConfidence": 0,
-        "measuredGradientSupport": 0.25,
+        "measuredGradientSupport": 0,
         "pairwiseInteractionSupport": 1,
         "photoCoverage": 31
       },
@@ -1538,18 +1530,18 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9805
+          "identity": 0.985
         },
         {
           "scale": 0.42,
-          "identity": 0.943
+          "identity": 0.9482
         },
         {
           "scale": 0.28,
-          "identity": 0.9267
+          "identity": 0.9245
         }
       ],
-      "minimum": 0.9267,
+      "minimum": 0.9245,
       "pass": true
     },
     "three": {
@@ -1560,11 +1552,11 @@
         },
         {
           "scale": 0.66,
-          "identity": 0.9395
+          "identity": 0.9338
         },
         {
           "scale": 0.42,
-          "identity": 0.9184
+          "identity": 0.9213
         },
         {
           "scale": 0.28,
@@ -1642,12 +1634,12 @@
     }
   },
   "dependencies": {
-    "focusRegion": "side_body",
+    "focusRegion": "front_arches",
     "assembly": [
-      "front_arches",
-      "rear_body",
-      "livery",
-      "roof"
+      "front_fascia",
+      "wheelFill",
+      "side_body",
+      "splitter"
     ],
     "mode": "constrained_assembly"
   },
@@ -1812,27 +1804,27 @@
   "diversity": {
     "lineages": {
       "owner_accuracy": {
-        "generation": 7594,
+        "generation": 7595,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_arches",
         "objective": "owner_accuracy"
       },
       "mobile_efficiency": {
-        "generation": 7594,
+        "generation": 7595,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_arches",
         "objective": "mobile_efficiency"
       },
       "photorealism": {
-        "generation": 7594,
+        "generation": 7595,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_arches",
         "objective": "photorealism"
       },
       "topology_exploration": {
-        "generation": 7594,
+        "generation": 7595,
         "score": 0,
-        "lastFocus": "side_body",
+        "lastFocus": "front_arches",
         "objective": "topology_exploration"
       }
     },
@@ -1879,7 +1871,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4329.jpeg": {
       "matchedView": "front",
@@ -1888,7 +1880,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4330.jpeg": {
       "matchedView": "front",
@@ -1897,7 +1889,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4331.jpeg": {
       "matchedView": "front",
@@ -1906,7 +1898,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4332.jpeg": {
       "matchedView": "front",
@@ -1915,7 +1907,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4333.jpeg": {
       "matchedView": "front",
@@ -1924,7 +1916,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4334.jpeg": {
       "matchedView": "front",
@@ -1933,7 +1925,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     },
     "IMG_4335.jpeg": {
       "matchedView": "front",
@@ -1942,7 +1934,7 @@
       "exposure": "owner_native",
       "occlusion": "learned_mask",
       "confidence": 1,
-      "updatedAt": "2026-11-21T11:17:25.925Z"
+      "updatedAt": "2026-11-21T11:27:42.700Z"
     }
   },
   "introspection": {
@@ -2641,18 +2633,18 @@
     "action": "freeze_focus_and_rotate"
   },
   "realityGap": {
-    "score": 0.5706,
-    "gap": 0.4294,
+    "score": 0.5705,
+    "gap": 0.4295,
     "signals": {
       "geometry": 0.5,
       "proportions": 0.5,
       "livery": 0.5,
-      "materials": 0.5345,
+      "materials": 0.5342,
       "interiorFit": 0.7,
       "temporal": 0.82,
       "mobile": 0.84,
-      "photorealism": 0.5345,
-      "lodIdentity": 0.8841
+      "photorealism": 0.5342,
+      "lodIdentity": 0.8836
     }
   },
   "vocabularyExpansion": [
@@ -2704,42 +2696,42 @@
       "from": "front",
       "to": "three",
       "fraction": 0.25,
-      "consistency": 0.9941,
+      "consistency": 0.9925,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.5,
-      "consistency": 0.9941,
+      "consistency": 0.9925,
       "pass": true
     },
     {
       "from": "front",
       "to": "three",
       "fraction": 0.75,
-      "consistency": 0.9941,
+      "consistency": 0.9925,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.25,
-      "consistency": 0.9809,
+      "consistency": 0.9817,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.5,
-      "consistency": 0.9809,
+      "consistency": 0.9817,
       "pass": true
     },
     {
       "from": "three",
       "to": "side",
       "fraction": 0.75,
-      "consistency": 0.9809,
+      "consistency": 0.9817,
       "pass": true
     },
     {
@@ -2800,25 +2792,25 @@
   },
   "benchmark": {
     "name": "Michael Graphics Intelligence Benchmark",
-    "score": 0.7153,
+    "score": 0.7152,
     "minimumPromotionScore": 0.7,
     "pass": true,
     "dimensions": {
       "owner_similarity": 1,
       "topology_correctness": 0.04,
       "geometry": 0.5,
-      "materials": 0.5345,
-      "photorealism": 0.5345,
+      "materials": 0.5342,
+      "photorealism": 0.5342,
       "temporal": 0.82,
       "mobile": 0.84,
-      "lod_identity": 0.8841,
+      "lod_identity": 0.8836,
       "causal_explainability": 1,
       "protected_invariants": 1,
       "certainty": 0.4195
     },
-    "hash": "22e0ee027066db1c02f7d7b76691d5e42b763852370a51984a751cce3c5d7342"
+    "hash": "8ba2a39bc4a16f3a7060785bb1d40719393b29b01c505dcf2d01a0b23630948c"
   },
-  "parentAutonomyGeneratedAt": "2026-11-21T11:10:33.711Z",
+  "parentAutonomyGeneratedAt": "2026-11-21T11:21:18.038Z",
   "qualityRepair": {
     "schema": 2,
     "allEightWeaknessesAddressed": true,
